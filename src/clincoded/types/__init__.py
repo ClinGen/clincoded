@@ -156,3 +156,33 @@ class SoftwareVersion(Item):
         root = find_root(self)
         software = root.get_by_uuid(properties['software'])
         return software.__ac_local_roles__()
+
+
+@collection(
+    name='curator-pages',
+    unique_key='curator_page:location',
+    properties={
+        'title': 'Curator pages',
+        'description': 'Pages for the curator action flow',
+    })
+class CuratorPage(Item):
+    item_type = 'curator_page'
+    schema = load_schema('clincoded:schemas/curator_page.json')
+    name_key = 'name'
+
+    def unique_keys(self, properties):
+        keys = super(CuratorPage, self).unique_keys(properties)
+        name = properties['name']
+        value = name
+        keys.setdefault('curator_page:location', []).append(value)
+        return keys
+
+    @calculated_property(
+        condition=lambda context, request: request.resource_path(context.__parent__) == '/curator-pages/',
+        schema={
+            "title": "Canonical URI",
+            "type": "string",
+        })
+    def canonical_uri(self, name):
+        return '/%s/' % name
+
