@@ -55,7 +55,7 @@ var CuratorCentral = module.exports.CuratorCentral = React.createClass({
                 <CurationData />
                 <div className="container">
                     <div className="row curation-content">
-                        <div className="col-sm-8">
+                        <div className="col-md-8">
                             <PmidSelectionTrigger pmidItems={pmid_items} selectionListOpenChange={this.selectionListOpenChange} currPmid={this.state.currPmid} />
                             {this.state.selectionListOpen ? <PmidSelectionList pmidItems={pmid_items} currPmidChange={this.currPmidChange} /> : null}
                             {currPmidItem ?
@@ -73,7 +73,7 @@ var CuratorCentral = module.exports.CuratorCentral = React.createClass({
                             : null}
                         </div>
                         {currPmidItem ?
-                            <div className="col-sm-4">
+                            <div className="col-md-4">
                                 <nav className="nav-add-evidence">
                                     <h5>Add Evidence for PMID:{currPmidItem.id}</h5>
                                     <ul className="nav nav-pills nav-stacked">

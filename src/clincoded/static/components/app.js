@@ -2,11 +2,15 @@
 var React = require('react');
 var globals = require('./globals');
 var mixins = require('./mixins');
-var navbar = require('./navbar');
+var navigation = require('./navigation');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var url = require('url');
 
-var Navbar = navbar.Navbar;
+var NavbarMixin = navigation.NavbarMixin;
+var Navbar = navigation.Navbar;
+var Nav = navigation.Nav;
+var NavItem = navigation.NavItem;
+
 
 var routes = {
     'curator': require('./curator').Curator
@@ -17,7 +21,7 @@ var routes = {
 var portal = {
     portal_title: 'ClinGen',
     global_sections: [
-        {id: 'curator', title: 'Curator', url: '/curator'},
+        {id: 'curator', title: 'Curation Central', url: '/curation-central'},
         {id: 'menu2', title: 'Menu 2', url: '/menu2'},
         {id: 'menu3', title: 'Menu 3', url: '/menu3'},
         {id: 'menu4', title: 'Menu 4', url: '/menu4'}
@@ -153,8 +157,49 @@ var Header = React.createClass({
                 <div className="session-temp">
                     {sessionRender}
                 </div>
-                <Navbar portal={portal} />
+                <NavbarMain portal={portal} />
             </header>
+        );
+    }
+});
+
+
+var NavbarMain = React.createClass({
+    mixins: [NavbarMixin],
+
+    propTypes: {
+        portal: React.PropTypes.object.isRequired
+    },
+
+    render: function() {
+        return (
+            <div>
+                <div className="navbar-main-bg"></div>
+                <div className="container">
+                    <Navbar styles='navbar-main' brand='ClinGen' brandStyles='portal-brand'>
+                        <GlobalSections portal={this.props.portal} />
+                    </Navbar>
+                </div>
+            </div>
+        );
+    }
+});
+
+
+var GlobalSections = React.createClass({
+    propTypes: {
+        portal: React.PropTypes.object.isRequired
+    },
+
+    render: function() {
+        var menus = this.props.portal.global_sections;
+
+        return (
+            <Nav styles='navbar-right nav-main'>
+                {menus.map(function(menu) {
+                    return <NavItem eventKey={menu.id} href={menu.url}>{menu.title}</NavItem>;
+                })}
+            </Nav>
         );
     }
 });
