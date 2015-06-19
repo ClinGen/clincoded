@@ -11,9 +11,13 @@ var CuratorPage = module.exports.CuratorPage = React.createClass({
     render: function() {
         var context = this.props.context;
 
-        var CuratorPageView = globals.curator_page.lookup(context);
-        console.log(CuratorPageView);
-        return null;
+        var CuratorPageView = globals.curator_page.lookup(context, context.name);
+        var content = <CuratorPageView context={this.props.context} />;
+        return (
+            <div>
+                {content}
+            </div>
+        );
     }
 });
 
@@ -24,7 +28,7 @@ globals.content_views.register(CuratorPage, 'curator_page');
 var CuratorCentral = module.exports.CuratorCentral = React.createClass({
     getInitialState: function() {
         return {
-            currPmid: '',
+            currPmid: -1,
             selectionListOpen: false
         };
     },
@@ -89,7 +93,7 @@ var CuratorCentral = module.exports.CuratorCentral = React.createClass({
     }
 });
 
-globals.curator_page.register(CuratorCentral, 'curation-central');
+globals.curator_page.register(CuratorCentral, 'curator_page', 'curation-central');
 
 
 // Curation data header for Gene:Disease
@@ -147,7 +151,7 @@ var DiseaseCurationData = React.createClass({
 var PmidSelectionTrigger = React.createClass({
     propTypes: {
         selectionListOpenChange: React.PropTypes.func,
-        currPmid: React.PropTypes.string
+        currPmid: React.PropTypes.number
     },
 
     render: function() {
@@ -155,7 +159,7 @@ var PmidSelectionTrigger = React.createClass({
             <div className="pmid-selection-trigger clearfix">
                 <div className="pmid-selection-selected">
                     <button className="btn btn-primary" onClick={this.props.selectionListOpenChange}>Select</button>
-                    <span className="pmid-selection-curr-id">{'PMID: ' + this.props.currPmid}</span>
+                    {this.props.currPmid > -1 ? <span className="pmid-selection-curr-id">{'PMID: ' + this.props.currPmid}</span> : null}
                 </div>
                 <button className="btn btn-primary btn-add-new-pmid">Add New PMID</button>
             </div>
@@ -166,7 +170,7 @@ var PmidSelectionTrigger = React.createClass({
 
 var PmidSelectionList = React.createClass({
     propTypes: {
-        pmidItems: React.PropTypes.object,
+        pmidItems: React.PropTypes.array,
         currPmidChange: React.PropTypes.func
     },
 
@@ -177,7 +181,7 @@ var PmidSelectionList = React.createClass({
             <div className="pmid-selection-list">
                 {items.map(function(item) {
                     return (
-                        <div key={item.id} className="pmid-selection-list-item" onClick={this.props.currPmidChange.bind(this, item.id)}>
+                        <div key={item.id} className="pmid-selection-list-item" onClick={this.props.currPmidChange.bind(null, item.id)}>
                             <div className="pmid-selection-list-pmid"><a href={'https://www.ncbi.nlm.nih.gov/pubmed/?term=' + item.id}>PMID: {item.id}</a></div>
                             <div className="pmid-selection-list-specs">
                                 <PmidSummary pmidItem={item} />
