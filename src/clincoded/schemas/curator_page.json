@@ -27,11 +27,6 @@
             "title": "Title",
             "description": "The name shown in the browser's title bar and tabs.",
             "type": "string"
-        },
-        "component": {
-            "title": "ReactJS Component",
-            "description": "The ReactJS component to execute for the entire page when this page is visited",
-            "type": "string"
         }
     },
     "columns": {

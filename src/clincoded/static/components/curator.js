@@ -7,8 +7,21 @@ var globals = require('./globals');
 var pmid_items = require('./testdata').pmid_items;
 
 
+var CuratorPage = module.exports.CuratorPage = React.createClass({
+    render: function() {
+        var context = this.props.context;
+
+        var CuratorPageView = globals.curator_page.lookup(context);
+        console.log(CuratorPageView);
+        return null;
+    }
+});
+
+globals.content_views.register(CuratorPage, 'curator_page');
+
+
 // Curator page content
-var Curator = module.exports.Curator = React.createClass({
+var CuratorCentral = module.exports.CuratorCentral = React.createClass({
     getInitialState: function() {
         return {
             currPmid: '',
@@ -76,7 +89,7 @@ var Curator = module.exports.Curator = React.createClass({
     }
 });
 
-globals.cg_template.register(Curator, 'curator');
+globals.curator_page.register(CuratorCentral, 'curation-central');
 
 
 // Curation data header for Gene:Disease
