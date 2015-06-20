@@ -1,6 +1,7 @@
 'use strict';
 var React = require('react');
 
+// Include this mixin for any components that contain navigation that needs to collapse on mobile
 var NavbarMixin = module.exports.NavbarMixin = {
     childContextTypes: {
         mobileMenuOpen: React.PropTypes.bool, // T if mobile menu is open, F if closed
@@ -34,8 +35,8 @@ var Navbar = module.exports.Navbar = React.createClass({
     },
 
     propTypes: {
-        styles: React.PropTypes.string, // Styles to add to <nav> element
-        brandStyles: React.PropTypes.string, // Styles to add to .navbar-brand element
+        styles: React.PropTypes.string, // CSS classes to add to <nav> element
+        brandStyles: React.PropTypes.string, // CSS classes to add to .navbar-brand element
         brand: React.PropTypes.string // Text brand in .navbar-brand element
     },
 
@@ -71,16 +72,20 @@ var Nav = module.exports.Nav = React.createClass({
     },
 
     propTypes: {
-        styles: React.PropTypes.string // Styles to add to ul.'nav navbar-nav'
+        styles: React.PropTypes.string, // CSS classes to add to ul.'nav navbar-nav'
+        navbarStyles: React.PropTypes.string, // CSS classes for wrapper <div>
+        collapse: React.PropTypes.bool // Support mobile menu collapsing
     },
 
     render: function() {
-        var navStyles = 'nav navbar-nav' + (this.props.styles ? ' ' + this.props.styles : '');
-        var collapseClasses = 'navbar-collapse' + (this.context.mobileMenuOpen ? '' : ' collapse');
+        var styles = 'nav navbar-nav' + (this.props.styles ? ' ' + this.props.styles : '');
+        var navbarStyles = this.props.navbarStyles ? this.props.navbarStyles : '';
+        var collapseStyles = this.props.collapse ? ('navbar-collapse' + (this.context.mobileMenuOpen ? '' : ' collapse')) : '';
+        var wrapperClasses = navbarStyles + collapseStyles;
 
         return (
-            <div className={collapseClasses}>
-                <ul className={navStyles}>
+            <div className={wrapperClasses}>
+                <ul className={styles}>
                     {this.props.children}
                 </ul>
             </div>
@@ -92,17 +97,17 @@ var Nav = module.exports.Nav = React.createClass({
 // Individual menu items within a <Nav> component.
 var NavItem = module.exports.NavItem = React.createClass({
     propTypes: {
-        href: React.PropTypes.string, // URL to link this item to
-        eventKey: React.PropTypes.oneOfType([ // Unique key for React ID; can be anything unique within <Nav>
-            React.PropTypes.string,
-            React.PropTypes.number
-        ])
+        styles: React.PropTypes.string, // CSS classes to add to <li> elements
+        href: React.PropTypes.string // URL to link this item to
+        // Additional properties (data attributes) set on <a> for the item
     },
 
     render: function() {
+        var url = this.props.href ? this.props.href : '#';
+
         return (
-            <li key={this.props.eventKey}>
-                <a href={this.props.href}>{this.props.children}</a>
+            <li className={this.props.styles}>
+                <a {...this.props} href={url}>{this.props.children}</a>
             </li>
         );
     }
