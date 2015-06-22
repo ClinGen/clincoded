@@ -237,16 +237,6 @@ var Table = module.exports.Table = React.createClass({
         return communicating;
     },
 
-    handleScroll: function(e) {
-        var el = e.srcElement.getElementById('sticky-header');
-        var top = el.getBoundingClientRect().top;
-        if (top < 0 && !this.stuck) {
-            el.style.position = 'fixed';
-            el.style.top = 0;
-            this.stuck = true;
-        }
-    },
-
     render: function () {
         var columns = this.state.columns;
         var context = this.props.context;
@@ -262,9 +252,11 @@ var Table = module.exports.Table = React.createClass({
         data.sort(sortOn, reversed);
         var self = this;
         var headers = columns.map(function (column, index) {
-            var className = "sortdirection icon";
+            var className;
             if (index === sortOn) {
-                className += reversed ? " icon-chevron-down" : " icon-chevron-up";
+                className = reversed ? "tcell-desc" : "tcell-asc";
+            } else {
+                className = "tcell-sort";
             }
             return (
                 <th onClick={self.handleClickHeader} key={index}>
@@ -326,8 +318,8 @@ var Table = module.exports.Table = React.createClass({
                 </div>
                 <div className="container">
                     <div className="table-responsive">
-                        <table className="table table-striped table-bordered table-condensed">
-                            <thead id="sticky-header">
+                        <table className="table table-striped table-bordered table-condensed sticky-area">
+                            <thead className="sticky-header">
                                 <tr className="col-headers">
                                     {headers}
                                 </tr>
@@ -343,7 +335,6 @@ var Table = module.exports.Table = React.createClass({
     },
 
     componentDidMount: function () {
-        bindEvent(document, 'scroll', this.handleScroll);
         this.setState({
             data: this.extractData(this.props),
             communicating: this.fetchAll(this.props),
@@ -406,7 +397,6 @@ var Table = module.exports.Table = React.createClass({
     }, 
 
     componentWillUnmount: function () {
-        unbindEvent(document, 'scroll', this.handleScroll);
         if (typeof this.submitTimer != 'undefined') {
             clearTimeout(this.submitTimer);
         }

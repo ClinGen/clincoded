@@ -59,6 +59,7 @@ module.exports = function(grunt) {
                 dest: './src/clincoded/static/build/bundle.js',
                 src: [
                     './src/clincoded/static/libs/compat.js', // The shims should execute first
+                    './src/clincoded/static/libs/sticky_header.js',
                     './src/clincoded/static/libs/respond.js',
                     './src/clincoded/static/browser.js',
                 ],

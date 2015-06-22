@@ -33,10 +33,6 @@
     position: relative;
 }
 
-.col-headers {
-    background-color: lighten($color-trim, 40%);
-}
-
 .clear-input-icon {
     position: absolute;
     cursor: pointer;
@@ -47,4 +43,36 @@
     @media screen and (min-width: $screen-sm-min) {
         top: 10px;
     }
+}
+
+.col-headers {
+    background-color: lighten($color-trim, 40%);
+
+    th {
+        position: relative;
+        padding-right: 20px !important;
+        cursor: pointer;
+    }
+}
+
+%tcell-template {
+    @extend .icon;
+    position: absolute;
+    right: 5px;
+    bottom: 7px;
+}
+
+.tcell-sort {
+    @extend %tcell-template;
+    @extend .icon-sort;
+}
+
+.tcell-asc {
+    @extend %tcell-template;
+    @extend .icon-sort-asc;
+}
+
+.tcell-desc {
+    @extend %tcell-template;
+    @extend .icon-sort-desc;
 }
