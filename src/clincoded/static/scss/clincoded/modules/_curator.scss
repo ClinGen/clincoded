@@ -84,7 +84,7 @@
 .pmid-selection-selected {
     float: none;
 
-    @media screen and (min-width: $screen-md-min) {
+    @media screen and (min-width: $screen-sm-min) {
         float: left;
     }
 }
@@ -93,7 +93,7 @@
     display: block;
     margin-top: 2px;
 
-    @media screen and (min-width: $screen-md-min) {
+    @media screen and (min-width: $screen-sm-min) {
         float: right;
         margin-top: 0;
     }

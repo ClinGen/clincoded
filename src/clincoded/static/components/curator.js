@@ -7,28 +7,11 @@ var globals = require('./globals');
 var pmid_items = require('./testdata').pmid_items;
 
 
-var CuratorPage = module.exports.CuratorPage = React.createClass({
-    render: function() {
-        var context = this.props.context;
-
-        var CuratorPageView = globals.curator_page.lookup(context, context.name);
-        var content = <CuratorPageView context={this.props.context} />;
-        return (
-            <div>
-                {content}
-            </div>
-        );
-    }
-});
-
-globals.content_views.register(CuratorPage, 'curator_page');
-
-
 // Curator page content
-var CuratorCentral = module.exports.CuratorCentral = React.createClass({
+var Curator = module.exports.Curator = React.createClass({
     getInitialState: function() {
         return {
-            currPmid: -1,
+            currPmid: '',
             selectionListOpen: false
         };
     },
@@ -55,7 +38,7 @@ var CuratorCentral = module.exports.CuratorCentral = React.createClass({
                 <CurationData />
                 <div className="container">
                     <div className="row curation-content">
-                        <div className="col-md-8">
+                        <div className="col-sm-8">
                             <PmidSelectionTrigger pmidItems={pmid_items} selectionListOpenChange={this.selectionListOpenChange} currPmid={this.state.currPmid} />
                             {this.state.selectionListOpen ? <PmidSelectionList pmidItems={pmid_items} currPmidChange={this.currPmidChange} /> : null}
                             {currPmidItem ?
@@ -73,7 +56,7 @@ var CuratorCentral = module.exports.CuratorCentral = React.createClass({
                             : null}
                         </div>
                         {currPmidItem ?
-                            <div className="col-md-4">
+                            <div className="col-sm-4">
                                 <nav className="nav-add-evidence">
                                     <h5>Add Evidence for PMID:{currPmidItem.id}</h5>
                                     <ul className="nav nav-pills nav-stacked">
@@ -93,7 +76,7 @@ var CuratorCentral = module.exports.CuratorCentral = React.createClass({
     }
 });
 
-globals.curator_page.register(CuratorCentral, 'curator_page', 'curation-central');
+globals.cg_template.register(Curator, 'curator');
 
 
 // Curation data header for Gene:Disease
@@ -151,7 +134,7 @@ var DiseaseCurationData = React.createClass({
 var PmidSelectionTrigger = React.createClass({
     propTypes: {
         selectionListOpenChange: React.PropTypes.func,
-        currPmid: React.PropTypes.number
+        currPmid: React.PropTypes.string
     },
 
     render: function() {
@@ -159,7 +142,7 @@ var PmidSelectionTrigger = React.createClass({
             <div className="pmid-selection-trigger clearfix">
                 <div className="pmid-selection-selected">
                     <button className="btn btn-primary" onClick={this.props.selectionListOpenChange}>Select</button>
-                    {this.props.currPmid > -1 ? <span className="pmid-selection-curr-id">{'PMID: ' + this.props.currPmid}</span> : null}
+                    <span className="pmid-selection-curr-id">{'PMID: ' + this.props.currPmid}</span>
                 </div>
                 <button className="btn btn-primary btn-add-new-pmid">Add New PMID</button>
             </div>
@@ -170,7 +153,7 @@ var PmidSelectionTrigger = React.createClass({
 
 var PmidSelectionList = React.createClass({
     propTypes: {
-        pmidItems: React.PropTypes.array,
+        pmidItems: React.PropTypes.object,
         currPmidChange: React.PropTypes.func
     },
 
@@ -181,7 +164,7 @@ var PmidSelectionList = React.createClass({
             <div className="pmid-selection-list">
                 {items.map(function(item) {
                     return (
-                        <div key={item.id} className="pmid-selection-list-item" onClick={this.props.currPmidChange.bind(null, item.id)}>
+                        <div key={item.id} className="pmid-selection-list-item" onClick={this.props.currPmidChange.bind(this, item.id)}>
                             <div className="pmid-selection-list-pmid"><a href={'https://www.ncbi.nlm.nih.gov/pubmed/?term=' + item.id}>PMID: {item.id}</a></div>
                             <div className="pmid-selection-list-specs">
                                 <PmidSummary pmidItem={item} />
