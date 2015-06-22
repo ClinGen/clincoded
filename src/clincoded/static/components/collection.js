@@ -238,7 +238,13 @@ var Table = module.exports.Table = React.createClass({
     },
 
     handleScroll: function(e) {
-        console.log(e);
+        var el = e.srcElement.getElementById('sticky-header');
+        var top = el.getBoundingClientRect().top;
+        if (top < 0 && !this.stuck) {
+            el.style.position = 'fixed';
+            el.style.top = 0;
+            this.stuck = true;
+        }
     },
 
     render: function () {
@@ -296,7 +302,7 @@ var Table = module.exports.Table = React.createClass({
         }
 
         return (
-            <div id="collection-page">
+            <div>
                 <div className="table-meta">
                     <div className="container">
                         <div className="row table-summary">
@@ -321,7 +327,7 @@ var Table = module.exports.Table = React.createClass({
                 <div className="container">
                     <div className="table-responsive">
                         <table className="table table-striped table-bordered table-condensed">
-                            <thead className="sticky-header">
+                            <thead id="sticky-header">
                                 <tr className="col-headers">
                                     {headers}
                                 </tr>
