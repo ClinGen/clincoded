@@ -16,8 +16,11 @@ module.exports.listing_titles = new Registry();
 // Blocks
 module.exports.blocks = new Registry();
 
-// Curator page view
-module.exports.curator_page = new Registry();
+// Graph detail view
+module.exports.graph_detail = new Registry();
+
+// ClinGen template chooser (temporary)
+module.exports.cg_template = new Registry();
 
 
 var itemClass = module.exports.itemClass = function (context, htmlClass) {
