@@ -1,0 +1,50 @@
+.table-meta {
+    background-color: $color-trim;
+    color: #fff;
+}
+
+.table-count {
+    line-height: $input-height-base;
+}
+
+.table-summary {
+    padding: 0;
+
+    @media screen and (min-width: $screen-sm-min) {
+        padding: 10px 0;
+    }
+}
+
+.table-filter {
+    @media screen and (min-width: $screen-sm-min) {
+        text-align: right;
+
+        label {
+            margin-right: 10px;
+        }
+    }
+
+    input {
+        position: relative;
+    }
+}
+
+.table-filter-input {
+    position: relative;
+}
+
+.col-headers {
+    background-color: lighten($color-trim, 40%);
+}
+
+.clear-input-icon {
+    position: absolute;
+    cursor: pointer;
+    top: 38px;
+    right: 5px;
+    color: #a0a0a0;
+
+    @media screen and (min-width: $screen-sm-min) {
+        top: 10px;
+    }
+}

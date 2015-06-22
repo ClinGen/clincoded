@@ -42,7 +42,7 @@ var Item = module.exports.Item = React.createClass({
     mixins: [AuditMixin],
     render: function() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-item');
+        var itemClass = globals.itemClass(context, 'view-item') + ' container';
         var title = globals.listing_titles.lookup(context)({context: context});
         var Panel = globals.panel_views.lookup(context);
 

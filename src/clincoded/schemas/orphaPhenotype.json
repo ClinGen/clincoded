@@ -83,7 +83,7 @@
         },
         "omimIds": {
             "title": "OMIM ID(s)",
-            "type": "string"
+            "type": "array"
         }
     }
 }

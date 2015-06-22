@@ -25,6 +25,13 @@ p {
     line-height: 1.6;
 }
 
+input[type=text],
+input[type=password],
+input[type=email],
+input[type=search] {
+    background-color: #f8f8f8;
+}
+
 .btn {
     @include border-radius(2px);
     border: none;
