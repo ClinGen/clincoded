@@ -4,6 +4,9 @@ var url = require('url');
 var globals = require('./globals');
 var parseAndLogError = require('./mixins').parseAndLogError;
 
+var bindEvent = globals.bindEvent;
+var unbindEvent = globals.unbindEvent;
+
 
 var lookup_column = function (result, column) {
     var value = result;
@@ -234,6 +237,10 @@ var Table = module.exports.Table = React.createClass({
         return communicating;
     },
 
+    handleScroll: function(e) {
+        console.log(e);
+    },
+
     render: function () {
         var columns = this.state.columns;
         var context = this.props.context;
@@ -283,14 +290,13 @@ var Table = module.exports.Table = React.createClass({
         }));
         var loading_or_total;
         if (this.state.communicating) {
-            loading_or_total = (
-                <span className="table-count label label-warning spinner-warning">Loading...</span>
-            );
+            loading_or_total = <i className="icon icon-refresh icon-spin"></i>;
         } else {
             loading_or_total = <span>Displaying {matching.length} of {total} records</span>;
         }
+
         return (
-            <div>
+            <div id="collection-page">
                 <div className="table-meta">
                     <div className="container">
                         <div className="row table-summary">
@@ -331,6 +337,7 @@ var Table = module.exports.Table = React.createClass({
     },
 
     componentDidMount: function () {
+        bindEvent(document, 'scroll', this.handleScroll);
         this.setState({
             data: this.extractData(this.props),
             communicating: this.fetchAll(this.props),
@@ -393,6 +400,7 @@ var Table = module.exports.Table = React.createClass({
     }, 
 
     componentWillUnmount: function () {
+        unbindEvent(document, 'scroll', this.handleScroll);
         if (typeof this.submitTimer != 'undefined') {
             clearTimeout(this.submitTimer);
         }
