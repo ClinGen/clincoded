@@ -17,23 +17,6 @@ def includeme(config):
     config.scan()
 
 ### new collections added for handling curation data, 06/19/2015
-<<<<<<< HEAD
-
-=======
-'''
-@collection(
-    name='genes',
-    unique_key='genes:symbol',
-    properties={
-        'title': 'HGNC Genes',
-        'description': 'List of HGNC genes',
-    })
-class Gene(Item):
-    item_type = 'genes'
-    schema = load_schema('clincoded:schemas/genes.json')
-    name_key = 'symbol'
-'''
->>>>>>> dev
 @collection(
     name='genes',
     unique_key='gene:symbol',
@@ -69,7 +52,6 @@ class Article(Item):
     item_type = 'article'
     schema = load_schema('clincoded:schemas/article.json')
     name_key = 'pmid'
-<<<<<<< HEAD
 
 @collection(
     name='gdm',
@@ -185,9 +167,6 @@ class Individual(Item):
     schema = load_schema('clincoded:schemas/individual.json')
     name_key = 'individualid'
     embedded = ['diagnosis']
-
-=======
->>>>>>> dev
 ### end of new collections for curation data
 
 
