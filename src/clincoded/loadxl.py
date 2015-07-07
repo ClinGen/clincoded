@@ -30,9 +30,6 @@ ORDER = [
     'gene',
     'orphaPhenotype',
     'article',
-    'individual',
-    'family',
-    'group',
     'annotation',
     'gdm',
 ]

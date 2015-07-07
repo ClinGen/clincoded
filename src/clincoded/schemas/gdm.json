@@ -4,8 +4,8 @@
     "description": "Schema for storing gene:disease:mode data.",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["gdmid", "geneSymbol", "orphaNumber", "modeInheritance", "owner", "status", "dateTime"],
-    "identifyingProperties": ["uuid", "gdmid"],
+    "required": ["gene", "disease", "modeInheritance", "owner", "status", "dateTime"],
+    "identifyingProperties": ["uuid", "gdmId"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -16,22 +16,22 @@
         "schema_version": {
             "default": "1"
         },
-        "gdmid": {
+        "gdmId": {
             "title": "Unique ID for gdm pair",
             "description": "Unique id and digital count.",
             "type": "string",
             "pattern": "^[0-9]{1,12}$",
             "uniqueKey": true
         },
-        "geneSymbol": {
-            "title": "HGNC Symbol",
-            "description": "HGNC Symbol of gene.",
+        "gene": {
+            "title": "Gene",
+            "description": "HGNC Symbol of the gene.",
             "type": "string",
             "linkTo": "gene"
         },
-        "orphaNumber": {
-            "title": "Orpha ID",
-            "description": "Unique id for Orphanet phenotypes.",
+        "disease": {
+            "title": "Disease",
+            "description": "Orphanet Number of the disease.",
             "type": "string",
             "linkTo": "orphaPhenotype"
         },
@@ -58,7 +58,7 @@
                 "Other"
             ]
         },
-        "omimid": {
+        "omimId": {
             "title": "OMIM ID",
             "description": "OMIM id",
             "type": "string",
@@ -90,12 +90,12 @@
         },
         "dateTime": {
             "title": "Date and Time",
-            "description": "Date and time stemp",
+            "description": "Time stemp of the gdm creation",
             "type": "string"
         },
         "annotations": {
             "title": "Annotations",
-            "description": "List of evidences to the gdm",
+            "description": "List of evidence for the gdm",
             "type": "array",
             "default": [],
             "items": {
@@ -108,7 +108,7 @@
         },
         "summary": {
             "title": "Summary",
-            "description": "Summary of evidences",
+            "description": "Summary of evidence",
             "type": "array",
             "default": [],
             "uniqueItems": true,
@@ -145,15 +145,15 @@
         }
     },
     "columns": {
-        "gdmid": {
+        "gdmId": {
             "title": "Item",
             "type": "string"
         },
-        "geneSymbol": {
+        "gene": {
             "title": "Gene",
             "type": "string"
         },
-        "orphaNumber": {
+        "disease": {
             "title": "Orpha #",
             "type": "string"
         },
@@ -161,7 +161,7 @@
             "title": "Mode of Inheritance",
             "type": "string"
         },
-        "omimid": {
+        "omimId": {
             "title": "OMIM ID",
             "type": "string"
         },
@@ -174,7 +174,7 @@
             "type": "string"
         },
         "annotations": {
-            "title": "Evidence(s)",
+            "title": "Evidence",
             "type": "string"
         },
         "summary": {

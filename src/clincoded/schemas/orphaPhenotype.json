@@ -15,7 +15,7 @@
             "default": "1"
         },
         "orphaNumber": {
-            "title": "Unique ID of Orphanet data",
+            "title": "Unique ID of Orphanet diseases (Phenotypes)",
             "description": "Digital Orphanet ID.",
             "type": "string",
             "pattern": "^[0-9]{1,6}$",
@@ -50,7 +50,7 @@
                 "Biological anomaly"
             ]
         },
-        "omimids": {
+        "omimIds": {
             "title": "OMIM ID",
             "description": "List of OMIM ids",
             "type": "array",
@@ -95,7 +95,7 @@
             "title": "Synonym(s)",
             "type": "array"
         },
-        "omimids": {
+        "omimIds": {
             "title": "OMIM ID(s)",
             "type": "string"
         }

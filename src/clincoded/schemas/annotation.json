@@ -1,11 +1,11 @@
 {
     "title": "Annotation",
     "id": "/profiles/annotation.json",
-    "description": "List of evidences in a gdm",
+    "description": "List of evidence in a gdm",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["annotationid", "article", "owner", "dateTime"],
-    "identifyingProperties": ["uuid", "annotationid"],
+    "required": ["annotationId", "article", "owner", "dateTime"],
+    "identifyingProperties": ["uuid", "annotationId"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -16,9 +16,9 @@
         "schema_version": {
             "default": "1"
         },
-        "annotationid": {
+        "annotationId": {
             "title": "Annotation ID",
-            "description": "Unique id for evidences",
+            "description": "Unique id for evidence",
             "type": "string",
             "pattern": "^[0-9]{1,9}$",
             "uniqueKey": true
@@ -36,19 +36,18 @@
         },
         "dateTime": {
             "title": "Date",
-            "description": "Date and time to create the evidence",
+            "description": "Time stamp for evidence creation",
             "type": "string"
         },
         "groups": {
             "title": "Group",
-            "description": "List of group ids",
+            "description": "List of groups in the evidence",
             "type": "array",
             "default": [],
             "items": {
                 "title": "Group ID",
                 "description": "Group id",
-                "type": "string",
-                "linkTo": "group"
+                "type": "string"
             }
         },
         "families": {
@@ -59,8 +58,7 @@
             "items": {
                 "title": "Family ID",
                 "description": "Family id",
-                "type": "string",
-                "linkTo": "family"
+                "type": "string"
             }
         },
         "individuals": {
@@ -71,8 +69,7 @@
             "items": {
                 "title": "Individual ID",
                 "description": "Individual id",
-                "type": "string",
-                "linkTo": "individual"
+                "type": "string"
             }
         },
         "functionalData": {
@@ -83,18 +80,23 @@
             "items": {
                 "title": "Functional Data ID",
                 "description": "FunctionalData id",
-                "type": "string",
-                "linkTo": "functionalData"
+                "type": "string"
             }
         },
         "active": {
             "title": "Active",
             "description": "Boolean switch for using the evidence",
             "type": "boolean"
+        },
+        "dateTime": {
+            "title": "Date and Time",
+            "description": "Time stamp of the evidence creation",
+            "type": "string",
+            "default": ""
         }
     },
     "columns": {
-        "annotationid": {
+        "annotationId": {
             "title": "Item",
             "type": "string"
         },
