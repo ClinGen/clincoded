@@ -4,7 +4,7 @@
     "description": "Schema for storing group data",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["label", "commonDiagnosis", "method"],
+    "required": ["label", "commonDiagnosis"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -203,12 +203,19 @@
         "additionalInformation": {
             "title": "Additional Information",
             "description": "List of Additional information of the group",
+            "type": "string",
+            "default": ""
+        },
+        "otherPMIDs": {
+            "title": "Other PMIDs",
+            "description": "List of other PMIDs having evidence about the group",
             "type": "array",
             "default": [],
             "items": {
-                "title": "Info",
-                "description": "",
-                "type": "string"
+                "title": "PMID",
+                "description": "PMID",
+                "type": "string",
+                "linkTo": "article"
             }
         },
         "statistic": {
