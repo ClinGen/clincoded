@@ -136,13 +136,13 @@ var CreateGeneDisease = React.createClass({
                     <Panel panelClassName="panel-create-gene-disease">
                         <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                             <div className="row">
-                                <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1"
+                                <Input type="text" id="hgncgene" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1"
                                     error={this.getFormError('hgncgene')} clearError={this.clrFormErrors.bind(null, 'hgncgene')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15"
+                                <Input type="text" id="orphanetid" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15"
                                     error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue={hpoValues[0].value}
+                                <Input type="select" id="hpo" ref="hpo" label="Mode of Inheritance" defaultValue={hpoValues[0].value}
                                     error={this.getFormError('hpo')} clearError={this.clrFormErrors.bind(null, 'hpo')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                                     {hpoValues.map(function(v, i) {

@@ -243,7 +243,7 @@ var AddOmimIdModal = React.createClass({
         return (
             <Form submitHandler={this.submitForm} formClassName="form-std">
                 <div className="modal-body">
-                    <Input type="text" ref="omimid" label="Enter an OMIM ID"
+                    <Input type="text" id="omimid" ref="omimid" label="Enter an OMIM ID"
                         error={this.getFormError('omimid')} clearError={this.clrFormErrors.bind(null, 'omim')}
                         labelClassName="control-label" groupClassName="form-group" required />
                 </div>

@@ -96,7 +96,7 @@ var GroupName = React.createClass({
     render: function() {
         return (
             <div className="row">
-                <Input type="text" ref="groupname" label="Group name (optional):"
+                <Input type="text" id="groupname" ref="groupname" label="Group name (optional):"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             </div>
         );
@@ -108,16 +108,16 @@ var GroupCommonDiseases = React.createClass({
     render: function() {
         return (
             <div className="row">
-                <Input type="text" ref="orphanetid" label={<LabelOrphanetId />}
+                <Input type="text" id="orphanetid" ref="orphanetid" label={<LabelOrphanetId />}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-                <Input type="text" ref="hpoid" label={<LabelHpoId />}
+                <Input type="text" id="hpoid" ref="hpoid" label={<LabelHpoId />}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5"
+                <Input type="textarea" id="phenoterms" ref="phenoterms" label={<LabelPhenoTerms />} rows="5"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                 <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Group</em> if they are specifically noted in the paper.</p>
-                <Input type="text" ref="nothpoid" label={<LabelHpoId not />}
+                <Input type="text" id="nothpoid" ref="nothpoid" label={<LabelHpoId not />}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms not />} rows="5"
+                <Input type="textarea" id="phenoterms" ref="phenoterms" label={<LabelPhenoTerms not />} rows="5"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             </div>
         );
@@ -160,22 +160,22 @@ var GroupDemographics = React.createClass({
     render: function() {
         return (
             <div className="row">
-                <Input type="text" ref="malecount" label="# males:"
+                <Input type="text" id="malecount" ref="malecount" label="# males:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                <Input type="text" ref="malecount" label="# females:"
+                <Input type="text" id="femalecount" ref="femalecount" label="# females:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                <Input type="select" ref="country" label="Country of Origin:"
+                <Input type="select" id="country" ref="country" label="Country of Origin:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     {country_codes.map(function(country_code) {
                         return <option key={country_code.code} value={country_code.code}>{country_code.name}</option>;
                     })}
                 </Input>
-                <Input type="select" ref="ethnicity" label="Ethnicity:"
+                <Input type="select" id="ethnicity" ref="ethnicity" label="Ethnicity:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="hispanic">Hispanic or Latino</option>
                     <option value="nonhispanic">Not Hispanic or Latino</option>
                 </Input>
-                <Input type="select" ref="race" label="Race:"
+                <Input type="select" id="race" ref="race" label="Race:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="nativeamerican">American Indian or Alaska Native</option>
                     <option value="asian">Asian</option>
@@ -187,7 +187,7 @@ var GroupDemographics = React.createClass({
                 </Input>
                 <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
                 <div className="demographics-age-range">
-                    <Input type="select" ref="agerangetype" label="Type:"
+                    <Input type="select" id="agerangetype" ref="agerangetype" label="Type:"
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                         <option value="onset">Onset</option>
                         <option value="report">Report</option>
@@ -195,11 +195,11 @@ var GroupDemographics = React.createClass({
                         <option value="death">Death</option>
                     </Input>
                     <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7">
-                        <Input type="text" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline" />
+                        <Input type="text" id="agefrom" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline" />
                         <span> to </span>
-                        <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline" />
+                        <Input type="text" id="ageto" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline" />
                     </Input>
-                    <Input type="select" ref="ageunit" label="Unit:"
+                    <Input type="select" id="ageunit" ref="ageunit" label="Unit:"
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                         <option value="days">Days</option>
                         <option value="weeks">Weeks</option>
@@ -217,19 +217,19 @@ var GroupProbandInfo = React.createClass({
     render: function() {
         return(
             <div className="row">
-                <Input type="text" ref="indcount" label="Total number individuals in group:"
+                <Input type="text" id="indcount" ref="indcount" label="Total number individuals in group:"
                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-                <Input type="text" ref="indfamilycount" label="# individuals with family information:"
+                <Input type="text" id="indfamilycount" ref="indfamilycount" label="# individuals with family information:"
                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-                <Input type="text" ref="notindfamilycount" label="# individuals WITHOUT family information:"
+                <Input type="text" id="notindfamilycount" ref="notindfamilycount" label="# individuals WITHOUT family information:"
                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-                <Input type="text" ref="indvariantgenecount" label="# individuals with variant in gene being curated:"
+                <Input type="text" id="indvariantgenecount" ref="indvariantgenecount" label="# individuals with variant in gene being curated:"
                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-                <Input type="text" ref="notindvariantgenecount" label="# individuals without variant in gene being curated:"
+                <Input type="text" id="notindvariantgenecount" ref="notindvariantgenecount" label="# individuals without variant in gene being curated:"
                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-                <Input type="text" ref="indvariantothercount" label="# individuals with variant found in other gene:"
+                <Input type="text" id="indvariantothercount" ref="indvariantothercount" label="# individuals with variant found in other gene:"
                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-                <Input type="text" ref="othergenevariants" label="Other genes found to have variants in them:"
+                <Input type="text" id="othergenevariants" ref="othergenevariants" label="Other genes found to have variants in them:"
                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
             </div>
         );
@@ -241,20 +241,20 @@ var GroupMethods = React.createClass({
     render: function() {
         return (
             <div className="row">
-                <Input type="select" ref="prevtesting" label="Previous Testing:"
+                <Input type="select" id="prevtesting" ref="prevtesting" label="Previous Testing:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="yes">Yes</option>
                     <option value="no">No</option>
                 </Input>
-                <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5"
+                <Input type="textarea" id="prevtestingdesc" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                <Input type="select" ref="genomewide" label="Genome-wide Study?:"
+                <Input type="select" id="genomewide" ref="genomewide" label="Genome-wide Study?:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="yes">Yes</option>
                     <option value="no">No</option>
                 </Input>
                 <h4 className="col-sm-7 col-sm-offset-5">Genotyping Method</h4>
-                <Input type="select" ref="genotypingmethod1" label="Method 1:"
+                <Input type="select" id="genotypingmethod1" ref="genotypingmethod1" label="Method 1:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="yes">Exome sequencing</option>
                     <option value="yes">Genotyping</option>
@@ -263,7 +263,7 @@ var GroupMethods = React.createClass({
                     <option value="yes">Sanger</option>
                     <option value="yes">Whole genome shotgun sequencing</option>
                 </Input>
-                <Input type="select" ref="genotypingmethod2" label="Method 2:"
+                <Input type="select" id="genotypingmethod2" ref="genotypingmethod2" label="Method 2:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="yes">Exome sequencing</option>
                     <option value="yes">Genotyping</option>
@@ -272,24 +272,24 @@ var GroupMethods = React.createClass({
                     <option value="yes">Sanger</option>
                     <option value="yes">Whole genome shotgun sequencing</option>
                 </Input>
-                <Input type="select" ref="entiregene" label="Entire gene sequenced?:"
+                <Input type="select" id="entiregene" ref="entiregene" label="Entire gene sequenced?:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="yes">Yes</option>
                     <option value="no">No</option>
                 </Input>
-                <Input type="select" ref="copyassessed" label="Copy number assessed?:"
+                <Input type="select" id="copyassessed" ref="copyassessed" label="Copy number assessed?:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="yes">Yes</option>
                     <option value="no">No</option>
                 </Input>
-                <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:"
+                <Input type="select" id="mutationsgenotyped" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="yes">Yes</option>
                     <option value="no">No</option>
                 </Input>
-                <Input type="textarea" ref="specificmutation" label="Method by which Specific Mutations Genotyped:" rows="5"
+                <Input type="textarea" id="specificmutation" ref="specificmutation" label="Method by which Specific Mutations Genotyped:" rows="5"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                <Input type="textarea" ref="additionalinfomethod" label="Additional Information about Group Method:" rows="8"
+                <Input type="textarea" id="additionalinfomethod" ref="additionalinfomethod" label="Additional Information about Group Method:" rows="8"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             </div>
         );
@@ -301,9 +301,9 @@ var GroupAdditional = React.createClass({
     render: function() {
         return (
             <div className="row">
-                <Input type="textarea" ref="additionalinfogroup" label="Additional Information about Group:" rows="5"
+                <Input type="textarea" id="additionalinfogroup" ref="additionalinfogroup" label="Additional Information about Group:" rows="5"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                <Input type="textarea" ref="otherpmids" label="Add any other PMID(s) that have evidence about this same Group:" rows="5"
+                <Input type="textarea" id="otherpmids" ref="otherpmids" label="Add any other PMID(s) that have evidence about this same Group:" rows="5"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                 <p className="col-sm-7 col-sm-offset-5">Note: Any variants associated with Individuals in the group who will be counted as probands are not captured at the Group level — they need to be captured at the Family level or Individual levels. Submit the Group information and you will be prompted to enter Family or Individual information after that.</p>
             </div>

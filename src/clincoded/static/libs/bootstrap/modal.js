@@ -1,5 +1,5 @@
 "use strict";
-var React = require('react');
+var React = require('react/addons');
 
 // Display a modal dialog box that blocks all other page input until it's dismissed.
 // Use it as a wrapper around a button or link that actuates it, like:
@@ -82,7 +82,7 @@ var Modal = module.exports.Modal = React.createClass({
             if (child.props.modal) {
                 // Child has "modal" prop; assign Modal click handler to child and pass it the child’s modal property.
                 // Modifying child React components requires modifying a clone, so...
-                var clone = React.cloneElement(child, {onClick: this.handleClick.bind(this, child.props.modal)});
+                var clone = React.addons.cloneWithProps(child, {onClick: this.handleClick.bind(this, child.props.modal)});
                 return clone;
             }
 

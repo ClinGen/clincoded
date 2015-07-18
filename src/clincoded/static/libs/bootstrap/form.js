@@ -5,37 +5,15 @@
 // mixin that handles standard form things like saving and retrieving form values, and
 // handling validation errors.
 
-var React = require('react');
+var React = require('react/addons');
 var _ = require('underscore');
 
 
 // Surround Input elements with the Form element
 var Form = module.exports.Form = React.createClass({
-    // Add 'id' property to any Input elements. Make it a copy of the Input's ref. Run through all children
-    // of the form, and any children of those children, recursively.
-    createInputRefs: function(children) {
-        var processedChildren = React.Children.map(children, child => {
-            var props = {};
-
-            // Copy ref to new id property.
-            if (child.ref) {
-                props.id = child.ref;
-            }
-
-            // If the current child has children, process them recursively and assign the result to the new children property
-            if (child.props && child.props.children) {
-                props.children = this.createInputRefs(child.props.children);
-            }
-
-            // If we made new properties, clone the child and assign the properties to the clone
-            return Object.keys(props).length ? React.cloneElement(child, props) : child;
-        });
-        return processedChildren;
-    },
-
     render: function() {
         // Before rendering, copy any refs on any elements in the form to each element's id property
-        var children = this.createInputRefs(this.props.children);
+        var children = this.props.children;
         return (
             <form onSubmit={this.props.submitHandler} className={this.props.formClassName}>
                 {children}
@@ -133,7 +111,7 @@ var Input = module.exports.Input = React.createClass({
     // Get the text the user entered from the text-type field. Meant to be called from
     // parent components.
     getValue: function() {
-        return React.findDOMNode(this.refs.input).value;
+        return this.refs.input.getDOMNode().value;
     },
 
     // Get the selected option from a <select> list
