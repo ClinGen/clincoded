@@ -1,5 +1,5 @@
 "use strict";
-var React = require('react');
+var React = require('react/addons');
 
 
 // Controls a group of Panel components. Useful for accordions.
@@ -13,7 +13,7 @@ var PanelGroup = module.exports.PanelGroup = React.createClass({
         var children = React.Children.map(this.props.children, child => {
             if (child.type === Panel) {
                 // Adding properties to children means cloning them, so...
-                var clone = React.cloneElement(child, {accordion: true});
+                var clone = React.addons.cloneWithProps(child, {accordion: true});
                 return clone;
             }
             return child;

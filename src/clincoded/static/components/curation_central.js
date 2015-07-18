@@ -281,7 +281,7 @@ var AddPmidModal = React.createClass({
         return (
             <Form submitHandler={this.submitForm} formClassName="form-std">
                 <div className="modal-body">
-                    <Input type="text" ref="pmid" label="Enter a PubMed ID"
+                    <Input type="text" id="pmid" ref="pmid" label="Enter a PubMed ID"
                         error={this.getFormError('pmid')} clearError={this.clrFormErrors.bind(null, 'pmid')}
                         labelClassName="control-label" groupClassName="form-group" required />
                 </div>
