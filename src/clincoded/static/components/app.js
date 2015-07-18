@@ -144,7 +144,7 @@ var App = module.exports = React.createClass({
 var Header = React.createClass({
     render: function() {
         return (
-            <header className="site-header">
+            <header className="site-header" id="navbar">
                 <NavbarMain portal={portal} session={this.props.session} />
             </header>
         );
