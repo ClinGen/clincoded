@@ -1,7 +1,7 @@
 [
     {
         "owner": "kgliu@stanford.edu",
-        "dateTime": "time stamp 01",
+        "dateTime": "2015-02-27T05:35:18-08:00",
         "analysisType": "type1",
         "description": "some thing about type1",
         "oddsRatio": "5:4",
@@ -16,7 +16,7 @@
     },
     {
         "owner": "selinad@stanford.edu",
-        "dateTime": "time stamp 02",
+        "dateTime": "2015-02-27T06:35:18-08:00",
         "analysisType": "type2",
         "description": "some thing about type2",
         "oddsRatio": "100:150",
