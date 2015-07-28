@@ -525,13 +525,13 @@ var GroupCommonDiseases = function() {
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="phenoterms" label="Shared Phenotype(s) (free text):" rows="5" value={group.termsInDiagnosis}
+            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={group.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Group</em> if they are specifically noted in the paper.</p>
-            <Input type="text" ref="nothpoid" label={<LabelNotHpoId />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
+            <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label="Not Phenotype(s) (free text):" rows="5" value={group.termsInElimination}
+            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={group.termsInElimination}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -541,35 +541,41 @@ var GroupCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span>Disease in Common (<a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term):</span>;
+        return <span>Disease in Common (<span style={{fontWeight: 'normal'}}><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term</span>):</span>;
     }
 });
 
 // HTML labels for inputs follow.
 var LabelHpoId = React.createClass({
-    render: function() {
-        return <span>Shared Phenotypes (HPO ID(s)); <a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="PhenExplorer home page in a new tab">PhenExplorer</a>):</span>;
-    }
-});
+    propTypes: {
+        not: React.PropTypes.bool // T to show 'NOT' version of label
+    },
 
-// HTML labels for inputs follow.
-var LabelNotHpoId = React.createClass({
     render: function() {
-        return <span>NOT Phenotype(s) (HPO ID(s); <a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="PhenExplorer home page in a new tab">PhenExplorer</a>):</span>;
+        return (
+            <span>
+                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
+                Phenotypes (<span style={{fontWeight: 'normal'}}>HPO ID(s)</span>); <a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="PhenExplorer home page in a new tab">PhenExplorer</a>:
+            </span>
+        );
     }
 });
 
 // HTML labels for inputs follow.
 var LabelPhenoTerms = React.createClass({
     propTypes: {
-        not: React.PropTypes.bool
+        not: React.PropTypes.bool // T to show 'NOT' version of label
     },
 
     render: function() {
-        return <span>Free text{this.props.not ? <span style={{color: 'red'}}> NOT</span> : null} phenotype terms:</span>;
+        return (
+            <span>
+                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
+                Phenotype(s) (<span style={{fontWeight: 'normal'}}>free text</span>):
+            </span>
+        );
     }
 });
-
 
 // Demographics group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
