@@ -52,7 +52,7 @@
         "disease": "777",
         "modeInheritance": "Autosomal dominant inheritance with paternal imprinting (HP:0012274)",
         "omimId": "300046",
-        "owner": "tsneddon@stanford",
+        "owner": "tsneddon@stanford.edu",
         "dateTime": "2015-02-25T14:55:54-08:00",
         "status": "Evidence",
         "active": true
@@ -63,7 +63,7 @@
         "disease": "183660",
         "modeInheritance": "Codominant",
         "omimId": "",
-        "owner": "tsneddon@stanford",
+        "owner": "tsneddon@stanford.edu",
         "dateTime": "2015-05-04T08:11:18-07:00",
         "status": "Evidence",
         "active": true
@@ -74,7 +74,7 @@
         "disease": "84",
         "modeInheritance": "Other",
         "omimId": "609054",
-        "owner": "tsneddon@stanford",
+        "owner": "tsneddon@stanford.edu",
         "dateTime": "2015-03-19T15:25:49-07:00",
         "status": "Evidence",
         "active": true
