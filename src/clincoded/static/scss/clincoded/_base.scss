@@ -80,7 +80,6 @@ dl.inline-dl {
     }
 }
 
-
 dl.dl-horizontal {
     margin: 0;
 
@@ -134,4 +133,13 @@ dl.dl-horizontal {
 
 .beta-note {
     font-style: italic;
+}
+
+.icon {
+    font-size: 1rem;
+
+    @media screen and (min-width: $screen-sm-min) {
+        font-size: 1.5rem;
+    }
+
 }
