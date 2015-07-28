@@ -57,7 +57,7 @@ var HTTPForbidden = module.exports.HTTPForbidden = React.createClass({
                 <div className={itemClass}>
                     <div className="row">
                         <div className="col-sm-12">
-                            <h1>Not available</h1>
+                            <h1>ClinGen Curator Interface</h1>
                             <p>Access to this interface is currently restricted to ClinGen curators. To access publicly available information, please visit the <a href="http://clinicalgenome.org">ClinGen portal</a>.</p>
                             <p>If you are a ClinGen curator, you may <a href='mailto:clingen-helpdesk@lists.stanford.edu'>request an account</a>.</p>
                         </div>

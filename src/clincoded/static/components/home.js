@@ -20,13 +20,21 @@ var SignIn = module.exports.SignIn = React.createClass({
 var Home = module.exports.Home = React.createClass({
     render: function() {
         var hidden = !this.props.session || this.props.session['auth.userid'];
+        if (hidden) {
+            window.location.replace("/dashboard/");
+        }
+        else {
+            var message = [<p>Access to this interface is currently restricted to ClinGen curators. To access publicly available information, please visit the <a href="http://clinicalgenome.org">ClinGen portal</a>.</p>,
+                <p>If you are a ClinGen curator, you may <a href='mailto:clingen-helpdesk@lists.stanford.edu'>request an account</a>.</p>]
+        }
         return (
-            <div>
+            <div className="container">
                 <div className="homepage-main-box panel-gray">
                     <div className="row">
                         <div className="col-sm-12">
                             <div className="project-info site-title">
-                                <h1>ClinGen Curator Portal</h1>
+                                <h1>ClinGen Curator Interface</h1>
+                                {message}
                             </div>
                         </div>
                     </div>
