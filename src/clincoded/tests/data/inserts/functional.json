@@ -2,7 +2,7 @@
     {
         "uuid": "79ba2b61-2a6e-11e5-93f9-60f81dc5b05a",
         "owner": "tsneddon@stanford.edu",
-        "dateTime": "Mon Apr 13 2015 10:10:37 GMT-0700 (PDT)",
+        "dateTime": "2015-04-13T10:10:37-07:00",
         "active": true,
         "evidenceType": "Expression",
         "expression": {
@@ -20,7 +20,7 @@
     {
         "uuid": "72341d2e-2a6e-11e5-bdd7-60f81dc5b05a",
         "owner": "selinad@stanford.edu",
-        "dateTime": "Mon Apr 13 2015 12:32:57 GMT-0700 (PDT)",
+        "dateTime": "2015-04-13T12:32:57-07:00",
         "active": true,
         "evidenceType": "Protein Interactions",
         "proteinIneractions": {
@@ -39,7 +39,7 @@
     {
         "uuid": "6be668d4-2a6e-11e5-804a-60f81dc5b05a",
         "owner": "selinad@stanford.edu",
-        "dateTime": "Mon Apr 13 2015 16:43:12 GMT-0700 (PDT)",
+        "dateTime": "2015-04-13T16:43:12-07:00",
         "active": true,
         "evidenceType": "Biochemical function",
         "biochemicalFunction": {
@@ -78,7 +78,7 @@
     {
         "uuid": "1ca71459-2cb5-11e5-a26a-60f81dc5b05a",
         "owner": "selinad@stanford.edu",
-        "dateTime": "Mon Apr 13 2015 16:43:12 GMT-0700 (PDT)",
+        "dateTime": "2015-04-13T16:43:12-07:00",
         "active": true,
         "evidenceType": "Rescue",
         "rescue": {
@@ -102,7 +102,7 @@
     {
         "uuid": "ca353d87-2cb8-11e5-85c1-60f81dc5b05a",
         "owner": "selinad@stanford.edu",
-        "dateTime": "Mon Apr 13 2015 16:43:12 GMT-0700 (PDT)",
+        "dateTime": "2015-04-13T16:43:12-07:00",
         "active": true,
         "evidenceType": "Functional alteration of gene/gene product",
         "functionalAleration": {
@@ -124,7 +124,7 @@
     {
         "uuid": "d06dae6b-2cb8-11e5-8e3e-60f81dc5b05a",
         "owner": "fytanaka@stanford.edu",
-        "dateTime": "Mon Apr 13 2015 16:43:12 GMT-0700 (PDT)",
+        "dateTime": "2015-04-13T16:43:12-07:00",
         "active": true,
         "evidenceType": "Model systems",
         "modelSystems": {
