@@ -19,6 +19,7 @@ var PmidDoiButtons = curator.PmidDoiButtons;
 var CurationData = curator.CurationData;
 var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
+var queryKeyValue = globals.queryKeyValue;
 var external_url_map = globals.external_url_map;
 
 // Curator page content
@@ -26,34 +27,8 @@ var CurationCentral = React.createClass({
     mixins: [RestMixin],
 
     getInitialState: function() {
-        // See if there’s a GDM UUID to retrieve
-        var gdmUuid, pmid;
-        var queryParsed = this.props.href && url.parse(this.props.href, true).query;
-        if (queryParsed && Object.keys(queryParsed).length) {
-            // Find the first 'gdm' query string item, if any
-            var uuidKey = _(Object.keys(queryParsed)).find(function(key) {
-                return key === 'gdm';
-            });
-            // Check to see if there's a PMID to retrieve, only if there's  GDM to retrieve
-            var pmidKey = _(Object.keys(queryParsed)).find(function(key) {
-                return key === 'pmid';
-            });
-            if (uuidKey) {
-                // Got the GDM key for its UUID from the query string. Now use it to retrieve that GDM
-                gdmUuid = queryParsed[uuidKey];
-                if (typeof gdmUuid === 'object') {
-                    gdmUuid = gdmUuid[0];
-                }
-                // Set the PMID variable
-                pmid = queryParsed[pmidKey];
-                if (typeof pmid === 'object') {
-                    pmid = pmid[0];
-                }
-            }
-        }
         return {
-            currPmid: pmid,
-            gdmUuid: gdmUuid,
+            currPmid: queryKeyValue('pmid', this.props.href),
             currOmimId: '',
             currGdm: {}
         };
@@ -61,9 +36,22 @@ var CurationCentral = React.createClass({
 
     // Called when currently selected PMID changes
     currPmidChange: function(pmid) {
-        this.setState({currPmid: pmid, selectionListOpen: false});
         if (pmid !== undefined) {
-            window.history.replaceState(window.state, '', '/curation-central/?gdm=' + this.state.gdmUuid + '&pmid=' + pmid);
+            var gdm = this.state.currGdm;
+
+            if (Object.keys(gdm).length) {
+                // Find the annotation in the GDM matching the given pmid
+                var currAnnotation = _(gdm.annotations).find(annotation => {
+                    return annotation.article.pmid === pmid;
+                });
+
+                if (currAnnotation) {
+                    this.setState({currPmid: currAnnotation.article.pmid});                
+                }
+            }
+            if (this.state.currGdm && Object.keys(this.state.currGdm).length) {
+                window.history.replaceState(window.state, '', '/curation-central/?gdm=' + this.state.currGdm.uuid + '&pmid=' + pmid);
+            }
         }
     },
 
@@ -78,7 +66,10 @@ var CurationCentral = React.createClass({
     // After the Curator Central page component mounts, grab the uuid from the query string and
     // retrieve the corresponding GDM from the DB.
     componentDidMount: function() {
-        this.getGdm(this.state.gdmUuid);
+        var gdmUuid = queryKeyValue('gdm', this.props.href);
+        if (gdmUuid) {
+            this.getGdm(gdmUuid);
+        }
     },
 
     // Add an article whose object is given to the current GDM
@@ -132,16 +123,14 @@ var CurationCentral = React.createClass({
     },
 
     render: function() {
-        var currArticle;
         var gdm = this.state.currGdm;
+        var pmid = this.state.currPmid;
 
-        // Get the PM item for the currently selected PMID
-        if (this.state.currPmid) {
-            var currAnnotation = _(gdm.annotations).find(annotation => {
-                return annotation.article.pmid === this.state.currPmid;
-            });
-            currArticle = currAnnotation ? currAnnotation.article : null;
-        }
+        // Find the GDM's annotation for the article with the curren PMID
+        var annotation = gdm.annotations && gdm.annotations.length && _(gdm.annotations).find(function(annotation) {
+            return pmid === annotation.article.pmid;
+        });
+        var currArticle = annotation ? annotation.article : null;
 
         return (
             <div>
@@ -149,24 +138,27 @@ var CurationCentral = React.createClass({
                 <div className="container">
                     <div className="row curation-content">
                         <div className="col-md-3">
-                            <PmidSelectionList annotations={gdm.annotations} currPmid={this.state.currPmid} currPmidChange={this.currPmidChange}
-                                    updateGdmArticles={this.updateGdmArticles} />
+                            <PmidSelectionList annotations={gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
+                                    updateGdmArticles={this.updateGdmArticles} /> 
                         </div>
                         <div className="col-md-6">
                             {currArticle ?
                                 <div className="curr-pmid-overview">
                                     <PmidSummary article={currArticle} displayJournal />
                                     <PmidDoiButtons pmid={currArticle.pmid} />
-                                    <div className="pmid-overview-abstract">
-                                        <h4>Abstract</h4>
-                                        <p>{currArticle.abstract}</p>
-                                    </div>
+                                    <BetaNote annotation={annotation} session={this.props.session} />
+                                    {currArticle.abstract ?
+                                        <div className="pmid-overview-abstract">
+                                            <h4>Abstract</h4>
+                                            <p>{currArticle.abstract}</p>
+                                        </div>
+                                    : null}
                                 </div>
                             : null}
                         </div>
                         {currArticle ?
                             <div className="col-md-3">
-                                <CurationPalette article={currArticle} />
+                                <CurationPalette gdm={gdm} annotation={annotation} session={this.props.session} />
                             </div>
                         : null}
                     </div>
@@ -178,6 +170,25 @@ var CurationCentral = React.createClass({
 
 globals.curator_page.register(CurationCentral, 'curator_page', 'curation-central');
 
+
+var BetaNote = React.createClass({
+    render: function() {
+        var annotation = this.props.annotation;
+        var session = this.props.session;
+        var curatorMatch = annotation.owner === (session && session.user_properties && session.user_properties.email);
+
+        return (
+            <div>
+                {!curatorMatch ?
+                    <div className="beta-note">
+                        <p>Currently, only the curator who adds a paper to a Gene-Disease record can associate evidence with that paper.</p>
+                        <p>PMID:{annotation.article.pmid} added by {annotation.owner}.</p>
+                    </div>
+                : null}
+            </div>
+        );
+    }
+});
 
 // Display the list of PubMed articles passed in pmidItems.
 var PmidSelectionList = React.createClass({
@@ -242,8 +253,8 @@ var AddPmidModal = React.createClass({
 
     // Form content validation
     validateForm: function() {
-        // Check if required fields have values
-        var valid = this.validateRequired();
+        // Start with default validation
+        var valid = this.validateDefault();
 
         // Valid if the field has only 10 or fewer digits
         if (valid) {
@@ -259,7 +270,7 @@ var AddPmidModal = React.createClass({
     // the process to add an article.
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setFormValue('pmid', this.refs.pmid.getValue());
+        this.saveFormValue('pmid', this.refs.pmid.getValue());
         if (this.validateForm()) {
             // Form is valid -- we have a good PMID. Fetch the article with that PMID
             var enteredPmid = this.getFormValue('pmid');

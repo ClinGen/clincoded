@@ -47,8 +47,8 @@ var CreateGeneDisease = React.createClass({
 
     // Form content validation
     validateForm: function() {
-        // Check if required fields have values
-        var valid = this.validateRequired();
+        // Start with default validation
+        var valid = this.validateDefault();
 
         // Check if orphanetid 
         if (valid) {
@@ -62,13 +62,13 @@ var CreateGeneDisease = React.createClass({
 
     // When the form is submitted...
     submitForm: function(e) {
-        e.preventDefault(); // Don't run through HTML submit handler
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
         // Get values from form and validate them
-        this.setFormValue('hgncgene', this.refs.hgncgene.getValue().toUpperCase());
-        this.setFormValue('orphanetid', this.refs.orphanetid.getValue());
+        this.saveFormValue('hgncgene', this.refs.hgncgene.getValue().toUpperCase());
+        this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
         var hpoDOMNode = this.refs.hpo.refs.input.getDOMNode();
-        this.setFormValue('hpo', hpoDOMNode[hpoDOMNode.selectedIndex].text);
+        this.saveFormValue('hpo', hpoDOMNode[hpoDOMNode.selectedIndex].text);
         if (this.validateForm()) {
             // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
             var orphaId = this.getFormValue('orphanetid').match(/^ORPHA([0-9]{1,6})$/i)[1];
