@@ -98,16 +98,21 @@ var Nav = module.exports.Nav = React.createClass({
 var NavItem = module.exports.NavItem = React.createClass({
     propTypes: {
         styles: React.PropTypes.string, // CSS classes to add to <li> elements
-        href: React.PropTypes.string // URL to link this item to
+        href: React.PropTypes.string, // URL to link this item to
+        icon: React.PropTypes.string // CSS class for fontawesome icon (e.g. 'icon-home')
         // Additional properties (data attributes) set on <a> for the item
     },
 
     render: function() {
         var url = this.props.href ? this.props.href : '#';
+        var iconClass = this.props.icon ? this.props.icon + ' icon' : '';
+        var contentClass = iconClass ? 'sr-only' : '';
 
         return (
             <li className={this.props.styles}>
-                <a {...this.props} href={url}>{this.props.children}</a>
+                <a {...this.props} href={url} className={iconClass}>
+                    <span className={contentClass}>{this.props.children}</span>
+                </a>
             </li>
         );
     }
