@@ -110,7 +110,7 @@ var NavItem = module.exports.NavItem = React.createClass({
 
         return (
             <li className={this.props.styles}>
-                <a {...this.props} ref={url} className={iconClass}>
+                <a {...this.props} href={url} className={iconClass}>
                     <span className={contentClass}>{this.props.children}</span>
                 </a>
             </li>
