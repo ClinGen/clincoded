@@ -17,6 +17,7 @@ var React = require('react');
 module.exports.ModalMixin = {
     childContextTypes: {
         modalOpen: React.PropTypes.bool, // T if modal is visible
+        alertOpen: React.PropTypes.object, // List of open alerts
         openModal: React.PropTypes.func, // Function to open the modal
         closeModal: React.PropTypes.func // Function to close the modal
     },
@@ -25,6 +26,7 @@ module.exports.ModalMixin = {
     getChildContext: function() {
         return {
             modalOpen: this.state.modalOpen,
+            alertOpen: this.state.alertOpen,
             openModal: this.openModal,
             closeModal: this.closeModal
         };
@@ -32,7 +34,8 @@ module.exports.ModalMixin = {
 
     getInitialState: function() {
         return {
-            modalOpen: false // T if the model and blocking backdrop are visible
+            modalOpen: false, // T if the model and blocking backdrop are visible
+            alertOpen: {} // Tracks the open state of each alert
         };
     },
 
@@ -50,6 +53,20 @@ module.exports.ModalMixin = {
 
         // Remove class from body element to make modal-backdrop div visible
         document.body.classList.remove('modal-open');
+    },
+
+    // Open an alert with the ID given in 'alert'
+    openAlert: function(alert) {
+        var currOpenStates = this.state.alertOpen;
+        currOpenStates[alert] = true;
+        this.setState({alertOpen: currOpenStates});
+    },
+
+    // Close the alert with the ID given in 'alert'
+    closeAlert: function(alert) {
+        var currOpenStates = this.state.alertOpen;
+        currOpenStates[alert] = false;
+        this.setState({alertOpen: currOpenStates});
     }
 };
 
@@ -116,3 +133,33 @@ var Modal = module.exports.Modal = React.createClass({
     }
 });
 
+
+var Alert = module.exports.Alert = React.createClass({
+    propTypes: {
+        content: React.PropTypes.object.isRequired, // Content of alert
+        wrapperClassName: React.PropTypes.string // CSS classes for modal trigger wrapper
+    },
+
+    contextTypes: {
+        alertOpen: React.PropTypes.object // List of visible alerts
+    },
+
+    render: function() {
+        return (
+            <div className={this.props.wrapperClassName}>
+                {this.context.alertOpen[this.props.id] ?
+                    <div>
+                        <div className="modal" style={{display: 'block'}}>
+                            <div className="modal-dialog">
+                                <div className="modal-content">
+                                    {this.props.content}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="modal-backdrop in"></div>
+                    </div>
+                : null}
+            </div>
+        );
+    }
+});
