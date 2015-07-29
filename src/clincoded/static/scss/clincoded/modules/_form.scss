@@ -37,3 +37,34 @@ input[type=search] {
 .form-group-inline {
     display: inline-block;
 }
+
+.group-age-fromto {
+    display: block;
+    padding-right: 0;
+}
+
+.group-age-input {
+    display: inline-block;
+    width: 45%;
+}
+
+.group-age-inter {
+    display: inline-block;
+    position: relative;
+    top: 9px;
+    width: 10%;
+    vertical-align: top;
+    text-align: center;
+}
+
+.submit-err {
+    margin-right: 10px;
+    line-height: 32px;
+    font-weight: bold;
+    color: #f22;
+    font-size: 0.9rem;
+
+    &.hidden {
+        display: none;
+    }
+}

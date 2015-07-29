@@ -53,17 +53,45 @@ var FormMixin = module.exports.FormMixin = {
         return {formErrors: {}};
     },
 
-    // Retrieves the saved value of the Input with the given 'ref' value. setFormValue
+    // Retrieves the saved value of the Input with the given 'ref' value. saveFormValue
     // must already have been called with this Input's value.
     getFormValue: function(ref) {
         return this.formValues[ref];
     },
 
+    // Retrieves the saved value of the Input with the given 'ref' value, and the Input
+    // value must be numeric. If the Input had no entered value at all, the empty string is
+    // returned. If the Input had an entered value but it wasn't numeric, null is returned.
+    // If the Input had a proper numberic value, a Javascript 'number' type is returned
+    // with the entered value.
+    getFormValueNumber: function(ref) {
+        var value = this.getFormValue(ref);
+        if (value) {
+            var numericValue = value.match(/^\s*(\d*)\s*$/);
+            if (numericValue) {
+                return parseInt(numericValue[1], 10);
+            }
+            return null;
+        }
+        return '';
+    },
+
     // Normally used after the submit button is clicked. Call this to save the value
     // from the Input with the given 'ref' value and the value itself. This does
     // NOT modify the form input values; it just saves them for later processing.
-    setFormValue: function(ref, value) {
+    saveFormValue: function(ref, value) {
         this.formValues[ref] = value;
+    },
+
+    // Call this to avoid calling 'saveFormValue' for every form item. It goes through all the
+    // form items with refs (should be all of them) and saves a formValue property with the
+    // corresponding value from the DOM.
+    saveAllFormValues: function() {
+        if (this.refs && Object.keys(this.refs).length) {
+            Object.keys(this.refs).map(ref => {
+                this.saveFormValue(ref, this.refs[ref].getValue());
+            });
+        }
     },
 
     // Get the saved form error for the Input with the given 'ref' value.
@@ -88,12 +116,26 @@ var FormMixin = module.exports.FormMixin = {
         this.setState({formErrors: errors});
     },
 
+    // Return true if the form's current state shows any Input errors. Return false if no
+    // errors are indicated. This should be called in the render function so that the submit
+    // form function will have had a chance to record any errors.
+    anyFormErrors: function() {
+        var formErrors = Object.keys(this.state.formErrors);
+
+        if (formErrors.length) {
+            return _(formErrors).any(errKey => {
+                return this.state.formErrors[errKey];
+            });
+        }
+        return false;
+    },
+
     // Do form validation on the required fields. Each field checked must have a unique ref,
     // and the boolean 'required' field set if it's required. All the Input's values must
-    // already have been collected with setFormValue. Returns true if all required fields
+    // already have been collected with saveFormValue. Returns true if all required fields
     // have values, or false if any do not. It also sets any empty required Inputs error
     // to the 'Required' message so it's displayed on the next render.
-    validateRequired: function() {
+    validateDefault: function() {
         var valid = true;
         Object.keys(this.refs).forEach(ref => {
             if (this.refs[ref].props.required && !this.getFormValue(ref)) {
@@ -101,6 +143,12 @@ var FormMixin = module.exports.FormMixin = {
                 // error, and remember to return false.
                 this.setFormErrors(ref, 'Required');
                 valid = false;
+            } else if (this.refs[ref].props.format === 'number') {
+                // Validate that format="number" fields have a valid number in them
+                if (this.getFormValueNumber(ref) === null) {
+                    this.setFormErrors(ref, 'Number only');
+                    valid = false;
+                }
             }
         });
         return valid;
@@ -130,10 +178,18 @@ var Input = module.exports.Input = React.createClass({
         cancelHandler: React.PropTypes.func // Called to handle cancel button click
     },
 
+    getInitialState: function() {
+        return {value: this.props.value};
+    },
+
     // Get the text the user entered from the text-type field. Meant to be called from
     // parent components.
     getValue: function() {
-        return React.findDOMNode(this.refs.input).value;
+        if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
+            return React.findDOMNode(this.refs.input).value;
+        } else if (this.props.type === 'select') {
+            return this.getSelectedOption();
+        }
     },
 
     // Get the selected option from a <select> list
@@ -147,11 +203,19 @@ var Input = module.exports.Input = React.createClass({
 
         // Get the selected options value, or its text if it has no value
         if (selectedOptionNode) {
-            return selectedOptionNode.getAttribute('value') || selectedOptionNode.innerHtml;
+            return selectedOptionNode.getAttribute('value') || selectedOptionNode.innerHTML;
         }
 
         // Nothing selected
         return '';
+    },
+
+    // Called when any input's value changes from user input
+    handleChange: function(e) {
+        this.setState({value: e.target.value});
+        if (this.props.clearError) {
+            this.props.clearError();
+        }
     },
 
     render: function() {
@@ -164,7 +228,7 @@ var Input = module.exports.Input = React.createClass({
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 var innerInput = (
                     <span>
-                        <input className={inputClasses} type={this.props.type} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.props.value} onChange={this.props.clearError} />
+                        <input className={inputClasses} type={this.props.type} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange} />
                         <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                     </span>
                 );
@@ -181,7 +245,7 @@ var Input = module.exports.Input = React.createClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <select className="form-control" ref="input" onChange={this.props.clearError} defaultValue={this.props.defaultValue}>
+                            <select className="form-control" ref="input" onChange={this.props.clearError} defaultValue={this.props.value ? this.props.value : this.props.defaultValue}>
                                 {this.props.children}
                             </select>
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
@@ -196,7 +260,7 @@ var Input = module.exports.Input = React.createClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" value={this.props.value} onChange={this.props.clearError} rows={this.props.rows} />
+                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} placeholder={this.props.placeholder} onChange={this.props.clearError} rows={this.props.rows} />
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                         </div>
                     </div>

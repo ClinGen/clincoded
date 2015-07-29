@@ -21,7 +21,7 @@ var routes = {
 var portal = {
     portal_title: 'ClinGen',
     navUser: [
-        {id: 'dashboard', title: 'Dashboard', url: '/dashboard/'},
+        {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
         {id: 'account', title: 'Account', url: '/account/'},
         {id: 'loginout', title: 'Login'}
     ]
@@ -176,7 +176,7 @@ var NavbarUser = React.createClass({
                 {this.props.portal.navUser.map(function(menu) {
                     if (menu.url) {
                         // Normal menu item
-                        return <NavItem key={menu.id} href={menu.url}>{menu.title}</NavItem>;
+                        return <NavItem key={menu.id} href={menu.url} icon={menu.icon}>{menu.title}</NavItem>;
                     } else {
                         // Trigger menu item; set <a> data attribute to login or logout
                         var attrs = {};

@@ -101,16 +101,33 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
 
 var CurationPalette = module.exports.CurationPalette = React.createClass({
     propTypes: {
-        article: React.PropTypes.object
+        annotation: React.PropTypes.object.isRequired, // Current annotation that owns the article
+        gdm: React.PropTypes.object.isRequired, // Current GDM that owns the given annotation
+        session: React.PropTypes.object // Session object
     },
 
     render: function() {
+        var annotation = this.props.annotation;
+        var session = this.props.session;
+        var curatorMatch = annotation.owner === (session && session.user_properties && session.user_properties.email);
+        var url = curatorMatch ? ('/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+
         return (
-            <Panel panelClassName="panel-evidence-group" title={'Evidence for PMID:' + this.props.article.pmid}>
-                <Panel title={<CurationPaletteTitles title="Group" />} panelClassName="panel-evidence">Stuff</Panel>
-                <Panel title={<CurationPaletteTitles title="Family" />} panelClassName="panel-evidence">Stuff</Panel>
-                <Panel title={<CurationPaletteTitles title="Individual" />} panelClassName="panel-evidence">Stuff</Panel>
-                <Panel title={<CurationPaletteTitles title="Functional" />} panelClassName="panel-evidence">Stuff</Panel>
+            <Panel panelClassName="panel-evidence-groups" title={'Evidence for PMID:' + this.props.annotation.article.pmid}>
+                <Panel title={<CurationPaletteTitles title="Group" url={url} />} panelClassName="panel-evidence">
+                    {annotation.groups && annotation.groups.map(function(group) {
+                        return (
+                            <div className="panel-evidence-group" key={group.uuid}>
+                                <h5>{group.label}</h5>
+                                <div className="evidence-curation-info">
+                                    <p className="evidence-curation-info">{annotation.owner}</p>
+                                    <p>{moment(annotation.dateTime).format('YYYY MMM DD, h:mm a')}</p>
+                                </div>
+                                <a href={'/group/' + group.uuid} target="_blank">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Edit</a></span> : null}
+                            </div>
+                        );
+                    }.bind(this))}
+                </Panel>
             </Panel>
         );
     }
@@ -120,15 +137,24 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
 // Title for each section of the curation palette. Contains the title and an Add button.
 var CurationPaletteTitles = React.createClass({
     propTypes: {
-        title: React.PropTypes.string // Title to display
+        title: React.PropTypes.string, // Title to display
+        url: React.PropTypes.string // URL for panel title click to go to.
     },
 
     render: function() {
         return (
-            <a href="#" className="clearfix">
-                <h4 className="pull-left">{this.props.title}</h4>
-                <i className="icon icon-plus-circle pull-right"></i>
-            </a>
+            <div>
+                {this.props.url ?
+                    <a href={this.props.url} className="curation-palette-title clearfix">
+                        <h4 className="pull-left">{this.props.title}</h4>
+                        <i className="icon icon-plus-circle pull-right"></i>
+                    </a>
+                :
+                    <span className="curation-palette-title clearfix">
+                        <h4 className="pull-left">{this.props.title}</h4>
+                    </span>
+                }
+            </div>
         );
     }
 });
@@ -212,8 +238,8 @@ var AddOmimIdModal = React.createClass({
 
     // Form content validation
     validateForm: function() {
-        // Check if required fields have values
-        var valid = this.validateRequired();
+        // Start with default validation
+        var valid = this.validateDefault();
 
         // Valid if the field has only 10 or fewer digits 
         if (valid) {
@@ -228,7 +254,7 @@ var AddOmimIdModal = React.createClass({
     // Called when the modal form’s submit button is clicked. Handles validation and updating the OMIM in the GDM.
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setFormValue('omimid', this.refs.omimid.getValue());
+        this.saveFormValue('omimid', this.refs.omimid.getValue());
         if (this.validateForm()) {
             // Form is valid -- we have a good OMIM ID. Close the modal and update the current GDM's OMIM ID
             this.props.closeModal();
