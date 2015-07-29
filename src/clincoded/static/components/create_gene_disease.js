@@ -18,22 +18,22 @@ var Panel = panel.Panel;
 var hpoValues = [
     {value: '', text: 'Select', disabled: true},
     {value: '', text: '', disabled: true},
-    {value: 'hp-0000006', text: 'Autosomal dominant inheritance (HP:0000006)'},
-    {value: 'hp-0012275', text: 'Autosomal dominant inheritance with maternal imprinting (HP:0012275)'},
-    {value: 'hp-0012274', text: 'Autosomal dominant inheritance with paternal imprinting (HP:0012274)'},
-    {value: 'hp-0000007', text: 'Autosomal recessive inheritance (HP:0000007)'},
-    {value: 'autosomal-unknown', text: 'Autosomal unknown'},
-    {value: 'codominant', text: 'Codominant'},
-    {value: 'hp-0003743', text: 'Genetic anticipation (HP:0003743)'},
-    {value: 'hp-0001427', text: 'Mitochondrial inheritance (HP:0001427)'},
-    {value: 'hp-0001470', text: 'Sex-limited autosomal dominant (HP:0001470)'},
-    {value: 'hp-0001428', text: 'Somatic mutation (HP:0001428)'},
-    {value: 'hp-0003745', text: 'Sporadic (HP:0003745)'},
-    {value: 'hp-0001423', text: 'X-linked dominant inheritance (HP:0001423)'},
-    {value: 'hp-0001417', text: 'X-linked inheritance (HP:0001417)'},
-    {value: 'hp-0001419', text: 'X-linked recessive inheritance (HP:0001419)'},
-    {value: 'hp-0001450', text: 'Y-linked inheritance (HP:0001450)'},
-    {value: 'other', text: 'Other'}
+    {text: 'Autosomal dominant inheritance (HP:0000006)'},
+    {text: 'Autosomal dominant inheritance with maternal imprinting (HP:0012275)'},
+    {text: 'Autosomal dominant inheritance with paternal imprinting (HP:0012274)'},
+    {text: 'Autosomal recessive inheritance (HP:0000007)'},
+    {text: 'Autosomal unknown'},
+    {text: 'Codominant'},
+    {text: 'Genetic anticipation (HP:0003743)'},
+    {text: 'Mitochondrial inheritance (HP:0001427)'},
+    {text: 'Sex-limited autosomal dominant (HP:0001470)'},
+    {text: 'Somatic mutation (HP:0001428)'},
+    {text: 'Sporadic (HP:0003745)'},
+    {text: 'X-linked dominant inheritance (HP:0001423)'},
+    {text: 'X-linked inheritance (HP:0001417)'},
+    {text: 'X-linked recessive inheritance (HP:0001419)'},
+    {text: 'Y-linked inheritance (HP:0001450)'},
+    {text: 'Other'}
 ];
 
 
@@ -67,8 +67,7 @@ var CreateGeneDisease = React.createClass({
         // Get values from form and validate them
         this.saveFormValue('hgncgene', this.refs.hgncgene.getValue().toUpperCase());
         this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
-        var hpoDOMNode = this.refs.hpo.refs.input.getDOMNode();
-        this.saveFormValue('hpo', hpoDOMNode[hpoDOMNode.selectedIndex].text);
+        this.saveFormValue('hpo', this.refs.hpo.getValue());
         if (this.validateForm()) {
             // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
             var orphaId = this.getFormValue('orphanetid').match(/^ORPHA([0-9]{1,6})$/i)[1];

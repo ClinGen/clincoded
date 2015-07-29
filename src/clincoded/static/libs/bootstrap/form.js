@@ -203,7 +203,8 @@ var Input = module.exports.Input = React.createClass({
 
         // Get the selected options value, or its text if it has no value
         if (selectedOptionNode) {
-            return selectedOptionNode.getAttribute('value') || selectedOptionNode.innerHTML;
+            var valAttr = selectedOptionNode.getAttribute('value');
+            return valAttr === null ? selectedOptionNode.innerHTML : valAttr;
         }
 
         // Nothing selected
@@ -215,7 +216,7 @@ var Input = module.exports.Input = React.createClass({
         this.setState({value: e.target.value});
         if (this.props.clearError) {
             this.props.clearError();
-        }
+        } 
     },
 
     render: function() {
