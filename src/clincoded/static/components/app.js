@@ -96,6 +96,7 @@ var App = module.exports = React.createClass({
                     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                     <title>ClinGen</title>
                     <link rel="canonical" href={canonical} />
+                    <script async src='//www.google-analytics.com/analytics.js'></script>
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="/static/css/style.css" />
                     <script src="/static/build/bundle.js" async defer></script>
