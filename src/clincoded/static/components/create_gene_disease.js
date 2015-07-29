@@ -48,7 +48,9 @@ var CreateGeneDisease = React.createClass({
         navigate: React.PropTypes.func
     },
 
-    componentVars: {},
+    getInitialState: function() {
+        return {gdm: {}};
+    },
 
     // Form content validation
     validateForm: function() {
@@ -66,11 +68,12 @@ var CreateGeneDisease = React.createClass({
     },
 
     editGdm: function() {
-        this.context.navigate('/curation-central/?gdm=' + this.componentVars.gdmUuid);
+        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
     },
 
     // When the form is submitted...
     submitForm: function(e) {
+        console.log(e);
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
         // Get values from form and validate them
@@ -114,8 +117,8 @@ var CreateGeneDisease = React.createClass({
                             this.context.navigate('/curation-central/?gdm=' + uuid);
                         });
                     } else {
-                        // Found matching GDM. Get its UUID and pass it to curation central page
-                        this.componentVars.gdmUuid = gdmSearch['@graph'][0].uuid;
+                        // Found matching GDM. See of the user wants to curate it.
+                        this.setState({gdm: gdmSearch['@graph'][0]});
                         this.openAlert('confirm-edit-gdm');
                     }
                 });
@@ -150,7 +153,7 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
                             </div>
                         </Form>
-                        <Alert id="confirm-edit-gdm" content={<ConfirmEditGdm editGdm={this.editGdm} closeAlert={this.closeAlert} />} />
+                        <Alert id="confirm-edit-gdm" content={<ConfirmEditGdm gdm={this.state.gdm} editGdm={this.editGdm} closeAlert={this.closeAlert} />} />
                     </Panel>
                 </div>
             </div>
@@ -177,6 +180,7 @@ var LabelOrphanetId = React.createClass({
 
 var ConfirmEditGdm = React.createClass({
     propTypes: {
+        gdm: React.PropTypes.object, // GDM object under consideration
         editGdm: React.PropTypes.func, // Function to call to edit the GDM
         closeAlert: React.PropTypes.func // Function to call to close the alert
     },
@@ -191,14 +195,16 @@ var ConfirmEditGdm = React.createClass({
     },
 
     render: function() {
+        var gdm = this.props.gdm;
+
         return (
             <div>
                 <div className="modal-body">
-                    <p>Do you want to curate the gene-disease record?</p>
+                    <p>A curation record already exists for <strong>{gdm.gene.symbol} — ORPHA{gdm.disease.orphaNumber} — {gdm.modeInheritance}</strong>. You may curate this record, or cancel to specify a different gene — disease — mode.</p>
                 </div>
                 <div className='modal-footer'>
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleClick.bind(this,false)} title="No" />
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleClick.bind(this.true)} title="Curate" />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleClick.bind(null, false)} title="Cancel" />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleClick.bind(null, true)} title="Curate" />
                 </div>
             </div>
         );

@@ -295,7 +295,7 @@ var Input = module.exports.Input = React.createClass({
                 title = this.props.title ? this.props.title : 'Submit';
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
-                    <input className={inputClasses} type={this.props.type} value={title} onClick={this.props.submitHandler} />
+                    <button className={inputClasses} onClick={this.props.submitHandler}>{title}</button>
                 );
                 break;
 
