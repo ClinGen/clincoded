@@ -159,7 +159,7 @@ var NavbarMain = React.createClass({
             <div>
                 <div className="container">
                     <NavbarUser portal={this.props.portal} session={this.props.session} />
-                    <a href="/dashboard" className='navbar-brand'>ClinGen Dashboard</a>
+                    <a href="/" className='navbar-brand'>ClinGen Dashboard</a>
                 </div>
             </div>
         );
