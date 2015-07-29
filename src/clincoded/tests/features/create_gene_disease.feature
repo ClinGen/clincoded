@@ -3,5 +3,5 @@ Feature: Create Gene Disease
 
     Scenario: See Required-Fields errors
         When I visit "/create-gene-disease/"
-        And I click the element with the css selector ".btn-primary"
+        And I click the element with the css selector ".btn-default"
         Then I should see "Required"
