@@ -172,17 +172,6 @@
                 "linkTo": "variant"
             }
         },
-        "assessments": {
-            "title": "Assessments",
-            "description": "List of assessments",
-            "type": "array",
-            "default": [],
-            "items": {
-                "title": "Asssessment",
-                "type": "string",
-                "linkTo": "assessment"
-            }
-        },
         "dateTime": {
             "title": "Date and Time",
             "description": "Time stamp of the individual creation",
@@ -207,17 +196,9 @@
             "title": "Race",
             "type": "string"
         },
-        "method": {
-            "title": "Method",
-            "type": "string"
-        },
         "variants": {
             "title": "Variants Associated",
             "type": "string"
-        },
-        "assessments": {
-            "title": "Assessments",
-            "type": "array"
         }
     }
 }

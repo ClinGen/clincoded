@@ -268,10 +268,6 @@
         }
     },
     "columns": {
-        "uuid": {
-            "title": "Group",
-            "type": "string"
-        },
         "label": {
             "title": "Label",
             "type": "string"
