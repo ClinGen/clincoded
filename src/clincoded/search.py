@@ -71,12 +71,7 @@ def get_sort_order():
         'embedded.dateTime': {
             'order': 'desc',
             'ignore_unmapped': True,
-        },
-        'embedded.label': {
-            'order': 'asc',
-            'missing': '_last',
-            'ignore_unmapped': True,
-        },
+        }
     }
 
 
