@@ -6,6 +6,7 @@ var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
+var parseAndLogError = require('./mixins').parseAndLogError;
 
 var Panel = panel.Panel;
 var Modal = modal.Modal;
@@ -14,6 +15,35 @@ var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
 var external_url_map = globals.external_url_map;
+
+
+var CurationMixin = module.exports.CurationMixin = {
+    getInitialState: function() {
+        return {
+            currOmimId: '' // Currently set OMIM ID
+        };
+    },
+
+    updateOmimId: function(gdmUuid, newOmimId) {
+        this.getRestData(
+            '/gdm/' + gdmUuid + '/?frame=object'
+        ).then(gdmObj => {
+            console.log(gdmObj.uuid);
+            // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
+            if (gdmObj.uuid) { delete gdmObj.uuid; }
+            if (gdmObj['@id']) { delete gdmObj['@id']; }
+            if (gdmObj['@type']) { delete gdmObj['@type']; }
+
+            gdmObj.omimId = newOmimId;
+            return this.putRestData('/gdm/' + this.state.currGdm.uuid, gdmObj);
+        }).then(data => {
+            this.setState({currOmimId: newOmimId});
+        }).catch(e => {
+            console.log('UPDATEOMIMID %o', e);
+            parseAndLogError.bind(undefined, 'putRequest');
+        });
+    }
+};
 
 
 var CuratorPage = module.exports.CuratorPage = React.createClass({
@@ -32,7 +62,7 @@ globals.content_views.register(CuratorPage, 'curator_page');
 
 
 // Curation data header for Gene:Disease
-var CurationData = module.exports.CurationData = React.createClass({
+var RecordHeader = module.exports.RecordHeader = React.createClass({
     propTypes: {
         gdm: React.PropTypes.object, // GDM data to display
         omimId: React.PropTypes.string, // OMIM ID to display
@@ -57,9 +87,9 @@ var CurationData = module.exports.CurationData = React.createClass({
                     </div>
                     <div className="container curation-data">
                         <div className="row equal-height">
-                            <GeneCurationData gene={gene} />
-                            <DiseaseCurationData gdm={this.props.gdm} omimId={this.props.omimId} updateOmimId={this.props.updateOmimId} />
-                            <CuratorCurationData gdm={this.props.gdm} />
+                            <GeneRecordHeader gene={gene} />
+                            <DiseaseRecordHeader gdm={this.props.gdm} omimId={this.props.omimId} updateOmimId={this.props.updateOmimId} />
+                            <CuratorRecordHeader gdm={this.props.gdm} />
                         </div>
                     </div>
                 </div>
@@ -161,7 +191,7 @@ var CurationPaletteTitles = React.createClass({
 
 
 // Display the gene section of the curation data
-var GeneCurationData = React.createClass({
+var GeneRecordHeader = React.createClass({
     propTypes: {
         gene: React.PropTypes.object // Object to display
     },
@@ -187,7 +217,7 @@ var GeneCurationData = React.createClass({
 
 
 // Display the disease section of the curation data
-var DiseaseCurationData = React.createClass({
+var DiseaseRecordHeader = React.createClass({
     mixins: [ModalMixin],
 
     propTypes: {
@@ -215,7 +245,7 @@ var DiseaseCurationData = React.createClass({
                                     </a>
                                 : null}&nbsp;
                                 <Modal title="Add/Change OMIM ID" wrapperClassName="edit-omim-modal">
-                                    <span>[</span><a modal={<AddOmimIdModal closeModal={this.closeModal} updateOmimId={this.props.updateOmimId} />} href="#">{addEdit}</a><span>]</span>
+                                    <span>[</span><a modal={<AddOmimIdModal gdm={gdm} closeModal={this.closeModal} updateOmimId={this.props.updateOmimId} />} href="#">{addEdit}</a><span>]</span>
                                 </Modal>
                             </dd>
                         </dl>
@@ -232,8 +262,9 @@ var AddOmimIdModal = React.createClass({
     mixins: [FormMixin],
 
     propTypes: {
-        closeModal: React.PropTypes.func, // Function to call to close the modal
-        updateOmimId: React.PropTypes.func // Function to call when we have a new OMIM ID
+        gdm: React.PropTypes.object.isRequired, // GDM being affected
+        closeModal: React.PropTypes.func.isRequired, // Function to call to close the modal
+        updateOmimId: React.PropTypes.func.isRequired // Function to call when we have a new OMIM ID
     },
 
     // Form content validation
@@ -259,7 +290,7 @@ var AddOmimIdModal = React.createClass({
             // Form is valid -- we have a good OMIM ID. Close the modal and update the current GDM's OMIM ID
             this.props.closeModal();
             var enteredOmimId = this.getFormValue('omimid');
-                this.props.updateOmimId(enteredOmimId);
+                this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
         }
     },
 
@@ -289,7 +320,7 @@ var AddOmimIdModal = React.createClass({
 
 
 // Display the curator data of the curation data
-var CuratorCurationData = React.createClass({
+var CuratorRecordHeader = React.createClass({
     propTypes: {
         gdm: React.PropTypes.object // GDM with curator data to display
     },

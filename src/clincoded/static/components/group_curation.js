@@ -9,7 +9,8 @@ var curator = require('./curator');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
 
-var CurationData = curator.CurationData;
+var CurationMixin = curator.CurationMixin;
+var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
@@ -24,7 +25,7 @@ var country_codes = globals.country_codes;
 
 
 var GroupCuration = React.createClass({
-    mixins: [FormMixin, RestMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -45,10 +46,10 @@ var GroupCuration = React.createClass({
     // state to the retrieved objects to cause a rerender of the component.
     getGdmAnnotation: function(gdmUuid, annotationUuid) {
         this.getRestDatas([
-            '/gdm/' + gdmUuid + '?frame=object',
-            '/evidence/' + annotationUuid + '?frame=object'
+            '/gdm/' + gdmUuid,
+            '/evidence/' + annotationUuid + '?frame=object' // Use flattened object because it can be updated
         ]).then(data => {
-            this.setState({gdm: data[0], annotation: data[1]});
+            this.setState({gdm: data[0], annotation: data[1], currOmimId: data[0].omimId});
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
@@ -406,7 +407,7 @@ var GroupCuration = React.createClass({
             <div>
                 {(!this.queryValues.groupUuid || Object.keys(this.state.group).length > 0) ?
                     <div>
-                        <CurationData />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
