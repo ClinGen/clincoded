@@ -22,7 +22,7 @@ var portal = {
     portal_title: 'ClinGen',
     navUser: [
         {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
-        {id: 'account', title: 'Account', url: '/account/'},
+        //{id: 'account', title: 'Account', url: '/account/'},
         {id: 'loginout', title: 'Login'}
     ]
 };
@@ -160,7 +160,7 @@ var NavbarMain = React.createClass({
             <div>
                 <div className="container">
                     <NavbarUser portal={this.props.portal} session={this.props.session} />
-                    <a href="/dashboard" className='navbar-brand'>ClinGen Dashboard</a>
+                    <a href="/" className='navbar-brand'>ClinGen Dashboard</a>
                 </div>
             </div>
         );
@@ -176,8 +176,10 @@ var NavbarUser = React.createClass({
             <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
                 {this.props.portal.navUser.map(function(menu) {
                     if (menu.url) {
-                        // Normal menu item
-                        return <NavItem key={menu.id} href={menu.url} icon={menu.icon}>{menu.title}</NavItem>;
+                        // Normal menu item; disabled if user is not logged in
+                        if (session && session['auth.userid']) {
+                            return <NavItem key={menu.id} href={menu.url} icon={menu.icon}>{menu.title}</NavItem>;
+                        }
                     } else {
                         // Trigger menu item; set <a> data attribute to login or logout
                         var attrs = {};
