@@ -2,6 +2,7 @@
 var React = require('react');
 var url = require('url');
 var _ = require('underscore');
+var moment = require('moment');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
@@ -39,7 +40,7 @@ var FamilyCuration = React.createClass({
             gdm: {}, // GDM object given in UUID
             annotation: {}, // Annotation object given in UUID
             article: {}, // Article from the annotation
-            group: {} // If we're editing a group, this gets the fleshed-out group object we're editing
+            family: {} // If we're editing a group, this gets the fleshed-out group object we're editing
         };
     },
 
@@ -59,15 +60,15 @@ var FamilyCuration = React.createClass({
     },
 
     // If a group UUID is given in the query string, load it into the group state variable.
-    loadGroup: function(groupUuid) {
+    loadFamily: function(familyUuid) {
         this.getRestData(
-            '/group/' + groupUuid
-        ).then(group => {
+            '/families/' + familyUuid
+        ).then(family => {
             // Received group data; set the current state with it
-            this.setState({group: group});
+            this.setState({family: family});
             return Promise.resolve();
         }).catch(function(e) {
-            console.log('GROUP LOAD ERROR=: %o', e);
+            console.log('FAMILY LOAD ERROR=: %o', e);
             parseAndLogError.bind(undefined, 'getRequest');
         });
     },
@@ -82,9 +83,9 @@ var FamilyCuration = React.createClass({
             this.getGdmAnnotation(this.queryValues.gdmUuid, this.queryValues.annotationUuid);
         }
 
-        // If a group's UUID was given in the query string, retrieve the group data.
-        if (this.queryValues.groupUuid) {
-            this.loadGroup(this.queryValues.groupUuid);
+        // If a family's UUID was given in the query string, retrieve the famly data for editing.
+        if (this.queryValues.familyUuid) {
+            this.loadFamily(this.queryValues.familyUuid);
         }
     },
 
@@ -96,13 +97,12 @@ var FamilyCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
-            var newGroup = {}; // Holds the new group object;
-            var groupDiseases, groupGenes, groupArticles;
+            var newFamily = {}; // Holds the new group object;
+            var familyDiseases, familyArticles;
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
             var orphaIds = captureOrphas(this.getFormValue('orphanetid'));
-            var geneSymbols = captureGenes(this.getFormValue('othergenevariants'));
             var pmids = capturePmids(this.getFormValue('otherpmids'));
 
             // Check that all HPO terms appear valid
@@ -141,7 +141,7 @@ var FamilyCuration = React.createClass({
                 this.getRestData(searchStr).then(diseases => {
                     if (diseases['@graph'].length === orphaIds.length) {
                         // Successfully retrieved all diseases
-                        groupDiseases = diseases;
+                        familyDiseases = diseases;
                         return Promise.resolve(diseases);
                     } else {
                         // Get array of missing Orphanet IDs
@@ -154,25 +154,6 @@ var FamilyCuration = React.createClass({
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
-                    if (geneSymbols) {
-                        // At least one gene symbol entered; search the DB for them.
-                        searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
-                        return this.getRestData(searchStr).then(genes => {
-                            if (genes['@graph'].length === geneSymbols.length) {
-                                // Successfully retrieved all genes
-                                groupGenes = genes;
-                                return Promise.resolve(genes);
-                            } else {
-                                var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
-                                this.setFormErrors('othergenevariants', missingGenes.join(', ') + ' not found');
-                                throw genes;
-                            }
-                        });
-                    } else {
-                        // No genes entered; just pass null to the next then
-                        return Promise.resolve(null);
-                    }
-                }).then(data => {
                     // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
                     if (pmids) {
                         // User entered at least one PMID
@@ -180,7 +161,7 @@ var FamilyCuration = React.createClass({
                         return this.getRestData(searchStr).then(articles => {
                             if (articles['@graph'].length === pmids.length) {
                                 // Successfully retrieved all genes
-                                groupArticles = articles;
+                                familyArticles = articles;
                                 return Promise.resolve(articles);
                             } else {
                                 var missingPmids = _.difference(pmids, articles['@graph'].map(function(article) { return article.pmid; }));
@@ -219,113 +200,94 @@ var FamilyCuration = React.createClass({
                     }
                 }).then(newMethod => {
                     // Method successfully created if needed (null if not); passed in 'newMethod'. Now make the new group.
-                    newGroup.label = this.getFormValue('groupname');
+                    newFamily.label = this.getFormValue('familyname');
 
                     // Get an array of all given disease IDs
-                    newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
+                    newFamily.commonDiagnosis = familyDiseases['@graph'].map(function(disease) { return disease['@id']; });
 
-                    // If a method object was created (at least one method field set), get its new object's 
+                    // If a method object was created (at least one method field set), assign it to the family
                     if (newMethod) {
-                        newGroup.method = newMethod['@id'];
+                        newFamily.method = newMethod['@id'];
                     }
 
                     // Fill in the group fields from the Common Diseases & Phenotypes panel
                     var hpoTerms = this.getFormValue('hpoid');
                     if (hpoTerms) {
-                        newGroup.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
+                        newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
                     }
                     var phenoterms = this.getFormValue('phenoterms');
                     if (phenoterms) {
-                        newGroup.termsInDiagnosis = phenoterms;
+                        newFamily.termsInDiagnosis = phenoterms;
                     }
                     hpoTerms = this.getFormValue('nothpoid');
                     if (hpoTerms) {
-                        newGroup.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
+                        newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
                     }
                     phenoterms = this.getFormValue('notphenoterms');
                     if (phenoterms) {
-                        newGroup.termsInElimination = phenoterms;
+                        newFamily.termsInElimination = phenoterms;
                     }
 
                     // Fill in the group fields from the Group Demographics panel
                     var value = this.getFormValue('malecount');
-                    if (value) {
-                        newGroup.numberOfMale = value + '';
-                    }
+                    if (value) { newFamily.numberOfMale = value + ''; }
+
                     value = this.getFormValue('femalecount');
-                    if (value) {
-                        newGroup.numberOfFemale = value + '';
-                    }
+                    if (value) { newFamily.numberOfFemale = value + ''; }
+
                     value = this.getFormValue('country');
-                    if (value !== 'none') {
-                        newGroup.countryOfOrigin = value;
-                    }
+                    if (value !== 'none') { newFamily.countryOfOrigin = value; }
+
                     value = this.getFormValue('ethnicity');
-                    if (value !== 'none') {
-                        newGroup.ethnicity = value;
-                    }
+                    if (value !== 'none') { newFamily.ethnicity = value; }
+
                     value = this.getFormValue('race');
-                    if (value !== 'none') {
-                        newGroup.race = value;
-                    }
+                    if (value !== 'none') { newFamily.race = value; }
+
                     value = this.getFormValue('agerangetype');
-                    if (value !== 'none') {
-                        newGroup.ageRangeType = value + '';
-                    }
+                    if (value !== 'none') { newFamily.ageRangeType = value + ''; }
+
                     value = this.getFormValue('agefrom');
-                    if (value) {
-                        newGroup.ageRangeFrom = value + '';
-                    }
+                    if (value) { newFamily.ageRangeFrom = value + ''; }
+
                     value = this.getFormValue('ageto');
-                    if (value) {
-                        newGroup.ageRangeTo = value + '';
-                    }
+                    if (value) { newFamily.ageRangeTo = value + ''; }
+
                     value = this.getFormValue('ageunit');
-                    if (value !== 'none') {
-                        newGroup.ageRangeUnit = value + '';
-                    }
-
-                    // Fill in the group fields from Group Information panel
-                    newGroup.totalNumberIndividuals = this.getFormValue('indcount');
-                    newGroup.numberOfIndividualsWithFamilyInformation = this.getFormValue('indfamilycount');
-                    newGroup.numberOfIndividualsWithoutFamilyInformation = this.getFormValue('notindfamilycount');
-                    newGroup.numberOfIndividualsWithVariantInCuratedGene = this.getFormValue('indvariantgenecount');
-                    newGroup.numberOfIndividualsWithoutVariantInCuratedGene = this.getFormValue('notindvariantgenecount');
-                    newGroup.numberOfIndividualsWithVariantInOtherGene = this.getFormValue('indvariantothercount');
-
-                    // Add array of 'Other genes found to have variants in them'
-                    if (groupGenes) {
-                        newGroup.otherGenes = groupGenes['@graph'].map(function(article) { return article['@id']; });
-                    }
+                    if (value !== 'none') { newFamily.ageRangeUnit = value + ''; }
 
                     // Add array of other PMIDs
-                    if (groupArticles) {
-                        newGroup.otherPMIDs = groupArticles['@graph'].map(function(article) { return article['@id']; });
+                    if (familyArticles) {
+                        newFamily.otherPMIDs = familyArticles['@graph'].map(function(article) { return article['@id']; });
                     }
 
-                    value = this.getFormValue('additionalinfogroup');
-                    if (value) {
-                        newGroup.additionalInformation = value;
-                    }
+                    value = this.getFormValue('additionalinfofamily');
+                    if (value) { newFamily.additionalInformation = value; }
+
+                    newFamily.dateTime= moment().format();
 
                     // Either update or create the group object in the DB
-                    if (this.state.group && Object.keys(this.state.group).length) {
+                    console.log(newFamily);
+                    if (this.state.family && Object.keys(this.state.family).length) {
                         // We're editing a group. PUT the new group object to the DB to update the existing one.
-                        return this.putRestData('/groups/' + this.state.group.uuid, newGroup).then(data => {
+                        return this.putRestData('/families/' + this.state.family.uuid, newFamily).then(data => {
                             return Promise.resolve(data['@graph'][0]);
                         });
                     } else {
                         // We created a group; post it to the DB
-                        return this.postRestData('/groups/', newGroup).then(data => {
+                        return this.postRestData('/families/', newFamily).then(data => {
                             return Promise.resolve(data['@graph'][0]);
                         });
                     }
-                }).then(newGroup => {
-                    if (!this.state.group || Object.keys(this.state.group).length === 0) {
+                }).then(newFamily => {
+                    if (!this.state.family || Object.keys(this.state.family).length === 0) {
                         // Let's avoid modifying a React state property, so clone it. Add the new group
                         // to the current annotation's 'groups' array.
                         var annotation = _.clone(this.state.annotation);
-                        annotation.groups.push(newGroup['@id']);
+                        if (!annotation.families) {
+                            annotation.families = [];
+                        }
+                        annotation.families.push(newFamily['@id']);
 
                         // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
                         delete annotation.uuid;
@@ -342,7 +304,7 @@ var FamilyCuration = React.createClass({
                     // FUTURE: Need to navigate to choices page.
                     this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
                 }).catch(function(e) {
-                    console.log('GROUP CREATION ERROR=: %o', e);
+                    console.log('FAMILY CREATION ERROR=: %o', e);
                     parseAndLogError.bind(undefined, 'putRequest');
                 });
             }
@@ -406,47 +368,42 @@ var FamilyCuration = React.createClass({
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
+        this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
 
         return (
             <div>
-                {(!this.queryValues.groupUuid || Object.keys(this.state.group).length > 0) ?
+                {(!this.queryValues.familyUuid || Object.keys(this.state.family).length > 0) ?
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
                             <div className="curation-pmid-summary">
                                 <PmidSummary article={this.state.article} displayJournal />
                             </div>
-                            <h1>Curate Group Information</h1>
+                            <h1>Curate Family Information</h1>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                         <Panel>
-                                            {GroupName.call(this)}
+                                            {FamilyName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title="Common diseases &amp; phenotypes" open>
-                                                {GroupCommonDiseases.call(this)}
+                                            <Panel title="Family – Common Disease & Phenotypes" open>
+                                                {FamilyCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Group Demographics" open>
-                                                {GroupDemographics.call(this)}
-                                            </Panel>
-                                        </PanelGroup>
-                                        <PanelGroup accordion>
-                                            <Panel title="Group Information" open>
-                                                {GroupProbandInfo.call(this)}
+                                            <Panel title="Family Demographics" open>
+                                                {FamilyDemographics.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Group Methods" open>
-                                                {GroupMethods.call(this)}
+                                                {FamilyMethods.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Group Additional Information" open>
-                                                {GroupAdditional.call(this)}
+                                                {FamilyAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
@@ -502,14 +459,17 @@ function captureHpoid(s) {
 
 
 
-// Group Name group curation panel. Call with .call(this) to run in the same context
+// Family Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var GroupName = function() {
+var FamilyName = function() {
+    var family = this.state.family;
+
     return (
         <div className="row">
-            <Input type="text" ref="groupname" label="Group name:" value={this.state.group.label}
-                error={this.getFormError('groupname')} clearError={this.clrFormErrors.bind(null, 'groupname')}
+            <Input type="text" ref="familyname" label="Family Name:" value={family.label}
+                error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one family with IDENTICAL information, you can indicate this at the bottom of this form.</p>
         </div>
     );
 };
@@ -517,14 +477,14 @@ var GroupName = function() {
 
 // Common diseases group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var GroupCommonDiseases = function() {
-    var group = this.state.group;
+var FamilyCommonDiseases = function() {
+    var family = this.state.family;
     var orphanetidVal, hpoidVal, nothpoidVal;
 
-    if (group) {
-        orphanetidVal = group.commonDiagnosis ? group.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
-        hpoidVal = group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis.join() : null;
-        nothpoidVal = group.hpoIdInElimination ? group.hpoIdInElimination.join() : null;
+    if (family) {
+        orphanetidVal = family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
+        hpoidVal = family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join() : null;
+        nothpoidVal = family.hpoIdInElimination ? family.hpoIdInElimination.join() : null;
     }
 
     return (
@@ -535,13 +495,13 @@ var GroupCommonDiseases = function() {
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={group.termsInDiagnosis}
+            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={family.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Group</em> if they are specifically noted in the paper.</p>
+            <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Family</em> if they are specifically noted in the paper.</p>
             <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={group.termsInElimination}
+            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={family.termsInElimination}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -551,7 +511,7 @@ var GroupCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span>Disease in Common (<span style={{fontWeight: 'normal'}}><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term</span>):</span>;
+        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Common Disease(s) in Family:</span>;
     }
 });
 
@@ -589,18 +549,18 @@ var LabelPhenoTerms = React.createClass({
 
 // Demographics group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var GroupDemographics = function() {
-    var group = this.state.group;
+var FamilyDemographics = function() {
+    var family = this.state.family;
 
     return (
         <div className="row">
-            <Input type="text" ref="malecount" label="# males:" format="number" value={group.numberOfMale}
+            <Input type="text" ref="malecount" label="# males:" format="number" value={family.numberOfMale}
                 error={this.getFormError('malecount')} clearError={this.clrFormErrors.bind(null, 'malecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="femalecount" label="# females:" format="number" value={group.numberOfFemale}
+            <Input type="text" ref="femalecount" label="# females:" format="number" value={family.numberOfFemale}
                 error={this.getFormError('femalecount')} clearError={this.clrFormErrors.bind(null, 'femalecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={group.countryOfOrigin}
+            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family.countryOfOrigin}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
@@ -608,14 +568,14 @@ var GroupDemographics = function() {
                     return <option key={country_code.code}>{country_code.name}</option>;
                 })}
             </Input>
-            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={group.ethnicity}
+            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family.ethnicity}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
                 <option>Hispanic or Latino</option>
                 <option>Not Hispanic or Latino</option>
             </Input>
-            <Input type="select" ref="race" label="Race:" defaultValue="none" value={group.race}
+            <Input type="select" ref="race" label="Race:" defaultValue="none" value={family.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
@@ -629,7 +589,7 @@ var GroupDemographics = function() {
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
             <div className="demographics-age-range">
-                <Input type="select" ref="agerangetype" label="Type:" defaultValue="none" value={group.ageRangeType}
+                <Input type="select" ref="agerangetype" label="Type:" defaultValue="none" value={family.ageRangeType}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none" disabled="disabled">Select</option>
                     <option disabled="disabled"></option>
@@ -640,12 +600,12 @@ var GroupDemographics = function() {
                 </Input>
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
                     <Input type="text" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number"
-                        error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={group.ageRangeFrom} />
+                        error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={family.ageRangeFrom} />
                     <span className="group-age-inter">to</span>
                     <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number"
-                        error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={group.ageRangeTo} />
+                        error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={family.ageRangeTo} />
                 </Input>
-                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={group.ageRangeUnit}
+                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={family.ageRangeUnit}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none" disabled="disabled">Select</option>
                     <option disabled="disabled"></option>
@@ -660,65 +620,24 @@ var GroupDemographics = function() {
 };
 
 
-// Group information group curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var GroupProbandInfo = function() {
-    var group = this.state.group;
-    var othergenevariantsVal = group && group.otherGenes ? group.otherGenes.map(function(gene) { return gene.symbol; }).join() : null;
-
-    return(
-        <div className="row">
-            <Input type="text" ref="indcount" label="Total number individuals in group:" format="number" value={group.totalNumberIndividuals}
-                error={this.getFormError('indcount')} clearError={this.clrFormErrors.bind(null, 'indcount')}
-                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="indfamilycount" label="# individuals with family information:" format="number" value={group.numberOfIndividualsWithFamilyInformation}
-                error={this.getFormError('indfamilycount')} clearError={this.clrFormErrors.bind(null, 'indfamilycount')}
-                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="notindfamilycount" label="# individuals WITHOUT family information:" format="number" value={group.numberOfIndividualsWithoutFamilyInformation}
-                error={this.getFormError('notindfamilycount')} clearError={this.clrFormErrors.bind(null, 'notindfamilycount')}
-                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="indvariantgenecount" label="# individuals with variant in gene being curated:" format="number" value={group.numberOfIndividualsWithVariantInCuratedGene}
-                error={this.getFormError('indvariantgenecount')} clearError={this.clrFormErrors.bind(null, 'indvariantgenecount')}
-                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="notindvariantgenecount" label="# individuals without variant in gene being curated:" format="number" value={group.numberOfIndividualsWithoutVariantInCuratedGene}
-                error={this.getFormError('notindvariantgenecount')} clearError={this.clrFormErrors.bind(null, 'notindvariantgenecount')}
-                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="indvariantothercount" label="# individuals with variant found in other gene:" format="number" value={group.numberOfIndividualsWithVariantInOtherGene}
-                error={this.getFormError('indvariantothercount')} clearError={this.clrFormErrors.bind(null, 'indvariantothercount')}
-                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="othergenevariants" label={<LabelOtherGenes />} inputClassName="uppercase-input" value={othergenevariantsVal} placeholder="e.g. DICER1, SMAD3"
-                error={this.getFormError('othergenevariants')} clearError={this.clrFormErrors.bind(null, 'othergenevariants')}
-                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
-        </div>
-    );
-};
-
-// HTML labels for inputs follow.
-var LabelOtherGenes = React.createClass({
-    render: function() {
-        return <span>Other genes found to have variants in them (<a href="http://www.genenames.org/" title="HGNC home page in a new tab" target="_blank">HGNC</a> symbol):</span>;
-    }
-});
-
-
 // Methods group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var GroupMethods = function() {
-    var group = this.state.group;
-    var method = group && group.method;
+var FamilyMethods = function() {
+    var family = this.state.family;
+    var method = (family.method && Object.keys(family.method).length) ? family.method : {};
 
     return (
         <div className="row">
-            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={method ? method.previousTesting : null}
+            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={method.previousTesting}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5" value={method ? method.previousTestingDescription : null}
+            <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5" value={method.previousTestingDescription}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={method ? method.genomeWideStudy : null}
+            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={method.genomeWideStudy}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
@@ -726,7 +645,7 @@ var GroupMethods = function() {
                 <option>No</option>
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Genotyping Method</h4>
-            <Input type="select" ref="genotypingmethod1" label="Method 1:" defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[0] ? method.genotypingMethods[0] : null}
+            <Input type="select" ref="genotypingmethod1" label="Method 1:" defaultValue="none" value={method.genotypingMethods && method.genotypingMethods[0] ? method.genotypingMethods[0] : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
@@ -737,7 +656,7 @@ var GroupMethods = function() {
                 <option>Sanger</option>
                 <option>Whole genome shotgun sequencing</option>
             </Input>
-            <Input type="select" ref="genotypingmethod2" label="Method 2:" defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[1] ? method.genotypingMethods[1] : null}
+            <Input type="select" ref="genotypingmethod2" label="Method 2:" defaultValue="none" value={method.genotypingMethods && method.genotypingMethods[1] ? method.genotypingMethods[1] : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
@@ -748,30 +667,30 @@ var GroupMethods = function() {
                 <option>Sanger</option>
                 <option>Whole genome shotgun sequencing</option>
             </Input>
-            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={method ? method.entireGeneSequenced : null}
+            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={method.entireGeneSequenced}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={method ? method.copyNumberAssessed : null}
+            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={method.copyNumberAssessed}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={method ? method.specificMutationsGenotyped : null}
+            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={method.specificMutationsGenotyped}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="textarea" ref="specificmutation" label="Method by which Specific Mutations Genotyped:" rows="5" value={method ? method.specificMutationsGenotypedMethod : null}
+            <Input type="textarea" ref="specificmutation" label="Method by which Specific Mutations Genotyped:" rows="5" value={method.specificMutationsGenotypedMethod}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="additionalinfomethod" label="Additional Information about Group Method:" rows="8" value={method ? method.additionalInformation : null}
+            <Input type="textarea" ref="additionalinfomethod" label="Additional Information about Family Method:" rows="8" value={method.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -780,33 +699,33 @@ var GroupMethods = function() {
 
 // Additional Information group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var GroupAdditional = function() {
+var FamilyAdditional = function() {
     var otherpmidsVal;
-    var group = this.state.group;
-    if (group) {
-        otherpmidsVal = group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
+    var family = this.state.family;
+    if (Object.keys(family).length) {
+        otherpmidsVal = family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
     }
-
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfogroup" label="Additional Information about Group:" rows="5" value={group.additionalInformation}
+            <Input type="textarea" ref="additionalinfofamily" label="Additional Information about Family:" rows="5" value={family.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same group:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+            <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">
-                Note: Any variants associated with probands that will be counted towards the Classification are not
-                captured at the Group level - variants and their association with probands are required to be captured
-                at the Family or Individual level. Once you submit the Group information, you will be prompted to enter
-                Family/Individual information.
+                Note: Any variants associated with the proband in this Family that were captured above will be counted as
+                probands — the proband does not need to be captured at the Individual level unless there is additional
+                information about the proband that you’d like to capture (e.g. phenotype, methods). Additional information
+                about other individuals in the Family may also be captured at the Individual level (including any additional
+                variant information).
             </p>
         </div>
     );
 };
 
 
-var GroupViewer = React.createClass({
+var FamilyViewer = React.createClass({
     render: function() {
         var context = this.props.context;
         var method = context.method;
@@ -1009,4 +928,4 @@ var GroupViewer = React.createClass({
     }
 });
 
-globals.content_views.register(GroupViewer, 'group');
+globals.content_views.register(FamilyViewer, 'family');

@@ -813,7 +813,7 @@ var GroupViewer = React.createClass({
 
         return (
             <div className="container">
-                <div className="row group-curation-content">
+                <div className="row curation-content-viewer">
                     <h1>{context.label}</h1>
                     <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
                         <dl className="dl-horizontal">
