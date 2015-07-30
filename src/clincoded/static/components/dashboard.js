@@ -48,24 +48,15 @@ var Dashboard = React.createClass({
 
     getData: function(userid) {
         // Retrieve all GDMs and other objects related to user via search
-        this.getRestDatas(['/search/?type=gdm&limit=all', '/search/?limit=all&owner=' + userid], [function() {}, function() {}]).then(data => {
+        this.getRestDatas(['/search/?type=gdm&limit=all', '/search/?type=gdm&type=annotation&limit=10&owner=' + userid], [function() {}, function() {}]).then(data => {
             // Search objects successfully retrieved; process results
-
-            // Sort results by time. Ideally this would be done by the search function, but until
-            // I can figure out how to set sorting for it, this will have to do
-            var sortedGdmData = _(data[0]['@graph']).sortBy(function(item) {
-                return -moment(item.dateTime).format("X");
-            });
-            var sortedHistoryData = _(data[1]['@graph']).sortBy(function(item) {
-                return -moment(item.dateTime).format("X");
-            }).slice(0,10);
 
             // GDM results; finds GDMs created by user, and also creates PMID-GDM mapping table
             // (stopgap measure until article -> GDM mapping ability is incorporated)
             var tempGdmList = [], tempRecentHistory = [];
             var pmidGdmMapping = {};
-            for (var i = 0; i < sortedGdmData.length; i++) {
-                var temp = sortedGdmData[i];
+            for (var i = 0; i < data[0]['@graph'].length; i++) {
+                var temp = data[0]['@graph'][i];
                 var tempDisplayName =  "()";
                 if (temp['owner'] == userid) {
                     tempGdmList.push({
@@ -88,22 +79,21 @@ var Dashboard = React.createClass({
             }
             // Recent History panel results; only displays annotation(article) addition and GDM
             // creation history for the time being.
-            for (var i = 0; i < sortedHistoryData.length; i++) {
+            for (var i = 0; i < data[1]['@graph'].length; i++) {
                 var display = false;
-                var temp = sortedHistoryData[i];
+                var temp = data[1]['@graph'][i];
                 var tempDisplayText = '';
                 var tempUrl = '';
                 var tempTimestamp = '';
                 var tempDateTime = moment(temp['dateTime']).format( "YYYY MMM DD, h:mm a");
                 switch (temp['@type'][0]) {
                     case 'annotation':
-                        tempUrl = "/curation-central/?gdm=" + pmidGdmMapping[temp['uuid']]['uuid'] + "&pmid=" + temp['article']['pmid'];
-                        tempDisplayText = <span><a href={tempUrl}>PMID:{temp['article']['pmid']}</a> added to <strong>{pmidGdmMapping[temp['uuid']]['displayName']}</strong>–<i>{pmidGdmMapping[temp['uuid']]['displayName2']}</i></span>;
-                        tempTimestamp = "added " + tempDateTime;
-                        display = true;
-                        break;
-                    case 'assessment':
-                        tempDisplayText = temp['value'] + ' Assessment';
+                        if (temp['uuid'] in pmidGdmMapping) {
+                            tempUrl = "/curation-central/?gdm=" + pmidGdmMapping[temp['uuid']]['uuid'] + "&pmid=" + temp['article']['pmid'];
+                            tempDisplayText = <span><a href={tempUrl}>PMID:{temp['article']['pmid']}</a> added to <strong>{pmidGdmMapping[temp['uuid']]['displayName']}</strong>–<i>{pmidGdmMapping[temp['uuid']]['displayName2']}</i></span>;
+                            tempTimestamp = "added " + tempDateTime;
+                            display = true;
+                        }
                         break;
                     case 'gdm':
                         tempUrl = "/curation-central/?gdm=" + temp['uuid'];

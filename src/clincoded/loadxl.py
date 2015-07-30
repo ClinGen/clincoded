@@ -30,7 +30,7 @@ ORDER = [
     #'statistic',
     #'controlGroup',
     'group',
-    'functional',
+    'experimental',
     'annotation',
     'gdm',
     'curator_page', # keep at bottom so it can load other type data

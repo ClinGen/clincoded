@@ -8,9 +8,11 @@ var Error = module.exports.Error = React.createClass({
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'panel-gray');
         return (
-            <div className={itemClass}>
-                <h1>{context.title}</h1>
-                <p>{context.description}</p>
+            <div className="container">
+                <div className={itemClass}>
+                    <h1>{context.title}</h1>
+                    <p>{context.description}</p>
+                </div>
             </div>
         );
     }
@@ -24,11 +26,13 @@ var HTTPNotFound = module.exports.HTTPNotFound = React.createClass({
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'panel-gray');
         return (
-            <div className={itemClass}>
-                <div className="row">
-                    <div className="col-sm-12">
-                        <h1>Not found</h1>
-                        <p>The page could not be found.</p>
+            <div className="container">
+                <div className={itemClass}>
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <h1>Not found</h1>
+                            <p>The requested page could not be found.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -49,12 +53,14 @@ var HTTPForbidden = module.exports.HTTPForbidden = React.createClass({
             </div>
         );
         return (
-            <div className={itemClass}>
-                <div className="row">
-                    <div className="col-sm-12">
-                        <h1>Not available</h1>
-                        <p>Please sign in to view this page.</p>
-                        <p>Or <a href='mailto:clingen-helpdesk@lists.stanford.edu'>Request an account.</a></p>
+            <div className="container">
+                <div className={itemClass}>
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <h1>Not available</h1>
+                            <p>Access to this interface is currently restricted to ClinGen curators. To access publicly available information, please visit the <a href="http://clinicalgenome.org">ClinGen portal</a>.</p>
+                            <p>If you are a ClinGen curator, you may <a href='mailto:clingen-helpdesk@lists.stanford.edu'>request an account</a>.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -78,13 +84,14 @@ var LoginDenied = module.exports.LoginDenied = React.createClass({
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'panel-gray');
         return (
-            <div className={itemClass}>
-                <div className="row">
-                    <div className="col-sm-12">
-                        <h1>Login failure</h1>
-                        <p>Access is restricted to ClinGen curators.</p>
-                        <p><a href='mailto:clingen-helpdesk@lists.stanford.edu'>Request an account</a></p>
-
+            <div className="container">
+                <div className={itemClass}>
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <h1>Login failure</h1>
+                            <p>Access is restricted to ClinGen curators.</p>
+                            <p>If you are a ClinGen curator, you may <a href='mailto:clingen-helpdesk@lists.stanford.edu'>request an account</a>.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -100,10 +107,12 @@ var RenderingError = module.exports.RenderingError = React.createClass({
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'panel-gray');
         return (
-            <div className={itemClass}>
-                <h1>{context.title}</h1>
-                <p>{context.description}</p>
-                <pre>{context.detail}</pre>
+            <div className="container">
+                <div className={itemClass}>
+                    <h1>{context.title}</h1>
+                    <p>{context.description}</p>
+                    <pre>{context.detail}</pre>
+                </div>
             </div>
         );
     }

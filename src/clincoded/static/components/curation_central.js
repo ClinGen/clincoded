@@ -8,6 +8,7 @@ var modal = require('../libs/bootstrap/modal');
 var form = require('../libs/bootstrap/form');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
+var CurationMixin = require('./curator').CurationMixin;
 var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 
 var Modal = modal.Modal;
@@ -16,20 +17,20 @@ var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
 var PmidDoiButtons = curator.PmidDoiButtons;
-var CurationData = curator.CurationData;
+var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
 var queryKeyValue = globals.queryKeyValue;
 var external_url_map = globals.external_url_map;
 
+
 // Curator page content
 var CurationCentral = React.createClass({
-    mixins: [RestMixin],
+    mixins: [RestMixin, CurationMixin],
 
     getInitialState: function() {
         return {
             currPmid: queryKeyValue('pmid', this.props.href),
-            currOmimId: '',
             currGdm: {}
         };
     },
@@ -106,22 +107,6 @@ var CurationCentral = React.createClass({
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
-    updateOmimId: function(omimId) {
-        this.getRestData(
-            '/gdm/' + this.state.currGdm.uuid + '/?frame=object'
-        ).then(gdmObj => {
-            // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
-            delete gdmObj.uuid;
-            delete gdmObj['@id'];
-            delete gdmObj['@type'];
-
-            gdmObj.omimId = omimId;
-            return this.putRestData('/gdm/' + this.state.currGdm.uuid, gdmObj);
-        }).then(data => {
-            this.setState({currOmimId: omimId});
-        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
-    },
-
     render: function() {
         var gdm = this.state.currGdm;
         var pmid = this.state.currPmid;
@@ -134,7 +119,7 @@ var CurationCentral = React.createClass({
 
         return (
             <div>
-                <CurationData gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                 <div className="container">
                     <div className="row curation-content">
                         <div className="col-md-3">

@@ -1,6 +1,6 @@
 {
-    "title": "Functional Data Analysis",
-    "description": "Schema for storing and using functional data.",
+    "title": "Experimental Data Analysis",
+    "description": "Schema for storing and using experimental data.",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["owner", "dateTime", "evidenceType"],
@@ -16,17 +16,17 @@
         },
         "owner": {
             "title": "Owner",
-            "description": "Email of curator who create the functional data",
+            "description": "Email of curator who create the experimental data",
             "type": "string"
         },
         "dateTime": {
             "title": "Date Time",
-            "description": "Date and time to create the functional data",
+            "description": "Date and time to create the experimental data",
             "type": "string"
         },
         "active": {
             "title": "Active",
-            "description": "Switch to set if the functional data is avaliable for curation",
+            "description": "Switch to set if the experimental data is avaliable for curation",
             "type": "boolean",
             "default": true
         },
@@ -560,7 +560,7 @@
     },
     "columns": {
         "uuid": {
-            "title": "FunctionalData",
+            "title": "ExperimentalData",
             "type": "string"
         },
         "owner": {
