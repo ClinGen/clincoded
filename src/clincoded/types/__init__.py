@@ -106,9 +106,6 @@ class Variant(Item):
     item_type = 'variant'
     schema = load_schema('clincoded:schemas/variant.json')
     name_key = 'uuid'
-    embedded = [
-        "assessments"
-    ]
 
 @collection(
     name='gdm',
@@ -173,7 +170,9 @@ class Gdm(Item):
         'annotations.experimentalData.proteinIneractions.assessments',
         'annotations.experimentalData.functionalAleration.assessments',
         'annotations.experimentalData.modelSystems.assessments',
-        'annotations.experimentalData.rescue.assessments'
+        'annotations.experimentalData.rescue.assessments',
+        'variantPathogenic.variant',
+        'variantPathogenic.assessments'
     ]
 
 @collection(
