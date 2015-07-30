@@ -267,3 +267,12 @@
 .edit-omim-modal {
     display: inline;
 }
+
+.curation-pmid-summary {
+    margin-top: 5px;
+    padding: 10px 20px 0 20px;
+    background-color: $group-curation-bg;
+    border: 1px solid $group-curation-trim;
+    font-size: 1.1rem;
+    text-align: center;
+}
