@@ -143,12 +143,10 @@ class Gdm(Item):
         'annotations.groups.familyIncluded.individualIncluded.diagnosis',
         'annotations.groups.familyIncluded.individualIncluded.method',
         'annotations.groups.familyIncluded.individualIncluded.variants',
-        'annotations.groups.familyIncluded.individualIncluded.assessments',
         'annotations.groups.individualIncluded',
         'annotations.groups.individualIncluded.diagnosis',
         'annotations.groups.individualIncluded.method',
         'annotations.groups.individualIncluded.variants',
-        'annotations.groups.individualIncluded.assessments',
         #'annotations.groups.control',
         'annotations.families',
         'annotations.families.commonDiagnosis',
@@ -160,24 +158,22 @@ class Gdm(Item):
         'annotations.families.individualIncluded.diagnosis',
         'annotations.families.individualIncluded.method',
         'annotations.families.individualIncluded.variants',
-        'annotations.families.individualIncluded.assessments',
         'annotations.individuals',
         'annotations.individuals.diagnosis',
         'annotations.individuals.method',
         'annotations.individuals.variants',
-        'annotations.individuals.assessments',
-        'annotations.functionalData',
-        'annotations.functionalData.variants',
-        'annotations.functionalData.biochemicalFunction.geneWithSameFunctionSameDisease.assessments',
-        'annotations.functionalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
-        'annotations.functionalData.biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments',
-        'annotations.functionalData.expression.alteredExpression.assessments',
-        'annotations.functionalData.expression.normalExpression.assessments',
-        'annotations.functionalData.proteinIneractions.interactingGenes',
-        'annotations.functionalData.proteinIneractions.assessments',
-        'annotations.functionalData.functionalAleration.assessments',
-        'annotations.functionalData.modelSystems.assessments',
-        'annotations.functionalData.rescue.assessments'
+        'annotations.experimentalData',
+        'annotations.experimentalData.variants',
+        'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.assessments',
+        'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
+        'annotations.experimentalData.biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments',
+        'annotations.experimentalData.expression.alteredExpression.assessments',
+        'annotations.experimentalData.expression.normalExpression.assessments',
+        'annotations.experimentalData.proteinIneractions.interactingGenes',
+        'annotations.experimentalData.proteinIneractions.assessments',
+        'annotations.experimentalData.functionalAleration.assessments',
+        'annotations.experimentalData.modelSystems.assessments',
+        'annotations.experimentalData.rescue.assessments'
     ]
 
 @collection(
@@ -209,12 +205,10 @@ class Annotation(Item):
         'groups.familyIncluded.individualIncluded.diagnosis',
         'groups.familyIncluded.individualIncluded.method',
         'groups.familyIncluded.individualIncluded.variants',
-        'groups.familyIncluded.individualIncluded.assessments',
         'groups.individualIncluded',
         'groups.individualIncluded.diagnosis',
         'groups.individualIncluded.method',
         'groups.individualIncluded.variants',
-        'groups.individualIncluded.assessments',
         #'groups.control',
         'families',
         'families.commonDiagnosis',
@@ -226,24 +220,22 @@ class Annotation(Item):
         'families.individualIncluded.diagnosis',
         'families.individualIncluded.method',
         'families.individualIncluded.variants',
-        'families.individualIncluded.assessments',
         'individuals',
         'individuals.diagnosis',
         'individuals.method',
         'individuals.variants',
-        'individuals.assessments',
-        'functionalData',
-        'functionalData.variants',
-        'functionalData.biochemicalFunction.geneWithSameFunctionSameDisease.assessments',
-        'functionalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
-        'functionalData.biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments',
-        'functionalData.expression.alteredExpression.assessments',
-        'functionalData.expression.normalExpression.assessments',
-        'functionalData.proteinIneractions.interactingGenes',
-        'functionalData.proteinIneractions.assessments',
-        'functionalData.functionalAleration.assessments',
-        'functionalData.modelSystems.assessments',
-        'functionalData.rescue.assessments'
+        'experimentalData',
+        'experimentalData.variants',
+        'experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.assessments',
+        'experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
+        'experimentalData.biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments',
+        'experimentalData.expression.alteredExpression.assessments',
+        'experimentalData.expression.normalExpression.assessments',
+        'experimentalData.proteinIneractions.interactingGenes',
+        'experimentalData.proteinIneractions.assessments',
+        'experimentalData.functionalAleration.assessments',
+        'experimentalData.modelSystems.assessments',
+        'experimentalData.rescue.assessments'
     ]
 
 @collection(
@@ -274,12 +266,10 @@ class Group(Item):
         'familyIncluded.individualIncluded.diagnosis',
         'familyIncluded.individualIncluded.method',
         'familyIncluded.individualIncluded.variants',
-        'familyIncluded.individualIncluded.assessments',
         'individualIncluded',
         'individualIncluded.diagnosis',
         'individualIncluded.method',
         'individualIncluded.variants',
-        'individualIncluded.assessments',
         'otherPMIDs',
         #'control'
     ]
@@ -304,8 +294,7 @@ class Family(Item):
         'individualIncluded',
         'individualIncluded.diagnosis',
         'individualIncluded.method',
-        'individualIncluded.variants',
-        'individualIncluded.assessments'
+        'individualIncluded.variants'
     ]
 
 @collection(
@@ -322,8 +311,7 @@ class Individual(Item):
     embedded = [
         'diagnosis',
         'method',
-        'variants',
-        'assessments'
+        'variants'
     ]
 
 @collection(
@@ -366,15 +354,15 @@ class Assessment(Item):
     name_key = 'uuid'
 
 @collection(
-    name='functional',
-    unique_key='functional:uuid',
+    name='experimental',
+    unique_key='experimental:uuid',
     properties={
-        'title': 'Functional Data Studies',
-        'description': 'List of all functional data studies',
+        'title': 'Experimental Studies',
+        'description': 'List of all experimental studies',
     })
 class Functional(Item):
-    item_type = 'functional'
-    schema = load_schema('clincoded:schemas/functional.json')
+    item_type = 'experimental'
+    schema = load_schema('clincoded:schemas/experimental.json')
     name_key = 'uuid'
     embedded = [
         'variants',

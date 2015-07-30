@@ -68,16 +68,16 @@
                 "linkTo": "individual"
             }
         },
-        "functionalData": {
-            "title": "Functional Data Analysis",
-            "descripton": "List of FunctionalData IDs",
+        "experimentalData": {
+            "title": "Experimental Data Analysis",
+            "descripton": "List of ExperimentalData ids",
             "type": "array",
             "default": [],
             "items": {
-                "title": "Functional Data ID",
-                "description": "FunctionalData id",
+                "title": "ExperimentalData ID",
+                "description": "ExperimentalData id",
                 "type": "string",
-                "linkTo": "functional"
+                "linkTo": "experimental"
             }
         },
         "active": {
@@ -112,8 +112,8 @@
             "title": "Individual",
             "type": "string"
         },
-        "functionalData": {
-            "title": "Functional",
+        "experimentalData": {
+            "title": "Experimental",
             "type": "string"
         }
     }
