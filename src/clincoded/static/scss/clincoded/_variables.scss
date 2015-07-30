@@ -17,3 +17,7 @@ $font-size-h3: 1.7rem;
 $font-size-h4: 1.25rem;
 $font-size-h5: 1rem;
 $font-size-h6: 0.85rem;
+
+$group-curation: #FFFF00;
+$group-curation-bg: desaturate(lighten($group-curation,45%),50%);
+$group-curation-trim: darken($group-curation,10%);
