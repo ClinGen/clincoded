@@ -28,14 +28,13 @@ var CurationMixin = module.exports.CurationMixin = {
         this.getRestData(
             '/gdm/' + gdmUuid + '/?frame=object'
         ).then(gdmObj => {
-            console.log(gdmObj.uuid);
             // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
             if (gdmObj.uuid) { delete gdmObj.uuid; }
             if (gdmObj['@id']) { delete gdmObj['@id']; }
             if (gdmObj['@type']) { delete gdmObj['@type']; }
 
             gdmObj.omimId = newOmimId;
-            return this.putRestData('/gdm/' + this.state.currGdm.uuid, gdmObj);
+            return this.putRestData('/gdm/' + gdmUuid, gdmObj);
         }).then(data => {
             this.setState({currOmimId: newOmimId});
         }).catch(e => {
