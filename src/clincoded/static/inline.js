@@ -10,8 +10,8 @@ cookie.set('X-Stats', '', {path: '/', expires: new Date(0)});
 
 // Use a separate tracker for dev / test
 var ga = require('google-analytics');
-var trackers = {'www.encodeproject.org': 'UA-47809317-1'};
-var tracker = trackers[document.location.hostname] || 'UA-47809317-2';
+var trackers = {'curation.clinicalgenome.org': 'UA-49947422-4'};
+var tracker = trackers[document.location.hostname] || 'UA-49947422-5';
 ga('create', tracker, {'cookieDomain': 'none', 'siteSpeedSampleRate': 100});
 ga('send', 'pageview');
 

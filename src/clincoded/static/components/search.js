@@ -28,7 +28,7 @@ var AuditMixin = audit.AuditMixin;
         family: {title: 'Famlies'},
         individual: {title: 'Individuals'},
         assessment: {title: 'Assessments'},
-        functional: {title: 'Functional Data'},
+        experimental: {title: 'Experimental Data'},
     };
 
     var Listing = module.exports.Listing = function (props) {
