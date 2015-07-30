@@ -73,7 +73,6 @@ var CreateGeneDisease = React.createClass({
 
     // When the form is submitted...
     submitForm: function(e) {
-        console.log(e);
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
         // Get values from form and validate them
