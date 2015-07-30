@@ -175,6 +175,8 @@ var Input = module.exports.Input = React.createClass({
         value: React.PropTypes.string, // Value to pre-fill input with
         defaultValue: React.PropTypes.string, // Default value for <select>
         required: React.PropTypes.bool, // T to make this a required field
+        clickHandler: React.PropTypes.func, // Called to handle button click
+        submitHandler: React.PropTypes.func, // Called to handle submit button click
         cancelHandler: React.PropTypes.func // Called to handle cancel button click
     },
 
@@ -203,7 +205,8 @@ var Input = module.exports.Input = React.createClass({
 
         // Get the selected options value, or its text if it has no value
         if (selectedOptionNode) {
-            return selectedOptionNode.getAttribute('value') || selectedOptionNode.innerHTML;
+            var valAttr = selectedOptionNode.getAttribute('value');
+            return valAttr === null ? selectedOptionNode.innerHTML : valAttr;
         }
 
         // Nothing selected
@@ -215,11 +218,11 @@ var Input = module.exports.Input = React.createClass({
         this.setState({value: e.target.value});
         if (this.props.clearError) {
             this.props.clearError();
-        }
+        } 
     },
 
     render: function() {
-        var input, inputClasses;
+        var input, inputClasses, title;
         var groupClassName = 'form-group' + this.props.groupClassName ? ' ' + this.props.groupClassName : '';
 
         switch (this.props.type) {
@@ -278,11 +281,21 @@ var Input = module.exports.Input = React.createClass({
                 );
                 break;
 
-            case 'submit':
-                var title = this.props.title ? this.props.title : 'Submit';
+            case 'button':
+                // Requires properties:
+                //   title: Label to put into button
+                //   clickHandler: Method to call when button is clicked
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
-                    <input className={inputClasses} type={this.props.type} value={title} onClick={this.props.submitHandler} />
+                    <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} />
+                );
+                break;
+
+            case 'submit':
+                title = this.props.title ? this.props.title : 'Submit';
+                inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
+                input = (
+                    <button className={inputClasses} onClick={this.props.submitHandler}>{title}</button>
                 );
                 break;
 
