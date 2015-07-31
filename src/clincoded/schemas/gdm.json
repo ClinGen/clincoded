@@ -262,6 +262,10 @@
             "title": "Creator",
             "type": "string"
         },
+        "status": {
+            "title": "Status",
+            "type": "string"
+        },
         "annotations": {
             "title": "Evidence",
             "type": "string"
@@ -288,6 +292,9 @@
         }
     },
     "boost_values": {
-        "annotations":1.0
+        "gene": 1.0,
+        "disease": 1.0,
+        "omimId": 1.0,
+        "owner": 1.0
     }
 }
