@@ -47,7 +47,7 @@ var CurationCentral = React.createClass({
                 });
 
                 if (currAnnotation) {
-                    this.setState({currPmid: currAnnotation.article.pmid});                
+                    this.setState({currPmid: currAnnotation.article.pmid});
                 }
             }
             if (this.state.currGdm && Object.keys(this.state.currGdm).length) {
@@ -97,6 +97,7 @@ var CurationCentral = React.createClass({
             delete gdmObj.uuid;
             delete gdmObj['@id'];
             delete gdmObj['@type'];
+            delete gdmObj.status;
 
             // Add our new annotation reference to the array of annotations in the GDM.
             gdmObj.annotations.push('/evidence/' + newAnnotation.uuid + '/');
@@ -124,7 +125,7 @@ var CurationCentral = React.createClass({
                     <div className="row curation-content">
                         <div className="col-md-3">
                             <PmidSelectionList annotations={gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
-                                    updateGdmArticles={this.updateGdmArticles} /> 
+                                    updateGdmArticles={this.updateGdmArticles} />
                         </div>
                         <div className="col-md-6">
                             {currArticle ?
