@@ -397,12 +397,17 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Group Methods" open>
+                                            <Panel title="Family Methods" open>
                                                 {FamilyMethods.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Group Additional Information" open>
+                                            <Panel title="Family Segregation" open>
+                                                {FamilySegregation.call(this)}
+                                            </Panel>
+                                        </PanelGroup>
+                                        <PanelGroup accordion>
+                                            <Panel title="Family Additional Information" open>
                                                 {FamilyAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -547,7 +552,7 @@ var LabelPhenoTerms = React.createClass({
     }
 });
 
-// Demographics group curation panel. Call with .call(this) to run in the same context
+// Demographics family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilyDemographics = function() {
     var family = this.state.family;
@@ -620,7 +625,7 @@ var FamilyDemographics = function() {
 };
 
 
-// Methods group curation panel. Call with .call(this) to run in the same context
+// Methods family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilyMethods = function() {
     var family = this.state.family;
@@ -697,7 +702,77 @@ var FamilyMethods = function() {
 };
 
 
-// Additional Information group curation panel. Call with .call(this) to run in the same context
+// Segregation family curation panel. Call with .call(this) to run in the same context
+// as the calling component.
+var FamilySegregation = function() {
+    var family = this.state.family;
+    var segregation = (family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
+
+    return (
+        <div className="row">
+            <Input type="textarea" ref="pedigreedesc" label="Pedigree description:" rows="5" value={segregation.pedigreeDescription}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="text" ref="pedigreesize" label="Pedigree size:" format="number" value={segregation.pedigreeSize}
+                error={this.getFormError('pedigreesize')} clearError={this.clrFormErrors.bind(null, 'pedigreesize')}
+                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
+            <Input type="text" ref="nogenerationsinpedigree" label="# generations in pedigree:" format="number" value={segregation.numberOfGenerationInPedigree}
+                error={this.getFormError('nogenerationsinpedigree')} clearError={this.clrFormErrors.bind(null, 'nogenerationsinpedigree')}
+                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
+            <Input type="select" ref="consanguineous" label="Consanguineous family?:" defaultValue="none" value={segregation.consanguineousFamily}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="none" disabled="disabled">Select</option>
+                <option disabled="disabled"></option>
+                <option>Yes</option>
+                <option>No</option>
+            </Input>
+            <Input type="text" ref="nocases" label="# cases (phenotype positive):" format="number" value={segregation.numberOfCases}
+                error={this.getFormError('nocases')} clearError={this.clrFormErrors.bind(null, 'nocases')}
+                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
+            <Input type="select" ref="denovo" label="de novo type:" defaultValue="none" value={segregation.deNovoType}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="none" disabled="disabled">Select</option>
+                <option disabled="disabled"></option>
+                <option>Inferred</option>
+                <option>Confirmed</option>
+            </Input>
+            <Input type="select" ref="unaffectedcarriers" label="Are parents unaffected carriers?" defaultValue="none" value={segregation.numberOfParentsUnaffectedCarriers}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="none" disabled="disabled">Select</option>
+                <option disabled="disabled"></option>
+                <option>0</option>
+                <option>1</option>
+                <option>2</option>
+            </Input>
+            <Input type="text" ref="noaffected" label="# affected individuals:" format="number" value={segregation.numberOfAffectedAlleles}
+                error={this.getFormError('noaffected')} clearError={this.clrFormErrors.bind(null, 'noaffected')}
+                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
+            <Input type="text" ref="noaffected1" label="# affected with 1 variant:" format="number" value={segregation.numberOfAffectedWithOneVariant}
+                error={this.getFormError('noaffected1')} clearError={this.clrFormErrors.bind(null, 'noaffected1')}
+                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
+            <Input type="text" ref="noaffected2" label="# affected with 2 variants or homozygous for 1:" format="number" value={segregation.numberOfAffectedWithTwoVariants}
+                error={this.getFormError('noaffected2')} clearError={this.clrFormErrors.bind(null, 'noaffected2')}
+                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
+            <Input type="text" ref="nounaffectedcarriers" label="# unaffected carriers:" format="number" value={segregation.numberOfUnaffectedCarriers}
+                error={this.getFormError('nounaffectedcarriers')} clearError={this.clrFormErrors.bind(null, 'nounaffectedcarriers')}
+                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
+            <Input type="text" ref="nounaffectedindividuals" label="# unaffected individuals:" format="number" value={segregation.numberOfUnaffectedIndividuals}
+                error={this.getFormError('nounaffectedindividuals')} clearError={this.clrFormErrors.bind(null, 'nounaffectedindividuals')}
+                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
+            <Input type="select" ref="bothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={segregation.probandAssociatedWithBoth}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="none" disabled="disabled">Select</option>
+                <option disabled="disabled"></option>
+                <option>Yes</option>
+                <option>No</option>
+            </Input>
+            <Input type="textarea" ref="addedsegregationinfo" label="Additional Segregation Information:" rows="5" value={segregation.additionalInformation}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+        </div>
+    );
+};
+
+
+// Additional Information family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilyAdditional = function() {
     var otherpmidsVal;
