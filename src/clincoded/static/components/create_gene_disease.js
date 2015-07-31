@@ -105,7 +105,6 @@ var CreateGeneDisease = React.createClass({
                             disease: orphaId,
                             modeInheritance: mode,
                             owner: this.props.session['auth.userid'],
-                            status: 'Creation',
                             dateTime: moment().format()
                         };
 

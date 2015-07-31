@@ -107,6 +107,7 @@ var App = module.exports = React.createClass({
                     }}></script>
                     <div>
                         <Header session={this.state.session} />
+                        <Notice noticeType='danger' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
                         {content}
                     </div>
                 </body>
@@ -144,6 +145,33 @@ var Header = React.createClass({
                 <NavbarMain portal={portal} session={this.props.session} />
             </header>
         );
+    }
+});
+
+
+// Render the notice bar, under header, if needed
+// Usage: <Notice noticeType='[TYPE]' noticeMessage={<span>[MESSAGE]</span>} />
+// Appropriate noticeTypes: success, info, warning, danger (bootstrap defaults)
+var Notice = React.createClass({
+    getInitialState: function () {
+        return { noticeVisible: true }
+    },
+    onClick: function() {
+        this.setState({ noticeVisible: false });
+    },
+    render: function() {
+        var noticeClass = 'alert alert-' + this.props.noticeType;
+        if (this.state.noticeVisible) {
+            return (
+                <div className={noticeClass} role="alert">
+                    <div className="container">
+                        {this.props.noticeMessage}
+                        <button type="button" className="close" onClick={this.onClick}>&times;</button>
+                    </div>
+                </div>
+            );
+        }
+        else { return (null); }
     }
 });
 
