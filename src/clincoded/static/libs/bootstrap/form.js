@@ -15,20 +15,24 @@ var Form = module.exports.Form = React.createClass({
     // of the form, and any children of those children, recursively.
     createInputRefs: function(children) {
         var processedChildren = React.Children.map(children, child => {
-            var props = {};
+            if (child) {
+                var props = {};
 
-            // Copy ref to new id property.
-            if (child.ref) {
-                props.id = child.ref;
+                // Copy ref to new id property.
+                if (child.ref) {
+                    props.id = child.ref;
+                }
+
+                // If the current child has children, process them recursively and assign the result to the new children property
+                if (child.props && child.props.children) {
+                    props.children = this.createInputRefs(child.props.children);
+                }
+
+                // If we made new properties, clone the child and assign the properties to the clone
+                return Object.keys(props).length ? React.cloneElement(child, props) : child;
             }
+            return null;
 
-            // If the current child has children, process them recursively and assign the result to the new children property
-            if (child.props && child.props.children) {
-                props.children = this.createInputRefs(child.props.children);
-            }
-
-            // If we made new properties, clone the child and assign the properties to the clone
-            return Object.keys(props).length ? React.cloneElement(child, props) : child;
         });
         return processedChildren;
     },
@@ -218,7 +222,10 @@ var Input = module.exports.Input = React.createClass({
         this.setState({value: e.target.value});
         if (this.props.clearError) {
             this.props.clearError();
-        } 
+        }
+        if (this.props.handleChange) {
+            this.props.handleChange(e);
+        }
     },
 
     render: function() {
@@ -248,7 +255,7 @@ var Input = module.exports.Input = React.createClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <select className="form-control" ref="input" onChange={this.props.clearError} defaultValue={this.props.value ? this.props.value : this.props.defaultValue}>
+                            <select className="form-control" ref="input" onChange={this.handleChange} defaultValue={this.props.value ? this.props.value : this.props.defaultValue}>
                                 {this.props.children}
                             </select>
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
@@ -263,7 +270,7 @@ var Input = module.exports.Input = React.createClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} placeholder={this.props.placeholder} onChange={this.props.clearError} rows={this.props.rows} />
+                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} placeholder={this.props.placeholder} onChange={this.handleChange} rows={this.props.rows} />
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                         </div>
                     </div>
