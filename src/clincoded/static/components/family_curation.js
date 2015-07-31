@@ -360,6 +360,60 @@ var FamilyCuration = React.createClass({
         return Object.keys(newMethod).length ? newMethod : null;
     },
 
+    // Create segregation object based on the form values
+    createSegregation: function() {
+        var newSegregation = {};
+        var value1, value2;
+
+        // Put together a new 'method' object
+        value1 = this.getFormValue('pedigreedesc');
+        if (value1 !== 'none') {
+            newSegregation.pedigreeDescription = value1;
+        }
+        value1 = this.getFormValue('pedigreesize');
+        if (value1) {
+            newSegregation.pedigreeSize = value1;
+        }
+        value1 = this.getFormValue('nogenerationsinpedigree');
+        if (value1 !== 'none') {
+            newSegregation.numberOfGenerationInPedigree = value1;
+        }
+        value1 = this.getFormValue('consanguineous');
+        if (value1 !== 'none') {
+            newSegregation.consanguineousFamily = value1;
+        }
+        value1 = this.getFormValue('nocases');
+        if (value1 !== 'none') {
+            newSegregation.numberOfCases = value1;
+        }
+        value1 = this.getFormValue('denovo');
+        if (value1 !== 'none') {
+            newSegregation.deNovoType = value1;
+        }
+        value1 = this.getFormValue('unaffectedcarriers');
+        if (value1) {
+            newSegregation.numberOfParentsUnaffectedCarriers = value1;
+        }
+        value1 = this.getFormValue('noaffected');
+        if (value1) {
+            newSegregation.numberOfAffectedAlleles = value1;
+        }
+        value1 = this.getFormValue('noaffected1');
+        if (value1) {
+            newSegregation.numberOfAffectedWithOneVariant = value1;
+        }
+        value1 = this.getFormValue('noaffected2');
+        if (value1) {
+            newSegregation.numberOfAffectedWithTwoVariants = value1;
+        }
+        value1 = this.getFormValue('nounaffectedcarriers');
+        if (value1) {
+            newSegregation.numberOfUnaffectedCarriers = value1;
+        }
+
+        return Object.keys(newSegregation).length ? newSegregation : null;
+    },
+
     render: function() {
         var annotation = this.state.annotation;
         var gdm = this.state.gdm;
