@@ -95,6 +95,143 @@ var FamilyCuration = React.createClass({
         this.setState({extraFamilyCount: e.target.value});
     },
 
+    writeFamilyObj: function(familyDiseases, familyArticles) {
+        var methodPromise; // Promise from writing (POST/PUT) a method to the DB
+        var newFamily = {}; // Holds the new group object;
+
+        // Make a new method and save it to the DB
+        var newMethod = this.createMethod();
+        if (newMethod) {
+            var family = this.state.family;
+            if (family && family.method && Object.keys(family.method).length) {
+                // We're editing a group and it had an existing method. Just PUT an update to the method.
+                methodPromise = this.putRestData('/methods/' + this.state.family.method.uuid, newMethod).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
+            } else {
+                // We're either creating a group, or editing an existing group that didn't have a method
+                // Post the new method to the DB. When the promise returns with the new method
+                // object, pass it to the next promise-processing code.
+                methodPromise = this.postRestData('/methods/', newMethod).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
+            }
+
+            // Wrote (POST/PUT) method to the DB
+            return methodPromise.then(newMethod => {
+                // Make a new segregation object and save it to the DB
+                var newSegregation = this.createSegregation();
+                if (newSegregation) {
+                    var family = this.state.family;
+                    if (family && family.segregation && Object.keys(family.segregation).length) {
+                        return this.putRestData('/segregations/' + family.segregation.uuid, newSegregation).then(data => {
+                            return Promise.resolve({method: newMethod, segregation: data['@graph'][0]});
+                        });
+                    } else {
+                        // We're either creating a family, or editing an existing family that didn't have a segregation
+                        // Post the new segregation to the DB. When the promise returns with the new segregation
+                        // object, pass it to the next promise-processing code.
+                        return this.postRestData('/segregations/', newSegregation).then(data => {
+                            return Promise.resolve({method: newMethod, segregation: data['@graph'][0]});
+                        });
+                    }
+                } else {
+                    return Promise.resolve({method: newMethod, segregation: null});
+                }
+            }).then(methSeg => {
+                // Method and/or segregation successfully created if needed (null if not); passed in 'methSeg' object. Now make the new family.
+                newFamily.label = this.getFormValue('familyname');
+
+                // Get an array of all given disease IDs
+                newFamily.commonDiagnosis = familyDiseases['@graph'].map(function(disease) { return disease['@id']; });
+
+                // Fill in the group fields from the Common Diseases & Phenotypes panel
+                var hpoTerms = this.getFormValue('hpoid');
+                if (hpoTerms) {
+                    newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
+                }
+                var phenoterms = this.getFormValue('phenoterms');
+                if (phenoterms) {
+                    newFamily.termsInDiagnosis = phenoterms;
+                }
+                hpoTerms = this.getFormValue('nothpoid');
+                if (hpoTerms) {
+                    newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
+                }
+                phenoterms = this.getFormValue('notphenoterms');
+                if (phenoterms) {
+                    newFamily.termsInElimination = phenoterms;
+                }
+
+                // Fill in the group fields from the Family Demographics panel
+                var value = this.getFormValue('malecount');
+                if (value) { newFamily.numberOfMale = value + ''; }
+
+                value = this.getFormValue('femalecount');
+                if (value) { newFamily.numberOfFemale = value + ''; }
+
+                value = this.getFormValue('country');
+                if (value !== 'none') { newFamily.countryOfOrigin = value; }
+
+                value = this.getFormValue('ethnicity');
+                if (value !== 'none') { newFamily.ethnicity = value; }
+
+                value = this.getFormValue('race');
+                if (value !== 'none') { newFamily.race = value; }
+
+                value = this.getFormValue('agerangetype');
+                if (value !== 'none') { newFamily.ageRangeType = value + ''; }
+
+                value = this.getFormValue('agefrom');
+                if (value) { newFamily.ageRangeFrom = value + ''; }
+
+                value = this.getFormValue('ageto');
+                if (value) { newFamily.ageRangeTo = value + ''; }
+
+                value = this.getFormValue('ageunit');
+                if (value !== 'none') { newFamily.ageRangeUnit = value + ''; }
+
+                // If a method and/or segregation object was created (at least one method/segregation field set), assign it to the family
+                if (methSeg.method) {
+                    newFamily.method = methSeg.method['@id'];
+                }
+                if (methSeg.segregation) {
+                    newFamily.segregation = methSeg.segregation['@id'];
+                }
+
+                // Add array of other PMIDs
+                if (familyArticles) {
+                    newFamily.otherPMIDs = familyArticles['@graph'].map(function(article) { return article['@id']; });
+                }
+
+                value = this.getFormValue('additionalinfofamily');
+                if (value) { newFamily.additionalInformation = value; }
+
+                newFamily.dateTime= moment().format();
+
+                // Either update or create the group object in the DB
+                if (this.state.family && Object.keys(this.state.family).length) {
+                    // We're editing a group. PUT the new group object to the DB to update the existing one.
+                    return this.putRestData('/families/' + this.state.family.uuid, newFamily).then(data => {
+                        return Promise.resolve(data['@graph'][0]);
+                    });
+                } else {
+                    // We created a group; post it to the DB
+                    return this.postRestData('/families/', newFamily).then(data => {
+                        return Promise.resolve(data['@graph'][0]);
+                    });
+                }
+            });
+        } else {
+            // If we're editing a group and it already had a method, then delete the method from the DB.
+            // If we're editing a group and it didn't have a method, do nothing
+            // If we're creating a group, do nothing.
+            // For now, just resolve the promise with no method object. We'll deal with deleting objects
+            // later.
+            return Promise.resolve(null);
+        }
+    },
+
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
@@ -104,7 +241,7 @@ var FamilyCuration = React.createClass({
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
             var newFamily = {}; // Holds the new group object;
-            var familyDiseases, familyArticles;
+            var familyDiseases = null, familyArticles;
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
@@ -181,134 +318,7 @@ var FamilyCuration = React.createClass({
                     }
                 }).then(data => {
                     // Make a new method and save it to the DB
-                    var newMethod = this.createMethod();
-                    if (newMethod) {
-                        var family = this.state.family;
-                        if (family && family.method && Object.keys(family.method).length) {
-                            // We're editing a group and it had an existing method. Just PUT an update to the method.
-                            return this.putRestData('/methods/' + this.state.family.method.uuid, newMethod).then(data => {
-                                return Promise.resolve(data['@graph'][0]);
-                            });
-                        } else {
-                            // We're either creating a group, or editing an existing group that didn't have a method
-                            // Post the new method to the DB. When the promise returns with the new method
-                            // object, pass it to the next promise-processing code.
-                            return this.postRestData('/methods/', newMethod).then(data => {
-                                return Promise.resolve(data['@graph'][0]);
-                            });
-                        }
-                    } else {
-                        // If we're editing a group and it already had a method, then delete the method from the DB.
-                        // If we're editing a group and it didn't have a method, do nothing
-                        // If we're creating a group, do nothing.
-                        // For now, just resolve the promise with no method object. We'll deal with deleting objects
-                        // later.
-                        return Promise.resolve(null);
-                    }
-                }).then(newMethod => {
-                    // Make a new segregation object and save it to the DB
-                    var newSegregation = this.createSegregation();
-                    if (newSegregation) {
-                        var family = this.state.family;
-                        if (family && family.segregation && Object.keys(family.segregation).length) {
-                            return this.putRestData('/segregations/' + family.segregation.uuid, newSegregation).then(data => {
-                                return Promise.resolve({method: newMethod, segregation: data['@graph'][0]});
-                            });
-                        } else {
-                            // We're either creating a family, or editing an existing family that didn't have a segregation
-                            // Post the new segregation to the DB. When the promise returns with the new segregation
-                            // object, pass it to the next promise-processing code.
-                            return this.postRestData('/segregations/', newSegregation).then(data => {
-                                return Promise.resolve({method: newMethod, segregation: data['@graph'][0]});
-                            });
-                        }
-                    } else {
-                        return Promise.resolve({method: newMethod, segregation: null});
-                    }
-                }).then(methSeg => {
-                    // Method and/or segregation successfully created if needed (null if not); passed in 'methSeg' object. Now make the new family.
-                    newFamily.label = this.getFormValue('familyname');
-
-                    // Get an array of all given disease IDs
-                    newFamily.commonDiagnosis = familyDiseases['@graph'].map(function(disease) { return disease['@id']; });
-
-                    // Fill in the group fields from the Common Diseases & Phenotypes panel
-                    var hpoTerms = this.getFormValue('hpoid');
-                    if (hpoTerms) {
-                        newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
-                    }
-                    var phenoterms = this.getFormValue('phenoterms');
-                    if (phenoterms) {
-                        newFamily.termsInDiagnosis = phenoterms;
-                    }
-                    hpoTerms = this.getFormValue('nothpoid');
-                    if (hpoTerms) {
-                        newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
-                    }
-                    phenoterms = this.getFormValue('notphenoterms');
-                    if (phenoterms) {
-                        newFamily.termsInElimination = phenoterms;
-                    }
-
-                    // Fill in the group fields from the Family Demographics panel
-                    var value = this.getFormValue('malecount');
-                    if (value) { newFamily.numberOfMale = value + ''; }
-
-                    value = this.getFormValue('femalecount');
-                    if (value) { newFamily.numberOfFemale = value + ''; }
-
-                    value = this.getFormValue('country');
-                    if (value !== 'none') { newFamily.countryOfOrigin = value; }
-
-                    value = this.getFormValue('ethnicity');
-                    if (value !== 'none') { newFamily.ethnicity = value; }
-
-                    value = this.getFormValue('race');
-                    if (value !== 'none') { newFamily.race = value; }
-
-                    value = this.getFormValue('agerangetype');
-                    if (value !== 'none') { newFamily.ageRangeType = value + ''; }
-
-                    value = this.getFormValue('agefrom');
-                    if (value) { newFamily.ageRangeFrom = value + ''; }
-
-                    value = this.getFormValue('ageto');
-                    if (value) { newFamily.ageRangeTo = value + ''; }
-
-                    value = this.getFormValue('ageunit');
-                    if (value !== 'none') { newFamily.ageRangeUnit = value + ''; }
-
-                    // If a method and/or segregation object was created (at least one method/segregation field set), assign it to the family
-                    if (methSeg.method) {
-                        newFamily.method = methSeg.method['@id'];
-                    }
-                    if (methSeg.segregation) {
-                        newFamily.segregation = methSeg.segregation['@id'];
-                    }
-
-                    // Add array of other PMIDs
-                    if (familyArticles) {
-                        newFamily.otherPMIDs = familyArticles['@graph'].map(function(article) { return article['@id']; });
-                    }
-
-                    value = this.getFormValue('additionalinfofamily');
-                    if (value) { newFamily.additionalInformation = value; }
-
-                    newFamily.dateTime= moment().format();
-
-                    // Either update or create the group object in the DB
-                    console.log(newFamily);
-                    if (this.state.family && Object.keys(this.state.family).length) {
-                        // We're editing a group. PUT the new group object to the DB to update the existing one.
-                        return this.putRestData('/families/' + this.state.family.uuid, newFamily).then(data => {
-                            return Promise.resolve(data['@graph'][0]);
-                        });
-                    } else {
-                        // We created a group; post it to the DB
-                        return this.postRestData('/families/', newFamily).then(data => {
-                            return Promise.resolve(data['@graph'][0]);
-                        });
-                    }
+                    return this.writeFamilyObj(familyDiseases, familyArticles);
                 }).then(newFamily => {
                     if (!this.state.family || Object.keys(this.state.family).length === 0) {
                         // Let's avoid modifying a React state property, so clone it. Add the new group
