@@ -91,6 +91,7 @@ var FamilyCuration = React.createClass({
         }
     },
 
+    // Called when user changes the number of copies of family
     extraFamilyCountChanged: function(e) {
         this.setState({extraFamilyCount: e.target.value});
     },
@@ -317,7 +318,7 @@ var FamilyCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    // Make a new method and save it to the DB
+                    // Write the new family object to the DB
                     return this.writeFamilyObj(familyDiseases, familyArticles);
                 }).then(newFamily => {
                     if (!this.state.family || Object.keys(this.state.family).length === 0) {
