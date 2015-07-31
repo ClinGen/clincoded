@@ -185,7 +185,7 @@ class Gdm(Item):
         elif draftClassification != '':
             return 'Draft Classification'
         elif len(provisionalClassifications) > 0:
-            return 'Provisional Classifications'
+            return 'Summary/Provisional Classifications'
         elif len(annotations) > 0:
             return 'In Progress'
         else:
