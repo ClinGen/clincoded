@@ -184,11 +184,13 @@ var NavbarMain = React.createClass({
     },
 
     render: function() {
+        var headerUrl = '/';
+        if (this.props.session['auth.userid'] !== undefined) headerUrl = '/dashboard/';
         return (
             <div>
                 <div className="container">
                     <NavbarUser portal={this.props.portal} session={this.props.session} />
-                    <a href="/" className='navbar-brand'>ClinGen Dashboard</a>
+                    <a href={headerUrl} className='navbar-brand'>ClinGen Dashboard</a>
                 </div>
             </div>
         );
