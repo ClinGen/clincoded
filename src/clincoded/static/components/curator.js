@@ -32,6 +32,7 @@ var CurationMixin = module.exports.CurationMixin = {
             if (gdmObj.uuid) { delete gdmObj.uuid; }
             if (gdmObj['@id']) { delete gdmObj['@id']; }
             if (gdmObj['@type']) { delete gdmObj['@type']; }
+            if (gdmObj.status) { delete gdmObj.status; }
 
             gdmObj.omimId = newOmimId;
             return this.putRestData('/gdm/' + gdmUuid, gdmObj);

@@ -175,6 +175,22 @@ class Gdm(Item):
         'variantPathogenic.assessments'
     ]
 
+    @calculated_property(schema={
+        "title": "Status",
+        "type": "string",
+    })
+    def status(self, finalClassification, draftClassification, provisionalClassifications, annotations):
+        if finalClassification != '':
+            return 'Final Classification'
+        elif draftClassification != '':
+            return 'Draft Classification'
+        elif len(provisionalClassifications) > 0:
+            return 'Summary/Provisional Classifications'
+        elif len(annotations) > 0:
+            return 'In Progress'
+        else:
+            return 'Created'
+
 @collection(
     name='evidence',
     unique_key='annotation:uuid',
