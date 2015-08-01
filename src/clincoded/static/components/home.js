@@ -19,7 +19,9 @@ var SignIn = module.exports.SignIn = React.createClass({
 
 var Home = module.exports.Home = React.createClass({
     render: function() {
-        var hidden = !this.props.session || this.props.session['auth.userid'];
+        if (this.props.session['auth.userid'] !== undefined) {
+            window.location.href = '/dashboard/';
+        }
         return (
             <div className="container">
                 <div className="homepage-main-box panel-gray">
