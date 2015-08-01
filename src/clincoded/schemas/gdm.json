@@ -262,6 +262,10 @@
             "title": "Creator",
             "type": "string"
         },
+        "status": {
+            "title": "Status",
+            "type": "string"
+        },
         "annotations": {
             "title": "Evidence",
             "type": "string"
