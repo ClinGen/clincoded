@@ -7,7 +7,6 @@
         "omimId": "609054",
         "owner": "tsneddon@stanford.edu",
         "dateTime": "2015-02-27T08:35:18-08:00",
-        "status": "Creation",
         "active": true
     },
     {
@@ -18,7 +17,6 @@
         "omimId": "601200",
         "owner": "selinad@stanford.edu",
         "dateTime": "2015-03-19T16:52:38-07:00",
-        "status": "Evidence",
         "active": true
     },
     {
@@ -28,11 +26,28 @@
         "modeInheritance": "Autosomal recessive inheritance (HP:0000007)",
         "omimId": "100800",
         "owner": "tsneddon@stanford.edu",
-        "status": "Evidence",
         "dateTime": "2015-03-20T10:02:09-07:00",
         "annotations": [
             "bb3432ca-1788-11e5-aefb-60f81dc5b05a",
             "5cd72a73-189e-11e5-9db5-60f81dc5b05a"
+        ],
+        "variantPathogenic": [
+            {
+                "variant": "3b3af7f0-2685-11e5-bc56-60f81dc5b05a",
+                "consistentWithDiseaseMechanism": "Yes",
+                "withinFunctionalDomain": "Yes",
+                "frequencySupportPathogenicity": "No",
+                "previouslyReported": "No",
+                "denovoType": "Confirmed",
+                "intransWithAnotherVariant": "No",
+                "supportingSegregation": "Yes",
+                "supportingStatistic": "No",
+                "SupportingFunctional": "Yes",
+                "assessments": [
+                    "4f94a226-2a4c-11e5-887c-60f81dc5b05a",
+                    "550d702b-2a4c-11e5-856d-60f81dc5b05a"
+                ]
+            }
         ]
     },
     {
@@ -43,7 +58,6 @@
         "omimId": "613795",
         "owner": "kgliu@stanford.edu",
         "dateTime": "2015-03-13T17:23:22-07:00",
-        "status": "Evidence",
         "active": true
     },
     {
@@ -54,7 +68,6 @@
         "omimId": "300046",
         "owner": "tsneddon@stanford.edu",
         "dateTime": "2015-02-25T14:55:54-08:00",
-        "status": "Evidence",
         "active": true
     },
     {
@@ -65,7 +78,6 @@
         "omimId": "",
         "owner": "tsneddon@stanford.edu",
         "dateTime": "2015-05-04T08:11:18-07:00",
-        "status": "Evidence",
         "active": true
     },
     {
@@ -76,7 +88,6 @@
         "omimId": "609054",
         "owner": "tsneddon@stanford.edu",
         "dateTime": "2015-03-19T15:25:49-07:00",
-        "status": "Evidence",
         "active": true
     }
 ]

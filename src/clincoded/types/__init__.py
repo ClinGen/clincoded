@@ -106,9 +106,6 @@ class Variant(Item):
     item_type = 'variant'
     schema = load_schema('clincoded:schemas/variant.json')
     name_key = 'uuid'
-    embedded = [
-        "assessments"
-    ]
 
 @collection(
     name='gdm',
@@ -173,8 +170,26 @@ class Gdm(Item):
         'annotations.experimentalData.proteinIneractions.assessments',
         'annotations.experimentalData.functionalAleration.assessments',
         'annotations.experimentalData.modelSystems.assessments',
-        'annotations.experimentalData.rescue.assessments'
+        'annotations.experimentalData.rescue.assessments',
+        'variantPathogenic.variant',
+        'variantPathogenic.assessments'
     ]
+
+    @calculated_property(schema={
+        "title": "Status",
+        "type": "string",
+    })
+    def status(self, finalClassification, draftClassification, provisionalClassifications, annotations):
+        if finalClassification != '':
+            return 'Final Classification'
+        elif draftClassification != '':
+            return 'Draft Classification'
+        elif len(provisionalClassifications) > 0:
+            return 'Summary/Provisional Classifications'
+        elif len(annotations) > 0:
+            return 'In Progress'
+        else:
+            return 'Created'
 
 @collection(
     name='evidence',
@@ -360,7 +375,7 @@ class Assessment(Item):
         'title': 'Experimental Studies',
         'description': 'List of all experimental studies',
     })
-class Functional(Item):
+class Experimental(Item):
     item_type = 'experimental'
     schema = load_schema('clincoded:schemas/experimental.json')
     name_key = 'uuid'
