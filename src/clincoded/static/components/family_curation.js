@@ -96,141 +96,84 @@ var FamilyCuration = React.createClass({
         this.setState({extraFamilyCount: e.target.value});
     },
 
-    writeFamilyObj: function(familyDiseases, familyArticles) {
+    // Write a family object to the DB.
+    writeFamilyObj: function(newFamily, familyDiseases, familyArticles, familyLabel) {
         var methodPromise; // Promise from writing (POST/PUT) a method to the DB
-        var newFamily = {}; // Holds the new group object;
 
         // Make a new method and save it to the DB
+        var family = this.state.family;
         var newMethod = this.createMethod();
-        if (newMethod) {
-            var family = this.state.family;
-            if (family && family.method && Object.keys(family.method).length) {
-                // We're editing a group and it had an existing method. Just PUT an update to the method.
-                methodPromise = this.putRestData('/methods/' + this.state.family.method.uuid, newMethod).then(data => {
+        if (!newMethod) {
+            // No method in the current form field values. Just return a null promise
+            methodPromise = Promise.resolve(null);
+        } else if (family && family.method && Object.keys(family.method).length) {
+            // We're editing a family and it had an existing method. Just PUT an update to the method.
+            methodPromise = this.putRestData('/methods/' + this.state.family.method.uuid, newMethod).then(data => {
+                return Promise.resolve(data['@graph'][0]);
+            });
+        } else {
+            // We're either creating a family, or editing an existing group that didn't have a method
+            // Post the new method to the DB. When the promise returns with the new method
+            // object, pass it to the next promise-processing code.
+            methodPromise = this.postRestData('/methods/', newMethod).then(data => {
+                return Promise.resolve(data['@graph'][0]);
+            });
+        }
+
+        // Wrote (POST/PUT) method to the DB. Now work on the segregation
+        return methodPromise.then(newMethod => {
+            // Make a new segregation object and save it to the DB
+            var newSegregation = this.createSegregation();
+            if (newSegregation) {
+                var family = this.state.family;
+                if (family && family.segregation && Object.keys(family.segregation).length) {
+                    // We're editing a family and it had an existing method. Just PUT an update to the method.
+                    return this.putRestData('/segregations/' + family.segregation.uuid, newSegregation).then(data => {
+                        return Promise.resolve({method: newMethod, segregation: data['@graph'][0]});
+                    });
+                } else {
+                    // We're either creating a family, or editing an existing family that didn't have a segregation
+                    // Post the new segregation to the DB. When the promise returns with the new segregation
+                    // object, pass it to the next promise-processing code.
+                    return this.postRestData('/segregations/', newSegregation).then(data => {
+                        return Promise.resolve({method: newMethod, segregation: data['@graph'][0]});
+                    });
+                }
+            } else {
+                return Promise.resolve({method: newMethod, segregation: null});
+            }
+        }).then(methSeg => {
+            // All family subobjects written. Now write the family object itself. We may be writing more than one in
+            // parallel, so clone the set-up family object before modifying it for this particular object
+            var writerFamily = _.clone(newFamily);
+            writerFamily.dateTime = moment().format();
+            if (familyLabel) {
+                writerFamily.label = familyLabel;
+            }
+
+            // If a method and/or segregation object was created (at least one method/segregation field set), assign it to the family.
+            // If writing multiple family objects, reuse the one we made, but assign new methods and segregations because each family
+            // needs unique objects here.
+            if (methSeg.method) {
+                writerFamily.method = methSeg.method['@id'];
+            }
+            if (methSeg.segregation) {
+                writerFamily.segregation = methSeg.segregation['@id'];
+            }
+
+            // Either update or create the family object in the DB
+            if (this.state.family && Object.keys(this.state.family).length) {
+                // We're editing a family. PUT the new family object to the DB to update the existing one.
+                return this.putRestData('/families/' + this.state.family.uuid, writerFamily).then(data => {
                     return Promise.resolve(data['@graph'][0]);
                 });
             } else {
-                // We're either creating a group, or editing an existing group that didn't have a method
-                // Post the new method to the DB. When the promise returns with the new method
-                // object, pass it to the next promise-processing code.
-                methodPromise = this.postRestData('/methods/', newMethod).then(data => {
+                // We created a group; post it to the DB
+                return this.postRestData('/families/', writerFamily).then(data => {
                     return Promise.resolve(data['@graph'][0]);
                 });
             }
-
-            // Wrote (POST/PUT) method to the DB
-            return methodPromise.then(newMethod => {
-                // Make a new segregation object and save it to the DB
-                var newSegregation = this.createSegregation();
-                if (newSegregation) {
-                    var family = this.state.family;
-                    if (family && family.segregation && Object.keys(family.segregation).length) {
-                        return this.putRestData('/segregations/' + family.segregation.uuid, newSegregation).then(data => {
-                            return Promise.resolve({method: newMethod, segregation: data['@graph'][0]});
-                        });
-                    } else {
-                        // We're either creating a family, or editing an existing family that didn't have a segregation
-                        // Post the new segregation to the DB. When the promise returns with the new segregation
-                        // object, pass it to the next promise-processing code.
-                        return this.postRestData('/segregations/', newSegregation).then(data => {
-                            return Promise.resolve({method: newMethod, segregation: data['@graph'][0]});
-                        });
-                    }
-                } else {
-                    return Promise.resolve({method: newMethod, segregation: null});
-                }
-            }).then(methSeg => {
-                // Method and/or segregation successfully created if needed (null if not); passed in 'methSeg' object. Now make the new family.
-                newFamily.label = this.getFormValue('familyname');
-
-                // Get an array of all given disease IDs
-                newFamily.commonDiagnosis = familyDiseases['@graph'].map(function(disease) { return disease['@id']; });
-
-                // Fill in the group fields from the Common Diseases & Phenotypes panel
-                var hpoTerms = this.getFormValue('hpoid');
-                if (hpoTerms) {
-                    newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
-                }
-                var phenoterms = this.getFormValue('phenoterms');
-                if (phenoterms) {
-                    newFamily.termsInDiagnosis = phenoterms;
-                }
-                hpoTerms = this.getFormValue('nothpoid');
-                if (hpoTerms) {
-                    newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
-                }
-                phenoterms = this.getFormValue('notphenoterms');
-                if (phenoterms) {
-                    newFamily.termsInElimination = phenoterms;
-                }
-
-                // Fill in the group fields from the Family Demographics panel
-                var value = this.getFormValue('malecount');
-                if (value) { newFamily.numberOfMale = value + ''; }
-
-                value = this.getFormValue('femalecount');
-                if (value) { newFamily.numberOfFemale = value + ''; }
-
-                value = this.getFormValue('country');
-                if (value !== 'none') { newFamily.countryOfOrigin = value; }
-
-                value = this.getFormValue('ethnicity');
-                if (value !== 'none') { newFamily.ethnicity = value; }
-
-                value = this.getFormValue('race');
-                if (value !== 'none') { newFamily.race = value; }
-
-                value = this.getFormValue('agerangetype');
-                if (value !== 'none') { newFamily.ageRangeType = value + ''; }
-
-                value = this.getFormValue('agefrom');
-                if (value) { newFamily.ageRangeFrom = value + ''; }
-
-                value = this.getFormValue('ageto');
-                if (value) { newFamily.ageRangeTo = value + ''; }
-
-                value = this.getFormValue('ageunit');
-                if (value !== 'none') { newFamily.ageRangeUnit = value + ''; }
-
-                // If a method and/or segregation object was created (at least one method/segregation field set), assign it to the family
-                if (methSeg.method) {
-                    newFamily.method = methSeg.method['@id'];
-                }
-                if (methSeg.segregation) {
-                    newFamily.segregation = methSeg.segregation['@id'];
-                }
-
-                // Add array of other PMIDs
-                if (familyArticles) {
-                    newFamily.otherPMIDs = familyArticles['@graph'].map(function(article) { return article['@id']; });
-                }
-
-                value = this.getFormValue('additionalinfofamily');
-                if (value) { newFamily.additionalInformation = value; }
-
-                newFamily.dateTime= moment().format();
-
-                // Either update or create the group object in the DB
-                if (this.state.family && Object.keys(this.state.family).length) {
-                    // We're editing a group. PUT the new group object to the DB to update the existing one.
-                    return this.putRestData('/families/' + this.state.family.uuid, newFamily).then(data => {
-                        return Promise.resolve(data['@graph'][0]);
-                    });
-                } else {
-                    // We created a group; post it to the DB
-                    return this.postRestData('/families/', newFamily).then(data => {
-                        return Promise.resolve(data['@graph'][0]);
-                    });
-                }
-            });
-        } else {
-            // If we're editing a group and it already had a method, then delete the method from the DB.
-            // If we're editing a group and it didn't have a method, do nothing
-            // If we're creating a group, do nothing.
-            // For now, just resolve the promise with no method object. We'll deal with deleting objects
-            // later.
-            return Promise.resolve(null);
-        }
+        });
     },
 
     submitForm: function(e) {
@@ -318,9 +261,26 @@ var FamilyCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
+                    // Make a new family object based on form fields.
+                    var newFamily = this.createFamily(familyDiseases, familyArticles);
+
+                    // Prep for multiple family writes, based on the family count dropdown (only appears when creating a new family,
+                    // not when editing a family). This is a count of *extra* families, so add 1 to it to get the number of families
+                    // to create.
+                    var familyPromises = [];
+                    var familyCount = parseInt(this.getFormValue('extrafamilycount'), 10);
+                    familyCount = familyCount ? familyCount + 1 : 1;
+
                     // Write the new family object to the DB
-                    return this.writeFamilyObj(familyDiseases, familyArticles);
-                }).then(newFamily => {
+                    for (var i = 0; i < familyCount; ++i) {
+                        var familyLabel;
+                        if (i > 0) {
+                            familyLabel = this.getFormValue('extrafamilyname' + (i - 1));
+                        }
+                        familyPromises.push(this.writeFamilyObj(newFamily, familyDiseases, familyArticles, familyLabel));
+                    }
+                    return Promise.all(familyPromises);
+                }).then(newFamilies => {
                     if (!this.state.family || Object.keys(this.state.family).length === 0) {
                         // Let's avoid modifying a React state property, so clone it. Add the new group
                         // to the current annotation's 'groups' array.
@@ -328,7 +288,9 @@ var FamilyCuration = React.createClass({
                         if (!annotation.families) {
                             annotation.families = [];
                         }
-                        annotation.families.push(newFamily['@id']);
+
+                        // Merge existing families in the annotation with the new set of families.
+                        Array.prototype.push.apply(annotation.families, newFamilies.map(function(family) { return family['@id']; }));
 
                         // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
                         delete annotation.uuid;
@@ -464,10 +426,82 @@ var FamilyCuration = React.createClass({
             newSegregation.additionalInformation = value1;
         }
 
-        newSegregation.dateTime = moment().format();
-        newSegregation.owner = this.props.session['auth.userid'];
+        if (Object.keys(newSegregation).length) {
+            newSegregation.dateTime = moment().format();
+            newSegregation.owner = this.props.session['auth.userid'];
+            return newSegregation;
+        }
+        return null;
+    },
 
-        return Object.keys(newSegregation).length ? newSegregation : null;
+    // Create a family object to be written to the database. Most values come from the values
+    // in the form. The created object is returned from the function.
+    createFamily: function(familyDiseases, familyArticles) {
+        var newFamily = {};
+
+        // Method and/or segregation successfully created if needed (null if not); passed in 'methSeg' object. Now make the new family.
+        newFamily.label = this.getFormValue('familyname');
+
+        // Get an array of all given disease IDs
+        if (familyDiseases) {
+            newFamily.commonDiagnosis = familyDiseases['@graph'].map(function(disease) { return disease['@id']; });
+        }
+
+        // Add array of other PMIDs
+        if (familyArticles) {
+            newFamily.otherPMIDs = familyArticles['@graph'].map(function(article) { return article['@id']; });
+        }
+
+        // Fill in the group fields from the Common Diseases & Phenotypes panel
+        var hpoTerms = this.getFormValue('hpoid');
+        if (hpoTerms) {
+            newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
+        }
+        var phenoterms = this.getFormValue('phenoterms');
+        if (phenoterms) {
+            newFamily.termsInDiagnosis = phenoterms;
+        }
+        hpoTerms = this.getFormValue('nothpoid');
+        if (hpoTerms) {
+            newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
+        }
+        phenoterms = this.getFormValue('notphenoterms');
+        if (phenoterms) {
+            newFamily.termsInElimination = phenoterms;
+        }
+
+        // Fill in the group fields from the Family Demographics panel
+        var value = this.getFormValue('malecount');
+        if (value) { newFamily.numberOfMale = value + ''; }
+
+        value = this.getFormValue('femalecount');
+        if (value) { newFamily.numberOfFemale = value + ''; }
+
+        value = this.getFormValue('country');
+        if (value !== 'none') { newFamily.countryOfOrigin = value; }
+
+        value = this.getFormValue('ethnicity');
+        if (value !== 'none') { newFamily.ethnicity = value; }
+
+        value = this.getFormValue('race');
+        if (value !== 'none') { newFamily.race = value; }
+
+        value = this.getFormValue('agerangetype');
+        if (value !== 'none') { newFamily.ageRangeType = value + ''; }
+
+        value = this.getFormValue('agefrom');
+        if (value) { newFamily.ageRangeFrom = value + ''; }
+
+        value = this.getFormValue('ageto');
+        if (value) { newFamily.ageRangeTo = value + ''; }
+
+        value = this.getFormValue('ageunit');
+        if (value !== 'none') { newFamily.ageRangeUnit = value + ''; }
+
+        value = this.getFormValue('additionalinfofamily');
+        if (value) { newFamily.additionalInformation = value; }
+
+        return newFamily;
     },
 
     render: function() {
@@ -590,6 +624,7 @@ var FamilyName = function() {
             <Input type="text" ref="familyname" label="Family Name:" value={family.label}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one family with IDENTICAL information, you can indicate this at the bottom of this form.</p>
         </div>
     );
 };
@@ -603,8 +638,8 @@ var FamilyCount = function() {
     return (
         <div>
             <p className="col-sm-7 col-sm-offset-5">
-                Note: If there is more than one family with IDENTICAL information, you can specify how many extra copies of this family to make with this information here.
-                Use the drop-down menu to indicate how many <em>extra</em> copies of this family to make when you submit this form, and specify the names
+                If more than one family has exactly the same information entered above and is associated with the same variants, you can specify how many extra copies of this
+                family to make with this drop-down menu to indicate how many <em>extra</em> copies of this family to make when you submit this form, and specify the names
                 of each extra family below that.
             </p>
             <Input type="select" ref="extrafamilycount" label="Number of extra identical Families to make:" defaultValue="0" handleChange={this.extraFamilyCountChanged}
@@ -1031,45 +1066,6 @@ var FamilyViewer = React.createClass({
                             <div>
                                 <dt>Age Range Unit</dt>
                                 <dd>{context.ageRangeUnit}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Group — Information" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Total number individuals in group</dt>
-                                <dd>{context.totalNumberIndividuals}</dd>
-                            </div>
-
-                            <div>
-                                <dt># individuals with family information</dt>
-                                <dd>{context.numberOfIndividualsWithFamilyInformation}</dd>
-                            </div>
-
-                            <div>
-                                <dt># individuals WITHOUT family information</dt>
-                                <dd>{context.numberOfIndividualsWithoutFamilyInformation}</dd>
-                            </div>
-
-                            <div>
-                                <dt># individuals with variant in gene being curated</dt>
-                                <dd>{context.numberOfIndividualsWithVariantInCuratedGene}</dd>
-                            </div>
-
-                            <div>
-                                <dt># individuals without variant in gene being curated</dt>
-                                <dd>{context.numberOfIndividualsWithoutVariantInCuratedGene}</dd>
-                            </div>
-
-                            <div>
-                                <dt># individuals with variant found in other gene</dt>
-                                <dd>{context.numberOfIndividualsWithVariantInOtherGene}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Other genes found to have variants in them</dt>
-                                <dd>{context.otherGenes && context.otherGenes.map(function(gene) { return gene.symbol; }).join(', ')}</dd>
                             </div>
                         </dl>
                     </Panel>

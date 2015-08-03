@@ -303,6 +303,7 @@ class Family(Item):
     embedded = [
         'commonDiagnosis',
         'method',
+        'otherPMIDs',
         'segregation',
         'segregation.assessments',
         'variants',
