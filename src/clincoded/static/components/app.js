@@ -167,7 +167,7 @@ var Notice = React.createClass({
         this.setState({ noticeVisible: false });
     },
     render: function() {
-        var noticeClass = 'alert alert-' + this.props.noticeType;
+        var noticeClass = 'notice-bar alert alert-' + this.props.noticeType;
         if (this.state.noticeVisible) {
             return (
                 <div className={noticeClass} role="alert">
