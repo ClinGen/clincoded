@@ -215,7 +215,7 @@ var NavbarUser = React.createClass({
                     if (menu.url) {
                         // Normal menu item; disabled if user is not logged in
                         if (session && session['auth.userid']) {
-                            return <NavItem key={menu.id} href={menu.url} icon={menu.icon}>{menu.title}</NavItem>;
+                            return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title}>{menu.title}</NavItem>;
                         }
                     } else {
                         // Trigger menu item; set <a> data attribute to login or logout
