@@ -142,5 +142,23 @@
                 "linkTo": "assessment"
             }
         }
+    },
+    "columns": {
+        "uuid": {
+            "title": "Item",
+            "type": "string"
+        },
+        "owner": {
+            "title": "Owner",
+            "type": "string"
+        },
+        "dateTime": {
+            "title": "Date/Time",
+            "type": "string"
+        },
+        "additionalInformation": {
+            "title": "Additional Information",
+           "type": "string"
+        }
     }
 }
