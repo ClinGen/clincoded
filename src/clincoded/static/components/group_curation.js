@@ -39,8 +39,16 @@ var GroupCuration = React.createClass({
             gdm: {}, // GDM object given in UUID
             annotation: {}, // Annotation object given in UUID
             article: {}, // Article from the annotation
-            group: {} // If we're editing a group, this gets the fleshed-out group object we're editing
+            group: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
+            genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
+    },
+
+    // Handle value changes in genotyping method 1
+    handleChange: function(ref, e) {
+        if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
+            this.setState({genotyping2Disabled: false});
+        }
     },
 
     // Retrieve the GDM and annotation objects with the given UUIDs from the DB. If successful, set the component
@@ -63,8 +71,11 @@ var GroupCuration = React.createClass({
         this.getRestData(
             '/group/' + groupUuid
         ).then(group => {
+            // See if the loaded group's genotyping methods are being used.
+            var genotypingMethodUsed = !!(group.method && group.method.genotypingMethods && group.method.genotypingMethods.length);
+
             // Received group data; set the current state with it
-            this.setState({group: group});
+            this.setState({group: group, genotyping2Disabled: !genotypingMethodUsed});
             return Promise.resolve();
         }).catch(function(e) {
             console.log('GROUP LOAD ERROR=: %o', e);
@@ -370,9 +381,9 @@ var GroupCuration = React.createClass({
         value1 = this.getFormValue('genotypingmethod1');
         value2 = this.getFormValue('genotypingmethod2');
         if (value1 !== 'none' || value2 !== 'none') {
-            newMethod.genotypingMethods = [];
-            newMethod.genotypingMethods[0] = value1 !== 'none' ? value1 : '';
-            newMethod.genotypingMethods[1] = value2 !== 'none' ? value2 : '';
+            newMethod.genotypingMethods = _([value1, value2]).filter(function(val) {
+                return val !== 'none';
+            });
         }
         value1 = this.getFormValue('entiregene');
         if (value1 !== 'none') {
@@ -726,7 +737,7 @@ var GroupMethods = function() {
                 <option>No</option>
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Genotyping Method</h4>
-            <Input type="select" ref="genotypingmethod1" label="Method 1:" defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[0] ? method.genotypingMethods[0] : null}
+            <Input type="select" ref="genotypingmethod1" label="Method 1:" handleChange={this.handleChange} defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[0] ? method.genotypingMethods[0] : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
@@ -738,7 +749,7 @@ var GroupMethods = function() {
                 <option>Whole genome shotgun sequencing</option>
             </Input>
             <Input type="select" ref="genotypingmethod2" label="Method 2:" defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[1] ? method.genotypingMethods[1] : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.genotyping2Disabled}>
                 <option value="none" disabled="disabled">Select</option>
                 <option disabled="disabled"></option>
                 <option>Exome sequencing</option>

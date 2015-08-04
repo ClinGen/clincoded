@@ -214,11 +214,14 @@ var Input = module.exports.Input = React.createClass({
     },
 
     // Called when any input's value changes from user input
-    handleChange: function(e) {
+    handleChange: function(ref, e) {
         this.setState({value: e.target.value});
         if (this.props.clearError) {
             this.props.clearError();
-        } 
+        }
+        if (this.props.handleChange) {
+            this.props.handleChange(ref, e);
+        }
     },
 
     render: function() {
@@ -231,7 +234,7 @@ var Input = module.exports.Input = React.createClass({
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 var innerInput = (
                     <span>
-                        <input className={inputClasses} type={this.props.type} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange} />
+                        <input className={inputClasses} type={this.props.type} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} />
                         <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                     </span>
                 );
@@ -248,7 +251,7 @@ var Input = module.exports.Input = React.createClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <select className="form-control" ref="input" onChange={this.props.clearError} defaultValue={this.props.value ? this.props.value : this.props.defaultValue}>
+                            <select className="form-control" ref="input" onChange={this.handleChange.bind(null, this.props.id)} defaultValue={this.props.value ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled}>
                                 {this.props.children}
                             </select>
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
