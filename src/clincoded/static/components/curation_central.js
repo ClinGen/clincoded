@@ -125,7 +125,7 @@ var CurationCentral = React.createClass({
                     <div className="row curation-content">
                         <div className="col-md-3">
                             <PmidSelectionList annotations={gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
-                                    updateGdmArticles={this.updateGdmArticles} />
+                                    protocol={this.props.href_url.protocol} updateGdmArticles={this.updateGdmArticles} />
                         </div>
                         <div className="col-md-6">
                             {currArticle ?
@@ -182,6 +182,7 @@ var PmidSelectionList = React.createClass({
 
     propTypes: {
         annotations: React.PropTypes.array, // List of PubMed items
+        protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
         currPmid: React.PropTypes.string, // PMID of currently selected article
         currPmidChange: React.PropTypes.func, // Function to call when currently selected article changes
         updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
@@ -197,7 +198,7 @@ var PmidSelectionList = React.createClass({
             <div>
                 <div className="pmid-selection-add">
                     <Modal title='Add new PubMed Article'>
-                        <button className="btn btn-primary pmid-selection-add-btn" modal={<AddPmidModal closeModal={this.closeModal} updateGdmArticles={this.props.updateGdmArticles} />}>
+                        <button className="btn btn-primary pmid-selection-add-btn" modal={<AddPmidModal protocol={this.props.protocol} closeModal={this.closeModal} updateGdmArticles={this.props.updateGdmArticles} />}>
                             Add New PMID(s)
                         </button>
                     </Modal>
@@ -230,6 +231,7 @@ var AddPmidModal = React.createClass({
 
     propTypes: {
         closeModal: React.PropTypes.func, // Function to call to close the modal
+        protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
         updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
     },
 
@@ -264,6 +266,7 @@ var AddPmidModal = React.createClass({
                 // Close the modal; update the GDM with this article.
                 return Promise.resolve(article);
             }, e => {
+                var url = this.props.protocol + external_url_map['PubMedSearch'];
                 // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
                     var newArticle = parsePubmed(xml, enteredPmid);

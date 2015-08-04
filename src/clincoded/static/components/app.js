@@ -44,40 +44,47 @@ var App = module.exports = React.createClass({
         };
     },
 
+    currentAction: function() {
+        var href_url = url.parse(this.props.href);
+        var hash = href_url.hash || '';
+        var name;
+        if (hash.slice(0, 2) === '#!') {
+            name = hash.slice(2);
+        }
+        return name;
+    },
+
     render: function() {
         var content;
         var context = this.props.context;
         var href_url = url.parse(this.props.href);
-        var hash = href_url.hash || '';
-        var name;
-        var context_actions = [];
-        if (hash.slice(0, 2) === '#!') {
-            name = hash.slice(2);
-        }
-
+        // Switching between collections may leave component in place
         var key = context && context['@id'];
+        var current_action = this.currentAction();
+        if (!current_action && context.default_page) {
+            context = context.default_page;
+        }
         if (context) {
-            Array.prototype.push.apply(context_actions, context.actions || []);
-            if (!name && context.default_page) {
-                context = context.default_page;
-                var actions = context.actions || [];
-                for (var i = 0; i < actions.length; i++) {
-                    var action = actions[i];
-                    if (action.href[0] == '#') {
-                        action.href = context['@id'] + action.href;
-                    }
-                    context_actions.push(action);
-                }
-            }
-
-            var ContentView = globals.content_views.lookup(context, name);
+            var ContentView = globals.content_views.lookup(context, current_action);
             content = <ContentView {...this.props} context={context}
                 loadingComplete={this.state.loadingComplete} session={this.state.session}
-                portal={this.state.portal} navigate={this.navigate} />;
+                portal={this.state.portal} navigate={this.navigate} href_url={href_url} />;
         }
         var errors = this.state.errors.map(function (error) {
             return <div className="alert alert-error"></div>;
         });
+
+        var appClass = 'done';
+        if (this.props.slow) {
+            appClass = 'communicating'; 
+        }
+
+        var title = context.title || context.name || context.accession || context['@id'];
+        if (title && title != 'Home') {
+            title = title + ' – ' + portal.portal_title;
+        } else {
+            title = portal.portal_title;
+        }
 
         var canonical = this.props.href;
         if (context.canonical_uri) {
@@ -154,13 +161,13 @@ var Header = React.createClass({
 // Appropriate noticeTypes: success, info, warning, danger (bootstrap defaults)
 var Notice = React.createClass({
     getInitialState: function () {
-        return { noticeVisible: true }
+        return { noticeVisible: true };
     },
     onClick: function() {
         this.setState({ noticeVisible: false });
     },
     render: function() {
-        var noticeClass = 'alert alert-' + this.props.noticeType;
+        var noticeClass = 'notice-bar alert alert-' + this.props.noticeType;
         if (this.state.noticeVisible) {
             return (
                 <div className={noticeClass} role="alert">
