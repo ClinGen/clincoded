@@ -56,7 +56,7 @@ textarea.form-control {
     border-top: 6px solid $color-trim;
     border-bottom: 2px solid $color-trim;
     background: white;
- 
+
     @media screen and (min-width: $screen-sm-min) {
         background: url(/static/img/header-bg.jpg) center center no-repeat;
         background-size: cover;
@@ -141,5 +141,9 @@ dl.dl-horizontal {
     @media screen and (min-width: $screen-sm-min) {
         font-size: 1.5rem;
     }
+}
 
+.notice-bar {
+    margin-bottom: 0;
+    border-radius: 0;
 }
