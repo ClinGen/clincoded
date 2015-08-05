@@ -611,25 +611,25 @@ var GroupDemographics = function() {
             <Input type="text" ref="femalecount" label="# females:" format="number" value={group.numberOfFemale}
                 error={this.getFormError('femalecount')} clearError={this.clrFormErrors.bind(null, 'femalecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="country" label="Country of Origin:" defaultValue="" value={group.countryOfOrigin}
+            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={group.countryOfOrigin}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="">None</option>
+                <option value="none">None</option>
                 <option disabled="disabled"></option>
                 {country_codes.map(function(country_code) {
                     return <option key={country_code.code}>{country_code.name}</option>;
                 })}
             </Input>
-            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="" value={group.ethnicity}
+            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={group.ethnicity}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="">None</option>
+                <option value="none">None</option>
                 <option disabled="disabled"></option>
                 <option>Hispanic or Latino</option>
                 <option>Not Hispanic or Latino</option>
                 <option>Unknown</option>
             </Input>
-            <Input type="select" ref="race" label="Race:" defaultValue="" value={group.race}
+            <Input type="select" ref="race" label="Race:" defaultValue="none" value={group.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="">None</option>
+                <option value="none">None</option>
                 <option disabled="disabled"></option>
                 <option>American Indian or Alaska Native</option>
                 <option>Asian</option>
@@ -641,9 +641,9 @@ var GroupDemographics = function() {
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
             <div className="demographics-age-range">
-                <Input type="select" ref="agerangetype" label="Type:" defaultValue="" value={group.ageRangeType}
+                <Input type="select" ref="agerangetype" label="Type:" defaultValue="none" value={group.ageRangeType}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="">None</option>
+                    <option value="none">None</option>
                     <option disabled="disabled"></option>
                     <option>Onset</option>
                     <option>Report</option>
@@ -657,9 +657,9 @@ var GroupDemographics = function() {
                     <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number"
                         error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={group.ageRangeTo} />
                 </Input>
-                <Input type="select" ref="ageunit" label="Unit:" defaultValue="" value={group.ageRangeUnit}
+                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={group.ageRangeUnit}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="">None</option>
+                    <option value="none">None</option>
                     <option disabled="disabled"></option>
                     <option>Days</option>
                     <option>Weeks</option>
@@ -721,9 +721,9 @@ var GroupMethods = function() {
 
     return (
         <div className="row">
-            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="" value={method ? method.previousTesting : null}
+            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={method ? method.previousTesting : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="">None</option>
+                <option value="none">None</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
@@ -760,23 +760,23 @@ var GroupMethods = function() {
                 <option>Sanger</option>
                 <option>Whole genome shotgun sequencing</option>
             </Input>
-            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="" value={method ? method.entireGeneSequenced : null}
+            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={method ? method.entireGeneSequenced : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="">None</option>
+                <option value="none">None</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="" value={method ? method.copyNumberAssessed : null}
+            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={method ? method.copyNumberAssessed : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="">None</option>
+                <option value="none">None</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="" value={method ? method.specificMutationsGenotyped : null}
+            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={method ? method.specificMutationsGenotyped : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="">None</option>
+                <option value="none">None</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
