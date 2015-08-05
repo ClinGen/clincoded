@@ -516,6 +516,11 @@ var FamilyCuration = React.createClass({
         return newFamily;
     },
 
+    // Add another variant section to the FamilyVariant panel
+    handleAddVariant: function() {
+        this.setState({variantCount: this.state.variantCount + 1});
+    },
+
     render: function() {
         var annotation = this.state.annotation;
         var gdm = this.state.gdm;
@@ -967,25 +972,30 @@ var FamilySegregation = function() {
 };
 
 
+// Display the Family variant panel. The number of copies depends on the variantCount state variable.
 var FamilyVariant = function() {
     var family = this.state.family;
     var hgbsNames = family.hgvsNames && family.hgvsNames.join();
     return (
-        {_.range(this.state.variantCount).map(i => {
-            <div className="row">
-                <Input type="text" ref="dbsnpid" label={<LabelDbSnp />} value={family.dbSNPId} placeholder="e.g. rs1748"
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                <Input type="text" ref="clinvarid" label={<LabelClinVar />} value={family.clinVarRCV} placeholder="e.g. RCV000162091"
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                <Input type="text" ref="hgvsterm" label={<LabelHgvs />} value={hgbsNames} placeholder="(e.g. NM_001009944.2:c.12420G>A)"
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                <Input type="textarea" ref="othervariant" label="Other description (only when no ID available):" rows="5" value={family.otherDescription}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                {(i === this.state.variantCount - 1) ?
-                    <Input type="button" ref="addvariant" title="Add another variant associated with proband" clickHandler={this.handleAddVariant} />
-                : null}
-            </div>
-        })
+        <div className="row">
+            {_.range(this.state.variantCount).map(i => {
+                return (
+                    <div key={i} className="variant-panel">
+                        <Input type="text" ref="dbsnpid" label={<LabelDbSnp />} value={family.dbSNPId} placeholder="e.g. rs1748"
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                        <Input type="text" ref="clinvarid" label={<LabelClinVar />} value={family.clinVarRCV} placeholder="e.g. RCV000162091"
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                        <Input type="text" ref="hgvsterm" label={<LabelHgvs />} value={hgbsNames} placeholder="e.g. NM_001009944.2:c.12420G>A"
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                        <Input type="textarea" ref="othervariant" label={<LabelOtherVariant />} rows="5" value={family.otherDescription}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                        {(i === this.state.variantCount - 1) ?
+                            <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband" clickHandler={this.handleAddVariant} />
+                        : null}
+                    </div>
+                );
+            })}
+        </div>
     );
 };
 
@@ -998,13 +1008,19 @@ var LabelDbSnp = React.createClass({
 
 var LabelClinVar = React.createClass({
     render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> ID (if no dbSNP, or in addition to dbSNP):</span>;
+        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> ID <span style={{fontWeight: 'normal'}}>(if no dbSNP, or in addition to dbSNP)</span>:</span>;
     }
 });
 
 var LabelHgvs = React.createClass({
     render: function() {
-        return <span><a href="http://www.hgvs.org/mutnomen/recs-DNA.html" target="_blank" title="Human Genome Variation Society home page in a new tab">HGVS</a> term: (if no dbSNP or ClinVar ID):</span>;
+        return <span><a href="http://www.hgvs.org/mutnomen/recs-DNA.html" target="_blank" title="Human Genome Variation Society home page in a new tab">HGVS</a> term: <span style={{fontWeight: 'normal'}}>(if no dbSNP or ClinVar ID)</span>:</span>;
+    }
+});
+
+var LabelOtherVariant = React.createClass({
+    render: function() {
+        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when no ID available)</span>:</span>;
     }
 });
 

@@ -281,3 +281,13 @@
     margin-top: 40px;
     padding-bottom: 40px;
 }
+
+.variant-panel {
+    padding-top: 40px;
+    border-top: 1px solid #c0c0c0;
+
+    &:first-child {
+        padding-top: 0;
+        border-top: none;
+    }
+}
