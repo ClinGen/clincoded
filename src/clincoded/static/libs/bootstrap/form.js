@@ -192,9 +192,9 @@ var Input = module.exports.Input = React.createClass({
     // parent components.
     getValue: function() {
         if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
-            return React.findDOMNode(this.refs.input).value;
+            return React.findDOMNode(this.refs.input).value.trim();
         } else if (this.props.type === 'select') {
-            return this.getSelectedOption();
+            return this.getSelectedOption().trim();
         }
     },
 

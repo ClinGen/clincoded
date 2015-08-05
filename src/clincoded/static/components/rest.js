@@ -75,6 +75,14 @@ var RestMixin = module.exports.RestMixin = {
         return this.writeRestData(uri, obj, 'POST');
     },
 
+    // Post the objects in the 'objs' array to given URI (so all objects have to be the same type).
+    // Might want to later expand this to optionally take an array of uris.
+    postRestDatas: function(uri, objs) {
+        return Promise.all(objs.map(obj => {
+            return this.postRestData(uri, obj);
+        }));
+    },
+
     // Not for use by client components
     writeRestData: function(uri, obj, method) {
         return this.context.fetch(uri, {
