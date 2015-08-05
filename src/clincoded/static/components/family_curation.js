@@ -43,6 +43,7 @@ var FamilyCuration = React.createClass({
             family: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
+            variantCount: 1, // Number of variants to display
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
     },
@@ -547,18 +548,23 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family Demographics" open>
+                                            <Panel title="Family — Demographics" open>
                                                 {FamilyDemographics.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family Methods" open>
+                                            <Panel title="Family — Methods" open>
                                                 {FamilyMethods.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family Segregation" open>
+                                            <Panel title="Family — Segregation" open>
                                                 {FamilySegregation.call(this)}
+                                            </Panel>
+                                        </PanelGroup>
+                                        <PanelGroup accordion>
+                                            <Panel title="Family — Variant(s) associated with Proband" open>
+                                                {FamilyVariant.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
@@ -961,6 +967,48 @@ var FamilySegregation = function() {
 };
 
 
+var FamilyVariant = function() {
+    var family = this.state.family;
+    var hgbsNames = family.hgvsNames && family.hgvsNames.join();
+    return (
+        {_.range(this.state.variantCount).map(i => {
+            <div className="row">
+                <Input type="text" ref="dbsnpid" label={<LabelDbSnp />} value={family.dbSNPId} placeholder="e.g. rs1748"
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                <Input type="text" ref="clinvarid" label={<LabelClinVar />} value={family.clinVarRCV} placeholder="e.g. RCV000162091"
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                <Input type="text" ref="hgvsterm" label={<LabelHgvs />} value={hgbsNames} placeholder="(e.g. NM_001009944.2:c.12420G>A)"
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                <Input type="textarea" ref="othervariant" label="Other description (only when no ID available):" rows="5" value={family.otherDescription}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                {(i === this.state.variantCount - 1) ?
+                    <Input type="button" ref="addvariant" title="Add another variant associated with proband" clickHandler={this.handleAddVariant} />
+                : null}
+            </div>
+        })
+    );
+};
+
+// HTML labels for inputs follow.
+var LabelDbSnp = React.createClass({
+    render: function() {
+        return <span><a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank" title="dbSNP Short Genetic Variations in a new tab">dbSNP</a> ID:</span>;
+    }
+});
+
+var LabelClinVar = React.createClass({
+    render: function() {
+        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> ID (if no dbSNP, or in addition to dbSNP):</span>;
+    }
+});
+
+var LabelHgvs = React.createClass({
+    render: function() {
+        return <span><a href="http://www.hgvs.org/mutnomen/recs-DNA.html" target="_blank" title="Human Genome Variation Society home page in a new tab">HGVS</a> term: (if no dbSNP or ClinVar ID):</span>;
+    }
+});
+
+
 // Additional Information family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilyAdditional = function() {
@@ -975,7 +1023,6 @@ var FamilyAdditional = function() {
             <Input type="textarea" ref="additionalinfofamily" label="Additional Information about Family:" rows="5" value={family.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
-                error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">
                 Note: Any variants associated with the proband in this Family that were captured above will be counted as
