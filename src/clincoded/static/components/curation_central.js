@@ -122,6 +122,10 @@ var CurationCentral = React.createClass({
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                 <div className="container">
+                    <div className="notice-bar-embed alert alert-info">
+                    <div className="container">Add papers to this Gene-Disease Record using the <strong>Add New PMID(s)</strong> button; click on any added paper to view its abstract and begin curating evidence from that paper.</div>
+                </div>
+
                     <div className="row curation-content">
                         <div className="col-md-3">
                             <PmidSelectionList annotations={gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
