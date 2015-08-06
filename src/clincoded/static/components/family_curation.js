@@ -1226,6 +1226,7 @@ var FamilyViewer = React.createClass({
         var context = this.props.context;
         var method = context.method;
         var segregation = context.segregation;
+        var variants = (context.variants && context.variants.length) ? context.variants : [{}];
 
         return (
             <div className="container">
@@ -1269,7 +1270,7 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Group — Demographics" panelClassName="panel-data">
+                    <Panel title="Family — Demographics" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt># Males</dt>
@@ -1313,7 +1314,7 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Group — Methods" panelClassName="panel-data">
+                    <Panel title="Family — Methods" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Previous testing</dt>
@@ -1362,7 +1363,7 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Group — Segregation" panelClassName="panel-data">
+                    <Panel title="Family — Segregation" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Pedigree description</dt>
@@ -1436,6 +1437,41 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
+                    <Panel title="Family - Variant(s) associated with Proband" panelClassName="panel-data">
+                        {variants.map(function(variant, i) {
+                            return (
+                                <div className="variant-view-panel">
+                                    <h5>Variant {i + 1}</h5>
+                                    <dl className="dl-horizontal">
+                                        <div>
+                                            <dt>dbSNP ID</dt>
+                                            <dd>{variant.dbSNPId}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>ClinVar ID</dt>
+                                            <dd>{variant.clinVarRCV}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>HGVS term</dt>
+                                            <dd>
+                                                {variant.hgvsNames ?
+                                                    <span>{variant.hgvsNames.join(', ')}</span>
+                                                : null}
+                                            </dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>ClinVar ID</dt>
+                                            <dd>{variant.otherDescription}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            );
+                        })}
+                    </Panel>
+
                     <Panel title="Family — Additional Information" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
@@ -1444,14 +1480,16 @@ var FamilyViewer = React.createClass({
                             </div>
 
                             <dt>Other PMID(s) that report evidence about this same Family</dt>
-                            <dd>{context.otherPMIDs && context.otherPMIDs.map(function(article, i) {
-                                return (
-                                    <span key={i}>
-                                        {i > 0 ? ', ' : ''}
-                                        {article.pmid}
-                                    </span>
-                                );
-                            })}</dd>
+                            <dd>
+                                {context.otherPMIDs && context.otherPMIDs.map(function(article, i) {
+                                    return (
+                                        <span key={i}>
+                                            {i > 0 ? ', ' : ''}
+                                            {article.pmid}
+                                        </span>
+                                    );
+                                })}
+                            </dd>
                         </dl>
                     </Panel>
                 </div>
