@@ -57,7 +57,7 @@ var CreateGeneDisease = React.createClass({
         // Start with default validation
         var valid = this.validateDefault();
 
-        // Check if orphanetid 
+        // Check if orphanetid
         if (valid) {
             valid = this.getFormValue('orphanetid').match(/^ORPHA[0-9]{1,6}$/i);
             if (!valid) {
@@ -198,7 +198,7 @@ var ConfirmEditGdm = React.createClass({
         return (
             <div>
                 <div className="modal-body">
-                    <p>A curation record already exists for <strong>{gdm.gene.symbol} — ORPHA{gdm.disease.orphaNumber} — {gdm.modeInheritance}</strong>. You may curate this record, or cancel to specify a different gene — disease — mode.</p>
+                    <p>A curation record already exists for <strong>{gdm.gene.symbol} — ORPHA{gdm.disease.orphaNumber} — {gdm.modeInheritance}</strong>. You may curate this existing record, or cancel to specify a different gene — disease — mode.</p>
                 </div>
                 <div className='modal-footer'>
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleClick.bind(null, false)} title="Cancel" />
