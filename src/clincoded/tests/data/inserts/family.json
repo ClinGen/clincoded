@@ -9,10 +9,28 @@
         "numberOfMale": "3",
         "numberOfFemale": "3",
         "method": "197e1c8a-1912-11e5-8050-60f81dc5b05a",
-        "segregation": "08b61bb3-2a5b-11e5-b2e4-60f81dc5b05a",
-        "variants": [
-            "df8135d4-2685-11e5-af19-60f81dc5b05a"
-        ],
+        "segregation": {
+            "dateTime": "2015-02-27 09:35:18-08:00",
+            "pedigreeDescription": "K8725",
+            "pedigreeSize": "15",
+            "numberOfGenerationInPedigree": "3",
+            "consanguineousFamily": "No",
+            "numberOfCases": "5",
+            "numberOfParentsUnaffectedCarriers": "1",
+            "numberOfAffectedAlleles": "8",
+            "numberOfAffectedWithOneVariant": "2",
+            "numberOfAffectedWithTwoVariants": "3",
+            "numberOfUnaffectedCarriers": "3",
+            "numberOfUnaffectedIndividuals": "10",
+            "probandAssociatedWithBoth": "Yes",
+            "additionalInformation": "11 of the 15 family members were sequenced",
+            "variants": [
+                "df8135d4-2685-11e5-af19-60f81dc5b05a"
+            ],
+            "assessments": [
+                "4f94a226-2a4c-11e5-887c-60f81dc5b05a"
+            ]
+        },
         "individualIncluded": [
             "6f762e73-1910-11e5-998f-60f81dc5b05a",
             "7997f687-1910-11e5-a066-60f81dc5b05a"
