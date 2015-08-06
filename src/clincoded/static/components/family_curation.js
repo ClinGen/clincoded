@@ -1463,7 +1463,7 @@ var FamilyViewer = React.createClass({
                                         </div>
 
                                         <div>
-                                            <dt>ClinVar ID</dt>
+                                            <dt>Other description</dt>
                                             <dd>{variant.otherDescription}</dd>
                                         </div>
                                     </dl>
