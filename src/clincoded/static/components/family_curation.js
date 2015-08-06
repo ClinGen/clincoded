@@ -116,7 +116,7 @@ var FamilyCuration = React.createClass({
     },
 
     // Write a family object to the DB.
-    writeFamilyObj: function(newFamily, familyDiseases, familyArticles, familyLabel) {
+    writeFamilyObj: function(newFamily, familyLabel) {
         var methodPromise; // Promise from writing (POST/PUT) a method to the DB
 
         // Make a new method and save it to the DB
@@ -398,7 +398,7 @@ var FamilyCuration = React.createClass({
                         if (i > 0) {
                             familyLabel = this.getFormValue('extrafamilyname' + (i - 1));
                         }
-                        familyPromises.push(this.writeFamilyObj(newFamily, familyDiseases, familyArticles, familyLabel));
+                        familyPromises.push(this.writeFamilyObj(newFamily, familyLabel));
                     }
                     return Promise.all(familyPromises);
                 }).then(newFamilies => {
