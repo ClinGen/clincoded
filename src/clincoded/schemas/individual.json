@@ -175,13 +175,8 @@
         "proband": {
             "title": "Proband",
             "description": "Whether or not associated with a proband variant to a family",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean",
+            "default": false
         },
         "dateTime": {
             "title": "Date and Time",
@@ -213,7 +208,7 @@
         },
         "proband": {
             "title": "Proband",
-            "type": "string"
+            "type": "boolean"
         }
     }
 }
