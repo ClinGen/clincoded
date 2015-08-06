@@ -270,7 +270,7 @@ var Input = module.exports.Input = React.createClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} placeholder={this.props.placeholder} onChange={this.handleChange} rows={this.props.rows} />
+                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} placeholder={this.props.placeholder} onChange={this.handleChange.bind(null, this.props.id)} rows={this.props.rows} />
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                         </div>
                     </div>
@@ -294,7 +294,7 @@ var Input = module.exports.Input = React.createClass({
                 //   clickHandler: Method to call when button is clicked
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
-                    <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} />
+                    <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} disabled={this.props.inputDisabled} />
                 );
                 break;
 
@@ -302,7 +302,7 @@ var Input = module.exports.Input = React.createClass({
                 title = this.props.title ? this.props.title : 'Submit';
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
-                    <button className={inputClasses} onClick={this.props.submitHandler}>{title}</button>
+                    <button className={inputClasses} onClick={this.props.submitHandler} disabled={this.props.inputDisabled}>{title}</button>
                 );
                 break;
 
@@ -310,7 +310,7 @@ var Input = module.exports.Input = React.createClass({
                 title = this.props.title ? this.props.title : 'Cancel';
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
-                    <button className={inputClasses} onClick={this.props.cancelHandler}>{title}</button>
+                    <button className={inputClasses} onClick={this.props.cancelHandler} disabled={this.props.inputDisabled}>{title}</button>
                 );
                 break;
 

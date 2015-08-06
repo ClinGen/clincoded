@@ -51,14 +51,30 @@ var FamilyCuration = React.createClass({
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 1, // Number of variants to display
+            addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
     },
 
-    // Handle value changes in genotyping method 1
+    // Handle value changes in various form fields
     handleChange: function(ref, e) {
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
+            // Disable the Genotyping Method 2 if Genotyping Method 1 has no value
             this.setState({genotyping2Disabled: false});
+        } else if (ref.substring(0, 3) === 'VAR') {
+            // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
+            // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
+            var lastVariantSuffix = (this.state.variantCount - 1) + '';
+            var lastRefSuffix = ref.match(/\d*$/);
+            if (lastRefSuffix && (lastVariantSuffix === lastRefSuffix[0])) {
+                // The changed item is in the last variant panel. If any fields in the last field have a value, disable
+                // the Add Another Variant button.
+                var dbsnpid = this.refs['VARdbsnpid' + lastVariantSuffix].getValue();
+                var clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
+                var hgvsterm = this.refs['VARhgvsterm' + lastVariantSuffix].getValue();
+                var othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
+                this.setState({addVariantDisabled: !(dbsnpid || clinvarid || hgvsterm || othervariant)});
+            }
         }
     },
 
@@ -202,10 +218,10 @@ var FamilyCuration = React.createClass({
 
         for (var i = 0; i < this.state.variantCount; i++) {
             // Grab the values from the variant form panel
-            var dbsnpid = this.getFormValue('dbsnpid' + i);
-            var clinvarid = this.getFormValue('clinvarid' + i);
-            var hgvsterm = this.getFormValue('hgvsterm' + i);
-            var othervariant = this.getFormValue('othervariant' + i);
+            var dbsnpid = this.getFormValue('VARdbsnpid' + i);
+            var clinvarid = this.getFormValue('VARclinvarid' + i);
+            var hgvsterm = this.getFormValue('VARhgvsterm' + i);
+            var othervariant = this.getFormValue('VARothervariant' + i);
             var searchStr = '/search/?type=variant';
 
             // Build the search string depending on what the user entered
@@ -235,10 +251,10 @@ var FamilyCuration = React.createClass({
     makeVariant: function(i) {
         var newVariant = {};
 
-        var dbsnpid = this.getFormValue('dbsnpid' + i);
-        var clinvarid = this.getFormValue('clinvarid' + i);
-        var hgvsterm = this.getFormValue('hgvsterm' + i);
-        var othervariant = this.getFormValue('othervariant' + i);
+        var dbsnpid = this.getFormValue('VARdbsnpid' + i);
+        var clinvarid = this.getFormValue('VARclinvarid' + i);
+        var hgvsterm = this.getFormValue('VARhgvsterm' + i);
+        var othervariant = this.getFormValue('VARothervariant' + i);
 
         if (othervariant) {
             newVariant.otherDescription = othervariant;
@@ -250,6 +266,41 @@ var FamilyCuration = React.createClass({
         return Object.keys(newVariant).length ? newVariant : null;
     },
 
+    varlidateForm: function() {
+        var valid = this.validateDefault();
+
+        if (valid) {
+            var varValid;
+            var anyInvalid = false;
+
+            // Check Variant panel inputs for correct formats
+            for (var i = 0; i < this.state.variantCount; i++) {
+                // Check dbSNP ID for a valid format
+                var value = this.getFormValue('VARdbsnpid' + i);
+                if (value) {
+                    varValid = value.match(/^[\s]*(rs\d{1,8})[\s]*$/);
+                    if (!varValid) {
+                        this.setFormErrors('VARdbsnpid' + i, 'Use dbSNP IDs (e.g. rs1748)');
+                        anyInvalid = true;
+                    }
+                }
+
+                // Check dbSNP ID for a valid format
+                value = this.getFormValue('VARclinvarid' + i);
+                if (value) {
+                    varValid = value.match(/^[\s]*(RCV\d{9}(.\d){0,1})[\s]*$/);
+                    if (!varValid) {
+                        this.setFormErrors('VARclinvarid' + i, 'Use ClinVar IDs (e.g. RCV000162091 or RCV000049373.1)');
+                        anyInvalid = true;
+                    }
+                }
+            }
+
+            valid = !anyInvalid;
+        }
+        return valid;
+    },
+
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
@@ -257,7 +308,7 @@ var FamilyCuration = React.createClass({
         this.saveAllFormValues();
 
         // Start with default validation; indicate errors on form if not, then bail
-        if (this.validateDefault()) {
+        if (this.varlidateForm()) {
             var newFamily = {}; // Holds the new group object;
             var familyDiseases = null, familyArticles, familyVariants = [];
             var formError = false;
@@ -632,7 +683,7 @@ var FamilyCuration = React.createClass({
 
     // Add another variant section to the FamilyVariant panel
     handleAddVariant: function() {
-        this.setState({variantCount: this.state.variantCount + 1});
+        this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
     },
 
     render: function() {
@@ -1095,16 +1146,20 @@ var FamilyVariant = function() {
             {_.range(this.state.variantCount).map(i => {
                 return (
                     <div key={i} className="variant-panel">
-                        <Input type="text" ref={'dbsnpid' + i} label={<LabelDbSnp />} value={family.dbSNPId} placeholder="e.g. rs1748"
+                        <Input type="text" ref={'VARdbsnpid' + i} label={<LabelDbSnp />} value={family.dbSNPId} placeholder="e.g. rs1748" handleChange={this.handleChange}
+                            error={this.getFormError('VARdbsnpid' + i)} clearError={this.clrFormErrors.bind(null, 'VARdbsnpid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                        <Input type="text" ref={'clinvarid' + i} label={<LabelClinVar />} value={family.clinVarRCV} placeholder="e.g. RCV000162091"
+                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={family.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange}
+                            error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <Input type="text" ref={'hgvsterm' + i} label={<LabelHgvs />} value={hgbsNames} placeholder="e.g. NM_001009944.2:c.12420G>A"
+                        <Input type="text" ref={'VARhgvsterm' + i} label={<LabelHgvs />} value={hgbsNames} placeholder="e.g. NM_001009944.2:c.12420G>A" handleChange={this.handleChange}
+                            error={this.getFormError('VARhgvsterm' + i)} clearError={this.clrFormErrors.bind(null, 'VARhgvsterm' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <Input type="textarea" ref={'othervariant' + i} label={<LabelOtherVariant />} rows="5" value={family.otherDescription}
+                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={family.otherDescription} handleChange={this.handleChange}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                         {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
-                            <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband" clickHandler={this.handleAddVariant} />
+                            <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
+                                clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                         : null}
                     </div>
                 );
