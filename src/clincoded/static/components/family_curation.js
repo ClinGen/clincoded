@@ -39,8 +39,11 @@ var FamilyCuration = React.createClass({
     // Keeps track of values from the query string
     queryValues: {},
 
-    // Pointers to all needed variant objects, both existing and new
-    variants: [],
+    instance: {
+        // If we're adding a family to a group, keep a flattened group here so we can update it when the family is submitted
+        group: {},
+    },
+
 
     getInitialState: function() {
         return {
@@ -110,6 +113,19 @@ var FamilyCuration = React.createClass({
         });
     },
 
+    // If a group UUID is given in the query string, load it into the group state variable.
+    loadGroup: function(groupUuid) {
+        this.getRestData(
+            '/group/' + groupUuid + '?frame=object'
+        ).then(group => {
+            this.instance.group = group;
+            return Promise.resolve();
+        }).catch(function(e) {
+            console.log('GROUP LOAD ERROR=: %o', e);
+            parseAndLogError.bind(undefined, 'getRequest');
+        });
+    },
+
     // After the Group Curation page component mounts, grab the GDM and annotation UUIDs from the query
     // string and retrieve the corresponding annotation from the DB, if they exist.
     // Note, we have to do this after the component mounts because AJAX DB queries can't be
@@ -120,9 +136,14 @@ var FamilyCuration = React.createClass({
             this.getGdmAnnotation(this.queryValues.gdmUuid, this.queryValues.annotationUuid);
         }
 
-        // If a family's UUID was given in the query string, retrieve the famly data for editing.
+        // If a family's UUID was given in the query string, retrieve the family data for editing.
         if (this.queryValues.familyUuid) {
             this.loadFamily(this.queryValues.familyUuid);
+        }
+
+        // If a group's UUID was given in the query string, retrieve the group data for updating.
+        if (this.queryValues.groupUuid) {
+            this.loadGroup(this.queryValues.groupUuid);
         }
     },
 
@@ -311,6 +332,7 @@ var FamilyCuration = React.createClass({
         if (this.varlidateForm()) {
             var newFamily = {}; // Holds the new group object;
             var familyDiseases = null, familyArticles, familyVariants = [];
+            var savedFamilies; // Array of saved written to DB
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
@@ -453,6 +475,7 @@ var FamilyCuration = React.createClass({
                     }
                     return Promise.all(familyPromises);
                 }).then(newFamilies => {
+                    savedFamilies = newFamilies;
                     if (!this.state.family || Object.keys(this.state.family).length === 0) {
                         // Let's avoid modifying a React state property, so clone it. Add the new group
                         // to the current annotation's 'groups' array.
@@ -474,6 +497,28 @@ var FamilyCuration = React.createClass({
                     } else {
                         return Promise.resolve(this.state.annotation);
                     }
+                }).then(data => {
+                    // If we're adding this family to a group, update the group with this family
+                    if (this.instance.group) {
+                        // Add the newly saved families to the group
+                        var group = this.instance.group;
+                        if (!group.familyIncluded) {
+                            group.familyIncluded = [];
+                        }
+                        Array.prototype.push.apply(group.familyIncluded, savedFamilies.map(function(family) { return family['@id']; }));
+
+                        // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
+                        var groupUuid = group.uuid;
+                        delete group.uuid;
+                        delete group['@id'];
+                        delete group['@type'];
+
+                        // Post the modified annotation to the DB, then go back to Curation Central
+                        return this.putRestData('/group/' + groupUuid, group);
+                    }
+
+                    // Not updating a group; just move on
+                    return Promise.resolve(null);
                 }).then(data => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to choices page.
@@ -695,6 +740,7 @@ var FamilyCuration = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
+        this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
 
         return (
             <div>
