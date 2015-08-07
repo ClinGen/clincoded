@@ -342,21 +342,6 @@ class Method(Item):
     name_key = 'uuid'
 
 @collection(
-    name='segregations',
-    unique_key='segregation:uuid',
-    properties={
-        'title': 'Segregation Study',
-        'description': 'List of segregation studies in all gdm pairs',
-    })
-class Segregation(Item):
-    item_type = 'segregation'
-    schema = load_schema('clincoded:schemas/segregation.json')
-    name_key = 'uuid'
-    embedded = [
-        'assessments'
-    ]
-
-@collection(
     name='assessments',
     unique_key='assessment:uuid',
     properties={
