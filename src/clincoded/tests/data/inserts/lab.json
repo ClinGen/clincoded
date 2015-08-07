@@ -605,5 +605,23 @@
         "state": "WA",
         "title": "Robert Waterston, UW",
         "uuid": "44324de6-c057-451f-a8f1-1d9a6cb2762c"
+    },
+    {
+        "address1": "ClinGen Curation",
+        "address2": "",
+        "awards": [],
+        "city": "Stanford",
+        "country": "USA",
+        "fax": "000-000-0000",
+        "institute_label": "SU",
+        "institute_name": "Stanford University",
+        "name": "curator",
+        "phone1": "000-000-0000",
+        "phone2": "000-000-0000",
+        "pi": "cherry@stanford.edu",
+        "postal_code": "94304",
+        "state": "CA",
+        "title": "ClinGen Curation",
+        "uuid": "59110818-1f5b-4ac5-af38-0d5948aca66e"
     }
 ]
