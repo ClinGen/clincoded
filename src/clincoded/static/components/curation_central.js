@@ -219,9 +219,11 @@ var PmidSelectionList = React.createClass({
                         })}
                     </div>
                 : null}
-                <div>
-                    <i>Add papers to this Gene-Disease Record using the <strong>Add New PMID(s)</strong> button; click on any added paper to view its abstract and begin curating evidence from that paper.</i>
-                </div>
+                {annotations.length == 0 ?
+                    <div>
+                        <i>Add papers to this Gene-Disease Record using the <strong>Add New PMID(s)</strong> button; click on any added paper to view its abstract and begin curating evidence from that paper.</i>
+                    </div>
+                :null }
             </div>
         );
     }
