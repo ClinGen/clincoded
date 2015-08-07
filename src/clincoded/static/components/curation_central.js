@@ -128,9 +128,6 @@ var CurationCentral = React.createClass({
                                     protocol={this.props.href_url.protocol} updateGdmArticles={this.updateGdmArticles} />
                         </div>
                         <div className="col-md-6">
-                            <div className="notice-bar-embed alert alert-info">
-                                <div className="container">Add papers to this Gene-Disease Record using the <strong>Add New PMID(s)</strong> button; click on any added paper to view its abstract and begin curating evidence from that paper.</div>
-                            </div>
                             {currArticle ?
                                 <div className="curr-pmid-overview">
                                     <PmidSummary article={currArticle} displayJournal />
@@ -222,6 +219,9 @@ var PmidSelectionList = React.createClass({
                         })}
                     </div>
                 : null}
+                <div>
+                    <i>Add papers to this Gene-Disease Record using the <strong>Add New PMID(s)</strong> button; click on any added paper to view its abstract and begin curating evidence from that paper.</i>
+                </div>
             </div>
         );
     }

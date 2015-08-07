@@ -133,7 +133,7 @@
 }
 
 .pmid-selection-list {
-    margin-bottom: 50px;
+    margin-bottom: 20px;
     max-height: 250px;
     overflow-y: scroll;
     border: 1px solid #e0e0e0;
@@ -275,8 +275,4 @@
     border: 1px solid $group-curation-trim;
     font-size: 1.1rem;
     text-align: center;
-}
-
-.notice-bar-embed {
-    margin: 15px 0 15px 0;
 }
