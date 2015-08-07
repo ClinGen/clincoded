@@ -68,14 +68,14 @@
         "numberOfMale": {
             "title": "Number of Male",
             "description": "Count of Male in the family",
-            "type": "string",
-            "default": ""
+            "type": "integer",
+            "minimum": 0
         },
         "numberOfFemale": {
             "title": "Number of Female",
             "description": "Count of female in the family",
-            "type": "string",
-            "default": ""
+            "type": "integer",
+            "minimum": 0
         },
         "countryOfOrigin": {
             "title": "Country Of Origin",
@@ -126,14 +126,16 @@
         "ageRangeFrom": {
             "title": "Age Range From",
             "description": "Yongest age in the family",
-            "type": "string",
-            "default": ""
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 150
         },
         "ageRangeTo": {
             "title": "Age Range To",
             "description": "Oldest age in the family",
-            "type": "string",
-            "default": ""
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 150
         },
         "ageRangeUnit": {
             "title": "Age Range Unit",
@@ -156,19 +158,128 @@
         },
         "segregation": {
             "title": "Segregation",
-            "description": "uuid link to segregation",
-            "type": "string",
-            "linkTo": "segregation"
-        },
-        "variants": {
-            "title": "Variants Associated with Proband",
-            "description": "List of variants asscociated with proband",
-            "type": "array",
-            "default": [],
-            "items": {
-                "title": "Variant uuid",
-                "type": "string",
-                "linkTo": "variant"
+            "type": "object",
+            "default": {},
+            "properties": {
+                "dateTime": {
+                    "title": "Date Time",
+                    "description": "Time stamp for creation",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "pedigreeDescription": {
+                    "title": "Pedigree Description",
+                    "description": "Pedigree Description",
+                    "type": "string",
+                    "default": ""
+                },
+                "pedigreeSize": {
+                    "title": "Pedigree Size",
+                    "description": "Pedigree Size",
+                    "type": "integer",
+                    "minimum": 2
+                },
+                "numberOfGenerationInPedigree": {
+                    "title": "# Generations in Pedigree",
+                    "description": "Number of generations in pedigree",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "consanguineousFamily": {
+                    "title": "Consanguineous Family",
+                    "description": "Consanguineous Family",
+                    "type": "boolean"
+                },
+                "numberOfCases": {
+                    "title": "# Cases",
+                    "description": "Number of cases (phenotype positive)",
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "deNovoType": {
+                    "title": "de novo type",
+                    "description": "de novo type",
+                    "type": "string",
+                    "default": "",
+                    "enum": [
+                        "",
+                        "Inferred",
+                        "Confirmed"
+                    ]
+                },
+                "numberOfParentsUnaffectedCarriers": {
+                    "title": "# Parents Unaffected",
+                    "description": "Number of parents unaffected carriers",
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1,
+                        2
+                    ]
+                },
+                "numberOfAffectedAlleles": {
+                    "title": "# Affected Alleles",
+                    "description": "Number of affected alleles",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "numberOfAffectedWithOneVariant": {
+                    "title": "# Affected with 1 Varaint",
+                    "description": "Number of affected with 1 variant",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "numberOfAffectedWithTwoVariants": {
+                    "title": "# Affected with 2 Variants/Homozygous",
+                    "description": "Number of affected with 2 variants or homozygous",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "numberOfUnaffectedCarriers": {
+                    "title": "# Unaffected Carriers",
+                    "description": "Number of unaffected carriers",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "numberOfUnaffectedIndividuals": {
+                    "title": "# Unaffected Individuals",
+                    "description": "Number of unaffected individuals",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "probandAssociatedWithBoth": {
+                    "title": "Is Proband Associated with Both",
+                    "description": "If > 1 variant, is proband associated with both",
+                    "type": "boolean"
+                },
+                "additionalInformation": {
+                    "title": "Additional Information",
+                    "description": "Additional information of the segregation",
+                    "type": "string",
+                    "default": ""
+                },
+                "variants": {
+                    "title": "Variants Associated with Proband",
+                    "description": "List of variant uuid(s)",
+                    "type": "array",
+                    "default": [],
+                    "items": {
+                        "type": "string",
+                        "linkTo": "variant"
+                    }
+                },
+                "assessments": {
+                    "title": "Assessments",
+                    "description": "List of assessments to the segregation",
+                    "type": "array",
+                    "default": [],
+                    "items": {
+                        "title": "Assessment",
+                        "description": "uuid link to assessment",
+                        "type": "string",
+                        "linkTo": "assessment"
+                    }
+                }
             }
         },
         "additionalInformation": {
@@ -205,6 +316,7 @@
             "title": "Date and Time",
             "description": "Time stamp of the family creation",
             "type": "string",
+            "format": "date-time",
             "default": ""
         }
     },
@@ -214,11 +326,7 @@
             "type": "string"
         },
         "commonDiagnosis": {
-            "title": "Diagnosis",
-            "type": "string"
-        },
-        "variants": {
-            "title": "Variants",
+            "title": "Common Diagnosis",
             "type": "string"
         },
         "individualIncluded": {

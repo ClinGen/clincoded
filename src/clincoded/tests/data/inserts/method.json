@@ -1,61 +1,66 @@
 [
     {
         "uuid": "197e1c8a-1912-11e5-8050-60f81dc5b05a",
-        "previousTesting": "Yes",
+        "previousTesting": true,
         "previousTestingDescription": "No variants detected in FBN1, TGFBR1, or TGFBR2 genes",
-        "genomeWideStudy": "No",
+        "genomeWideStudy": false,
         "genotypingMethods": [
             "PCR",
             "HRM"
         ],
-        "entireGeneSequenced": "No",
-        "copyNumberAssessed": "No",
-        "specificMutationsGenotyped": "Yes",
+        "entireGeneSequenced": false,
+        "copyNumberAssessed": false,
+        "specificMutationsGenotyped": true,
         "specificMutationsGenotypedMethod": "Blah Blah Blah",
-        "additionalInformation": "The coding Exon 3 was PCR ampilified and sequenced"
+        "additionalInformation": "The coding Exon 3 was PCR ampilified and sequenced",
+        "dateTime": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "4d4c9aa8-1912-11e5-a5a5-60f81dc5b05a",
-        "genomeWideStudy": "Yes",
+        "genomeWideStudy": true,
         "genotypingMethods": [
             "Exome sequencing",
             "Genotyping"
         ],
-        "entireGeneSequenced": "No",
-        "copyNumberAssessed": "Yes"
+        "entireGeneSequenced": false,
+        "copyNumberAssessed": true,
+        "dateTime": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "44f00657-1912-11e5-9f05-60f81dc5b05a",
-        "previousTesting": "No",
-        "genomeWideStudy": "Yes",
+        "previousTesting": false,
+        "genomeWideStudy": true,
         "genotypingMethods": [
             "Sanger",
             "Whole genome shotgun sequencing"
         ],
-        "entireGeneSequenced": "No",
-        "copyNumberAssessed": "Yes",
-        "additionalInformation": "some info here."
+        "entireGeneSequenced": false,
+        "copyNumberAssessed": true,
+        "additionalInformation": "some info here.",
+        "dateTime": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "3c4eb8f0-1912-11e5-90c7-60f81dc5b05a",
-        "previousTesting": "Yes",
+        "previousTesting": true,
         "previousTestingDescription": "method here",
-        "genomeWideStudy": "Yes",
+        "genomeWideStudy": true,
         "genotypingMethods": [
             "Sanger"
         ],
-        "entireGeneSequenced": "Yes",
-        "copyNumberAssessed": "Yes",
-        "specificMutationsGenotyped": "Yes",
+        "entireGeneSequenced": true,
+        "copyNumberAssessed": true,
+        "specificMutationsGenotyped": true,
         "specificMutationsGenotypedMethod": "method #2",
-        "additionalInformation": "additional info here."
+        "additionalInformation": "additional info here.",
+        "dateTime": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "34d309dc-1912-11e5-aa88-60f81dc5b05a",
-        "previousTesting": "Yes",
+        "previousTesting": true,
         "previousTestingDescription": "description here",
-        "genomeWideStudy": "No",
-        "entireGeneSequenced": "Yes",
-        "copyNumberAssessed": "No"
+        "genomeWideStudy": false,
+        "entireGeneSequenced": true,
+        "copyNumberAssessed": false,
+        "dateTime": "2015-07-14T22:47:10.000000+00:00"
     }
 ]
