@@ -24,6 +24,9 @@ var CurationMixin = module.exports.CurationMixin = {
         };
     },
 
+    // Get a flattened GDM corresponding to the one given in gdmUuid. update its OMIM ID given in
+    // newOmimId, and write it back out. If the write is successful, also update the currOmimId
+    // React state variable.
     updateOmimId: function(gdmUuid, newOmimId) {
         this.getRestData(
             '/gdm/' + gdmUuid + '/?frame=object'
@@ -40,8 +43,12 @@ var CurationMixin = module.exports.CurationMixin = {
             this.setState({currOmimId: newOmimId});
         }).catch(e => {
             console.log('UPDATEOMIMID %o', e);
-            parseAndLogError.bind(undefined, 'putRequest');
         });
+    },
+
+    // Set the currOmimId state to the given omimId
+    setOmimIdState: function(omimId) {
+        this.setState({currOmimId: omimId});
     }
 };
 

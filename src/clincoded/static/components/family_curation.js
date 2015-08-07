@@ -47,10 +47,10 @@ var FamilyCuration = React.createClass({
 
     getInitialState: function() {
         return {
-            gdm: {}, // GDM object given in UUID
-            annotation: {}, // Annotation object given in UUID
-            article: {}, // Article from the annotation
+            gdm: {}, // GDM object given in query string
+            group: {}, // Group object given in query string
             family: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
+            annotation: {}, // Annotation object given in query string
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 1, // Number of variants to display
@@ -81,48 +81,59 @@ var FamilyCuration = React.createClass({
         }
     },
 
-    // Retrieve the GDM and annotation objects with the given UUIDs from the DB. If successful, set the component
-    // state to the retrieved objects to cause a rerender of the component.
-    getGdmAnnotation: function(gdmUuid, annotationUuid) {
-        this.getRestDatas([
-            '/gdm/' + gdmUuid,
-            '/evidence/' + annotationUuid + '?frame=object' // Use flattened object because it can be updated
-        ]).then(data => {
-            var annotation = data[1];
-            this.setState({gdm: data[0], annotation: annotation, currOmimId: data[0].omimId});
-            return this.getRestData(annotation.article);
-        }).then(article => {
-            return this.setState({article: article});
-        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
-    },
+    // Load objects from query string into the state variables. Must have already parsed the query string
+    // and set the queryValues property of this React class.
+    loadData: function() {
+        var gdmUuid = this.queryValues.gdmUuid;
+        var groupUuid = this.queryValues.groupUuid;
+        var familyUuid = this.queryValues.familyUuid;
+        var annotationUuid = this.queryValues.annotationUuid;
 
-    // If a group UUID is given in the query string, load it into the group state variable.
-    loadFamily: function(familyUuid) {
-        this.getRestData(
-            '/families/' + familyUuid
-        ).then(family => {
-            // See if the loaded group's genotyping methods are being used.
-            var genotypingMethodUsed = !!(family.method && family.method.genotypingMethods && family.method.genotypingMethods.length);
+        // Make an array of URIs to query the database. Don't include any that didn't include a query string.
+        var uris = _.compact([
+            gdmUuid ? '/gdm/' + gdmUuid : '',
+            groupUuid ? '/groups/' + groupUuid : '',
+            familyUuid ? '/families/' + familyUuid: '',
+            annotationUuid ? '/evidence/' + annotationUuid : ''
+        ]);
 
-            // Received group data; set the current state with it
-            this.setState({family: family, genotyping2Disabled: !genotypingMethodUsed});
+        // With all given query string variables, get the corresponding objects from the DB.
+        this.getRestDatas(
+            uris
+        ).then(datas => {
+            // See what we got back so we can build an object to copy in this React object's state to rerender the page.
+            var stateObj = {};
+            datas.forEach(function(data) {
+                switch(data['@type'][0]) {
+                    case 'gdm':
+                        stateObj.gdm = data;
+                        break;
+
+                    case 'group':
+                        stateObj.group = data;
+                        break;
+
+                    case 'family':
+                        stateObj.family = data;
+                        break;
+
+                    case 'annotation':
+                        stateObj.annotation = data;
+                        break;
+
+                    default:
+                        break;
+                }
+            });
+            this.setState(stateObj);
+
+            // Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
+            if (stateObj.gdm && stateObj.gdm.omimId) {
+                this.setOmimIdState(stateObj.gdm.omimId);
+            }
             return Promise.resolve();
         }).catch(function(e) {
-            console.log('FAMILY LOAD ERROR=: %o', e);
-            parseAndLogError.bind(undefined, 'getRequest');
-        });
-    },
-
-    // If a group UUID is given in the query string, load it into the group state variable.
-    loadGroup: function(groupUuid) {
-        this.getRestData(
-            '/group/' + groupUuid + '?frame=object'
-        ).then(group => {
-            this.instance.group = group;
-            return Promise.resolve();
-        }).catch(function(e) {
-            console.log('GROUP LOAD ERROR=: %o', e);
-            parseAndLogError.bind(undefined, 'getRequest');
+            console.log('OBJECT LOAD ERROR: %s — %s', e.statusText, e.url);
         });
     },
 
@@ -710,31 +721,16 @@ var FamilyCuration = React.createClass({
         this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
     },
 
-    // After the Family Curation page component mounts, grab the GDM and annotation UUIDs from the query
-    // string and retrieve the corresponding annotation from the DB, if they exist.
-    // Note, we have to do this after the component mounts because AJAX DB queries can't be
-    // done from unmounted components.
+    // After the Family Curation page component mounts, grab the GDM, group, family, and annotation UUIDs (as many as given)
+    // from the query string and retrieve the corresponding objects from the DB, if they exist. Note, we have to do this after
+    // the component mounts because AJAX DB queries can't be done from unmounted components.
     componentDidMount: function() {
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
-        this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
-
-        if (this.queryValues.annotationUuid && this.queryValues.gdmUuid) {
-            // Query the DB with this UUID, setting the component state if successful.
-            this.getGdmAnnotation(this.queryValues.gdmUuid, this.queryValues.annotationUuid);
-        }
-
-        // If a family's UUID was given in the query string, retrieve the family data for editing.
-        if (this.queryValues.familyUuid) {
-            this.loadFamily(this.queryValues.familyUuid);
-        }
-
-        // If a group's UUID was given in the query string, retrieve the group data for updating.
-        if (this.queryValues.groupUuid) {
-            this.loadGroup(this.queryValues.groupUuid);
-        }
+        this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
+        this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
+        this.loadData();
     },
 
     render: function() {
@@ -746,9 +742,11 @@ var FamilyCuration = React.createClass({
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                 <div className="container">
-                    <div className="curation-pmid-summary">
-                        <PmidSummary article={this.state.article} displayJournal />
-                    </div>
+                    {Object.keys(this.state.annotation).length ?
+                        <div className="curation-pmid-summary">
+                            <PmidSummary article={this.state.annotation.article} displayJournal />
+                        </div>
+                    : null}
                     <h1>Curate Family Information</h1>
                     <div className="row group-curation-content">
                         <div className="col-sm-12">
