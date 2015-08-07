@@ -126,27 +126,6 @@ var FamilyCuration = React.createClass({
         });
     },
 
-    // After the Group Curation page component mounts, grab the GDM and annotation UUIDs from the query
-    // string and retrieve the corresponding annotation from the DB, if they exist.
-    // Note, we have to do this after the component mounts because AJAX DB queries can't be
-    // done from unmounted components.
-    componentDidMount: function() {
-        if (this.queryValues.annotationUuid && this.queryValues.gdmUuid) {
-            // Query the DB with this UUID, setting the component state if successful.
-            this.getGdmAnnotation(this.queryValues.gdmUuid, this.queryValues.annotationUuid);
-        }
-
-        // If a family's UUID was given in the query string, retrieve the family data for editing.
-        if (this.queryValues.familyUuid) {
-            this.loadFamily(this.queryValues.familyUuid);
-        }
-
-        // If a group's UUID was given in the query string, retrieve the group data for updating.
-        if (this.queryValues.groupUuid) {
-            this.loadGroup(this.queryValues.groupUuid);
-        }
-    },
-
     // Called when user changes the number of copies of family
     extraFamilyCountChanged: function(e) {
         this.setState({extraFamilyCount: e.target.value});
@@ -731,78 +710,95 @@ var FamilyCuration = React.createClass({
         this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
     },
 
-    render: function() {
-        var annotation = this.state.annotation;
-        var gdm = this.state.gdm;
-        var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
-
+    // After the Family Curation page component mounts, grab the GDM and annotation UUIDs from the query
+    // string and retrieve the corresponding annotation from the DB, if they exist.
+    // Note, we have to do this after the component mounts because AJAX DB queries can't be
+    // done from unmounted components.
+    componentDidMount: function() {
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
 
+        if (this.queryValues.annotationUuid && this.queryValues.gdmUuid) {
+            // Query the DB with this UUID, setting the component state if successful.
+            this.getGdmAnnotation(this.queryValues.gdmUuid, this.queryValues.annotationUuid);
+        }
+
+        // If a family's UUID was given in the query string, retrieve the family data for editing.
+        if (this.queryValues.familyUuid) {
+            this.loadFamily(this.queryValues.familyUuid);
+        }
+
+        // If a group's UUID was given in the query string, retrieve the group data for updating.
+        if (this.queryValues.groupUuid) {
+            this.loadGroup(this.queryValues.groupUuid);
+        }
+    },
+
+    render: function() {
+        var annotation = this.state.annotation;
+        var gdm = this.state.gdm;
+        var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
+
         return (
             <div>
-                {(!this.queryValues.familyUuid || Object.keys(this.state.family).length > 0) ?
-                    <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
-                        <div className="container">
-                            <div className="curation-pmid-summary">
-                                <PmidSummary article={this.state.article} displayJournal />
-                            </div>
-                            <h1>Curate Family Information</h1>
-                            <div className="row group-curation-content">
-                                <div className="col-sm-12">
-                                    <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                        <Panel>
-                                            {FamilyName.call(this)}
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                <div className="container">
+                    <div className="curation-pmid-summary">
+                        <PmidSummary article={this.state.article} displayJournal />
+                    </div>
+                    <h1>Curate Family Information</h1>
+                    <div className="row group-curation-content">
+                        <div className="col-sm-12">
+                            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                <Panel>
+                                    {FamilyName.call(this)}
+                                </Panel>
+                                <PanelGroup accordion>
+                                    <Panel title="Family – Common Disease & Phenotypes" open>
+                                        {FamilyCommonDiseases.call(this)}
+                                    </Panel>
+                                </PanelGroup>
+                                <PanelGroup accordion>
+                                    <Panel title="Family — Demographics" open>
+                                        {FamilyDemographics.call(this)}
+                                    </Panel>
+                                </PanelGroup>
+                                <PanelGroup accordion>
+                                    <Panel title="Family — Methods" open>
+                                        {FamilyMethods.call(this)}
+                                    </Panel>
+                                </PanelGroup>
+                                <PanelGroup accordion>
+                                    <Panel title="Family — Segregation" open>
+                                        {FamilySegregation.call(this)}
+                                    </Panel>
+                                </PanelGroup>
+                                <PanelGroup accordion>
+                                    <Panel title="Family — Variant(s) associated with Proband" open>
+                                        {FamilyVariant.call(this)}
+                                    </Panel>
+                                </PanelGroup>
+                                <PanelGroup accordion>
+                                    <Panel title="Family Additional Information" open>
+                                        {FamilyAdditional.call(this)}
+                                    </Panel>
+                                </PanelGroup>
+                                {(!this.state.family || Object.keys(this.state.family).length === 0) ?
+                                    <PanelGroup accordion>
+                                        <Panel title="Family – Number with identical information" open>
+                                            {FamilyCount.call(this)}
                                         </Panel>
-                                        <PanelGroup accordion>
-                                            <Panel title="Family – Common Disease & Phenotypes" open>
-                                                {FamilyCommonDiseases.call(this)}
-                                            </Panel>
-                                        </PanelGroup>
-                                        <PanelGroup accordion>
-                                            <Panel title="Family — Demographics" open>
-                                                {FamilyDemographics.call(this)}
-                                            </Panel>
-                                        </PanelGroup>
-                                        <PanelGroup accordion>
-                                            <Panel title="Family — Methods" open>
-                                                {FamilyMethods.call(this)}
-                                            </Panel>
-                                        </PanelGroup>
-                                        <PanelGroup accordion>
-                                            <Panel title="Family — Segregation" open>
-                                                {FamilySegregation.call(this)}
-                                            </Panel>
-                                        </PanelGroup>
-                                        <PanelGroup accordion>
-                                            <Panel title="Family — Variant(s) associated with Proband" open>
-                                                {FamilyVariant.call(this)}
-                                            </Panel>
-                                        </PanelGroup>
-                                        <PanelGroup accordion>
-                                            <Panel title="Family Additional Information" open>
-                                                {FamilyAdditional.call(this)}
-                                            </Panel>
-                                        </PanelGroup>
-                                        {(!this.state.family || Object.keys(this.state.family).length === 0) ?
-                                            <PanelGroup accordion>
-                                                <Panel title="Family – Number with identical information" open>
-                                                    {FamilyCount.call(this)}
-                                                </Panel>
-                                            </PanelGroup>
-                                        : null}
-                                        <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
-                                        <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
-                                    </Form>
-                                </div>
-                            </div>
+                                    </PanelGroup>
+                                : null}
+                                <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                            </Form>
                         </div>
                     </div>
-                : null}
+                </div>
             </div>
         );
     }
