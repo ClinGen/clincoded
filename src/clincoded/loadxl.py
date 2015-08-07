@@ -25,7 +25,7 @@ ORDER = [
     'assessment',
     'method',
     'individual',
-    'segregation',
+    #'segregation',
     'family',
     #'statistic',
     #'controlGroup',

@@ -172,6 +172,12 @@
                 "linkTo": "variant"
             }
         },
+        "proband": {
+            "title": "Proband",
+            "description": "Whether or not associated with a proband variant to a family",
+            "type": "boolean",
+            "default": false
+        },
         "dateTime": {
             "title": "Date and Time",
             "description": "Time stamp of the individual creation",
@@ -199,6 +205,10 @@
         "variants": {
             "title": "Variants Associated",
             "type": "string"
+        },
+        "proband": {
+            "title": "Proband",
+            "type": "boolean"
         }
     }
 }
