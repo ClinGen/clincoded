@@ -92,9 +92,9 @@ var FamilyCuration = React.createClass({
         // Make an array of URIs to query the database. Don't include any that didn't include a query string.
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '',
-            groupUuid ? '/groups/' + groupUuid : '',
+            groupUuid ? '/groups/' + groupUuid + '?frame=object' : '',
             familyUuid ? '/families/' + familyUuid: '',
-            annotationUuid ? '/evidence/' + annotationUuid : ''
+            annotationUuid ? '/evidence/' + annotationUuid + '?frame=object' : ''
         ]);
 
         // With all given query string variables, get the corresponding objects from the DB.
@@ -489,9 +489,9 @@ var FamilyCuration = React.createClass({
                     }
                 }).then(data => {
                     // If we're adding this family to a group, update the group with this family
-                    if (this.instance.group) {
+                    if (Object.keys(this.state.group)) {
                         // Add the newly saved families to the group
-                        var group = this.instance.group;
+                        var group = _.clone(this.state.group);
                         if (!group.familyIncluded) {
                             group.familyIncluded = [];
                         }
@@ -972,7 +972,7 @@ var FamilyDemographics = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family.countryOfOrigin}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 {country_codes.map(function(country_code) {
                     return <option key={country_code.code}>{country_code.name}</option>;
@@ -980,14 +980,14 @@ var FamilyDemographics = function() {
             </Input>
             <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family.ethnicity}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Hispanic or Latino</option>
                 <option>Not Hispanic or Latino</option>
             </Input>
             <Input type="select" ref="race" label="Race:" defaultValue="none" value={family.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>American Indian or Alaska Native</option>
                 <option>Asian</option>
@@ -1001,7 +1001,7 @@ var FamilyDemographics = function() {
             <div className="demographics-age-range">
                 <Input type="select" ref="agerangetype" label="Type:" defaultValue="none" value={family.ageRangeType}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="none" disabled="disabled">Select</option>
+                    <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>Onset</option>
                     <option>Report</option>
@@ -1017,7 +1017,7 @@ var FamilyDemographics = function() {
                 </Input>
                 <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={family.ageRangeUnit}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="none" disabled="disabled">Select</option>
+                    <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>Days</option>
                     <option>Weeks</option>
@@ -1040,7 +1040,7 @@ var FamilyMethods = function() {
         <div className="row">
             <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={method.previousTesting}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
@@ -1049,7 +1049,7 @@ var FamilyMethods = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={method.genomeWideStudy}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
@@ -1057,7 +1057,7 @@ var FamilyMethods = function() {
             <h4 className="col-sm-7 col-sm-offset-5">Genotyping Method</h4>
             <Input type="select" ref="genotypingmethod1" label="Method 1:" handleChange={this.handleChange} defaultValue="none" value={method.genotypingMethods && method.genotypingMethods[0] ? method.genotypingMethods[0] : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Exome sequencing</option>
                 <option>Genotyping</option>
@@ -1068,7 +1068,7 @@ var FamilyMethods = function() {
             </Input>
             <Input type="select" ref="genotypingmethod2" label="Method 2:" defaultValue="none" value={method.genotypingMethods && method.genotypingMethods[1] ? method.genotypingMethods[1] : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.genotyping2Disabled}>
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Exome sequencing</option>
                 <option>Genotyping</option>
@@ -1079,21 +1079,21 @@ var FamilyMethods = function() {
             </Input>
             <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={method.entireGeneSequenced}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
             <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={method.copyNumberAssessed}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
             <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={method.specificMutationsGenotyped}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
@@ -1125,7 +1125,7 @@ var FamilySegregation = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="consanguineous" label="Consanguineous family?:" defaultValue="none" value={segregation.consanguineousFamily}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
@@ -1135,14 +1135,14 @@ var FamilySegregation = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="denovo" label="de novo type:" defaultValue="none" value={segregation.deNovoType}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Inferred</option>
                 <option>Confirmed</option>
             </Input>
             <Input type="select" ref="unaffectedcarriers" label="Are parents unaffected carriers?" defaultValue="none" value={segregation.numberOfParentsUnaffectedCarriers}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>0</option>
                 <option>1</option>
@@ -1165,7 +1165,7 @@ var FamilySegregation = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="bothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={segregation.probandAssociatedWithBoth}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
