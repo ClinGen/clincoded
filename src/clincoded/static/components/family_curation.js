@@ -51,6 +51,7 @@ var FamilyCuration = React.createClass({
             group: {}, // Group object given in query string
             family: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
             annotation: {}, // Annotation object given in query string
+            article: {}, // Article from annotation; need to load because annotation is flattened
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 1, // Number of variants to display
@@ -131,6 +132,19 @@ var FamilyCuration = React.createClass({
             if (stateObj.gdm && stateObj.gdm.omimId) {
                 this.setOmimIdState(stateObj.gdm.omimId);
             }
+
+            // If we have an annotation, load its article separately because we asked for a flattened annotation
+            // (the article is just its string @id).
+            if (Object.keys(stateObj.annotation).length) {
+                return this.getRestData(
+                    stateObj.annotation.article
+                ).then(article => {
+                    this.setState({article: article});
+                    return Promise.resolve(article);
+                });
+            }
+
+            // No annotation; just resolve with an empty promise.
             return Promise.resolve();
         }).catch(function(e) {
             console.log('OBJECT LOAD ERROR: %s — %s', e.statusText, e.url);
@@ -489,7 +503,7 @@ var FamilyCuration = React.createClass({
                     }
                 }).then(data => {
                     // If we're adding this family to a group, update the group with this family
-                    if (Object.keys(this.state.group)) {
+                    if (Object.keys(this.state.group).length) {
                         // Add the newly saved families to the group
                         var group = _.clone(this.state.group);
                         if (!group.familyIncluded) {
@@ -504,7 +518,7 @@ var FamilyCuration = React.createClass({
                         delete group['@type'];
 
                         // Post the modified annotation to the DB, then go back to Curation Central
-                        return this.putRestData('/group/' + groupUuid, group);
+                        return this.putRestData('/groups/' + groupUuid, group);
                     }
 
                     // Not updating a group; just move on
@@ -742,9 +756,9 @@ var FamilyCuration = React.createClass({
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                 <div className="container">
-                    {Object.keys(this.state.annotation).length ?
+                    {Object.keys(this.state.article).length ?
                         <div className="curation-pmid-summary">
-                            <PmidSummary article={this.state.annotation.article} displayJournal />
+                            <PmidSummary article={this.state.article} displayJournal />
                         </div>
                     : null}
                     <h1>Curate Family Information</h1>
