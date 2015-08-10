@@ -77,14 +77,14 @@
         "numberOfMale": {
             "title": "Number of Male",
             "description": "Count of Male in the group",
-            "type": "string",
-            "default": ""
+            "type": "integer",
+            "minimum": 0
         },
         "numberOfFemale": {
             "title": "Number of Female",
             "description": "Count of female in the group",
-            "type": "string",
-            "default": ""
+            "type": "integer",
+            "minimum": 0
         },
         "countryOfOrigin": {
             "title": "Country Of Origin",
@@ -136,14 +136,16 @@
         "ageRangeFrom": {
             "title": "Age Range From",
             "description": "Yongest age in the group",
-            "type": "string",
-            "default": ""
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 150
         },
         "ageRangeTo": {
             "title": "Age Range To",
             "description": "Oldest age in the group",
-            "type": "string",
-            "default": ""
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 150
         },
         "ageRangeUnit": {
             "title": "Age Range Unit",
@@ -161,33 +163,38 @@
         "totalNumberIndividuals":{
             "title": "Total Number Individuals in Group",
             "description": "Total Number Individuals in Group",
-            "type": "string"
+            "type": "integer",
+            "minimum": 1
         },
         "numberOfIndividualsWithFamilyInformation": {
             "title": "# Individuals with Family Information",
             "description": "# Individuals with Family Information",
-            "type": "string"
+            "type": "integer",
+            "minimum": 0
         },
         "numberOfIndividualsWithoutFamilyInformation": {
             "title": "# Individuals without Family Informnation",
             "description": "# Individuals without Family Information",
-            "type": "string"
+            "type": "integer",
+            "minimum": 0
         },
         "numberOfIndividualsWithVariantInCuratedGene": {
             "title": "# Individuals with Variant in gene being curated",
             "description": "# Individuals with Variant in gene being curated",
-            "type": "string"
+            "type": "integer",
+            "minimum": 0
         },
         "numberOfIndividualsWithoutVariantInCuratedGene": {
             "title": "# Individuals without Variant in gene being curated",
             "description": "# Individuals without Variant in gene being curated",
-            "type": "string"
+            "type": "integer",
+            "minimum": 0
         },
         "numberOfIndividualsWithVariantInOtherGene": {
             "title": "# Individuals with Variant in Other Gene",
             "description": "# Individuals with Variant in other gene",
-            "type": "string",
-            "default": ""
+            "type": "integer",
+            "minimum": 0
         },
         "otherGenes": {
             "title": "Other Gene(s)",
@@ -265,6 +272,7 @@
             "title": "Time Stamp",
             "description": "Time stamp of the group creation",
             "type": "string",
+            "format": "date-time",
             "default": ""
         }
     },
@@ -279,7 +287,7 @@
         },
         "totalNumberIndividuals": {
             "title": "Total Number Individuals",
-            "type": "string"
+            "type": "integer"
         },
         "familyIncluded": {
             "title": "Family Included",

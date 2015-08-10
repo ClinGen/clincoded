@@ -6,7 +6,7 @@
         "modeInheritance": "Autosomal dominant inheritance (HP:0000006)",
         "omimId": "609054",
         "owner": "tsneddon@stanford.edu",
-        "dateTime": "2015-02-27T08:35:18-08:00",
+        "dateTime": "2015-02-27T08:35:18.000000+00:00",
         "active": true
     },
     {
@@ -16,7 +16,7 @@
         "modeInheritance": "Autosomal dominant inheritance with maternal imprinting (HP:0012275)",
         "omimId": "601200",
         "owner": "selinad@stanford.edu",
-        "dateTime": "2015-03-19T16:52:38-07:00",
+        "dateTime": "2015-03-19T16:52:38.000000+00:00",
         "active": true
     },
     {
@@ -26,7 +26,7 @@
         "modeInheritance": "Autosomal recessive inheritance (HP:0000007)",
         "omimId": "100800",
         "owner": "tsneddon@stanford.edu",
-        "dateTime": "2015-03-20T10:02:09-07:00",
+        "dateTime": "2015-03-20T10:02:09.000000+00:00",
         "annotations": [
             "bb3432ca-1788-11e5-aefb-60f81dc5b05a",
             "5cd72a73-189e-11e5-9db5-60f81dc5b05a"
@@ -57,7 +57,7 @@
         "modeInheritance": "Autosomal unknown",
         "omimId": "613795",
         "owner": "kgliu@stanford.edu",
-        "dateTime": "2015-03-13T17:23:22-07:00",
+        "dateTime": "2015-03-13T17:23:22.000000+00:00",
         "active": true
     },
     {
@@ -67,7 +67,7 @@
         "modeInheritance": "Autosomal dominant inheritance with paternal imprinting (HP:0012274)",
         "omimId": "300046",
         "owner": "tsneddon@stanford.edu",
-        "dateTime": "2015-02-25T14:55:54-08:00",
+        "dateTime": "2015-02-25T14:55:54.000000+00:00",
         "active": true
     },
     {
@@ -77,7 +77,7 @@
         "modeInheritance": "Codominant",
         "omimId": "",
         "owner": "tsneddon@stanford.edu",
-        "dateTime": "2015-05-04T08:11:18-07:00",
+        "dateTime": "2015-05-04T08:11:18.000000+00:00",
         "active": true
     },
     {
@@ -87,7 +87,7 @@
         "modeInheritance": "Other",
         "omimId": "609054",
         "owner": "tsneddon@stanford.edu",
-        "dateTime": "2015-03-19T15:25:49-07:00",
+        "dateTime": "2015-03-19T15:25:49.000000+00:00",
         "active": true
     }
 ]

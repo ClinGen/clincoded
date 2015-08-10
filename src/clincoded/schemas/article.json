@@ -20,8 +20,20 @@
             "title": "PMID",
             "description": "Unique PubMed article id",
             "type": "string",
-            "pattern": "^[0-9]{1,8}$",
+            "pattern": "^[1-9][0-9]*$",
             "uniqueKey": true
+        },
+        "doi": {
+            "title": "Digital Object Identifier",
+            "description": "DOI of PubMed article",
+            "type": "string",
+            "default": ""
+        },
+        "pmcid": {
+            "title": "PubMed Central ID",
+            "description": "PubMed Central reference number of PubMed article",
+            "type": "string",
+            "default": ""
         },
         "title": {
             "title": "Title",
@@ -52,6 +64,12 @@
             "descripton": "Abstract of article",
             "type": "string",
             "default": ""
+        },
+        "dateTime": {
+            "title": "Date Time",
+            "description": "Time stamp for the first use of the article",
+            "type": "string",
+            "format": "date-time"
         }
     },
     "columns": {

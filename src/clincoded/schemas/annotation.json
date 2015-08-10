@@ -30,7 +30,8 @@
         "dateTime": {
             "title": "Date",
             "description": "Date and time to create the evidence",
-            "type": "string"
+            "type": "string",
+            "format": "date-time"
         },
         "groups": {
             "title": "Group",
