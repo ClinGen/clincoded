@@ -2,6 +2,7 @@
 var React = require('react');
 var _ = require('underscore');
 var url = require('url');
+var moment = require('moment');
 var globals = require('./globals');
 var curator = require('./curator');
 var modal = require('../libs/bootstrap/modal');
@@ -219,7 +220,7 @@ var PmidSelectionList = React.createClass({
                         })}
                     </div>
                 : null}
-                {annotations.length == 0 ?
+                {annotations.length ?
                     <div>
                         <i>Add papers to this Gene-Disease Record using the <strong>Add New PMID(s)</strong> button; click on any added paper to view its abstract and begin curating evidence from that paper.</i>
                     </div>
@@ -275,6 +276,7 @@ var AddPmidModal = React.createClass({
                 // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
                     var newArticle = parsePubmed(xml, enteredPmid);
+                    newArticle.dateTime = moment().format();
                     return this.postRestData('/articles/', newArticle).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });

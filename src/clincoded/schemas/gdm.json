@@ -65,7 +65,8 @@
         "dateTime": {
             "title": "Date and Time",
             "description": "Date and time stemp",
-            "type": "string"
+            "type": "string",
+            "format": "date-time"
         },
         "annotations": {
             "title": "Annotations",

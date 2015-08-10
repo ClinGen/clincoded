@@ -19,13 +19,7 @@
         "previousTesting": {
             "title": "Previous Testing",
             "description": "Previous testing",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "previousTestingDescription": {
             "title": "Previous Testing",
@@ -36,13 +30,7 @@
         "genomeWideStudy": {
             "title": "Genome-Wide Study",
             "description": "Genome-wide study",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "genotypingMethods": {
             "title": "Genotyping Method(s)",
@@ -66,35 +54,17 @@
         "entireGeneSequenced": {
             "title": "Entire Gene Sequenced",
             "description": "Entire gene sequenced",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "copyNumberAssessed": {
             "title": "Copy Number Assessed",
             "description": "Copy number assessed",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "specificMutationsGenotyped": {
             "title": "Copy Number Assessed",
             "description": "Copy number assessed",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "specificMutationsGenotypedMethod": {
             "title": "Specific Mutations Genotyped Method",
@@ -107,6 +77,13 @@
             "description": "Additional information",
             "type": "string",
             "default": ""
+        },
+        "dateTime": {
+            "title": "Date Time",
+            "description": "Time stamp for creation",
+            "type": "string",
+            "format": "date-time",
+            "default": ""
         }
     },
     "columns": {
@@ -114,20 +91,12 @@
             "title": "Method",
             "type": "string"
         },
-        "previousTesting": {
+        "previousTestingDescription": {
             "title": "Previous Test",
             "type": "string"
         },
-        "genomeWideStudy": {
-            "title": "Genome Wide Study",
-            "type": "string"
-        },
-        "entireGeneSequenced": {
-            "title": "Entire Gene Sequenced",
-            "type": "string"
-        },
-        "specificMutationsGenotyped": {
-            "title": "Specific Mutation",
+        "genotypingMethods": {
+            "title": "Genome Method",
             "type": "string"
         }
     }
