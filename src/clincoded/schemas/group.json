@@ -210,6 +210,7 @@
         },
         "method": {
             "title": "Method",
+            "description": "Group method",
             "type": "object",
             "default": {},
             "properties": {

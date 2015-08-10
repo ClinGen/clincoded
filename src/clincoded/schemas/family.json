@@ -152,6 +152,7 @@
         },
         "method": {
             "title": "Method",
+            "description": "Family method",
             "type": "object",
             "default": {},
             "properties": {

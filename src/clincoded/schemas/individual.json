@@ -119,6 +119,7 @@
         },
         "ageValue": {
             "title": "Age Value",
+            "description": "Individual method",
             "description": "Age value",
             "type": "integer",
             "minimum": 0,
