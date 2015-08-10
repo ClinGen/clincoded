@@ -427,3 +427,9 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
         );
     }
 });
+
+
+// Convert a boolean value to a dropdown value
+var booleanToDropdown = module.exports.booleanToDropdown = function booleanToDropdown(boolVal) {
+    return boolVal === true ? 'Yes' : (boolVal === false ? 'No' : 'none');
+};

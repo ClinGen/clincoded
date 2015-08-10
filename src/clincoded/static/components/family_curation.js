@@ -21,6 +21,7 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 var PmidDoiButtons = curator.PmidDoiButtons;
+var booleanToDropdown = curator.booleanToDropdown;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 
@@ -64,7 +65,7 @@ var FamilyCuration = React.createClass({
     handleChange: function(ref, e) {
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
             // Disable the Genotyping Method 2 if Genotyping Method 1 has no value
-            this.setState({genotyping2Disabled: false});
+            this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -133,6 +134,9 @@ var FamilyCuration = React.createClass({
                 this.setOmimIdState(stateObj.gdm.omimId);
             }
 
+            var genotypingMethodUsed = !!(stateObj.family.method && stateObj.family.method.genotypingMethods && stateObj.family.method.genotypingMethods.length);
+            this.setState({genotyping2Disabled: !genotypingMethodUsed});
+
             // If we have an annotation, load its article separately because we asked for a flattened annotation
             // (the article is just its string @id).
             if (Object.keys(stateObj.annotation).length) {
@@ -152,7 +156,7 @@ var FamilyCuration = React.createClass({
     },
 
     // Called when user changes the number of copies of family
-    extraFamilyCountChanged: function(e) {
+    extraFamilyCountChanged: function(ref, e) {
         this.setState({extraFamilyCount: e.target.value});
     },
 
@@ -182,27 +186,6 @@ var FamilyCuration = React.createClass({
 
         // Wrote (POST/PUT) method to the DB. Now work on the segregation
         return methodPromise.then(newMethod => {
-            // Make a new segregation object and save it to the DB
-            var newSegregation = this.createSegregation();
-            if (newSegregation) {
-                var family = this.state.family;
-                if (family && family.segregation && Object.keys(family.segregation).length) {
-                    // We're editing a family and it had an existing method. Just PUT an update to the method.
-                    return this.putRestData('/segregations/' + family.segregation.uuid, newSegregation).then(data => {
-                        return Promise.resolve({method: newMethod, segregation: data['@graph'][0]});
-                    });
-                } else {
-                    // We're either creating a family, or editing an existing family that didn't have a segregation
-                    // Post the new segregation to the DB. When the promise returns with the new segregation
-                    // object, pass it to the next promise-processing code.
-                    return this.postRestData('/segregations/', newSegregation).then(data => {
-                        return Promise.resolve({method: newMethod, segregation: data['@graph'][0]});
-                    });
-                }
-            } else {
-                return Promise.resolve({method: newMethod, segregation: null});
-            }
-        }).then(methSeg => {
             // All family subobjects written. Now write the family object itself. We may be writing more than one in
             // parallel, so clone the set-up family object before modifying it for this particular object
             var writerFamily = _.clone(newFamily);
@@ -214,11 +197,8 @@ var FamilyCuration = React.createClass({
             // If a method and/or segregation object was created (at least one method/segregation field set), assign it to the family.
             // If writing multiple family objects, reuse the one we made, but assign new methods and segregations because each family
             // needs unique objects here.
-            if (methSeg.method) {
-                writerFamily.method = methSeg.method['@id'];
-            }
-            if (methSeg.segregation) {
-                writerFamily.segregation = methSeg.segregation['@id'];
+            if (newMethod) {
+                writerFamily.method = newMethod['@id'];
             }
 
             // Either update or create the family object in the DB
@@ -543,7 +523,7 @@ var FamilyCuration = React.createClass({
         // Put together a new 'method' object
         value1 = this.getFormValue('prevtesting');
         if (value1 !== 'none') {
-            newMethod.previousTesting = value1;
+            newMethod.previousTesting = value1 === 'Yes';
         }
         value1 = this.getFormValue('prevtestingdesc');
         if (value1) {
@@ -551,7 +531,7 @@ var FamilyCuration = React.createClass({
         }
         value1 = this.getFormValue('genomewide');
         if (value1 !== 'none') {
-            newMethod.genomeWideStudy = value1;
+            newMethod.genomeWideStudy = value1 === 'Yes';
         }
         value1 = this.getFormValue('genotypingmethod1');
         value2 = this.getFormValue('genotypingmethod2');
@@ -562,15 +542,15 @@ var FamilyCuration = React.createClass({
         }
         value1 = this.getFormValue('entiregene');
         if (value1 !== 'none') {
-            newMethod.entireGeneSequenced = value1;
+            newMethod.entireGeneSequenced = value1 === 'Yes';
         }
         value1 = this.getFormValue('copyassessed');
         if (value1 !== 'none') {
-            newMethod.copyNumberAssessed = value1;
+            newMethod.copyNumberAssessed = value1 === 'Yes';
         }
         value1 = this.getFormValue('mutationsgenotyped');
         if (value1 !== 'none') {
-            newMethod.specificMutationsGenotyped = value1;
+            newMethod.specificMutationsGenotyped = value1 === 'Yes';
         }
         value1 = this.getFormValue('specificmutation');
         if (value1) {
@@ -585,7 +565,7 @@ var FamilyCuration = React.createClass({
     },
 
     // Create segregation object based on the form values
-    createSegregation: function() {
+    createSegregation: function(newFamily, variants) {
         var newSegregation = {};
         var value1;
 
@@ -596,19 +576,19 @@ var FamilyCuration = React.createClass({
         }
         value1 = this.getFormValue('pedigreesize');
         if (value1) {
-            newSegregation.pedigreeSize = value1;
+            newSegregation.pedigreeSize = parseInt(value1, 10);
         }
         value1 = this.getFormValue('nogenerationsinpedigree');
         if (value1) {
-            newSegregation.numberOfGenerationInPedigree = value1;
+            newSegregation.numberOfGenerationInPedigree = parseInt(value1, 10);
         }
         value1 = this.getFormValue('consanguineous');
         if (value1 !== 'none') {
-            newSegregation.consanguineousFamily = value1;
+            newSegregation.consanguineousFamily = value1 === 'Yes';
         }
         value1 = this.getFormValue('nocases');
         if (value1) {
-            newSegregation.numberOfCases = value1;
+            newSegregation.numberOfCases = parseInt(value1, 10);
         }
         value1 = this.getFormValue('denovo');
         if (value1 !== 'none') {
@@ -616,43 +596,44 @@ var FamilyCuration = React.createClass({
         }
         value1 = this.getFormValue('unaffectedcarriers');
         if (value1 !== 'none') {
-            newSegregation.numberOfParentsUnaffectedCarriers = value1;
+            newSegregation.numberOfParentsUnaffectedCarriers = parseInt(value1, 10);
         }
         value1 = this.getFormValue('noaffected');
         if (value1) {
-            newSegregation.numberOfAffectedAlleles = value1;
+            newSegregation.numberOfAffectedAlleles = parseInt(value1, 10);
         }
         value1 = this.getFormValue('noaffected1');
         if (value1) {
-            newSegregation.numberOfAffectedWithOneVariant = value1;
+            newSegregation.numberOfAffectedWithOneVariant = parseInt(value1, 10);
         }
         value1 = this.getFormValue('noaffected2');
         if (value1) {
-            newSegregation.numberOfAffectedWithTwoVariants = value1;
+            newSegregation.numberOfAffectedWithTwoVariants = parseInt(value1, 10);
         }
         value1 = this.getFormValue('nounaffectedcarriers');
         if (value1) {
-            newSegregation.numberOfUnaffectedCarriers = value1;
+            newSegregation.numberOfUnaffectedCarriers = parseInt(value1, 10);
         }
         value1 = this.getFormValue('nounaffectedindividuals');
         if (value1) {
-            newSegregation.numberOfUnaffectedIndividuals = value1;
+            newSegregation.numberOfUnaffectedIndividuals = parseInt(value1, 10);
         }
         value1 = this.getFormValue('bothvariants');
         if (value1 !== 'none') {
-            newSegregation.probandAssociatedWithBoth = value1;
+            newSegregation.probandAssociatedWithBoth = value1 === 'Yes';
         }
         value1 = this.getFormValue('addedsegregationinfo');
         if (value1) {
             newSegregation.additionalInformation = value1;
         }
+        if (variants && variants.length) {
+            newSegregation.variants = variants;
+        }
 
         if (Object.keys(newSegregation).length) {
             newSegregation.dateTime = moment().format();
-            newSegregation.owner = this.props.session['auth.userid'];
-            return newSegregation;
+            newFamily.segregation = newSegregation;
         }
-        return null;
     },
 
     // Create a family object to be written to the database. Most values come from the values
@@ -693,10 +674,10 @@ var FamilyCuration = React.createClass({
 
         // Fill in the group fields from the Family Demographics panel
         var value = this.getFormValue('malecount');
-        if (value) { newFamily.numberOfMale = value + ''; }
+        if (value) { newFamily.numberOfMale = parseInt(value, 10); }
 
         value = this.getFormValue('femalecount');
-        if (value) { newFamily.numberOfFemale = value + ''; }
+        if (value) { newFamily.numberOfFemale = parseInt(value, 10); }
 
         value = this.getFormValue('country');
         if (value !== 'none') { newFamily.countryOfOrigin = value; }
@@ -711,21 +692,19 @@ var FamilyCuration = React.createClass({
         if (value !== 'none') { newFamily.ageRangeType = value + ''; }
 
         value = this.getFormValue('agefrom');
-        if (value) { newFamily.ageRangeFrom = value + ''; }
+        if (value) { newFamily.ageRangeFrom = parseInt(value, 10); }
 
         value = this.getFormValue('ageto');
-        if (value) { newFamily.ageRangeTo = value + ''; }
+        if (value) { newFamily.ageRangeTo = parseInt(value, 10); }
 
         value = this.getFormValue('ageunit');
-        if (value !== 'none') { newFamily.ageRangeUnit = value + ''; }
+        if (value !== 'none') { newFamily.ageRangeUnit = value; }
 
         value = this.getFormValue('additionalinfofamily');
         if (value) { newFamily.additionalInformation = value; }
 
-        // Finally fill in the variants, if any
-        if (familyVariants) {
-            newFamily.variants = familyVariants;
-        }
+        // Fill in the segregation fields to the family.
+        this.createSegregation(newFamily, familyVariants);
 
         return newFamily;
     },
@@ -804,7 +783,7 @@ var FamilyCuration = React.createClass({
                                                 {FamilyAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        {(!this.state.family || Object.keys(this.state.family).length === 0) ?
+                                        {!this.queryValues.familyUuid ?
                                             <PanelGroup accordion>
                                                 <Panel title="Family – Number with identical information" open>
                                                     {FamilyCount.call(this)}
@@ -865,7 +844,7 @@ function captureHpoid(s) {
 
 // Family Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var FamilyName = function() {
+var FamilyName = function(displayNote) {
     var family = this.state.family;
 
     return (
@@ -873,7 +852,9 @@ var FamilyName = function() {
             <Input type="text" ref="familyname" label="Family Name:" value={family.label}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one family with IDENTICAL information, you can indicate this at the bottom of this form.</p>
+            {displayNote ?
+                <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one family with IDENTICAL information, you can indicate this at the bottom of this form.</p>
+            : null}
         </div>
     );
 };
@@ -1031,10 +1012,10 @@ var FamilyDemographics = function() {
                     <option>Death</option>
                 </Input>
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
-                    <Input type="text" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number"
+                    <Input type="text" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
                         error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={family.ageRangeFrom} />
                     <span className="group-age-inter">to</span>
-                    <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number"
+                    <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
                         error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={family.ageRangeTo} />
                 </Input>
                 <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={family.ageRangeUnit}
@@ -1060,7 +1041,7 @@ var FamilyMethods = function() {
 
     return (
         <div className="row">
-            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={method.previousTesting}
+            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={booleanToDropdown(method.previousTesting)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1069,7 +1050,7 @@ var FamilyMethods = function() {
             </Input>
             <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5" value={method.previousTestingDescription}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={method.genomeWideStudy}
+            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={booleanToDropdown(method.genomeWideStudy)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1099,21 +1080,21 @@ var FamilyMethods = function() {
                 <option>Sanger</option>
                 <option>Whole genome shotgun sequencing</option>
             </Input>
-            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={method.entireGeneSequenced}
+            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={booleanToDropdown(method.entireGeneSequenced)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={method.copyNumberAssessed}
+            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={booleanToDropdown(method.copyNumberAssessed)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={method.specificMutationsGenotyped}
+            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={booleanToDropdown(method.specificMutationsGenotyped)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1139,20 +1120,20 @@ var FamilySegregation = function() {
         <div className="row">
             <Input type="textarea" ref="pedigreedesc" label="Pedigree description:" rows="5" value={segregation.pedigreeDescription}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="pedigreesize" label="Pedigree size:" format="number" value={segregation.pedigreeSize}
+            <Input type="text" ref="pedigreesize" label="Pedigree size:" format="number" value={segregation.pedigreeSize} minVal={2}
                 error={this.getFormError('pedigreesize')} clearError={this.clrFormErrors.bind(null, 'pedigreesize')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="text" ref="nogenerationsinpedigree" label="# generations in pedigree:" format="number" value={segregation.numberOfGenerationInPedigree}
                 error={this.getFormError('nogenerationsinpedigree')} clearError={this.clrFormErrors.bind(null, 'nogenerationsinpedigree')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="consanguineous" label="Consanguineous family?:" defaultValue="none" value={segregation.consanguineousFamily}
+            <Input type="select" ref="consanguineous" label="Consanguineous family?:" defaultValue="none" value={booleanToDropdown(segregation.consanguineousFamily)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="text" ref="nocases" label="# cases (phenotype positive):" format="number" value={segregation.numberOfCases}
+            <Input type="text" ref="nocases" label="# cases (phenotype positive):" format="number" value={segregation.numberOfCases} minVal={1}
                 error={this.getFormError('nocases')} clearError={this.clrFormErrors.bind(null, 'nocases')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="denovo" label="de novo type:" defaultValue="none" value={segregation.deNovoType}
@@ -1185,7 +1166,7 @@ var FamilySegregation = function() {
             <Input type="text" ref="nounaffectedindividuals" label="# unaffected individuals:" format="number" value={segregation.numberOfUnaffectedIndividuals}
                 error={this.getFormError('nounaffectedindividuals')} clearError={this.clrFormErrors.bind(null, 'nounaffectedindividuals')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="bothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={segregation.probandAssociatedWithBoth}
+            <Input type="select" ref="bothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={booleanToDropdown(segregation.probandAssociatedWithBoth)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1288,7 +1269,7 @@ var FamilyViewer = React.createClass({
         var context = this.props.context;
         var method = context.method;
         var segregation = context.segregation;
-        var variants = (context.variants && context.variants.length) ? context.variants : [{}];
+        var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
 
         return (
             <div className="container">
@@ -1380,7 +1361,7 @@ var FamilyViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Previous testing</dt>
-                                <dd>{method && method.previousTesting}</dd>
+                                <dd>{method && method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
@@ -1390,7 +1371,7 @@ var FamilyViewer = React.createClass({
 
                             <div>
                                 <dt>Genome-wide study</dt>
-                                <dd>{method && method.genomeWideStudy}</dd>
+                                <dd>{method && method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
@@ -1400,17 +1381,17 @@ var FamilyViewer = React.createClass({
 
                             <div>
                                 <dt>Entire gene sequenced</dt>
-                                <dd>{method && method.entireGeneSequenced}</dd>
+                                <dd>{method && method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
                                 <dt>Copy number assessed</dt>
-                                <dd>{method && method.copyNumberAssessed}</dd>
+                                <dd>{method && method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
                                 <dt>Specific Mutations Genotyped</dt>
-                                <dd>{method && method.specificMutationsGenotyped}</dd>
+                                <dd>{method && method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
@@ -1444,7 +1425,7 @@ var FamilyViewer = React.createClass({
 
                             <div>
                                 <dt>Consanguineous family</dt>
-                                <dd>{segregation && segregation.consanguineousFamily}</dd>
+                                <dd>{segregation && segregation.consanguineousFamily === true ? 'Yes' : (segregation.consanguineousFamily === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
@@ -1489,7 +1470,7 @@ var FamilyViewer = React.createClass({
 
                             <div>
                                 <dt>If more than 1 variant, is proband associated with both</dt>
-                                <dd>{segregation && segregation.probandAssociatedWithBoth}</dd>
+                                <dd>{segregation && segregation.probandAssociatedWithBoth === true ? 'Yes' : (segregation.probandAssociatedWithBoth === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>

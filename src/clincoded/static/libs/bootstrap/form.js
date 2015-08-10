@@ -68,6 +68,9 @@ var FormMixin = module.exports.FormMixin = {
     // returned. If the Input had an entered value but it wasn't numeric, null is returned.
     // If the Input had a proper numberic value, a Javascript 'number' type is returned
     // with the entered value.
+    // If min and max are defined, we additionally check to make sure it fits within the bounds
+    // defined by the values of min and max. min defaults to 0, and max has no default but can
+    // be undefined.
     getFormValueNumber: function(ref) {
         var value = this.getFormValue(ref);
         if (value) {
@@ -142,16 +145,27 @@ var FormMixin = module.exports.FormMixin = {
     validateDefault: function() {
         var valid = true;
         Object.keys(this.refs).forEach(ref => {
-            if (this.refs[ref].props.required && !this.getFormValue(ref)) {
+            var props = this.refs[ref].props;
+            if (props.required && !this.getFormValue(ref)) {
                 // Required field has no value. Set error state to render
                 // error, and remember to return false.
                 this.setFormErrors(ref, 'Required');
                 valid = false;
-            } else if (this.refs[ref].props.format === 'number') {
+            } else if (props.format === 'number') {
                 // Validate that format="number" fields have a valid number in them
-                if (this.getFormValueNumber(ref) === null) {
+                var numVal = this.getFormValueNumber(ref);
+                if (numVal === null) {
                     this.setFormErrors(ref, 'Number only');
                     valid = false;
+                } else if (numVal !== '' && ((props.minVal && numVal < props.minVal) || (props.maxVal && numVal > props.maxVal))) {
+                    valid = false;
+                    if (props.minVal && props.maxVal) {
+                        this.setFormErrors(ref, 'The range of allowed values is ' + props.minVal + ' to ' + props.maxVal);
+                    } else if (props.minVal) {
+                        this.setFormErrors(ref, 'The minimum allowed value is ' + props.minVal);
+                    } else {
+                        this.setFormErrors(ref, 'The maximum allowed value is ' + props.maxVal);
+                    }
                 }
             }
         });
@@ -181,7 +195,9 @@ var Input = module.exports.Input = React.createClass({
         required: React.PropTypes.bool, // T to make this a required field
         clickHandler: React.PropTypes.func, // Called to handle button click
         submitHandler: React.PropTypes.func, // Called to handle submit button click
-        cancelHandler: React.PropTypes.func // Called to handle cancel button click
+        cancelHandler: React.PropTypes.func, // Called to handle cancel button click
+        minNum: React.PropTypes.number, // Minimum value for a number formatted input
+        maxNum: React.PropTypes.number // Maximum value for a number formatted input
     },
 
     getInitialState: function() {
