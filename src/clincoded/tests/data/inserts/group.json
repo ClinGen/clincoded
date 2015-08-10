@@ -16,7 +16,21 @@
             "TP53",
             "TP63"
         ],
-        "method": "197e1c8a-1912-11e5-8050-60f81dc5b05a",
+        "method": {
+            "previousTesting": true,
+            "previousTestingDescription": "No variants detected in FBN1, TGFBR1, or TGFBR2 genes",
+            "genomeWideStudy": false,
+            "genotypingMethods": [
+                "PCR",
+                "HRM"
+            ],
+            "entireGeneSequenced": false,
+            "copyNumberAssessed": false,
+            "specificMutationsGenotyped": true,
+            "specificMutationsGenotypedMethod": "Blah Blah Blah",
+            "additionalInformation": "The coding Exon 3 was PCR ampilified and sequenced",
+            "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        },
         "uuid": "eab0dd0a-1d05-11e5-8d2d-60f81dc5b05a",
         "dateTime": "2015-07-14T22:47:10.000000+00:00"
     },
@@ -33,7 +47,21 @@
         "numberOfIndividualsWithoutFamilyInformation": 21,
         "numberOfIndividualsWithVariantInCuratedGene": 13,
         "numberOfIndividualsWithoutVariantInCuratedGene": 10,
-        "method": "197e1c8a-1912-11e5-8050-60f81dc5b05a",
+        "method": {
+            "previousTesting": true,
+            "previousTestingDescription": "No variants detected in FBN1, TGFBR1, or TGFBR2 genes",
+            "genomeWideStudy": false,
+            "genotypingMethods": [
+                "PCR",
+                "HRM"
+            ],
+            "entireGeneSequenced": false,
+            "copyNumberAssessed": false,
+            "specificMutationsGenotyped": true,
+            "specificMutationsGenotypedMethod": "Blah Blah Blah",
+            "additionalInformation": "The coding Exon 3 was PCR ampilified and sequenced",
+            "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        },
         "uuid": "e79009fd-2988-11e5-b98a-60f81dc5b05a",
         "dateTime": "2015-07-14T22:47:10.000000+00:00"
     },
@@ -55,7 +83,20 @@
             "PPM1D",
             "JMY"
         ],
-        "method": "34d309dc-1912-11e5-aa88-60f81dc5b05a",
+        "method": {
+            "previousTesting": true,
+            "previousTestingDescription": "method here",
+            "genomeWideStudy": true,
+            "genotypingMethods": [
+                "Sanger"
+            ],
+            "entireGeneSequenced": true,
+            "copyNumberAssessed": true,
+            "specificMutationsGenotyped": true,
+            "specificMutationsGenotypedMethod": "method #2",
+            "additionalInformation": "additional info here.",
+            "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        },
         "familyIncluded": [
             "ab9a37ba-18fa-11e5-bad8-60f81dc5b05a",
             "e659bd3a-18f8-11e5-9d3a-60f81dc5b05a"
