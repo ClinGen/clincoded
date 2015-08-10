@@ -232,11 +232,12 @@ var PmidSelectionList = React.createClass({
 
 // The content of the Add PMID(s) modal dialog box
 var AddPmidModal = React.createClass({
-    mixins: [FormMixin, RestMixin],
+    mixins: [FormMixin, RestMixin, ModalMixin],
 
     propTypes: {
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
+        currPmidChange: React.PropTypes.func, // Function to call when currently selected article changes
         updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
     },
 
@@ -282,6 +283,9 @@ var AddPmidModal = React.createClass({
             }).then(article => {
                 this.props.closeModal();
                 this.props.updateGdmArticles(article);
+                this.props.currPmidChange(article.pmid);
+                console.log(article['pmid']);
+                //window.history.replaceState(window.state, '', '/curation-central/?gdm=' + this.props['updateGdmArticles']['__reactBoundContext']['state']['currGdm']['uuid'] + '&pmid=' + article['pmid']);
             }).catch(function(e) {
                 console.log('ERROR %o', e);
             });
