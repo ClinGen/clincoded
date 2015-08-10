@@ -138,7 +138,7 @@ var Dashboard = React.createClass({
         return (
             <div className="container">
                 <h1>Welcome, {this.state.userName}!</h1>
-                <h4>Your curator status: {this.state.userStatus}</h4>
+                <h4>Your status: {this.state.userStatus}</h4>
                 <div className="row">
                     <div className="col-md-6">
                         <Panel panelClassName="panel-dashboard">
