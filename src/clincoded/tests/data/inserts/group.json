@@ -5,19 +5,20 @@
             "15",
             "891"
         ],
-        "numberOfMale": "8",
-        "numberOfFemale": "7",
-        "totalNumberIndividuals": "3",
-        "numberOfIndividualsWithFamilyInformation": "2",
-        "numberOfIndividualsWithoutFamilyInformation": "1",
-        "numberOfIndividualsWithVariantInCuratedGene": "3",
-        "numberOfIndividualsWithoutVariantInCuratedGene": "0",
+        "numberOfMale": 8,
+        "numberOfFemale": 7,
+        "totalNumberIndividuals": 3,
+        "numberOfIndividualsWithFamilyInformation": 2,
+        "numberOfIndividualsWithoutFamilyInformation": 1,
+        "numberOfIndividualsWithVariantInCuratedGene": 3,
+        "numberOfIndividualsWithoutVariantInCuratedGene": 0,
         "otherGenes": [
             "TP53",
             "TP63"
         ],
         "method": "197e1c8a-1912-11e5-8050-60f81dc5b05a",
-        "uuid": "eab0dd0a-1d05-11e5-8d2d-60f81dc5b05a"
+        "uuid": "eab0dd0a-1d05-11e5-8d2d-60f81dc5b05a",
+        "dateTime": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "label": "CaseGroupAA",
@@ -25,15 +26,16 @@
             "15",
             "777"
         ],
-        "numberOfMale": "28",
-        "numberOfFemale": "17",
-        "totalNumberIndividuals": "11",
-        "numberOfIndividualsWithFamilyInformation": "12",
-        "numberOfIndividualsWithoutFamilyInformation": "21",
-        "numberOfIndividualsWithVariantInCuratedGene": "13",
-        "numberOfIndividualsWithoutVariantInCuratedGene": "10",
+        "numberOfMale": 28,
+        "numberOfFemale": 17,
+        "totalNumberIndividuals": 11,
+        "numberOfIndividualsWithFamilyInformation": 12,
+        "numberOfIndividualsWithoutFamilyInformation": 21,
+        "numberOfIndividualsWithVariantInCuratedGene": 13,
+        "numberOfIndividualsWithoutVariantInCuratedGene": 10,
         "method": "197e1c8a-1912-11e5-8050-60f81dc5b05a",
-        "uuid": "e79009fd-2988-11e5-b98a-60f81dc5b05a"
+        "uuid": "e79009fd-2988-11e5-b98a-60f81dc5b05a",
+        "dateTime": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "label": "CaseGroupShiang",
@@ -41,13 +43,13 @@
             "15",
             "654"
         ],
-        "numberOfMale": "18",
-        "numberOfFemale": "17",
-        "totalNumberIndividuals": "12",
-        "numberOfIndividualsWithFamilyInformation": "10",
-        "numberOfIndividualsWithoutFamilyInformation": "2",
-        "numberOfIndividualsWithVariantInCuratedGene": "11",
-        "numberOfIndividualsWithoutVariantInCuratedGene": "1",
+        "numberOfMale": 18,
+        "numberOfFemale": 17,
+        "totalNumberIndividuals": 12,
+        "numberOfIndividualsWithFamilyInformation": 10,
+        "numberOfIndividualsWithoutFamilyInformation": 2,
+        "numberOfIndividualsWithVariantInCuratedGene": 11,
+        "numberOfIndividualsWithoutVariantInCuratedGene": 1,
         "otherGenes": [
             "PIDD1",
             "PPM1D",
@@ -61,6 +63,7 @@
         "individualIncluded": [
             "359612a3-18fb-11e5-be10-60f81dc5b05a"
         ],
-        "uuid": "edea98e3-25cc-11e5-9019-60f81dc5b05a"
+        "uuid": "edea98e3-25cc-11e5-9019-60f81dc5b05a",
+        "dateTime": "2015-07-14T22:47:10.000000+00:00"
     }
 ]
