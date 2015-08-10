@@ -8,7 +8,21 @@
         ],
         "numberOfMale": 3,
         "numberOfFemale": 3,
-        "method": "197e1c8a-1912-11e5-8050-60f81dc5b05a",
+        "method": {
+            "previousTesting": true,
+            "previousTestingDescription": "No variants detected in FBN1, TGFBR1, or TGFBR2 genes",
+            "genomeWideStudy": false,
+            "genotypingMethods": [
+                "PCR",
+                "HRM"
+            ],
+            "entireGeneSequenced": false,
+            "copyNumberAssessed": false,
+            "specificMutationsGenotyped": true,
+            "specificMutationsGenotypedMethod": "Blah Blah Blah",
+            "additionalInformation": "The coding Exon 3 was PCR ampilified and sequenced",
+            "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        },
         "segregation": {
             "dateTime": "2015-09-27T09:35:18.000000+00:00",
             "pedigreeDescription": "K8725",
@@ -28,7 +42,23 @@
                 "df8135d4-2685-11e5-af19-60f81dc5b05a"
             ],
             "assessments": [
-                "4f94a226-2a4c-11e5-887c-60f81dc5b05a"
+                {
+                    "owner": "fytanaka@stanford.edu",
+                    "values": [
+                        {
+                            "value": "Review",
+                            "dateTime": "2015-03-03T12:52:27.000000+00:00"
+                        },
+                        {
+                            "value": "Inactive",
+                            "dateTime": "2015-03-04T12:52:27.000000+00:00"
+                        },
+                        {
+                            "value": "Supports",
+                            "dateTime": "2015-03-05T12:52:27.000000+00:00"
+                        }
+                    ]
+                }
             ]
         },
         "individualIncluded": [
@@ -46,7 +76,21 @@
         ],
         "numberOfMale": 4,
         "numberOfFemale": 4,
-        "method": "197e1c8a-1912-11e5-8050-60f81dc5b05a",
+        "method": {
+            "previousTesting": true,
+            "previousTestingDescription": "No variants detected in FBN1, TGFBR1, or TGFBR2 genes",
+            "genomeWideStudy": false,
+            "genotypingMethods": [
+                "PCR",
+                "HRM"
+            ],
+            "entireGeneSequenced": false,
+            "copyNumberAssessed": false,
+            "specificMutationsGenotyped": true,
+            "specificMutationsGenotypedMethod": "Blah Blah Blah",
+            "additionalInformation": "The coding Exon 3 was PCR ampilified and sequenced",
+            "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        },
         "dateTime": "2015-07-14T22:47:10.000000+00:00"
     },
     {
@@ -58,7 +102,20 @@
         ],
         "numberOfMale": 6,
         "numberOfFemale": 5,
-        "method": "3c4eb8f0-1912-11e5-90c7-60f81dc5b05a",
+        "method": {
+            "previousTesting": true,
+            "previousTestingDescription": "method here",
+            "genomeWideStudy": true,
+            "genotypingMethods": [
+                "Sanger"
+            ],
+            "entireGeneSequenced": true,
+            "copyNumberAssessed": true,
+            "specificMutationsGenotyped": true,
+            "specificMutationsGenotypedMethod": "method #2",
+            "additionalInformation": "additional info here.",
+            "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        },
         "dateTime": "2015-07-14T22:47:10.000000+00:00"
     },
     {
@@ -69,7 +126,20 @@
         ],
         "numberOfMale": 7,
         "numberOfFemale": 5,
-        "method": "3c4eb8f0-1912-11e5-90c7-60f81dc5b05a",
+        "method": {
+            "previousTesting": true,
+            "previousTestingDescription": "method here",
+            "genomeWideStudy": true,
+            "genotypingMethods": [
+                "Sanger"
+            ],
+            "entireGeneSequenced": true,
+            "copyNumberAssessed": true,
+            "specificMutationsGenotyped": true,
+            "specificMutationsGenotypedMethod": "method #2",
+            "additionalInformation": "additional info here.",
+            "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        },
         "dateTime": "2015-07-14T22:47:10.000000+00:00"
     },
     {
@@ -80,7 +150,20 @@
         ],
         "numberOfMale": 4,
         "numberOfFemale": 5,
-        "method": "3c4eb8f0-1912-11e5-90c7-60f81dc5b05a",
+        "method": {
+            "previousTesting": true,
+            "previousTestingDescription": "method here",
+            "genomeWideStudy": true,
+            "genotypingMethods": [
+                "Sanger"
+            ],
+            "entireGeneSequenced": true,
+            "copyNumberAssessed": true,
+            "specificMutationsGenotyped": true,
+            "specificMutationsGenotypedMethod": "method #2",
+            "additionalInformation": "additional info here.",
+            "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        },
         "dateTime": "2015-07-14T22:47:10.000000+00:00"
     }
 ]
