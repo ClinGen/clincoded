@@ -152,7 +152,6 @@
         },
         "method": {
             "title": "Method",
-            "description": "Mothed id",
             "type": "object",
             "default": {},
             "properties": {
