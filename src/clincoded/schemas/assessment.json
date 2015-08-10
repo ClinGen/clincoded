@@ -34,7 +34,8 @@
         "dateTime": {
             "title": "Date and Time",
             "description": "Time stamp of assessment creation",
-            "type": "string"
+            "type": "string",
+            "format": "date-time"
         },
         "active": {
             "title": "Active",
