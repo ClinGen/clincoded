@@ -740,10 +740,6 @@ var FamilyCuration = React.createClass({
     // the component mounts because AJAX DB queries can't be done from unmounted components.
     componentDidMount: function() {
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
-        this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
-        this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
-        this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.loadData();
     },
 
@@ -752,65 +748,77 @@ var FamilyCuration = React.createClass({
         var gdm = this.state.gdm;
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
+        // Get the query strings. Have to do this now so we know whether to render the form or not. The form
+        // uses React controlled inputs, so we can only render them the first time if we already have the
+        // family object read in.
+        this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
+        this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
+        this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
+        this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
+
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
-                <div className="container">
-                    {Object.keys(this.state.article).length ?
-                        <div className="curation-pmid-summary">
-                            <PmidSummary article={this.state.article} displayJournal />
-                        </div>
-                    : null}
-                    <h1>Curate Family Information</h1>
-                    <div className="row group-curation-content">
-                        <div className="col-sm-12">
-                            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                <Panel>
-                                    {FamilyName.call(this)}
-                                </Panel>
-                                <PanelGroup accordion>
-                                    <Panel title="Family – Common Disease & Phenotypes" open>
-                                        {FamilyCommonDiseases.call(this)}
-                                    </Panel>
-                                </PanelGroup>
-                                <PanelGroup accordion>
-                                    <Panel title="Family — Demographics" open>
-                                        {FamilyDemographics.call(this)}
-                                    </Panel>
-                                </PanelGroup>
-                                <PanelGroup accordion>
-                                    <Panel title="Family — Methods" open>
-                                        {FamilyMethods.call(this)}
-                                    </Panel>
-                                </PanelGroup>
-                                <PanelGroup accordion>
-                                    <Panel title="Family — Segregation" open>
-                                        {FamilySegregation.call(this)}
-                                    </Panel>
-                                </PanelGroup>
-                                <PanelGroup accordion>
-                                    <Panel title="Family — Variant(s) associated with Proband" open>
-                                        {FamilyVariant.call(this)}
-                                    </Panel>
-                                </PanelGroup>
-                                <PanelGroup accordion>
-                                    <Panel title="Family Additional Information" open>
-                                        {FamilyAdditional.call(this)}
-                                    </Panel>
-                                </PanelGroup>
-                                {(!this.state.family || Object.keys(this.state.family).length === 0) ?
-                                    <PanelGroup accordion>
-                                        <Panel title="Family – Number with identical information" open>
-                                            {FamilyCount.call(this)}
+                {(!this.queryValues.familyUuid || Object.keys(this.state.family).length) ?
+                    <div>
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                        <div className="container">
+                            {Object.keys(this.state.article).length ?
+                                <div className="curation-pmid-summary">
+                                    <PmidSummary article={this.state.article} displayJournal />
+                                </div>
+                            : null}
+                            <h1>Curate Family Information</h1>
+                            <div className="row group-curation-content">
+                                <div className="col-sm-12">
+                                    <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                        <Panel>
+                                            {FamilyName.call(this)}
                                         </Panel>
-                                    </PanelGroup>
-                                : null}
-                                <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
-                                <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
-                            </Form>
+                                        <PanelGroup accordion>
+                                            <Panel title="Family – Common Disease & Phenotypes" open>
+                                                {FamilyCommonDiseases.call(this)}
+                                            </Panel>
+                                        </PanelGroup>
+                                        <PanelGroup accordion>
+                                            <Panel title="Family — Demographics" open>
+                                                {FamilyDemographics.call(this)}
+                                            </Panel>
+                                        </PanelGroup>
+                                        <PanelGroup accordion>
+                                            <Panel title="Family — Methods" open>
+                                                {FamilyMethods.call(this)}
+                                            </Panel>
+                                        </PanelGroup>
+                                        <PanelGroup accordion>
+                                            <Panel title="Family — Segregation" open>
+                                                {FamilySegregation.call(this)}
+                                            </Panel>
+                                        </PanelGroup>
+                                        <PanelGroup accordion>
+                                            <Panel title="Family — Variant(s) associated with Proband" open>
+                                                {FamilyVariant.call(this)}
+                                            </Panel>
+                                        </PanelGroup>
+                                        <PanelGroup accordion>
+                                            <Panel title="Family Additional Information" open>
+                                                {FamilyAdditional.call(this)}
+                                            </Panel>
+                                        </PanelGroup>
+                                        {(!this.state.family || Object.keys(this.state.family).length === 0) ?
+                                            <PanelGroup accordion>
+                                                <Panel title="Family – Number with identical information" open>
+                                                    {FamilyCount.call(this)}
+                                                </Panel>
+                                            </PanelGroup>
+                                        : null}
+                                        <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                        <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                    </Form>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                : null}
             </div>
         );
     }
