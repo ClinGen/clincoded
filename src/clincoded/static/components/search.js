@@ -27,7 +27,6 @@ var AuditMixin = audit.AuditMixin;
         group: {title: 'Groups'},
         family: {title: 'Famlies'},
         individual: {title: 'Individuals'},
-        assessment: {title: 'Assessments'},
         experimental: {title: 'Experimental Data'},
     };
 
