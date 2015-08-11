@@ -54,6 +54,7 @@ var FormMixin = module.exports.FormMixin = {
 
     // Do not call; called by React.
     getInitialState: function() {
+        this.formValues = {};
         return {formErrors: {}};
     },
 
@@ -107,7 +108,8 @@ var FormMixin = module.exports.FormMixin = {
                 this.refs[ref].resetValue();
             });
         }
-    }
+        this.formValues = {};
+    },
 
     // Get the saved form error for the Input with the given 'ref' value.
     getFormError: function(ref) {
@@ -224,7 +226,7 @@ var Input = module.exports.Input = React.createClass({
 
     resetValue: function() {
         if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
-            React.findDOMNode(this.refs.input).value = 0;
+            React.findDOMNode(this.refs.input).value = '';
         } else if (this.props.type === 'select') {
             this.resetSelectedOption();
         }

@@ -517,6 +517,7 @@ var FamilyCuration = React.createClass({
                 }).then(data => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to choices page.
+                    this.resetAllFormValues();
                     this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
@@ -1381,7 +1382,7 @@ var FamilyViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Previous testing</dt>
-                                <dd>{method && method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')}</dd>
+                                <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
@@ -1391,7 +1392,7 @@ var FamilyViewer = React.createClass({
 
                             <div>
                                 <dt>Genome-wide study</dt>
-                                <dd>{method && method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')}</dd>
+                                <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
@@ -1401,17 +1402,17 @@ var FamilyViewer = React.createClass({
 
                             <div>
                                 <dt>Entire gene sequenced</dt>
-                                <dd>{method && method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')}</dd>
+                                <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
                                 <dt>Copy number assessed</dt>
-                                <dd>{method && method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')}</dd>
+                                <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
                                 <dt>Specific Mutations Genotyped</dt>
-                                <dd>{method && method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')}</dd>
+                                <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>

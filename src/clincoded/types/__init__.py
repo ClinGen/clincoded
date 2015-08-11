@@ -305,7 +305,7 @@ class Family(Item):
         'method',
         'segregation.variants',
         'segregation.assessments',
-        #'variants',
+        'otherPMIDs',
         'individualIncluded',
         'individualIncluded.diagnosis',
         'individualIncluded.method',
