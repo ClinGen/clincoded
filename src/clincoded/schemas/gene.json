@@ -176,6 +176,10 @@
         "entrezId": {
             "title": "Entrez #",
             "type": "string"
+        },
+        "pmids": {
+            "title": "PMID",
+            "type": "string"
         }
     }
 }

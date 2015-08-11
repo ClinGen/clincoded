@@ -43,10 +43,10 @@ def acl_from_settings(settings):
 
 
 @root
-class EncodedRoot(Root):
+class ClinGenCurationRoot(Root):
     properties = {
         'title': 'Home',
-        'portal_title': 'ENCODE',
+        'portal_title': 'ClinGen',
     }
 
     @reify
@@ -62,7 +62,7 @@ class EncodedRoot(Root):
         return acl
 
     def get(self, name, default=None):
-        resource = super(EncodedRoot, self).get(name, None)
+        resource = super(ClinGenCurationRoot, self).get(name, None)
         if resource is not None:
             return resource
         resource = self.connection.get_by_unique_key('page:location', name)

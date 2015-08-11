@@ -22,7 +22,8 @@
         "dateTime": {
             "title": "Date Time",
             "description": "Date and time to create the experimental data",
-            "type": "string"
+            "type": "string",
+            "format": "date-time"
         },
         "active": {
             "title": "Active",
@@ -205,11 +206,7 @@
                 "geneImplicatedInDisease": {
                     "title": "Gene Expressed in Tissue",
                     "description": "Is gene normally expressed in tissue",
-                    "type": "string",
-                    "enum": [
-                        "Yes",
-                        "No"
-                    ]
+                    "type": "boolean"
                 },
                 "relationshipOfOtherGenesToDisese": {
                     "title": "Raltionship of Other Gene(s) to the Disease",
@@ -508,20 +505,12 @@
                 "wildTypeRescuePhenotype": {
                     "title": "Wild-type Rescue the Phenotype",
                     "description": "Does the wild-type rescue the above phenotype?",
-                    "type": "string",
-                    "enum": [
-                        "Yes",
-                        "No"
-                    ]
+                    "type": "boolean"
                 },
                 "patientVariantRescue": {
                     "title": "Does Patient Variant Rescue",
                     "description": "Does Patient Variant Rescue?",
-                    "type": "string",
-                    "enum": [
-                        "Yes",
-                        "No"
-                    ]
+                    "type": "boolean"
                 },
                 "explanation": {
                     "title": "Explanation",

@@ -133,8 +133,8 @@ class Gdm(Item):
         'annotations.groups.familyIncluded',
         'annotations.groups.familyIncluded.commonDiagnosis',
         'annotations.groups.familyIncluded.method',
-        'annotations.groups.familyIncluded.variants',
-        'annotations.groups.familyIncluded.segregation',
+        #'annotations.groups.familyIncluded.variants',
+        'annotations.groups.familyIncluded.segregation.variants',
         'annotations.groups.familyIncluded.segregation.assessments',
         'annotations.groups.familyIncluded.individualIncluded',
         'annotations.groups.familyIncluded.individualIncluded.diagnosis',
@@ -148,8 +148,8 @@ class Gdm(Item):
         'annotations.families',
         'annotations.families.commonDiagnosis',
         'annotations.families.method',
-        'annotations.families.variants',
-        'annotations.families.segregation',
+        #'annotations.families.variants',
+        'annotations.families.segregation.variants',
         'annotations.families.segregation.assessments',
         'annotations.families.individualIncluded',
         'annotations.families.individualIncluded.diagnosis',
@@ -213,8 +213,8 @@ class Annotation(Item):
         #'groups.statistic.assessments',
         'groups.familyIncluded.commonDiagnosis',
         'groups.familyIncluded.method',
-        'groups.familyIncluded.variants',
-        'groups.familyIncluded.segregation',
+        #'groups.familyIncluded.variants',
+        'groups.familyIncluded.segregation.variants',
         'groups.familyIncluded.segregation.assessments',
         'groups.familyIncluded.individualIncluded',
         'groups.familyIncluded.individualIncluded.diagnosis',
@@ -228,8 +228,8 @@ class Annotation(Item):
         'families',
         'families.commonDiagnosis',
         'families.method',
-        'families.variants',
-        'families.segregation',
+        #'families.variants',
+        'families.segregation.variants',
         'families.segregation.assessments',
         'families.individualIncluded',
         'families.individualIncluded.diagnosis',
@@ -274,8 +274,8 @@ class Group(Item):
         'familyIncluded',
         'familyIncluded.commonDiagnosis',
         'familyIncluded.method',
-        'familyIncluded.variants',
-        'familyIncluded.segregation',
+        #'familyIncluded.variants',
+        'familyIncluded.segregation.variants',
         'familyIncluded.segregation.assessments',
         'familyIncluded.individualIncluded',
         'familyIncluded.individualIncluded.diagnosis',
@@ -303,9 +303,9 @@ class Family(Item):
     embedded = [
         'commonDiagnosis',
         'method',
-        'segregation',
+        'segregation.variants',
         'segregation.assessments',
-        'variants',
+        #'variants',
         'individualIncluded',
         'individualIncluded.diagnosis',
         'individualIncluded.method',
@@ -340,21 +340,6 @@ class Method(Item):
     item_type = 'method'
     schema = load_schema('clincoded:schemas/method.json')
     name_key = 'uuid'
-
-@collection(
-    name='segregations',
-    unique_key='segregation:uuid',
-    properties={
-        'title': 'Segregation Study',
-        'description': 'List of segregation studies in all gdm pairs',
-    })
-class Segregation(Item):
-    item_type = 'segregation'
-    schema = load_schema('clincoded:schemas/segregation.json')
-    name_key = 'uuid'
-    embedded = [
-        'assessments'
-    ]
 
 @collection(
     name='assessments',

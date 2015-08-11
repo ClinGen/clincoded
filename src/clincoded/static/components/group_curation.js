@@ -2,6 +2,7 @@
 var React = require('react');
 var url = require('url');
 var _ = require('underscore');
+var moment = require('moment');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
@@ -39,8 +40,16 @@ var GroupCuration = React.createClass({
             gdm: {}, // GDM object given in UUID
             annotation: {}, // Annotation object given in UUID
             article: {}, // Article from the annotation
-            group: {} // If we're editing a group, this gets the fleshed-out group object we're editing
+            group: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
+            genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
+    },
+
+    // Handle value changes in genotyping method 1
+    handleChange: function(ref, e) {
+        if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
+            this.setState({genotyping2Disabled: false});
+        }
     },
 
     // Retrieve the GDM and annotation objects with the given UUIDs from the DB. If successful, set the component
@@ -63,8 +72,11 @@ var GroupCuration = React.createClass({
         this.getRestData(
             '/group/' + groupUuid
         ).then(group => {
+            // See if the loaded group's genotyping methods are being used.
+            var genotypingMethodUsed = !!(group.method && group.method.genotypingMethods && group.method.genotypingMethods.length);
+
             // Received group data; set the current state with it
-            this.setState({group: group});
+            this.setState({group: group, genotyping2Disabled: !genotypingMethodUsed});
             return Promise.resolve();
         }).catch(function(e) {
             console.log('GROUP LOAD ERROR=: %o', e);
@@ -129,7 +141,7 @@ var GroupCuration = React.createClass({
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (!orphaIds || !orphaIds.length) {
-                // No 'orphaXX' found 
+                // No 'orphaXX' found
                 formError = true;
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
             }
@@ -198,6 +210,7 @@ var GroupCuration = React.createClass({
                     if (newMethod) {
                         if (this.state.group && this.state.group.method && Object.keys(this.state.group.method).length) {
                             // We're editing a group and it had an existing method. Just PUT an update to the method.
+                            newMethod.dateTime = moment().format();
                             return this.putRestData('/methods/' + this.state.group.method.uuid, newMethod).then(data => {
                                 return Promise.resolve(data['@graph'][0]);
                             });
@@ -224,7 +237,7 @@ var GroupCuration = React.createClass({
                     // Get an array of all given disease IDs
                     newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
 
-                    // If a method object was created (at least one method field set), get its new object's 
+                    // If a method object was created (at least one method field set), get its new object's
                     if (newMethod) {
                         newGroup.method = newMethod['@id'];
                     }
@@ -250,11 +263,11 @@ var GroupCuration = React.createClass({
                     // Fill in the group fields from the Group Demographics panel
                     var value = this.getFormValue('malecount');
                     if (value) {
-                        newGroup.numberOfMale = value + '';
+                        newGroup.numberOfMale = parseInt(value, 10);
                     }
                     value = this.getFormValue('femalecount');
                     if (value) {
-                        newGroup.numberOfFemale = value + '';
+                        newGroup.numberOfFemale = parseInt(value, 10);
                     }
                     value = this.getFormValue('country');
                     if (value !== 'none') {
@@ -274,24 +287,24 @@ var GroupCuration = React.createClass({
                     }
                     value = this.getFormValue('agefrom');
                     if (value) {
-                        newGroup.ageRangeFrom = value + '';
+                        newGroup.ageRangeFrom = parseInt(value, 10);
                     }
                     value = this.getFormValue('ageto');
                     if (value) {
-                        newGroup.ageRangeTo = value + '';
+                        newGroup.ageRangeTo = parseInt(value, 10);
                     }
                     value = this.getFormValue('ageunit');
                     if (value !== 'none') {
-                        newGroup.ageRangeUnit = value + '';
+                        newGroup.ageRangeUnit = value;
                     }
 
                     // Fill in the group fields from Group Information panel
-                    newGroup.totalNumberIndividuals = this.getFormValue('indcount');
-                    newGroup.numberOfIndividualsWithFamilyInformation = this.getFormValue('indfamilycount');
-                    newGroup.numberOfIndividualsWithoutFamilyInformation = this.getFormValue('notindfamilycount');
-                    newGroup.numberOfIndividualsWithVariantInCuratedGene = this.getFormValue('indvariantgenecount');
-                    newGroup.numberOfIndividualsWithoutVariantInCuratedGene = this.getFormValue('notindvariantgenecount');
-                    newGroup.numberOfIndividualsWithVariantInOtherGene = this.getFormValue('indvariantothercount');
+                    newGroup.totalNumberIndividuals = parseInt(this.getFormValue('indcount'), 10);
+                    newGroup.numberOfIndividualsWithFamilyInformation = parseInt(this.getFormValue('indfamilycount'), 10);
+                    newGroup.numberOfIndividualsWithoutFamilyInformation = parseInt(this.getFormValue('notindfamilycount'), 10);
+                    newGroup.numberOfIndividualsWithVariantInCuratedGene = parseInt(this.getFormValue('indvariantgenecount'), 10);
+                    newGroup.numberOfIndividualsWithoutVariantInCuratedGene = parseInt(this.getFormValue('notindvariantgenecount'), 10);
+                    newGroup.numberOfIndividualsWithVariantInOtherGene = parseInt(this.getFormValue('indvariantothercount'), 10);
 
                     // Add array of 'Other genes found to have variants in them'
                     if (groupGenes) {
@@ -357,7 +370,7 @@ var GroupCuration = React.createClass({
         // Put together a new 'method' object
         value1 = this.getFormValue('prevtesting');
         if (value1 !== 'none') {
-            newMethod.previousTesting = value1;
+            newMethod.previousTesting = value1 === 'Yes';
         }
         value1 = this.getFormValue('prevtestingdesc');
         if (value1) {
@@ -365,26 +378,26 @@ var GroupCuration = React.createClass({
         }
         value1 = this.getFormValue('genomewide');
         if (value1 !== 'none') {
-            newMethod.genomeWideStudy = value1;
+            newMethod.genomeWideStudy = value1 === 'Yes';
         }
         value1 = this.getFormValue('genotypingmethod1');
         value2 = this.getFormValue('genotypingmethod2');
         if (value1 !== 'none' || value2 !== 'none') {
-            newMethod.genotypingMethods = [];
-            newMethod.genotypingMethods[0] = value1 !== 'none' ? value1 : '';
-            newMethod.genotypingMethods[1] = value2 !== 'none' ? value2 : '';
+            newMethod.genotypingMethods = _([value1, value2]).filter(function(val) {
+                return val !== 'none';
+            });
         }
         value1 = this.getFormValue('entiregene');
         if (value1 !== 'none') {
-            newMethod.entireGeneSequenced = value1;
+            newMethod.entireGeneSequenced = value1 === 'Yes';
         }
         value1 = this.getFormValue('copyassessed');
         if (value1 !== 'none') {
-            newMethod.copyNumberAssessed = value1;
+            newMethod.copyNumberAssessed = value1 === 'Yes';
         }
         value1 = this.getFormValue('mutationsgenotyped');
         if (value1 !== 'none') {
-            newMethod.specificMutationsGenotyped = value1;
+            newMethod.specificMutationsGenotyped = value1 === 'Yes';
         }
         value1 = this.getFormValue('specificmutation');
         if (value1) {
@@ -602,7 +615,7 @@ var GroupDemographics = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={group.countryOfOrigin}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 {country_codes.map(function(country_code) {
                     return <option key={country_code.code}>{country_code.name}</option>;
@@ -610,14 +623,15 @@ var GroupDemographics = function() {
             </Input>
             <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={group.ethnicity}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Hispanic or Latino</option>
                 <option>Not Hispanic or Latino</option>
+                <option>Unknown</option>
             </Input>
             <Input type="select" ref="race" label="Race:" defaultValue="none" value={group.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>American Indian or Alaska Native</option>
                 <option>Asian</option>
@@ -631,7 +645,7 @@ var GroupDemographics = function() {
             <div className="demographics-age-range">
                 <Input type="select" ref="agerangetype" label="Type:" defaultValue="none" value={group.ageRangeType}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="none" disabled="disabled">Select</option>
+                    <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>Onset</option>
                     <option>Report</option>
@@ -647,7 +661,7 @@ var GroupDemographics = function() {
                 </Input>
                 <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={group.ageRangeUnit}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="none" disabled="disabled">Select</option>
+                    <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>Days</option>
                     <option>Weeks</option>
@@ -711,7 +725,7 @@ var GroupMethods = function() {
         <div className="row">
             <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={method ? method.previousTesting : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
@@ -720,15 +734,15 @@ var GroupMethods = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={method ? method.genomeWideStudy : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none" disabled="disabled">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Genotyping Method</h4>
-            <Input type="select" ref="genotypingmethod1" label="Method 1:" defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[0] ? method.genotypingMethods[0] : null}
+            <Input type="select" ref="genotypingmethod1" label="Method 1:" handleChange={this.handleChange} defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[0] ? method.genotypingMethods[0] : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Exome sequencing</option>
                 <option>Genotyping</option>
@@ -738,8 +752,8 @@ var GroupMethods = function() {
                 <option>Whole genome shotgun sequencing</option>
             </Input>
             <Input type="select" ref="genotypingmethod2" label="Method 2:" defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[1] ? method.genotypingMethods[1] : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.genotyping2Disabled}>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Exome sequencing</option>
                 <option>Genotyping</option>
@@ -750,21 +764,21 @@ var GroupMethods = function() {
             </Input>
             <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={method ? method.entireGeneSequenced : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
             <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={method ? method.copyNumberAssessed : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
             <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={method ? method.specificMutationsGenotyped : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">Select</option>
+                <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
@@ -940,7 +954,7 @@ var GroupViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Previous testing</dt>
-                                <dd>{method && method.previousTesting}</dd>
+                                <dd>{(method && method.previousTesting) ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
@@ -950,7 +964,7 @@ var GroupViewer = React.createClass({
 
                             <div>
                                 <dt>Genome-wide study</dt>
-                                <dd>{method && method.genomeWideStudy}</dd>
+                                <dd>{(method && method.genomeWideStudy) ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
@@ -960,17 +974,17 @@ var GroupViewer = React.createClass({
 
                             <div>
                                 <dt>Entire gene sequenced</dt>
-                                <dd>{method && method.entireGeneSequenced}</dd>
+                                <dd>{(method && method.entireGeneSequenced) ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
                                 <dt>Copy number assessed</dt>
-                                <dd>{method && method.copyNumberAssessed}</dd>
+                                <dd>{(method && method.copyNumberAssessed) ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
                                 <dt>Specific Mutations Genotyped</dt>
-                                <dd>{method && method.specificMutationsGenotyped}</dd>
+                                <dd>{(method && method.specificMutationsGenotyped) ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>

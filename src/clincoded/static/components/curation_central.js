@@ -2,6 +2,7 @@
 var React = require('react');
 var _ = require('underscore');
 var url = require('url');
+var moment = require('moment');
 var globals = require('./globals');
 var curator = require('./curator');
 var modal = require('../libs/bootstrap/modal');
@@ -57,10 +58,11 @@ var CurationCentral = React.createClass({
     },
 
     // Retrieve the GDM object from the DB with the given uuid
-    getGdm: function(uuid) {
+    getGdm: function(uuid, pmid) {
         this.getRestData('/gdm/' + uuid).then(gdm => {
             // The GDM object successfully retrieved; set the Curator Central component
             this.setState({currGdm: gdm, currOmimId: gdm.omimId});
+            this.currPmidChange(pmid);
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
@@ -68,8 +70,9 @@ var CurationCentral = React.createClass({
     // retrieve the corresponding GDM from the DB.
     componentDidMount: function() {
         var gdmUuid = queryKeyValue('gdm', this.props.href);
+        var pmid = queryKeyValue('pmid', this.props.href);
         if (gdmUuid) {
-            this.getGdm(gdmUuid);
+            this.getGdm(gdmUuid, pmid);
         }
     },
 
@@ -104,7 +107,7 @@ var CurationCentral = React.createClass({
             return this.putRestData('/gdm/' + this.state.currGdm.uuid, gdmObj);
         }).then(data => {
             // Retrieve the updated GDM and set it as the new state GDM to force a rerendering.
-            this.getGdm(data['@graph'][0].uuid);
+            this.getGdm(data['@graph'][0].uuid, article.pmid);
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
@@ -195,7 +198,7 @@ var PmidSelectionList = React.createClass({
         });
 
         return (
-            <div>
+            <div className="pmid-selection-wrapper">
                 <div className="pmid-selection-add">
                     <Modal title='Add new PubMed Article'>
                         <button className="btn btn-primary pmid-selection-add-btn" modal={<AddPmidModal protocol={this.props.protocol} closeModal={this.closeModal} updateGdmArticles={this.props.updateGdmArticles} />}>
@@ -219,6 +222,11 @@ var PmidSelectionList = React.createClass({
                         })}
                     </div>
                 : null}
+                {annotations.length == 0 ?
+                    <div className="pmid-selection-help">
+                        <i>Add papers to this Gene-Disease Record using the <strong>Add New PMID(s)</strong> button; click on any added paper to view its abstract and begin curating evidence from that paper.</i>
+                    </div>
+                :null }
             </div>
         );
     }
@@ -270,6 +278,7 @@ var AddPmidModal = React.createClass({
                 // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
                     var newArticle = parsePubmed(xml, enteredPmid);
+                    newArticle.dateTime = moment().format();
                     return this.postRestData('/articles/', newArticle).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });
