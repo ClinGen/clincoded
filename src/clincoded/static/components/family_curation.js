@@ -45,7 +45,6 @@ var FamilyCuration = React.createClass({
         group: {},
     },
 
-
     getInitialState: function() {
         return {
             gdm: {}, // GDM object given in query string
