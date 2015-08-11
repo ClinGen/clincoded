@@ -189,10 +189,10 @@ var FormMixin = module.exports.FormMixin = {
 var Input = module.exports.Input = React.createClass({
     propTypes: {
         type: React.PropTypes.string.isRequired, // Type of input
-        label: React.PropTypes.oneOfType([
+        label: React.PropTypes.oneOfType([ // <label> for input; string or another React component
             React.PropTypes.string,
             React.PropTypes.object
-        ]), // <label> for input; string or another React component
+        ]),
         placeholder: React.PropTypes.string, // <input> placeholder text
         error: React.PropTypes.string, // Error message to display below input
         labelClassName: React.PropTypes.string, // CSS classes to add to labels
@@ -200,7 +200,10 @@ var Input = module.exports.Input = React.createClass({
         wrapperClassName: React.PropTypes.string, // CSS classes to add to wrapper div around inputs
         inputClassName: React.PropTypes.string, // CSS classes to add to input elements themselves
         rows: React.PropTypes.string, // Number of rows in textarea
-        value: React.PropTypes.string, // Value to pre-fill input with
+        value: React.PropTypes.oneOfType([ // Value to pre-fill input with
+            React.PropTypes.string,
+            React.PropTypes.number
+        ]),
         defaultValue: React.PropTypes.string, // Default value for <select>
         required: React.PropTypes.bool, // T to make this a required field
         clickHandler: React.PropTypes.func, // Called to handle button click
