@@ -139,7 +139,7 @@
             ]
         },
         "method": {
-            "title": "Method",
+            "title": "Individual Method",
             "type": "object",
             "default": {},
             "properties": {

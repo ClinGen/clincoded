@@ -209,8 +209,7 @@
             }
         },
         "method": {
-            "title": "Method",
-            "description": "Group method",
+            "title": "Group Method",
             "type": "object",
             "default": {},
             "properties": {
