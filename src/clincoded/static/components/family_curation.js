@@ -127,15 +127,26 @@ var FamilyCuration = React.createClass({
                         break;
                 }
             });
-            this.setState(stateObj);
 
             // Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
             if (stateObj.gdm && stateObj.gdm.omimId) {
                 this.setOmimIdState(stateObj.gdm.omimId);
             }
 
-            var genotypingMethodUsed = !!(stateObj.family.method && stateObj.family.method.genotypingMethods && stateObj.family.method.genotypingMethods.length);
-            this.setState({genotyping2Disabled: !genotypingMethodUsed});
+            // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
+            // Also see if we need to disable the Add Variant button
+            if (stateObj.family && Object.keys(stateObj.family).length) {
+                stateObj.genotyping2Disabled = !(stateObj.family.method && stateObj.family.method.genotypingMethods && stateObj.family.method.genotypingMethods.length);
+
+                var segregation = stateObj.family.segregation;
+                if (segregation && segregation.variants && segregation.variants.length) {
+                    stateObj.variantCount = segregation.variants.length;
+                    this.setState({addVariantDisabled: false});
+                }
+            }
+
+            // Set all the state variables we've collected
+            this.setState(stateObj);
 
             // If we have an annotation, load its article separately because we asked for a flattened annotation
             // (the article is just its string @id).
@@ -1182,23 +1193,32 @@ var FamilySegregation = function() {
 
 // Display the Family variant panel. The number of copies depends on the variantCount state variable.
 var FamilyVariant = function() {
-    var family = this.state.family;
-    var hgbsNames = family.hgvsNames && family.hgvsNames.join();
+    var family = Object.keys(this.state.family).length ? this.state.family : null;
+    var segregation = family && family.segregation ? family.segregation : null;
+    var variants = segregation && segregation.variants;
+
     return (
         <div className="row">
             {_.range(this.state.variantCount).map(i => {
+                var variant, hgvsNames;
+
+                if (variants && variants.length) {
+                    variant = variants[i];
+                    hgvsNames = variant ? variant && variant.hgvsNames && variant.hgvsNames.join() : null;
+                }
+
                 return (
                     <div key={i} className="variant-panel">
-                        <Input type="text" ref={'VARdbsnpid' + i} label={<LabelDbSnp />} value={family.dbSNPId} placeholder="e.g. rs1748" handleChange={this.handleChange}
+                        <Input type="text" ref={'VARdbsnpid' + i} label={<LabelDbSnp />} value={variant && variant.dbSNPId} placeholder="e.g. rs1748" handleChange={this.handleChange}
                             error={this.getFormError('VARdbsnpid' + i)} clearError={this.clrFormErrors.bind(null, 'VARdbsnpid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={family.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange}
+                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={variant && variant.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <Input type="text" ref={'VARhgvsterm' + i} label={<LabelHgvs />} value={hgbsNames} placeholder="e.g. NM_001009944.2:c.12420G>A" handleChange={this.handleChange}
+                        <Input type="text" ref={'VARhgvsterm' + i} label={<LabelHgvs />} value={hgvsNames} placeholder="e.g. NM_001009944.2:c.12420G>A" handleChange={this.handleChange}
                             error={this.getFormError('VARhgvsterm' + i)} clearError={this.clrFormErrors.bind(null, 'VARhgvsterm' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={family.otherDescription} handleChange={this.handleChange}
+                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                         {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
                             <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"

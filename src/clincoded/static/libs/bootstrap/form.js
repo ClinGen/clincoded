@@ -101,6 +101,14 @@ var FormMixin = module.exports.FormMixin = {
         }
     },
 
+    resetAllFormValues: function() {
+        if (this.refs && Object.keys(this.refs).length) {
+            Object.keys(this.refs).map(ref => {
+                this.refs[ref].resetValue();
+            });
+        }
+    }
+
     // Get the saved form error for the Input with the given 'ref' value.
     getFormError: function(ref) {
         return this.state.formErrors[ref];
@@ -212,6 +220,30 @@ var Input = module.exports.Input = React.createClass({
         } else if (this.props.type === 'select') {
             return this.getSelectedOption().trim();
         }
+    },
+
+    resetValue: function() {
+        if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
+            React.findDOMNode(this.refs.input).value = 0;
+        } else if (this.props.type === 'select') {
+            this.resetSelectedOption();
+        }
+    },
+
+    resetSelectedOption: function() {
+        var optionNodes = this.refs.input.getDOMNode().getElementsByTagName('option');
+
+        // Get the DOM node for the selected <option>
+        var selectedOptionNode = _(optionNodes).find(function(option) {
+            return option.selected;
+        });
+
+        // Clear the selected option and set it to the first option
+        if (selectedOptionNode) {
+            selectedOptionNode.selected = false;
+            optionNodes[0] = true;
+        }
+
     },
 
     // Get the selected option from a <select> list
