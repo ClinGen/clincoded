@@ -101,13 +101,43 @@
                         },
                         "assessments": {
                             "title": "Assessments",
-                            "description": "List of assessments",
+                            "description": "List of assessments added from different curators",
                             "type": "array",
                             "default": [],
                             "items": {
-                                "title": "Assessment",
-                                "type": "string",
-                                "linkTo": "assessment"
+                                "description": "Assessment from one curator",
+                                "type": "object",
+                                "default" : {},
+                                "properties": {
+                                    "owner": {
+                                        "description": "Email of curator who add the assessment",
+                                        "type": "string"
+                                    },
+                                    "values": {
+                                        "description": "List of values and time stamps the owner added and changed",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "value": {
+                                                    "description": "Record of values. Current value with latest time stamp, others are history. Inactive -> revoke the assessment",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "Supports",
+                                                        "Review",
+                                                        "Contradicts",
+                                                        "Inactive"
+                                                    ]
+                                                },
+                                                "dateTime": {
+                                                    "description": "Time stramp of the value",
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -148,13 +178,43 @@
                         },
                         "assessments": {
                             "title": "Assessments",
-                            "description": "List of assessments",
+                            "description": "List of assessments added from different curators",
                             "type": "array",
                             "default": [],
                             "items": {
-                                "title": "Assessment",
-                                "type": "string",
-                                "linkTo": "assessment"
+                                "description": "Assessment from one curator",
+                                "type": "object",
+                                "default" : {},
+                                "properties": {
+                                    "owner": {
+                                        "description": "Email of curator who add the assessment",
+                                        "type": "string"
+                                    },
+                                    "values": {
+                                        "description": "List of values and time stamps the owner added and changed",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "value": {
+                                                    "description": "Record of values. Current value with latest time stamp, others are history. Inactive -> revoke the assessment",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "Supports",
+                                                        "Review",
+                                                        "Contradicts",
+                                                        "Inactive"
+                                                    ]
+                                                },
+                                                "dateTime": {
+                                                    "description": "Time stramp of the value",
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -220,12 +280,43 @@
                 },
                 "assessments": {
                     "title": "Assessments",
-                    "description": "List of assessments",
+                    "description": "List of assessments added from different curators",
                     "type": "array",
+                    "default": [],
                     "items": {
-                        "title": "Assessment uuid",
-                        "type": "string",
-                        "linkTo": "assessment"
+                        "description": "Assessment from one curator",
+                        "type": "object",
+                        "default" : {},
+                        "properties": {
+                            "owner": {
+                                "description": "Email of curator who add the assessment",
+                                "type": "string"
+                            },
+                            "values": {
+                                "description": "List of values and time stamps the owner added and changed",
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "description": "Record of values. Current value with latest time stamp, others are history. Inactive -> revoke the assessment",
+                                            "type": "string",
+                                            "enum": [
+                                                "Supports",
+                                                "Review",
+                                                "Contradicts",
+                                                "Inactive"
+                                            ]
+                                        },
+                                        "dateTime": {
+                                            "description": "Time stramp of the value",
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -259,12 +350,43 @@
                         },
                         "assessments": {
                             "title": "Assessments",
-                            "description": "List of assessment",
+                            "description": "List of assessments added from different curators",
                             "type": "array",
+                            "default": [],
                             "items": {
-                                "title": "Assessment",
-                                "type": "string",
-                                "linkTo": "assessment"
+                                "description": "Assessment from one curator",
+                                "type": "object",
+                                "default" : {},
+                                "properties": {
+                                    "owner": {
+                                        "description": "Email of curator who add the assessment",
+                                        "type": "string"
+                                    },
+                                    "values": {
+                                        "description": "List of values and time stamps the owner added and changed",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "value": {
+                                                    "description": "Record of values. Current value with latest time stamp, others are history. Inactive -> revoke the assessment",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "Supports",
+                                                        "Review",
+                                                        "Contradicts",
+                                                        "Inactive"
+                                                    ]
+                                                },
+                                                "dateTime": {
+                                                    "description": "Time stramp of the value",
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -287,12 +409,43 @@
                         },
                         "assessments": {
                             "title": "Assessments",
-                            "description": "List of assessments",
+                            "description": "List of assessments added from different curators",
                             "type": "array",
+                            "default": [],
                             "items": {
-                                "title": "Assessment uuid",
-                                "type": "string",
-                                "linkTo": "assessment"
+                                "description": "Assessment from one curator",
+                                "type": "object",
+                                "default" : {},
+                                "properties": {
+                                    "owner": {
+                                        "description": "Email of curator who add the assessment",
+                                        "type": "string"
+                                    },
+                                    "values": {
+                                        "description": "List of values and time stamps the owner added and changed",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "value": {
+                                                    "description": "Record of values. Current value with latest time stamp, others are history. Inactive -> revoke the assessment",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "Supports",
+                                                        "Review",
+                                                        "Contradicts",
+                                                        "Inactive"
+                                                    ]
+                                                },
+                                                "dateTime": {
+                                                    "description": "Time stramp of the value",
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -347,12 +500,43 @@
                 },
                 "assessments": {
                     "title": "Assessments",
-                    "description": "List of assessments",
+                    "description": "List of assessments added from different curators",
                     "type": "array",
+                    "default": [],
                     "items": {
-                        "title": "Assessment uuid",
-                        "type": "string",
-                        "linkTo": "assessment"
+                        "description": "Assessment from one curator",
+                        "type": "object",
+                        "default" : {},
+                        "properties": {
+                            "owner": {
+                                "description": "Email of curator who add the assessment",
+                                "type": "string"
+                            },
+                            "values": {
+                                "description": "List of values and time stamps the owner added and changed",
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "description": "Record of values. Current value with latest time stamp, others are history. Inactive -> revoke the assessment",
+                                            "type": "string",
+                                            "enum": [
+                                                "Supports",
+                                                "Review",
+                                                "Contradicts",
+                                                "Inactive"
+                                            ]
+                                        },
+                                        "dateTime": {
+                                            "description": "Time stramp of the value",
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -447,12 +631,43 @@
                 },
                 "assessments": {
                     "title": "Assessments",
-                    "description": "List of assessments",
+                    "description": "List of assessments added from different curators",
                     "type": "array",
+                    "default": [],
                     "items": {
-                        "title": "Assessment uuid",
-                        "type": "string",
-                        "linkTo": "assessment"
+                        "description": "Assessment from one curator",
+                        "type": "object",
+                        "default" : {},
+                        "properties": {
+                            "owner": {
+                                "description": "Email of curator who add the assessment",
+                                "type": "string"
+                            },
+                            "values": {
+                                "description": "List of values and time stamps the owner added and changed",
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "description": "Record of values. Current value with latest time stamp, others are history. Inactive -> revoke the assessment",
+                                            "type": "string",
+                                            "enum": [
+                                                "Supports",
+                                                "Review",
+                                                "Contradicts",
+                                                "Inactive"
+                                            ]
+                                        },
+                                        "dateTime": {
+                                            "description": "Time stramp of the value",
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -525,12 +740,43 @@
                 },
                 "assessments": {
                     "title": "Assessments",
-                    "description": "List of assessments",
+                    "description": "List of assessments added from different curators",
                     "type": "array",
+                    "default": [],
                     "items": {
-                        "title": "Assessment uuid",
-                        "type": "string",
-                        "linkTo": "assessment"
+                        "description": "Assessment from one curator",
+                        "type": "object",
+                        "default" : {},
+                        "properties": {
+                            "owner": {
+                                "description": "Email of curator who add the assessment",
+                                "type": "string"
+                            },
+                            "values": {
+                                "description": "List of values and time stamps the owner added and changed",
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "description": "Record of values. Current value with latest time stamp, others are history. Inactive -> revoke the assessment",
+                                            "type": "string",
+                                            "enum": [
+                                                "Supports",
+                                                "Review",
+                                                "Contradicts",
+                                                "Inactive"
+                                            ]
+                                        },
+                                        "dateTime": {
+                                            "description": "Time stramp of the value",
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -560,5 +806,15 @@
             "title": "Type",
             "type": "string"
         }
+    },
+    "boost_values": {
+        "biochemicalFunction.geneWithSameFunctionSameDisease.assessments": 1.0,
+        "biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments": 1.0,
+        "expression.normalExpression.assessments": 1.0,
+        "expression.alteredExpression.assessments": 1.0,
+        "proteinIneractions.assessments": 1.0,
+        "functionalAleration.assessments": 1.0,
+        "modelSystems.assessments": 1.0,
+        "rescue.assessments": 1.0
     }
 }
