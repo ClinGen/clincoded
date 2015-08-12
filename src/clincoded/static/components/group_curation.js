@@ -205,41 +205,16 @@ var GroupCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    // Make a new method and save it to the DB
-                    var newMethod = this.createMethod();
-                    if (newMethod) {
-                        if (this.state.group && this.state.group.method && Object.keys(this.state.group.method).length) {
-                            // We're editing a group and it had an existing method. Just PUT an update to the method.
-                            newMethod.dateTime = moment().format();
-                            return this.putRestData('/methods/' + this.state.group.method.uuid, newMethod).then(data => {
-                                return Promise.resolve(data['@graph'][0]);
-                            });
-                        } else {
-                            // We're either creating a group, or editing an existing group that didn't have a method
-                            // Post the new method to the DB. When the promise returns with the new method
-                            // object, pass it to the next promise-processing code.
-                            return this.postRestData('/methods/', newMethod).then(data => {
-                                return Promise.resolve(data['@graph'][0]);
-                            });
-                        }
-                    } else {
-                        // If we're editing a group and it already had a method, then delete the method from the DB.
-                        // If we're editing a group and it didn't have a method, do nothing
-                        // If we're creating a group, do nothing.
-                        // For now, just resolve the promise with no method object. We'll deal with deleting objects
-                        // later.
-                        return Promise.resolve(null);
-                    }
-                }).then(newMethod => {
-                    // Method successfully created if needed (null if not); passed in 'newMethod'. Now make the new group.
+                    // Now make the new group.
                     newGroup.label = this.getFormValue('groupname');
 
                     // Get an array of all given disease IDs
                     newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
 
                     // If a method object was created (at least one method field set), get its new object's
+                    var newMethod = this.createMethod();
                     if (newMethod) {
-                        newGroup.method = newMethod['@id'];
+                        newGroup.method = newMethod;
                     }
 
                     // Fill in the group fields from the Common Diseases & Phenotypes panel

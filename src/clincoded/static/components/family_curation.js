@@ -175,55 +175,32 @@ var FamilyCuration = React.createClass({
         var methodPromise; // Promise from writing (POST/PUT) a method to the DB
 
         // Make a new method and save it to the DB
-        var family = this.state.family;
+        var writerFamily = _.clone(newFamily);
+        writerFamily.dateTime = moment().format();
+        if (familyLabel) {
+            writerFamily.label = familyLabel;
+        }
+
+        // If a method and/or segregation object was created (at least one method/segregation field set), assign it to the family.
+        // If writing multiple family objects, reuse the one we made, but assign new methods and segregations because each family
+        // needs unique objects here.
         var newMethod = this.createMethod();
-        if (!newMethod) {
-            // No method in the current form field values. Just return a null promise
-            methodPromise = Promise.resolve(null);
-        } else if (family && family.method && Object.keys(family.method).length) {
-            // We're editing a family and it had an existing method. Just PUT an update to the method.
-            methodPromise = this.putRestData('/methods/' + this.state.family.method.uuid, newMethod).then(data => {
+        if (newMethod) {
+            writerFamily.method = newMethod;
+        }
+
+        // Either update or create the family object in the DB
+        if (this.state.family && Object.keys(this.state.family).length) {
+            // We're editing a family. PUT the new family object to the DB to update the existing one.
+            return this.putRestData('/families/' + this.state.family.uuid, writerFamily).then(data => {
                 return Promise.resolve(data['@graph'][0]);
             });
         } else {
-            // We're either creating a family, or editing an existing group that didn't have a method
-            // Post the new method to the DB. When the promise returns with the new method
-            // object, pass it to the next promise-processing code.
-            methodPromise = this.postRestData('/methods/', newMethod).then(data => {
+            // We created a group; post it to the DB
+            return this.postRestData('/families/', writerFamily).then(data => {
                 return Promise.resolve(data['@graph'][0]);
             });
         }
-
-        // Wrote (POST/PUT) method to the DB. Now work on the segregation
-        return methodPromise.then(newMethod => {
-            // All family subobjects written. Now write the family object itself. We may be writing more than one in
-            // parallel, so clone the set-up family object before modifying it for this particular object
-            var writerFamily = _.clone(newFamily);
-            writerFamily.dateTime = moment().format();
-            if (familyLabel) {
-                writerFamily.label = familyLabel;
-            }
-
-            // If a method and/or segregation object was created (at least one method/segregation field set), assign it to the family.
-            // If writing multiple family objects, reuse the one we made, but assign new methods and segregations because each family
-            // needs unique objects here.
-            if (newMethod) {
-                writerFamily.method = newMethod['@id'];
-            }
-
-            // Either update or create the family object in the DB
-            if (this.state.family && Object.keys(this.state.family).length) {
-                // We're editing a family. PUT the new family object to the DB to update the existing one.
-                return this.putRestData('/families/' + this.state.family.uuid, writerFamily).then(data => {
-                    return Promise.resolve(data['@graph'][0]);
-                });
-            } else {
-                // We created a group; post it to the DB
-                return this.postRestData('/families/', writerFamily).then(data => {
-                    return Promise.resolve(data['@graph'][0]);
-                });
-            }
-        });
     },
 
     // Return an array of variant search strings, one element per variant entered.
