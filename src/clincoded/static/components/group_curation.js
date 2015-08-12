@@ -383,6 +383,7 @@ var GroupCuration = React.createClass({
         if (value1) {
             newMethod.additionalInformation = value1;
         }
+        newMethod.dateTime = moment().format();
 
         return Object.keys(newMethod).length ? newMethod : null;
     },
@@ -945,7 +946,7 @@ var GroupViewer = React.createClass({
 
                             <div>
                                 <dt>Genotyping methods</dt>
-                                <dd>{method && method.genotypingMethods.join(', ')}</dd>
+                                <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
                             </div>
 
                             <div>
