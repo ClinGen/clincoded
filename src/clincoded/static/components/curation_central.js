@@ -27,7 +27,7 @@ var external_url_map = globals.external_url_map;
 
 // Curator page content
 var CurationCentral = React.createClass({
-    mixins: [RestMixin, CurationMixin],
+    mixins: [RestMixin, CurationMixin, ModalMixin],
 
     getInitialState: function() {
         return {
@@ -39,17 +39,19 @@ var CurationCentral = React.createClass({
     // Called when currently selected PMID changes
     currPmidChange: function(pmid) {
         if (pmid !== undefined) {
-            var gdm = this.state.currGdm;
+            // pass currPmidChange(0) if you want to clear the PMID selection
+            if (pmid === 0) {
+                window.location.replace('/curation-central/?gdm=' + this.state.currGdm.uuid);
+            }
 
+            // otherwise, replaceState to the specified pmid
+            var gdm = this.state.currGdm;
             if (Object.keys(gdm).length) {
                 // Find the annotation in the GDM matching the given pmid
                 var currAnnotation = _(gdm.annotations).find(annotation => {
                     return annotation.article.pmid === pmid;
                 });
-
-                if (currAnnotation) {
-                    this.setState({currPmid: currAnnotation.article.pmid});
-                }
+                if (currAnnotation) this.setState({currPmid: currAnnotation.article.pmid});
             }
             if (this.state.currGdm && Object.keys(this.state.currGdm).length) {
                 window.history.replaceState(window.state, '', '/curation-central/?gdm=' + this.state.currGdm.uuid + '&pmid=' + pmid);
@@ -148,6 +150,10 @@ var CurationCentral = React.createClass({
                         {currArticle ?
                             <div className="col-md-3">
                                 <CurationPalette gdm={gdm} annotation={annotation} session={this.props.session} />
+                                <Modal title='Reassign PubMed aritcle to another Mode of Inheritance'>
+                                    <button className="btn btn-primary pmid-selection-add-btn" modal={<ReassignPmid protocol={this.props.protocol}
+                                            currPmidChange={this.currPmidChange} closeModal={this.closeModal} gdm={gdm} article={currArticle} />}>Reassign PMID</button>
+                                </Modal>
                             </div>
                         : null}
                     </div>
@@ -310,6 +316,148 @@ var AddPmidModal = React.createClass({
                 <div className='modal-footer'>
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
                     <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Add Article" />
+                </div>
+            </Form>
+        );
+    }
+});
+
+// The content of the Add PMID(s) modal dialog box
+var ReassignPmid = React.createClass({
+    mixins: [FormMixin, RestMixin],
+
+    propTypes: {
+        closeModal: React.PropTypes.func, // Function to call to close the modal
+        protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
+        currPmidChange: React.PropTypes.func // Function to call when currently selected article changes
+    },
+
+    contextTypes: {
+        fetch: React.PropTypes.func // Function to perform a search
+    },
+
+    getInitialState: function() {
+        return {
+            currGdmUuid: '',
+            evidenceUuid: '',
+            otherGdms: [],
+            selectedGdmUuid: ''
+        };
+    },
+
+    onGdmSelectChange: function(e) {
+        this.setState({ selectedGdmUuid: e.target.value });
+    },
+
+    getData: function() {
+        // run through current GDM's annotations and find uuid of selected evidence;
+        // also set uuid of current GDM
+        for (var i = 0; i < this.props.gdm.annotations.length; i++) {
+            var tempAnnotation = this.props.gdm.annotations[i];
+            if (tempAnnotation.article.uuid == this.props.article.uuid) {
+                this.setState({
+                    currGdmUuid: this.props.gdm.uuid,
+                    evidenceUuid: tempAnnotation.uuid
+                });
+            }
+        }
+        // find other GDMs with same Gene and Disease...
+        this.getRestData('/search/?type=gdm&gene.uuid=' + this.props.gdm.gene.uuid + '&disease.uuid=' + this.props.gdm.disease.uuid).then(data => {
+            var tempOtherGdms = [];
+            for (var i = 0; i < data['@graph'].length; i++) {
+                var tempGdm = data['@graph'][i];
+                // ... but different Mode of Inheritance
+                if (tempGdm.uuid != this.props.gdm.uuid) {
+                    tempOtherGdms.push({
+                        uuid: tempGdm.uuid,
+                        gdm: tempGdm.gene.symbol + "–" + tempGdm.disease.term + "–" + tempGdm.modeInheritance
+                    });
+                }
+            }
+            this.setState({otherGdms: tempOtherGdms});
+        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
+    },
+
+    componentDidMount: function() {
+        this.getData();
+    },
+
+    // Called when the modal form’s submit button is clicked. Handles validation and triggering
+    // the process to add an article.
+    submitForm: function(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+        var newGdmUuid = e.target.elements.newGdm.value;
+        // grab complete data for both involved GDMs; regrabbing currGdm data as it might have changed
+        // since initial page load
+        this.getRestDatas(['/gdm/' + this.state.currGdmUuid + '/?frame=object', '/gdm/' + newGdmUuid + '/?frame=object'],
+                [function() {}, function() {}]).then(data => {
+            var currGdm = data[0];
+            var newGdm = data[1];
+            var currGdmAnnotIndex;
+            var failState = true;
+            console.log(this.state.evidenceUuid);
+            // find index of annotation we want from new currGdm object
+            for (var i = 0; i < currGdm.annotations.length; i++) {
+                console.log(currGdm.annotations[i]);
+                if (currGdm.annotations[i] == '/evidence/' + this.state.evidenceUuid + '/') {
+                    currGdmAnnotIndex = i;
+                    failState = false;
+                }
+            }
+            // make sure that this annotation doesn't already exist in the newGdm object
+            for (var i = 0; i < newGdm.annotations.length; i++) {
+                if (newGdm.annotations[i] == '/evidence/' + this.state.evidenceUuid + '/') failState = true;
+            }
+            if (failState == false) {
+                newGdm.annotations.push(currGdm.annotations[currGdmAnnotIndex]);
+                currGdm.annotations.splice(currGdmAnnotIndex, 1);
+                // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
+                delete currGdm.uuid;
+                delete currGdm.status;
+                delete currGdm['@id'];
+                delete currGdm['@type'];
+                delete newGdm.uuid;
+                delete newGdm.status;
+                delete newGdm['@id'];
+                delete newGdm['@type'];
+                // PUT the new current GDM and the new receiving GDM
+                this.putRestData('/gdm/' + newGdmUuid, newGdm);
+                this.putRestData('/gdm/' + this.state.currGdmUuid, currGdm);
+                this.props.closeModal();
+                // refresh page
+                this.props.currPmidChange(0);
+            }
+        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
+    },
+
+    // Called when the modal form's cancel button is clicked. Just closes the modal like
+    // nothing happened.
+    cancelForm: function(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+        this.props.closeModal();
+    },
+
+    render: function() {
+        return (
+            <Form submitHandler={this.submitForm} formClassName="form-std">
+                <div className="modal-body">
+                    Reassign this article to which related GDM?
+                    {this.state.otherGdms.length > 0 ?
+                    <div className="radio">
+                        {this.state.otherGdms.map(function(item) {
+                            return <label key={item.uuid}><input type="radio" name="newGdm" id={item.uuid} value={item.uuid}
+                                checked={this.state.selectedGdmUuid === item.uuid} onChange={this.onGdmSelectChange} />{item.gdm}</label>;
+                        }, this)}
+                    </div>
+                    : <ul><li>No related GDMs found</li></ul>}
+                    If there are no related GDMs, or if the GDM you are looking for is not listed, please create the GDM <a href="/create-gene-disease/">here</a>.
+                </div>
+                <div className='modal-footer'>
+                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    {this.state.selectedGdmUuid !== '' ?
+                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Reassign Article" />
+                        : <a href="#" className="btn btn-primary btn-inline-spacer disabled" role="button">Reassign Article</a>
+                    }
                 </div>
             </Form>
         );
