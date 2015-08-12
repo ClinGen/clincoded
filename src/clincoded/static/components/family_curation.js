@@ -504,8 +504,18 @@ var FamilyCuration = React.createClass({
                         // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
                         var groupUuid = group.uuid;
                         delete group.uuid;
+                        delete group.status;
+                        delete group.schema_version;
                         delete group['@id'];
                         delete group['@type'];
+
+//                        Object.keys(group).map(function(key) {
+//                            if ((typeof group[key] === 'object' && group[key].length === 0) || !group[key]) {
+//                                delete group[key];
+//                            }
+//                        });
+
+                        console.log('GROUP: %o', group);
 
                         // Post the modified annotation to the DB, then go back to Curation Central
                         return this.putRestData('/groups/' + groupUuid, group);

@@ -321,6 +321,8 @@ var GroupCuration = React.createClass({
                         newGroup.additionalInformation = value;
                     }
 
+                    console.log('GROUP: %o', newGroup);
+
                     // Either update or create the group object in the DB
                     if (this.state.group && Object.keys(this.state.group).length) {
                         // We're editing a group. PUT the new group object to the DB to update the existing one.
