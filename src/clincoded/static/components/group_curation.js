@@ -207,6 +207,7 @@ var GroupCuration = React.createClass({
                 }).then(data => {
                     // Now make the new group.
                     newGroup.label = this.getFormValue('groupname');
+                    newGroup.dateTime = moment().format();
 
                     // Get an array of all given disease IDs
                     newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
@@ -295,8 +296,6 @@ var GroupCuration = React.createClass({
                     if (value) {
                         newGroup.additionalInformation = value;
                     }
-
-                    console.log('GROUP: %o', newGroup);
 
                     // Either update or create the group object in the DB
                     if (this.state.group && Object.keys(this.state.group).length) {

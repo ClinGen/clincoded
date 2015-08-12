@@ -486,14 +486,6 @@ var FamilyCuration = React.createClass({
                         delete group['@id'];
                         delete group['@type'];
 
-//                        Object.keys(group).map(function(key) {
-//                            if ((typeof group[key] === 'object' && group[key].length === 0) || !group[key]) {
-//                                delete group[key];
-//                            }
-//                        });
-
-                        console.log('GROUP: %o', group);
-
                         // Post the modified annotation to the DB, then go back to Curation Central
                         return this.putRestData('/groups/' + groupUuid, group);
                     }
