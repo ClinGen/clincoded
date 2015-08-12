@@ -22,8 +22,6 @@ ORDER = [
     #'disease',
     'article',
     'variant',
-    'assessment',
-    'method',
     'individual',
     'family',
     #'statistic',

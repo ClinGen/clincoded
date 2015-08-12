@@ -119,6 +119,7 @@
         },
         "ageValue": {
             "title": "Age Value",
+            "description": "Individual method",
             "description": "Age value",
             "type": "integer",
             "minimum": 0,
@@ -138,10 +139,80 @@
             ]
         },
         "method": {
-            "title": "Method",
-            "description": "Mothed id",
-            "type": "string",
-            "linkTo": "method"
+            "title": "Individual Method",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "previousTesting": {
+                    "title": "Previous Testing",
+                    "description": "Previous testing",
+                    "type": "boolean"
+                },
+                "previousTestingDescription": {
+                    "title": "Previous Testing",
+                    "description": "Previous testing",
+                    "type": "string",
+                    "default": ""
+                },
+                "genomeWideStudy": {
+                    "title": "Genome-Wide Study",
+                    "description": "Genome-wide study",
+                    "type": "boolean"
+                },
+                "genotypingMethods": {
+                    "title": "Genotyping Method(s)",
+                    "description": "List of genotyping methods",
+                    "type": "array",
+                    "default": [],
+                    "items": {
+                        "title": "Genotyping Method",
+                        "description": "Genotyping method",
+                        "type": "string",
+                        "enum": [
+                            "Exome sequencing",
+                            "Genotyping",
+                            "HRM",
+                            "PCR",
+                            "Sanger",
+                            "Whole genome shotgun sequencing"
+                        ]
+                    }
+                },
+                "entireGeneSequenced": {
+                    "title": "Entire Gene Sequenced",
+                    "description": "Entire gene sequenced",
+                    "type": "boolean"
+                },
+                "copyNumberAssessed": {
+                    "title": "Copy Number Assessed",
+                    "description": "Copy number assessed",
+                    "type": "boolean"
+                },
+                "specificMutationsGenotyped": {
+                    "title": "Copy Number Assessed",
+                    "description": "Copy number assessed",
+                    "type": "boolean"
+                },
+                "specificMutationsGenotypedMethod": {
+                    "title": "Specific Mutations Genotyped Method",
+                    "description": "Method by which specific mutations genotyped",
+                    "type": "string",
+                    "default": ""
+                },
+                "additionalInformation": {
+                    "title": "Additional Information",
+                    "description": "Additional information",
+                    "type": "string",
+                    "default": ""
+                },
+                "dateTime": {
+                    "title": "Date Time",
+                    "description": "Time stamp for creation",
+                    "type": "string",
+                    "format": "date-time",
+                    "default": ""
+                }
+            }
         },
         "additionalInformation": {
             "title": "Additional Information",
