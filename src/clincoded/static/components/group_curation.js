@@ -14,6 +14,7 @@ var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
+var booleanToDropdown = curator.booleanToDropdown;
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
 var Form = form.Form;
@@ -205,41 +206,17 @@ var GroupCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    // Make a new method and save it to the DB
-                    var newMethod = this.createMethod();
-                    if (newMethod) {
-                        if (this.state.group && this.state.group.method && Object.keys(this.state.group.method).length) {
-                            // We're editing a group and it had an existing method. Just PUT an update to the method.
-                            newMethod.dateTime = moment().format();
-                            return this.putRestData('/methods/' + this.state.group.method.uuid, newMethod).then(data => {
-                                return Promise.resolve(data['@graph'][0]);
-                            });
-                        } else {
-                            // We're either creating a group, or editing an existing group that didn't have a method
-                            // Post the new method to the DB. When the promise returns with the new method
-                            // object, pass it to the next promise-processing code.
-                            return this.postRestData('/methods/', newMethod).then(data => {
-                                return Promise.resolve(data['@graph'][0]);
-                            });
-                        }
-                    } else {
-                        // If we're editing a group and it already had a method, then delete the method from the DB.
-                        // If we're editing a group and it didn't have a method, do nothing
-                        // If we're creating a group, do nothing.
-                        // For now, just resolve the promise with no method object. We'll deal with deleting objects
-                        // later.
-                        return Promise.resolve(null);
-                    }
-                }).then(newMethod => {
-                    // Method successfully created if needed (null if not); passed in 'newMethod'. Now make the new group.
+                    // Now make the new group.
                     newGroup.label = this.getFormValue('groupname');
+                    newGroup.dateTime = moment().format();
 
                     // Get an array of all given disease IDs
                     newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
 
                     // If a method object was created (at least one method field set), get its new object's
+                    var newMethod = this.createMethod();
                     if (newMethod) {
-                        newGroup.method = newMethod['@id'];
+                        newGroup.method = newMethod;
                     }
 
                     // Fill in the group fields from the Common Diseases & Phenotypes panel
@@ -407,6 +384,7 @@ var GroupCuration = React.createClass({
         if (value1) {
             newMethod.additionalInformation = value1;
         }
+        newMethod.dateTime = moment().format();
 
         return Object.keys(newMethod).length ? newMethod : null;
     },
@@ -423,7 +401,7 @@ var GroupCuration = React.createClass({
 
         return (
             <div>
-                {(!this.queryValues.groupUuid || Object.keys(this.state.group).length > 0) ?
+                {(!this.queryValues.groupUuid || Object.keys(this.state.group).length) ?
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
@@ -719,11 +697,11 @@ var LabelOtherGenes = React.createClass({
 // as the calling component.
 var GroupMethods = function() {
     var group = this.state.group;
-    var method = group && group.method;
+    var method = (group.method && Object.keys(group.method).length) ? group.method : {};
 
     return (
         <div className="row">
-            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={method ? method.previousTesting : null}
+            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={booleanToDropdown(method.previousTesting)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -732,7 +710,7 @@ var GroupMethods = function() {
             </Input>
             <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5" value={method ? method.previousTestingDescription : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={method ? method.genomeWideStudy : null}
+            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={booleanToDropdown(method.genomeWideStudy)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">No Selection</option>
                 <option disabled="disabled"></option>
@@ -762,21 +740,21 @@ var GroupMethods = function() {
                 <option>Sanger</option>
                 <option>Whole genome shotgun sequencing</option>
             </Input>
-            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={method ? method.entireGeneSequenced : null}
+            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={booleanToDropdown(method.entireGeneSequenced)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={method ? method.copyNumberAssessed : null}
+            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={booleanToDropdown(method.copyNumberAssessed)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={method ? method.specificMutationsGenotyped : null}
+            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={booleanToDropdown(method.specificMutationsGenotyped)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -827,7 +805,7 @@ var GroupViewer = React.createClass({
 
         return (
             <div className="container">
-                <div className="row group-curation-content">
+                <div className="row curation-content-viewer">
                     <h1>{context.label}</h1>
                     <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
                         <dl className="dl-horizontal">
@@ -954,7 +932,7 @@ var GroupViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Previous testing</dt>
-                                <dd>{(method && method.previousTesting) ? 'Yes' : 'No'}</dd>
+                                <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
@@ -964,27 +942,27 @@ var GroupViewer = React.createClass({
 
                             <div>
                                 <dt>Genome-wide study</dt>
-                                <dd>{(method && method.genomeWideStudy) ? 'Yes' : 'No'}</dd>
+                                <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
                                 <dt>Genotyping methods</dt>
-                                <dd>{method && method.genotypingMethods.join(', ')}</dd>
+                                <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
                             </div>
 
                             <div>
                                 <dt>Entire gene sequenced</dt>
-                                <dd>{(method && method.entireGeneSequenced) ? 'Yes' : 'No'}</dd>
+                                <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
                                 <dt>Copy number assessed</dt>
-                                <dd>{(method && method.copyNumberAssessed) ? 'Yes' : 'No'}</dd>
+                                <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
                                 <dt>Specific Mutations Genotyped</dt>
-                                <dd>{(method && method.specificMutationsGenotyped) ? 'Yes' : 'No'}</dd>
+                                <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>

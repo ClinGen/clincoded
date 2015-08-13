@@ -24,6 +24,9 @@ var CurationMixin = module.exports.CurationMixin = {
         };
     },
 
+    // Get a flattened GDM corresponding to the one given in gdmUuid. update its OMIM ID given in
+    // newOmimId, and write it back out. If the write is successful, also update the currOmimId
+    // React state variable.
     updateOmimId: function(gdmUuid, newOmimId) {
         this.getRestData(
             '/gdm/' + gdmUuid + '/?frame=object'
@@ -40,8 +43,12 @@ var CurationMixin = module.exports.CurationMixin = {
             this.setState({currOmimId: newOmimId});
         }).catch(e => {
             console.log('UPDATEOMIMID %o', e);
-            parseAndLogError.bind(undefined, 'putRequest');
         });
+    },
+
+    // Set the currOmimId state to the given omimId
+    setOmimIdState: function(omimId) {
+        this.setState({currOmimId: omimId});
     }
 };
 
@@ -144,11 +151,12 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var annotation = this.props.annotation;
         var session = this.props.session;
         var curatorMatch = annotation.owner === (session && session.user_properties && session.user_properties.email);
-        var url = curatorMatch ? ('/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
 
         return (
             <Panel panelClassName="panel-evidence-groups" title={'Evidence for PMID:' + this.props.annotation.article.pmid}>
-                <Panel title={<CurationPaletteTitles title="Group" url={url} />} panelClassName="panel-evidence">
+                <Panel title={<CurationPaletteTitles title="Group" url={groupUrl} />} panelClassName="panel-evidence">
                     {annotation.groups && annotation.groups.map(function(group) {
                         return (
                             <div className="panel-evidence-group" key={group.uuid}>
@@ -158,6 +166,21 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                     <p>{moment(annotation.dateTime).format('YYYY MMM DD, h:mm a')}</p>
                                 </div>
                                 <a href={'/group/' + group.uuid} target="_blank">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Edit</a></span> : null}
+                                {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid}>Add family information</a></div> : null}
+                            </div>
+                        );
+                    }.bind(this))}
+                </Panel>
+                <Panel title={<CurationPaletteTitles title="Family" url={familyUrl} />} panelClassName="panel-evidence">
+                    {annotation.families && annotation.families.map(function(family) {
+                        return (
+                            <div className="panel-evidence-group" key={family.uuid}>
+                                <h5>{family.label}</h5>
+                                <div className="evidence-curation-info">
+                                    <p className="evidence-curation-info">{annotation.owner}</p>
+                                    <p>{moment(annotation.dateTime).format('YYYY MMM DD, h:mm a')}</p>
+                                </div>
+                                <a href={'/family/' + family.uuid} target="_blank">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Edit</a></span> : null}
                             </div>
                         );
                     }.bind(this))}
@@ -404,3 +427,9 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
         );
     }
 });
+
+
+// Convert a boolean value to a dropdown value
+var booleanToDropdown = module.exports.booleanToDropdown = function booleanToDropdown(boolVal) {
+    return boolVal === true ? 'Yes' : (boolVal === false ? 'No' : 'none');
+};

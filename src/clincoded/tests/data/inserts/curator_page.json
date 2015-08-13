@@ -18,6 +18,12 @@
         "uuid": "a1d4d18b-27be-4a2b-9447-503e310d6f66"
     },
     {
+        "name": "family-curation",
+        "title": "Family Curation",
+        "status": "released",
+        "uuid": "1c69cb8c-bace-4f88-b623-9d3c43262abb"
+    },
+    {
         "name": "dashboard",
         "title": "Dashboard",
         "status": "released",

@@ -30,7 +30,7 @@ input[type=password],
 input[type=email],
 input[type=search],
 textarea.form-control {
-    background-color: #f8f8f8;
+    background-color: #fff;
 }
 
 .btn {
@@ -49,6 +49,11 @@ textarea.form-control {
 
 .btn-inline-spacer {
     margin-left: 5px;
+}
+
+// Last button in a panel; gap to bottom of panel
+.btn-last {
+    margin-bottom: 40px;
 }
 
 .site-header {
