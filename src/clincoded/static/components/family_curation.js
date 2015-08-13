@@ -258,41 +258,38 @@ var FamilyCuration = React.createClass({
         return Object.keys(newVariant).length ? newVariant : null;
     },
 
-    varlidateForm: function() {
-        var valid = this.validateDefault();
+    // Validate that all the variant panels have properly-formatted input. Return true if they all do.
+    validateVariants: function() {
+        var valid;
+        var anyInvalid = false;
 
-        if (valid) {
-            var varValid;
-            var anyInvalid = false;
-
-            // Check Variant panel inputs for correct formats
-            for (var i = 0; i < this.state.variantCount; i++) {
-                // Check dbSNP ID for a valid format
-                var value = this.getFormValue('VARdbsnpid' + i);
-                if (value) {
-                    varValid = value.match(/^[\s]*(rs\d{1,8})[\s]*$/);
-                    if (!varValid) {
-                        this.setFormErrors('VARdbsnpid' + i, 'Use dbSNP IDs (e.g. rs1748)');
-                        anyInvalid = true;
-                    }
-                }
-
-                // Check dbSNP ID for a valid format
-                value = this.getFormValue('VARclinvarid' + i);
-                if (value) {
-                    varValid = value.match(/^[\s]*(RCV\d{9}(.\d){0,1})[\s]*$/);
-                    if (!varValid) {
-                        this.setFormErrors('VARclinvarid' + i, 'Use ClinVar IDs (e.g. RCV000162091 or RCV000049373.1)');
-                        anyInvalid = true;
-                    }
+        // Check Variant panel inputs for correct formats
+        for (var i = 0; i < this.state.variantCount; i++) {
+            // Check dbSNP ID for a valid format
+            var value = this.getFormValue('VARdbsnpid' + i);
+            if (value) {
+                valid = value.match(/^\s*(rs\d{1,8})\s*$/i);
+                if (!valid) {
+                    this.setFormErrors('VARdbsnpid' + i, 'Use dbSNP IDs (e.g. rs1748)');
+                    anyInvalid = true;
                 }
             }
 
-            valid = !anyInvalid;
+            // Check dbSNP ID for a valid format
+            value = this.getFormValue('VARclinvarid' + i);
+            if (value) {
+                valid = value.match(/^\s*(RCV\d{9}(.\d){0,1})\s*$/i);
+                if (!valid) {
+                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar IDs (e.g. RCV000162091 or RCV000049373.1)');
+                    anyInvalid = true;
+                }
+            }
         }
-        return valid;
+
+        return !anyInvalid;
     },
 
+    // Called when a form is submitted.
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
@@ -300,44 +297,46 @@ var FamilyCuration = React.createClass({
         this.saveAllFormValues();
 
         // Start with default validation; indicate errors on form if not, then bail
-        if (this.varlidateForm()) {
+        if (this.varlidateDefault() && this.validateVariants()) {
             var newFamily = {}; // Holds the new group object;
             var familyDiseases = null, familyArticles, familyVariants = [];
             var savedFamilies; // Array of saved written to DB
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
-            var orphaIds = captureOrphas(this.getFormValue('orphanetid'));
-            var pmids = capturePmids(this.getFormValue('otherpmids'));
-
-            // Check that all HPO terms appear valid
-            var hpoTerms = this.getFormValue('hpoid');
-            if (hpoTerms) {
-                var rawHpoids = _.compact(hpoTerms.toUpperCase().split(','));
-                var hpoids = _.compact(rawHpoids.map(function(id) { return captureHpoid(id); }));
-                if (rawHpoids.length !== hpoids.length) {
-                    formError = true;
-                    this.setFormErrors('hpoid', 'HPO IDs must be in the form “HP:NNNNNNN,” where N is a digit');
-                }
-            }
-
-            // Check that all NOT HPO terms appear valid
-            hpoTerms = this.getFormValue('nothpoid');
-            if (hpoTerms) {
-                var rawNotHpoids = _.compact(hpoTerms.toUpperCase().split(','));
-                var nothpoids = _.compact(rawNotHpoids.map(function(id) { return captureHpoid(id); }));
-                if (rawNotHpoids.length !== nothpoids.length) {
-                    formError = true;
-                    this.setFormErrors('nothpoid', 'Use HPO IDs, e.g. HP:0000123');
-                }
-            }
+            var orphaIds = curator.captureOrphas(this.getFormValue('orphanetid'));
+            var pmids = curator.capturePmids(this.getFormValue('otherpmids'));
+            var hpoids = curator.captureHpoids(this.getFormValue('hpoid'));
+            var nothpoids = curator.captureHpoids(this.getFormValue('nothpoid'));
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
-            if (!orphaIds || !orphaIds.length) {
-                // No 'orphaXX' found 
+            if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
+                // ORPHA list is bad
                 formError = true;
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
             }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (pmids && pmids.length && _(pmids).any(function(id) { return id === null; })) {
+                // PMID list is bad
+                formError = true;
+                this.setFormErrors('otherpmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
+            }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
+                // HPOID list is bad
+                formError = true;
+                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (nothpoids && nothpoids.length && _(nothpoids).any(function(id) { return id === null; })) {
+                // NOT HPOID list is bad
+                formError = true;
+                this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
             if (!formError) {
                 // Build search string from given ORPHA IDs
                 var searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');

@@ -113,39 +113,48 @@ var GroupCuration = React.createClass({
             var groupDiseases, groupGenes, groupArticles;
             var formError = false;
 
-            // Parse the comma-separated list of Orphanet IDs
-            var orphaIds = captureOrphas(this.getFormValue('orphanetid'));
-            var geneSymbols = captureGenes(this.getFormValue('othergenevariants'));
-            var pmids = capturePmids(this.getFormValue('otherpmids'));
-
-            // Check that all HPO terms appear valid
-            var hpoTerms = this.getFormValue('hpoid');
-            if (hpoTerms) {
-                var rawHpoids = _.compact(hpoTerms.toUpperCase().split(','));
-                var hpoids = _.compact(rawHpoids.map(function(id) { return captureHpoid(id); }));
-                if (rawHpoids.length !== hpoids.length) {
-                    formError = true;
-                    this.setFormErrors('hpoid', 'HPO IDs must be in the form “HP:NNNNNNN,” where N is a digit');
-                }
-            }
-
-            // Check that all NOT HPO terms appear valid
-            hpoTerms = this.getFormValue('nothpoid');
-            if (hpoTerms) {
-                var rawNotHpoids = _.compact(hpoTerms.toUpperCase().split(','));
-                var nothpoids = _.compact(rawNotHpoids.map(function(id) { return captureHpoid(id); }));
-                if (rawNotHpoids.length !== nothpoids.length) {
-                    formError = true;
-                    this.setFormErrors('nothpoid', 'Use HPO IDs, e.g. HP:0000123');
-                }
-            }
+            // Parse comma-separated list fields
+            var orphaIds = curator.captureOrphas(this.getFormValue('orphanetid'));
+            var geneSymbols = curator.captureGenes(this.getFormValue('othergenevariants'));
+            var pmids = curator.capturePmids(this.getFormValue('otherpmids'));
+            var hpoids = curator.captureHpoids(this.getFormValue('hpoid'));
+            var nothpoids = curator.captureHpoids(this.getFormValue('nothpoid'));
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
-            if (!orphaIds || !orphaIds.length) {
-                // No 'orphaXX' found
+            if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
+                // ORPHA list is bad
                 formError = true;
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
             }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (geneSymbols && geneSymbols.length && _(geneSymbols).any(function(id) { return id === null; })) {
+                // Gene symbol list is bad
+                formError = true;
+                this.setFormErrors('othergenevariants', 'Use gene symbols (e.g. SMAD3) separated by commas');
+            }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (pmids && pmids.length && _(pmids).any(function(id) { return id === null; })) {
+                // PMID list is bad
+                formError = true;
+                this.setFormErrors('otherpmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
+            }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
+                // HPOID list is bad
+                formError = true;
+                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (nothpoids && nothpoids.length && _(nothpoids).any(function(id) { return id === null; })) {
+                // NOT HPOID list is bad
+                formError = true;
+                this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
             if (!formError) {
                 // Build search string from given ORPHA IDs
                 var searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
@@ -167,7 +176,7 @@ var GroupCuration = React.createClass({
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
-                    if (geneSymbols) {
+                    if (geneSymbols && geneSymbols.length) {
                         // At least one gene symbol entered; search the DB for them.
                         searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
                         return this.getRestData(searchStr).then(genes => {
@@ -187,7 +196,7 @@ var GroupCuration = React.createClass({
                     }
                 }).then(data => {
                     // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
-                    if (pmids) {
+                    if (pmids && pmids.length) {
                         // User entered at least one PMID
                         searchStr = '/search/?type=article&' + pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
                         return this.getRestData(searchStr).then(articles => {
@@ -454,43 +463,6 @@ var GroupCuration = React.createClass({
 });
 
 globals.curator_page.register(GroupCuration, 'curator_page', 'group-curation');
-
-
-function captureBase(s, re, uppercase) {
-    var match, matchResults = [];
-
-    do {
-        match = re.exec(s);
-        if (match) {
-            matchResults.push(uppercase ? match[1].toUpperCase() : match[1]);
-        }
-    } while(match);
-    return matchResults;
-}
-
-// Given a string, find all the comma-separated 'orphaXX' occurrences.
-// Return all orpha IDs in an array.
-function captureOrphas(s) {
-    return captureBase(s, /(?:^|,|\s)orpha(\d+)(?=,|\s|$)/gi, true);
-}
-
-// Given a string, find all the comma-separated gene symbol occurrences.
-// Return all gene symbols in an array.
-function captureGenes(s) {
-    return s ? captureBase(s, /(?:^|,|\s*)([a-zA-Z](?:\w)*)(?=,|\s*|$)/gi, true) : null;
-}
-
-// Given a string, find all the comma-separated PMID occurrences.
-// Return all PMIDs in an array.
-function capturePmids(s) {
-    return s ? captureBase(s, /(?:^|,|\s*)(\d{1,8})(?=,|\s*|$)/gi) : null;
-}
-
-function captureHpoid(s) {
-    var match = s.toUpperCase().match(/^ *(HP:\d{7}) *$/i);
-    return match ? match[1] : null;
-}
-
 
 
 // Group Name group curation panel. Call with .call(this) to run in the same context

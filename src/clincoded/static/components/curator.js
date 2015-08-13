@@ -165,8 +165,8 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                     <p className="evidence-curation-info">{annotation.owner}</p>
                                     <p>{moment(group.dateTime).format('YYYY MMM DD, h:mm a')}</p>
                                 </div>
-                                <a href={'/group/' + group.uuid} target="_blank">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Edit</a></span> : null}
-                                {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid}>Add family information</a></div> : null}
+                                <a href={'/group/' + group.uuid} target="_blank" title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
+                                {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group">Add family information</a></div> : null}
                             </div>
                         );
                     }.bind(this))}
@@ -185,7 +185,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                         <span>Associations: </span>
                                         {family.associatedGroups.map(function(group, i) {
                                             return (
-                                                <span>
+                                                <span key={i}>
                                                     {i > 0 ? ', ' : ''}
                                                     <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
                                                 </span>
@@ -195,7 +195,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                 :
                                     <div>No associations</div>
                                 }
-                                <a href={'/family/' + family.uuid} target="_blank">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Edit</a></span> : null}
+                                <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
                             </div>
                         );
                     }.bind(this))}
@@ -447,4 +447,46 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
 // Convert a boolean value to a dropdown value
 var booleanToDropdown = module.exports.booleanToDropdown = function booleanToDropdown(boolVal) {
     return boolVal === true ? 'Yes' : (boolVal === false ? 'No' : 'none');
+};
+
+
+// Pull values from 's' that match the regular expression given in 're'. If resulting values should
+// be converted to uppercase, pass true in 'uppercase'.
+function captureBase(s, re, uppercase) {
+    if (s) {
+        var list;
+        var rawList = s.split(','); // Break input into array of raw strings
+        if (rawList && rawList.length) {
+            list = rawList.map(function(item) {
+                var m = re.exec(item);
+                return m ? (uppercase ? m[1].toUpperCase() : m[1]) : null;
+            });
+        }
+        return list;
+    }
+    return null;
+}
+
+// Given a string, find all the comma-separated 'orphaXX' occurrences. Return all orpha IDs in an array.
+// Any that don't match orphaXX pattern have null in the corresponding array element.
+exports.captureOrphas = function(s) {
+    return captureBase(s, /^\s*orpha(\d+)\s*$/i);
+};
+
+// Given a string, find all the comma-separated gene symbol occurrences. Return all given gene symbols in an array.
+// Any that don't match the gene symbol pattern have null in the corresponding array element.
+exports.captureGenes = function(s) {
+    return captureBase(s, /^\s*(\w+)\s*$/, true);
+};
+
+// Given a string, find all the comma-separated PMID occurrences. Return all given PMIDs in an array.
+// Any that don't match a 1- through 10-digit pattern have null in the corresponding array element.
+exports.capturePmids = function(s) {
+    return captureBase(s, /^\s*(\d{1,10})\s*$/);
+};
+
+// Given a string, find all the comma-separated PMID occurrences. Return all given PMIDs in an array.
+// Any that don't match a 1- through 10-digit pattern have null in the corresponding array element.
+exports.captureHpoids = function(s) {
+    return captureBase(s, /^\s*(HP:\d{7})\s*$/i, true);
 };
