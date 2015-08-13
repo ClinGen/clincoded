@@ -14,6 +14,7 @@ var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
+var booleanToDropdown = curator.booleanToDropdown;
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
 var Form = form.Form;
@@ -700,7 +701,7 @@ var GroupMethods = function() {
 
     return (
         <div className="row">
-            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={method ? method.previousTesting : null}
+            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={booleanToDropdown(method.previousTesting)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -709,7 +710,7 @@ var GroupMethods = function() {
             </Input>
             <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5" value={method ? method.previousTestingDescription : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={method ? method.genomeWideStudy : null}
+            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={booleanToDropdown(method.genomeWideStudy)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none" disabled="disabled">No Selection</option>
                 <option disabled="disabled"></option>
@@ -739,21 +740,21 @@ var GroupMethods = function() {
                 <option>Sanger</option>
                 <option>Whole genome shotgun sequencing</option>
             </Input>
-            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={method ? method.entireGeneSequenced : null}
+            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={booleanToDropdown(method.entireGeneSequenced)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={method ? method.copyNumberAssessed : null}
+            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={booleanToDropdown(method.copyNumberAssessed)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={method ? method.specificMutationsGenotyped : null}
+            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={booleanToDropdown(method.specificMutationsGenotyped)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -931,7 +932,7 @@ var GroupViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Previous testing</dt>
-                                <dd>{(method && method.previousTesting) ? 'Yes' : 'No'}</dd>
+                                <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
@@ -941,7 +942,7 @@ var GroupViewer = React.createClass({
 
                             <div>
                                 <dt>Genome-wide study</dt>
-                                <dd>{(method && method.genomeWideStudy) ? 'Yes' : 'No'}</dd>
+                                <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
@@ -951,17 +952,17 @@ var GroupViewer = React.createClass({
 
                             <div>
                                 <dt>Entire gene sequenced</dt>
-                                <dd>{(method && method.entireGeneSequenced) ? 'Yes' : 'No'}</dd>
+                                <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
                                 <dt>Copy number assessed</dt>
-                                <dd>{(method && method.copyNumberAssessed) ? 'Yes' : 'No'}</dd>
+                                <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
                                 <dt>Specific Mutations Genotyped</dt>
-                                <dd>{(method && method.specificMutationsGenotyped) ? 'Yes' : 'No'}</dd>
+                                <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
