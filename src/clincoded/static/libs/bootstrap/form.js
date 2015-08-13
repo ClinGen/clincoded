@@ -15,20 +15,24 @@ var Form = module.exports.Form = React.createClass({
     // of the form, and any children of those children, recursively.
     createInputRefs: function(children) {
         var processedChildren = React.Children.map(children, child => {
-            var props = {};
+            if (child) {
+                var props = {};
 
-            // Copy ref to new id property.
-            if (child.ref) {
-                props.id = child.ref;
+                // Copy ref to new id property.
+                if (child.ref) {
+                    props.id = child.ref;
+                }
+
+                // If the current child has children, process them recursively and assign the result to the new children property
+                if (child.props && child.props.children) {
+                    props.children = this.createInputRefs(child.props.children);
+                }
+
+                // If we made new properties, clone the child and assign the properties to the clone
+                return Object.keys(props).length ? React.cloneElement(child, props) : child;
             }
+            return null;
 
-            // If the current child has children, process them recursively and assign the result to the new children property
-            if (child.props && child.props.children) {
-                props.children = this.createInputRefs(child.props.children);
-            }
-
-            // If we made new properties, clone the child and assign the properties to the clone
-            return Object.keys(props).length ? React.cloneElement(child, props) : child;
         });
         return processedChildren;
     },
@@ -50,6 +54,7 @@ var FormMixin = module.exports.FormMixin = {
 
     // Do not call; called by React.
     getInitialState: function() {
+        this.formValues = {};
         return {formErrors: {}};
     },
 
@@ -64,6 +69,9 @@ var FormMixin = module.exports.FormMixin = {
     // returned. If the Input had an entered value but it wasn't numeric, null is returned.
     // If the Input had a proper numberic value, a Javascript 'number' type is returned
     // with the entered value.
+    // If min and max are defined, we additionally check to make sure it fits within the bounds
+    // defined by the values of min and max. min defaults to 0, and max has no default but can
+    // be undefined.
     getFormValueNumber: function(ref) {
         var value = this.getFormValue(ref);
         if (value) {
@@ -92,6 +100,15 @@ var FormMixin = module.exports.FormMixin = {
                 this.saveFormValue(ref, this.refs[ref].getValue());
             });
         }
+    },
+
+    resetAllFormValues: function() {
+        if (this.refs && Object.keys(this.refs).length) {
+            Object.keys(this.refs).map(ref => {
+                this.refs[ref].resetValue();
+            });
+        }
+        this.formValues = {};
     },
 
     // Get the saved form error for the Input with the given 'ref' value.
@@ -138,16 +155,27 @@ var FormMixin = module.exports.FormMixin = {
     validateDefault: function() {
         var valid = true;
         Object.keys(this.refs).forEach(ref => {
-            if (this.refs[ref].props.required && !this.getFormValue(ref)) {
+            var props = this.refs[ref].props;
+            if (props.required && !this.getFormValue(ref)) {
                 // Required field has no value. Set error state to render
                 // error, and remember to return false.
                 this.setFormErrors(ref, 'Required');
                 valid = false;
-            } else if (this.refs[ref].props.format === 'number') {
+            } else if (props.format === 'number') {
                 // Validate that format="number" fields have a valid number in them
-                if (this.getFormValueNumber(ref) === null) {
+                var numVal = this.getFormValueNumber(ref);
+                if (numVal === null) {
                     this.setFormErrors(ref, 'Number only');
                     valid = false;
+                } else if (numVal !== '' && ((props.minVal && numVal < props.minVal) || (props.maxVal && numVal > props.maxVal))) {
+                    valid = false;
+                    if (props.minVal && props.maxVal) {
+                        this.setFormErrors(ref, 'The range of allowed values is ' + props.minVal + ' to ' + props.maxVal);
+                    } else if (props.minVal) {
+                        this.setFormErrors(ref, 'The minimum allowed value is ' + props.minVal);
+                    } else {
+                        this.setFormErrors(ref, 'The maximum allowed value is ' + props.maxVal);
+                    }
                 }
             }
         });
@@ -161,10 +189,10 @@ var FormMixin = module.exports.FormMixin = {
 var Input = module.exports.Input = React.createClass({
     propTypes: {
         type: React.PropTypes.string.isRequired, // Type of input
-        label: React.PropTypes.oneOfType([
+        label: React.PropTypes.oneOfType([ // <label> for input; string or another React component
             React.PropTypes.string,
             React.PropTypes.object
-        ]), // <label> for input; string or another React component
+        ]),
         placeholder: React.PropTypes.string, // <input> placeholder text
         error: React.PropTypes.string, // Error message to display below input
         labelClassName: React.PropTypes.string, // CSS classes to add to labels
@@ -172,12 +200,17 @@ var Input = module.exports.Input = React.createClass({
         wrapperClassName: React.PropTypes.string, // CSS classes to add to wrapper div around inputs
         inputClassName: React.PropTypes.string, // CSS classes to add to input elements themselves
         rows: React.PropTypes.string, // Number of rows in textarea
-        value: React.PropTypes.string, // Value to pre-fill input with
+        value: React.PropTypes.oneOfType([ // Value to pre-fill input with
+            React.PropTypes.string,
+            React.PropTypes.number
+        ]),
         defaultValue: React.PropTypes.string, // Default value for <select>
         required: React.PropTypes.bool, // T to make this a required field
         clickHandler: React.PropTypes.func, // Called to handle button click
         submitHandler: React.PropTypes.func, // Called to handle submit button click
-        cancelHandler: React.PropTypes.func // Called to handle cancel button click
+        cancelHandler: React.PropTypes.func, // Called to handle cancel button click
+        minNum: React.PropTypes.number, // Minimum value for a number formatted input
+        maxNum: React.PropTypes.number // Maximum value for a number formatted input
     },
 
     getInitialState: function() {
@@ -188,10 +221,34 @@ var Input = module.exports.Input = React.createClass({
     // parent components.
     getValue: function() {
         if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
-            return React.findDOMNode(this.refs.input).value;
+            return React.findDOMNode(this.refs.input).value.trim();
         } else if (this.props.type === 'select') {
-            return this.getSelectedOption();
+            return this.getSelectedOption().trim();
         }
+    },
+
+    resetValue: function() {
+        if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
+            React.findDOMNode(this.refs.input).value = '';
+        } else if (this.props.type === 'select') {
+            this.resetSelectedOption();
+        }
+    },
+
+    resetSelectedOption: function() {
+        var optionNodes = this.refs.input.getDOMNode().getElementsByTagName('option');
+
+        // Get the DOM node for the selected <option>
+        var selectedOptionNode = _(optionNodes).find(function(option) {
+            return option.selected;
+        });
+
+        // Clear the selected option and set it to the first option
+        if (selectedOptionNode) {
+            selectedOptionNode.selected = false;
+            optionNodes[0] = true;
+        }
+
     },
 
     // Get the selected option from a <select> list
@@ -266,7 +323,7 @@ var Input = module.exports.Input = React.createClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} placeholder={this.props.placeholder} onChange={this.props.clearError} rows={this.props.rows} />
+                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} placeholder={this.props.placeholder} onChange={this.handleChange.bind(null, this.props.id)} rows={this.props.rows} />
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                         </div>
                     </div>
@@ -290,7 +347,7 @@ var Input = module.exports.Input = React.createClass({
                 //   clickHandler: Method to call when button is clicked
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
-                    <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} />
+                    <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} disabled={this.props.inputDisabled} />
                 );
                 break;
 
@@ -298,7 +355,7 @@ var Input = module.exports.Input = React.createClass({
                 title = this.props.title ? this.props.title : 'Submit';
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
-                    <button className={inputClasses} onClick={this.props.submitHandler}>{title}</button>
+                    <button className={inputClasses} onClick={this.props.submitHandler} disabled={this.props.inputDisabled}>{title}</button>
                 );
                 break;
 
@@ -306,7 +363,7 @@ var Input = module.exports.Input = React.createClass({
                 title = this.props.title ? this.props.title : 'Cancel';
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
-                    <button className={inputClasses} onClick={this.props.cancelHandler}>{title}</button>
+                    <button className={inputClasses} onClick={this.props.cancelHandler} disabled={this.props.inputDisabled}>{title}</button>
                 );
                 break;
 

@@ -249,6 +249,7 @@ class Family(Item):
     embedded = [
         'commonDiagnosis',
         'segregation.variants',
+        'otherPMIDs',
         'individualIncluded',
         'individualIncluded.diagnosis',
         'individualIncluded.variants'
