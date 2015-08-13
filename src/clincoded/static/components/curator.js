@@ -377,9 +377,12 @@ var CuratorRecordHeader = React.createClass({
 
     render: function() {
         var gdm = this.props.gdm;
-        var annotationOwners = _.uniq(gdm.annotations.map(function(annotation) {
+        var owners = gdm.annotations.map(function(annotation) {
             return annotation.submitted_by;
-        }), function(owner) { return owner.uuid; });
+        });
+        var annotationOwners = _.chain(owners).uniq(function(owner) {
+            return owner.uuid;
+        }).sortBy('last_name').value();
         var latestAnnotation = this.findLatestAnnotation();
 
         return (
