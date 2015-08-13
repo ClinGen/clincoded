@@ -180,6 +180,21 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                     <p className="evidence-curation-info">{annotation.owner}</p>
                                     <p>{moment(annotation.dateTime).format('YYYY MMM DD, h:mm a')}</p>
                                 </div>
+                                {family.associatedGroups && family.associatedGroups.length ?
+                                    <div>
+                                        <span>Associations: </span>
+                                        {family.associatedGroups.map(function(group, i) {
+                                            return (
+                                                <span>
+                                                    {i > 0 ? ', ' : ''}
+                                                    <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
+                                :
+                                    <div>No associations</div>
+                                }
                                 <a href={'/family/' + family.uuid} target="_blank">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Edit</a></span> : null}
                             </div>
                         );
