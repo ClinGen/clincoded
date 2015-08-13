@@ -226,6 +226,18 @@ def i_select(browser, value, name):
         inp.first.check()
 
 
+@when(parse('I select "{value}" from dropdown "{name}"'))
+def i_select(browser, value, name):
+    from splinter.exceptions import ElementDoesNotExist
+    try:
+        element = browser.find_by_xpath("//select[@class='%s']//option[@value='%s']" % (name, value)).first
+        element.click()
+    except ElementDoesNotExist:
+        inp = browser.find_by_xpath("//select[@class='%s']//option[@value='%s']" % (name, value)).first
+        assert inp, u'Element not found'
+        inp.first.check()
+
+
 @when(parse('I press "{name}"'))
 def i_press(browser, name):
     element = browser.find_by_xpath(

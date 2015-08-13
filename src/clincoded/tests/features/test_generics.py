@@ -8,13 +8,14 @@ from . import browsersteps
 
 pytestmark = [
     pytest.mark.bdd,
-    pytest.mark.usefixtures('workbook'),
+    pytest.mark.usefixtures('workbook', 'admin_user'),
 ]
 
 scenarios(
     'title.feature',
     'generics.feature',
     'create_gene_disease.feature',
+    'curation_central.feature',
 )
 
 

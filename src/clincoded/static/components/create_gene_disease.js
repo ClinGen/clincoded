@@ -143,9 +143,9 @@ var CreateGeneDisease = React.createClass({
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
                                 <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue={hpoValues[0].value}
                                     error={this.getFormError('hpo')} clearError={this.clrFormErrors.bind(null, 'hpo')}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="hpo" required>
                                     {hpoValues.map(function(v, i) {
-                                        return <option key={i} value={v.value} disabled={v.disabled ? 'disabled' : ''}>{v.text}</option>;
+                                        return <option key={i} value={v.value !== undefined ? v.value : v.text} disabled={v.disabled ? 'disabled' : ''}>{v.text}</option>;
                                     })}
                                 </Input>
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
