@@ -469,24 +469,24 @@ function captureBase(s, re, uppercase) {
 
 // Given a string, find all the comma-separated 'orphaXX' occurrences. Return all orpha IDs in an array.
 // Any that don't match orphaXX pattern have null in the corresponding array element.
-exports.captureOrphas = function(s) {
+module.exports.captureOrphas = function(s) {
     return captureBase(s, /^\s*orpha(\d+)\s*$/i);
 };
 
 // Given a string, find all the comma-separated gene symbol occurrences. Return all given gene symbols in an array.
 // Any that don't match the gene symbol pattern have null in the corresponding array element.
-exports.captureGenes = function(s) {
+module.exports.captureGenes = function(s) {
     return captureBase(s, /^\s*(\w+)\s*$/, true);
 };
 
 // Given a string, find all the comma-separated PMID occurrences. Return all given PMIDs in an array.
 // Any that don't match a 1- through 10-digit pattern have null in the corresponding array element.
-exports.capturePmids = function(s) {
+module.exports.capturePmids = function(s) {
     return captureBase(s, /^\s*(\d{1,10})\s*$/);
 };
 
 // Given a string, find all the comma-separated PMID occurrences. Return all given PMIDs in an array.
 // Any that don't match a 1- through 10-digit pattern have null in the corresponding array element.
-exports.captureHpoids = function(s) {
+module.exports.captureHpoids = function(s) {
     return captureBase(s, /^\s*(HP:\d{7})\s*$/i, true);
 };

@@ -21,7 +21,6 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 var PmidDoiButtons = curator.PmidDoiButtons;
-var booleanToDropdown = curator.booleanToDropdown;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 
@@ -174,7 +173,8 @@ var FamilyCuration = React.createClass({
     writeFamilyObj: function(newFamily, familyLabel) {
         var methodPromise; // Promise from writing (POST/PUT) a method to the DB
 
-        // Make a new method and save it to the DB
+        // Get a new family object ready for writing. Modify a copy of it instead
+        // of the one we were given.
         var writerFamily = _.clone(newFamily);
         writerFamily.dateTime = moment().format();
         if (familyLabel) {
@@ -196,7 +196,7 @@ var FamilyCuration = React.createClass({
                 return Promise.resolve(data['@graph'][0]);
             });
         } else {
-            // We created a group; post it to the DB
+            // We created a family; post it to the DB
             return this.postRestData('/families/', writerFamily).then(data => {
                 return Promise.resolve(data['@graph'][0]);
             });
@@ -559,7 +559,6 @@ var FamilyCuration = React.createClass({
         var newSegregation = {};
         var value1;
 
-        // Put together a new 'method' object
         value1 = this.getFormValue('pedigreedesc');
         if (value1) {
             newSegregation.pedigreeDescription = value1;
@@ -796,42 +795,6 @@ var FamilyCuration = React.createClass({
 globals.curator_page.register(FamilyCuration, 'curator_page', 'family-curation');
 
 
-function captureBase(s, re, uppercase) {
-    var match, matchResults = [];
-
-    do {
-        match = re.exec(s);
-        if (match) {
-            matchResults.push(uppercase ? match[1].toUpperCase() : match[1]);
-        }
-    } while(match);
-    return matchResults;
-}
-
-// Given a string, find all the comma-separated 'orphaXX' occurrences.
-// Return all orpha IDs in an array.
-function captureOrphas(s) {
-    return captureBase(s, /(?:^|,|\s)orpha(\d+)(?=,|\s|$)/gi, true);
-}
-
-// Given a string, find all the comma-separated gene symbol occurrences.
-// Return all gene symbols in an array.
-function captureGenes(s) {
-    return s ? captureBase(s, /(?:^|,|\s*)([a-zA-Z](?:\w)*)(?=,|\s*|$)/gi, true) : null;
-}
-
-// Given a string, find all the comma-separated PMID occurrences.
-// Return all PMIDs in an array.
-function capturePmids(s) {
-    return s ? captureBase(s, /(?:^|,|\s*)(\d{1,8})(?=,|\s*|$)/gi) : null;
-}
-
-function captureHpoid(s) {
-    var match = s.toUpperCase().match(/^ *(HP:\d{7}) *$/i);
-    return match ? match[1] : null;
-}
-
-
 // Family Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilyName = function(displayNote) {
@@ -1031,7 +994,7 @@ var FamilyMethods = function() {
 
     return (
         <div className="row">
-            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={booleanToDropdown(method.previousTesting)}
+            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={curator.booleanToDropdown(method.previousTesting)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1040,7 +1003,7 @@ var FamilyMethods = function() {
             </Input>
             <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5" value={method.previousTestingDescription}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={booleanToDropdown(method.genomeWideStudy)}
+            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={curator.booleanToDropdown(method.genomeWideStudy)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1070,21 +1033,21 @@ var FamilyMethods = function() {
                 <option>Sanger</option>
                 <option>Whole genome shotgun sequencing</option>
             </Input>
-            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={booleanToDropdown(method.entireGeneSequenced)}
+            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={curator.booleanToDropdown(method.entireGeneSequenced)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={booleanToDropdown(method.copyNumberAssessed)}
+            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={curator.booleanToDropdown(method.copyNumberAssessed)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={booleanToDropdown(method.specificMutationsGenotyped)}
+            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={curator.booleanToDropdown(method.specificMutationsGenotyped)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1116,7 +1079,7 @@ var FamilySegregation = function() {
             <Input type="text" ref="nogenerationsinpedigree" label="# generations in pedigree:" format="number" value={segregation.numberOfGenerationInPedigree}
                 error={this.getFormError('nogenerationsinpedigree')} clearError={this.clrFormErrors.bind(null, 'nogenerationsinpedigree')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="consanguineous" label="Consanguineous family?:" defaultValue="none" value={booleanToDropdown(segregation.consanguineousFamily)}
+            <Input type="select" ref="consanguineous" label="Consanguineous family?:" defaultValue="none" value={curator.booleanToDropdown(segregation.consanguineousFamily)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1156,7 +1119,7 @@ var FamilySegregation = function() {
             <Input type="text" ref="nounaffectedindividuals" label="# unaffected individuals:" format="number" value={segregation.numberOfUnaffectedIndividuals}
                 error={this.getFormError('nounaffectedindividuals')} clearError={this.clrFormErrors.bind(null, 'nounaffectedindividuals')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="bothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={booleanToDropdown(segregation.probandAssociatedWithBoth)}
+            <Input type="select" ref="bothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={curator.booleanToDropdown(segregation.probandAssociatedWithBoth)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
