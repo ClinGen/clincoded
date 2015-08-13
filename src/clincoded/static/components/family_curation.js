@@ -297,7 +297,7 @@ var FamilyCuration = React.createClass({
         this.saveAllFormValues();
 
         // Start with default validation; indicate errors on form if not, then bail
-        if (this.varlidateDefault() && this.validateVariants()) {
+        if (this.validateDefault() && this.validateVariants()) {
             var newFamily = {}; // Holds the new group object;
             var familyDiseases = null, familyArticles, familyVariants = [];
             var savedFamilies; // Array of saved written to DB
