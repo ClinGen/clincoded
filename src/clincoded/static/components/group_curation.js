@@ -697,7 +697,7 @@ var LabelOtherGenes = React.createClass({
 // as the calling component.
 var GroupMethods = function() {
     var group = this.state.group;
-    var method = group && group.method;
+    var method = (group.method && Object.keys(group.method).length) ? group.method : {};
 
     return (
         <div className="row">
