@@ -163,7 +163,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                 <h5>{group.label}</h5>
                                 <div className="evidence-curation-info">
                                     <p className="evidence-curation-info">{annotation.owner}</p>
-                                    <p>{moment(annotation.dateTime).format('YYYY MMM DD, h:mm a')}</p>
+                                    <p>{moment(group.dateTime).format('YYYY MMM DD, h:mm a')}</p>
                                 </div>
                                 <a href={'/group/' + group.uuid} target="_blank">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Edit</a></span> : null}
                                 {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid}>Add family information</a></div> : null}
@@ -178,7 +178,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                 <h5>{family.label}</h5>
                                 <div className="evidence-curation-info">
                                     <p className="evidence-curation-info">{annotation.owner}</p>
-                                    <p>{moment(annotation.dateTime).format('YYYY MMM DD, h:mm a')}</p>
+                                    <p>{moment(family.dateTime).format('YYYY MMM DD, h:mm a')}</p>
                                 </div>
                                 {family.associatedGroups && family.associatedGroups.length ?
                                     <div>
