@@ -176,7 +176,6 @@ var FamilyCuration = React.createClass({
 
         // Make a new method and save it to the DB
         var writerFamily = _.clone(newFamily);
-        writerFamily.dateTime = moment().format();
         if (familyLabel) {
             writerFamily.label = familyLabel;
         }
@@ -550,7 +549,6 @@ var FamilyCuration = React.createClass({
         if (value1) {
             newMethod.additionalInformation = value1;
         }
-        newMethod.dateTime = moment().format();
 
         return Object.keys(newMethod).length ? newMethod : null;
     },
@@ -622,7 +620,6 @@ var FamilyCuration = React.createClass({
         }
 
         if (Object.keys(newSegregation).length) {
-            newSegregation.dateTime = moment().format();
             newFamily.segregation = newSegregation;
         }
     },

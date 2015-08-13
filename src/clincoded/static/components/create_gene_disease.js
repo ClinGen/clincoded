@@ -103,9 +103,7 @@ var CreateGeneDisease = React.createClass({
                         var newGdm = {
                             gene: geneId,
                             disease: orphaId,
-                            modeInheritance: mode,
-                            owner: this.props.session['auth.userid'],
-                            dateTime: moment().format()
+                            modeInheritance: mode
                         };
 
                         // Post the new GDM to the DB. Once promise returns, go to /curation-central page with the UUID

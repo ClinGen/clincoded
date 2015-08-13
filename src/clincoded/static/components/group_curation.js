@@ -208,7 +208,6 @@ var GroupCuration = React.createClass({
                 }).then(data => {
                     // Now make the new group.
                     newGroup.label = this.getFormValue('groupname');
-                    newGroup.dateTime = moment().format();
 
                     // Get an array of all given disease IDs
                     newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
@@ -384,7 +383,6 @@ var GroupCuration = React.createClass({
         if (value1) {
             newMethod.additionalInformation = value1;
         }
-        newMethod.dateTime = moment().format();
 
         return Object.keys(newMethod).length ? newMethod : null;
     },

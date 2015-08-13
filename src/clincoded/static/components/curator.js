@@ -15,6 +15,7 @@ var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
 var external_url_map = globals.external_url_map;
+var userMatch = globals.userMatch;
 
 
 var CurationMixin = module.exports.CurationMixin = {
@@ -150,7 +151,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
     render: function() {
         var annotation = this.props.annotation;
         var session = this.props.session;
-        var curatorMatch = annotation.owner === (session && session.user_properties && session.user_properties.email);
+        var curatorMatch = annotation && userMatch(annotation.submitted_by, session);
         var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
 
@@ -162,8 +163,10 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                             <div className="panel-evidence-group" key={group.uuid}>
                                 <h5>{group.label}</h5>
                                 <div className="evidence-curation-info">
-                                    <p className="evidence-curation-info">{annotation.owner}</p>
-                                    <p>{moment(annotation.dateTime).format('YYYY MMM DD, h:mm a')}</p>
+                                    {group.submitted_by ?
+                                        <p className="evidence-curation-info">{group.submitted_by.title}</p>
+                                    : null}
+                                    <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
                                 </div>
                                 <a href={'/group/' + group.uuid} target="_blank">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Edit</a></span> : null}
                                 {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid}>Add family information</a></div> : null}
@@ -177,8 +180,10 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                             <div className="panel-evidence-group" key={family.uuid}>
                                 <h5>{family.label}</h5>
                                 <div className="evidence-curation-info">
-                                    <p className="evidence-curation-info">{annotation.owner}</p>
-                                    <p>{moment(annotation.dateTime).format('YYYY MMM DD, h:mm a')}</p>
+                                    {family.submitted_by ?
+                                        <p className="evidence-curation-info">{family.submitted_by.title}</p>
+                                    : null}
+                                    <p>{moment(family.date_created).format('YYYY MMM DD, h:mm a')}</p>
                                 </div>
                                 <a href={'/family/' + family.uuid} target="_blank">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Edit</a></span> : null}
                             </div>
@@ -360,7 +365,7 @@ var CuratorRecordHeader = React.createClass({
         if (annotations && annotations.length) {
             annotations.forEach(function(annotation) {
                 // Get Unix timestamp version of annotation's time and compare against the saved version.
-                var time = moment(annotation.dateTime).format('x');
+                var time = moment(annotation.date_created).format('x');
                 if (latestTime < time) {
                     latestAnnotation = annotation;
                     latestTime = time;
@@ -373,8 +378,8 @@ var CuratorRecordHeader = React.createClass({
     render: function() {
         var gdm = this.props.gdm;
         var annotationOwners = _.uniq(gdm.annotations.map(function(annotation) {
-            return annotation.owner;
-        })).sort();
+            return annotation.submitted_by;
+        }), function(owner) { return owner.uuid; });
         var latestAnnotation = this.findLatestAnnotation();
 
         return (
@@ -383,7 +388,7 @@ var CuratorRecordHeader = React.createClass({
                     {gdm ?
                         <dl className="inline-dl clearfix">
                             <dt>Status: </dt><dd>{gdm.status}</dd>
-                            <dt>Creator: </dt><dd><a href={'mailto:' + gdm.owner}>{gdm.owner}</a> – {moment(gdm.dateTime).format('YYYY MMM DD, h:mm a')}</dd>
+                            <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> – {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
                             {annotationOwners && annotationOwners.length ?
                                 <div>
                                     <dt>Participants: </dt>
@@ -392,13 +397,13 @@ var CuratorRecordHeader = React.createClass({
                                             return (
                                                 <span key={i}>
                                                     {i > 0 ? ', ' : ''}
-                                                    <a href={'mailto:' + owner}>{owner}</a>
+                                                    <a href={'mailto:' + owner.email}>{owner.title}</a>
                                                 </span>
                                             );
                                         })}
                                     </dd>
                                     <dt>Last edited: </dt>
-                                    <dd><a href={'mailto:' + latestAnnotation.owner}>{latestAnnotation.owner}</a> — {moment(latestAnnotation.dateTime).format('YYYY MMM DD, h:mm a')}</dd>
+                                    <dd><a href={'mailto:' + latestAnnotation.submitted_by.email}>{latestAnnotation.submitted_by.title}</a> — {moment(latestAnnotation.date_created).format('YYYY MMM DD, h:mm a')}</dd>
                                 </div>
                             : null}
                         </dl>
