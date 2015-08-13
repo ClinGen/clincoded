@@ -10,7 +10,7 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/shared_status" }
+        { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
         "schema_version": {
@@ -209,7 +209,6 @@
                     "title": "Date Time",
                     "description": "Time stamp for creation",
                     "type": "string",
-                    "format": "date-time",
                     "default": ""
                 }
             }
@@ -249,13 +248,6 @@
             "description": "Whether or not associated with a proband variant to a family",
             "type": "boolean",
             "default": false
-        },
-        "dateTime": {
-            "title": "Date and Time",
-            "description": "Time stamp of the individual creation",
-            "type": "string",
-            "format": "date-time",
-            "default": ""
         }
     },
     "columns": {
@@ -267,16 +259,16 @@
             "title": "Diagnosis",
             "type": "string"
         },
+        "date_created": {
+            "title": "Creation Date",
+            "type": "string"
+        },
         "sex": {
             "title": "Sex",
             "type": "string"
         },
         "race": {
             "title": "Race",
-            "type": "string"
-        },
-        "variants": {
-            "title": "Variants Associated",
             "type": "string"
         },
         "proband": {

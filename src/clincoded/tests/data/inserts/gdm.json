@@ -5,8 +5,8 @@
         "disease": "84",
         "modeInheritance": "Autosomal dominant inheritance (HP:0000006)",
         "omimId": "609054",
-        "owner": "tsneddon@stanford.edu",
-        "dateTime": "2015-02-27T08:35:18.000000+00:00",
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "date_created": "2015-02-27T08:35:18.000000+00:00",
         "active": true
     },
     {
@@ -15,8 +15,8 @@
         "disease": "64742",
         "modeInheritance": "Autosomal dominant inheritance with maternal imprinting (HP:0012275)",
         "omimId": "601200",
-        "owner": "selinad@stanford.edu",
-        "dateTime": "2015-03-19T16:52:38.000000+00:00",
+        "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
+        "date_created": "2015-03-19T16:52:38.000000+00:00",
         "active": true
     },
     {
@@ -25,8 +25,8 @@
         "disease": "15",
         "modeInheritance": "Autosomal recessive inheritance (HP:0000007)",
         "omimId": "100800",
-        "owner": "tsneddon@stanford.edu",
-        "dateTime": "2015-03-20T10:02:09.000000+00:00",
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "date_created": "2015-03-20T10:02:09.000000+00:00",
         "annotations": [
             "bb3432ca-1788-11e5-aefb-60f81dc5b05a",
             "5cd72a73-189e-11e5-9db5-60f81dc5b05a"
@@ -84,8 +84,8 @@
         "disease": "284984",
         "modeInheritance": "Autosomal unknown",
         "omimId": "613795",
-        "owner": "kgliu@stanford.edu",
-        "dateTime": "2015-03-13T17:23:22.000000+00:00",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-03-13T17:23:22.000000+00:00",
         "active": true
     },
     {
@@ -94,8 +94,8 @@
         "disease": "777",
         "modeInheritance": "Autosomal dominant inheritance with paternal imprinting (HP:0012274)",
         "omimId": "300046",
-        "owner": "tsneddon@stanford.edu",
-        "dateTime": "2015-02-25T14:55:54.000000+00:00",
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "date_created": "2015-02-25T14:55:54.000000+00:00",
         "active": true
     },
     {
@@ -104,8 +104,8 @@
         "disease": "183660",
         "modeInheritance": "Codominant",
         "omimId": "",
-        "owner": "tsneddon@stanford.edu",
-        "dateTime": "2015-05-04T08:11:18.000000+00:00",
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "date_created": "2015-05-04T08:11:18.000000+00:00",
         "active": true
     },
     {
@@ -114,8 +114,8 @@
         "disease": "84",
         "modeInheritance": "Other",
         "omimId": "609054",
-        "owner": "tsneddon@stanford.edu",
-        "dateTime": "2015-03-19T15:25:49.000000+00:00",
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "date_created": "2015-03-19T15:25:49.000000+00:00",
         "active": true
     }
 ]

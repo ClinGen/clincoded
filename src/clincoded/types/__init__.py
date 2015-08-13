@@ -121,33 +121,51 @@ class Gdm(Item):
     embedded = [
         'gene',
         'disease',
+        'submitted_by',
+        'variantPathogenic.variant',
         'annotations',
         'annotations.article',
+        'annotations.submitted_by',
         'annotations.groups',
         'annotations.groups.commonDiagnosis',
+        'annotations.groups.submitted_by',
         'annotations.groups.otherGenes',
+        'annotations.groups.otherPMIDs',
         #'annotations.groups.statistic',
         #'annotations.groups.statistic.variants',
         'annotations.groups.familyIncluded',
         'annotations.groups.familyIncluded.commonDiagnosis',
+        'annotations.groups.familyIncluded.submitted_by',
+        'annotations.groups.familyIncluded.otherPMIDs',
         'annotations.groups.familyIncluded.segregation.variants',
         'annotations.groups.familyIncluded.individualIncluded',
         'annotations.groups.familyIncluded.individualIncluded.diagnosis',
+        'annotations.groups.familyIncluded.individualIncluded.submitted_by',
         'annotations.groups.familyIncluded.individualIncluded.variants',
+        'annotations.groups.familyIncluded.individualIncluded.otherPMIDs',
         'annotations.groups.individualIncluded',
         'annotations.groups.individualIncluded.diagnosis',
+        'annotations.groups.individualIncluded.submitted_by',
         'annotations.groups.individualIncluded.variants',
+        'annotations.groups.individualIncluded.otherPMIDs',
         #'annotations.groups.control',
         'annotations.families',
         'annotations.families.commonDiagnosis',
+        'annotations.families.submitted_by',
+        'annotations.families.otherPMIDs',
         'annotations.families.segregation.variants',
         'annotations.families.individualIncluded',
         'annotations.families.individualIncluded.diagnosis',
+        'annotations.families.individualIncluded.submitted_by',
         'annotations.families.individualIncluded.variants',
+        'annotations.families.individualIncluded.otherPMIDs',
         'annotations.individuals',
         'annotations.individuals.diagnosis',
+        'annotations.individuals.submitted_by',
         'annotations.individuals.variants',
+        'annotations.individuals.otherPMIDs',
         'annotations.experimentalData',
+        'annotations.experimentalData.submitted_by',
         'annotations.experimentalData.variants',
         'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes'
     ]
@@ -181,28 +199,44 @@ class Annotation(Item):
     name_key = 'uuid'
     embedded = [
         'article',
+        'submitted_by',
         'groups',
         'groups.commonDiagnosis',
+        'groups.submitted_by',
         'groups.otherGenes',
+        'groups.otherPMIDs',
         'groups.familyIncluded.commonDiagnosis',
+        'groups.familyIncluded.submitted_by',
+        'groups.familyIncluded.otherPMIDs',
         'groups.familyIncluded.segregation.variants',
         'groups.familyIncluded.individualIncluded',
         'groups.familyIncluded.individualIncluded.diagnosis',
+        'groups.familyIncluded.individualIncluded.submitted_by',
         'groups.familyIncluded.individualIncluded.variants',
+        'groups.familyIncluded.individualIncluded.otherPMIDs',
         'groups.individualIncluded',
         'groups.individualIncluded.diagnosis',
+        'groups.individualIncluded.submitted_by',
         'groups.individualIncluded.variants',
+        'groups.individualIncluded.otherPMIDs',
         #'groups.control',
         'families',
         'families.commonDiagnosis',
+        'families.submitted_by',
+        'families.otherPMIDs',
         'families.segregation.variants',
         'families.individualIncluded',
         'families.individualIncluded.diagnosis',
+        'families.individualIncluded.submitted_by',
         'families.individualIncluded.variants',
+        'families.individualIncluded.otherPMIDs',
         'individuals',
         'individuals.diagnosis',
+        'individuals.submitted_by',
         'individuals.variants',
+        'individuals.otherPMIDs',
         'experimentalData',
+        'experimentalData.submitted_by',
         'experimentalData.variants',
         'experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes'
     ]
@@ -220,18 +254,22 @@ class Group(Item):
     name_key = 'uuid'
     embedded = [
         'commonDiagnosis',
+        'submitted_by',
         'otherGenes',
+        'otherPMIDs',
         #'statistic',
         'familyIncluded',
         'familyIncluded.commonDiagnosis',
+        'familyIncluded.submitted_by',
         'familyIncluded.segregation.variants',
         'familyIncluded.individualIncluded',
         'familyIncluded.individualIncluded.diagnosis',
+        'familyIncluded.individualIncluded.submitted_by',
         'familyIncluded.individualIncluded.variants',
         'individualIncluded',
         'individualIncluded.diagnosis',
+        'individualIncluded.submitted_by',
         'individualIncluded.variants',
-        'otherPMIDs',
         #'control'
     ]
 
@@ -248,10 +286,12 @@ class Family(Item):
     name_key = 'uuid'
     embedded = [
         'commonDiagnosis',
+        'submitted_by',
         'segregation.variants',
         'otherPMIDs',
         'individualIncluded',
         'individualIncluded.diagnosis',
+        'individualIncluded.submitted_by',
         'individualIncluded.variants'
     ]
 
@@ -268,7 +308,9 @@ class Individual(Item):
     name_key = 'uuid'
     embedded = [
         'diagnosis',
-        'variants'
+        'submitted_by',
+        'variants',
+        'otherPMIDs'
     ]
 
 @collection(
@@ -283,6 +325,7 @@ class Experimental(Item):
     schema = load_schema('clincoded:schemas/experimental.json')
     name_key = 'uuid'
     embedded = [
+        'submitted_by',
         'variants',
         'biochemicalFunction.geneWithSameFunctionSameDisease.genes'
     ]

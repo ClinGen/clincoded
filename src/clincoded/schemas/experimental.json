@@ -3,27 +3,17 @@
     "description": "Schema for storing and using experimental data.",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["owner", "dateTime", "evidenceType"],
+    "required": ["evidenceType"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
-        { "$ref": "mixins.json#/uuid" }
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
         "schema_version": {
             "default": "1"
-        },
-        "owner": {
-            "title": "Owner",
-            "description": "Email of curator who create the experimental data",
-            "type": "string"
-        },
-        "dateTime": {
-            "title": "Date Time",
-            "description": "Date and time to create the experimental data",
-            "type": "string",
-            "format": "date-time"
         },
         "active": {
             "title": "Active",
@@ -132,7 +122,7 @@
                                                 "dateTime": {
                                                     "description": "Time stramp of the value",
                                                     "type": "string",
-                                                    "format": "date-time"
+                                                    "default": ""
                                                 }
                                             }
                                         }
@@ -209,7 +199,7 @@
                                                 "dateTime": {
                                                     "description": "Time stramp of the value",
                                                     "type": "string",
-                                                    "format": "date-time"
+                                                    "default": ""
                                                 }
                                             }
                                         }
@@ -311,7 +301,7 @@
                                         "dateTime": {
                                             "description": "Time stramp of the value",
                                             "type": "string",
-                                            "format": "date-time"
+                                            "default": ""
                                         }
                                     }
                                 }
@@ -381,7 +371,7 @@
                                                 "dateTime": {
                                                     "description": "Time stramp of the value",
                                                     "type": "string",
-                                                    "format": "date-time"
+                                                    "default": ""
                                                 }
                                             }
                                         }
@@ -440,7 +430,7 @@
                                                 "dateTime": {
                                                     "description": "Time stramp of the value",
                                                     "type": "string",
-                                                    "format": "date-time"
+                                                    "default": ""
                                                 }
                                             }
                                         }
@@ -531,7 +521,7 @@
                                         "dateTime": {
                                             "description": "Time stramp of the value",
                                             "type": "string",
-                                            "format": "date-time"
+                                            "default": ""
                                         }
                                     }
                                 }
@@ -662,7 +652,7 @@
                                         "dateTime": {
                                             "description": "Time stramp of the value",
                                             "type": "string",
-                                            "format": "date-time"
+                                            "default": ""
                                         }
                                     }
                                 }
@@ -771,7 +761,7 @@
                                         "dateTime": {
                                             "description": "Time stramp of the value",
                                             "type": "string",
-                                            "format": "date-time"
+                                            "default": ""
                                         }
                                     }
                                 }
@@ -798,8 +788,8 @@
             "title": "ExperimentalData",
             "type": "string"
         },
-        "owner": {
-            "title": "Owner",
+        "date_created": {
+            "title": "Creation Date",
             "type": "string"
         },
         "evidenceType": {
