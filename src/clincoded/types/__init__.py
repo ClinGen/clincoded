@@ -94,6 +94,9 @@ class Article(Item):
     item_type = 'article'
     schema = load_schema('clincoded:schemas/article.json')
     name_key = 'pmid'
+    embedded = [
+        'submitted_by'
+    ]
 
 @collection(
     name='variants',
@@ -106,6 +109,9 @@ class Variant(Item):
     item_type = 'variant'
     schema = load_schema('clincoded:schemas/variant.json')
     name_key = 'uuid'
+    embedded = [
+        'submitted_by'
+    ]
 
 @collection(
     name='gdm',

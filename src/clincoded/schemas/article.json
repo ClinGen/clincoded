@@ -10,7 +10,7 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/shared_status" }
+        { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
         "schema_version": {
@@ -64,12 +64,6 @@
             "descripton": "Abstract of article",
             "type": "string",
             "default": ""
-        },
-        "dateTime": {
-            "title": "Date Time",
-            "description": "Time stamp for the first use of the article",
-            "type": "string",
-            "format": "date-time"
         }
     },
     "columns": {
