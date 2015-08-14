@@ -128,6 +128,7 @@ runcmd:
 -   echo "====== restoring test data"
 -   sudo -u clincoded psql clincoded < DEV_TEST_DB_DUMP_9.4
 - fi
+- sudo -u clincoded psql -c 'update transactions set xid = NULL'
 - /etc/init.d/postgresql stop
 #TEMP for inital tests --commented out
 #- sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-fetch /var/lib/postgresql/9.4/main LATEST
@@ -195,7 +196,9 @@ write_files:
 
 - path: /etc/default/elasticsearch
   content: |
-    ES_HEAP_SIZE=4g
+    #TEMP changed to 2g for testing
+    #ES_HEAP_SIZE=4g
+    ES_HEAP_SIZE=2g
 
 - path: /etc/postgresql/9.4/main/custom.conf
   content: |
