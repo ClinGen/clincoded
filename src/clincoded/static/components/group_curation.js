@@ -62,7 +62,7 @@ var GroupCuration = React.createClass({
         // Make an array of URIs to query the database. Don't include any that didn't include a query string.
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '',
-            groupUuid ? '/groups/' + groupUuid + '?frame=object' : '',
+            groupUuid ? '/groups/' + groupUuid : '',
             annotationUuid ? '/evidence/' + annotationUuid + '?frame=object' : ''
         ]);
 
