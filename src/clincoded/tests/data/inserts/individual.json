@@ -21,12 +21,16 @@
             "additionalInformation": "The coding Exon 3 was PCR ampilified and sequenced",
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
+        "otherPMIDs": [
+            "14598163"
+        ],
         "variants": [
             "c71fc085-2683-11e5-b9fe-60f81dc5b05a",
             "3b3af7f0-2685-11e5-bc56-60f81dc5b05a"
         ],
         "proband": true,
-        "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "6f762e73-1910-11e5-998f-60f81dc5b05a",
@@ -55,7 +59,8 @@
             "35eedfdc-2685-11e5-b6a0-60f81dc5b05a"
         ],
         "proband": true,
-        "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "7997f687-1910-11e5-a066-60f81dc5b05a",
@@ -79,7 +84,8 @@
             "additionalInformation": "The coding Exon 3 was PCR ampilified and sequenced",
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
-        "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "8395c173-1910-11e5-8c7c-60f81dc5b05a",
@@ -107,7 +113,8 @@
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
         ],
         "proband": false,
-        "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "8e204451-1910-11e5-a206-60f81dc5b05a",
@@ -130,7 +137,8 @@
             "additionalInformation": "additional info here.",
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
-        "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "95df0123-1910-11e5-bf07-60f81dc5b05a",
@@ -153,6 +161,7 @@
             "additionalInformation": "additional info here.",
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
-        "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     }
 ]

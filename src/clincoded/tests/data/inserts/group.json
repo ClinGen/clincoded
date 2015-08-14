@@ -31,8 +31,14 @@
             "additionalInformation": "The coding Exon 3 was PCR ampilified and sequenced",
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
+        "otherPMIDs": [
+            "14598163",
+            "12089445",
+            "24885126"
+        ],
         "uuid": "eab0dd0a-1d05-11e5-8d2d-60f81dc5b05a",
-        "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "label": "CaseGroupAA",
@@ -63,7 +69,8 @@
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
         "uuid": "e79009fd-2988-11e5-b98a-60f81dc5b05a",
-        "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "label": "CaseGroupShiang",
@@ -97,6 +104,10 @@
             "additionalInformation": "additional info here.",
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
+        "otherPMIDs": [
+            "23272854",
+            "19556464"
+        ],
         "familyIncluded": [
             "ab9a37ba-18fa-11e5-bad8-60f81dc5b05a",
             "e659bd3a-18f8-11e5-9d3a-60f81dc5b05a"
@@ -105,6 +116,7 @@
             "359612a3-18fb-11e5-be10-60f81dc5b05a"
         ],
         "uuid": "edea98e3-25cc-11e5-9019-60f81dc5b05a",
-        "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     }
 ]

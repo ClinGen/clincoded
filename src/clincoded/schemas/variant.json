@@ -10,7 +10,7 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/shared_status" }
+        { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
         "schema_version": {
@@ -44,12 +44,6 @@
             "description": "List of other descriptions",
             "type": "string",
             "default": ""
-        },
-        "dateTime": {
-            "title": "Date Time",
-            "description": "Time stamp for the first use of this variant",
-            "type": "string",
-            "format": "date-time"
         }
     },
     "columns": {

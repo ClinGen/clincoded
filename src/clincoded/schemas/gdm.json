@@ -4,13 +4,13 @@
     "description": "Schema for storing gene:disease:mode data.",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["gene", "disease", "modeInheritance", "owner", "dateTime"],
+    "required": ["gene", "disease", "modeInheritance"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/shared_status" }
+        { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
         "schema_version": {
@@ -56,17 +56,6 @@
             "description": "OMIM id",
             "type": "string",
             "default": ""
-        },
-        "owner": {
-            "title": "Owner",
-            "descripton": "Curator's email",
-            "type": "string"
-        },
-        "dateTime": {
-            "title": "Date and Time",
-            "description": "Date and time stemp",
-            "type": "string",
-            "format": "date-time"
         },
         "annotations": {
             "title": "Annotations",
@@ -289,10 +278,6 @@
             "title": "OMIM ID",
             "type": "string"
         },
-        "owner": {
-            "title": "Creator",
-            "type": "string"
-        },
         "status": {
             "title": "Status",
             "type": "string"
@@ -317,12 +302,16 @@
             "title": "Final Assertion",
             "type": "string"
         },
-        "dateTime": {
+        "date_created": {
             "title": "Creation Date",
+            "type": "string"
+        },
+        "submitted_by.uuid": {
+            "title": "Submitted by",
             "type": "string"
         }
     },
     "boost_values": {
-        "variantPathogenic.assessments": 1.0
+        "annotations.article": 1.0
     }
 }

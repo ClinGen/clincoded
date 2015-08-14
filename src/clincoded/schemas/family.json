@@ -10,7 +10,7 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/shared_status" }
+        { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
         "schema_version": {
@@ -221,7 +221,6 @@
                     "title": "Date Time",
                     "description": "Time stamp for creation",
                     "type": "string",
-                    "format": "date-time",
                     "default": ""
                 }
             }
@@ -235,7 +234,7 @@
                     "title": "Date Time",
                     "description": "Time stamp for creation",
                     "type": "string",
-                    "format": "date-time"
+                    "default": ""
                 },
                 "pedigreeDescription": {
                     "title": "Pedigree Description",
@@ -371,7 +370,7 @@
                                         "dateTime": {
                                             "description": "Time stramp of the value",
                                             "type": "string",
-                                            "format": "date-time"
+                                            "default": ""
                                         }
                                     }
                                 }
@@ -410,13 +409,6 @@
                 "type": "string",
                 "linkTo": "individual"
             }
-        },
-        "dateTime": {
-            "title": "Date and Time",
-            "description": "Time stamp of the family creation",
-            "type": "string",
-            "format": "date-time",
-            "default": ""
         }
     },
     "columns": {
