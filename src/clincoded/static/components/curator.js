@@ -493,7 +493,7 @@ module.exports.capture = {
 };
 
 
-// Take an annotation object and make a flattened version ready for writing.
+// Take an object and make a flattened version ready for writing.
 // SCHEMA: This might need to change when the schema changes.
 module.exports.flatten = {
     annotation: function(annotation) {
@@ -559,6 +559,15 @@ module.exports.flatten = {
             });
         } else {
             delete flat.commonDiagnosis;
+        }
+
+        // Flatten otherGenes
+        if (group.otherGenes && group.otherGenes.length) {
+            flat.otherGenes = group.otherGenes.map(function(gene) {
+                return gene['@id'];
+            });
+        } else {
+            delete flat.otherGenes;
         }
 
         // Flatten other PMIDs

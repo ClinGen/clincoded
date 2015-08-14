@@ -8,6 +8,7 @@ var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
+var methods = require('./methods');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -239,7 +240,7 @@ var GroupCuration = React.createClass({
                     newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
 
                     // If a method object was created (at least one method field set), get its new object's
-                    var newMethod = this.createMethod();
+                    var newMethod = methods.create.call(this);
                     if (newMethod) {
                         newGroup.method = newMethod;
                     }
@@ -361,59 +362,11 @@ var GroupCuration = React.createClass({
         }
     },
 
-    // Create method object based on the form values
-    createMethod: function() {
-        var newMethod = {};
-        var value1, value2;
-
-        // Put together a new 'method' object
-        value1 = this.getFormValue('prevtesting');
-        if (value1 !== 'none') {
-            newMethod.previousTesting = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('prevtestingdesc');
-        if (value1) {
-            newMethod.previousTestingDescription = value1;
-        }
-        value1 = this.getFormValue('genomewide');
-        if (value1 !== 'none') {
-            newMethod.genomeWideStudy = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('genotypingmethod1');
-        value2 = this.getFormValue('genotypingmethod2');
-        if (value1 !== 'none' || value2 !== 'none') {
-            newMethod.genotypingMethods = _([value1, value2]).filter(function(val) {
-                return val !== 'none';
-            });
-        }
-        value1 = this.getFormValue('entiregene');
-        if (value1 !== 'none') {
-            newMethod.entireGeneSequenced = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('copyassessed');
-        if (value1 !== 'none') {
-            newMethod.copyNumberAssessed = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('mutationsgenotyped');
-        if (value1 !== 'none') {
-            newMethod.specificMutationsGenotyped = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('specificmutation');
-        if (value1) {
-            newMethod.specificMutationsGenotypedMethod = value1;
-        }
-        value1 = this.getFormValue('additionalinfomethod');
-        if (value1) {
-            newMethod.additionalInformation = value1;
-        }
-        newMethod.dateTime = moment().format();
-
-        return Object.keys(newMethod).length ? newMethod : null;
-    },
-
     render: function() {
         var annotation = this.state.annotation;
         var gdm = this.state.gdm;
+        var group = this.state.group;
+        var method = (group.method && Object.keys(group.method).length) ? group.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
@@ -456,7 +409,7 @@ var GroupCuration = React.createClass({
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Group Methods" open>
-                                                {GroupMethods.call(this)}
+                                                {methods.render.call(this, method)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
@@ -678,83 +631,6 @@ var LabelOtherGenes = React.createClass({
         return <span>Other genes found to have variants in them (<a href="http://www.genenames.org/" title="HGNC home page in a new tab" target="_blank">HGNC</a> symbol):</span>;
     }
 });
-
-
-// Methods group curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var GroupMethods = function() {
-    var group = this.state.group;
-    var method = (group.method && Object.keys(group.method).length) ? group.method : {};
-
-    return (
-        <div className="row">
-            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={curator.booleanToDropdown(method.previousTesting)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5" value={method ? method.previousTestingDescription : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={curator.booleanToDropdown(method.genomeWideStudy)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <h4 className="col-sm-7 col-sm-offset-5">Genotyping Method</h4>
-            <Input type="select" ref="genotypingmethod1" label="Method 1:" handleChange={this.handleChange} defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[0] ? method.genotypingMethods[0] : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Exome sequencing</option>
-                <option>Genotyping</option>
-                <option>HRM</option>
-                <option>PCR</option>
-                <option>Sanger</option>
-                <option>Whole genome shotgun sequencing</option>
-            </Input>
-            <Input type="select" ref="genotypingmethod2" label="Method 2:" defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[1] ? method.genotypingMethods[1] : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.genotyping2Disabled}>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Exome sequencing</option>
-                <option>Genotyping</option>
-                <option>HRM</option>
-                <option>PCR</option>
-                <option>Sanger</option>
-                <option>Whole genome shotgun sequencing</option>
-            </Input>
-            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={curator.booleanToDropdown(method.entireGeneSequenced)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={curator.booleanToDropdown(method.copyNumberAssessed)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={curator.booleanToDropdown(method.specificMutationsGenotyped)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="textarea" ref="specificmutation" label="Method by which Specific Mutations Genotyped:" rows="5" value={method ? method.specificMutationsGenotypedMethod : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="additionalinfomethod" label="Additional Information about Group Method:" rows="8" value={method ? method.additionalInformation : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-        </div>
-    );
-};
 
 
 // Additional Information group curation panel. Call with .call(this) to run in the same context
