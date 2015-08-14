@@ -374,7 +374,7 @@ var FamilyCuration = React.createClass({
                             // 'result' is an array of search results, one per search string. There should only be one result per array element --
                             // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
                             results.forEach(function(result, i) {
-                                if (results.total) {
+                                if (result.total) {
                                     // Search got a result. Add a string for family.variants for this existing variant
                                     familyVariants.push('/variants/' + result['@graph'][0].uuid);
                                 } else {
@@ -384,7 +384,7 @@ var FamilyCuration = React.createClass({
                                         newVariants.push(newVariant);
                                     }
                                 }
-                            }.bind(this));
+                            }, this);
 
                             // If we have new variants, write them to the DB.
                             if (newVariants) {
