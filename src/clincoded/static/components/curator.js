@@ -444,14 +444,14 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
 });
 
 
-// Convert a boolean value to a dropdown value
+// Convert a boolean value to a Yes/No dropdown value
 var booleanToDropdown = module.exports.booleanToDropdown = function booleanToDropdown(boolVal) {
     return boolVal === true ? 'Yes' : (boolVal === false ? 'No' : 'none');
 };
 
 
-// Pull values from 's' that match the regular expression given in 're'. If resulting values should
-// be converted to uppercase, pass true in 'uppercase'.
+// Pull values from 's' (a list of comma-separated values) that match the regular expression given in 're'.
+// If resulting values should be converted to uppercase, pass true in 'uppercase'.
 function captureBase(s, re, uppercase) {
     if (s) {
         var list;
@@ -489,4 +489,60 @@ module.exports.capturePmids = function(s) {
 // Any that don't match a 1- through 10-digit pattern have null in the corresponding array element.
 module.exports.captureHpoids = function(s) {
     return captureBase(s, /^\s*(HP:\d{7})\s*$/i, true);
+};
+
+// Take an annotation object and make a flattened version ready for writing.
+// SCHEMA: This might need to change when the schema changes.
+module.exports.flatten = {
+    annotation: function(annotation) {
+        // First copy everything before fixing the special properties
+        var flat = _.clone(annotation);
+
+        flat.article = annotation.article['@id'];
+
+        // Flatten groups
+        if (annotation.groups && annotation.groups.length) {
+            flat.groups = annotation.groups.map(function(group) {
+                return group['@id'];
+            });
+        } else {
+            delete flat.groups;
+        }
+
+        // Flatten families
+        if (annotation.families && annotation.families.length) {
+            flat.families = annotation.families.map(function(family) {
+                return family['@id'];
+            });
+        } else {
+            delete flat.families;
+        }
+
+        // Flatten individuals
+        if (annotation.individuals && annotation.individuals.length) {
+            flat.individuals = annotation.individuals.map(function(individual) {
+                return individual['@id'];
+            });
+        } else {
+            delete flat.individuals;
+        }
+
+        // Flatten experimentalData
+        if (annotation.experimentalData && annotation.experimentalData.length) {
+            flat.experimentalData = annotation.experimentalData.map(function(data) {
+                return data['@id'];
+            });
+        } else {
+            delete flat.experimentalData;
+        }
+
+        // Delete fields we can't write
+        delete flat.uuid;
+        delete flat['@id'];
+        delete flat['@type'];
+        delete flat.actions;
+        delete flat.audit;
+
+        return flat;
+    }
 };

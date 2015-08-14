@@ -39,7 +39,6 @@ var GroupCuration = React.createClass({
         return {
             gdm: {}, // GDM object given in UUID
             annotation: {}, // Annotation object given in UUID
-            article: {}, // Article from the annotation
             group: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
@@ -63,7 +62,7 @@ var GroupCuration = React.createClass({
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '',
             groupUuid ? '/groups/' + groupUuid : '',
-            annotationUuid ? '/evidence/' + annotationUuid + '?frame=object' : ''
+            annotationUuid ? '/evidence/' + annotationUuid : ''
         ]);
 
         // With all given query string variables, get the corresponding objects from the DB.
@@ -104,18 +103,7 @@ var GroupCuration = React.createClass({
             // Set all the state variables we've collected
             this.setState(stateObj);
 
-            // If we have an annotation, load its article separately because we asked for a flattened annotation
-            // (the article is just its string @id).
-            if (Object.keys(stateObj.annotation).length) {
-                return this.getRestData(
-                    stateObj.annotation.article
-                ).then(article => {
-                    this.setState({article: article});
-                    return Promise.resolve(article);
-                });
-            }
-
-            // No annotation; just resolve with an empty promise.
+            // No one’s waiting but the user; just resolve with an empty promise.
             return Promise.resolve();
         }).catch(function(e) {
             console.log('OBJECT LOAD ERROR: %s — %s', e.statusText, e.url);
@@ -352,13 +340,12 @@ var GroupCuration = React.createClass({
                     if (!this.state.group || Object.keys(this.state.group).length === 0) {
                         // Let's avoid modifying a React state property, so clone it. Add the new group
                         // to the current annotation's 'groups' array.
-                        var annotation = _.clone(this.state.annotation);
-                        annotation.groups.push(newGroup['@id']);
-
-                        // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
-                        delete annotation.uuid;
-                        delete annotation['@id'];
-                        delete annotation['@type'];
+                        var annotation = curator.flatten.annotation(this.state.annotation);
+                        if (annotation.groups) {
+                            annotation.groups.push(newGroup['@id']);
+                        } else {
+                            annotation.groups = [newGroup['@id']];
+                        }
 
                         // Post the modified annotation to the DB, then go back to Curation Central
                         return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
@@ -443,9 +430,11 @@ var GroupCuration = React.createClass({
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
-                            <div className="curation-pmid-summary">
-                                <PmidSummary article={this.state.article} displayJournal />
-                            </div>
+                            {this.state.annotation && this.state.annotation.article ?
+                                <div className="curation-pmid-summary">
+                                    <PmidSummary article={this.state.annotation.article} displayJournal />
+                                </div>
+                            : null}
                             <h1>Curate Group Information</h1>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
