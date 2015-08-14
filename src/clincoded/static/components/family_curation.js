@@ -28,6 +28,11 @@ var country_codes = globals.country_codes;
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 5;
 
+// Settings for this.state.varOption
+var VAR_NONE = 0; // No variants entered in a panel
+var VAR_SPEC = 1; // A specific variant (dbSNP, ClinVar, HGVS) entered in a panel
+var VAR_OTHER = 2; // Other description entered in a panel
+
 
 var FamilyCuration = React.createClass({
     mixins: [FormMixin, RestMixin, CurationMixin],
@@ -48,6 +53,7 @@ var FamilyCuration = React.createClass({
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 1, // Number of variants to display
+            variantOption: [VAR_NONE], // One variant panel, and nothing entered
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
@@ -55,6 +61,8 @@ var FamilyCuration = React.createClass({
 
     // Handle value changes in various form fields
     handleChange: function(ref, e) {
+        var dbsnpid, clinvarid, hgvsterm, othervariant;
+
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
             // Disable the Genotyping Method 2 if Genotyping Method 1 has no value
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
@@ -62,16 +70,36 @@ var FamilyCuration = React.createClass({
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
             var lastVariantSuffix = (this.state.variantCount - 1) + '';
-            var lastRefSuffix = ref.match(/\d*$/);
-            if (lastRefSuffix && (lastVariantSuffix === lastRefSuffix[0])) {
+            var refSuffix = ref.match(/\d+$/);
+            refSuffix = refSuffix && refSuffix[0];
+            if (refSuffix && (lastVariantSuffix === refSuffix)) {
                 // The changed item is in the last variant panel. If any fields in the last field have a value, disable
                 // the Add Another Variant button.
-                var dbsnpid = this.refs['VARdbsnpid' + lastVariantSuffix].getValue();
-                var clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                var hgvsterm = this.refs['VARhgvsterm' + lastVariantSuffix].getValue();
-                var othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
+                dbsnpid = this.refs['VARdbsnpid' + lastVariantSuffix].getValue();
+                clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
+                hgvsterm = this.refs['VARhgvsterm' + lastVariantSuffix].getValue();
+                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
                 this.setState({addVariantDisabled: !(dbsnpid || clinvarid || hgvsterm || othervariant)});
             }
+
+            // Disable fields depending on what fields have values in them.
+            dbsnpid = this.refs['VARdbsnpid' + refSuffix].getValue();
+            clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
+            hgvsterm = this.refs['VARhgvsterm' + refSuffix].getValue();
+            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
+            var currVariantOption = this.state.variantOption;
+            if (othervariant) {
+                this.refs['VARdbsnpid' + refSuffix].resetValue();
+                this.refs['VARclinvarid' + refSuffix].resetValue();
+                this.refs['VARhgvsterm' + refSuffix].resetValue();
+                currVariantOption[refSuffix] = VAR_OTHER;
+            } else if (dbsnpid || clinvarid || hgvsterm) {
+                this.refs['VARothervariant' + refSuffix].resetValue();
+                currVariantOption[refSuffix] = VAR_SPEC;
+            } else {
+                currVariantOption[refSuffix] = VAR_NONE;
+            }
+            this.setState({variantOption: currVariantOption});
         }
     },
 
@@ -997,16 +1025,16 @@ var FamilyVariant = function() {
 
                 return (
                     <div key={i} className="variant-panel">
-                        <Input type="text" ref={'VARdbsnpid' + i} label={<LabelDbSnp />} value={variant && variant.dbSNPId} placeholder="e.g. rs1748" handleChange={this.handleChange}
+                        <Input type="text" ref={'VARdbsnpid' + i} label={<LabelDbSnp />} value={variant && variant.dbSNPId} placeholder="e.g. rs1748" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                             error={this.getFormError('VARdbsnpid' + i)} clearError={this.clrFormErrors.bind(null, 'VARdbsnpid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={variant && variant.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange}
+                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={variant && variant.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <Input type="text" ref={'VARhgvsterm' + i} label={<LabelHgvs />} value={hgvsNames} placeholder="e.g. NM_001009944.2:c.12420G>A" handleChange={this.handleChange}
+                        <Input type="text" ref={'VARhgvsterm' + i} label={<LabelHgvs />} value={hgvsNames} placeholder="e.g. NM_001009944.2:c.12420G>A" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                             error={this.getFormError('VARhgvsterm' + i)} clearError={this.clrFormErrors.bind(null, 'VARhgvsterm' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange}
+                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                         {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
                             <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
