@@ -7,7 +7,6 @@ var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
 var curator = require('./curator');
-var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
 
 var CurationMixin = curator.CurationMixin;
@@ -50,7 +49,6 @@ var FamilyCuration = React.createClass({
             group: {}, // Group object given in query string
             family: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
             annotation: {}, // Annotation object given in query string
-            article: {}, // Article from annotation; need to load because annotation is flattened
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 1, // Number of variants to display
@@ -92,9 +90,9 @@ var FamilyCuration = React.createClass({
         // Make an array of URIs to query the database. Don't include any that didn't include a query string.
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '',
-            groupUuid ? '/groups/' + groupUuid + '?frame=object' : '',
+            groupUuid ? '/groups/' + groupUuid : '',
             familyUuid ? '/families/' + familyUuid: '',
-            annotationUuid ? '/evidence/' + annotationUuid + '?frame=object' : ''
+            annotationUuid ? '/evidence/' + annotationUuid : ''
         ]);
 
         // With all given query string variables, get the corresponding objects from the DB.
@@ -145,17 +143,6 @@ var FamilyCuration = React.createClass({
 
             // Set all the state variables we've collected
             this.setState(stateObj);
-
-            // If we have an annotation, load its article separately because we asked for a flattened annotation
-            // (the article is just its string @id).
-            if (Object.keys(stateObj.annotation).length) {
-                return this.getRestData(
-                    stateObj.annotation.article
-                ).then(article => {
-                    this.setState({article: article});
-                    return Promise.resolve(article);
-                });
-            }
 
             // No annotation; just resolve with an empty promise.
             return Promise.resolve();
@@ -304,10 +291,10 @@ var FamilyCuration = React.createClass({
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
-            var orphaIds = curator.captureOrphas(this.getFormValue('orphanetid'));
-            var pmids = curator.capturePmids(this.getFormValue('otherpmids'));
-            var hpoids = curator.captureHpoids(this.getFormValue('hpoid'));
-            var nothpoids = curator.captureHpoids(this.getFormValue('nothpoid'));
+            var orphaIds = curator.capture.orphas(this.getFormValue('orphanetid'));
+            var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
+            var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
+            var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
@@ -447,20 +434,15 @@ var FamilyCuration = React.createClass({
                 }).then(newFamilies => {
                     savedFamilies = newFamilies;
                     if (!this.state.family || Object.keys(this.state.family).length === 0) {
-                        // Let's avoid modifying a React state property, so clone it. Add the new group
-                        // to the current annotation's 'groups' array.
-                        var annotation = _.clone(this.state.annotation);
+                        // Get a flattened copy of the annotation and put our new families into it,
+                        // ready for writing.
+                        var annotation = curator.flatten.annotation(this.state.annotation);
                         if (!annotation.families) {
                             annotation.families = [];
                         }
 
                         // Merge existing families in the annotation with the new set of families.
-                        Array.prototype.push.apply(annotation.families, newFamilies.map(function(family) { return family['@id']; }));
-
-                        // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
-                        delete annotation.uuid;
-                        delete annotation['@id'];
-                        delete annotation['@type'];
+                        Array.prototype.push.apply(annotation.families, savedFamilies.map(function(family) { return family['@id']; }));
 
                         // Post the modified annotation to the DB, then go back to Curation Central
                         return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
@@ -471,34 +453,27 @@ var FamilyCuration = React.createClass({
                     // If we're adding this family to a group, update the group with this family
                     if (Object.keys(this.state.group).length) {
                         // Add the newly saved families to the group
-                        var group = _.clone(this.state.group);
+                        var group = curator.flatten.group(this.state.group);
                         if (!group.familyIncluded) {
                             group.familyIncluded = [];
                         }
+
+                        // Merge existing families in the annotation with the new set of families.
                         Array.prototype.push.apply(group.familyIncluded, savedFamilies.map(function(family) { return family['@id']; }));
 
-                        // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
-                        var groupUuid = group.uuid;
-                        delete group.uuid;
-                        delete group.status;
-                        delete group.schema_version;
-                        delete group['@id'];
-                        delete group['@type'];
-
                         // Post the modified annotation to the DB, then go back to Curation Central
-                        return this.putRestData('/groups/' + groupUuid, group);
+                        return this.putRestData('/groups/' + this.state.group.uuid, group);
                     }
 
                     // Not updating a group; just move on
                     return Promise.resolve(null);
                 }).then(data => {
                     // Navigate back to Curation Central page.
-                    // FUTURE: Need to navigate to choices page.
+                    // FUTURE: Need to navigate to Family Submit page.
                     this.resetAllFormValues();
                     this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
-                    parseAndLogError.bind(undefined, 'putRequest');
                 });
             }
         }
@@ -730,9 +705,9 @@ var FamilyCuration = React.createClass({
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
-                            {Object.keys(this.state.article).length ?
+                            {Object.keys(this.state.annotation).length && this.state.annotation.article ?
                                 <div className="curation-pmid-summary">
-                                    <PmidSummary article={this.state.article} displayJournal />
+                                    <PmidSummary article={this.state.annotation.article} displayJournal />
                                 </div>
                             : null}
                             <h1>Curate Family Information</h1>

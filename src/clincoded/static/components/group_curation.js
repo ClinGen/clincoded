@@ -7,7 +7,6 @@ var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
 var curator = require('./curator');
-var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
 
 var CurationMixin = curator.CurationMixin;
@@ -96,8 +95,8 @@ var GroupCuration = React.createClass({
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
-            if (stateObj.family && Object.keys(stateObj.family).length) {
-                stateObj.genotyping2Disabled = !(stateObj.family.method && stateObj.family.method.genotypingMethods && stateObj.family.method.genotypingMethods.length);
+            if (stateObj.group && Object.keys(stateObj.group).length) {
+                stateObj.genotyping2Disabled = !(stateObj.group.method && stateObj.group.method.genotypingMethods && stateObj.group.method.genotypingMethods.length);
             }
 
             // Set all the state variables we've collected
@@ -131,11 +130,11 @@ var GroupCuration = React.createClass({
             var formError = false;
 
             // Parse comma-separated list fields
-            var orphaIds = curator.captureOrphas(this.getFormValue('orphanetid'));
-            var geneSymbols = curator.captureGenes(this.getFormValue('othergenevariants'));
-            var pmids = curator.capturePmids(this.getFormValue('otherpmids'));
-            var hpoids = curator.captureHpoids(this.getFormValue('hpoid'));
-            var nothpoids = curator.captureHpoids(this.getFormValue('nothpoid'));
+            var orphaIds = curator.capture.orphas(this.getFormValue('orphanetid'));
+            var geneSymbols = curator.capture.genes(this.getFormValue('othergenevariants'));
+            var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
+            var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
+            var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
@@ -246,17 +245,15 @@ var GroupCuration = React.createClass({
                     }
 
                     // Fill in the group fields from the Common Diseases & Phenotypes panel
-                    var hpoTerms = this.getFormValue('hpoid');
-                    if (hpoTerms) {
-                        newGroup.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
+                    if (hpoids && hpoids.length) {
+                        newGroup.hpoIdInDiagnosis = hpoids;
                     }
                     var phenoterms = this.getFormValue('phenoterms');
                     if (phenoterms) {
                         newGroup.termsInDiagnosis = phenoterms;
                     }
-                    hpoTerms = this.getFormValue('nothpoid');
-                    if (hpoTerms) {
-                        newGroup.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
+                    if (nothpoids && nothpoids.length) {
+                        newGroup.hpoIdInElimination = nothpoids;
                     }
                     phenoterms = this.getFormValue('notphenoterms');
                     if (phenoterms) {
@@ -338,8 +335,8 @@ var GroupCuration = React.createClass({
                     }
                 }).then(newGroup => {
                     if (!this.state.group || Object.keys(this.state.group).length === 0) {
-                        // Let's avoid modifying a React state property, so clone it. Add the new group
-                        // to the current annotation's 'groups' array.
+                        // Get a flattened copy of the annotation and put our new group into it,
+                        // ready for writing.
                         var annotation = curator.flatten.annotation(this.state.annotation);
                         if (annotation.groups) {
                             annotation.groups.push(newGroup['@id']);
@@ -354,11 +351,11 @@ var GroupCuration = React.createClass({
                     }
                 }).then(data => {
                     // Navigate back to Curation Central page.
-                    // FUTURE: Need to navigate to choices page.
+                    // FUTURE: Need to navigate to Group Submit page.
+                    this.resetAllFormValues();
                     this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
                 }).catch(function(e) {
                     console.log('GROUP CREATION ERROR=: %o', e);
-                    parseAndLogError.bind(undefined, 'putRequest');
                 });
             }
         }
@@ -430,7 +427,7 @@ var GroupCuration = React.createClass({
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
-                            {this.state.annotation && this.state.annotation.article ?
+                            {Object.keys(this.state.annotation).length && this.state.annotation.article ?
                                 <div className="curation-pmid-summary">
                                     <PmidSummary article={this.state.annotation.article} displayJournal />
                                 </div>

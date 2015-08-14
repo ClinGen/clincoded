@@ -467,29 +467,31 @@ function captureBase(s, re, uppercase) {
     return null;
 }
 
-// Given a string, find all the comma-separated 'orphaXX' occurrences. Return all orpha IDs in an array.
-// Any that don't match orphaXX pattern have null in the corresponding array element.
-module.exports.captureOrphas = function(s) {
-    return captureBase(s, /^\s*orpha(\d+)\s*$/i);
+// Given a string of comma-separated values, these functions break them into an array, but only
+// for values that satisfy the regex pattern. Any items that don't result in a null array entry
+// for that item.
+module.exports.capture = {
+    // Find all the comma-separated 'orphaXX' occurrences. Return all valid orpha IDs in an array.
+    orphas: function(s) {
+        return captureBase(s, /^\s*orpha(\d+)\s*$/i);
+    },
+
+    // Find all the comma-separated gene-symbol occurrences. Return all valid symbols in an array.
+    genes: function(s) {
+        return captureBase(s, /^\s*(\w+)\s*$/, true);
+    },
+
+    // Find all the comma-separated PMID occurrences. Return all valid PMIDs in an array.
+    pmids: function(s) {
+        return captureBase(s, /^\s*(\d{1,10})\s*$/);
+    },
+
+    // Find all the comma-separated HPO ID occurrences. Return all valid HPO ID in an array.
+    hpoids: function(s) {
+        return captureBase(s, /^\s*(HP:\d{7})\s*$/i, true);
+    }
 };
 
-// Given a string, find all the comma-separated gene symbol occurrences. Return all given gene symbols in an array.
-// Any that don't match the gene symbol pattern have null in the corresponding array element.
-module.exports.captureGenes = function(s) {
-    return captureBase(s, /^\s*(\w+)\s*$/, true);
-};
-
-// Given a string, find all the comma-separated PMID occurrences. Return all given PMIDs in an array.
-// Any that don't match a 1- through 10-digit pattern have null in the corresponding array element.
-module.exports.capturePmids = function(s) {
-    return captureBase(s, /^\s*(\d{1,10})\s*$/);
-};
-
-// Given a string, find all the comma-separated PMID occurrences. Return all given PMIDs in an array.
-// Any that don't match a 1- through 10-digit pattern have null in the corresponding array element.
-module.exports.captureHpoids = function(s) {
-    return captureBase(s, /^\s*(HP:\d{7})\s*$/i, true);
-};
 
 // Take an annotation object and make a flattened version ready for writing.
 // SCHEMA: This might need to change when the schema changes.
@@ -537,11 +539,69 @@ module.exports.flatten = {
         }
 
         // Delete fields we can't write
-        delete flat.uuid;
         delete flat['@id'];
         delete flat['@type'];
         delete flat.actions;
         delete flat.audit;
+        delete flat.uuid;
+
+        return flat;
+    },
+
+    group: function(group) {
+        // First copy everything before fixing the special properties
+        var flat = _.clone(group);
+
+        // Flatten diseases
+        if (group.commonDiagnosis && group.commonDiagnosis.length) {
+            flat.commonDiagnosis = group.commonDiagnosis.map(function(disease) {
+                return disease['@id'];
+            });
+        } else {
+            delete flat.commonDiagnosis;
+        }
+
+        // Flatten other PMIDs
+        if (group.otherPMIDs && group.otherPMIDs.length) {
+            flat.otherPMIDs = group.otherPMIDs.map(function(article) {
+                return article['@id'];
+            });
+        } else {
+            delete flat.otherPMIDs;
+        }
+
+        // Flatten included families
+        if (group.familyIncluded && group.familyIncluded.length) {
+            flat.familyIncluded = group.familyIncluded.map(function(family) {
+                return family['@id'];
+            });
+        } else {
+            delete flat.familyIncluded;
+        }
+
+        // Flatten included families
+        if (group.individualIncluded && group.individualIncluded.length) {
+            flat.individualIncluded = group.individualIncluded.map(function(individual) {
+                return individual['@id'];
+            });
+        } else {
+            delete flat.individualIncluded;
+        }
+
+        // Flatten other linked objects
+        if (group.statistic) {
+            flat.statistic = group.statistic['@id'];
+        }
+        if (group.statistic) {
+            flat.control = group.control['@id'];
+        }
+
+        // Delete fields we can't write
+        delete flat['@id'];
+        delete flat['@type'];
+        delete flat.actions;
+        delete flat.audit;
+        delete flat.uuid;
 
         return flat;
     }
