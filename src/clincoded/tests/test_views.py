@@ -6,22 +6,8 @@ def _type_length():
     #from ..loadxl import ORDER
     ORDER = [
         'user',
-        'award',
-        'lab',
-        'organism',
-        'source',
-        # 'variant',
-        # 'allele',
-        # 'condition',
-        # 'phenotype',
-        # 'gene',
-        # 'publication',
-        'document',
-        # 'human_donor',
-        # 'software',
-        # 'software_version',
-        'image',
-        # 'page',
+        'gene',
+        'gdm',
         'orphaPhenotype',
         'curator_page',
     ]
@@ -38,13 +24,6 @@ def _type_length():
 TYPE_LENGTH = _type_length()
 
 PUBLIC_COLLECTIONS = [
-    'source',
-    'platform',
-    'treatment',
-    'lab',
-    'award',
-    'target',
-    'organism',
 ]
 
 
@@ -130,54 +109,6 @@ def test_json_basic_auth(anonhtmltestapp):
     assert res.content_type == 'application/json'
 
 
-# def _test_antibody_approval_creation(testapp):
-#     from urllib.parse import urlparse
-#     new_antibody = {'foo': 'bar'}
-#     res = testapp.post_json('/antibodies/', new_antibody, status=201)
-#     assert res.location
-#     assert '/profiles/result' in res.json['@type']['profile']
-#     assert res.json['@graph'] == [{'href': urlparse(res.location).path}]
-#     res = testapp.get(res.location, status=200)
-#     assert '/profiles/antibody_approval' in res.json['@type']
-#     data = res.json
-#     for key in new_antibody:
-#         assert data[key] == new_antibody[key]
-#     res = testapp.get('/antibodies/', status=200)
-#     assert len(res.json['@graph']) == 1
-
-
-# def test_load_sample_data(
-#         analysis_step,
-#         analysis_step_run,
-#         antibody_characterization,
-#         antibody_lot,
-#         award,
-#         biosample,
-#         biosample_characterization,
-#         construct,
-#         dataset,
-#         document,
-#         experiment,
-#         file,
-#         lab,
-#         library,
-#         mouse_donor,
-#         organism,
-#         pipeline,
-#         publication,
-#         quality_metric,
-#         replicate,
-#         rnai,
-#         software,
-#         software_version,
-#         source,
-#         submitter,
-#         target,
-#         workflow_run,
-#         ):
-#     assert True, 'Fixtures have loaded sample data'
-
-
 @pytest.mark.slow
 @pytest.mark.parametrize(('item_type', 'length'), TYPE_LENGTH.items())
 def test_load_workbook(workbook, testapp, item_type, length):
@@ -186,45 +117,45 @@ def test_load_workbook(workbook, testapp, item_type, length):
     res = testapp.get('/%s/?limit=all' % item_type).maybe_follow(status=200)
     assert len(res.json['@graph']) == length
 
-
-# @pytest.mark.slow
-# def test_collection_limit(workbook, testapp):
-#     res = testapp.get('/antibodies/?limit=2', status=200)
-#     assert len(res.json['@graph']) == 2
-
+'''
+@pytest.mark.slow
+def test_collection_limit(testapp):
+    res = testapp.get('/gene/?limit=2', status=200)
+    assert len(res.json['@graph']) == 2
+'''
 
 def test_collection_post(testapp):
     item = {
-        'name': 'human',
-        'scientific_name': 'Homo sapiens',
-        'taxon_id': '9606',
+        'term': 'AchondroplasiaTest',
+        'orphaNumber': '9999',
+        'type': 'Disease',
     }
-    return testapp.post_json('/organism', item, status=201)
+    return testapp.post_json('/orphaPhenotype', item, status=201)
 
 
 def test_collection_post_bad_json(testapp):
     item = {'foo': 'bar'}
-    res = testapp.post_json('/organism', item, status=422)
+    res = testapp.post_json('/orphaPhenotype', item, status=422)
     assert res.json['errors']
 
 
 def test_collection_post_malformed_json(testapp):
     item = '{'
     headers = {'Content-Type': 'application/json'}
-    res = testapp.post('/organism', item, status=400, headers=headers)
+    res = testapp.post('/orphaPhenotype', item, status=400, headers=headers)
     assert res.json['detail'].startswith('Expecting')
 
 
 def test_collection_post_missing_content_type(testapp):
     item = '{}'
-    testapp.post('/organism', item, status=415)
+    testapp.post('/orphaPhenotype', item, status=415)
 
 
 def test_collection_post_bad_(anontestapp):
     from base64 import b64encode
     from pyramid.compat import ascii_native_
     value = "Authorization: Basic %s" % ascii_native_(b64encode(b'nobody:pass'))
-    anontestapp.post_json('/organism', {}, headers={'Authorization': value}, status=401)
+    anontestapp.post_json('/orphaPhenotype', {}, headers={'Authorization': value}, status=401)
 
 
 def test_collection_actions_filtered_by_permission(workbook, testapp, anontestapp):
@@ -235,8 +166,8 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
     assert not any(action for action in res.json.get('actions', []) if action['name'] == 'add')
 
 
-def test_item_actions_filtered_by_permission(testapp, authenticated_testapp, source):
-    location = source['@id']
+def test_item_actions_filtered_by_permission(testapp, authenticated_testapp, gene):
+    location = gene['@id']
 
     res = testapp.get(location)
     assert any(action for action in res.json.get('actions', []) if action['name'] == 'edit')
@@ -247,11 +178,11 @@ def test_item_actions_filtered_by_permission(testapp, authenticated_testapp, sou
 
 def test_collection_put(testapp, execute_counter):
     initial = {
-        'name': 'human',
-        'scientific_name': 'Homo sapiens',
-        'taxon_id': '9606',
+        'term': 'AchondroplasiaTestAgain',
+        'orphaNumber': '9999',
+        'type': 'Disease',
     }
-    item_url = testapp.post_json('/organism', initial).location
+    item_url = testapp.post_json('/orphaPhenotype', initial).location
 
     with execute_counter.expect(1):
         item = testapp.get(item_url).json
@@ -260,9 +191,9 @@ def test_collection_put(testapp, execute_counter):
         assert item[key] == initial[key]
 
     update = {
-        'name': 'mouse',
-        'scientific_name': 'Mus musculus',
-        'taxon_id': '10090',
+        'term': 'AchondroplasiaTestAgainAgain',
+        'orphaNumber': '9999',
+        'type': 'Disease',
     }
     testapp.put_json(item_url, update, status=200)
 
@@ -272,14 +203,14 @@ def test_collection_put(testapp, execute_counter):
         assert res[key] == update[key]
 
 
-def test_post_duplicate_uuid(testapp, mouse):
+def test_post_duplicate_uuid(testapp, disease):
     item = {
-        'uuid': mouse['uuid'],
-        'name': 'human',
-        'scientific_name': 'Homo sapiens',
-        'taxon_id': '9606',
+        'uuid': disease['uuid'],
+        'term': 'AchondroplasiaTestAgain',
+        'orphaNumber': '9999',
+        'type': 'Disease',
     }
-    testapp.post_json('/organism', item, status=409)
+    testapp.post_json('/orphaPhenotype', item, status=409)
 
 
 # def test_user_effective_principals(submitter, lab, anontestapp, execute_counter):
