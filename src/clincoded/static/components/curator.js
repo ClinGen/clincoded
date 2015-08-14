@@ -495,123 +495,186 @@ module.exports.capture = {
 
 // Take an object and make a flattened version ready for writing.
 // SCHEMA: This might need to change when the schema changes.
-module.exports.flatten = {
-    annotation: function(annotation) {
-        // First copy everything before fixing the special properties
-        var flat = _.clone(annotation);
+module.exports.flatten = function(obj) {
+    var flat;
 
-        flat.article = annotation.article['@id'];
+    switch(obj['@type'][0]) {
+        case 'annotation':
+            flat = flattenAnnotation(obj);
+            break;
 
-        // Flatten groups
-        if (annotation.groups && annotation.groups.length) {
-            flat.groups = annotation.groups.map(function(group) {
-                return group['@id'];
-            });
-        } else {
-            delete flat.groups;
-        }
+        case 'group':
+            flat = flattenGroup(obj);
+            break;
 
-        // Flatten families
-        if (annotation.families && annotation.families.length) {
-            flat.families = annotation.families.map(function(family) {
-                return family['@id'];
-            });
-        } else {
-            delete flat.families;
-        }
+        case 'family':
+            flat = flattenFamily(obj);
+            break;
 
-        // Flatten individuals
-        if (annotation.individuals && annotation.individuals.length) {
-            flat.individuals = annotation.individuals.map(function(individual) {
-                return individual['@id'];
-            });
-        } else {
-            delete flat.individuals;
-        }
-
-        // Flatten experimentalData
-        if (annotation.experimentalData && annotation.experimentalData.length) {
-            flat.experimentalData = annotation.experimentalData.map(function(data) {
-                return data['@id'];
-            });
-        } else {
-            delete flat.experimentalData;
-        }
-
-        // Delete fields we can't write
-        delete flat['@id'];
-        delete flat['@type'];
-        delete flat.actions;
-        delete flat.audit;
-        delete flat.uuid;
-
-        return flat;
-    },
-
-    group: function(group) {
-        // First copy everything before fixing the special properties
-        var flat = _.clone(group);
-
-        // Flatten diseases
-        if (group.commonDiagnosis && group.commonDiagnosis.length) {
-            flat.commonDiagnosis = group.commonDiagnosis.map(function(disease) {
-                return disease['@id'];
-            });
-        } else {
-            delete flat.commonDiagnosis;
-        }
-
-        // Flatten otherGenes
-        if (group.otherGenes && group.otherGenes.length) {
-            flat.otherGenes = group.otherGenes.map(function(gene) {
-                return gene['@id'];
-            });
-        } else {
-            delete flat.otherGenes;
-        }
-
-        // Flatten other PMIDs
-        if (group.otherPMIDs && group.otherPMIDs.length) {
-            flat.otherPMIDs = group.otherPMIDs.map(function(article) {
-                return article['@id'];
-            });
-        } else {
-            delete flat.otherPMIDs;
-        }
-
-        // Flatten included families
-        if (group.familyIncluded && group.familyIncluded.length) {
-            flat.familyIncluded = group.familyIncluded.map(function(family) {
-                return family['@id'];
-            });
-        } else {
-            delete flat.familyIncluded;
-        }
-
-        // Flatten included families
-        if (group.individualIncluded && group.individualIncluded.length) {
-            flat.individualIncluded = group.individualIncluded.map(function(individual) {
-                return individual['@id'];
-            });
-        } else {
-            delete flat.individualIncluded;
-        }
-
-        // Flatten other linked objects
-        if (group.statistic) {
-            flat.statistic = group.statistic['@id'];
-        }
-        if (group.statistic) {
-            flat.control = group.control['@id'];
-        }
-
-        // Delete fields we can't write
-        delete flat['@id'];
-        delete flat['@type'];
-        delete flat.actions;
-        delete flat.audit;
-        delete flat.uuid;
-
-        return flat;
+        default:
+            break;
     }
+
+    // Delete fields we can't write
+    if (flat) {
+        delete flat['@id'];
+        delete flat['@type'];
+        delete flat.actions;
+        delete flat.audit;
+        delete flat.uuid;
+    }
+    return flat;
 };
+
+
+
+
+function flattenAnnotation(annotation) {
+    // First copy everything before fixing the special properties
+    var flat = _.clone(annotation);
+
+    flat.article = annotation.article['@id'];
+
+    // Flatten groups
+    if (annotation.groups && annotation.groups.length) {
+        flat.groups = annotation.groups.map(function(group) {
+            return group['@id'];
+        });
+    } else {
+        delete flat.groups;
+    }
+
+    // Flatten families
+    if (annotation.families && annotation.families.length) {
+        flat.families = annotation.families.map(function(family) {
+            return family['@id'];
+        });
+    } else {
+        delete flat.families;
+    }
+
+    // Flatten individuals
+    if (annotation.individuals && annotation.individuals.length) {
+        flat.individuals = annotation.individuals.map(function(individual) {
+            return individual['@id'];
+        });
+    } else {
+        delete flat.individuals;
+    }
+
+    // Flatten experimentalData
+    if (annotation.experimentalData && annotation.experimentalData.length) {
+        flat.experimentalData = annotation.experimentalData.map(function(data) {
+            return data['@id'];
+        });
+    } else {
+        delete flat.experimentalData;
+    }
+
+    return flat;
+}
+
+function flattenGroup(group) {
+    // First copy everything before fixing the special properties
+    var flat = _.clone(group);
+
+    // Flatten diseases
+    if (group.commonDiagnosis && group.commonDiagnosis.length) {
+        flat.commonDiagnosis = group.commonDiagnosis.map(function(disease) {
+            return disease['@id'];
+        });
+    } else {
+        delete flat.commonDiagnosis;
+    }
+
+    // Flatten otherGenes
+    if (group.otherGenes && group.otherGenes.length) {
+        flat.otherGenes = group.otherGenes.map(function(gene) {
+            return gene['@id'];
+        });
+    } else {
+        delete flat.otherGenes;
+    }
+
+    // Flatten other PMIDs
+    if (group.otherPMIDs && group.otherPMIDs.length) {
+        flat.otherPMIDs = group.otherPMIDs.map(function(article) {
+            return article['@id'];
+        });
+    } else {
+        delete flat.otherPMIDs;
+    }
+
+    // Flatten included families
+    if (group.familyIncluded && group.familyIncluded.length) {
+        flat.familyIncluded = group.familyIncluded.map(function(family) {
+            return family['@id'];
+        });
+    } else {
+        delete flat.familyIncluded;
+    }
+
+    // Flatten included individuals
+    if (group.individualIncluded && group.individualIncluded.length) {
+        flat.individualIncluded = group.individualIncluded.map(function(individual) {
+            return individual['@id'];
+        });
+    } else {
+        delete flat.individualIncluded;
+    }
+
+    // Flatten other linked objects
+    if (group.statistic) {
+        flat.statistic = group.statistic['@id'];
+    }
+    if (group.statistic) {
+        flat.control = group.control['@id'];
+    }
+
+    return flat;
+}
+
+function flattenFamily(family) {
+    // First copy everything before fixing the special properties
+    var flat = _.clone(family);
+
+    // Flatten diseases
+    if (family.commonDiagnosis && family.commonDiagnosis.length) {
+        flat.commonDiagnosis = family.commonDiagnosis.map(function(disease) {
+            return disease['@id'];
+        });
+    } else {
+        delete flat.commonDiagnosis;
+    }
+
+    // Flatten segregation variants
+    if (family.segregation && family.segregation.variants && family.segregation.variants.length) {
+        flat.segregation.variants = family.segregation.variants.map(function(variant) {
+            return variant['@id'];
+        });
+    } else {
+        delete flat.segregation.variants;
+    }
+
+    // Flatten other PMIDs
+    if (family.otherPMIDs && family.otherPMIDs.length) {
+        flat.otherPMIDs = family.otherPMIDs.map(function(article) {
+            return article['@id'];
+        });
+    } else {
+        delete flat.otherPMIDs;
+    }
+
+    // Flatten included individuals
+    if (family.individualIncluded && family.individualIncluded.length) {
+        flat.individualIncluded = family.individualIncluded.map(function(individual) {
+            return individual['@id'];
+        });
+    } else {
+        delete flat.individualIncluded;
+    }
+
+    delete flat.associatedGroups;
+
+    return flat;
+}

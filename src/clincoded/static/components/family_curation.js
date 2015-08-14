@@ -432,7 +432,7 @@ var FamilyCuration = React.createClass({
                     if (!this.state.family || Object.keys(this.state.family).length === 0) {
                         // Get a flattened copy of the annotation and put our new families into it,
                         // ready for writing.
-                        var annotation = curator.flatten.annotation(this.state.annotation);
+                        var annotation = curator.flatten(this.state.annotation);
                         if (!annotation.families) {
                             annotation.families = [];
                         }
@@ -449,7 +449,7 @@ var FamilyCuration = React.createClass({
                     // If we're adding this family to a group, update the group with this family
                     if (Object.keys(this.state.group).length) {
                         // Add the newly saved families to the group
-                        var group = curator.flatten.group(this.state.group);
+                        var group = curator.flatten(this.state.group);
                         if (!group.familyIncluded) {
                             group.familyIncluded = [];
                         }
@@ -549,7 +549,9 @@ var FamilyCuration = React.createClass({
     // Create a family object to be written to the database. Most values come from the values
     // in the form. The created object is returned from the function.
     createFamily: function(familyDiseases, familyArticles, familyVariants) {
-        var newFamily = {};
+        // Make a new family. If we're editing the form, first copy the old family
+        // to make sure we have everything not from the form.
+        var newFamily = Object.keys(this.state.family).length ? curator.flatten(this.state.family) : {};
 
         // Method and/or segregation successfully created if needed (null if not); passed in 'methSeg' object. Now make the new family.
         newFamily.label = this.getFormValue('familyname');

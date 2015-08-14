@@ -126,7 +126,6 @@ var GroupCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
-            var newGroup = {}; // Holds the new group object;
             var groupDiseases, groupGenes, groupArticles;
             var formError = false;
 
@@ -232,7 +231,9 @@ var GroupCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    // Now make the new group.
+                    // Now make the new group. If we're editing the form, first copy the old group
+                    // to make sure we have everything not from the form.
+                    var newGroup = Object.keys(this.state.group).length ? curator.flatten(this.state.group) : {};
                     newGroup.label = this.getFormValue('groupname');
                     newGroup.dateTime = moment().format();
 
@@ -338,7 +339,7 @@ var GroupCuration = React.createClass({
                     if (!this.state.group || Object.keys(this.state.group).length === 0) {
                         // Get a flattened copy of the annotation and put our new group into it,
                         // ready for writing.
-                        var annotation = curator.flatten.annotation(this.state.annotation);
+                        var annotation = curator.flatten(this.state.annotation);
                         if (annotation.groups) {
                             annotation.groups.push(newGroup['@id']);
                         } else {
