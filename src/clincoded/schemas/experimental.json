@@ -795,6 +795,10 @@
         "evidenceType": {
             "title": "Type",
             "type": "string"
+        },
+        "submitted_by.uuid": {
+            "title": "Submitted by",
+            "type": "string"
         }
     },
     "boost_values": {

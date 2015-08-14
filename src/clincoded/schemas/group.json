@@ -362,6 +362,10 @@
         "individualIncluded": {
             "title": "Individual Included",
             "type": "string"
+        },
+        "submitted_by.uuid": {
+            "title": "Submitted by",
+            "type": "string"
         }
     }
 }
