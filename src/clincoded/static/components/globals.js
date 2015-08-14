@@ -45,6 +45,14 @@ var validationStatusClass = module.exports.validationStatusClass = function (sta
     return htmlClass;
 };
 
+// Returns true if the given user matches the user in the session
+module.exports.userMatch = function(user, session) {
+    if (user && session && session.user_properties) {
+        return user.uuid === session.user_properties.uuid;
+    }
+    return false;
+};
+
 module.exports.truncateString = function (str, len) {
     if (str.length > len) {
         str = str.replace(/(^\s)|(\s$)/gi, ''); // Trim leading/trailing white space

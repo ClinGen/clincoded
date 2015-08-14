@@ -159,7 +159,6 @@ var FamilyCuration = React.createClass({
         // Get a new family object ready for writing. Modify a copy of it instead
         // of the one we were given.
         var writerFamily = _.clone(newFamily);
-        writerFamily.dateTime = moment().format();
         if (familyLabel) {
             writerFamily.label = familyLabel;
         }
@@ -541,7 +540,6 @@ var FamilyCuration = React.createClass({
         }
 
         if (Object.keys(newSegregation).length) {
-            newSegregation.dateTime = moment().format();
             newFamily.segregation = newSegregation;
         }
     },

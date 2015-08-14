@@ -83,9 +83,7 @@ var CurationCentral = React.createClass({
 
         // Put together a new annotation object with the article reference
         var newAnnotationObj = {
-            owner: this.props.session['auth.userid'],
             article: article.pmid,
-            dateTime: new Date().toISOString(),
             active: true
         };
 
@@ -171,7 +169,7 @@ var BetaNote = React.createClass({
                 {!curatorMatch ?
                     <div className="beta-note">
                         <p>Currently, only the curator who adds a paper to a Gene-Disease record can associate evidence with that paper.</p>
-                        <p>PMID:{annotation.article.pmid} added by {annotation.owner}.</p>
+                        <p>PMID:{annotation.article.pmid} added by {annotation.submitted_by.title}.</p>
                     </div>
                 : null}
             </div>
@@ -278,7 +276,6 @@ var AddPmidModal = React.createClass({
                 // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
                     var newArticle = parsePubmed(xml, enteredPmid);
-                    newArticle.dateTime = moment().format();
                     return this.postRestData('/articles/', newArticle).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });

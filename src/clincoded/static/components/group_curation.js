@@ -235,7 +235,6 @@ var GroupCuration = React.createClass({
                     // to make sure we have everything not from the form.
                     var newGroup = Object.keys(this.state.group).length ? curator.flatten(this.state.group) : {};
                     newGroup.label = this.getFormValue('groupname');
-                    newGroup.dateTime = moment().format();
 
                     // Get an array of all given disease IDs
                     newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
