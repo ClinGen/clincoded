@@ -52,35 +52,73 @@ var GroupCuration = React.createClass({
         }
     },
 
-    // Retrieve the GDM and annotation objects with the given UUIDs from the DB. If successful, set the component
-    // state to the retrieved objects to cause a rerender of the component.
-    getGdmAnnotation: function(gdmUuid, annotationUuid) {
-        this.getRestDatas([
-            '/gdm/' + gdmUuid,
-            '/evidence/' + annotationUuid + '?frame=object' // Use flattened object because it can be updated
-        ]).then(data => {
-            var annotation = data[1];
-            this.setState({gdm: data[0], annotation: annotation, currOmimId: data[0].omimId});
-            return this.getRestData(annotation.article);
-        }).then(article => {
-            return this.setState({article: article});
-        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
-    },
+    // Load objects from query string into the state variables. Must have already parsed the query string
+    // and set the queryValues property of this React class.
+    loadData: function() {
+        var gdmUuid = this.queryValues.gdmUuid;
+        var groupUuid = this.queryValues.groupUuid;
+        var annotationUuid = this.queryValues.annotationUuid;
 
-    // If a group UUID is given in the query string, load it into the group state variable.
-    loadGroup: function(groupUuid) {
-        this.getRestData(
-            '/group/' + groupUuid
-        ).then(group => {
-            // See if the loaded group's genotyping methods are being used.
-            var genotypingMethodUsed = !!(group.method && group.method.genotypingMethods && group.method.genotypingMethods.length);
+        // Make an array of URIs to query the database. Don't include any that didn't include a query string.
+        var uris = _.compact([
+            gdmUuid ? '/gdm/' + gdmUuid : '',
+            groupUuid ? '/groups/' + groupUuid + '?frame=object' : '',
+            annotationUuid ? '/evidence/' + annotationUuid + '?frame=object' : ''
+        ]);
 
-            // Received group data; set the current state with it
-            this.setState({group: group, genotyping2Disabled: !genotypingMethodUsed});
+        // With all given query string variables, get the corresponding objects from the DB.
+        this.getRestDatas(
+            uris
+        ).then(datas => {
+            // See what we got back so we can build an object to copy in this React object's state to rerender the page.
+            var stateObj = {};
+            datas.forEach(function(data) {
+                switch(data['@type'][0]) {
+                    case 'gdm':
+                        stateObj.gdm = data;
+                        break;
+
+                    case 'group':
+                        stateObj.group = data;
+                        break;
+
+                    case 'annotation':
+                        stateObj.annotation = data;
+                        break;
+
+                    default:
+                        break;
+                }
+            });
+
+            // Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
+            if (stateObj.gdm && stateObj.gdm.omimId) {
+                this.setOmimIdState(stateObj.gdm.omimId);
+            }
+
+            // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
+            if (stateObj.family && Object.keys(stateObj.family).length) {
+                stateObj.genotyping2Disabled = !(stateObj.family.method && stateObj.family.method.genotypingMethods && stateObj.family.method.genotypingMethods.length);
+            }
+
+            // Set all the state variables we've collected
+            this.setState(stateObj);
+
+            // If we have an annotation, load its article separately because we asked for a flattened annotation
+            // (the article is just its string @id).
+            if (Object.keys(stateObj.annotation).length) {
+                return this.getRestData(
+                    stateObj.annotation.article
+                ).then(article => {
+                    this.setState({article: article});
+                    return Promise.resolve(article);
+                });
+            }
+
+            // No annotation; just resolve with an empty promise.
             return Promise.resolve();
         }).catch(function(e) {
-            console.log('GROUP LOAD ERROR=: %o', e);
-            parseAndLogError.bind(undefined, 'getRequest');
+            console.log('OBJECT LOAD ERROR: %s — %s', e.statusText, e.url);
         });
     },
 
@@ -89,15 +127,7 @@ var GroupCuration = React.createClass({
     // Note, we have to do this after the component mounts because AJAX DB queries can't be
     // done from unmounted components.
     componentDidMount: function() {
-        if (this.queryValues.annotationUuid && this.queryValues.gdmUuid) {
-            // Query the DB with this UUID, setting the component state if successful.
-            this.getGdmAnnotation(this.queryValues.gdmUuid, this.queryValues.annotationUuid);
-        }
-
-        // If a group's UUID was given in the query string, retrieve the group data.
-        if (this.queryValues.groupUuid) {
-            this.loadGroup(this.queryValues.groupUuid);
-        }
+        this.loadData();
     },
 
     submitForm: function(e) {
