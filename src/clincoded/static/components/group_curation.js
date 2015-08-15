@@ -7,14 +7,13 @@ var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
 var curator = require('./curator');
-var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
+var methods = require('./methods');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
-var booleanToDropdown = curator.booleanToDropdown;
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
 var Form = form.Form;
@@ -40,7 +39,6 @@ var GroupCuration = React.createClass({
         return {
             gdm: {}, // GDM object given in UUID
             annotation: {}, // Annotation object given in UUID
-            article: {}, // Article from the annotation
             group: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
@@ -53,35 +51,62 @@ var GroupCuration = React.createClass({
         }
     },
 
-    // Retrieve the GDM and annotation objects with the given UUIDs from the DB. If successful, set the component
-    // state to the retrieved objects to cause a rerender of the component.
-    getGdmAnnotation: function(gdmUuid, annotationUuid) {
-        this.getRestDatas([
-            '/gdm/' + gdmUuid,
-            '/evidence/' + annotationUuid + '?frame=object' // Use flattened object because it can be updated
-        ]).then(data => {
-            var annotation = data[1];
-            this.setState({gdm: data[0], annotation: annotation, currOmimId: data[0].omimId});
-            return this.getRestData(annotation.article);
-        }).then(article => {
-            return this.setState({article: article});
-        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
-    },
+    // Load objects from query string into the state variables. Must have already parsed the query string
+    // and set the queryValues property of this React class.
+    loadData: function() {
+        var gdmUuid = this.queryValues.gdmUuid;
+        var groupUuid = this.queryValues.groupUuid;
+        var annotationUuid = this.queryValues.annotationUuid;
 
-    // If a group UUID is given in the query string, load it into the group state variable.
-    loadGroup: function(groupUuid) {
-        this.getRestData(
-            '/group/' + groupUuid
-        ).then(group => {
-            // See if the loaded group's genotyping methods are being used.
-            var genotypingMethodUsed = !!(group.method && group.method.genotypingMethods && group.method.genotypingMethods.length);
+        // Make an array of URIs to query the database. Don't include any that didn't include a query string.
+        var uris = _.compact([
+            gdmUuid ? '/gdm/' + gdmUuid : '',
+            groupUuid ? '/groups/' + groupUuid : '',
+            annotationUuid ? '/evidence/' + annotationUuid : ''
+        ]);
 
-            // Received group data; set the current state with it
-            this.setState({group: group, genotyping2Disabled: !genotypingMethodUsed});
+        // With all given query string variables, get the corresponding objects from the DB.
+        this.getRestDatas(
+            uris
+        ).then(datas => {
+            // See what we got back so we can build an object to copy in this React object's state to rerender the page.
+            var stateObj = {};
+            datas.forEach(function(data) {
+                switch(data['@type'][0]) {
+                    case 'gdm':
+                        stateObj.gdm = data;
+                        break;
+
+                    case 'group':
+                        stateObj.group = data;
+                        break;
+
+                    case 'annotation':
+                        stateObj.annotation = data;
+                        break;
+
+                    default:
+                        break;
+                }
+            });
+
+            // Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
+            if (stateObj.gdm && stateObj.gdm.omimId) {
+                this.setOmimIdState(stateObj.gdm.omimId);
+            }
+
+            // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
+            if (stateObj.group && Object.keys(stateObj.group).length) {
+                stateObj.genotyping2Disabled = !(stateObj.group.method && stateObj.group.method.genotypingMethods && stateObj.group.method.genotypingMethods.length);
+            }
+
+            // Set all the state variables we've collected
+            this.setState(stateObj);
+
+            // No one’s waiting but the user; just resolve with an empty promise.
             return Promise.resolve();
         }).catch(function(e) {
-            console.log('GROUP LOAD ERROR=: %o', e);
-            parseAndLogError.bind(undefined, 'getRequest');
+            console.log('OBJECT LOAD ERROR: %s — %s', e.statusText, e.url);
         });
     },
 
@@ -90,15 +115,7 @@ var GroupCuration = React.createClass({
     // Note, we have to do this after the component mounts because AJAX DB queries can't be
     // done from unmounted components.
     componentDidMount: function() {
-        if (this.queryValues.annotationUuid && this.queryValues.gdmUuid) {
-            // Query the DB with this UUID, setting the component state if successful.
-            this.getGdmAnnotation(this.queryValues.gdmUuid, this.queryValues.annotationUuid);
-        }
-
-        // If a group's UUID was given in the query string, retrieve the group data.
-        if (this.queryValues.groupUuid) {
-            this.loadGroup(this.queryValues.groupUuid);
-        }
+        this.loadData();
     },
 
     submitForm: function(e) {
@@ -109,43 +126,51 @@ var GroupCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
-            var newGroup = {}; // Holds the new group object;
             var groupDiseases, groupGenes, groupArticles;
             var formError = false;
 
-            // Parse the comma-separated list of Orphanet IDs
-            var orphaIds = captureOrphas(this.getFormValue('orphanetid'));
-            var geneSymbols = captureGenes(this.getFormValue('othergenevariants'));
-            var pmids = capturePmids(this.getFormValue('otherpmids'));
-
-            // Check that all HPO terms appear valid
-            var hpoTerms = this.getFormValue('hpoid');
-            if (hpoTerms) {
-                var rawHpoids = _.compact(hpoTerms.toUpperCase().split(','));
-                var hpoids = _.compact(rawHpoids.map(function(id) { return captureHpoid(id); }));
-                if (rawHpoids.length !== hpoids.length) {
-                    formError = true;
-                    this.setFormErrors('hpoid', 'HPO IDs must be in the form “HP:NNNNNNN,” where N is a digit');
-                }
-            }
-
-            // Check that all NOT HPO terms appear valid
-            hpoTerms = this.getFormValue('nothpoid');
-            if (hpoTerms) {
-                var rawNotHpoids = _.compact(hpoTerms.toUpperCase().split(','));
-                var nothpoids = _.compact(rawNotHpoids.map(function(id) { return captureHpoid(id); }));
-                if (rawNotHpoids.length !== nothpoids.length) {
-                    formError = true;
-                    this.setFormErrors('nothpoid', 'Use HPO IDs, e.g. HP:0000123');
-                }
-            }
+            // Parse comma-separated list fields
+            var orphaIds = curator.capture.orphas(this.getFormValue('orphanetid'));
+            var geneSymbols = curator.capture.genes(this.getFormValue('othergenevariants'));
+            var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
+            var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
+            var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
-            if (!orphaIds || !orphaIds.length) {
-                // No 'orphaXX' found
+            if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
+                // ORPHA list is bad
                 formError = true;
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
             }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (geneSymbols && geneSymbols.length && _(geneSymbols).any(function(id) { return id === null; })) {
+                // Gene symbol list is bad
+                formError = true;
+                this.setFormErrors('othergenevariants', 'Use gene symbols (e.g. SMAD3) separated by commas');
+            }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (pmids && pmids.length && _(pmids).any(function(id) { return id === null; })) {
+                // PMID list is bad
+                formError = true;
+                this.setFormErrors('otherpmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
+            }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
+                // HPOID list is bad
+                formError = true;
+                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (nothpoids && nothpoids.length && _(nothpoids).any(function(id) { return id === null; })) {
+                // NOT HPOID list is bad
+                formError = true;
+                this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
             if (!formError) {
                 // Build search string from given ORPHA IDs
                 var searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
@@ -167,7 +192,7 @@ var GroupCuration = React.createClass({
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
-                    if (geneSymbols) {
+                    if (geneSymbols && geneSymbols.length) {
                         // At least one gene symbol entered; search the DB for them.
                         searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
                         return this.getRestData(searchStr).then(genes => {
@@ -187,7 +212,7 @@ var GroupCuration = React.createClass({
                     }
                 }).then(data => {
                     // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
-                    if (pmids) {
+                    if (pmids && pmids.length) {
                         // User entered at least one PMID
                         searchStr = '/search/?type=article&' + pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
                         return this.getRestData(searchStr).then(articles => {
@@ -206,30 +231,30 @@ var GroupCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    // Now make the new group.
+                    // Now make the new group. If we're editing the form, first copy the old group
+                    // to make sure we have everything not from the form.
+                    var newGroup = Object.keys(this.state.group).length ? curator.flatten(this.state.group) : {};
                     newGroup.label = this.getFormValue('groupname');
 
                     // Get an array of all given disease IDs
                     newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
 
                     // If a method object was created (at least one method field set), get its new object's
-                    var newMethod = this.createMethod();
+                    var newMethod = methods.create.call(this);
                     if (newMethod) {
                         newGroup.method = newMethod;
                     }
 
                     // Fill in the group fields from the Common Diseases & Phenotypes panel
-                    var hpoTerms = this.getFormValue('hpoid');
-                    if (hpoTerms) {
-                        newGroup.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
+                    if (hpoids && hpoids.length) {
+                        newGroup.hpoIdInDiagnosis = hpoids;
                     }
                     var phenoterms = this.getFormValue('phenoterms');
                     if (phenoterms) {
                         newGroup.termsInDiagnosis = phenoterms;
                     }
-                    hpoTerms = this.getFormValue('nothpoid');
-                    if (hpoTerms) {
-                        newGroup.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
+                    if (nothpoids && nothpoids.length) {
+                        newGroup.hpoIdInElimination = nothpoids;
                     }
                     phenoterms = this.getFormValue('notphenoterms');
                     if (phenoterms) {
@@ -311,15 +336,14 @@ var GroupCuration = React.createClass({
                     }
                 }).then(newGroup => {
                     if (!this.state.group || Object.keys(this.state.group).length === 0) {
-                        // Let's avoid modifying a React state property, so clone it. Add the new group
-                        // to the current annotation's 'groups' array.
-                        var annotation = _.clone(this.state.annotation);
-                        annotation.groups.push(newGroup['@id']);
-
-                        // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
-                        delete annotation.uuid;
-                        delete annotation['@id'];
-                        delete annotation['@type'];
+                        // Get a flattened copy of the annotation and put our new group into it,
+                        // ready for writing.
+                        var annotation = curator.flatten(this.state.annotation);
+                        if (annotation.groups) {
+                            annotation.groups.push(newGroup['@id']);
+                        } else {
+                            annotation.groups = [newGroup['@id']];
+                        }
 
                         // Post the modified annotation to the DB, then go back to Curation Central
                         return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
@@ -328,68 +352,21 @@ var GroupCuration = React.createClass({
                     }
                 }).then(data => {
                     // Navigate back to Curation Central page.
-                    // FUTURE: Need to navigate to choices page.
+                    // FUTURE: Need to navigate to Group Submit page.
+                    this.resetAllFormValues();
                     this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
                 }).catch(function(e) {
                     console.log('GROUP CREATION ERROR=: %o', e);
-                    parseAndLogError.bind(undefined, 'putRequest');
                 });
             }
         }
     },
 
-    // Create method object based on the form values
-    createMethod: function() {
-        var newMethod = {};
-        var value1, value2;
-
-        // Put together a new 'method' object
-        value1 = this.getFormValue('prevtesting');
-        if (value1 !== 'none') {
-            newMethod.previousTesting = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('prevtestingdesc');
-        if (value1) {
-            newMethod.previousTestingDescription = value1;
-        }
-        value1 = this.getFormValue('genomewide');
-        if (value1 !== 'none') {
-            newMethod.genomeWideStudy = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('genotypingmethod1');
-        value2 = this.getFormValue('genotypingmethod2');
-        if (value1 !== 'none' || value2 !== 'none') {
-            newMethod.genotypingMethods = _([value1, value2]).filter(function(val) {
-                return val !== 'none';
-            });
-        }
-        value1 = this.getFormValue('entiregene');
-        if (value1 !== 'none') {
-            newMethod.entireGeneSequenced = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('copyassessed');
-        if (value1 !== 'none') {
-            newMethod.copyNumberAssessed = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('mutationsgenotyped');
-        if (value1 !== 'none') {
-            newMethod.specificMutationsGenotyped = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('specificmutation');
-        if (value1) {
-            newMethod.specificMutationsGenotypedMethod = value1;
-        }
-        value1 = this.getFormValue('additionalinfomethod');
-        if (value1) {
-            newMethod.additionalInformation = value1;
-        }
-
-        return Object.keys(newMethod).length ? newMethod : null;
-    },
-
     render: function() {
         var annotation = this.state.annotation;
         var gdm = this.state.gdm;
+        var group = this.state.group;
+        var method = (group.method && Object.keys(group.method).length) ? group.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
@@ -403,9 +380,11 @@ var GroupCuration = React.createClass({
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
-                            <div className="curation-pmid-summary">
-                                <PmidSummary article={this.state.article} displayJournal />
-                            </div>
+                            {Object.keys(this.state.annotation).length && this.state.annotation.article ?
+                                <div className="curation-pmid-summary">
+                                    <PmidSummary article={this.state.annotation.article} displayJournal />
+                                </div>
+                            : null}
                             <h1>Curate Group Information</h1>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
@@ -430,7 +409,7 @@ var GroupCuration = React.createClass({
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Group Methods" open>
-                                                {GroupMethods.call(this)}
+                                                {methods.render.call(this, method)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
@@ -452,43 +431,6 @@ var GroupCuration = React.createClass({
 });
 
 globals.curator_page.register(GroupCuration, 'curator_page', 'group-curation');
-
-
-function captureBase(s, re, uppercase) {
-    var match, matchResults = [];
-
-    do {
-        match = re.exec(s);
-        if (match) {
-            matchResults.push(uppercase ? match[1].toUpperCase() : match[1]);
-        }
-    } while(match);
-    return matchResults;
-}
-
-// Given a string, find all the comma-separated 'orphaXX' occurrences.
-// Return all orpha IDs in an array.
-function captureOrphas(s) {
-    return captureBase(s, /(?:^|,|\s)orpha(\d+)(?=,|\s|$)/gi, true);
-}
-
-// Given a string, find all the comma-separated gene symbol occurrences.
-// Return all gene symbols in an array.
-function captureGenes(s) {
-    return s ? captureBase(s, /(?:^|,|\s*)([a-zA-Z](?:\w)*)(?=,|\s*|$)/gi, true) : null;
-}
-
-// Given a string, find all the comma-separated PMID occurrences.
-// Return all PMIDs in an array.
-function capturePmids(s) {
-    return s ? captureBase(s, /(?:^|,|\s*)(\d{1,8})(?=,|\s*|$)/gi) : null;
-}
-
-function captureHpoid(s) {
-    var match = s.toUpperCase().match(/^ *(HP:\d{7}) *$/i);
-    return match ? match[1] : null;
-}
-
 
 
 // Group Name group curation panel. Call with .call(this) to run in the same context
@@ -689,83 +631,6 @@ var LabelOtherGenes = React.createClass({
         return <span>Other genes found to have variants in them (<a href="http://www.genenames.org/" title="HGNC home page in a new tab" target="_blank">HGNC</a> symbol):</span>;
     }
 });
-
-
-// Methods group curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var GroupMethods = function() {
-    var group = this.state.group;
-    var method = (group.method && Object.keys(group.method).length) ? group.method : {};
-
-    return (
-        <div className="row">
-            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={booleanToDropdown(method.previousTesting)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5" value={method ? method.previousTestingDescription : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={booleanToDropdown(method.genomeWideStudy)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none" disabled="disabled">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <h4 className="col-sm-7 col-sm-offset-5">Genotyping Method</h4>
-            <Input type="select" ref="genotypingmethod1" label="Method 1:" handleChange={this.handleChange} defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[0] ? method.genotypingMethods[0] : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Exome sequencing</option>
-                <option>Genotyping</option>
-                <option>HRM</option>
-                <option>PCR</option>
-                <option>Sanger</option>
-                <option>Whole genome shotgun sequencing</option>
-            </Input>
-            <Input type="select" ref="genotypingmethod2" label="Method 2:" defaultValue="none" value={method && method.genotypingMethods && method.genotypingMethods[1] ? method.genotypingMethods[1] : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.genotyping2Disabled}>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Exome sequencing</option>
-                <option>Genotyping</option>
-                <option>HRM</option>
-                <option>PCR</option>
-                <option>Sanger</option>
-                <option>Whole genome shotgun sequencing</option>
-            </Input>
-            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={booleanToDropdown(method.entireGeneSequenced)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={booleanToDropdown(method.copyNumberAssessed)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={booleanToDropdown(method.specificMutationsGenotyped)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="textarea" ref="specificmutation" label="Method by which Specific Mutations Genotyped:" rows="5" value={method ? method.specificMutationsGenotypedMethod : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="additionalinfomethod" label="Additional Information about Group Method:" rows="8" value={method ? method.additionalInformation : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-        </div>
-    );
-};
 
 
 // Additional Information group curation panel. Call with .call(this) to run in the same context

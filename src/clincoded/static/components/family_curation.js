@@ -7,8 +7,8 @@ var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
 var curator = require('./curator');
-var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
+var methods = require('./methods');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -21,13 +21,17 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 var PmidDoiButtons = curator.PmidDoiButtons;
-var booleanToDropdown = curator.booleanToDropdown;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 5;
+
+// Settings for this.state.varOption
+var VAR_NONE = 0; // No variants entered in a panel
+var VAR_SPEC = 1; // A specific variant (dbSNP, ClinVar, HGVS) entered in a panel
+var VAR_OTHER = 2; // Other description entered in a panel
 
 
 var FamilyCuration = React.createClass({
@@ -40,21 +44,16 @@ var FamilyCuration = React.createClass({
     // Keeps track of values from the query string
     queryValues: {},
 
-    instance: {
-        // If we're adding a family to a group, keep a flattened group here so we can update it when the family is submitted
-        group: {},
-    },
-
     getInitialState: function() {
         return {
             gdm: {}, // GDM object given in query string
             group: {}, // Group object given in query string
             family: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
             annotation: {}, // Annotation object given in query string
-            article: {}, // Article from annotation; need to load because annotation is flattened
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 1, // Number of variants to display
+            variantOption: [VAR_NONE], // One variant panel, and nothing entered
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
@@ -62,6 +61,8 @@ var FamilyCuration = React.createClass({
 
     // Handle value changes in various form fields
     handleChange: function(ref, e) {
+        var dbsnpid, clinvarid, hgvsterm, othervariant;
+
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
             // Disable the Genotyping Method 2 if Genotyping Method 1 has no value
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
@@ -69,16 +70,36 @@ var FamilyCuration = React.createClass({
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
             var lastVariantSuffix = (this.state.variantCount - 1) + '';
-            var lastRefSuffix = ref.match(/\d*$/);
-            if (lastRefSuffix && (lastVariantSuffix === lastRefSuffix[0])) {
+            var refSuffix = ref.match(/\d+$/);
+            refSuffix = refSuffix && refSuffix[0];
+            if (refSuffix && (lastVariantSuffix === refSuffix)) {
                 // The changed item is in the last variant panel. If any fields in the last field have a value, disable
                 // the Add Another Variant button.
-                var dbsnpid = this.refs['VARdbsnpid' + lastVariantSuffix].getValue();
-                var clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                var hgvsterm = this.refs['VARhgvsterm' + lastVariantSuffix].getValue();
-                var othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
+                dbsnpid = this.refs['VARdbsnpid' + lastVariantSuffix].getValue();
+                clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
+                hgvsterm = this.refs['VARhgvsterm' + lastVariantSuffix].getValue();
+                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
                 this.setState({addVariantDisabled: !(dbsnpid || clinvarid || hgvsterm || othervariant)});
             }
+
+            // Disable fields depending on what fields have values in them.
+            dbsnpid = this.refs['VARdbsnpid' + refSuffix].getValue();
+            clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
+            hgvsterm = this.refs['VARhgvsterm' + refSuffix].getValue();
+            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
+            var currVariantOption = this.state.variantOption;
+            if (othervariant) {
+                this.refs['VARdbsnpid' + refSuffix].resetValue();
+                this.refs['VARclinvarid' + refSuffix].resetValue();
+                this.refs['VARhgvsterm' + refSuffix].resetValue();
+                currVariantOption[refSuffix] = VAR_OTHER;
+            } else if (dbsnpid || clinvarid || hgvsterm) {
+                this.refs['VARothervariant' + refSuffix].resetValue();
+                currVariantOption[refSuffix] = VAR_SPEC;
+            } else {
+                currVariantOption[refSuffix] = VAR_NONE;
+            }
+            this.setState({variantOption: currVariantOption});
         }
     },
 
@@ -93,9 +114,9 @@ var FamilyCuration = React.createClass({
         // Make an array of URIs to query the database. Don't include any that didn't include a query string.
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '',
-            groupUuid ? '/groups/' + groupUuid + '?frame=object' : '',
+            groupUuid ? '/groups/' + groupUuid : '',
             familyUuid ? '/families/' + familyUuid: '',
-            annotationUuid ? '/evidence/' + annotationUuid + '?frame=object' : ''
+            annotationUuid ? '/evidence/' + annotationUuid : ''
         ]);
 
         // With all given query string variables, get the corresponding objects from the DB.
@@ -147,17 +168,6 @@ var FamilyCuration = React.createClass({
             // Set all the state variables we've collected
             this.setState(stateObj);
 
-            // If we have an annotation, load its article separately because we asked for a flattened annotation
-            // (the article is just its string @id).
-            if (Object.keys(stateObj.annotation).length) {
-                return this.getRestData(
-                    stateObj.annotation.article
-                ).then(article => {
-                    this.setState({article: article});
-                    return Promise.resolve(article);
-                });
-            }
-
             // No annotation; just resolve with an empty promise.
             return Promise.resolve();
         }).catch(function(e) {
@@ -174,7 +184,8 @@ var FamilyCuration = React.createClass({
     writeFamilyObj: function(newFamily, familyLabel) {
         var methodPromise; // Promise from writing (POST/PUT) a method to the DB
 
-        // Make a new method and save it to the DB
+        // Get a new family object ready for writing. Modify a copy of it instead
+        // of the one we were given.
         var writerFamily = _.clone(newFamily);
         if (familyLabel) {
             writerFamily.label = familyLabel;
@@ -183,7 +194,7 @@ var FamilyCuration = React.createClass({
         // If a method and/or segregation object was created (at least one method/segregation field set), assign it to the family.
         // If writing multiple family objects, reuse the one we made, but assign new methods and segregations because each family
         // needs unique objects here.
-        var newMethod = this.createMethod();
+        var newMethod = methods.create.call(this);
         if (newMethod) {
             writerFamily.method = newMethod;
         }
@@ -195,7 +206,7 @@ var FamilyCuration = React.createClass({
                 return Promise.resolve(data['@graph'][0]);
             });
         } else {
-            // We created a group; post it to the DB
+            // We created a family; post it to the DB
             return this.postRestData('/families/', writerFamily).then(data => {
                 return Promise.resolve(data['@graph'][0]);
             });
@@ -257,41 +268,38 @@ var FamilyCuration = React.createClass({
         return Object.keys(newVariant).length ? newVariant : null;
     },
 
-    varlidateForm: function() {
-        var valid = this.validateDefault();
+    // Validate that all the variant panels have properly-formatted input. Return true if they all do.
+    validateVariants: function() {
+        var valid;
+        var anyInvalid = false;
 
-        if (valid) {
-            var varValid;
-            var anyInvalid = false;
-
-            // Check Variant panel inputs for correct formats
-            for (var i = 0; i < this.state.variantCount; i++) {
-                // Check dbSNP ID for a valid format
-                var value = this.getFormValue('VARdbsnpid' + i);
-                if (value) {
-                    varValid = value.match(/^[\s]*(rs\d{1,8})[\s]*$/);
-                    if (!varValid) {
-                        this.setFormErrors('VARdbsnpid' + i, 'Use dbSNP IDs (e.g. rs1748)');
-                        anyInvalid = true;
-                    }
-                }
-
-                // Check dbSNP ID for a valid format
-                value = this.getFormValue('VARclinvarid' + i);
-                if (value) {
-                    varValid = value.match(/^[\s]*(RCV\d{9}(.\d){0,1})[\s]*$/);
-                    if (!varValid) {
-                        this.setFormErrors('VARclinvarid' + i, 'Use ClinVar IDs (e.g. RCV000162091 or RCV000049373.1)');
-                        anyInvalid = true;
-                    }
+        // Check Variant panel inputs for correct formats
+        for (var i = 0; i < this.state.variantCount; i++) {
+            // Check dbSNP ID for a valid format
+            var value = this.getFormValue('VARdbsnpid' + i);
+            if (value) {
+                valid = value.match(/^\s*(rs\d{1,8})\s*$/i);
+                if (!valid) {
+                    this.setFormErrors('VARdbsnpid' + i, 'Use dbSNP IDs (e.g. rs1748)');
+                    anyInvalid = true;
                 }
             }
 
-            valid = !anyInvalid;
+            // Check dbSNP ID for a valid format
+            value = this.getFormValue('VARclinvarid' + i);
+            if (value) {
+                valid = value.match(/^\s*(RCV\d{9}(.\d){0,1})\s*$/i);
+                if (!valid) {
+                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar IDs (e.g. RCV000162091 or RCV000049373.1)');
+                    anyInvalid = true;
+                }
+            }
         }
-        return valid;
+
+        return !anyInvalid;
     },
 
+    // Called when a form is submitted.
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
@@ -299,44 +307,46 @@ var FamilyCuration = React.createClass({
         this.saveAllFormValues();
 
         // Start with default validation; indicate errors on form if not, then bail
-        if (this.varlidateForm()) {
+        if (this.validateDefault() && this.validateVariants()) {
             var newFamily = {}; // Holds the new group object;
             var familyDiseases = null, familyArticles, familyVariants = [];
             var savedFamilies; // Array of saved written to DB
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
-            var orphaIds = captureOrphas(this.getFormValue('orphanetid'));
-            var pmids = capturePmids(this.getFormValue('otherpmids'));
-
-            // Check that all HPO terms appear valid
-            var hpoTerms = this.getFormValue('hpoid');
-            if (hpoTerms) {
-                var rawHpoids = _.compact(hpoTerms.toUpperCase().split(','));
-                var hpoids = _.compact(rawHpoids.map(function(id) { return captureHpoid(id); }));
-                if (rawHpoids.length !== hpoids.length) {
-                    formError = true;
-                    this.setFormErrors('hpoid', 'HPO IDs must be in the form “HP:NNNNNNN,” where N is a digit');
-                }
-            }
-
-            // Check that all NOT HPO terms appear valid
-            hpoTerms = this.getFormValue('nothpoid');
-            if (hpoTerms) {
-                var rawNotHpoids = _.compact(hpoTerms.toUpperCase().split(','));
-                var nothpoids = _.compact(rawNotHpoids.map(function(id) { return captureHpoid(id); }));
-                if (rawNotHpoids.length !== nothpoids.length) {
-                    formError = true;
-                    this.setFormErrors('nothpoid', 'Use HPO IDs, e.g. HP:0000123');
-                }
-            }
+            var orphaIds = curator.capture.orphas(this.getFormValue('orphanetid'));
+            var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
+            var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
+            var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
-            if (!orphaIds || !orphaIds.length) {
-                // No 'orphaXX' found 
+            if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
+                // ORPHA list is bad
                 formError = true;
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
             }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (pmids && pmids.length && _(pmids).any(function(id) { return id === null; })) {
+                // PMID list is bad
+                formError = true;
+                this.setFormErrors('otherpmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
+            }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
+                // HPOID list is bad
+                formError = true;
+                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
+            // Check that all gene symbols have the proper format (will check for existence later)
+            if (nothpoids && nothpoids.length && _(nothpoids).any(function(id) { return id === null; })) {
+                // NOT HPOID list is bad
+                formError = true;
+                this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
             if (!formError) {
                 // Build search string from given ORPHA IDs
                 var searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
@@ -391,7 +401,7 @@ var FamilyCuration = React.createClass({
                             // 'result' is an array of search results, one per search string. There should only be one result per array element --
                             // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
                             results.forEach(function(result, i) {
-                                if (results.total) {
+                                if (result.total) {
                                     // Search got a result. Add a string for family.variants for this existing variant
                                     familyVariants.push('/variants/' + result['@graph'][0].uuid);
                                 } else {
@@ -401,7 +411,7 @@ var FamilyCuration = React.createClass({
                                         newVariants.push(newVariant);
                                     }
                                 }
-                            }.bind(this));
+                            }, this);
 
                             // If we have new variants, write them to the DB.
                             if (newVariants) {
@@ -447,20 +457,15 @@ var FamilyCuration = React.createClass({
                 }).then(newFamilies => {
                     savedFamilies = newFamilies;
                     if (!this.state.family || Object.keys(this.state.family).length === 0) {
-                        // Let's avoid modifying a React state property, so clone it. Add the new group
-                        // to the current annotation's 'groups' array.
-                        var annotation = _.clone(this.state.annotation);
+                        // Get a flattened copy of the annotation and put our new families into it,
+                        // ready for writing.
+                        var annotation = curator.flatten(this.state.annotation);
                         if (!annotation.families) {
                             annotation.families = [];
                         }
 
                         // Merge existing families in the annotation with the new set of families.
-                        Array.prototype.push.apply(annotation.families, newFamilies.map(function(family) { return family['@id']; }));
-
-                        // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
-                        delete annotation.uuid;
-                        delete annotation['@id'];
-                        delete annotation['@type'];
+                        Array.prototype.push.apply(annotation.families, savedFamilies.map(function(family) { return family['@id']; }));
 
                         // Post the modified annotation to the DB, then go back to Curation Central
                         return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
@@ -471,86 +476,30 @@ var FamilyCuration = React.createClass({
                     // If we're adding this family to a group, update the group with this family
                     if (Object.keys(this.state.group).length) {
                         // Add the newly saved families to the group
-                        var group = _.clone(this.state.group);
+                        var group = curator.flatten(this.state.group);
                         if (!group.familyIncluded) {
                             group.familyIncluded = [];
                         }
+
+                        // Merge existing families in the annotation with the new set of families.
                         Array.prototype.push.apply(group.familyIncluded, savedFamilies.map(function(family) { return family['@id']; }));
 
-                        // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
-                        var groupUuid = group.uuid;
-                        delete group.uuid;
-                        delete group.status;
-                        delete group.schema_version;
-                        delete group['@id'];
-                        delete group['@type'];
-
                         // Post the modified annotation to the DB, then go back to Curation Central
-                        return this.putRestData('/groups/' + groupUuid, group);
+                        return this.putRestData('/groups/' + this.state.group.uuid, group);
                     }
 
                     // Not updating a group; just move on
                     return Promise.resolve(null);
                 }).then(data => {
                     // Navigate back to Curation Central page.
-                    // FUTURE: Need to navigate to choices page.
+                    // FUTURE: Need to navigate to Family Submit page.
                     this.resetAllFormValues();
                     this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
-                    parseAndLogError.bind(undefined, 'putRequest');
                 });
             }
         }
-    },
-
-    // Create method object based on the form values
-    createMethod: function() {
-        var newMethod = {};
-        var value1, value2;
-
-        // Put together a new 'method' object
-        value1 = this.getFormValue('prevtesting');
-        if (value1 !== 'none') {
-            newMethod.previousTesting = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('prevtestingdesc');
-        if (value1) {
-            newMethod.previousTestingDescription = value1;
-        }
-        value1 = this.getFormValue('genomewide');
-        if (value1 !== 'none') {
-            newMethod.genomeWideStudy = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('genotypingmethod1');
-        value2 = this.getFormValue('genotypingmethod2');
-        if (value1 !== 'none' || value2 !== 'none') {
-            newMethod.genotypingMethods = _([value1, value2]).filter(function(val) {
-                return val !== 'none';
-            });
-        }
-        value1 = this.getFormValue('entiregene');
-        if (value1 !== 'none') {
-            newMethod.entireGeneSequenced = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('copyassessed');
-        if (value1 !== 'none') {
-            newMethod.copyNumberAssessed = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('mutationsgenotyped');
-        if (value1 !== 'none') {
-            newMethod.specificMutationsGenotyped = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('specificmutation');
-        if (value1) {
-            newMethod.specificMutationsGenotypedMethod = value1;
-        }
-        value1 = this.getFormValue('additionalinfomethod');
-        if (value1) {
-            newMethod.additionalInformation = value1;
-        }
-
-        return Object.keys(newMethod).length ? newMethod : null;
     },
 
     // Create segregation object based on the form values
@@ -558,7 +507,6 @@ var FamilyCuration = React.createClass({
         var newSegregation = {};
         var value1;
 
-        // Put together a new 'method' object
         value1 = this.getFormValue('pedigreedesc');
         if (value1) {
             newSegregation.pedigreeDescription = value1;
@@ -627,7 +575,9 @@ var FamilyCuration = React.createClass({
     // Create a family object to be written to the database. Most values come from the values
     // in the form. The created object is returned from the function.
     createFamily: function(familyDiseases, familyArticles, familyVariants) {
-        var newFamily = {};
+        // Make a new family. If we're editing the form, first copy the old family
+        // to make sure we have everything not from the form.
+        var newFamily = Object.keys(this.state.family).length ? curator.flatten(this.state.family) : {};
 
         // Method and/or segregation successfully created if needed (null if not); passed in 'methSeg' object. Now make the new family.
         newFamily.label = this.getFormValue('familyname');
@@ -713,6 +663,8 @@ var FamilyCuration = React.createClass({
     render: function() {
         var annotation = this.state.annotation;
         var gdm = this.state.gdm;
+        var family = this.state.family;
+        var method = (family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
@@ -729,9 +681,9 @@ var FamilyCuration = React.createClass({
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
-                            {Object.keys(this.state.article).length ?
+                            {Object.keys(this.state.annotation).length && this.state.annotation.article ?
                                 <div className="curation-pmid-summary">
-                                    <PmidSummary article={this.state.article} displayJournal />
+                                    <PmidSummary article={this.state.annotation.article} displayJournal />
                                 </div>
                             : null}
                             <h1>Curate Family Information</h1>
@@ -753,7 +705,7 @@ var FamilyCuration = React.createClass({
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Family — Methods" open>
-                                                {FamilyMethods.call(this)}
+                                                {methods.render.call(this, method)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
@@ -792,42 +744,6 @@ var FamilyCuration = React.createClass({
 });
 
 globals.curator_page.register(FamilyCuration, 'curator_page', 'family-curation');
-
-
-function captureBase(s, re, uppercase) {
-    var match, matchResults = [];
-
-    do {
-        match = re.exec(s);
-        if (match) {
-            matchResults.push(uppercase ? match[1].toUpperCase() : match[1]);
-        }
-    } while(match);
-    return matchResults;
-}
-
-// Given a string, find all the comma-separated 'orphaXX' occurrences.
-// Return all orpha IDs in an array.
-function captureOrphas(s) {
-    return captureBase(s, /(?:^|,|\s)orpha(\d+)(?=,|\s|$)/gi, true);
-}
-
-// Given a string, find all the comma-separated gene symbol occurrences.
-// Return all gene symbols in an array.
-function captureGenes(s) {
-    return s ? captureBase(s, /(?:^|,|\s*)([a-zA-Z](?:\w)*)(?=,|\s*|$)/gi, true) : null;
-}
-
-// Given a string, find all the comma-separated PMID occurrences.
-// Return all PMIDs in an array.
-function capturePmids(s) {
-    return s ? captureBase(s, /(?:^|,|\s*)(\d{1,8})(?=,|\s*|$)/gi) : null;
-}
-
-function captureHpoid(s) {
-    var match = s.toUpperCase().match(/^ *(HP:\d{7}) *$/i);
-    return match ? match[1] : null;
-}
 
 
 // Family Name group curation panel. Call with .call(this) to run in the same context
@@ -1021,83 +937,6 @@ var FamilyDemographics = function() {
 };
 
 
-// Methods family curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var FamilyMethods = function() {
-    var family = this.state.family;
-    var method = (family.method && Object.keys(family.method).length) ? family.method : {};
-
-    return (
-        <div className="row">
-            <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={booleanToDropdown(method.previousTesting)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5" value={method.previousTestingDescription}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={booleanToDropdown(method.genomeWideStudy)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <h4 className="col-sm-7 col-sm-offset-5">Genotyping Method</h4>
-            <Input type="select" ref="genotypingmethod1" label="Method 1:" handleChange={this.handleChange} defaultValue="none" value={method.genotypingMethods && method.genotypingMethods[0] ? method.genotypingMethods[0] : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Exome sequencing</option>
-                <option>Genotyping</option>
-                <option>HRM</option>
-                <option>PCR</option>
-                <option>Sanger</option>
-                <option>Whole genome shotgun sequencing</option>
-            </Input>
-            <Input type="select" ref="genotypingmethod2" label="Method 2:" defaultValue="none" value={method.genotypingMethods && method.genotypingMethods[1] ? method.genotypingMethods[1] : null}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.genotyping2Disabled}>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Exome sequencing</option>
-                <option>Genotyping</option>
-                <option>HRM</option>
-                <option>PCR</option>
-                <option>Sanger</option>
-                <option>Whole genome shotgun sequencing</option>
-            </Input>
-            <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={booleanToDropdown(method.entireGeneSequenced)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={booleanToDropdown(method.copyNumberAssessed)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={booleanToDropdown(method.specificMutationsGenotyped)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="textarea" ref="specificmutation" label="Method by which Specific Mutations Genotyped:" rows="5" value={method.specificMutationsGenotypedMethod}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="additionalinfomethod" label="Additional Information about Family Method:" rows="8" value={method.additionalInformation}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-        </div>
-    );
-};
-
-
 // Segregation family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilySegregation = function() {
@@ -1114,7 +953,7 @@ var FamilySegregation = function() {
             <Input type="text" ref="nogenerationsinpedigree" label="# generations in pedigree:" format="number" value={segregation.numberOfGenerationInPedigree}
                 error={this.getFormError('nogenerationsinpedigree')} clearError={this.clrFormErrors.bind(null, 'nogenerationsinpedigree')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="consanguineous" label="Consanguineous family?:" defaultValue="none" value={booleanToDropdown(segregation.consanguineousFamily)}
+            <Input type="select" ref="consanguineous" label="Consanguineous family?:" defaultValue="none" value={curator.booleanToDropdown(segregation.consanguineousFamily)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1154,7 +993,7 @@ var FamilySegregation = function() {
             <Input type="text" ref="nounaffectedindividuals" label="# unaffected individuals:" format="number" value={segregation.numberOfUnaffectedIndividuals}
                 error={this.getFormError('nounaffectedindividuals')} clearError={this.clrFormErrors.bind(null, 'nounaffectedindividuals')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="bothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={booleanToDropdown(segregation.probandAssociatedWithBoth)}
+            <Input type="select" ref="bothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={curator.booleanToDropdown(segregation.probandAssociatedWithBoth)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1186,16 +1025,16 @@ var FamilyVariant = function() {
 
                 return (
                     <div key={i} className="variant-panel">
-                        <Input type="text" ref={'VARdbsnpid' + i} label={<LabelDbSnp />} value={variant && variant.dbSNPId} placeholder="e.g. rs1748" handleChange={this.handleChange}
+                        <Input type="text" ref={'VARdbsnpid' + i} label={<LabelDbSnp />} value={variant && variant.dbSNPId} placeholder="e.g. rs1748" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                             error={this.getFormError('VARdbsnpid' + i)} clearError={this.clrFormErrors.bind(null, 'VARdbsnpid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={variant && variant.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange}
+                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={variant && variant.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <Input type="text" ref={'VARhgvsterm' + i} label={<LabelHgvs />} value={hgvsNames} placeholder="e.g. NM_001009944.2:c.12420G>A" handleChange={this.handleChange}
+                        <Input type="text" ref={'VARhgvsterm' + i} label={<LabelHgvs />} value={hgvsNames} placeholder="e.g. NM_001009944.2:c.12420G>A" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                             error={this.getFormError('VARhgvsterm' + i)} clearError={this.clrFormErrors.bind(null, 'VARhgvsterm' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange}
+                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                         {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
                             <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"

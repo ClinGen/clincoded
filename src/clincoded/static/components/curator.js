@@ -168,8 +168,8 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                     : null}
                                     <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
                                 </div>
-                                <a href={'/group/' + group.uuid} target="_blank">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Edit</a></span> : null}
-                                {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid}>Add family information</a></div> : null}
+                                <a href={'/group/' + group.uuid} target="_blank" title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
+                                {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group">Add family information</a></div> : null}
                             </div>
                         );
                     }.bind(this))}
@@ -185,7 +185,22 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                     : null}
                                     <p>{moment(family.date_created).format('YYYY MMM DD, h:mm a')}</p>
                                 </div>
-                                <a href={'/family/' + family.uuid} target="_blank">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Edit</a></span> : null}
+                                {family.associatedGroups && family.associatedGroups.length ?
+                                    <div>
+                                        <span>Associations: </span>
+                                        {family.associatedGroups.map(function(group, i) {
+                                            return (
+                                                <span key={i}>
+                                                    {i > 0 ? ', ' : ''}
+                                                    <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
+                                :
+                                    <div>No associations</div>
+                                }
+                                <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
                             </div>
                         );
                     }.bind(this))}
@@ -437,7 +452,239 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
 });
 
 
-// Convert a boolean value to a dropdown value
+// Convert a boolean value to a Yes/No dropdown value
 var booleanToDropdown = module.exports.booleanToDropdown = function booleanToDropdown(boolVal) {
     return boolVal === true ? 'Yes' : (boolVal === false ? 'No' : 'none');
 };
+
+
+// Pull values from 's' (a list of comma-separated values) that match the regular expression given in 're'.
+// If resulting values should be converted to uppercase, pass true in 'uppercase'.
+function captureBase(s, re, uppercase) {
+    if (s) {
+        var list;
+        var rawList = s.split(','); // Break input into array of raw strings
+        if (rawList && rawList.length) {
+            list = rawList.map(function(item) {
+                var m = re.exec(item);
+                return m ? (uppercase ? m[1].toUpperCase() : m[1]) : null;
+            });
+        }
+        return list;
+    }
+    return null;
+}
+
+// Given a string of comma-separated values, these functions break them into an array, but only
+// for values that satisfy the regex pattern. Any items that don't result in a null array entry
+// for that item.
+module.exports.capture = {
+    // Find all the comma-separated 'orphaXX' occurrences. Return all valid orpha IDs in an array.
+    orphas: function(s) {
+        return captureBase(s, /^\s*orpha(\d+)\s*$/i);
+    },
+
+    // Find all the comma-separated gene-symbol occurrences. Return all valid symbols in an array.
+    genes: function(s) {
+        return captureBase(s, /^\s*(\w+)\s*$/, true);
+    },
+
+    // Find all the comma-separated PMID occurrences. Return all valid PMIDs in an array.
+    pmids: function(s) {
+        return captureBase(s, /^\s*(\d{1,10})\s*$/);
+    },
+
+    // Find all the comma-separated HPO ID occurrences. Return all valid HPO ID in an array.
+    hpoids: function(s) {
+        return captureBase(s, /^\s*(HP:\d{7})\s*$/i, true);
+    }
+};
+
+
+// Take an object and make a flattened version ready for writing.
+// SCHEMA: This might need to change when the schema changes.
+module.exports.flatten = function(obj) {
+    var flat;
+
+    switch(obj['@type'][0]) {
+        case 'annotation':
+            flat = flattenAnnotation(obj);
+            break;
+
+        case 'group':
+            flat = flattenGroup(obj);
+            break;
+
+        case 'family':
+            flat = flattenFamily(obj);
+            break;
+
+        default:
+            break;
+    }
+
+    // Delete fields we can't write
+    if (flat) {
+        delete flat['@id'];
+        delete flat['@type'];
+        delete flat.actions;
+        delete flat.audit;
+        delete flat.uuid;
+        delete flat.submitted_by;
+        delete flat.date_created;
+    }
+    return flat;
+};
+
+
+
+
+function flattenAnnotation(annotation) {
+    // First copy everything before fixing the special properties
+    var flat = _.clone(annotation);
+
+    flat.article = annotation.article['@id'];
+
+    // Flatten groups
+    if (annotation.groups && annotation.groups.length) {
+        flat.groups = annotation.groups.map(function(group) {
+            return group['@id'];
+        });
+    } else {
+        delete flat.groups;
+    }
+
+    // Flatten families
+    if (annotation.families && annotation.families.length) {
+        flat.families = annotation.families.map(function(family) {
+            return family['@id'];
+        });
+    } else {
+        delete flat.families;
+    }
+
+    // Flatten individuals
+    if (annotation.individuals && annotation.individuals.length) {
+        flat.individuals = annotation.individuals.map(function(individual) {
+            return individual['@id'];
+        });
+    } else {
+        delete flat.individuals;
+    }
+
+    // Flatten experimentalData
+    if (annotation.experimentalData && annotation.experimentalData.length) {
+        flat.experimentalData = annotation.experimentalData.map(function(data) {
+            return data['@id'];
+        });
+    } else {
+        delete flat.experimentalData;
+    }
+
+    return flat;
+}
+
+function flattenGroup(group) {
+    // First copy everything before fixing the special properties
+    var flat = _.clone(group);
+
+    // Flatten diseases
+    if (group.commonDiagnosis && group.commonDiagnosis.length) {
+        flat.commonDiagnosis = group.commonDiagnosis.map(function(disease) {
+            return disease['@id'];
+        });
+    } else {
+        delete flat.commonDiagnosis;
+    }
+
+    // Flatten otherGenes
+    if (group.otherGenes && group.otherGenes.length) {
+        flat.otherGenes = group.otherGenes.map(function(gene) {
+            return gene['@id'];
+        });
+    } else {
+        delete flat.otherGenes;
+    }
+
+    // Flatten other PMIDs
+    if (group.otherPMIDs && group.otherPMIDs.length) {
+        flat.otherPMIDs = group.otherPMIDs.map(function(article) {
+            return article['@id'];
+        });
+    } else {
+        delete flat.otherPMIDs;
+    }
+
+    // Flatten included families
+    if (group.familyIncluded && group.familyIncluded.length) {
+        flat.familyIncluded = group.familyIncluded.map(function(family) {
+            return family['@id'];
+        });
+    } else {
+        delete flat.familyIncluded;
+    }
+
+    // Flatten included individuals
+    if (group.individualIncluded && group.individualIncluded.length) {
+        flat.individualIncluded = group.individualIncluded.map(function(individual) {
+            return individual['@id'];
+        });
+    } else {
+        delete flat.individualIncluded;
+    }
+
+    // Flatten other linked objects
+    if (group.statistic) {
+        flat.statistic = group.statistic['@id'];
+    }
+    if (group.statistic) {
+        flat.control = group.control['@id'];
+    }
+
+    return flat;
+}
+
+function flattenFamily(family) {
+    // First copy everything before fixing the special properties
+    var flat = _.clone(family);
+
+    // Flatten diseases
+    if (family.commonDiagnosis && family.commonDiagnosis.length) {
+        flat.commonDiagnosis = family.commonDiagnosis.map(function(disease) {
+            return disease['@id'];
+        });
+    } else {
+        delete flat.commonDiagnosis;
+    }
+
+    // Flatten segregation variants
+    if (family.segregation && family.segregation.variants && family.segregation.variants.length) {
+        flat.segregation.variants = family.segregation.variants.map(function(variant) {
+            return variant['@id'];
+        });
+    } else {
+        delete flat.segregation.variants;
+    }
+
+    // Flatten other PMIDs
+    if (family.otherPMIDs && family.otherPMIDs.length) {
+        flat.otherPMIDs = family.otherPMIDs.map(function(article) {
+            return article['@id'];
+        });
+    } else {
+        delete flat.otherPMIDs;
+    }
+
+    // Flatten included individuals
+    if (family.individualIncluded && family.individualIncluded.length) {
+        flat.individualIncluded = family.individualIncluded.map(function(individual) {
+            return individual['@id'];
+        });
+    } else {
+        delete flat.individualIncluded;
+    }
+
+    delete flat.associatedGroups;
+
+    return flat;
+}
