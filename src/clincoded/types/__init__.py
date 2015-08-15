@@ -164,6 +164,7 @@ class Gdm(Item):
         'annotations.groups.individualIncluded.otherPMIDs.submitted_by',
         #'annotations.groups.control',
         'annotations.families',
+        'annotations.families.associatedGroups',
         'annotations.families.commonDiagnosis',
         'annotations.families.submitted_by',
         'annotations.families.otherPMIDs',
@@ -250,6 +251,7 @@ class Annotation(Item):
         'groups.individualIncluded.otherPMIDs.submitted_by',
         #'groups.control',
         'families',
+        'families.associatedGroups',
         'families.commonDiagnosis',
         'families.submitted_by',
         'families.otherPMIDs',
@@ -341,8 +343,23 @@ class Family(Item):
         'individualIncluded.diagnosis',
         'individualIncluded.submitted_by',
         'individualIncluded.variants',
+        'associatedGroups',
         'individualIncluded.variants.submitted_by',
     ]
+    rev = {
+        'associatedGroups': ('group', 'familyIncluded'),
+    }
+
+    @calculated_property(schema={
+        "title": "Associated groups",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "group.familyIncluded",
+        },
+    })
+    def associatedGroups(self, request, associatedGroups):
+        return paths_filtered_by_status(request, associatedGroups)
 
 @collection(
     name='individuals',
