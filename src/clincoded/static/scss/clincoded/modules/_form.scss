@@ -68,3 +68,72 @@ input[type=search] {
         display: none;
     }
 }
+
+// Group and Family Submit Result page styles
+.submit-results-panel {
+    margin: 40px 0;
+}
+
+.submit-results-wrapper {
+    display: block;
+    margin: 20px 0;
+
+    @media screen and (min-width: $screen-sm-min) {
+        display: table;
+        padding: 5px 0;
+    }
+
+    .form-error {
+        display: none;
+    }
+}
+
+@mixin submit-results-label($width) {
+    display: block;
+
+    @media screen and (min-width: $screen-sm-min) {
+        display: table-cell;
+        width: $width;
+        vertical-align: middle;
+    }
+}
+
+@mixin submit-results-switch($width) {
+    display: block;
+
+    @media screen and (min-width: $screen-sm-min) {
+        display: table-cell;
+        width: $width;
+        vertical-align: middle;
+    }
+}
+
+.group-submit-results-label {
+    @include submit-results-label(60%);
+}
+
+.group-submit-results-switch {
+    @include submit-results-switch(40%);
+}
+
+.submit-results-choices {
+    padding-bottom: 40px;
+
+    @media screen and (min-width: $screen-sm-min) {
+        display: table;
+        width: 100%;
+
+        a {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .submit-results-choices-sep {
+            display: table-cell;
+            padding: 0 15px;
+            vertical-align: middle;
+            font-weight: bold;
+            text-align: center;
+        }
+    }
+}

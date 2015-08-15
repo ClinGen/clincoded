@@ -291,9 +291,11 @@ var DiseaseRecordHeader = React.createClass({
                                         {this.props.omimId}
                                     </a>
                                 : null}&nbsp;
-                                <Modal title="Add/Change OMIM ID" wrapperClassName="edit-omim-modal">
-                                    <span>[</span><a modal={<AddOmimIdModal gdm={gdm} closeModal={this.closeModal} updateOmimId={this.props.updateOmimId} />} href="#">{addEdit}</a><span>]</span>
-                                </Modal>
+                                {this.props.updateOmimId ?
+                                    <Modal title="Add/Change OMIM ID" wrapperClassName="edit-omim-modal">
+                                        <span>[</span><a modal={<AddOmimIdModal gdm={gdm} closeModal={this.closeModal} updateOmimId={this.props.updateOmimId} />} href="#">{addEdit}</a><span>]</span>
+                                    </Modal>
+                                : null}
                             </dd>
                         </dl>
                     : null}

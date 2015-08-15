@@ -18,6 +18,12 @@
         "uuid": "a1d4d18b-27be-4a2b-9447-503e310d6f66"
     },
     {
+        "name": "group-submit",
+        "title": "Group Submit Results",
+        "status": "released",
+        "uuid": "75b3be5a-6deb-4c7c-9bd5-9b2858c3b82f"
+    },
+    {
         "name": "family-curation",
         "title": "Family Curation",
         "status": "released",
