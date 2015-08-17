@@ -230,6 +230,7 @@ class Gdm(Item):
         else:
             return 'Created'
 
+
 @collection(
     name='evidence',
     unique_key='annotation:uuid',
