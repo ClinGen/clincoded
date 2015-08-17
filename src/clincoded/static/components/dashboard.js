@@ -57,22 +57,24 @@ var Dashboard = React.createClass({
             var tempGdmList = [], tempRecentHistory = [];
             var pmidGdmMapping = {};
             for (var i = 0; i < data[0]['@graph'].length; i++) {
-                var temp = data[0]['@graph'][i];
-                if (userMatch(temp.submitted_by, session)) {
+                // loop through GDMs
+                var gdm = data[0]['@graph'][i];
+                if (userMatch(gdm.submitted_by, session)) {
                     tempGdmList.push({
-                        uuid: temp.uuid,
-                        gdmGeneDisease: this.cleanGdmGeneDiseaseName(temp.gene.symbol, temp.disease.term),
-                        gdmModel: this.cleanGdmModelName(temp.modeInheritance),
-                        status: temp.status,
-                        date_created: temp.date_created
+                        uuid: gdm.uuid,
+                        gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
+                        gdmModel: this.cleanGdmModelName(gdm.modeInheritance),
+                        status: gdm.status,
+                        date_created: gdm.date_created
                     });
                 }
-                if (temp.annotations.length > 0) {
-                    for (var j = 0; j < temp.annotations.length; j++) {
-                        pmidGdmMapping[temp.annotations[j].uuid] = {
-                            uuid: temp.uuid,
-                            displayName: this.cleanGdmGeneDiseaseName(temp.gene.symbol, temp.disease.term),
-                            displayName2: this.cleanGdmModelName(temp.modeInheritance)
+                if (gdm.annotations.length > 0) {
+                    for (var j = 0; j < gdm.annotations.length; j++) {
+                        // loop through annotatiosn in GDM
+                        pmidGdmMapping[gdm.annotations[j].uuid] = {
+                            uuid: gdm.uuid,
+                            displayName: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
+                            displayName2: this.cleanGdmModelName(gdm.modeInheritance)
                         };
                     }
                 }
@@ -80,24 +82,25 @@ var Dashboard = React.createClass({
             // Recent History panel results; only displays annotation(article) addition and GDM
             // creation history for the time being.
             for (var i = 0; i < data[1]['@graph'].length; i++) {
+                // loop through search results for history panel results
                 var display = false;
-                var temp = data[1]['@graph'][i];
+                var result = data[1]['@graph'][i];
                 var tempDisplayText = '';
                 var tempUrl = '';
                 var tempTimestamp = '';
-                var tempDateTime = moment(temp.date_created).format("YYYY MMM DD, h:mm a");
-                switch (temp['@type'][0]) {
+                var tempDateTime = moment(result.date_created).format("YYYY MMM DD, h:mm a");
+                switch (result['@type'][0]) {
                     case 'annotation':
-                        if (temp.uuid in pmidGdmMapping) {
-                            tempUrl = "/curation-central/?gdm=" + pmidGdmMapping[temp.uuid].uuid + "&pmid=" + temp.article.pmid;
-                            tempDisplayText = <span><a href={tempUrl}>PMID:{temp.article.pmid}</a> added to <strong>{pmidGdmMapping[temp.uuid].displayName}</strong>–<i>{pmidGdmMapping[temp.uuid].displayName2}</i></span>;
+                        if (result.uuid in pmidGdmMapping) {
+                            tempUrl = "/curation-central/?gdm=" + pmidGdmMapping[result.uuid].uuid + "&pmid=" + result.article.pmid;
+                            tempDisplayText = <span><a href={tempUrl}>PMID:{result.article.pmid}</a> added to <strong>{pmidGdmMapping[result.uuid].displayName}</strong>–<i>{pmidGdmMapping[result.uuid].displayName2}</i></span>;
                             tempTimestamp = "added " + tempDateTime;
                             display = true;
                         }
                         break;
                     case 'gdm':
-                        tempUrl = "/curation-central/?gdm=" + temp.uuid;
-                        tempDisplayText = <span><a href={tempUrl}><strong>{this.cleanGdmGeneDiseaseName(temp.gene.symbol, temp.disease.term)}</strong>–<i>{this.cleanGdmModelName(temp.modeInheritance)}</i></a></span>;
+                        tempUrl = "/curation-central/?gdm=" + result.uuid;
+                        tempDisplayText = <span><a href={tempUrl}><strong>{this.cleanGdmGeneDiseaseName(result.gene.symbol, result.disease.term)}</strong>–<i>{this.cleanGdmModelName(result.modeInheritance)}</i></a></span>;
                         tempTimestamp = "created " + tempDateTime;
                         display = true;
                         break;
@@ -106,7 +109,7 @@ var Dashboard = React.createClass({
                 }
                 if (display === true) {
                     tempRecentHistory.push({
-                        uuid: temp.uuid,
+                        uuid: result.uuid,
                         displayText: tempDisplayText,
                         timestamp: tempTimestamp
                     });
