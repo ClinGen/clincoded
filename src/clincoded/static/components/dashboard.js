@@ -14,6 +14,7 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var Panel = panel.Panel;
 var external_url_map = globals.external_url_map;
+var userMatch = globals.userMatch;
 
 var Dashboard = React.createClass({
     mixins: [RestMixin],
@@ -46,9 +47,10 @@ var Dashboard = React.createClass({
         });
     },
 
-    getData: function(userid) {
+    getData: function(session) {
         // Retrieve all GDMs and other objects related to user via search
-        this.getRestDatas(['/gdm/', '/search/?type=gdm&type=annotation&limit=10&submitted_by.uuid=' + userid], [function() {}, function() {}]).then(data => {
+        this.getRestDatas(['/gdm/', '/search/?type=gdm&type=annotation&limit=10&submitted_by.uuid=' +
+            session.user_properties.uuid], [function() {}, function() {}]).then(data => {
             // Search objects successfully retrieved; process results
             // GDM results; finds GDMs created by user, and also creates PMID-GDM mapping table
             // (stopgap measure until article -> GDM mapping ability is incorporated)
@@ -56,7 +58,7 @@ var Dashboard = React.createClass({
             var pmidGdmMapping = {};
             for (var i = 0; i < data[0]['@graph'].length; i++) {
                 var temp = data[0]['@graph'][i];
-                if (temp.submitted_by.uuid == userid) {
+                if (userMatch(temp.submitted_by, session)) {
                     tempGdmList.push({
                         uuid: temp.uuid,
                         gdmGeneDisease: this.cleanGdmGeneDiseaseName(temp.gene.symbol, temp.disease.term),
@@ -121,14 +123,14 @@ var Dashboard = React.createClass({
     componentDidMount: function() {
         if (this.props.session.user_properties !== undefined) {
             this.setUserData(this.props.session.user_properties);
-            this.getData(this.props.session.user_properties.uuid);
+            this.getData(this.props.session);
         }
     },
 
     componentWillReceiveProps: function(nextProps) {
         if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
             this.setUserData(nextProps.session.user_properties);
-            this.getData(nextProps.session.user_properties.uuid);
+            this.getData(nextProps.session);
         }
     },
 
