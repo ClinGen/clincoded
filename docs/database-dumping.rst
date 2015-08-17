@@ -4,7 +4,7 @@ Test Database Dumps
 Why?
 ----
 
-There are currently two database dumps that contains starting test data that must be updated on every schema/database entry change. This is because the AWS Doinstances uses these dumps as a data source, not the .json files. If you make a change to the schema/database entries, then make changes on the UI to reflect these changes, but do not update the database dumps, the AWS instances you spin up with your changes will not function as expected.
+There are currently two database dumps that contains starting test data that must be updated on every schema/database entry change. This is because the AWS instances uses these dumps as a data source, not the .json files. If you make a change to the schema/database entries, then make changes on the UI to reflect these changes, but do not update the database dumps, the AWS instances you spin up with your changes will not function as expected.
 
 How?
 ----
