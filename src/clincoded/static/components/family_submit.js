@@ -143,7 +143,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                     </p>
                                     <div className="family-submit-results-choices">
                                         <span className="family-submit-results-btn">
-                                            <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Add New Family for this Group</a>
+                                            <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Add New Individuals for this Family</a>
                                         </span>
                                     </div>
                                 </Panel>
