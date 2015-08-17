@@ -30,6 +30,12 @@
         "uuid": "1c69cb8c-bace-4f88-b623-9d3c43262abb"
     },
     {
+        "name": "family-submit",
+        "title": "Family Submit Results",
+        "status": "released",
+        "uuid": "dfb36444-1d78-46b5-8cdf-dbd2d4cca3d8"
+    },
+    {
         "name": "dashboard",
         "title": "Dashboard",
         "status": "released",
