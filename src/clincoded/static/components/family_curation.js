@@ -494,7 +494,7 @@ var FamilyCuration = React.createClass({
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
                     this.resetAllFormValues();
-                    this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
+                    this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + savedFamilies[0].uuid + '&annotation=' + this.state.annotation.uuid);
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
                 });
