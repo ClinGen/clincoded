@@ -23,6 +23,7 @@ var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
 var queryKeyValue = globals.queryKeyValue;
 var external_url_map = globals.external_url_map;
+var userMatch = globals.userMatch;
 
 
 // Curator page content
@@ -162,7 +163,7 @@ var BetaNote = React.createClass({
     render: function() {
         var annotation = this.props.annotation;
         var session = this.props.session;
-        var curatorMatch = annotation.owner === (session && session.user_properties && session.user_properties.email);
+        var curatorMatch = annotation && userMatch(annotation.submitted_by, session);
 
         return (
             <div>
