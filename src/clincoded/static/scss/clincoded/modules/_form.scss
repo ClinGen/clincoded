@@ -119,21 +119,43 @@ input[type=search] {
 .submit-results-choices {
     padding-bottom: 40px;
 
-    @media screen and (min-width: $screen-sm-min) {
+    @media screen and (min-width: $screen-md-min) {
         display: table;
         width: 100%;
-
-        a {
-            display: table-cell;
-            vertical-align: middle;
-        }
-
-        .submit-results-choices-sep {
-            display: table-cell;
-            padding: 0 15px;
-            vertical-align: middle;
-            font-weight: bold;
-            text-align: center;
-        }
     }
+}
+
+.submit-results-choices-sep {
+    display: block;
+    font-weight: bold;
+    text-align: center;
+
+    @media screen and (min-width: $screen-md-min) {
+        position: relative;
+        top: 5px;
+        display: table-cell;
+        width: 10%;
+        padding: 0 15px;
+        vertical-align: top;
+    }
+}
+
+.submit-results-btn {
+    display: block;
+
+    @media screen and (min-width: $screen-md-min) {
+        display: table-cell;
+        width: 45%;
+        vertical-align: top;
+    }
+
+    a {
+        width: 100%;
+    }
+}
+
+.submit-results-note {
+    margin: 5px 0;
+    font-size: 0.9;
+    font-style: italic;
 }

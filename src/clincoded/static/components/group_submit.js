@@ -120,7 +120,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                         </div>
                     : null}
                     <div className="row">
-                        <div className="col-md-8 col-md-offset-2 col-sm-9 col-sm-offset-1">
+                        <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
                             <Form formClassName="form-horizontal form-std">
                                 <Input type="select" ref="havefamily" label="Do any of the probands or other individuals in this Group have Family Information?" defaultValue={this.state.haveFamily}
                                     handleChange={this.handleChange} labelClassName="group-submit-results-label" wrapperClassName="group-submit-results-switch" groupClassName="submit-results-wrapper">
@@ -138,28 +138,38 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                             {this.state.haveFamily === 'y' ?
                                 <Panel panelClassName="submit-results-panel">
                                     <p>
-                                        Any variant associated with a proband in a Family is captured at the Family level. To associate segregation, variant,
+                                        <em>Any variant associated with a proband in a Family is captured at the Family level. To associate segregation, variant,
                                         or any other information for a family, click <strong>Add New Family for this Group</strong>. If you have previously
-                                        created an entry for this Family, return to the Gene-Disease record page to add this Family to the newly created Group.
+                                        created an entry for this Family, return to the Gene-Disease record page to add this Family to the newly created Group.</em>
                                     </p>
                                     <div className="submit-results-choices">
-                                        <a className="btn btn-default" href={'/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Add New Family for this Group</a>
+                                        <span className="submit-results-btn">
+                                            <a className="btn btn-default" href={'/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Add New Family for this Group</a>
+                                        </span>
                                         <span className="submit-results-choices-sep">OR</span>
-                                        <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                        <span className="submit-results-btn">
+                                            <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                            <div className="submit-results-note">Note: To associate an existing Family with this Group, return to the Curation Central page.</div>
+                                        </span>
                                     </div>
                                 </Panel>
                             : (this.state.haveFamily === 'n' ?
                                 <Panel panelClassName="submit-results-panel">
                                     <p>
-                                        Any variant associated with an individual that is a member of a Group but not part of a Family is captured at the
+                                        <em>Any variant associated with an individual that is a member of a Group but not part of a Family is captured at the
                                         Individual level. To associate a variant and/or information such as age, race, etc. with an individual in the Group,
                                         click <strong>Add New Individuals for this Group</strong>. If you have previously created an entry for this Individual,
-                                        return to the Gene-Disease record page to add this Individual to the newly created Group.
+                                        return to the Gene-Disease record page to add this Individual to the newly created Group.</em>
                                     </p>
                                     <div className="submit-results-choices">
-                                        <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Add New Individuals for this Group</a>
+                                        <span className="submit-results-btn">
+                                            <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Add New Individuals for this Group</a>
+                                        </span>
                                         <span className="submit-results-choices-sep">OR</span>
-                                        <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                        <span className="submit-results-btn">
+                                            <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                            <div className="submit-results-note">Note: To associate an existing Individual with this Group, return to the Record Curation page.</div>
+                                        </span>
                                     </div>
                                 </Panel>
                             : null)}
