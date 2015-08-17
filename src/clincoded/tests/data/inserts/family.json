@@ -24,7 +24,7 @@
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
         "segregation": {
-            "dateTime": "2015-09-27T09:35:18.000000+00:00",
+            "dateTime": "2015-06-27T09:35:18.000000+00:00",
             "pedigreeDescription": "K8725",
             "pedigreeSize": 15,
             "numberOfGenerationInPedigree": 3,
@@ -42,23 +42,7 @@
                 "df8135d4-2685-11e5-af19-60f81dc5b05a"
             ],
             "assessments": [
-                {
-                    "owner": "fytanaka@stanford.edu",
-                    "values": [
-                        {
-                            "value": "Review",
-                            "dateTime": "2015-03-03T12:52:27.000000+00:00"
-                        },
-                        {
-                            "value": "Inactive",
-                            "dateTime": "2015-03-04T12:52:27.000000+00:00"
-                        },
-                        {
-                            "value": "Supports",
-                            "dateTime": "2015-03-05T12:52:27.000000+00:00"
-                        }
-                    ]
-                }
+                "4f94a226-2a4c-11e5-887c-60f81dc5b05a"
             ]
         },
         "otherPMIDs": [

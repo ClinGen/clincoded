@@ -129,6 +129,8 @@ class Gdm(Item):
         'disease',
         'submitted_by',
         'variantPathogenic.variant',
+        'variantPathogenic.assessments',
+        'variantPathogenic.assessments.submitted_by',
         'annotations',
         'annotations.article',
         'annotations.article.submitted_by',
@@ -148,6 +150,8 @@ class Gdm(Item):
         'annotations.groups.familyIncluded.otherPMIDs.submitted_by',
         'annotations.groups.familyIncluded.segregation.variants',
         'annotations.groups.familyIncluded.segregation.variants.submitted_by',
+        'annotations.groups.familyIncluded.segregation.assessments',
+        'annotations.groups.familyIncluded.segregation.assessments.submitted_by',
         'annotations.groups.familyIncluded.individualIncluded',
         'annotations.groups.familyIncluded.individualIncluded.diagnosis',
         'annotations.groups.familyIncluded.individualIncluded.submitted_by',
@@ -171,6 +175,8 @@ class Gdm(Item):
         'annotations.families.otherPMIDs.submitted_by',
         'annotations.families.segregation.variants',
         'annotations.families.segregation.variants.submitted_by',
+        'annotations.families.segregation.assessments',
+        'annotations.families.segregation.assessments.submitted_by',
         'annotations.families.individualIncluded',
         'annotations.families.individualIncluded.diagnosis',
         'annotations.families.individualIncluded.submitted_by',
@@ -208,6 +214,7 @@ class Gdm(Item):
         else:
             return 'Created'
 
+
 @collection(
     name='evidence',
     unique_key='annotation:uuid',
@@ -235,6 +242,8 @@ class Annotation(Item):
         'groups.familyIncluded.otherPMIDs.submitted_by',
         'groups.familyIncluded.segregation.variants',
         'groups.familyIncluded.segregation.variants.submitted_by',
+        'groups.familyIncluded.segregation.assessments',
+        'groups.familyIncluded.segregation.assessments.submitted_by',
         'groups.familyIncluded.individualIncluded',
         'groups.familyIncluded.individualIncluded.diagnosis',
         'groups.familyIncluded.individualIncluded.submitted_by',
@@ -258,6 +267,8 @@ class Annotation(Item):
         'families.otherPMIDs.submitted_by',
         'families.segregation.variants',
         'families.segregation.variants.submitted_by',
+        'families.segregation.assessments',
+        'families.segregation.assessments.submitted_by',
         'families.individualIncluded',
         'families.individualIncluded.diagnosis',
         'families.individualIncluded.submitted_by',
@@ -304,6 +315,8 @@ class Group(Item):
         'familyIncluded.otherPMIDs.submitted_by',
         'familyIncluded.segregation.variants',
         'familyIncluded.segregation.variants.submitted_by',
+        'familyIncluded.segregation.assessments',
+        'familyIncluded.segregation.assessments.submitted_by',
         'familyIncluded.individualIncluded',
         'familyIncluded.individualIncluded.diagnosis',
         'familyIncluded.individualIncluded.submitted_by',
@@ -337,6 +350,8 @@ class Family(Item):
         'submitted_by',
         'segregation.variants',
         'segregation.variants.submitted_by',
+        'segregation.assessments',
+        'segregation.assessments.submitted_by',
         'otherPMIDs',
         'otherPMIDs.submitted_by',
         'individualIncluded',
@@ -395,8 +410,22 @@ class Experimental(Item):
     embedded = [
         'submitted_by',
         'variants',
-        'variants.submitted_by',
-        'biochemicalFunction.geneWithSameFunctionSameDisease.genes'
+        'variants.submitted_by'
+    ]
+
+@collection(
+    name='assessment',
+    unique_key='assessment:uuid',
+    properties={
+        'title': 'Assessments',
+        'description': 'List of assessments',
+    })
+class Assessment(Item):
+    item_type = 'assessment'
+    schema = load_schema('clincoded:schemas/assessment.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by'
     ]
 ### end of new collections for curation data
 

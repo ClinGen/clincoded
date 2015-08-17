@@ -21,6 +21,7 @@ ORDER = [
     'orphaPhenotype',
     #'disease',
     'article',
+    'assessment',
     'variant',
     'individual',
     'family',

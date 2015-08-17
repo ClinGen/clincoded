@@ -34,7 +34,7 @@
                 "Rescue"
             ]
         },
-        "biochemicalFunction": {
+"biochemicalFunction": {
             "title": "Biochemical Function",
             "description": "Items in biochemical function type",
             "type": "object",
@@ -802,13 +802,6 @@
         }
     },
     "boost_values": {
-        "biochemicalFunction.geneWithSameFunctionSameDisease.assessments": 1.0,
-        "biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments": 1.0,
-        "expression.normalExpression.assessments": 1.0,
-        "expression.alteredExpression.assessments": 1.0,
-        "proteinIneractions.assessments": 1.0,
-        "functionalAleration.assessments": 1.0,
-        "modelSystems.assessments": 1.0,
-        "rescue.assessments": 1.0
+        "evidenceType": 1.0
     }
 }
