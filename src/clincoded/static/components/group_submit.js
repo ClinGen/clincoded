@@ -142,12 +142,12 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                                         or any other information for a family, click <strong>Add New Family for this Group</strong>. If you have previously
                                         created an entry for this Family, return to the Gene-Disease record page to add this Family to the newly created Group.</em>
                                     </p>
-                                    <div className="submit-results-choices">
-                                        <span className="submit-results-btn">
+                                    <div className="group-submit-results-choices">
+                                        <span className="group-submit-results-btn">
                                             <a className="btn btn-default" href={'/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Add New Family for this Group</a>
                                         </span>
                                         <span className="submit-results-choices-sep">OR</span>
-                                        <span className="submit-results-btn">
+                                        <span className="group-submit-results-btn">
                                             <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
                                             <div className="submit-results-note">Note: To associate an existing Family with this Group, return to the Curation Central page.</div>
                                         </span>
@@ -161,12 +161,12 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                                         click <strong>Add New Individuals for this Group</strong>. If you have previously created an entry for this Individual,
                                         return to the Gene-Disease record page to add this Individual to the newly created Group.</em>
                                     </p>
-                                    <div className="submit-results-choices">
-                                        <span className="submit-results-btn">
+                                    <div className="group-submit-results-choices">
+                                        <span className="group-submit-results-btn">
                                             <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Add New Individuals for this Group</a>
                                         </span>
                                         <span className="submit-results-choices-sep">OR</span>
-                                        <span className="submit-results-btn">
+                                        <span className="group-submit-results-btn">
                                             <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
                                             <div className="submit-results-note">Note: To associate an existing Individual with this Group, return to the Record Curation page.</div>
                                         </span>

@@ -123,7 +123,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                         <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
                             <Form formClassName="form-horizontal form-std">
                                 <Input type="select" ref="haveindividual" label="Other than the variant information associated with the proband, is there any additional information provided about the proband or any other individuals in the family?" defaultValue={this.state.haveIndividual}
-                                    handleChange={this.handleChange} labelClassName="group-submit-results-label" wrapperClassName="group-submit-results-switch" groupClassName="submit-results-wrapper">
+                                    handleChange={this.handleChange} labelClassName="family-submit-results-label" wrapperClassName="family-submit-results-switch" groupClassName="submit-results-wrapper">
                                     <option value="" disabled="disabled">No Selection</option>
                                     <option disabled="disabled"></option>
                                     <option value="y">Yes</option>
@@ -141,19 +141,19 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                         or any other information for a family, click <strong>Add New Family for this Group</strong>. If you have previously
                                         created an entry for this Family, return to the Gene-Disease record page to add this Family to the newly created Group.</em>
                                     </p>
-                                    <div className="submit-results-choices">
-                                        <span className="submit-results-btn">
+                                    <div className="family-submit-results-choices">
+                                        <span className="family-submit-results-btn">
                                             <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Add New Family for this Group</a>
                                         </span>
                                     </div>
                                 </Panel>
                             : (this.state.haveIndividual === 'n' ?
                                 <Panel panelClassName="submit-results-panel">
-                                    <div className="submit-results-choices">
-                                        <span className="submit-results-btn">
+                                    <div className="family-submit-results-choices">
+                                        <span className="family-submit-results-btn">
                                             <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
-                                            <div className="submit-results-note">Note: To add another family to this group or to associate an existing Individual with this Group, return to the Record Curation page.</div>
                                         </span>
+                                        <div className="submit-results-note">Note: To add another family to this group or to associate an existing Individual with this Group, return to the Record Curation page.</div>
                                     </div>
                                 </Panel>
                             : null)}

@@ -723,13 +723,6 @@ var FamilyCuration = React.createClass({
                                                 {FamilyAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        {!this.queryValues.familyUuid ?
-                                            <PanelGroup accordion>
-                                                <Panel title="Family – Number with identical information" open>
-                                                    {FamilyCount.call(this)}
-                                                </Panel>
-                                            </PanelGroup>
-                                        : null}
                                         <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                     </Form>
