@@ -77,7 +77,7 @@ after_script:
       pid="$(cat ${SC_PIDFILE})"
       echo "PID to stop is $pid"
       while [ $n -le $max_tries ]; do
-        kill -0 $pid || break
+        kill $pid || break
         n=$((n+1))
         [ $n -ge $max_tries ] && exit 1
         sleep 1
