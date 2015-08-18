@@ -796,6 +796,7 @@ var FamilyCount = function() {
 // as the calling component.
 var FamilyCommonDiseases = function() {
     var family = this.state.family;
+    var group = this.state.group;
     var orphanetidVal, hpoidVal, nothpoidVal;
 
     if (family) {
@@ -806,6 +807,23 @@ var FamilyCommonDiseases = function() {
 
     return (
         <div className="row">
+            {Object.keys(group).length ?
+                <div className="form-group">
+                    <div className="col-sm-5">
+                        <strong className="pull-right">Orphanet Disease Associated with Group:</strong>
+                    </div>
+                    <div className="col-sm-7">
+                        {group.commonDiagnosis.map(function(disease, i) {
+                            return (
+                                <span key={disease.orphaNumber}>
+                                    {i > 0 ? ', ' : ''}
+                                    {'ORPHA' + disease.orphaNumber}
+                                </span>
+                            );
+                        })}
+                    </div>
+                </div>
+            : null}
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
