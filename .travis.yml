@@ -42,7 +42,6 @@ before_script:
         --logfile $SC_LOGFILE \
         --pidfile $SC_PIDFILE \
         --tunnel-identifier $TRAVIS_JOB_NUMBER \
-        --verbose \
         --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
       while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
     fi
