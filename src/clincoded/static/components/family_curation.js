@@ -810,7 +810,7 @@ var FamilyCommonDiseases = function() {
             {Object.keys(group).length ?
                 <div className="form-group">
                     <div className="col-sm-5">
-                        <strong className="pull-right">Orphanet Disease Associate with Group:</strong>
+                        <strong className="pull-right">Orphanet Disease Associated with Group:</strong>
                     </div>
                     <div className="col-sm-7">
                         {group.commonDiagnosis.map(function(disease, i) {
