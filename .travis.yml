@@ -74,7 +74,8 @@ after_script:
       # Wait for Sauce Connect to shut down its tunnel.
       n=0
       max_tries=30
-      pid="$(cat $SC_PIDFILE)"
+      pid="$(cat ${SC_PIDFILE})"
+      echo "PID to stop is $pid"
       while [ $n -le $max_tries ]; do
         kill -0 $pid || break
         n=$((n+1))
