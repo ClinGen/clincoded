@@ -274,6 +274,10 @@
         "proband": {
             "title": "Proband",
             "type": "boolean"
+        },
+        "submitted_by.uuid": {
+            "title": "Creator",
+            "type": "string"
         }
     }
 }
