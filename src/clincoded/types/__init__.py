@@ -344,6 +344,7 @@ class Family(Item):
         'individualIncluded.submitted_by',
         'individualIncluded.variants',
         'associatedGroups',
+        'associatedGroups.commonDiagnosis',
         'individualIncluded.variants.submitted_by',
     ]
     rev = {
