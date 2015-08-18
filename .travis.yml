@@ -64,10 +64,22 @@ script:
 after_script:
   - >
     if test -f "$SC_PIDFILE"; then
-      SAUCE_JOB_ID=`grep -m 1 /session/ "$HOME/sauce-connect.log" | cut -d / -f 7`
-      SAUCE_PASSED=`((TRAVIS_TEST_RESULT == 0)) && echo true || echo false`
-      curl -H "Content-Type:text/json" -s -X PUT -d "{\"passed\": $SAUCE_PASSED}" \
-        "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@saucelabs.com/rest/v1/$SAUCE_USERNAME/jobs/$SAUCE_JOB_ID" > /dev/null
+      # NOTE: Selenium Session ID/Sauce Connect Job ID is no longer stored in sauce-connect.log
+      # SAUCE_JOB_ID=`grep -m 1 /session/ "$HOME/sauce-connect.log" | cut -d / -f 7`
+      # SAUCE_PASSED=`((TRAVIS_TEST_RESULT == 0)) && echo true || echo false`
+      # curl -H "Content-Type:text/json" -s -X PUT -d "{\"passed\": $SAUCE_PASSED}" \
+      #   "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@saucelabs.com/rest/v1/$SAUCE_USERNAME/jobs/$SAUCE_JOB_ID" > /dev/null
       echo "Sauce test page https://saucelabs.com/tests/$SAUCE_JOB_ID"
-      kill $(cat "$SC_PIDFILE")
+      # Wait for Sauce Connect to shut down its tunnel.
+      echo "Closing Sauce Connect tunnel."
+      num_tries=0
+      max_tries=30
+      SC_PID="$(cat $SC_PIDFILE)"
+      echo "Sauce Connect PID to stop is $SC_PID"
+      while [ $num_tries -le $max_tries ]; do
+        kill $SC_PID || break
+        num_tries=$((num_tries+1))
+        [ $num_tries -ge $max_tries ] && exit 1
+        sleep 1
+      done
     fi
