@@ -169,7 +169,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                     <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
                                 </div>
                                 <a href={'/group/' + group.uuid} target="_blank" title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
-                                {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group">Add family information</a></div> : null}
+                                {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group">Add new Family to this Group</a></div> : null}
                             </div>
                         );
                     }.bind(this))}
