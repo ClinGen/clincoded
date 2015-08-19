@@ -1006,7 +1006,7 @@ var FamilySegregation = function() {
                 <option>Inferred</option>
                 <option>Confirmed</option>
             </Input>
-            <Input type="select" ref="unaffectedcarriers" label="Are parents unaffected carriers?" defaultValue="none" value={segregation.numberOfParentsUnaffectedCarriers}
+            <Input type="select" ref="unaffectedcarriers" label="# parents who are unaffected carriers" defaultValue="none" value={segregation.numberOfParentsUnaffectedCarriers}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1020,7 +1020,7 @@ var FamilySegregation = function() {
             <Input type="text" ref="noaffected1" label="# affected with 1 variant:" format="number" value={segregation.numberOfAffectedWithOneVariant}
                 error={this.getFormError('noaffected1')} clearError={this.clrFormErrors.bind(null, 'noaffected1')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="noaffected2" label="# affected with 2 variants or homozygous for 1:" format="number" value={segregation.numberOfAffectedWithTwoVariants}
+            <Input type="text" ref="noaffected2" label="# affected with 2 different variants or homozygous for 1:" format="number" value={segregation.numberOfAffectedWithTwoVariants}
                 error={this.getFormError('noaffected2')} clearError={this.clrFormErrors.bind(null, 'noaffected2')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="text" ref="nounaffectedcarriers" label="# unaffected carriers:" format="number" value={segregation.numberOfUnaffectedCarriers}
@@ -1311,7 +1311,7 @@ var FamilyViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Are parents unaffected carriers</dt>
+                                <dt># parents who are unaffected carriers</dt>
                                 <dd>{segregation && segregation.numberOfParentsUnaffectedCarriers}</dd>
                             </div>
 
@@ -1326,7 +1326,7 @@ var FamilyViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt># affected with 2 variants or homozygous for 1</dt>
+                                <dt># affected with 2 different variants or homozygous for 1</dt>
                                 <dd>{segregation && segregation.numberOfAffectedWithTwoVariants}</dd>
                             </div>
 
