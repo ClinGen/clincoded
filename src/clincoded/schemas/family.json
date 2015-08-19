@@ -344,38 +344,8 @@
                     "default": [],
                     "items": {
                         "description": "Assessment from one curator",
-                        "type": "object",
-                        "default" : {},
-                        "properties": {
-                            "owner": {
-                                "description": "Email of curator who add the assessment",
-                                "type": "string"
-                            },
-                            "values": {
-                                "description": "List of values and time stamps the owner added and changed",
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "value": {
-                                            "description": "Record of values. Current value with latest time stamp, others are history. Inactive -> revoke the assessment",
-                                            "type": "string",
-                                            "enum": [
-                                                "Supports",
-                                                "Review",
-                                                "Contradicts",
-                                                "Inactive"
-                                            ]
-                                        },
-                                        "dateTime": {
-                                            "description": "Time stramp of the value",
-                                            "type": "string",
-                                            "default": ""
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        "type": "string",
+                        "linkTo": "assessment"
                     }
                 }
             }
@@ -423,9 +393,17 @@
         "individualIncluded": {
             "title": "Individual",
             "type": "string"
+        },
+        "submitted_by.uuid": {
+            "title": "Creator",
+            "type": "string"
+        },
+        "date_created": {
+            "title": "Creation Date",
+            "type": "string"
         }
     },
     "boost_values": {
-        "segregation.assessments": 1.0
+        "label": 1.0
     }
 }

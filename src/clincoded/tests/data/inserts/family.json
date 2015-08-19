@@ -24,7 +24,7 @@
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
         "segregation": {
-            "dateTime": "2015-09-27T09:35:18.000000+00:00",
+            "dateTime": "2015-06-27T09:35:18.000000+00:00",
             "pedigreeDescription": "K8725",
             "pedigreeSize": 15,
             "numberOfGenerationInPedigree": 3,
@@ -42,23 +42,7 @@
                 "df8135d4-2685-11e5-af19-60f81dc5b05a"
             ],
             "assessments": [
-                {
-                    "owner": "fytanaka@stanford.edu",
-                    "values": [
-                        {
-                            "value": "Review",
-                            "dateTime": "2015-03-03T12:52:27.000000+00:00"
-                        },
-                        {
-                            "value": "Inactive",
-                            "dateTime": "2015-03-04T12:52:27.000000+00:00"
-                        },
-                        {
-                            "value": "Supports",
-                            "dateTime": "2015-03-05T12:52:27.000000+00:00"
-                        }
-                    ]
-                }
+                "4f94a226-2a4c-11e5-887c-60f81dc5b05a"
             ]
         },
         "otherPMIDs": [
@@ -69,7 +53,8 @@
             "6f762e73-1910-11e5-998f-60f81dc5b05a",
             "7997f687-1910-11e5-a066-60f81dc5b05a"
         ],
-        "date_created": "2015-07-14T22:47:10.000000+00:00"
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "date_created": "2015-07-04T22:47:10.000000+00:00"
     },
     {
         "uuid": "d674b2c2-18f9-11e5-a556-60f81dc5b05a",
@@ -96,7 +81,7 @@
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
-        "date_created": "2015-07-14T22:47:10.000000+00:00"
+        "date_created": "2015-07-12T22:47:10.000000+00:00"
     },
     {
         "uuid": "25c6a663-18fa-11e5-8554-60f81dc5b05a",
@@ -122,7 +107,7 @@
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
-        "date_created": "2015-07-14T22:47:10.000000+00:00"
+        "date_created": "2015-07-19T22:47:10.000000+00:00"
     },
     {
         "uuid": "a20e9182-18fa-11e5-96d1-60f81dc5b05a",
@@ -147,7 +132,7 @@
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
-        "date_created": "2015-07-14T22:47:10.000000+00:00"
+        "date_created": "2015-07-16T22:47:10.000000+00:00"
     },
     {
         "uuid": "ab9a37ba-18fa-11e5-bad8-60f81dc5b05a",
@@ -172,6 +157,6 @@
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
-        "date_created": "2015-07-14T22:47:10.000000+00:00"
+        "date_created": "2015-06-14T22:47:10.000000+00:00"
     }
 ]

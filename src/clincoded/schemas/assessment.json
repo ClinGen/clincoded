@@ -4,22 +4,17 @@
     "description": "Schema for storing and using assessments",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["owner", "value", "dateTime"],
+    "required": ["submitted_by", "value", "date_created"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/shared_status" }
+        { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
         "schema_version": {
             "default": "1"
-        },
-        "owner": {
-            "title": "Owner",
-            "description": "Email of creator",
-            "type": "string"
         },
         "value": {
             "title": "Value",
@@ -30,12 +25,6 @@
                 "Review",
                 "Contradicts"
             ]
-        },
-        "dateTime": {
-            "title": "Date and Time",
-            "description": "Time stamp of assessment creation",
-            "type": "string",
-            "format": "date-time"
         },
         "active": {
             "title": "Active",
@@ -49,16 +38,8 @@
             "title": "Assessment",
             "type": "string"
         },
-        "owner": {
-            "title": "Owner",
-            "type": "string"
-        },
         "value": {
             "Title": "Value",
-            "type": "string"
-        },
-        "dateTime": {
-            "title": "Date/Time",
             "type": "string"
         }
     }

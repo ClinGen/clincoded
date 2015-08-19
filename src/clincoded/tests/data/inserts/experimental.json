@@ -32,15 +32,7 @@
             "geneImplicatedInDisease": true,
             "relationshipOfOtherGenesToDisese": "very strong relationship",
             "assessments": [
-                {
-                    "owner": "fytanaka@stanford.edu",
-                    "values": [
-                        {
-                            "value": "Review",
-                            "dateTime": "2015-03-03T12:52:27.000000+00:00"
-                        }
-                    ]
-                }
+                "4f94a226-2a4c-11e5-887c-60f81dc5b05a"
             ]
         }
     },
@@ -63,28 +55,7 @@
                 "explanationOfOtherGenes": "some explanation here",
                 "evidenceInPaper": "Paragraph 21-30, page 55",
                 "assessments": [
-                    {
-                        "owner": "fytanaka@stanford.edu",
-                        "values": [
-                            {
-                                "value": "Review",
-                                "dateTime": "2015-03-03T12:52:27.000000+00:00"
-                            },
-                            {
-                                "value": "Supports",
-                                "dateTime": "2015-03-05T12:52:27.000000+00:00"
-                            }
-                        ]
-                    },
-                    {
-                        "owner": "selinad@stanford@stanford.edu",
-                        "values": [
-                            {
-                                "value": "Supports",
-                                "dateTime": "2015-03-06T12:52:27.000000+00:00"
-                            }
-                        ]
-                    }
+                    "4aec0dae-2a4c-11e5-a66f-60f81dc5b05a"
                 ]
             },
             "geneFunctionConsistentWithPhenotype": {
@@ -96,36 +67,8 @@
                 "explanation": "some explanation here",
                 "evidenceInPaper": "Paragraph 2-12, page 12",
                 "assessments": [
-                    {
-                        "owner": "selinad@stanford@stanford.edu",
-                        "values": [
-                            {
-                                "value": "Review",
-                                "dateTime": "2015-03-03T12:52:27.000000+00:00"
-                            },
-                            {
-                                "value": "Inactive",
-                                "dateTime": "2015-03-04T12:52:27.000000+00:00"
-                            },
-                            {
-                                "value": "Supports",
-                                "dateTime": "2015-03-05T12:52:27.000000+00:00"
-                            }
-                        ]
-                    },
-                    {
-                        "owner": "kgliu@stanford.edu",
-                        "values": [
-                            {
-                                "value": "Supports",
-                                "dateTime": "2015-03-06T12:52:27.000000+00:00"
-                            },
-                            {
-                                "value": "Inactive",
-                                "dateTime": "2015-03-07T12:52:27.000000+00:00"
-                            }
-                        ]
-                    }
+                    "3ecaaf6b-2a4c-11e5-ab2d-60f81dc5b05a",
+                    "4519985e-2a4c-11e5-96a0-60f81dc5b05a"
                 ]
             }
         },
@@ -150,15 +93,7 @@
             "explanation": "some explanation here",
             "evidenceLocationInPaper": "Paragraph 31-32, page 2",
             "assessments": [
-                {
-                    "owner": "tsneddon@stanford@stanford.edu",
-                    "values": [
-                        {
-                            "value": "Supports",
-                            "dateTime": "2015-03-05T12:52:27.000000+00:00"
-                        }
-                    ]
-                }
+                "5a5cefba-2a4c-11e5-9f97-60f81dc5b05a"
             ]
         },
         "variants": [
@@ -180,33 +115,7 @@
             "evidenceForNormalFunction": "evidence 007",
             "evidenceInPaper": "Paragraph 2-5, page 5",
             "assessments": [
-                {
-                    "owner": "selinad@stanford@stanford.edu",
-                    "values": [
-                        {
-                            "value": "Supports",
-                            "dateTime": "2015-03-06T12:52:27.000000+00:00"
-                        }
-                    ]
-                },
-                {
-                    "owner": "kdalton@stanford.edu",
-                    "values": [
-                        {
-                            "value": "Contradicts",
-                            "dateTime": "2015-03-03T12:52:27.000000+00:00"
-                        }
-                    ]
-                },
-                {
-                    "owner": "tsneddon@stanford@stanford",
-                    "values": [
-                        {
-                            "value": "Supports",
-                            "dateTime": "2015-03-07T12:52:27.000000+00:00"
-                        }
-                    ]
-                }
+                "3ecaaf6b-2a4c-11e5-ab2d-60f81dc5b05a"
             ]
         },
         "variants": [
