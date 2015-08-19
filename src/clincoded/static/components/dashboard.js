@@ -51,6 +51,7 @@ var Dashboard = React.createClass({
                     extraInfo: extraInfo
                 };
                 if (gdmSubItem[i].familyIncluded) {
+                    // families that are associated with groups show up in the familyIncluded address
                     if (gdmSubItem[i].familyIncluded.length > 0) {
                         gdmMapping[gdmSubItem[i].familyIncluded[0].uuid] = {
                             uuid: gdmUuid,
@@ -62,7 +63,7 @@ var Dashboard = React.createClass({
                         gdmMapping[gdmSubItem[i].familyIncluded[0].uuid].extraInfo['groupUuid'] = gdmSubItem[i].uuid;
                     }
                 }
-                // recursively loop through the annotations' groups, families, etc
+                // recursively loop through the annotations' families (not associated with groups) and groups
                 if (gdmSubItem[i].families) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].families,
                     gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
                 if (gdmSubItem[i].groups) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].groups,
