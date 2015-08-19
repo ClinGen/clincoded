@@ -96,9 +96,9 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
     },
 
     render: function() {
-        var gdm = this.state.gdm;
-        var group = this.state.group;
-        var annotation = this.state.annotation;
+        var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
+        var group = Object.keys(this.state.group).length ? this.state.group : null;
+        var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
@@ -107,34 +107,39 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
 
+        // Build the link to go back and edit the newly created group page
+        var editGroupLink = (gdm && group && annotation) ? '/group-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid : '';
+
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={gdm.omimId} />
+                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} />
                 <div className="container">
-                    {Object.keys(group).length ?
-                        <h1>Group Information: {group.label} <a href={group['@id']} className="btn btn-info" target="_blank">View</a></h1>
+                    {group ?
+                        <h1>Group Information: {group.label} <a href={group['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editGroupLink} className="btn btn-info">Edit</a></h1>
                     : null}
-                    {Object.keys(annotation).length && annotation.article ?
+                    {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
                             <PmidSummary article={annotation.article} displayJournal />
                         </div>
                     : null}
                     <div className="row">
                         <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
-                            <Form formClassName="form-horizontal form-std">
-                                <Input type="select" ref="havefamily" label="Do any of the probands or other individuals in this Group have Family Information?" defaultValue={this.state.haveFamily}
-                                    handleChange={this.handleChange} labelClassName="group-submit-results-label" wrapperClassName="group-submit-results-switch" groupClassName="submit-results-wrapper">
-                                    <option value="" disabled="disabled">No Selection</option>
-                                    <option disabled="disabled"></option>
-                                    <option value="y">Yes</option>
-                                    <option value="n">No</option>
-                                </Input>
-                            </Form>
-                            <p>
-                                <em><strong>Note</strong>: Family Information includes any information about a proband in the group that is part of family 
-                                and any relatives of the proband (e.g. presence of phenotypes, average age of onset, race, family ethnicity and/or any
-                                information about the segregation of phenotypes and/or variants) and/or any information about segregation e.g. de novo status.</em>
-                            </p>
+                            <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
+                                <Form formClassName="form-horizontal form-std">
+                                    <Input type="select" ref="havefamily" label="Do any of the probands or other individuals in this Group have Family Information?" defaultValue={this.state.haveFamily}
+                                        handleChange={this.handleChange} labelClassName="group-submit-results-label" wrapperClassName="group-submit-results-switch" groupClassName="submit-results-wrapper">
+                                        <option value="" disabled="disabled">No Selection</option>
+                                        <option disabled="disabled"></option>
+                                        <option value="y">Yes</option>
+                                        <option value="n">No</option>
+                                    </Input>
+                                </Form>
+                                <p className="submit-results-panel-info">
+                                    <em><strong>Note</strong>: Family Information includes any information about a proband in the group that is part of family 
+                                    and any relatives of the proband (e.g. presence of phenotypes, average age of onset, race, family ethnicity and/or any
+                                    information about the segregation of phenotypes and/or variants) and/or any information about segregation e.g. de novo status.</em>
+                                </p>
+                            </Panel>
                             {this.state.haveFamily === 'y' ?
                                 <Panel panelClassName="submit-results-panel">
                                     <p>

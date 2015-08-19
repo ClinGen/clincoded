@@ -791,16 +791,51 @@ var FamilyCount = function() {
 // as the calling component.
 var FamilyCommonDiseases = function() {
     var family = this.state.family;
-    var orphanetidVal, hpoidVal, nothpoidVal;
+    var group = this.state.group;
+    var orphanetidVal, hpoidVal, nothpoidVal, associatedGroups;
 
-    if (family) {
+    // If we're editing a family, make editable values of the complex properties
+    if (family && Object.keys(family).length) {
         orphanetidVal = family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
         hpoidVal = family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join() : null;
         nothpoidVal = family.hpoIdInElimination ? family.hpoIdInElimination.join() : null;
     }
 
+    // Make a list of diseases from the group, either from the given group,
+    // or the family if we're editing one that has associated groups.
+    if (Object.keys(group).length) {
+        // We have a group, so get the disease array from it.
+        associatedGroups = [group];
+    } else if (family && family.associatedGroups && family.associatedGroups.length) {
+        // We have a family with associated groups. Combine the diseases from all groups.
+        associatedGroups = family.associatedGroups;
+    }
+
     return (
         <div className="row">
+            {associatedGroups && associatedGroups.length ?
+                <div>
+                    {associatedGroups.map(function(associatedGroup) {
+                        return (
+                            <div key={associatedGroup.uuid} className="form-group">
+                                <div className="col-sm-5">
+                                    <strong className="pull-right">Orphanet Diseases Associated with {associatedGroup.label}</strong>
+                                </div>
+                                <div className="col-sm-7">
+                                    {associatedGroup.commonDiagnosis.map(function(disease, i) {
+                                        return (
+                                            <span key={disease.orphaNumber}>
+                                                {i > 0 ? ', ' : ''}
+                                                {'ORPHA' + disease.orphaNumber}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            : null}
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
