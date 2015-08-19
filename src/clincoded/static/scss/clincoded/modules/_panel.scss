@@ -43,8 +43,11 @@ span.curation-palette-title {
     display: none;
 }
 
-.panel-std {
+.panel-bg-std {
     background-color: #f0f0f0;
+}
+
+.panel-std {
     padding: 20px 30px;
 
     @media screen and (min-width: $screen-sm-min) {

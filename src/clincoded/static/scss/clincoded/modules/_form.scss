@@ -74,9 +74,18 @@ input[type=search] {
     margin: 40px 0;
 }
 
+.submit-results-panel-info {
+    margin: 0;
+    padding-bottom: 0;
+
+    @media screen and (min-width: $screen-sm-min) {
+        padding-bottom: 40px;
+    }
+}
+
 .submit-results-wrapper {
     display: block;
-    margin: 20px 0;
+    margin: 0 0 20px;
 
     @media screen and (min-width: $screen-sm-min) {
         display: table;
@@ -90,11 +99,12 @@ input[type=search] {
 
 @mixin submit-results-label($width) {
     display: block;
+    font-size: 1.2rem;
 
     @media screen and (min-width: $screen-sm-min) {
         display: table-cell;
         width: $width;
-        vertical-align: middle;
+        vertical-align: top;
     }
 }
 
@@ -104,7 +114,7 @@ input[type=search] {
     @media screen and (min-width: $screen-sm-min) {
         display: table-cell;
         width: $width;
-        vertical-align: middle;
+        vertical-align: top;
     }
 }
 
