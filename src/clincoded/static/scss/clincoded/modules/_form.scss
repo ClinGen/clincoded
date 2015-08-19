@@ -68,3 +68,128 @@ input[type=search] {
         display: none;
     }
 }
+
+// Group and Family Submit Result page styles
+.submit-results-panel {
+    margin: 40px 0;
+}
+
+.submit-results-panel-info {
+    margin: 0;
+    padding-bottom: 0;
+
+    @media screen and (min-width: $screen-sm-min) {
+        padding-bottom: 40px;
+    }
+}
+
+.submit-results-wrapper {
+    display: block;
+    margin: 0 0 20px;
+
+    @media screen and (min-width: $screen-sm-min) {
+        display: table;
+        padding: 5px 0;
+    }
+
+    .form-error {
+        display: none;
+    }
+}
+
+@mixin submit-results-label($width) {
+    display: block;
+    font-size: 1.2rem;
+
+    @media screen and (min-width: $screen-sm-min) {
+        display: table-cell;
+        padding-right: 20px;
+        width: $width;
+        vertical-align: top;
+    }
+}
+
+@mixin submit-results-switch($width) {
+    display: block;
+
+    @media screen and (min-width: $screen-sm-min) {
+        display: table-cell;
+        width: $width;
+        vertical-align: top;
+    }
+}
+
+.group-submit-results-label {
+    @include submit-results-label(60%);
+}
+
+.group-submit-results-switch {
+    @include submit-results-switch(40%);
+}
+
+.family-submit-results-label {
+    @include submit-results-label(60%);
+}
+
+.family-submit-results-switch {
+    @include submit-results-switch(40%);
+}
+
+.group-submit-results-choices {
+    padding-bottom: 0;
+
+    @media screen and (min-width: $screen-md-min) {
+        display: table;
+        padding-bottom: 40px;
+        width: 100%;
+    }
+}
+
+.submit-results-choices-sep {
+    display: block;
+    font-weight: bold;
+    text-align: center;
+
+    @media screen and (min-width: $screen-md-min) {
+        position: relative;
+        top: 5px;
+        display: table-cell;
+        width: 10%;
+        padding: 0 15px;
+        vertical-align: top;
+    }
+}
+
+.family-submit-results-choices {
+    padding-bottom: 0;
+
+    @media screen and (min-width: $screen-md-min) {
+        padding-bottom: 40px;
+    }
+}
+
+
+.group-submit-results-btn {
+    display: block;
+
+    @media screen and (min-width: $screen-md-min) {
+        display: table-cell;
+        width: 45%;
+        vertical-align: top;
+    }
+
+    a {
+        width: 100%;
+    }
+}
+
+.submit-results-note {
+    margin: 5px 0;
+    font-size: 0.9;
+    font-style: italic;
+}
+
+.family-submit-results-btn {
+    display: block;
+    text-align: center;
+}

@@ -494,7 +494,7 @@ var FamilyCuration = React.createClass({
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
                     this.resetAllFormValues();
-                    this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
+                    this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + savedFamilies[0].uuid + '&annotation=' + this.state.annotation.uuid);
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
                 });
@@ -661,10 +661,11 @@ var FamilyCuration = React.createClass({
     },
 
     render: function() {
-        var annotation = this.state.annotation;
-        var gdm = this.state.gdm;
-        var family = this.state.family;
-        var method = (family.method && Object.keys(family.method).length) ? family.method : {};
+        var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
+        var group = Object.keys(this.state.group).length ? this.state.group : null;
+        var family = Object.keys(this.state.family).length ? this.state.family : null;
+        var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
+        var method = (family && family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
@@ -681,12 +682,12 @@ var FamilyCuration = React.createClass({
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
-                            {Object.keys(this.state.annotation).length && this.state.annotation.article ?
+                            {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
-                                    <PmidSummary article={this.state.annotation.article} displayJournal />
+                                    <PmidSummary article={annotation.article} displayJournal />
                                 </div>
                             : null}
-                            <h1>Curate Family Information</h1>
+                            <h1>Curate Family Information{group ? ' for Group: ' + group.label : ''}</h1>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
@@ -723,15 +724,10 @@ var FamilyCuration = React.createClass({
                                                 {FamilyAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        {!this.queryValues.familyUuid ?
-                                            <PanelGroup accordion>
-                                                <Panel title="Family – Number with identical information" open>
-                                                    {FamilyCount.call(this)}
-                                                </Panel>
-                                            </PanelGroup>
-                                        : null}
-                                        <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
-                                        <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                        <div className="curation-submit clearfix">
+                                            <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                            <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                        </div>
                                     </Form>
                                 </div>
                             </div>
