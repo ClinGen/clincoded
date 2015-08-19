@@ -140,7 +140,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                                     information about the segregation of phenotypes and/or variants) and/or any information about segregation e.g. de novo status.</em>
                                 </p>
                             </Panel>
-                            {this.state.haveFamily === 'y' ?
+                            {(this.state.haveFamily === 'y' && gdm && annotation && group) ?
                                 <Panel panelClassName="submit-results-panel">
                                     <p>
                                         <em>Any variant associated with a proband in a Family is captured at the Family level. To associate segregation, variant,
@@ -158,7 +158,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                                         </span>
                                     </div>
                                 </Panel>
-                            : (this.state.haveFamily === 'n' ?
+                            : ((this.state.haveFamily === 'n' && gdm && annotation && group) ?
                                 <Panel panelClassName="submit-results-panel">
                                     <p>
                                         <em>Any variant associated with an individual that is a member of a Group but not part of a Family is captured at the
