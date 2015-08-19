@@ -10,7 +10,7 @@ PROD
 *******
 .. image:: https://travis-ci.org/ClinGen/clincoded.svg?branch=master
     :target: https://travis-ci.org/ClinGen/clincoded
-    
+
 This software creates an object store and user interface for the collection of mappings between human diseases and genetic variation as input by the ClinGen curation staff.
 
 Baseline Dependendencies
@@ -26,7 +26,7 @@ Step 1a: Verify that homebrew is working properly::
 Step 2a: Install or update dependencies::
 
     $ brew install libevent libmagic libxml2 libxslt elasticsearch openssl postgresql graphviz
-    $ brew install freetype libjpeg libtiff littlecms webp  # Required by Pillow
+    $ brew install freetype libjpeg libtiff littlecms webp chromedriver # Required by Pillow
 
 Note: For Mac < 10.9, the system python doesn't work. You should install Python with Homebrew::
 

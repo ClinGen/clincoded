@@ -494,7 +494,11 @@ var FamilyCuration = React.createClass({
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
                     this.resetAllFormValues();
-                    this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
+                    if (this.queryValues.editShortcut) {
+                        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
+                    } else {
+                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + savedFamilies[0].uuid + '&annotation=' + this.state.annotation.uuid);
+                    }
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
                 });
@@ -661,10 +665,11 @@ var FamilyCuration = React.createClass({
     },
 
     render: function() {
-        var annotation = this.state.annotation;
-        var gdm = this.state.gdm;
-        var family = this.state.family;
-        var method = (family.method && Object.keys(family.method).length) ? family.method : {};
+        var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
+        var group = Object.keys(this.state.group).length ? this.state.group : null;
+        var family = Object.keys(this.state.family).length ? this.state.family : null;
+        var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
+        var method = (family && family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
@@ -674,6 +679,7 @@ var FamilyCuration = React.createClass({
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
         this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
+        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "true";
 
         return (
             <div>
@@ -681,12 +687,12 @@ var FamilyCuration = React.createClass({
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
-                            {Object.keys(this.state.annotation).length && this.state.annotation.article ?
+                            {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
-                                    <PmidSummary article={this.state.annotation.article} displayJournal />
+                                    <PmidSummary article={annotation.article} displayJournal />
                                 </div>
                             : null}
-                            <h1>Curate Family Information</h1>
+                            <h1>Curate Family Information{group ? ' for Group: ' + group.label : ''}</h1>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
@@ -723,15 +729,10 @@ var FamilyCuration = React.createClass({
                                                 {FamilyAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        {!this.queryValues.familyUuid ?
-                                            <PanelGroup accordion>
-                                                <Panel title="Family – Number with identical information" open>
-                                                    {FamilyCount.call(this)}
-                                                </Panel>
-                                            </PanelGroup>
-                                        : null}
-                                        <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
-                                        <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                        <div className="curation-submit clearfix">
+                                            <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                            <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                        </div>
                                     </Form>
                                 </div>
                             </div>
@@ -796,16 +797,51 @@ var FamilyCount = function() {
 // as the calling component.
 var FamilyCommonDiseases = function() {
     var family = this.state.family;
-    var orphanetidVal, hpoidVal, nothpoidVal;
+    var group = this.state.group;
+    var orphanetidVal, hpoidVal, nothpoidVal, associatedGroups;
 
-    if (family) {
+    // If we're editing a family, make editable values of the complex properties
+    if (family && Object.keys(family).length) {
         orphanetidVal = family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
         hpoidVal = family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join() : null;
         nothpoidVal = family.hpoIdInElimination ? family.hpoIdInElimination.join() : null;
     }
 
+    // Make a list of diseases from the group, either from the given group,
+    // or the family if we're editing one that has associated groups.
+    if (Object.keys(group).length) {
+        // We have a group, so get the disease array from it.
+        associatedGroups = [group];
+    } else if (family && family.associatedGroups && family.associatedGroups.length) {
+        // We have a family with associated groups. Combine the diseases from all groups.
+        associatedGroups = family.associatedGroups;
+    }
+
     return (
         <div className="row">
+            {associatedGroups && associatedGroups.length ?
+                <div>
+                    {associatedGroups.map(function(associatedGroup) {
+                        return (
+                            <div key={associatedGroup.uuid} className="form-group">
+                                <div className="col-sm-5">
+                                    <strong className="pull-right">Orphanet Diseases Associated with {associatedGroup.label}</strong>
+                                </div>
+                                <div className="col-sm-7">
+                                    {associatedGroup.commonDiagnosis.map(function(disease, i) {
+                                        return (
+                                            <span key={disease.orphaNumber}>
+                                                {i > 0 ? ', ' : ''}
+                                                {'ORPHA' + disease.orphaNumber}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            : null}
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
@@ -970,7 +1006,7 @@ var FamilySegregation = function() {
                 <option>Inferred</option>
                 <option>Confirmed</option>
             </Input>
-            <Input type="select" ref="unaffectedcarriers" label="Are parents unaffected carriers?" defaultValue="none" value={segregation.numberOfParentsUnaffectedCarriers}
+            <Input type="select" ref="unaffectedcarriers" label="# parents who are unaffected carriers" defaultValue="none" value={segregation.numberOfParentsUnaffectedCarriers}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -984,7 +1020,7 @@ var FamilySegregation = function() {
             <Input type="text" ref="noaffected1" label="# affected with 1 variant:" format="number" value={segregation.numberOfAffectedWithOneVariant}
                 error={this.getFormError('noaffected1')} clearError={this.clrFormErrors.bind(null, 'noaffected1')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="noaffected2" label="# affected with 2 variants or homozygous for 1:" format="number" value={segregation.numberOfAffectedWithTwoVariants}
+            <Input type="text" ref="noaffected2" label="# affected with 2 different variants or homozygous for 1:" format="number" value={segregation.numberOfAffectedWithTwoVariants}
                 error={this.getFormError('noaffected2')} clearError={this.clrFormErrors.bind(null, 'noaffected2')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="text" ref="nounaffectedcarriers" label="# unaffected carriers:" format="number" value={segregation.numberOfUnaffectedCarriers}
@@ -1275,7 +1311,7 @@ var FamilyViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Are parents unaffected carriers</dt>
+                                <dt># parents who are unaffected carriers</dt>
                                 <dd>{segregation && segregation.numberOfParentsUnaffectedCarriers}</dd>
                             </div>
 
@@ -1290,7 +1326,7 @@ var FamilyViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt># affected with 2 variants or homozygous for 1</dt>
+                                <dt># affected with 2 different variants or homozygous for 1</dt>
                                 <dd>{segregation && segregation.numberOfAffectedWithTwoVariants}</dd>
                             </div>
 

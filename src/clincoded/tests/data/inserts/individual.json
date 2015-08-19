@@ -30,7 +30,7 @@
         ],
         "proband": true,
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
-        "date_created": "2015-07-14T22:47:10.000000+00:00"
+        "date_created": "2015-07-15T22:47:10.000000+00:00"
     },
     {
         "uuid": "6f762e73-1910-11e5-998f-60f81dc5b05a",
@@ -60,7 +60,7 @@
         ],
         "proband": true,
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
-        "date_created": "2015-07-14T22:47:10.000000+00:00"
+        "date_created": "2015-07-14T12:47:10.000000+00:00"
     },
     {
         "uuid": "7997f687-1910-11e5-a066-60f81dc5b05a",
@@ -85,7 +85,7 @@
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
-        "date_created": "2015-07-14T22:47:10.000000+00:00"
+        "date_created": "2015-07-11T22:47:10.000000+00:00"
     },
     {
         "uuid": "8395c173-1910-11e5-8c7c-60f81dc5b05a",
@@ -107,14 +107,14 @@
             "specificMutationsGenotyped": true,
             "specificMutationsGenotypedMethod": "method #2",
             "additionalInformation": "additional info here.",
-            "dateTime": "2015-07-14T22:47:10.000000+00:00"
+            "dateTime": "2015-07-10T22:47:10.000000+00:00"
         },
         "variants": [
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
         ],
         "proband": false,
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
-        "date_created": "2015-07-14T22:47:10.000000+00:00"
+        "date_created": "2015-07-10T22:47:10.000000+00:00"
     },
     {
         "uuid": "8e204451-1910-11e5-a206-60f81dc5b05a",
@@ -138,7 +138,7 @@
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
-        "date_created": "2015-07-14T22:47:10.000000+00:00"
+        "date_created": "2015-02-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "95df0123-1910-11e5-bf07-60f81dc5b05a",
@@ -162,6 +162,6 @@
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
-        "date_created": "2015-07-14T22:47:10.000000+00:00"
+        "date_created": "2015-03-09T22:47:10.000000+00:00"
     }
 ]

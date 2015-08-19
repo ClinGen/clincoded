@@ -127,6 +127,7 @@ var GroupCuration = React.createClass({
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
             var groupDiseases, groupGenes, groupArticles;
+            var savedGroup;
             var formError = false;
 
             // Parse comma-separated list fields
@@ -335,6 +336,7 @@ var GroupCuration = React.createClass({
                         });
                     }
                 }).then(newGroup => {
+                    savedGroup = newGroup;
                     if (!this.state.group || Object.keys(this.state.group).length === 0) {
                         // Get a flattened copy of the annotation and put our new group into it,
                         // ready for writing.
@@ -354,7 +356,11 @@ var GroupCuration = React.createClass({
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Group Submit page.
                     this.resetAllFormValues();
-                    this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
+                    if (this.queryValues.editShortcut) {
+                        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
+                    } else {
+                        this.context.navigate('/group-submit/?gdm=' + this.state.gdm.uuid + '&group=' + savedGroup.uuid + '&evidence=' + this.state.annotation.uuid);
+                    }
                 }).catch(function(e) {
                     console.log('GROUP CREATION ERROR=: %o', e);
                 });
@@ -373,6 +379,7 @@ var GroupCuration = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
+        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "true";
 
         return (
             <div>
@@ -417,8 +424,10 @@ var GroupCuration = React.createClass({
                                                 {GroupAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
-                                        <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                        <div className="curation-submit clearfix">
+                                            <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                            <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                        </div>
                                     </Form>
                                 </div>
                             </div>

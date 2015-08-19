@@ -44,36 +44,8 @@
                 "supportingStatistic": "No",
                 "SupportingFunctional": "Yes",
                 "assessments": [
-                    {
-                        "owner": "fytanaka@stanford.edu",
-                        "values": [
-                            {
-                                "value": "Review",
-                                "dateTime": "2015-03-03T12:52:27.000000+00:00"
-                            },
-                            {
-                                "value": "Inactive",
-                                "dateTime": "2015-03-04T12:52:27.000000+00:00"
-                            },
-                            {
-                                "value": "Supports",
-                                "dateTime": "2015-03-05T12:52:27.000000+00:00"
-                            }
-                        ]
-                    },
-                    {
-                        "owner": "kgliu@stanford.edu",
-                        "values": [
-                            {
-                                "value": "Supports",
-                                "dateTime": "2015-03-06T12:52:27.000000+00:00"
-                            },
-                            {
-                                "value": "Inactive",
-                                "dateTime": "2015-03-07T12:52:27.000000+00:00"
-                            }
-                        ]
-                    }
+                    "4519985e-2a4c-11e5-96a0-60f81dc5b05a",
+                    "4aec0dae-2a4c-11e5-a66f-60f81dc5b05a"
                 ]
             }
         ]

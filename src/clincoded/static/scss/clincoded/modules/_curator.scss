@@ -308,3 +308,11 @@
         font-size: 1.3rem;
     }
 }
+
+.curation-submit {
+    margin-bottom: 20px;
+
+    @media screen and (min-width: $screen-sm-min) {
+        margin-bottom: 40px;
+    }
+}
