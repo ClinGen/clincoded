@@ -494,7 +494,11 @@ var FamilyCuration = React.createClass({
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
                     this.resetAllFormValues();
-                    this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + savedFamilies[0].uuid + '&annotation=' + this.state.annotation.uuid);
+                    if (this.queryValues.editShortcut) {
+                        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
+                    } else {
+                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + savedFamilies[0].uuid + '&annotation=' + this.state.annotation.uuid);
+                    }
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
                 });
@@ -675,6 +679,7 @@ var FamilyCuration = React.createClass({
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
         this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
+        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "true";
 
         return (
             <div>

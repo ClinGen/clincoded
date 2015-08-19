@@ -356,7 +356,11 @@ var GroupCuration = React.createClass({
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Group Submit page.
                     this.resetAllFormValues();
-                    this.context.navigate('/group-submit/?gdm=' + this.state.gdm.uuid + '&group=' + savedGroup.uuid + '&evidence=' + this.state.annotation.uuid);
+                    if (this.queryValues.editShortcut) {
+                        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
+                    } else {
+                        this.context.navigate('/group-submit/?gdm=' + this.state.gdm.uuid + '&group=' + savedGroup.uuid + '&evidence=' + this.state.annotation.uuid);
+                    }
                 }).catch(function(e) {
                     console.log('GROUP CREATION ERROR=: %o', e);
                 });
@@ -375,6 +379,7 @@ var GroupCuration = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
+        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "true";
 
         return (
             <div>
