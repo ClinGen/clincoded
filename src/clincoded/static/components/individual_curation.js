@@ -118,7 +118,7 @@ var IndividualCuration = React.createClass({
             gdmUuid ? '/gdm/' + gdmUuid : '',
             groupUuid ? '/groups/' + groupUuid : '',
             familyUuid ? '/families/' + familyUuid: '',
-            familyUuid ? '/individuals/' + individualUuid: '',
+            individualUuid ? '/individuals/' + individualUuid: '',
             annotationUuid ? '/evidence/' + annotationUuid : ''
         ]);
 
@@ -203,18 +203,18 @@ var IndividualCuration = React.createClass({
         // needs unique objects here.
         var newMethod = methods.create.call(this);
         if (newMethod) {
-            writerFamily.method = newMethod;
+            writerIndividual.method = newMethod;
         }
 
         // Either update or create the family object in the DB
-        if (this.state.family && Object.keys(this.state.family).length) {
+        if (this.state.individual && Object.keys(this.state.individual).length) {
             // We're editing a family. PUT the new family object to the DB to update the existing one.
-            return this.putRestData('/families/' + this.state.family.uuid, writerFamily).then(data => {
+            return this.putRestData('/individuals/' + this.state.family.uuid, writerIndividual).then(data => {
                 return Promise.resolve(data['@graph'][0]);
             });
         } else {
             // We created a family; post it to the DB
-            return this.postRestData('/families/', writerFamily).then(data => {
+            return this.postRestData('/individuals/', writerIndividual).then(data => {
                 return Promise.resolve(data['@graph'][0]);
             });
         }
@@ -315,9 +315,9 @@ var IndividualCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault() && this.validateVariants()) {
-            var newFamily = {}; // Holds the new group object;
-            var familyDiseases = null, familyArticles, familyVariants = [];
-            var savedFamilies; // Array of saved written to DB
+            var newIndividual = {}; // Holds the new group object;
+            var individualDiseases = null, individualArticles, individualVariants = [];
+            var savedIndividuals; // Array of saved written to DB
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
@@ -362,7 +362,7 @@ var IndividualCuration = React.createClass({
                 this.getRestData(searchStr).then(diseases => {
                     if (diseases['@graph'].length === orphaIds.length) {
                         // Successfully retrieved all diseases
-                        familyDiseases = diseases;
+                        individualDiseases = diseases;
                         return Promise.resolve(diseases);
                     } else {
                         // Get array of missing Orphanet IDs
@@ -375,14 +375,14 @@ var IndividualCuration = React.createClass({
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
-                    // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
+                    // Handle 'Add any other PMID(s) that have evidence about this same Individual' list of PMIDs
                     if (pmids) {
                         // User entered at least one PMID
                         searchStr = '/search/?type=article&' + pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
                         return this.getRestData(searchStr).then(articles => {
                             if (articles['@graph'].length === pmids.length) {
                                 // Successfully retrieved all genes
-                                familyArticles = articles;
+                                individualArticles = articles;
                                 return Promise.resolve(articles);
                             } else {
                                 var missingPmids = _.difference(pmids, articles['@graph'].map(function(article) { return article.pmid; }));
@@ -410,7 +410,7 @@ var IndividualCuration = React.createClass({
                             results.forEach(function(result, i) {
                                 if (result.total) {
                                     // Search got a result. Add a string for family.variants for this existing variant
-                                    familyVariants.push('/variants/' + result['@graph'][0].uuid);
+                                    individualVariants.push('/variants/' + result['@graph'][0].uuid);
                                 } else {
                                     // Search got no result; make a new variant and save it in an array so we can write them.
                                     var newVariant = this.makeVariant(i);
@@ -427,7 +427,7 @@ var IndividualCuration = React.createClass({
                                 ).then(results => {
                                     if (results && results.length) {
                                         results.forEach(result => {
-                                            familyVariants.push('/variants/' + result['@graph'][0].uuid);
+                                            individualVariants.push('/variants/' + result['@graph'][0].uuid);
                                         });
                                     }
                                     return Promise.resolve(results);
@@ -442,37 +442,37 @@ var IndividualCuration = React.createClass({
                     // No variant search strings. Go to next THEN.
                     return Promise.resolve(null);
                 }).then(data => {
-                    // Make a new family object based on form fields.
-                    var newFamily = this.createFamily(familyDiseases, familyArticles, familyVariants);
+                    // Make a new individual object based on form fields.
+                    var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants);
 
                     // Prep for multiple family writes, based on the family count dropdown (only appears when creating a new family,
                     // not when editing a family). This is a count of *extra* families, so add 1 to it to get the number of families
                     // to create.
-                    var familyPromises = [];
-                    var familyCount = parseInt(this.getFormValue('extrafamilycount'), 10);
-                    familyCount = familyCount ? familyCount + 1 : 1;
+                    var individualPromises = [];
+                    var individualCount = parseInt(this.getFormValue('extraindividualcount'), 10);
+                    individualCount = individualCount ? individualCount + 1 : 1;
 
-                    // Write the new family object to the DB
-                    for (var i = 0; i < familyCount; ++i) {
-                        var familyLabel;
+                    // Write the new individual object(s) to the DB
+                    for (var i = 0; i < individualCount; ++i) {
+                        var individualLabel;
                         if (i > 0) {
-                            familyLabel = this.getFormValue('extrafamilyname' + (i - 1));
+                            individualLabel = this.getFormValue('extraindividualname' + (i - 1));
                         }
-                        familyPromises.push(this.writeFamilyObj(newFamily, familyLabel));
+                        individualPromises.push(this.writeFamilyObj(newIndividual, individualLabel));
                     }
-                    return Promise.all(familyPromises);
-                }).then(newFamilies => {
-                    savedFamilies = newFamilies;
-                    if (!this.state.family || Object.keys(this.state.family).length === 0) {
-                        // Get a flattened copy of the annotation and put our new families into it,
+                    return Promise.all(individualPromises);
+                }).then(newIndividuals => {
+                    savedIndividuals = newIndividuals;
+                    if (!this.state.individual || Object.keys(this.state.individual).length === 0) {
+                        // Get a flattened copy of the annotation and put our new individuals into it,
                         // ready for writing.
                         var annotation = curator.flatten(this.state.annotation);
                         if (!annotation.families) {
                             annotation.families = [];
                         }
 
-                        // Merge existing families in the annotation with the new set of families.
-                        Array.prototype.push.apply(annotation.families, savedFamilies.map(function(family) { return family['@id']; }));
+                        // Merge existing individuals in the annotation with the new set of individuals.
+                        Array.prototype.push.apply(annotation.individuals, savedIndividuals.map(function(individual) { return individual['@id']; }));
 
                         // Post the modified annotation to the DB, then go back to Curation Central
                         return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
@@ -480,22 +480,40 @@ var IndividualCuration = React.createClass({
                         return Promise.resolve(this.state.annotation);
                     }
                 }).then(data => {
-                    // If we're adding this family to a group, update the group with this family
+                    // If we're adding this individual to a group, update the group with this individual
                     if (Object.keys(this.state.group).length) {
-                        // Add the newly saved families to the group
+                        // Add the newly saved individuals to the group
                         var group = curator.flatten(this.state.group);
-                        if (!group.familyIncluded) {
-                            group.familyIncluded = [];
+                        if (!group.individualIncluded) {
+                            group.individualIncluded = [];
                         }
 
-                        // Merge existing families in the annotation with the new set of families.
-                        Array.prototype.push.apply(group.familyIncluded, savedFamilies.map(function(family) { return family['@id']; }));
+                        // Merge existing individuals in the group with the new set of individuals.
+                        Array.prototype.push.apply(group.individualIncluded, savedIndividuals.map(function(individual) { return individual['@id']; }));
 
-                        // Post the modified annotation to the DB, then go back to Curation Central
+                        // Post the modified group to the DB, then go back to Curation Central
                         return this.putRestData('/groups/' + this.state.group.uuid, group);
                     }
 
                     // Not updating a group; just move on
+                    return Promise.resolve(null);
+                }).then(data => {
+                    // If we're adding this individual to a family, update the family with this individual
+                    if (Object.keys(this.state.family).length) {
+                        // Add the newly saved individuals to the family
+                        var family = curator.flatten(this.state.family);
+                        if (!family.individualIncluded) {
+                            family.individualIncluded = [];
+                        }
+
+                        // Merge existing individuals in the family with the new set of individuals.
+                        Array.prototype.push.apply(family.individualIncluded, savedIndividuals.map(function(individual) { return individual['@id']; }));
+
+                        // Post the modified family to the DB, then go back to Curation Central
+                        return this.putRestData('/families/' + this.state.family.uuid, family);
+                    }
+
+                    // Not updating a family; just move on
                     return Promise.resolve(null);
                 }).then(data => {
                     // Navigate back to Curation Central page.
@@ -503,7 +521,7 @@ var IndividualCuration = React.createClass({
                     this.resetAllFormValues();
                     this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
                 }).catch(function(e) {
-                    console.log('FAMILY CREATION ERROR=: %o', e);
+                    console.log('INDIVIDUAL CREATION ERROR=: %o', e);
                 });
             }
         }
@@ -678,8 +696,11 @@ var IndividualCuration = React.createClass({
         // uses React controlled inputs, so we can only render them the first time if we already have the
         // family object read in.
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
         this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
+        if (!this.queryValues.familyUuid) {
+            // In case we get both family and group (shouldn't), ignore the group if we have a family.
+            this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
+        }
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
 
         return (
@@ -693,47 +714,47 @@ var IndividualCuration = React.createClass({
                                     <PmidSummary article={this.state.annotation.article} displayJournal />
                                 </div>
                             : null}
-                            <h1>Curate Family Information</h1>
+                            <h1>Curate Individual Information</h1>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                         <Panel>
-                                            {FamilyName.call(this)}
+                                            {IndividualName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title="Family – Common Disease & Phenotypes" open>
-                                                {FamilyCommonDiseases.call(this)}
+                                            <Panel title="Individual – Common Disease & Phenotypes" open>
+                                                {IndividualCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family — Demographics" open>
-                                                {FamilyDemographics.call(this)}
+                                            <Panel title="Individual — Demographics" open>
+                                                {IndividualDemographics.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family — Methods" open>
+                                            <Panel title="Individual — Methods" open>
                                                 {methods.render.call(this, method)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family — Segregation" open>
-                                                {FamilySegregation.call(this)}
+                                            <Panel title="Individual — Segregation" open>
+                                                {IndividualSegregation.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family — Variant(s) associated with Proband" open>
-                                                {FamilyVariant.call(this)}
+                                            <Panel title="Individual — Variant(s) associated with Proband" open>
+                                                {IndividualVariant.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family Additional Information" open>
-                                                {FamilyAdditional.call(this)}
+                                            <Panel title="Individual Additional Information" open>
+                                                {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         {!this.queryValues.familyUuid ?
                                             <PanelGroup accordion>
-                                                <Panel title="Family – Number with identical information" open>
-                                                    {FamilyCount.call(this)}
+                                                <Panel title="Individual – Number with identical information" open>
+                                                    {IndividualCount.call(this)}
                                                 </Panel>
                                             </PanelGroup>
                                         : null}
@@ -753,18 +774,18 @@ var IndividualCuration = React.createClass({
 globals.curator_page.register(IndividualCuration, 'curator_page', 'individual-curation');
 
 
-// Family Name group curation panel. Call with .call(this) to run in the same context
+// Individual Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var FamilyName = function(displayNote) {
-    var family = this.state.family;
+var IndividualName = function(displayNote) {
+    var individual = this.state.individual;
 
     return (
         <div className="row">
-            <Input type="text" ref="familyname" label="Family Name:" value={family.label}
-                error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
+            <Input type="text" ref="individualname" label="Individual Name:" value={individual.label}
+                error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {displayNote ?
-                <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one family with IDENTICAL information, you can indicate this at the bottom of this form.</p>
+                <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one individual with IDENTICAL information, you can indicate this at the bottom of this form.</p>
             : null}
         </div>
     );
@@ -773,24 +794,24 @@ var FamilyName = function(displayNote) {
 
 // If the Family is being edited (we know this because there was a family
 // UUID in the query string), then don’t present the ability to specify multiple families.
-var FamilyCount = function() {
+var IndividualCount = function() {
     var family = this.state.family;
 
     return (
         <div>
             <p className="col-sm-7 col-sm-offset-5">
-                If more than one family has exactly the same information entered above and is associated with the same variants, you can specify how many extra copies of this
-                family to make with this drop-down menu to indicate how many <em>extra</em> copies of this family to make when you submit this form, and specify the names
-                of each extra family below that.
+                If more than one individual has exactly the same information entered above and is associated with the same variants, you can specify how many extra copies of this
+                individual to make with this drop-down menu to indicate how many <em>extra</em> copies of this individual to make when you submit this form, and specify the names
+                of each extra individual below that.
             </p>
-            <Input type="select" ref="extrafamilycount" label="Number of extra identical Families to make:" defaultValue="0" handleChange={this.extraFamilyCountChanged}
+            <Input type="select" ref="extraindividualcount" label="Number of extra identical Individuals to make:" defaultValue="0" handleChange={this.extraIndividualCountChanged}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 {_.range(11).map(function(count) { return <option key={count}>{count}</option>; })}
             </Input>
-            {_.range(this.state.extraFamilyCount).map(i => {
+            {_.range(this.state.extraIndividualCount).map(i => {
                 return (
-                    <Input key={i} type="text" ref={'extrafamilyname' + i} label={'Family Name ' + (i + 2)}
-                        error={this.getFormError('extrafamilyname' + i)} clearError={this.clrFormErrors.bind(null, 'extrafamilyname' + i)}
+                    <Input key={i} type="text" ref={'extraindividualname' + i} label={'Individual Name ' + (i + 2)}
+                        error={this.getFormError('extraindividualname' + i)} clearError={this.clrFormErrors.bind(null, 'extraindividualname' + i)}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
                 );
             })}
@@ -801,14 +822,14 @@ var FamilyCount = function() {
 
 // Common diseases group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var FamilyCommonDiseases = function() {
-    var family = this.state.family;
+var IndividualCommonDiseases = function() {
+    var individual = this.state.individual;
     var orphanetidVal, hpoidVal, nothpoidVal;
 
-    if (family) {
-        orphanetidVal = family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
-        hpoidVal = family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join() : null;
-        nothpoidVal = family.hpoIdInElimination ? family.hpoIdInElimination.join() : null;
+    if (individual && Object.keys(individual).length) {
+        orphanetidVal = individual.commonDiagnosis ? individual.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
+        hpoidVal = individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis.join() : null;
+        nothpoidVal = individual.hpoIdInElimination ? individual.hpoIdInElimination.join() : null;
     }
 
     return (
@@ -819,13 +840,13 @@ var FamilyCommonDiseases = function() {
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={family.termsInDiagnosis}
+            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={individual.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Family</em> if they are specifically noted in the paper.</p>
+            <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Individual</em> if they are specifically noted in the paper.</p>
             <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={family.termsInElimination}
+            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={individual.termsInElimination}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -835,7 +856,7 @@ var FamilyCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Common Disease(s) in Family:</span>;
+        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Common Disease(s) in Individual:</span>;
     }
 });
 
@@ -873,18 +894,25 @@ var LabelPhenoTerms = React.createClass({
 
 // Demographics family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var FamilyDemographics = function() {
-    var family = this.state.family;
+var IndividualDemographics = function() {
+    var individual = this.state.individual;
 
     return (
         <div className="row">
-            <Input type="text" ref="malecount" label="# males:" format="number" value={family.numberOfMale}
-                error={this.getFormError('malecount')} clearError={this.clrFormErrors.bind(null, 'malecount')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="femalecount" label="# females:" format="number" value={family.numberOfFemale}
-                error={this.getFormError('femalecount')} clearError={this.clrFormErrors.bind(null, 'femalecount')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family.countryOfOrigin}
+            <Input type="select" ref="country" label="Sex:" defaultValue="none" value={individual.sex}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Intersex</option>
+                <option>MTF/Transwoman/Transgender Female</option>
+                <option>FTM/Transman/Transgender Male</option>
+                <option>Ambiguous</option>
+                <option>Unknown</option>
+                <option>Other</option>
+            </Input>
+            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={individual.countryOfOrigin}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -892,14 +920,14 @@ var FamilyDemographics = function() {
                     return <option key={country_code.code}>{country_code.name}</option>;
                 })}
             </Input>
-            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family.ethnicity}
+            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={individual.ethnicity}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Hispanic or Latino</option>
                 <option>Not Hispanic or Latino</option>
             </Input>
-            <Input type="select" ref="race" label="Race:" defaultValue="none" value={family.race}
+            <Input type="select" ref="race" label="Race:" defaultValue="none" value={individual.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -912,33 +940,22 @@ var FamilyDemographics = function() {
                 <option>Unknown</option>
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
-            <div className="demographics-age-range">
-                <Input type="select" ref="agerangetype" label="Type:" defaultValue="none" value={family.ageRangeType}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="none">No Selection</option>
-                    <option disabled="disabled"></option>
-                    <option>Onset</option>
-                    <option>Report</option>
-                    <option>Diagnosis</option>
-                    <option>Death</option>
-                </Input>
-                <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
-                    <Input type="text" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
-                        error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={family.ageRangeFrom} />
-                    <span className="group-age-inter">to</span>
-                    <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
-                        error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={family.ageRangeTo} />
-                </Input>
-                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={family.ageRangeUnit}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="none">No Selection</option>
-                    <option disabled="disabled"></option>
-                    <option>Days</option>
-                    <option>Weeks</option>
-                    <option>Months</option>
-                    <option>Years</option>
-                </Input>
-            </div>
+            <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
+                <Input type="text" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
+                    error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={family.ageRangeFrom} />
+                <span className="group-age-inter">to</span>
+                <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
+                    error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={family.ageRangeTo} />
+            </Input>
+            <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={family.ageRangeUnit}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option>Days</option>
+                <option>Weeks</option>
+                <option>Months</option>
+                <option>Years</option>
+            </Input>
         </div>
     );
 };
