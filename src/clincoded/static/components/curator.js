@@ -30,16 +30,11 @@ var CurationMixin = module.exports.CurationMixin = {
     // React state variable.
     updateOmimId: function(gdmUuid, newOmimId) {
         this.getRestData(
-            '/gdm/' + gdmUuid + '/?frame=object'
+            '/gdm/' + gdmUuid
         ).then(gdmObj => {
-            // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
-            if (gdmObj.uuid) { delete gdmObj.uuid; }
-            if (gdmObj['@id']) { delete gdmObj['@id']; }
-            if (gdmObj['@type']) { delete gdmObj['@type']; }
-            if (gdmObj.status) { delete gdmObj.status; }
-
-            gdmObj.omimId = newOmimId;
-            return this.putRestData('/gdm/' + gdmUuid, gdmObj);
+            var gdm = flatten(gdmObj);
+            gdm.omimId = newOmimId;
+            return this.putRestData('/gdm/' + gdmUuid, gdm);
         }).then(data => {
             this.setState({currOmimId: newOmimId});
         }).catch(e => {
@@ -505,7 +500,7 @@ module.exports.capture = {
 
 // Take an object and make a flattened version ready for writing.
 // SCHEMA: This might need to change when the schema changes.
-module.exports.flatten = function(obj) {
+var flatten = module.exports.flatten = function(obj) {
     var flat;
 
     switch(obj['@type'][0]) {
