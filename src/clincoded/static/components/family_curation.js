@@ -1155,7 +1155,17 @@ var FamilyViewer = React.createClass({
         return (
             <div className="container">
                 <div className="row group-curation-content">
-                    <h1>Family ({context.label}){groups && groups.length ? ' Associated with ' + (groups > 1 ? 'Groups (' + groups.map(function(group) { return group.label; }).join(', ') + ')' : 'Group (' + groups[0].label) + ')' : ''}</h1>
+                    <div className="viewer-titles">
+                        <h1>Family: {context.label}</h1>
+                        {groups && groups.length ?
+                            <h2>
+                                Group association:&nbsp;
+                                {groups.map(function(group, i) {
+                                    return <span key={i}>{i > 0 ? ', ' : ''}{group.label}</span>;
+                                })}
+                            </h2>
+                        : null}
+                    </div>
                     <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
