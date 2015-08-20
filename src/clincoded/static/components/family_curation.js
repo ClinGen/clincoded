@@ -278,7 +278,7 @@ var FamilyCuration = React.createClass({
             // Check dbSNP ID for a valid format
             var value = this.getFormValue('VARdbsnpid' + i);
             if (value) {
-                valid = value.match(/^\s*(rs\d{1,8})\s*$/i);
+                valid = value.match(/^\s*(rs\d{1,9})\s*$/i);
                 if (!valid) {
                     this.setFormErrors('VARdbsnpid' + i, 'Use dbSNP IDs (e.g. rs1748)');
                     anyInvalid = true;
@@ -666,8 +666,9 @@ var FamilyCuration = React.createClass({
 
     render: function() {
         var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
-        var group = Object.keys(this.state.group).length ? this.state.group : null;
         var family = Object.keys(this.state.family).length ? this.state.family : null;
+        var groups = (family && family.associatedGroups) ? family.associatedGroups :
+            (Object.keys(this.state.group).length ? [this.state.group] : null);
         var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
         var method = (family && family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
@@ -692,7 +693,14 @@ var FamilyCuration = React.createClass({
                                     <PmidSummary article={annotation.article} displayJournal />
                                 </div>
                             : null}
-                            <h1>Curate Family Information{group ? ' for Group: ' + group.label : ''}</h1>
+                            <h1>
+                                Curate Family Information
+                                {groups && groups.length ?
+                                    (groups.length > 1 ?
+                                        ' for Groups: ' + groups.map(function(group) { return group.label; }).join(', ')
+                                    : ' for Group: ' + groups[0].label)
+                                : ''}
+                            </h1>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
@@ -1140,13 +1148,24 @@ var FamilyViewer = React.createClass({
     render: function() {
         var context = this.props.context;
         var method = context.method;
+        var groups = context.associatedGroups;
         var segregation = context.segregation;
         var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
 
         return (
             <div className="container">
                 <div className="row group-curation-content">
-                    <h1>{context.label}</h1>
+                    <div className="viewer-titles">
+                        <h1>Family: {context.label}</h1>
+                        {groups && groups.length ?
+                            <h2>
+                                Group association:&nbsp;
+                                {groups.map(function(group, i) {
+                                    return <span key={i}>{i > 0 ? ', ' : ''}{group.label}</span>;
+                                })}
+                            </h2>
+                        : null}
+                    </div>
                     <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>

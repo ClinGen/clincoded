@@ -309,10 +309,25 @@
     }
 }
 
+.viewer-titles {
+    h1 {
+        margin-bottom: 10px;
+    }
+
+    h2 {
+        margin-top: 0;
+        font-size: 1.5rem;
+    }
+}
+
 .curation-submit {
     margin-bottom: 20px;
 
     @media screen and (min-width: $screen-sm-min) {
         margin-bottom: 40px;
     }
+}
+
+.disabled {
+    color: $gray-light;
 }
