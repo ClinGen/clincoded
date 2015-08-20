@@ -92,18 +92,16 @@ var CurationCentral = React.createClass({
         this.postRestData('/evidence/', newAnnotationObj).then(data => {
             // Save the new annotation; fetch the currently displayed GDM as an object without its embedded
             // objects; basically the object as it exists in the DB. We'll update that and write it back to the DB.
-            newAnnotation = data['@graph'][0];
-            return this.getRestData('/gdm/' + this.state.currGdm.uuid + '/?frame=object');
-        }).then(gdmObj => {
-            // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
-            delete gdmObj.uuid;
-            delete gdmObj['@id'];
-            delete gdmObj['@type'];
-            delete gdmObj.status;
+            return (data['@graph'][0]);
+        }).then(newAnnotation => {
+            var gdmObj = curator.flatten(currGdm);
 
             // Add our new annotation reference to the array of annotations in the GDM.
-            gdmObj.annotations.push('/evidence/' + newAnnotation.uuid + '/');
-            return this.putRestData('/gdm/' + this.state.currGdm.uuid, gdmObj);
+            if (!gdmObj.annotations) {
+                gdmObj.annotations = [];
+            }
+            gdmObj.annotations.push(newAnnotation['@id']);
+            return this.putRestData('/gdm/' + currGdm.uuid, gdmObj);
         }).then(data => {
             // Retrieve the updated GDM and set it as the new state GDM to force a rerendering.
             this.getGdm(data['@graph'][0].uuid, article.pmid);
