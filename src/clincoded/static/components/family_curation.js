@@ -278,7 +278,7 @@ var FamilyCuration = React.createClass({
             // Check dbSNP ID for a valid format
             var value = this.getFormValue('VARdbsnpid' + i);
             if (value) {
-                valid = value.match(/^\s*(rs\d{1,8})\s*$/i);
+                valid = value.match(/^\s*(rs\d{1,9})\s*$/i);
                 if (!valid) {
                     this.setFormErrors('VARdbsnpid' + i, 'Use dbSNP IDs (e.g. rs1748)');
                     anyInvalid = true;
