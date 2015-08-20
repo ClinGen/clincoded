@@ -36,7 +36,7 @@
         },
         "families": {
             "title": "Family",
-            "descripton": "List of Family IDs",
+            "descripton": "List of Family IDs which do not belong to any group in the annotation",
             "type": "array",
             "default": [],
             "items": {
@@ -48,7 +48,7 @@
         },
         "individuals": {
             "title": "Individual",
-            "descripton": "List of Individual IDs",
+            "descripton": "List of Individual IDs which do not belong to any group and any family in the annotaion",
             "type": "array",
             "default": [],
             "items": {
