@@ -148,7 +148,7 @@ var Dashboard = React.createClass({
                             <h3>Tools</h3>
                             <ul>
                                 <li><a href="/create-gene-disease/">Create Gene-Disease Record</a></li>
-                                <li><a href="/gdm/">View list of all Gene-Disease Records</a></li>
+                                <li><span className="disabled">View list of all Gene-Disease Records</span></li>
                             </ul>
                         </Panel>
                         <Panel panelClassName="panel-dashboard">
