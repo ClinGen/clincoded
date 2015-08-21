@@ -40,6 +40,7 @@ var GroupCuration = React.createClass({
             gdm: {}, // GDM object given in UUID
             annotation: {}, // Annotation object given in UUID
             group: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
+            groupName: '', // Currently entered name of the group
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
     },
@@ -48,6 +49,8 @@ var GroupCuration = React.createClass({
     handleChange: function(ref, e) {
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
             this.setState({genotyping2Disabled: false});
+        } else if (ref === 'groupname') {
+            this.setState({groupName: this.refs[ref].getValue()});
         }
     },
 
@@ -98,6 +101,7 @@ var GroupCuration = React.createClass({
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
             if (stateObj.group && Object.keys(stateObj.group).length) {
                 stateObj.genotyping2Disabled = !(stateObj.group.method && stateObj.group.method.genotypingMethods && stateObj.group.method.genotypingMethods.length);
+                this.setState({groupName: stateObj.group.label});
             }
 
             // Set all the state variables we've collected
@@ -369,10 +373,10 @@ var GroupCuration = React.createClass({
     },
 
     render: function() {
-        var annotation = this.state.annotation;
-        var gdm = this.state.gdm;
-        var group = this.state.group;
-        var method = (group.method && Object.keys(group.method).length) ? group.method : {};
+        var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
+        var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
+        var group = Object.keys(this.state.group).length ? this.state.group : null;
+        var method = (group && group.method && Object.keys(group.method).length) ? group.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
@@ -387,12 +391,15 @@ var GroupCuration = React.createClass({
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
-                            {Object.keys(this.state.annotation).length && this.state.annotation.article ?
+                            {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
                                     <PmidSummary article={this.state.annotation.article} displayJournal />
                                 </div>
                             : null}
-                            <h1>Curate Group Information</h1>
+                            <div className="viewer-titles">
+                                <h1>{(group ? 'Edit' : 'Curate') + ' Group Information'}</h1>
+                                <h2>Group: {this.state.groupName ? <span>{this.state.groupName}</span> : <span className="no-entry">No entry</span>}</h2>
+                            </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
@@ -447,7 +454,7 @@ globals.curator_page.register(GroupCuration, 'curator_page', 'group-curation');
 var GroupName = function() {
     return (
         <div className="row">
-            <Input type="text" ref="groupname" label="Group name:" value={this.state.group.label}
+            <Input type="text" ref="groupname" label="Group name:" value={this.state.group.label} handleChange={this.handleChange}
                 error={this.getFormError('groupname')} clearError={this.clrFormErrors.bind(null, 'groupname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
         </div>
@@ -678,7 +685,7 @@ var GroupViewer = React.createClass({
         return (
             <div className="container">
                 <div className="row curation-content-viewer">
-                    <h1>{context.label}</h1>
+                    <h1>View Group: {context.label}</h1>
                     <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>

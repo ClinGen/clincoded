@@ -54,6 +54,7 @@ var FamilyCuration = React.createClass({
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 1, // Number of variants to display
             variantOption: [VAR_NONE], // One variant panel, and nothing entered
+            familyName: '', // Currently entered family name
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
@@ -66,6 +67,8 @@ var FamilyCuration = React.createClass({
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
             // Disable the Genotyping Method 2 if Genotyping Method 1 has no value
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
+        } else if (ref === 'familyname') {
+            this.setState({familyName: this.refs[ref].getValue()});
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -151,6 +154,11 @@ var FamilyCuration = React.createClass({
             // Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
             if (stateObj.gdm && stateObj.gdm.omimId) {
                 this.setOmimIdState(stateObj.gdm.omimId);
+            }
+
+            // Update the family name
+            if (stateObj.family && Object.keys(stateObj.family).length) {
+                this.setState({familyName: stateObj.family.label});
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
@@ -689,14 +697,15 @@ var FamilyCuration = React.createClass({
                                     <PmidSummary article={annotation.article} displayJournal />
                                 </div>
                             : null}
-                            <h1>
-                                Curate Family Information
+                            <div className="viewer-titles">
+                                <h1>{(family ? 'Edit' : 'Curate') + ' Family Information'}</h1>
+                                <h2>Family: {this.state.familyName ? <span>{this.state.familyName}</span> : <span className="no-entry">No entry</span>}</h2>
                                 {groups && groups.length ?
-                                    (groups.length > 1 ?
-                                        ' for Groups: ' + groups.map(function(group) { return group.label; }).join(', ')
-                                    : ' for Group: ' + groups[0].label)
-                                : ''}
-                            </h1>
+                                    <h2>
+                                        {'Group association: ' + groups.map(function(group) { return group.label; }).join(', ')}
+                                    </h2>
+                                : null}
+                            </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
@@ -758,7 +767,7 @@ var FamilyName = function(displayNote) {
 
     return (
         <div className="row">
-            <Input type="text" ref="familyname" label="Family Name:" value={family.label}
+            <Input type="text" ref="familyname" label="Family Name:" value={family.label} handleChange={this.handleChange}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {displayNote ?
@@ -1152,7 +1161,7 @@ var FamilyViewer = React.createClass({
             <div className="container">
                 <div className="row group-curation-content">
                     <div className="viewer-titles">
-                        <h1>Family: {context.label}</h1>
+                        <h1>View Family: {context.label}</h1>
                         {groups && groups.length ?
                             <h2>
                                 Group association:&nbsp;
