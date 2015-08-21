@@ -38,6 +38,41 @@ var Dashboard = React.createClass({
         return model.indexOf('(') > -1 ? model.substring(0, model.indexOf('(') - 1) : model;
     },
 
+    gdmMappingLoop: function(gdmMapping, gdmSubItem, gdmUuid, geneSymbol, diseaseTerm, modeInheritance, extraInfo) {
+        // loop through an gdmSubItem and map its subitems' UUIDs to the GDM UUID and Disease/Gene/Mode data
+        if (gdmSubItem.length > 0) {
+            for (var i = 0; i < gdmSubItem.length; i++) {
+                var tempExtraInfo = {};
+                // create mapping object
+                gdmMapping[gdmSubItem[i].uuid] = {
+                    uuid: gdmUuid,
+                    displayName: this.cleanGdmGeneDiseaseName(geneSymbol, diseaseTerm),
+                    displayName2: this.cleanGdmModelName(modeInheritance),
+                    extraInfo: extraInfo
+                };
+                if (gdmSubItem[i].familyIncluded) {
+                    // families that are associated with groups show up in the familyIncluded address
+                    if (gdmSubItem[i].familyIncluded.length > 0) {
+                        gdmMapping[gdmSubItem[i].familyIncluded[0].uuid] = {
+                            uuid: gdmUuid,
+                            displayName: this.cleanGdmGeneDiseaseName(geneSymbol, diseaseTerm),
+                            displayName2: this.cleanGdmModelName(modeInheritance),
+                            extraInfo: extraInfo
+                        };
+                        gdmMapping[gdmSubItem[i].familyIncluded[0].uuid].extraInfo['group'] = gdmSubItem[i].label;
+                        gdmMapping[gdmSubItem[i].familyIncluded[0].uuid].extraInfo['groupUuid'] = gdmSubItem[i].uuid;
+                    }
+                }
+                // recursively loop through the annotations' families (not associated with groups) and groups
+                if (gdmSubItem[i].families) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].families,
+                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
+                if (gdmSubItem[i].groups) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].groups,
+                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
+            }
+        }
+        return gdmMapping;
+    },
+
     setUserData: function(props) {
         // sets the display name and curator status
         this.setState({
@@ -49,13 +84,13 @@ var Dashboard = React.createClass({
 
     getData: function(session) {
         // Retrieve all GDMs and other objects related to user via search
-        this.getRestDatas(['/gdm/', '/search/?type=gdm&type=annotation&limit=10&submitted_by.uuid=' +
+        this.getRestDatas(['/gdm/', '/search/?type=gdm&type=annotation&type=group&type=family&limit=10&submitted_by.uuid=' +
             session.user_properties.uuid], [function() {}, function() {}]).then(data => {
             // Search objects successfully retrieved; process results
             // GDM results; finds GDMs created by user, and also creates PMID-GDM mapping table
             // (stopgap measure until article -> GDM mapping ability is incorporated)
             var tempGdmList = [], tempRecentHistory = [];
-            var pmidGdmMapping = {};
+            var gdmMapping = {};
             for (var i = 0; i < data[0]['@graph'].length; i++) {
                 // loop through GDMs
                 var gdm = data[0]['@graph'][i];
@@ -68,19 +103,11 @@ var Dashboard = React.createClass({
                         date_created: gdm.date_created
                     });
                 }
-                if (gdm.annotations.length > 0) {
-                    for (var j = 0; j < gdm.annotations.length; j++) {
-                        // loop through annotatiosn in GDM
-                        pmidGdmMapping[gdm.annotations[j].uuid] = {
-                            uuid: gdm.uuid,
-                            displayName: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
-                            displayName2: this.cleanGdmModelName(gdm.modeInheritance)
-                        };
-                    }
-                }
+                // loop through annotations, if they exist, and map annotation UUIDs to GDMs
+                if (gdm.annotations) gdmMapping = this.gdmMappingLoop(gdmMapping, gdm.annotations, gdm.uuid,
+                    gdm.gene.symbol, gdm.disease.term, gdm.modeInheritance, null);
             }
-            // Recent History panel results; only displays annotation(article) addition and GDM
-            // creation history for the time being.
+            // Recent History panel results
             for (var i = 0; i < data[1]['@graph'].length; i++) {
                 // loop through search results for history panel results
                 var display = false;
@@ -91,11 +118,26 @@ var Dashboard = React.createClass({
                 var tempDateTime = moment(result.date_created).format("YYYY MMM DD, h:mm a");
                 switch (result['@type'][0]) {
                     case 'annotation':
-                        if (result.uuid in pmidGdmMapping) {
-                            tempUrl = "/curation-central/?gdm=" + pmidGdmMapping[result.uuid].uuid + "&pmid=" + result.article.pmid;
-                            tempDisplayText = <span><a href={tempUrl}>PMID:{result.article.pmid}</a> added to <strong>{pmidGdmMapping[result.uuid].displayName}</strong>–<i>{pmidGdmMapping[result.uuid].displayName2}</i></span>;
+                        if (result.uuid in gdmMapping) {
+                            tempUrl = "/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + result.article.pmid;
+                            tempDisplayText = <span><a href={tempUrl}>PMID:{result.article.pmid}</a> added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i></span>;
                             tempTimestamp = "added " + tempDateTime;
                             display = true;
+                        }
+                        break;
+                    case 'family':
+                        if (result.uuid in gdmMapping) {
+                            tempUrl = "/families/" + result.uuid + "/";
+                            tempTimestamp = "added " + tempDateTime;
+                            display = true;
+                            if (gdmMapping[result.uuid].extraInfo.group) {
+                                // for families associated with a group
+                                tempDisplayText = <span><a href={tempUrl}>{result.label}</a> associated with <a href={"/groups/" + gdmMapping[result.uuid].extraInfo.groupUuid + "/"}>{gdmMapping[result.uuid].extraInfo.group}</a> in <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
+                            }
+                            else {
+                                // for families not associated with a group
+                                tempDisplayText = <span><a href={tempUrl}>{result.label}</a> added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
+                            }
                         }
                         break;
                     case 'gdm':
@@ -103,6 +145,14 @@ var Dashboard = React.createClass({
                         tempDisplayText = <span><a href={tempUrl}><strong>{this.cleanGdmGeneDiseaseName(result.gene.symbol, result.disease.term)}</strong>–<i>{this.cleanGdmModelName(result.modeInheritance)}</i></a></span>;
                         tempTimestamp = "created " + tempDateTime;
                         display = true;
+                        break;
+                    case 'group':
+                        if (result.uuid in gdmMapping) {
+                            tempUrl = "/groups/" + result.uuid + "/";
+                            tempDisplayText = <span><a href={tempUrl}>{result.label}</a> added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
+                            tempTimestamp = "added " + tempDateTime;
+                            display = true;
+                        }
                         break;
                     default:
                         tempDisplayText = 'Item';

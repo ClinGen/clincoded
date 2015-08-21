@@ -54,6 +54,7 @@ var FamilyCuration = React.createClass({
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 1, // Number of variants to display
             variantOption: [VAR_NONE], // One variant panel, and nothing entered
+            familyName: '', // Currently entered family name
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
@@ -66,6 +67,8 @@ var FamilyCuration = React.createClass({
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
             // Disable the Genotyping Method 2 if Genotyping Method 1 has no value
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
+        } else if (ref === 'familyname') {
+            this.setState({familyName: this.refs[ref].getValue()});
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -151,6 +154,11 @@ var FamilyCuration = React.createClass({
             // Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
             if (stateObj.gdm && stateObj.gdm.omimId) {
                 this.setOmimIdState(stateObj.gdm.omimId);
+            }
+
+            // Update the family name
+            if (stateObj.family && Object.keys(stateObj.family).length) {
+                this.setState({familyName: stateObj.family.label});
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
@@ -455,25 +463,11 @@ var FamilyCuration = React.createClass({
                     }
                     return Promise.all(familyPromises);
                 }).then(newFamilies => {
+                    var promise;
                     savedFamilies = newFamilies;
-                    if (!this.state.family || Object.keys(this.state.family).length === 0) {
-                        // Get a flattened copy of the annotation and put our new families into it,
-                        // ready for writing.
-                        var annotation = curator.flatten(this.state.annotation);
-                        if (!annotation.families) {
-                            annotation.families = [];
-                        }
 
-                        // Merge existing families in the annotation with the new set of families.
-                        Array.prototype.push.apply(annotation.families, savedFamilies.map(function(family) { return family['@id']; }));
-
-                        // Post the modified annotation to the DB, then go back to Curation Central
-                        return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
-                    } else {
-                        return Promise.resolve(this.state.annotation);
-                    }
-                }).then(data => {
-                    // If we're adding this family to a group, update the group with this family
+                    // If we're adding this family to a group, update the group with this family; otherwise update the annotation
+                    // with the family.
                     if (Object.keys(this.state.group).length) {
                         // Add the newly saved families to the group
                         var group = curator.flatten(this.state.group);
@@ -485,11 +479,21 @@ var FamilyCuration = React.createClass({
                         Array.prototype.push.apply(group.familyIncluded, savedFamilies.map(function(family) { return family['@id']; }));
 
                         // Post the modified annotation to the DB, then go back to Curation Central
-                        return this.putRestData('/groups/' + this.state.group.uuid, group);
-                    }
+                        promise = this.putRestData('/groups/' + this.state.group.uuid, group);
+                    } else {
+                        // Not part of a group, so add the family to the annotation instead.
+                        var annotation = curator.flatten(this.state.annotation);
+                        if (!annotation.families) {
+                            annotation.families = [];
+                        }
 
-                    // Not updating a group; just move on
-                    return Promise.resolve(null);
+                        // Merge existing families in the annotation with the new set of families.
+                        Array.prototype.push.apply(annotation.families, savedFamilies.map(function(family) { return family['@id']; }));
+
+                        // Post the modified annotation to the DB, then go back to Curation Central
+                        promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
+                    }
+                    return promise;
                 }).then(data => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
@@ -693,14 +697,15 @@ var FamilyCuration = React.createClass({
                                     <PmidSummary article={annotation.article} displayJournal />
                                 </div>
                             : null}
-                            <h1>
-                                Curate Family Information
+                            <div className="viewer-titles">
+                                <h1>{(family ? 'Edit' : 'Curate') + ' Family Information'}</h1>
+                                <h2>Family: {this.state.familyName ? <span>{this.state.familyName}</span> : <span className="no-entry">No entry</span>}</h2>
                                 {groups && groups.length ?
-                                    (groups.length > 1 ?
-                                        ' for Groups: ' + groups.map(function(group) { return group.label; }).join(', ')
-                                    : ' for Group: ' + groups[0].label)
-                                : ''}
-                            </h1>
+                                    <h2>
+                                        {'Group association: ' + groups.map(function(group) { return group.label; }).join(', ')}
+                                    </h2>
+                                : null}
+                            </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
@@ -762,7 +767,7 @@ var FamilyName = function(displayNote) {
 
     return (
         <div className="row">
-            <Input type="text" ref="familyname" label="Family Name:" value={family.label}
+            <Input type="text" ref="familyname" label="Family Name:" value={family.label} handleChange={this.handleChange}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {displayNote ?
@@ -1134,7 +1139,7 @@ var FamilyViewer = React.createClass({
             <div className="container">
                 <div className="row group-curation-content">
                     <div className="viewer-titles">
-                        <h1>Family: {context.label}</h1>
+                        <h1>View Family: {context.label}</h1>
                         {groups && groups.length ?
                             <h2>
                                 Group association:&nbsp;

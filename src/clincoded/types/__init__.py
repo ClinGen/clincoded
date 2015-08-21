@@ -144,6 +144,7 @@ class Gdm(Item):
         #'annotations.groups.statistic',
         #'annotations.groups.statistic.variants',
         'annotations.groups.familyIncluded',
+        'annotations.groups.familyIncluded.associatedGroups',
         'annotations.groups.familyIncluded.commonDiagnosis',
         'annotations.groups.familyIncluded.submitted_by',
         'annotations.groups.familyIncluded.otherPMIDs',
