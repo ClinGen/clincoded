@@ -455,25 +455,11 @@ var FamilyCuration = React.createClass({
                     }
                     return Promise.all(familyPromises);
                 }).then(newFamilies => {
+                    var promise;
                     savedFamilies = newFamilies;
-                    if (!this.state.family || Object.keys(this.state.family).length === 0) {
-                        // Get a flattened copy of the annotation and put our new families into it,
-                        // ready for writing.
-                        var annotation = curator.flatten(this.state.annotation);
-                        if (!annotation.families) {
-                            annotation.families = [];
-                        }
 
-                        // Merge existing families in the annotation with the new set of families.
-                        Array.prototype.push.apply(annotation.families, savedFamilies.map(function(family) { return family['@id']; }));
-
-                        // Post the modified annotation to the DB, then go back to Curation Central
-                        return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
-                    } else {
-                        return Promise.resolve(this.state.annotation);
-                    }
-                }).then(data => {
-                    // If we're adding this family to a group, update the group with this family
+                    // If we're adding this family to a group, update the group with this family; otherwise update the annotation
+                    // with the family.
                     if (Object.keys(this.state.group).length) {
                         // Add the newly saved families to the group
                         var group = curator.flatten(this.state.group);
@@ -485,11 +471,21 @@ var FamilyCuration = React.createClass({
                         Array.prototype.push.apply(group.familyIncluded, savedFamilies.map(function(family) { return family['@id']; }));
 
                         // Post the modified annotation to the DB, then go back to Curation Central
-                        return this.putRestData('/groups/' + this.state.group.uuid, group);
-                    }
+                        promise = this.putRestData('/groups/' + this.state.group.uuid, group);
+                    } else {
+                        // Not part of a group, so add the family to the annotation instead.
+                        var annotation = curator.flatten(this.state.annotation);
+                        if (!annotation.families) {
+                            annotation.families = [];
+                        }
 
-                    // Not updating a group; just move on
-                    return Promise.resolve(null);
+                        // Merge existing families in the annotation with the new set of families.
+                        Array.prototype.push.apply(annotation.families, savedFamilies.map(function(family) { return family['@id']; }));
+
+                        // Post the modified annotation to the DB, then go back to Curation Central
+                        promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
+                    }
+                    return promise;
                 }).then(data => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
