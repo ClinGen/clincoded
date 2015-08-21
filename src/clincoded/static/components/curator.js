@@ -150,10 +150,22 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
 
+        var familyRenders = annotation.families && annotation.families.map(family => {
+            return <div key={family.uuid}>{renderFamily(family, this.props.gdm, annotation, curatorMatch)}</div>;
+        });
+        if (annotation.groups && annotation.groups.length) {
+            annotation.groups.forEach(group => {
+                var familyGroupRenders = group.familyIncluded && group.familyIncluded.map(family => {
+                    return <div key={family.uuid}>{renderFamily(family, this.props.gdm, annotation, curatorMatch)}</div>;
+                });
+                familyRenders = familyRenders.concat(familyGroupRenders);
+            });
+        }
+
         return (
             <Panel panelClassName="panel-evidence-groups" title={'Evidence for PMID:' + this.props.annotation.article.pmid}>
                 <Panel title={<CurationPaletteTitles title="Group" url={groupUrl} />} panelClassName="panel-evidence">
-                    {annotation.groups && annotation.groups.map(function(group) {
+                    {annotation.groups && annotation.groups.map(group => {
                         return (
                             <div className="panel-evidence-group" key={group.uuid}>
                                 <h5>{group.label}</h5>
@@ -167,43 +179,46 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                 {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
                             </div>
                         );
-                    }.bind(this))}
+                    })}
                 </Panel>
                 <Panel title={<CurationPaletteTitles title="Family" url={familyUrl} />} panelClassName="panel-evidence">
-                    {annotation.families && annotation.families.map(function(family) {
-                        return (
-                            <div className="panel-evidence-group" key={family.uuid}>
-                                <h5>{family.label}</h5>
-                                <div className="evidence-curation-info">
-                                    {family.submitted_by ?
-                                        <p className="evidence-curation-info">{family.submitted_by.title}</p>
-                                    : null}
-                                    <p>{moment(family.date_created).format('YYYY MMM DD, h:mm a')}</p>
-                                </div>
-                                {family.associatedGroups && family.associatedGroups.length ?
-                                    <div>
-                                        <span>Associations: </span>
-                                        {family.associatedGroups.map(function(group, i) {
-                                            return (
-                                                <span key={i}>
-                                                    {i > 0 ? ', ' : ''}
-                                                    <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
-                                                </span>
-                                            );
-                                        })}
-                                    </div>
-                                :
-                                    <div>No associations</div>
-                                }
-                                <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?editsc=true&gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
-                            </div>
-                        );
-                    }.bind(this))}
+                    {familyRenders}
                 </Panel>
             </Panel>
         );
     }
 });
+
+// Render a family in the curator palette.
+var renderFamily = function(family, gdm, annotation, curatorMatch) {
+    return (
+        <div className="panel-evidence-group" key={family.uuid}>
+            <h5>{family.label}</h5>
+            <div className="evidence-curation-info">
+                {family.submitted_by ?
+                    <p className="evidence-curation-info">{family.submitted_by.title}</p>
+                : null}
+                <p>{moment(family.date_created).format('YYYY MMM DD, h:mm a')}</p>
+            </div>
+            {family.associatedGroups && family.associatedGroups.length ?
+                <div>
+                    <span>Associations: </span>
+                    {family.associatedGroups.map(function(group, i) {
+                        return (
+                            <span key={i}>
+                                {i > 0 ? ', ' : ''}
+                                <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                            </span>
+                        );
+                    })}
+                </div>
+            :
+                <div>No associations</div>
+            }
+            <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?editsc=true&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
+        </div>
+    );
+};
 
 
 // Title for each section of the curation palette. Contains the title and an Add button.
