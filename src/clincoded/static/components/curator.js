@@ -30,16 +30,11 @@ var CurationMixin = module.exports.CurationMixin = {
     // React state variable.
     updateOmimId: function(gdmUuid, newOmimId) {
         this.getRestData(
-            '/gdm/' + gdmUuid + '/?frame=object'
+            '/gdm/' + gdmUuid
         ).then(gdmObj => {
-            // We'll get 422 (Unprocessible entity) if we PUT any of these fields:
-            if (gdmObj.uuid) { delete gdmObj.uuid; }
-            if (gdmObj['@id']) { delete gdmObj['@id']; }
-            if (gdmObj['@type']) { delete gdmObj['@type']; }
-            if (gdmObj.status) { delete gdmObj.status; }
-
-            gdmObj.omimId = newOmimId;
-            return this.putRestData('/gdm/' + gdmUuid, gdmObj);
+            var gdm = flatten(gdmObj);
+            gdm.omimId = newOmimId;
+            return this.putRestData('/gdm/' + gdmUuid, gdm);
         }).then(data => {
             this.setState({currOmimId: newOmimId});
         }).catch(e => {
@@ -505,10 +500,14 @@ module.exports.capture = {
 
 // Take an object and make a flattened version ready for writing.
 // SCHEMA: This might need to change when the schema changes.
-module.exports.flatten = function(obj) {
+var flatten = module.exports.flatten = function(obj) {
     var flat;
 
     switch(obj['@type'][0]) {
+        case 'gdm':
+            flat = flattenGdm(obj);
+            break;
+
         case 'annotation':
             flat = flattenAnnotation(obj);
             break;
@@ -525,25 +524,30 @@ module.exports.flatten = function(obj) {
             break;
     }
 
-    // Delete fields we can't write
-    if (flat) {
-        delete flat['@id'];
-        delete flat['@type'];
-        delete flat.actions;
-        delete flat.audit;
-        delete flat.uuid;
-        delete flat.submitted_by;
-        delete flat.date_created;
-    }
     return flat;
 };
 
 
+// Clone the simple properties of the given object and return them in a new object.
+// An array of the names of the properties to copy in the 'props' parameter.
+// Simple properties include strings, booleans, integers, arrays of those things,
+// and objects comprising simple properties.
 
+function cloneSimpleProps(obj, props) {
+    var dup = {};
+
+    props.forEach(function(prop) {
+        dup[prop] = obj[prop];
+    });
+    return dup;
+}
+
+
+var annotationSimpleProps = ["active"];
 
 function flattenAnnotation(annotation) {
     // First copy everything before fixing the special properties
-    var flat = _.clone(annotation);
+    var flat = cloneSimpleProps(annotation, annotationSimpleProps);
 
     flat.article = annotation.article['@id'];
 
@@ -552,8 +556,6 @@ function flattenAnnotation(annotation) {
         flat.groups = annotation.groups.map(function(group) {
             return group['@id'];
         });
-    } else {
-        delete flat.groups;
     }
 
     // Flatten families
@@ -561,8 +563,6 @@ function flattenAnnotation(annotation) {
         flat.families = annotation.families.map(function(family) {
             return family['@id'];
         });
-    } else {
-        delete flat.families;
     }
 
     // Flatten individuals
@@ -570,8 +570,6 @@ function flattenAnnotation(annotation) {
         flat.individuals = annotation.individuals.map(function(individual) {
             return individual['@id'];
         });
-    } else {
-        delete flat.individuals;
     }
 
     // Flatten experimentalData
@@ -579,93 +577,91 @@ function flattenAnnotation(annotation) {
         flat.experimentalData = annotation.experimentalData.map(function(data) {
             return data['@id'];
         });
-    } else {
-        delete flat.experimentalData;
     }
 
     return flat;
 }
 
+
+var groupSimpleProps = ["label", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "numberOfMale", "numberOfFemale", "countryOfOrigin",
+    "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "totalNumberIndividuals", "numberOfIndividualsWithFamilyInformation",
+    "numberOfIndividualsWithoutFamilyInformation", "numberOfIndividualsWithVariantInCuratedGene", "numberOfIndividualsWithoutVariantInCuratedGene",
+    "numberOfIndividualsWithVariantInOtherGene", "method", "additionalInformation", "date_created"
+];
+
 function flattenGroup(group) {
-    // First copy everything before fixing the special properties
-    var flat = _.clone(group);
+    // First copy simple properties before fixing the special properties
+    var flat = cloneSimpleProps(group, groupSimpleProps);
 
-    // Flatten diseases
-    if (group.commonDiagnosis && group.commonDiagnosis.length) {
-        flat.commonDiagnosis = group.commonDiagnosis.map(function(disease) {
-            return disease['@id'];
-        });
-    } else {
-        delete flat.commonDiagnosis;
-    }
+    flat.commonDiagnosis = group.commonDiagnosis.map(function(disease) {
+        return disease['@id'];
+    });
 
-    // Flatten otherGenes
     if (group.otherGenes && group.otherGenes.length) {
         flat.otherGenes = group.otherGenes.map(function(gene) {
             return gene['@id'];
         });
-    } else {
-        delete flat.otherGenes;
     }
 
-    // Flatten other PMIDs
     if (group.otherPMIDs && group.otherPMIDs.length) {
         flat.otherPMIDs = group.otherPMIDs.map(function(article) {
             return article['@id'];
         });
-    } else {
-        delete flat.otherPMIDs;
     }
 
-    // Flatten included families
+    if (group.statistic) {
+        flat.statistic = group.statistic['@id'];
+    }
+
     if (group.familyIncluded && group.familyIncluded.length) {
         flat.familyIncluded = group.familyIncluded.map(function(family) {
             return family['@id'];
         });
-    } else {
-        delete flat.familyIncluded;
     }
 
-    // Flatten included individuals
     if (group.individualIncluded && group.individualIncluded.length) {
         flat.individualIncluded = group.individualIncluded.map(function(individual) {
             return individual['@id'];
         });
-    } else {
-        delete flat.individualIncluded;
     }
 
-    // Flatten other linked objects
-    if (group.statistic) {
-        flat.statistic = group.statistic['@id'];
-    }
-    if (group.statistic) {
+    if (group.control) {
         flat.control = group.control['@id'];
     }
 
     return flat;
 }
 
+
+var familySimpleProps = ["label", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "numberOfMale", "numberOfFemale", "countryOfOrigin",
+    "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "method", "additionalInformation", "date_created"
+];
+var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGenerationInPedigree", "consanguineousFamily", "numberOfCases", "deNovoType",
+    "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
+    "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation"];
+
 function flattenFamily(family) {
     // First copy everything before fixing the special properties
-    var flat = _.clone(family);
+    var flat = cloneSimpleProps(family, familySimpleProps);
 
     // Flatten diseases
-    if (family.commonDiagnosis && family.commonDiagnosis.length) {
-        flat.commonDiagnosis = family.commonDiagnosis.map(function(disease) {
-            return disease['@id'];
-        });
-    } else {
-        delete flat.commonDiagnosis;
-    }
+    flat.commonDiagnosis = family.commonDiagnosis.map(function(disease) {
+        return disease['@id'];
+    });
 
     // Flatten segregation variants
-    if (family.segregation && family.segregation.variants && family.segregation.variants.length) {
-        flat.segregation.variants = family.segregation.variants.map(function(variant) {
-            return variant['@id'];
-        });
-    } else {
-        delete flat.segregation.variants;
+    if (family.segregation) {
+        flat.segregation = cloneSimpleProps(family.segregation, segregationSimpleProps);
+        if (family.segregation.variants && family.segregation.variants.length) {
+            flat.segregation.variants = family.segregation.variants.map(function(variant) {
+                return variant['@id'];
+            });
+        }
+        if (family.segregation.assessments && family.segregation.assessments.length) {
+            flat.segregation.assessments = family.segregation.assessments.map(function(assessment) {
+                return assessment['@id'];
+            });
+        }
     }
 
     // Flatten other PMIDs
@@ -673,8 +669,6 @@ function flattenFamily(family) {
         flat.otherPMIDs = family.otherPMIDs.map(function(article) {
             return article['@id'];
         });
-    } else {
-        delete flat.otherPMIDs;
     }
 
     // Flatten included individuals
@@ -682,11 +676,61 @@ function flattenFamily(family) {
         flat.individualIncluded = family.individualIncluded.map(function(individual) {
             return individual['@id'];
         });
-    } else {
-        delete flat.individualIncluded;
     }
 
-    delete flat.associatedGroups;
+    return flat;
+}
+
+
+var gdmSimpleProps = [
+    "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active"
+];
+var variantPathogenicSimpleProps = [
+    "consistentWithDiseaseMechanism", "withinFunctionalDomain", "frequencySupportPathogenicity", "previouslyReported", "denovoType",
+    "intransWithAnotherVariant", "supportingSegregation", "supportingStatistic", "SupportingFunctional", "comment"
+];
+
+function flattenGdm(gdm) {
+    // First copy all the simple properties
+    var flat = cloneSimpleProps(gdm, gdmSimpleProps);
+
+    // Flatten genes
+    if (gdm.gene) {
+        flat.gene = gdm.gene['@id'];
+    }
+
+    // Flatten diseases
+    if (gdm.disease) {
+        flat.disease = gdm.disease['@id'];
+    }
+
+    // Flatten annotations
+    if (gdm.annotations && gdm.annotations.length) {
+        flat.annotations = gdm.annotations.map(function(annotation) {
+            return annotation['@id'];
+        });
+    }
+
+    // Flatten variant pathogenics
+    if (gdm.variantPathogenic && gdm.variantPathogenic.length) {
+        flat.variantPathogenic = gdm.variantPathogenic.map(function(vp) {
+            var flat_vp = cloneSimpleProps(vp, variantPathogenicSimpleProps);
+            if (vp.variant) {
+                flat_vp.variant = vp.variant['@id'];
+            }
+            if (vp.assessments && vp.assessments.length) {
+                flat_vp.assessments = vp.assessments.map(function(assessment) {
+                    return assessment['@id'];
+                });
+            }
+            return flat_vp;
+        });
+    }
+
+    // Flatten provisional classifications
+    if (gdm.provisionalClassifications && gdm.provisionalClassifications.length) {
+        flat.provisionalClassifications = gdm.provisionalClassifications;
+    }
 
     return flat;
 }
