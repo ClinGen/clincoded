@@ -543,7 +543,7 @@ function cloneSimpleProps(obj, props) {
 }
 
 
-var annotationSimpleProps = ["active"];
+var annotationSimpleProps = ["active", "date_created"];
 
 function flattenAnnotation(annotation) {
     // First copy everything before fixing the special properties
