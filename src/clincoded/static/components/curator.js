@@ -161,6 +161,9 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                 familyRenders = familyRenders.concat(familyGroupRenders);
             });
         }
+        var individualRenders = annotation.individuals && annotation.individuals.map(individual => {
+            return <div key={individual.uuid}>{renderIndividual(individual, this.props.gdm, annotation, curatorMatch)}</div>;
+        });
 
         return (
             <Panel panelClassName="panel-evidence-groups" title={'Evidence for PMID:' + this.props.annotation.article.pmid}>
@@ -177,6 +180,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                 </div>
                                 <a href={'/group/' + group.uuid} target="_blank" title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?editsc=true&gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
                                 {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
+                                {curatorMatch ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
                             </div>
                         );
                     })}
@@ -232,6 +236,38 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                 <div>No associations</div>
             }
             <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?editsc=true&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
+        </div>
+    );
+};
+
+
+// Render a family in the curator palette.
+var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
+    return (
+        <div className="panel-evidence-group" key={individual.uuid}>
+            <h5>{individual.label}</h5>
+            <div className="evidence-curation-info">
+                {individual.submitted_by ?
+                    <p className="evidence-curation-info">{individual.submitted_by.title}</p>
+                : null}
+                <p>{moment(individual.date_created).format('YYYY MMM DD, h:mm a')}</p>
+            </div>
+            {individual.associatedGroups && individual.associatedGroups.length ?
+                <div>
+                    <span>Associations: </span>
+                    {individual.associatedGroups.map(function(group, i) {
+                        return (
+                            <span key={i}>
+                                {i > 0 ? ', ' : ''}
+                                <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                            </span>
+                        );
+                    })}
+                </div>
+            :
+                <div>No associations</div>
+            }
+            <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>{curatorMatch ? <span> | <a href={'/individual-curation/?editsc=true&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
         </div>
     );
 };
