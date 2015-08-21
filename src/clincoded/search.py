@@ -68,7 +68,7 @@ def get_sort_order():
     specifies sort order for elasticsearch results
     """
     return {
-        'embedded.dateTime': {
+        'embedded.date_created': {
             'order': 'desc',
             'ignore_unmapped': True,
         }
