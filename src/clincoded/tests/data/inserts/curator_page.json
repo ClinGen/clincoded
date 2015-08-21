@@ -36,6 +36,12 @@
         "uuid": "dfb36444-1d78-46b5-8cdf-dbd2d4cca3d8"
     },
     {
+        "name": "individual-curation",
+        "title": "Individual Curation",
+        "status": "released",
+        "uuid": "8c1fc394-02fc-49bb-94bd-559988f5b69d"
+    },
+    {
         "name": "dashboard",
         "title": "Dashboard",
         "status": "released",

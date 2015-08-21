@@ -801,7 +801,7 @@ var FamilyCount = function() {
 };
 
 
-// Common diseases group curation panel. Call with .call(this) to run in the same context
+// Common diseases family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilyCommonDiseases = function() {
     var family = this.state.family;
@@ -827,29 +827,7 @@ var FamilyCommonDiseases = function() {
 
     return (
         <div className="row">
-            {associatedGroups && associatedGroups.length ?
-                <div>
-                    {associatedGroups.map(function(associatedGroup) {
-                        return (
-                            <div key={associatedGroup.uuid} className="form-group">
-                                <div className="col-sm-5">
-                                    <strong className="pull-right">Orphanet Diseases Associated with {associatedGroup.label}</strong>
-                                </div>
-                                <div className="col-sm-7">
-                                    {associatedGroup.commonDiagnosis.map(function(disease, i) {
-                                        return (
-                                            <span key={disease.orphaNumber}>
-                                                {i > 0 ? ', ' : ''}
-                                                {'ORPHA' + disease.orphaNumber}
-                                            </span>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            : null}
+            {curator.renderOrphanets(associatedGroups, 'Group')}
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />

@@ -428,6 +428,32 @@ class Individual(Item):
         'otherPMIDs',
         'otherPMIDs.submitted_by',
     ]
+    rev = {
+        'associatedGroups': ('group', 'individualIncluded'),
+        'associatedFamilies': ('family', 'individualIncluded'),
+    }
+
+    @calculated_property(schema={
+        "title": "Associated groups",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "group.individualIncluded",
+        },
+    })
+    def associatedGroups(self, request, associatedGroups):
+        return paths_filtered_by_status(request, associatedGroups)
+
+    @calculated_property(schema={
+        "title": "Associated families",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "family.individualIncluded",
+        },
+    })
+    def associatedFamilies(self, request, associatedFamilies):
+        return paths_filtered_by_status(request, associatedFamilies)
 
 @collection(
     name='experimental',

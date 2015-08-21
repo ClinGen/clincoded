@@ -149,11 +149,12 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var curatorMatch = annotation && userMatch(annotation.submitted_by, session);
         var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
 
         return (
             <Panel panelClassName="panel-evidence-groups" title={'Evidence for PMID:' + this.props.annotation.article.pmid}>
                 <Panel title={<CurationPaletteTitles title="Group" url={groupUrl} />} panelClassName="panel-evidence">
-                    {annotation.groups && annotation.groups.map(function(group) {
+                    {annotation.groups && annotation.groups.map(group => {
                         return (
                             <div className="panel-evidence-group" key={group.uuid}>
                                 <h5>{group.label}</h5>
@@ -167,10 +168,10 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                 {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
                             </div>
                         );
-                    }.bind(this))}
+                    })}
                 </Panel>
                 <Panel title={<CurationPaletteTitles title="Family" url={familyUrl} />} panelClassName="panel-evidence">
-                    {annotation.families && annotation.families.map(function(family) {
+                    {annotation.families && annotation.families.map(family => {
                         return (
                             <div className="panel-evidence-group" key={family.uuid}>
                                 <h5>{family.label}</h5>
@@ -198,7 +199,23 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                 <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?editsc=true&gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
                             </div>
                         );
-                    }.bind(this))}
+                    })}
+                </Panel>
+                <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
+                    {annotation.individuals && annotation.individuals.map(individual => {
+                        return (
+                            <div className="panel-evidence-group" key={individual.uuid}>
+                                <h5>{individual.label}</h5>
+                                <div className="evidence-curation-info">
+                                    {individual.submitted_by ?
+                                        <p className="evidence-curation-info">{individual.submitted_by.title}</p>
+                                    : null}
+                                    <p>{moment(individual.date_created).format('YYYY MMM DD, h:mm a')}</p>
+                                </div>
+                                <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>{curatorMatch ? <span> | <a href={'/individual-curation/?editsc=true&gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
+                            </div>
+                        );
+                    })}
                 </Panel>
             </Panel>
         );
@@ -734,3 +751,35 @@ function flattenGdm(gdm) {
 
     return flat;
 }
+
+// Given an array of group or families in 'objList', render a list of Orphanet IDs for all diseases in those
+// groups or families.
+var renderOrphanets = module.exports.renderOrphanets = function(objList, title) {
+    return (
+        <div>
+            {objList && objList.length ?
+                <div>
+                    {objList.map(function(obj) {
+                        return (
+                            <div key={obj.uuid} className="form-group">
+                                <div className="col-sm-5">
+                                    <strong className="pull-right">Orphanet Diseases Associated with {title}:</strong>
+                                </div>
+                                <div className="col-sm-7">
+                                    {obj.commonDiagnosis.map(function(disease, i) {
+                                        return (
+                                            <span key={disease.orphaNumber}>
+                                                {i > 0 ? ', ' : ''}
+                                                {'ORPHA' + disease.orphaNumber}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            : null}
+        </div>
+    );
+};

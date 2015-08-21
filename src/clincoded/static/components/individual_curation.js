@@ -162,10 +162,10 @@ var IndividualCuration = React.createClass({
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
             // Also see if we need to disable the Add Variant button
-            if (stateObj.family && Object.keys(stateObj.family).length) {
-                stateObj.genotyping2Disabled = !(stateObj.family.method && stateObj.family.method.genotypingMethods && stateObj.family.method.genotypingMethods.length);
+            if (stateObj.individual && Object.keys(stateObj.individual).length) {
+                stateObj.genotyping2Disabled = !(stateObj.individual.method && stateObj.individual.method.genotypingMethods && stateObj.individual.method.genotypingMethods.length);
 
-                var segregation = stateObj.family.segregation;
+                var segregation = stateObj.individual.segregation;
                 if (segregation && segregation.variants && segregation.variants.length) {
                     stateObj.variantCount = segregation.variants.length;
                     this.setState({addVariantDisabled: false});
@@ -198,7 +198,7 @@ var IndividualCuration = React.createClass({
             writerIndividual.label = individualLabel;
         }
 
-        // If a method and/or segregation object was created (at least one method/segregation field set), assign it to the family.
+        // If a method and/or segregation object was created (at least one method/segregation field set), assign it to the individual.
         // If writing multiple family objects, reuse the one we made, but assign new methods and segregations because each family
         // needs unique objects here.
         var newMethod = methods.create.call(this);
@@ -206,7 +206,7 @@ var IndividualCuration = React.createClass({
             writerIndividual.method = newMethod;
         }
 
-        // Either update or create the family object in the DB
+        // Either update or create the individual object in the DB
         if (this.state.individual && Object.keys(this.state.individual).length) {
             // We're editing a family. PUT the new family object to the DB to update the existing one.
             return this.putRestData('/individuals/' + this.state.family.uuid, writerIndividual).then(data => {
@@ -458,7 +458,7 @@ var IndividualCuration = React.createClass({
                         if (i > 0) {
                             individualLabel = this.getFormValue('extraindividualname' + (i - 1));
                         }
-                        individualPromises.push(this.writeFamilyObj(newIndividual, individualLabel));
+                        individualPromises.push(this.writeIndividualObj(newIndividual, individualLabel));
                     }
                     return Promise.all(individualPromises);
                 }).then(newIndividuals => {
@@ -467,8 +467,8 @@ var IndividualCuration = React.createClass({
                         // Get a flattened copy of the annotation and put our new individuals into it,
                         // ready for writing.
                         var annotation = curator.flatten(this.state.annotation);
-                        if (!annotation.families) {
-                            annotation.families = [];
+                        if (!annotation.individuals) {
+                            annotation.individuals = [];
                         }
 
                         // Merge existing individuals in the annotation with the new set of individuals.
@@ -527,149 +527,43 @@ var IndividualCuration = React.createClass({
         }
     },
 
-    // Create segregation object based on the form values
-    createSegregation: function(newFamily, variants) {
-        var newSegregation = {};
-        var value1;
-
-        value1 = this.getFormValue('pedigreedesc');
-        if (value1) {
-            newSegregation.pedigreeDescription = value1;
-        }
-        value1 = this.getFormValue('pedigreesize');
-        if (value1) {
-            newSegregation.pedigreeSize = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('nogenerationsinpedigree');
-        if (value1) {
-            newSegregation.numberOfGenerationInPedigree = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('consanguineous');
-        if (value1 !== 'none') {
-            newSegregation.consanguineousFamily = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('nocases');
-        if (value1) {
-            newSegregation.numberOfCases = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('denovo');
-        if (value1 !== 'none') {
-            newSegregation.deNovoType = value1;
-        }
-        value1 = this.getFormValue('unaffectedcarriers');
-        if (value1 !== 'none') {
-            newSegregation.numberOfParentsUnaffectedCarriers = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('noaffected');
-        if (value1) {
-            newSegregation.numberOfAffectedAlleles = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('noaffected1');
-        if (value1) {
-            newSegregation.numberOfAffectedWithOneVariant = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('noaffected2');
-        if (value1) {
-            newSegregation.numberOfAffectedWithTwoVariants = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('nounaffectedcarriers');
-        if (value1) {
-            newSegregation.numberOfUnaffectedCarriers = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('nounaffectedindividuals');
-        if (value1) {
-            newSegregation.numberOfUnaffectedIndividuals = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('bothvariants');
-        if (value1 !== 'none') {
-            newSegregation.probandAssociatedWithBoth = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('addedsegregationinfo');
-        if (value1) {
-            newSegregation.additionalInformation = value1;
-        }
-        if (variants && variants.length) {
-            newSegregation.variants = variants;
-        }
-
-        if (Object.keys(newSegregation).length) {
-            newFamily.segregation = newSegregation;
-        }
-    },
-
     // Create a family object to be written to the database. Most values come from the values
     // in the form. The created object is returned from the function.
-    createFamily: function(familyDiseases, familyArticles, familyVariants) {
+    createIndividual: function(individualDiseases, individualArticles, individualVariants) {
         // Make a new family. If we're editing the form, first copy the old family
         // to make sure we have everything not from the form.
-        var newFamily = Object.keys(this.state.family).length ? curator.flatten(this.state.family) : {};
-
-        // Method and/or segregation successfully created if needed (null if not); passed in 'methSeg' object. Now make the new family.
-        newFamily.label = this.getFormValue('familyname');
+        var newIndividual = Object.keys(this.state.individual).length ? curator.flatten(this.state.individual) : {};
+        newIndividual.label = this.getFormValue('individualname');
 
         // Get an array of all given disease IDs
-        if (familyDiseases) {
-            newFamily.commonDiagnosis = familyDiseases['@graph'].map(function(disease) { return disease['@id']; });
+        if (individualDiseases) {
+            newIndividual.diagnosis = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
         }
 
         // Add array of other PMIDs
-        if (familyArticles) {
-            newFamily.otherPMIDs = familyArticles['@graph'].map(function(article) { return article['@id']; });
+        if (individualArticles) {
+            newIndividual.otherPMIDs = individualArticles['@graph'].map(function(article) { return article['@id']; });
         }
 
         // Fill in the group fields from the Common Diseases & Phenotypes panel
         var hpoTerms = this.getFormValue('hpoid');
         if (hpoTerms) {
-            newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
+            newIndividual.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
         }
         var phenoterms = this.getFormValue('phenoterms');
         if (phenoterms) {
-            newFamily.termsInDiagnosis = phenoterms;
+            newIndividual.termsInDiagnosis = phenoterms;
         }
         hpoTerms = this.getFormValue('nothpoid');
         if (hpoTerms) {
-            newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
+            newIndividual.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
         }
         phenoterms = this.getFormValue('notphenoterms');
         if (phenoterms) {
-            newFamily.termsInElimination = phenoterms;
+            newIndividual.termsInElimination = phenoterms;
         }
 
-        // Fill in the group fields from the Family Demographics panel
-        var value = this.getFormValue('malecount');
-        if (value) { newFamily.numberOfMale = parseInt(value, 10); }
-
-        value = this.getFormValue('femalecount');
-        if (value) { newFamily.numberOfFemale = parseInt(value, 10); }
-
-        value = this.getFormValue('country');
-        if (value !== 'none') { newFamily.countryOfOrigin = value; }
-
-        value = this.getFormValue('ethnicity');
-        if (value !== 'none') { newFamily.ethnicity = value; }
-
-        value = this.getFormValue('race');
-        if (value !== 'none') { newFamily.race = value; }
-
-        value = this.getFormValue('agerangetype');
-        if (value !== 'none') { newFamily.ageRangeType = value + ''; }
-
-        value = this.getFormValue('agefrom');
-        if (value) { newFamily.ageRangeFrom = parseInt(value, 10); }
-
-        value = this.getFormValue('ageto');
-        if (value) { newFamily.ageRangeTo = parseInt(value, 10); }
-
-        value = this.getFormValue('ageunit');
-        if (value !== 'none') { newFamily.ageRangeUnit = value; }
-
-        value = this.getFormValue('additionalinfofamily');
-        if (value) { newFamily.additionalInformation = value; }
-
-        // Fill in the segregation fields to the family.
-        this.createSegregation(newFamily, familyVariants);
-
-        return newFamily;
+        return newIndividual;
     },
 
     // Add another variant section to the FamilyVariant panel
@@ -686,10 +580,10 @@ var IndividualCuration = React.createClass({
     },
 
     render: function() {
-        var annotation = this.state.annotation;
-        var gdm = this.state.gdm;
-        var family = this.state.family;
-        var method = (family.method && Object.keys(family.method).length) ? family.method : {};
+        var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
+        var individual = Object.keys(this.state.individual).length ? this.state.individual : null;
+        var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
+        var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
@@ -697,21 +591,19 @@ var IndividualCuration = React.createClass({
         // family object read in.
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
-        if (!this.queryValues.familyUuid) {
-            // In case we get both family and group (shouldn't), ignore the group if we have a family.
-            this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
-        }
+        this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
+        this.queryValues.individualUuid = queryKeyValue('individual', this.props.href);
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
 
         return (
             <div>
-                {(!this.queryValues.familyUuid || Object.keys(this.state.family).length) ?
+                {(!this.queryValues.individualUuid || individual) ?
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
-                            {Object.keys(this.state.annotation).length && this.state.annotation.article ?
+                            {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
-                                    <PmidSummary article={this.state.annotation.article} displayJournal />
+                                    <PmidSummary article={annotation.article} displayJournal />
                                 </div>
                             : null}
                             <h1>Curate Individual Information</h1>
@@ -737,21 +629,11 @@ var IndividualCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Individual — Segregation" open>
-                                                {IndividualSegregation.call(this)}
-                                            </Panel>
-                                        </PanelGroup>
-                                        <PanelGroup accordion>
-                                            <Panel title="Individual — Variant(s) associated with Proband" open>
-                                                {IndividualVariant.call(this)}
-                                            </Panel>
-                                        </PanelGroup>
-                                        <PanelGroup accordion>
                                             <Panel title="Individual Additional Information" open>
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        {!this.queryValues.familyUuid ?
+                                        {!this.queryValues.individualUuid ?
                                             <PanelGroup accordion>
                                                 <Panel title="Individual – Number with identical information" open>
                                                     {IndividualCount.call(this)}
@@ -792,10 +674,10 @@ var IndividualName = function(displayNote) {
 };
 
 
-// If the Family is being edited (we know this because there was a family
-// UUID in the query string), then don’t present the ability to specify multiple families.
+// If the individual is being edited (we know this because there was an individual
+// UUID in the query string), then don’t present the ability to specify multiple individuals.
 var IndividualCount = function() {
-    var family = this.state.family;
+    var individual = this.state.individual;
 
     return (
         <div>
@@ -820,20 +702,46 @@ var IndividualCount = function() {
 };
 
 
-// Common diseases group curation panel. Call with .call(this) to run in the same context
+// Common diseases individual curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var IndividualCommonDiseases = function() {
     var individual = this.state.individual;
-    var orphanetidVal, hpoidVal, nothpoidVal;
+    var family = this.state.family;
+    var group = this.state.group;
+    var orphanetidVal, hpoidVal, nothpoidVal, associatedGroups, associatedFamilies;
 
+    // If we're editing an individual, make editable values of the complex properties
     if (individual && Object.keys(individual).length) {
-        orphanetidVal = individual.commonDiagnosis ? individual.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
+        orphanetidVal = individual.diagnosis ? individual.diagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
         hpoidVal = individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis.join() : null;
         nothpoidVal = individual.hpoIdInElimination ? individual.hpoIdInElimination.join() : null;
     }
 
+    // Make a list of diseases from the group, either from the given group,
+    // or the individual if we're editing one that has associated groups.
+    if (Object.keys(group).length) {
+        // We have a group, so get the disease array from it.
+        associatedGroups = [group];
+    } else if (individual && individual.associatedGroups && individual.associatedGroups.length) {
+        // We have an individual with associated groups. Combine the diseases from all groups.
+        associatedGroups = individual.associatedGroups;
+    }
+
+    // Make a list of diseases from the family, either from the given family,
+    // or the individual if we're editing one that has associated families.
+    if (Object.keys(family).length) {
+        // We have a group, so get the disease array from it.
+        associatedFamilies = [family];
+    } else if (individual && individual.associatedFamilies && individual.associatedFamilies.length) {
+        // We have an individual with associated groups. Combine the diseases from all groups.
+        associatedFamilies = individual.associatedFamilies;
+    }
+
     return (
         <div className="row">
+            {curator.renderOrphanets(associatedGroups, 'Group')}
+            {curator.renderOrphanets(associatedFamilies, 'Family')}
+
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
@@ -851,7 +759,6 @@ var IndividualCommonDiseases = function() {
         </div>
     );
 };
-
 
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
@@ -892,7 +799,7 @@ var LabelPhenoTerms = React.createClass({
     }
 });
 
-// Demographics family curation panel. Call with .call(this) to run in the same context
+// Demographics individual curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var IndividualDemographics = function() {
     var individual = this.state.individual;
@@ -942,12 +849,12 @@ var IndividualDemographics = function() {
             <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
             <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
                 <Input type="text" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
-                    error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={family.ageRangeFrom} />
+                    error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={individual.ageRangeFrom} />
                 <span className="group-age-inter">to</span>
                 <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
-                    error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={family.ageRangeTo} />
+                    error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={individual.ageRangeTo} />
             </Input>
-            <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={family.ageRangeUnit}
+            <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={individual.ageRangeUnit}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -961,80 +868,10 @@ var IndividualDemographics = function() {
 };
 
 
-// Segregation family curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var FamilySegregation = function() {
-    var family = this.state.family;
-    var segregation = (family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
-
-    return (
-        <div className="row">
-            <Input type="textarea" ref="pedigreedesc" label="Pedigree description:" rows="5" value={segregation.pedigreeDescription}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="pedigreesize" label="Pedigree size:" format="number" value={segregation.pedigreeSize} minVal={2}
-                error={this.getFormError('pedigreesize')} clearError={this.clrFormErrors.bind(null, 'pedigreesize')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="nogenerationsinpedigree" label="# generations in pedigree:" format="number" value={segregation.numberOfGenerationInPedigree}
-                error={this.getFormError('nogenerationsinpedigree')} clearError={this.clrFormErrors.bind(null, 'nogenerationsinpedigree')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="consanguineous" label="Consanguineous family?:" defaultValue="none" value={curator.booleanToDropdown(segregation.consanguineousFamily)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="text" ref="nocases" label="# cases (phenotype positive):" format="number" value={segregation.numberOfCases} minVal={1}
-                error={this.getFormError('nocases')} clearError={this.clrFormErrors.bind(null, 'nocases')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="denovo" label="de novo type:" defaultValue="none" value={segregation.deNovoType}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Inferred</option>
-                <option>Confirmed</option>
-            </Input>
-            <Input type="select" ref="unaffectedcarriers" label="Are parents unaffected carriers?" defaultValue="none" value={segregation.numberOfParentsUnaffectedCarriers}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>0</option>
-                <option>1</option>
-                <option>2</option>
-            </Input>
-            <Input type="text" ref="noaffected" label="# affected individuals:" format="number" value={segregation.numberOfAffectedAlleles}
-                error={this.getFormError('noaffected')} clearError={this.clrFormErrors.bind(null, 'noaffected')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="noaffected1" label="# affected with 1 variant:" format="number" value={segregation.numberOfAffectedWithOneVariant}
-                error={this.getFormError('noaffected1')} clearError={this.clrFormErrors.bind(null, 'noaffected1')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="noaffected2" label="# affected with 2 variants or homozygous for 1:" format="number" value={segregation.numberOfAffectedWithTwoVariants}
-                error={this.getFormError('noaffected2')} clearError={this.clrFormErrors.bind(null, 'noaffected2')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="nounaffectedcarriers" label="# unaffected carriers:" format="number" value={segregation.numberOfUnaffectedCarriers}
-                error={this.getFormError('nounaffectedcarriers')} clearError={this.clrFormErrors.bind(null, 'nounaffectedcarriers')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="nounaffectedindividuals" label="# unaffected individuals:" format="number" value={segregation.numberOfUnaffectedIndividuals}
-                error={this.getFormError('nounaffectedindividuals')} clearError={this.clrFormErrors.bind(null, 'nounaffectedindividuals')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="bothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={curator.booleanToDropdown(segregation.probandAssociatedWithBoth)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
-            <Input type="textarea" ref="addedsegregationinfo" label="Additional Segregation Information:" rows="5" value={segregation.additionalInformation}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-        </div>
-    );
-};
-
-
-// Display the Family variant panel. The number of copies depends on the variantCount state variable.
-var FamilyVariant = function() {
-    var family = Object.keys(this.state.family).length ? this.state.family : null;
-    var segregation = family && family.segregation ? family.segregation : null;
+// Display the Individual variant panel. The number of copies depends on the variantCount state variable.
+var IndividualVariant = function() {
+    var individual = Object.keys(this.state.individual).length ? this.state.individual : null;
+    var segregation = individual && individual.segregation ? individual.segregation : null;
     var variants = segregation && segregation.variants;
 
     return (
@@ -1099,16 +936,16 @@ var LabelOtherVariant = React.createClass({
 
 // Additional Information family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var FamilyAdditional = function() {
+var IndividualAdditional = function() {
     var otherpmidsVal;
-    var family = this.state.family;
-    if (Object.keys(family).length) {
-        otherpmidsVal = family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
+    var individual = this.state.individual;
+    if (Object.keys(individual).length) {
+        otherpmidsVal = individual.otherPMIDs ? individual.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
     }
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfofamily" label="Additional Information about Family:" rows="5" value={family.additionalInformation}
+            <Input type="textarea" ref="additionalinfoindividual" label="Additional Information about Individual:" rows="5" value={individual.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1124,7 +961,7 @@ var FamilyAdditional = function() {
 };
 
 
-var FamilyViewer = React.createClass({
+var IndividualViewer = React.createClass({
     render: function() {
         var context = this.props.context;
         var method = context.method;
@@ -1140,7 +977,7 @@ var FamilyViewer = React.createClass({
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
                                 <dd>
-                                    {context.commonDiagnosis.map(function(disease, i) {
+                                    {context.diagnosis.map(function(disease, i) {
                                         return (
                                             <span key={disease.orphaNumber}>
                                                 {i > 0 ? ', ' : ''}
@@ -1266,115 +1103,6 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Family — Segregation" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Pedigree description</dt>
-                                <dd>{segregation && segregation.pedigreeDescription}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Pedigree size</dt>
-                                <dd>{segregation && segregation.pedigreeSize}</dd>
-                            </div>
-
-                            <div>
-                                <dt># generations in pedigree</dt>
-                                <dd>{segregation && segregation.numberOfGenerationInPedigree}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Consanguineous family</dt>
-                                <dd>{segregation && segregation.consanguineousFamily === true ? 'Yes' : (segregation.consanguineousFamily === false ? 'No' : '')}</dd>
-                            </div>
-
-                            <div>
-                                <dt># cases (phenotype positive)</dt>
-                                <dd>{segregation && segregation.numberOfCases}</dd>
-                            </div>
-
-                            <div>
-                                <dt>de novo type</dt>
-                                <dd>{segregation && segregation.deNovoType}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Are parents unaffected carriers</dt>
-                                <dd>{segregation && segregation.numberOfParentsUnaffectedCarriers}</dd>
-                            </div>
-
-                            <div>
-                                <dt># affected individuals</dt>
-                                <dd>{segregation && segregation.numberOfAffectedAlleles}</dd>
-                            </div>
-
-                            <div>
-                                <dt># affected with 1 variant</dt>
-                                <dd>{segregation && segregation.numberOfAffectedWithOneVariant}</dd>
-                            </div>
-
-                            <div>
-                                <dt># affected with 2 variants or homozygous for 1</dt>
-                                <dd>{segregation && segregation.numberOfAffectedWithTwoVariants}</dd>
-                            </div>
-
-                            <div>
-                                <dt># unaffected carriers</dt>
-                                <dd>{segregation && segregation.numberOfUnaffectedCarriers}</dd>
-                            </div>
-
-                            <div>
-                                <dt># unaffected individuals</dt>
-                                <dd>{segregation && segregation.numberOfUnaffectedIndividuals}</dd>
-                            </div>
-
-                            <div>
-                                <dt>If more than 1 variant, is proband associated with both</dt>
-                                <dd>{segregation && segregation.probandAssociatedWithBoth === true ? 'Yes' : (segregation.probandAssociatedWithBoth === false ? 'No' : '')}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Additional Segregation information</dt>
-                                <dd>{segregation && segregation.additionalInformation}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Family - Variant(s) associated with Proband" panelClassName="panel-data">
-                        {variants.map(function(variant, i) {
-                            return (
-                                <div className="variant-view-panel">
-                                    <h5>Variant {i + 1}</h5>
-                                    <dl className="dl-horizontal">
-                                        <div>
-                                            <dt>dbSNP ID</dt>
-                                            <dd>{variant.dbSNPId}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>ClinVar ID</dt>
-                                            <dd>{variant.clinVarRCV}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>HGVS term</dt>
-                                            <dd>
-                                                {variant.hgvsNames ?
-                                                    <span>{variant.hgvsNames.join(', ')}</span>
-                                                : null}
-                                            </dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>Other description</dt>
-                                            <dd>{variant.otherDescription}</dd>
-                                        </div>
-                                    </dl>
-                                </div>
-                            );
-                        })}
-                    </Panel>
-
                     <Panel title="Family — Additional Information" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
@@ -1401,4 +1129,4 @@ var FamilyViewer = React.createClass({
     }
 });
 
-globals.content_views.register(FamilyViewer, 'family');
+globals.content_views.register(IndividualViewer, 'individual');
