@@ -69,9 +69,6 @@ var FormMixin = module.exports.FormMixin = {
     // returned. If the Input had an entered value but it wasn't numeric, null is returned.
     // If the Input had a proper numberic value, a Javascript 'number' type is returned
     // with the entered value.
-    // If min and max are defined, we additionally check to make sure it fits within the bounds
-    // defined by the values of min and max. min defaults to 0, and max has no default but can
-    // be undefined.
     getFormValueNumber: function(ref) {
         var value = this.getFormValue(ref);
         if (value) {
@@ -161,8 +158,8 @@ var FormMixin = module.exports.FormMixin = {
                 // error, and remember to return false.
                 this.setFormErrors(ref, 'Required');
                 valid = false;
-            } else if (props.format === 'number') {
-                // Validate that format="number" fields have a valid number in them
+            } else if (props.type === 'number') {
+                // Validate that type="number" fields have a valid number in them
                 var numVal = this.getFormValueNumber(ref);
                 if (numVal === null) {
                     this.setFormErrors(ref, 'Number only');
@@ -209,8 +206,8 @@ var Input = module.exports.Input = React.createClass({
         clickHandler: React.PropTypes.func, // Called to handle button click
         submitHandler: React.PropTypes.func, // Called to handle submit button click
         cancelHandler: React.PropTypes.func, // Called to handle cancel button click
-        minNum: React.PropTypes.number, // Minimum value for a number formatted input
-        maxNum: React.PropTypes.number // Maximum value for a number formatted input
+        minVal: React.PropTypes.number, // Minimum value for a number formatted input
+        maxVal: React.PropTypes.number // Maximum value for a number formatted input
     },
 
     getInitialState: function() {
@@ -220,7 +217,7 @@ var Input = module.exports.Input = React.createClass({
     // Get the text the user entered from the text-type field. Meant to be called from
     // parent components.
     getValue: function() {
-        if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
+        if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'number' || this.props.type === 'textarea') {
             return React.findDOMNode(this.refs.input).value.trim();
         } else if (this.props.type === 'select') {
             return this.getSelectedOption().trim();
@@ -288,10 +285,12 @@ var Input = module.exports.Input = React.createClass({
         switch (this.props.type) {
             case 'text':
             case 'email':
+            case 'number':
+                var inputType = this.props.type === 'number' ? 'text' : this.props.type;
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 var innerInput = (
                     <span>
-                        <input className={inputClasses} type={this.props.type} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} />
+                        <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} />
                         <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                     </span>
                 );

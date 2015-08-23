@@ -541,10 +541,10 @@ var GroupDemographics = function() {
 
     return (
         <div className="row">
-            <Input type="text" ref="malecount" label="# males:" format="number" value={group.numberOfMale}
+            <Input type="number" ref="malecount" label="# males:" value={group.numberOfMale}
                 error={this.getFormError('malecount')} clearError={this.clrFormErrors.bind(null, 'malecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="femalecount" label="# females:" format="number" value={group.numberOfFemale}
+            <Input type="number" ref="femalecount" label="# females:" value={group.numberOfFemale}
                 error={this.getFormError('femalecount')} clearError={this.clrFormErrors.bind(null, 'femalecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={group.countryOfOrigin}
@@ -587,10 +587,10 @@ var GroupDemographics = function() {
                     <option>Death</option>
                 </Input>
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
-                    <Input type="text" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number"
+                    <Input type="number" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input"
                         error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={group.ageRangeFrom} />
                     <span className="group-age-inter">to</span>
-                    <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number"
+                    <Input type="number" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input"
                         error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={group.ageRangeTo} />
                 </Input>
                 <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={group.ageRangeUnit}
@@ -616,22 +616,22 @@ var GroupProbandInfo = function() {
 
     return(
         <div className="row">
-            <Input type="text" ref="indcount" label="Total number individuals in group:" format="number" value={group.totalNumberIndividuals}
+            <Input type="number" ref="indcount" label="Total number individuals in group:" value={group.totalNumberIndividuals}
                 error={this.getFormError('indcount')} clearError={this.clrFormErrors.bind(null, 'indcount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="indfamilycount" label="# individuals with family information:" format="number" value={group.numberOfIndividualsWithFamilyInformation}
+            <Input type="number" ref="indfamilycount" label="# individuals with family information:" value={group.numberOfIndividualsWithFamilyInformation}
                 error={this.getFormError('indfamilycount')} clearError={this.clrFormErrors.bind(null, 'indfamilycount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="notindfamilycount" label="# individuals WITHOUT family information:" format="number" value={group.numberOfIndividualsWithoutFamilyInformation}
+            <Input type="number" ref="notindfamilycount" label="# individuals WITHOUT family information:" value={group.numberOfIndividualsWithoutFamilyInformation}
                 error={this.getFormError('notindfamilycount')} clearError={this.clrFormErrors.bind(null, 'notindfamilycount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="indvariantgenecount" label="# individuals with variant in gene being curated:" format="number" value={group.numberOfIndividualsWithVariantInCuratedGene}
+            <Input type="number" ref="indvariantgenecount" label="# individuals with variant in gene being curated:" value={group.numberOfIndividualsWithVariantInCuratedGene}
                 error={this.getFormError('indvariantgenecount')} clearError={this.clrFormErrors.bind(null, 'indvariantgenecount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="notindvariantgenecount" label="# individuals without variant in gene being curated:" format="number" value={group.numberOfIndividualsWithoutVariantInCuratedGene}
+            <Input type="number" ref="notindvariantgenecount" label="# individuals without variant in gene being curated:" value={group.numberOfIndividualsWithoutVariantInCuratedGene}
                 error={this.getFormError('notindvariantgenecount')} clearError={this.clrFormErrors.bind(null, 'notindvariantgenecount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="indvariantothercount" label="# individuals with variant found in other gene:" format="number" value={group.numberOfIndividualsWithVariantInOtherGene}
+            <Input type="number" ref="indvariantothercount" label="# individuals with variant found in other gene:" value={group.numberOfIndividualsWithVariantInOtherGene}
                 error={this.getFormError('indvariantothercount')} clearError={this.clrFormErrors.bind(null, 'indvariantothercount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
             <Input type="text" ref="othergenevariants" label={<LabelOtherGenes />} inputClassName="uppercase-input" value={othergenevariantsVal} placeholder="e.g. DICER1, SMAD3"

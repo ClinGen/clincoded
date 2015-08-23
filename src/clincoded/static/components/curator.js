@@ -587,6 +587,10 @@ var flatten = module.exports.flatten = function(obj) {
             flat = flattenFamily(obj);
             break;
 
+        case 'individual':
+            flat = flattenIndividual(obj);
+            break;
+
         default:
             break;
     }
@@ -742,6 +746,37 @@ function flattenFamily(family) {
     if (family.individualIncluded && family.individualIncluded.length) {
         flat.individualIncluded = family.individualIncluded.map(function(individual) {
             return individual['@id'];
+        });
+    }
+
+    return flat;
+}
+
+
+var individualSimpleProps = ["label", "sex", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "countryOfOrigin", "ethnicity",
+    "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created"
+];
+
+function flattenIndividual(individual) {
+    // First copy everything before fixing the special properties
+    var flat = cloneSimpleProps(individual, familySimpleProps);
+
+    // Flatten diseases
+    flat.diagnosis = individual.diagnosis.map(function(disease) {
+        return disease['@id'];
+    });
+
+    // Flatten other PMIDs
+    if (individual.otherPMIDs && individual.otherPMIDs.length) {
+        flat.otherPMIDs = individual.otherPMIDs.map(function(article) {
+            return article['@id'];
+        });
+    }
+
+    // Flatten variants
+    if (individual.variants && individual.variants.length) {
+        flat.variants = individual.variants.map(function(variant) {
+            return variant['@id'];
         });
     }
 

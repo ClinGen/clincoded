@@ -207,6 +207,7 @@ var IndividualCuration = React.createClass({
         }
 
         // Either update or create the individual object in the DB
+        console.log('IND: %o', writerIndividual);
         if (this.state.individual && Object.keys(this.state.individual).length) {
             // We're editing a family. PUT the new family object to the DB to update the existing one.
             return this.putRestData('/individuals/' + this.state.family.uuid, writerIndividual).then(data => {
@@ -443,7 +444,7 @@ var IndividualCuration = React.createClass({
                     return Promise.resolve(null);
                 }).then(data => {
                     // Make a new individual object based on form fields.
-                    var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants);
+                    var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants, hpoids, nothpoids);
 
                     // Prep for multiple family writes, based on the family count dropdown (only appears when creating a new family,
                     // not when editing a family). This is a count of *extra* families, so add 1 to it to get the number of families
@@ -494,12 +495,12 @@ var IndividualCuration = React.createClass({
                     } else {
                         // Not part of a group, so add the family to the annotation instead.
                         var annotation = curator.flatten(this.state.annotation);
-                        if (!annotation.families) {
-                            annotation.families = [];
+                        if (!annotation.individuals) {
+                            annotation.individuals = [];
                         }
 
                         // Merge existing families in the annotation with the new set of families.
-                        Array.prototype.push.apply(annotation.families, savedIndividuals.map(function(individual) { return individual['@id']; }));
+                        Array.prototype.push.apply(annotation.individuals, savedIndividuals.map(function(individual) { return individual['@id']; }));
 
                         // Post the modified annotation to the DB, then go back to Curation Central
                         promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
@@ -519,7 +520,9 @@ var IndividualCuration = React.createClass({
 
     // Create a family object to be written to the database. Most values come from the values
     // in the form. The created object is returned from the function.
-    createIndividual: function(individualDiseases, individualArticles, individualVariants) {
+    createIndividual: function(individualDiseases, individualArticles, individualVariants, hpoids, nothpoids) {
+        var value;
+
         // Make a new family. If we're editing the form, first copy the old family
         // to make sure we have everything not from the form.
         var newIndividual = Object.keys(this.state.individual).length ? curator.flatten(this.state.individual) : {};
@@ -530,27 +533,50 @@ var IndividualCuration = React.createClass({
             newIndividual.diagnosis = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
         }
 
-        // Add array of other PMIDs
-        if (individualArticles) {
-            newIndividual.otherPMIDs = individualArticles['@graph'].map(function(article) { return article['@id']; });
-        }
-
-        // Fill in the group fields from the Common Diseases & Phenotypes panel
-        var hpoTerms = this.getFormValue('hpoid');
-        if (hpoTerms) {
-            newIndividual.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
+        // Fill in the individual fields from the Common Diseases & Phenotypes panel
+        if (hpoids && hpoids.length) {
+            newIndividual.hpoIdInDiagnosis = hpoids;
         }
         var phenoterms = this.getFormValue('phenoterms');
         if (phenoterms) {
             newIndividual.termsInDiagnosis = phenoterms;
         }
-        hpoTerms = this.getFormValue('nothpoid');
-        if (hpoTerms) {
-            newIndividual.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
+        if (nothpoids && nothpoids.length) {
+            newIndividual.hpoIdInElimination = nothpoids;
         }
         phenoterms = this.getFormValue('notphenoterms');
         if (phenoterms) {
             newIndividual.termsInElimination = phenoterms;
+        }
+
+        // Fill in the individual fields from the Demographics panel
+        value = this.getFormValue('sex');
+        if (value) { newIndividual.sex = value; }
+
+        value = this.getFormValue('country');
+        if (value) { newIndividual.countryOfOrigin = value; }
+
+        value = this.getFormValue('ethnicity');
+        if (value) { newIndividual.ethnicity = value; }
+
+        value = this.getFormValue('race');
+        if (value) { newIndividual.race = value; }
+
+        value = this.getFormValue('agetype');
+        if (value) { newIndividual.ageType = value; }
+
+        value = this.getFormValueNumber('agevalue');
+        if (value) { newIndividual.ageValue = value; }
+
+        value = this.getFormValue('ageunit');
+        if (value) { newIndividual.ageUnit = value; }
+
+        // Fill in the individual fields from the Additional panel
+        value = this.getFormValue('additionalinfoindividual');
+        if (value) { newIndividual.additionalInformation = value; }
+
+        if (individualArticles) {
+            newIndividual.otherPMIDs = individualArticles['@graph'].map(function(article) { return article['@id']; });
         }
 
         return newIndividual;
@@ -796,7 +822,7 @@ var IndividualDemographics = function() {
 
     return (
         <div className="row">
-            <Input type="select" ref="country" label="Sex:" defaultValue="none" value={individual.sex}
+            <Input type="select" ref="sex" label="Sex:" defaultValue="none" value={individual.sex}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -836,23 +862,30 @@ var IndividualDemographics = function() {
                 <option>Mixed</option>
                 <option>Unknown</option>
             </Input>
-            <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
-            <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
-                <Input type="text" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
-                    error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={individual.ageRangeFrom} />
-                <span className="group-age-inter">to</span>
-                <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
-                    error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={individual.ageRangeTo} />
-            </Input>
-            <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={individual.ageRangeUnit}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Days</option>
-                <option>Weeks</option>
-                <option>Months</option>
-                <option>Years</option>
-            </Input>
+            <h4 className="col-sm-7 col-sm-offset-5">Age</h4>
+            <div className="demographics-age-range">
+                <Input type="select" ref="agetype" label="Type:" defaultValue="none" value={individual.ageType}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                    <option value="none">No Selection</option>
+                    <option disabled="disabled"></option>
+                    <option>Onset</option>
+                    <option>Report</option>
+                    <option>Diagnosis</option>
+                    <option>Death</option>
+                </Input>
+                <Input type="number" ref="agevalue" label="Value:" value={individual.ageValue} maxVal={150}
+                    error={this.getFormError('agevalue')} clearError={this.clrFormErrors.bind(null, 'agevalue')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={individual.ageUnit}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                    <option value="none">No Selection</option>
+                    <option disabled="disabled"></option>
+                    <option>Days</option>
+                    <option>Weeks</option>
+                    <option>Months</option>
+                    <option>Years</option>
+                </Input>
+            </div>
         </div>
     );
 };

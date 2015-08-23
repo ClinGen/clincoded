@@ -724,7 +724,7 @@ var FamilyCuration = React.createClass({
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Family — Methods" open>
-                                                {methods.render.call(this, method)}
+                                                {methods.render.call(this, method, true)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
@@ -898,10 +898,10 @@ var FamilyDemographics = function() {
 
     return (
         <div className="row">
-            <Input type="text" ref="malecount" label="# males:" format="number" value={family.numberOfMale}
+            <Input type="number" ref="malecount" label="# males:" value={family.numberOfMale}
                 error={this.getFormError('malecount')} clearError={this.clrFormErrors.bind(null, 'malecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="femalecount" label="# females:" format="number" value={family.numberOfFemale}
+            <Input type="number" ref="femalecount" label="# females:" value={family.numberOfFemale}
                 error={this.getFormError('femalecount')} clearError={this.clrFormErrors.bind(null, 'femalecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family.countryOfOrigin}
@@ -943,10 +943,10 @@ var FamilyDemographics = function() {
                     <option>Death</option>
                 </Input>
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
-                    <Input type="text" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
+                    <Input type="number" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" maxVal={150}
                         error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={family.ageRangeFrom} />
                     <span className="group-age-inter">to</span>
-                    <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number" maxVal={150}
+                    <Input type="number" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" maxVal={150}
                         error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={family.ageRangeTo} />
                 </Input>
                 <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={family.ageRangeUnit}
@@ -974,10 +974,10 @@ var FamilySegregation = function() {
         <div className="row">
             <Input type="textarea" ref="pedigreedesc" label="Pedigree description:" rows="5" value={segregation.pedigreeDescription}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="pedigreesize" label="Pedigree size:" format="number" value={segregation.pedigreeSize} minVal={2}
+            <Input type="number" ref="pedigreesize" label="Pedigree size:" value={segregation.pedigreeSize} minVal={2}
                 error={this.getFormError('pedigreesize')} clearError={this.clrFormErrors.bind(null, 'pedigreesize')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="nogenerationsinpedigree" label="# generations in pedigree:" format="number" value={segregation.numberOfGenerationInPedigree}
+            <Input type="number" ref="nogenerationsinpedigree" label="# generations in pedigree:" value={segregation.numberOfGenerationInPedigree}
                 error={this.getFormError('nogenerationsinpedigree')} clearError={this.clrFormErrors.bind(null, 'nogenerationsinpedigree')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="consanguineous" label="Consanguineous family?:" defaultValue="none" value={curator.booleanToDropdown(segregation.consanguineousFamily)}
@@ -987,7 +987,7 @@ var FamilySegregation = function() {
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="text" ref="nocases" label="# cases (phenotype positive):" format="number" value={segregation.numberOfCases} minVal={1}
+            <Input type="number" ref="nocases" label="# cases (phenotype positive):" value={segregation.numberOfCases} minVal={1}
                 error={this.getFormError('nocases')} clearError={this.clrFormErrors.bind(null, 'nocases')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="denovo" label="de novo type:" defaultValue="none" value={segregation.deNovoType}
@@ -1005,19 +1005,19 @@ var FamilySegregation = function() {
                 <option>1</option>
                 <option>2</option>
             </Input>
-            <Input type="text" ref="noaffected" label="# affected individuals:" format="number" value={segregation.numberOfAffectedAlleles}
+            <Input type="number" ref="noaffected" label="# affected individuals:" value={segregation.numberOfAffectedAlleles}
                 error={this.getFormError('noaffected')} clearError={this.clrFormErrors.bind(null, 'noaffected')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="noaffected1" label="# affected with 1 variant:" format="number" value={segregation.numberOfAffectedWithOneVariant}
+            <Input type="number" ref="noaffected1" label="# affected with 1 variant:" value={segregation.numberOfAffectedWithOneVariant}
                 error={this.getFormError('noaffected1')} clearError={this.clrFormErrors.bind(null, 'noaffected1')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="noaffected2" label="# affected with 2 different variants or homozygous for 1:" format="number" value={segregation.numberOfAffectedWithTwoVariants}
+            <Input type="number" ref="noaffected2" label="# affected with 2 different variants or homozygous for 1:" value={segregation.numberOfAffectedWithTwoVariants}
                 error={this.getFormError('noaffected2')} clearError={this.clrFormErrors.bind(null, 'noaffected2')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="nounaffectedcarriers" label="# unaffected carriers:" format="number" value={segregation.numberOfUnaffectedCarriers}
+            <Input type="number" ref="nounaffectedcarriers" label="# unaffected carriers:" value={segregation.numberOfUnaffectedCarriers}
                 error={this.getFormError('nounaffectedcarriers')} clearError={this.clrFormErrors.bind(null, 'nounaffectedcarriers')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="nounaffectedindividuals" label="# unaffected individuals:" format="number" value={segregation.numberOfUnaffectedIndividuals}
+            <Input type="number" ref="nounaffectedindividuals" label="# unaffected individuals:" value={segregation.numberOfUnaffectedIndividuals}
                 error={this.getFormError('nounaffectedindividuals')} clearError={this.clrFormErrors.bind(null, 'nounaffectedindividuals')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="bothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={curator.booleanToDropdown(segregation.probandAssociatedWithBoth)}
