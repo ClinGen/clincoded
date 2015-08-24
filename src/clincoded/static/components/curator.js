@@ -144,78 +144,77 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
     },
 
     render: function() {
+        var gdm = this.props.gdm;
         var annotation = this.props.annotation;
         var session = this.props.session;
         var curatorMatch = annotation && userMatch(annotation.submitted_by, session);
-        var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + this.props.gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var familyRenders = annotation.families && annotation.families.map(family => {
-            return <div key={family.uuid}>{renderFamily(family, this.props.gdm, annotation, curatorMatch)}</div>;
-        });
-        var groupRenders, familyRenders, individualRenders;
+        var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var groupRenders = [], familyRenders = [], individualRenders = [];
 
+        // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
         if (annotation.groups) {
-            annotation.groups.forEach(group => {
+            var groupAnnotationRenders = annotation.groups.map(group => {
                 if (group.familyIncluded) {
-                    var familyRendering = group.familyIncluded.map(family => {
+                    // Collect up family renders that are associated with the group, and individuals that are associated with those families.
+                    var familyGroupRenders = group.familyIncluded.map(family => {
                         if (family.individualIncluded) {
-                            var individualRendering = family.individualIncluded.map(individual) => {
-                                return <div key={individual.uuid}>{renderIndividual(individual, this.props.gdm, annotation, curatorMatch)}</div>;
-                            }
-                            individualRenders = individualRenders.concat(individualRendering);
+                            // Collect up individuals that are direct children of families associated with groups
+                            var individualFamilyRenders = family.individualIncluded.map(individual => {
+                                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
+                            });
+                            individualRenders = individualRenders.concat(individualFamilyRenders);
                         }
-                        return <div key={family.uuid}>{renderFamily(family, this.props.gdm, annotation, curatorMatch)}</div>;
+                        return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch)}</div>;
                     });
+                    familyRenders = familyRenders.concat(familyGroupRenders);
                 }
-                forEach(family => {
-                    return <div key={family.uuid}>{renderFamily(family, this.props.gdm, annotation, curatorMatch)}</div>;
-                });
-                familyRenders = familyRenders.concat(familyGroupRenders);
+                if (group.individualIncluded) {
+                    // Collect up family renders that are associated with the group, and individuals that are associated with those families.
+                    var individualGroupRenders = group.individualIncluded.map(individual => {
+                        return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
+                    });
+                    individualRenders = individualRenders.concat(individualGroupRenders);
+                }
+                return <div key={group.uuid}>{renderGroup(group, gdm, annotation, curatorMatch)}</div>;
             });
+            groupRenders = groupRenders.concat(groupAnnotationRenders);
         }
-        var individualRenders = annotation.individuals && annotation.individuals.map(individual => {
-            return <div key={individual.uuid}>{renderIndividual(individual, this.props.gdm, annotation, curatorMatch)}</div>;
-        });
+
+        // Add to the array of family renders the unassociated families, and individuals that associate with them.
+        if (annotation.families) {
+            var familyAnnotationRenders = annotation.families.map(family => {
+                if (family.individualIncluded) {
+                    // Add to individual renders the individuals that are associated with this family
+                    var individualFamilyRenders = family.individualIncluded.map(individual => {
+                        return <div key={individual.uuid}>{renderIndividual(individual, this.props.gdm, annotation, curatorMatch)}</div>;
+                    });
+                    individualRenders = individualRenders.concat(individualFamilyRenders);
+                }
+                return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch)}</div>;
+            });
+            familyRenders = familyRenders.concat(familyAnnotationRenders);
+        }
+
+        // Add to the array of individual renders the unassociated individuals.
+        if (annotation.individuals) {
+            var individualAnnotationRenders = annotation.individuals.map(individual => {
+                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
+            });
+            individualRenders = individualRenders.concat(individualAnnotationRenders);
+        }
 
         return (
             <Panel panelClassName="panel-evidence-groups" title={'Evidence for PMID:' + this.props.annotation.article.pmid}>
                 <Panel title={<CurationPaletteTitles title="Group" url={groupUrl} />} panelClassName="panel-evidence">
-                    {annotation.groups && annotation.groups.map(group => {
-                        return (
-                            <div className="panel-evidence-group" key={group.uuid}>
-                                <h5>{group.label}</h5>
-                                <div className="evidence-curation-info">
-                                    {group.submitted_by ?
-                                        <p className="evidence-curation-info">{group.submitted_by.title}</p>
-                                    : null}
-                                    <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
-                                </div>
-                                <a href={'/group/' + group.uuid} target="_blank" title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?editsc=true&gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
-                                {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
-                                {curatorMatch ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
-                            </div>
-                        );
-                    })}
+                    {groupRenders}
                 </Panel>
                 <Panel title={<CurationPaletteTitles title="Family" url={familyUrl} />} panelClassName="panel-evidence">
                     {familyRenders}
                 </Panel>
                 <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
-                    {annotation.individuals && annotation.individuals.map(individual => {
-                        return (
-                            <div className="panel-evidence-group" key={individual.uuid}>
-                                <h5>{individual.label}</h5>
-                                <div className="evidence-curation-info">
-                                    {individual.submitted_by ?
-                                        <p className="evidence-curation-info">{individual.submitted_by.title}</p>
-                                    : null}
-                                    <p>{moment(individual.date_created).format('YYYY MMM DD, h:mm a')}</p>
-                                </div>
-                                <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>{curatorMatch ? <span> | <a href={'/individual-curation/?editsc=true&gdm=' + this.props.gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
-                            </div>
-                        );
-                    })}
+                    {individualRenders}
                 </Panel>
             </Panel>
         );
@@ -223,7 +222,28 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
 });
 
 // Render a family in the curator palette.
-var renderFamily = function(family, gdm, annotation, curatorMatch, individual) {
+var renderGroup = function(group, gdm, annotation, curatorMatch) {
+    var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+    var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+
+    return (
+        <div className="panel-evidence-group" key={group.uuid}>
+            <h5>{group.label}</h5>
+            <div className="evidence-curation-info">
+                {group.submitted_by ?
+                    <p className="evidence-curation-info">{group.submitted_by.title}</p>
+                : null}
+                <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
+            </div>
+            <a href={'/group/' + group.uuid} target="_blank" title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?editsc=true&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
+            {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
+            {curatorMatch ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
+        </div>
+    );
+};
+
+// Render a family in the curator palette.
+var renderFamily = function(family, gdm, annotation, curatorMatch) {
     var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
 
     return (
@@ -250,15 +270,17 @@ var renderFamily = function(family, gdm, annotation, curatorMatch, individual) {
             :
                 <div>No associations</div>
             }
-            <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?editsc=true&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
-            {curatorMatch ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
+            <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>
+            {curatorMatch ? <span> | <a href={'/family-curation/?editsc=true&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
+            {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
         </div>
     );
 };
 
-
-// Render a family in the curator palette.
+// Render an individual in the curator palette.
 var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
+    var i = 0;
+
     return (
         <div className="panel-evidence-group" key={individual.uuid}>
             <h5>{individual.label}</h5>
@@ -268,14 +290,32 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                 : null}
                 <p>{moment(individual.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            {individual.associatedGroups && individual.associatedGroups.length ?
+            {(individual.associatedGroups && individual.associatedGroups.length) || (individual.associatedFamilies && individual.associatedFamilies.length) ?
                 <div>
                     <span>Associations: </span>
-                    {individual.associatedGroups.map(function(group, i) {
+                    {individual.associatedGroups.map(function(group) {
                         return (
                             <span key={i}>
-                                {i > 0 ? ', ' : ''}
+                                {i++ > 0 ? ', ' : ''}
                                 <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                            </span>
+                        );
+                    })}
+                    {individual.associatedFamilies.map(function(family) {
+                        return (
+                            <span>
+                                {family.associatedGroups.map(function(group) {
+                                    return (
+                                        <span key={i}>
+                                            {i++ > 0 ? ', ' : ''}
+                                            <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                                        </span>
+                                    );
+                                })}
+                                <span key={i}>
+                                    {i++ > 0 ? ', ' : ''}
+                                    <a href={family['@id']} target="_blank" title="View family in a new tab">{family.label}</a>
+                                </span>
                             </span>
                         );
                     })}

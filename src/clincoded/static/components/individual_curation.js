@@ -491,7 +491,7 @@ var IndividualCuration = React.createClass({
                         Array.prototype.push.apply(family.individualIncluded, savedIndividuals.map(function(individual) { return individual['@id']; }));
 
                         // Post the modified annotation to the DB, then go back to Curation Central
-                        promise = this.putRestData('/families/' + this.state.group.uuid, family);
+                        promise = this.putRestData('/families/' + this.state.family.uuid, family);
                     } else {
                         // Not part of a group, so add the family to the annotation instead.
                         var annotation = curator.flatten(this.state.annotation);
@@ -551,25 +551,25 @@ var IndividualCuration = React.createClass({
 
         // Fill in the individual fields from the Demographics panel
         value = this.getFormValue('sex');
-        if (value) { newIndividual.sex = value; }
+        if (value !== 'none') { newIndividual.sex = value; }
 
         value = this.getFormValue('country');
-        if (value) { newIndividual.countryOfOrigin = value; }
+        if (value !== 'none') { newIndividual.countryOfOrigin = value; }
 
         value = this.getFormValue('ethnicity');
-        if (value) { newIndividual.ethnicity = value; }
+        if (value !== 'none') { newIndividual.ethnicity = value; }
 
         value = this.getFormValue('race');
-        if (value) { newIndividual.race = value; }
+        if (value !== 'none') { newIndividual.race = value; }
 
         value = this.getFormValue('agetype');
-        if (value) { newIndividual.ageType = value; }
+        if (value !== 'none') { newIndividual.ageType = value; }
 
         value = this.getFormValueNumber('agevalue');
         if (value) { newIndividual.ageValue = value; }
 
         value = this.getFormValue('ageunit');
-        if (value) { newIndividual.ageUnit = value; }
+        if (value !== 'none') { newIndividual.ageUnit = value; }
 
         // Fill in the individual fields from the Additional panel
         value = this.getFormValue('additionalinfoindividual');
