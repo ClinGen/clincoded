@@ -32,7 +32,7 @@ before_script:
     if test -n "$BROWSER"; then
       CONNECT_URL=https://saucelabs.com/downloads/sc-4.3.11-linux.tar.gz
       CONNECT_DOWNLOAD=sc.tar.gz
-      SC_READYFILE=sauce-connect-ready-$RANDOM
+      SC_READYFILE=$HOME/sauce-connect-ready-$RANDOM
       SC_LOGFILE=$HOME/sauce-connect.log
       SC_PIDFILE=$HOME/sauce-connect.pid
       curl $CONNECT_URL > $CONNECT_DOWNLOAD
@@ -53,7 +53,7 @@ script:
   - if test -z "$BROWSER"; then bin/test -v -v --timeout=1000 -m "not bdd"; fi
   - >
     if test -n "$BROWSER"; then
-      test -s "$SC_PIDFILE" && test -f "$SC_READYFILE" && bin/test -v -v --timeout=1000 -m "bdd" --tb=short \
+      test -s "$SC_PIDFILE" && bin/test -v -v --timeout=1000 -m "bdd" --tb=short \
         --splinter-implicit-wait 1000 \
         --splinter-webdriver remote \
         --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@localhost:4445/wd/hub" \
