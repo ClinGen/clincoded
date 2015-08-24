@@ -319,7 +319,10 @@ var AddPmidModal = React.createClass({
                 </div>
                 <div className='modal-footer'>
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                    <Input type="submit" inputClassName={this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ? "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" />
+                    {this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ?
+                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Add Article" />
+                        : <Input type="submit" inputClassName="btn-primary btn-inline-spacer disabled" title="Add Article" />
+                    }
                 </div>
             </Form>
         );
