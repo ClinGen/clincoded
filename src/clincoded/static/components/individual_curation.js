@@ -55,6 +55,7 @@ var IndividualCuration = React.createClass({
             extraIndividualNames: [], // Names of extra families to create
             variantCount: 1, // Number of variants to display
             variantOption: [VAR_NONE], // One variant panel, and nothing entered
+            individualName: '', // Currently entered individual name
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
@@ -67,6 +68,8 @@ var IndividualCuration = React.createClass({
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
             // Disable the Genotyping Method 2 if Genotyping Method 1 has no value
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
+        } else if (ref === 'individualname') {
+            this.setState({individualName: this.refs[ref].getValue()});
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -160,6 +163,11 @@ var IndividualCuration = React.createClass({
                 this.setOmimIdState(stateObj.gdm.omimId);
             }
 
+            // Update the individual name
+            if (stateObj.individual && Object.keys(stateObj.individual).length) {
+                this.setState({individualName: stateObj.individual.label});
+            }
+
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
             // Also see if we need to disable the Add Variant button
             if (stateObj.individual && Object.keys(stateObj.individual).length) {
@@ -207,10 +215,9 @@ var IndividualCuration = React.createClass({
         }
 
         // Either update or create the individual object in the DB
-        console.log('IND: %o', writerIndividual);
         if (this.state.individual && Object.keys(this.state.individual).length) {
             // We're editing a family. PUT the new family object to the DB to update the existing one.
-            return this.putRestData('/individuals/' + this.state.family.uuid, writerIndividual).then(data => {
+            return this.putRestData('/individuals/' + this.state.individual.uuid, writerIndividual).then(data => {
                 return Promise.resolve(data['@graph'][0]);
             });
         } else {
@@ -598,6 +605,10 @@ var IndividualCuration = React.createClass({
     render: function() {
         var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
         var individual = Object.keys(this.state.individual).length ? this.state.individual : null;
+        var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
+            (Object.keys(this.state.group).length ? [this.state.group] : null);
+        var families = (individual && individual.associatedFamilies) ? individual.associatedFamilies :
+            (Object.keys(this.state.family).length ? [this.state.family] : null);
         var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
         var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
@@ -622,7 +633,20 @@ var IndividualCuration = React.createClass({
                                     <PmidSummary article={annotation.article} displayJournal />
                                 </div>
                             : null}
-                            <h1>Curate Individual Information</h1>
+                            <div className="viewer-titles">
+                                <h1>{(individual ? 'Edit' : 'Curate') + ' Individual Information'}</h1>
+                                <h2>Individual: {this.state.individualName ? <span>{this.state.individualName}</span> : <span className="no-entry">No entry</span>}</h2>
+                                {groups && groups.length ?
+                                    <h2>
+                                        {'Group association: ' + groups.map(function(group) { return group.label; }).join(', ')}
+                                    </h2>
+                                : null}
+                                {families && families.length ?
+                                    <h2>
+                                        {'Family association: ' + families.map(function(family) { return family.label; }).join(', ')}
+                                    </h2>
+                                : null}
+                            </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
@@ -679,7 +703,7 @@ var IndividualName = function(displayNote) {
 
     return (
         <div className="row">
-            <Input type="text" ref="individualname" label="Individual Name:" value={individual.label}
+            <Input type="text" ref="individualname" label="Individual Name:" value={individual.label} handleChange={this.handleChange}
                 error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {displayNote ?

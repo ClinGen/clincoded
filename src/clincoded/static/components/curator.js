@@ -295,7 +295,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                     <span>Associations: </span>
                     {individual.associatedGroups.map(function(group) {
                         return (
-                            <span key={i}>
+                            <span key={group.uuid}>
                                 {i++ > 0 ? ', ' : ''}
                                 <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
                             </span>
@@ -306,13 +306,13 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                             <span>
                                 {family.associatedGroups.map(function(group) {
                                     return (
-                                        <span key={i}>
+                                        <span key={group.uuid}>
                                             {i++ > 0 ? ', ' : ''}
                                             <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
                                         </span>
                                     );
                                 })}
-                                <span key={i}>
+                                <span key={family.uuid}>
                                     {i++ > 0 ? ', ' : ''}
                                     <a href={family['@id']} target="_blank" title="View family in a new tab">{family.label}</a>
                                 </span>
