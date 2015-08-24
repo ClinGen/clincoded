@@ -81,6 +81,7 @@ var CurationCentral = React.createClass({
     updateGdmArticles: function(article) {
         var newAnnotation;
         var currGdm = this.state.currGdm;
+        var addPost = true;
 
         // Put together a new annotation object with the article reference
         var newAnnotationObj = {
@@ -88,24 +89,35 @@ var CurationCentral = React.createClass({
             active: true
         };
 
-        // Post new annotation to the DB. fetch returns a JS promise.
-        this.postRestData('/evidence/', newAnnotationObj).then(data => {
-            // Save the new annotation; fetch the currently displayed GDM as an object without its embedded
-            // objects; basically the object as it exists in the DB. We'll update that and write it back to the DB.
-            return (data['@graph'][0]);
-        }).then(newAnnotation => {
-            var gdmObj = curator.flatten(currGdm);
+        // check to see if this PMID has already been added to the GDM
+        for (var i = 0; i < currGdm.annotations.length; i++) {
+            if (currGdm.annotations[i].article.pmid == newAnnotationObj.article) addPost = false;
+        }
 
-            // Add our new annotation reference to the array of annotations in the GDM.
-            if (!gdmObj.annotations) {
-                gdmObj.annotations = [];
-            }
-            gdmObj.annotations.push(newAnnotation['@id']);
-            return this.putRestData('/gdm/' + currGdm.uuid, gdmObj);
-        }).then(data => {
-            // Retrieve the updated GDM and set it as the new state GDM to force a rerendering.
-            this.getGdm(data['@graph'][0].uuid, article.pmid);
-        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
+        if (addPost) {
+            // Post new annotation to the DB. fetch returns a JS promise.
+            this.postRestData('/evidence/', newAnnotationObj).then(data => {
+                // Save the new annotation; fetch the currently displayed GDM as an object without its embedded
+                // objects; basically the object as it exists in the DB. We'll update that and write it back to the DB.
+                return (data['@graph'][0]);
+            }).then(newAnnotation => {
+                var gdmObj = curator.flatten(currGdm);
+
+                // Add our new annotation reference to the array of annotations in the GDM.
+                if (!gdmObj.annotations) {
+                    gdmObj.annotations = [];
+                }
+                gdmObj.annotations.push(newAnnotation['@id']);
+                return this.putRestData('/gdm/' + currGdm.uuid, gdmObj);
+            }).then(data => {
+                // Retrieve the updated GDM and set it as the new state GDM to force a rerendering.
+                this.getGdm(data['@graph'][0].uuid, article.pmid);
+            }).catch(parseAndLogError.bind(undefined, 'putRequest'));
+        }
+        else {
+            // if the PMID is already in the GDM, just select it
+            this.getGdm(currGdm.uuid, article.pmid);
+        }
     },
 
     render: function() {
