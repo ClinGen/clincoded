@@ -475,42 +475,46 @@ var IndividualCuration = React.createClass({
 
                     // If we're adding this individual to a group, update the group with this family; otherwise update the annotation
                     // with the family.
-                    if (Object.keys(this.state.group).length) {
-                        // Add the newly saved families to the group
-                        var group = curator.flatten(this.state.group);
-                        if (!group.individualIncluded) {
-                            group.individualIncluded = [];
+                    if (!this.state.individual || Object.keys(this.state.individual).length === 0) {
+                        if (Object.keys(this.state.group).length) {
+                            // Add the newly saved families to the group
+                            var group = curator.flatten(this.state.group);
+                            if (!group.individualIncluded) {
+                                group.individualIncluded = [];
+                            }
+
+                            // Merge existing families in the annotation with the new set of families.
+                            Array.prototype.push.apply(group.individualIncluded, savedIndividuals.map(function(individual) { return individual['@id']; }));
+
+                            // Post the modified annotation to the DB, then go back to Curation Central
+                            promise = this.putRestData('/groups/' + this.state.group.uuid, group);
+                        } else if (Object.keys(this.state.family).length) {
+                            // Add the newly saved families to the group
+                            var family = curator.flatten(this.state.family);
+                            if (!family.individualIncluded) {
+                                family.individualIncluded = [];
+                            }
+
+                            // Merge existing families in the annotation with the new set of families.
+                            Array.prototype.push.apply(family.individualIncluded, savedIndividuals.map(function(individual) { return individual['@id']; }));
+
+                            // Post the modified annotation to the DB, then go back to Curation Central
+                            promise = this.putRestData('/families/' + this.state.family.uuid, family);
+                        } else {
+                            // Not part of a group, so add the family to the annotation instead.
+                            var annotation = curator.flatten(this.state.annotation);
+                            if (!annotation.individuals) {
+                                annotation.individuals = [];
+                            }
+
+                            // Merge existing families in the annotation with the new set of families.
+                            Array.prototype.push.apply(annotation.individuals, savedIndividuals.map(function(individual) { return individual['@id']; }));
+
+                            // Post the modified annotation to the DB, then go back to Curation Central
+                            promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
                         }
-
-                        // Merge existing families in the annotation with the new set of families.
-                        Array.prototype.push.apply(group.individualIncluded, savedIndividuals.map(function(individual) { return individual['@id']; }));
-
-                        // Post the modified annotation to the DB, then go back to Curation Central
-                        promise = this.putRestData('/groups/' + this.state.group.uuid, group);
-                    } else if (Object.keys(this.state.family).length) {
-                        // Add the newly saved families to the group
-                        var family = curator.flatten(this.state.family);
-                        if (!family.individualIncluded) {
-                            family.individualIncluded = [];
-                        }
-
-                        // Merge existing families in the annotation with the new set of families.
-                        Array.prototype.push.apply(family.individualIncluded, savedIndividuals.map(function(individual) { return individual['@id']; }));
-
-                        // Post the modified annotation to the DB, then go back to Curation Central
-                        promise = this.putRestData('/families/' + this.state.family.uuid, family);
                     } else {
-                        // Not part of a group, so add the family to the annotation instead.
-                        var annotation = curator.flatten(this.state.annotation);
-                        if (!annotation.individuals) {
-                            annotation.individuals = [];
-                        }
-
-                        // Merge existing families in the annotation with the new set of families.
-                        Array.prototype.push.apply(annotation.individuals, savedIndividuals.map(function(individual) { return individual['@id']; }));
-
-                        // Post the modified annotation to the DB, then go back to Curation Central
-                        promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
+                        promise = Promise.resolve(null);
                     }
                     return promise;
                 }).then(data => {

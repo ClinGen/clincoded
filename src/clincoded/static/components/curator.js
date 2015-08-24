@@ -303,7 +303,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                     })}
                     {individual.associatedFamilies.map(function(family) {
                         return (
-                            <span>
+                            <span key={family.uuid}>
                                 {family.associatedGroups.map(function(group) {
                                     return (
                                         <span key={group.uuid}>

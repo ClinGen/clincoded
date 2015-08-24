@@ -354,7 +354,7 @@ var GroupCuration = React.createClass({
                         // Post the modified annotation to the DB, then go back to Curation Central
                         return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
                     } else {
-                        return Promise.resolve(this.state.annotation);
+                        return Promise.resolve(null);
                     }
                 }).then(data => {
                     // Navigate back to Curation Central page.
