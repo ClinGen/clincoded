@@ -153,9 +153,22 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var familyRenders = annotation.families && annotation.families.map(family => {
             return <div key={family.uuid}>{renderFamily(family, this.props.gdm, annotation, curatorMatch)}</div>;
         });
-        if (annotation.groups && annotation.groups.length) {
+        var groupRenders, familyRenders, individualRenders;
+
+        if (annotation.groups) {
             annotation.groups.forEach(group => {
-                var familyGroupRenders = group.familyIncluded && group.familyIncluded.map(family => {
+                if (group.familyIncluded) {
+                    var familyRendering = group.familyIncluded.map(family => {
+                        if (family.individualIncluded) {
+                            var individualRendering = family.individualIncluded.map(individual) => {
+                                return <div key={individual.uuid}>{renderIndividual(individual, this.props.gdm, annotation, curatorMatch)}</div>;
+                            }
+                            individualRenders = individualRenders.concat(individualRendering);
+                        }
+                        return <div key={family.uuid}>{renderFamily(family, this.props.gdm, annotation, curatorMatch)}</div>;
+                    });
+                }
+                forEach(family => {
                     return <div key={family.uuid}>{renderFamily(family, this.props.gdm, annotation, curatorMatch)}</div>;
                 });
                 familyRenders = familyRenders.concat(familyGroupRenders);
@@ -210,7 +223,9 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
 });
 
 // Render a family in the curator palette.
-var renderFamily = function(family, gdm, annotation, curatorMatch) {
+var renderFamily = function(family, gdm, annotation, curatorMatch, individual) {
+    var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+
     return (
         <div className="panel-evidence-group" key={family.uuid}>
             <h5>{family.label}</h5>
@@ -236,6 +251,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                 <div>No associations</div>
             }
             <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>{curatorMatch ? <span> | <a href={'/family-curation/?editsc=true&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
+            {curatorMatch ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
         </div>
     );
 };
