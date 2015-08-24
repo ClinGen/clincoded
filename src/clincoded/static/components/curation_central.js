@@ -248,19 +248,24 @@ var AddPmidModal = React.createClass({
     validateForm: function() {
         // Start with default validation
         var valid = this.validateDefault();
+        var formInput = this.getFormValue('pmid').replace(/^[0]+/g,"");
 
         if (valid) {
-            // valid if the field has only numbers
-            valid = this.getFormValue('pmid').match(/^[0-9]*$/i);
-            if (!valid) this.setFormErrors('pmid', 'Only numbers allowed');
+            valid = formInput.length > 0;
+            if (!valid) this.setFormErrors('pmid', 'This PMID does not exist');
             else {
-                valid = this.getFormValue('pmid').length < 9;
-                if (!valid) this.setFormErrors('pmid', 'This PMID does not exist');
+                // valid if the field has only numbers
+                valid = formInput.match(/^[0-9]*$/i);
+                if (!valid) this.setFormErrors('pmid', 'Only numbers allowed');
                 else {
-                    for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
-                        if (this.props.currGdm.annotations[i].article.pmid == this.getFormValue('pmid')) {
-                            valid = false;
-                            this.setFormErrors('pmid', 'This article has already been associated with this GDM');
+                    valid = formInput.length < 9;
+                    if (!valid) this.setFormErrors('pmid', 'This PMID does not exist');
+                    else {
+                        for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
+                            if (this.props.currGdm.annotations[i].article.pmid == formInput) {
+                                valid = false;
+                                this.setFormErrors('pmid', 'This article has already been associated with this GDM');
+                            }
                         }
                     }
                 }
@@ -286,9 +291,7 @@ var AddPmidModal = React.createClass({
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
                     var newArticle = parsePubmed(xml, enteredPmid);
                     // if the PubMed article for this PMID doesn't exist, display an error
-                    if (newArticle.length == undefined) {
-                        this.setFormErrors('pmid', 'This PMID does not exist');
-                    }
+                    if (newArticle.length == undefined) this.setFormErrors('pmid', 'This PMID does not exist');
                     return this.postRestData('/articles/', newArticle).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });
@@ -319,10 +322,8 @@ var AddPmidModal = React.createClass({
                 </div>
                 <div className='modal-footer'>
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                    {this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ?
-                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Add Article" />
-                        : <Input type="submit" inputClassName="btn-primary btn-inline-spacer disabled" title="Add Article" />
-                    }
+                    <Input type="submit" inputClassName={this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ?
+                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" />
                 </div>
             </Form>
         );
