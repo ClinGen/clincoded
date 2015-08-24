@@ -81,7 +81,6 @@ var CurationCentral = React.createClass({
     updateGdmArticles: function(article) {
         var newAnnotation;
         var currGdm = this.state.currGdm;
-        var addPost = true;
 
         // Put together a new annotation object with the article reference
         var newAnnotationObj = {
@@ -89,35 +88,24 @@ var CurationCentral = React.createClass({
             active: true
         };
 
-        // check to see if this PMID has already been added to the GDM
-        for (var i = 0; i < currGdm.annotations.length; i++) {
-            if (currGdm.annotations[i].article.pmid == newAnnotationObj.article) addPost = false;
-        }
+        // Post new annotation to the DB. fetch returns a JS promise.
+        this.postRestData('/evidence/', newAnnotationObj).then(data => {
+            // Save the new annotation; fetch the currently displayed GDM as an object without its embedded
+            // objects; basically the object as it exists in the DB. We'll update that and write it back to the DB.
+            return (data['@graph'][0]);
+        }).then(newAnnotation => {
+            var gdmObj = curator.flatten(currGdm);
 
-        if (addPost) {
-            // Post new annotation to the DB. fetch returns a JS promise.
-            this.postRestData('/evidence/', newAnnotationObj).then(data => {
-                // Save the new annotation; fetch the currently displayed GDM as an object without its embedded
-                // objects; basically the object as it exists in the DB. We'll update that and write it back to the DB.
-                return (data['@graph'][0]);
-            }).then(newAnnotation => {
-                var gdmObj = curator.flatten(currGdm);
-
-                // Add our new annotation reference to the array of annotations in the GDM.
-                if (!gdmObj.annotations) {
-                    gdmObj.annotations = [];
-                }
-                gdmObj.annotations.push(newAnnotation['@id']);
-                return this.putRestData('/gdm/' + currGdm.uuid, gdmObj);
-            }).then(data => {
-                // Retrieve the updated GDM and set it as the new state GDM to force a rerendering.
-                this.getGdm(data['@graph'][0].uuid, article.pmid);
-            }).catch(parseAndLogError.bind(undefined, 'putRequest'));
-        }
-        else {
-            // if the PMID is already in the GDM, just select it
-            this.getGdm(currGdm.uuid, article.pmid);
-        }
+            // Add our new annotation reference to the array of annotations in the GDM.
+            if (!gdmObj.annotations) {
+                gdmObj.annotations = [];
+            }
+            gdmObj.annotations.push(newAnnotation['@id']);
+            return this.putRestData('/gdm/' + currGdm.uuid, gdmObj);
+        }).then(data => {
+            // Retrieve the updated GDM and set it as the new state GDM to force a rerendering.
+            this.getGdm(data['@graph'][0].uuid, article.pmid);
+        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
     render: function() {
@@ -137,7 +125,7 @@ var CurationCentral = React.createClass({
                     <div className="row curation-content">
                         <div className="col-md-3">
                             <PmidSelectionList annotations={gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
-                                    protocol={this.props.href_url.protocol} updateGdmArticles={this.updateGdmArticles} />
+                                    protocol={this.props.href_url.protocol} updateGdmArticles={this.updateGdmArticles} currGdm={gdm} />
                         </div>
                         <div className="col-md-6">
                             {currArticle ?
@@ -210,7 +198,7 @@ var PmidSelectionList = React.createClass({
             <div className="pmid-selection-wrapper">
                 <div className="pmid-selection-add">
                     <Modal title='Add new PubMed Article'>
-                        <button className="btn btn-primary pmid-selection-add-btn" modal={<AddPmidModal protocol={this.props.protocol} closeModal={this.closeModal} updateGdmArticles={this.props.updateGdmArticles} />}>
+                        <button className="btn btn-primary pmid-selection-add-btn" modal={<AddPmidModal protocol={this.props.protocol} closeModal={this.closeModal} updateGdmArticles={this.props.updateGdmArticles} currGdm={this.props.currGdm} />}>
                             Add New PMID(s)
                         </button>
                     </Modal>
@@ -261,11 +249,21 @@ var AddPmidModal = React.createClass({
         // Start with default validation
         var valid = this.validateDefault();
 
-        // Valid if the field has only 10 or fewer digits
         if (valid) {
-            valid = this.getFormValue('pmid').match(/^[0-9]{1,10}$/i);
-            if (!valid) {
-                this.setFormErrors('pmid', 'Only numbers allowed');
+            // valid if the field has only numbers
+            valid = this.getFormValue('pmid').match(/^[0-9]*$/i);
+            if (!valid) this.setFormErrors('pmid', 'Only numbers allowed');
+            else {
+                valid = this.getFormValue('pmid').length < 9;
+                if (!valid) this.setFormErrors('pmid', 'This PMID does not exist');
+                else {
+                    for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
+                        if (this.props.currGdm.annotations[i].article.pmid == this.getFormValue('pmid')) {
+                            valid = false;
+                            this.setFormErrors('pmid', 'This article has already been associated with this GDM');
+                        }
+                    }
+                }
             }
         }
         return valid;
@@ -287,6 +285,10 @@ var AddPmidModal = React.createClass({
                 // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
                     var newArticle = parsePubmed(xml, enteredPmid);
+                    // if the PubMed article for this PMID doesn't exist, display an error
+                    if (newArticle.length == undefined) {
+                        this.setFormErrors('pmid', 'This PMID does not exist');
+                    }
                     return this.postRestData('/articles/', newArticle).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });
@@ -317,7 +319,7 @@ var AddPmidModal = React.createClass({
                 </div>
                 <div className='modal-footer'>
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Add Article" />
+                    <Input type="submit" inputClassName={this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ? "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" />
                 </div>
             </Form>
         );
