@@ -43,7 +43,9 @@ before_script:
         --pidfile $SC_PIDFILE \
         --tunnel-identifier $TRAVIS_JOB_NUMBER \
         --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
-      while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep 1; done
+      while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do 
+        sleep 1
+      done
       echo "SC_PIDFILE = $(cat $SC_PIDFILE) , SC_READYFILE = $(ls -l $SC_READYFILE)"
     fi
 script:
