@@ -443,6 +443,7 @@ class Individual(Item):
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
         'associatedFamilies',
+        'associatedFamilies.associatedGroups',
         'associatedFamilies.commonDiagnosis',
     ]
     rev = {

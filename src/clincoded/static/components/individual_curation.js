@@ -1034,11 +1034,62 @@ var IndividualViewer = React.createClass({
         var context = this.props.context;
         var method = context.method;
         var variants = (context.variants && context.variants.length) ? context.variants : [{}];
+        var i = 0;
+        var groupRenders = [];
+
+        // Collect all families to render, as well as groups associated with these families
+        var familyRenders = context.associatedFamilies.map(function(family, j) {
+            groupRenders = family.associatedGroups.map(function(group) {
+                return (
+                    <span key={group.uuid}>
+                        {i++ > 0 ? ', ' : ''}
+                        {group.label}
+                    </span>
+                );
+            });
+            return (
+                <span key={family.uuid}>
+                    <span key={family.uuid}>
+                        {j > 0 ? ', ' : ''}
+                        {family.label}
+                    </span>
+                </span>
+            );
+        });
+
+        // Collect all groups associated with these individuals directly
+        var directGroupRenders = context.associatedGroups.map(function(group) {
+            return (
+                <span key={group.uuid}>
+                    {i++ > 0 ? ', ' : ''}
+                    {group.label}
+                </span>
+            );
+        });
+        groupRenders = groupRenders.concat(directGroupRenders);
 
         return (
             <div className="container">
                 <div className="row group-curation-content">
-                    <h1>{context.label}</h1>
+                    <div className="viewer-titles">
+                        <h1>View Individual: {context.label}</h1>
+                        <h2>
+                            {familyRenders.length ?
+                                <div>
+                                    <span>Family association: </span>
+                                    {familyRenders}
+                                </div>
+                            : null}
+                        </h2>
+                        <h2>
+                            {groupRenders.length ?
+                                <div>
+                                    <span>Group association: </span>
+                                    {groupRenders}
+                                </div>
+                            : null}
+                        </h2>
+                    </div>
                     <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
