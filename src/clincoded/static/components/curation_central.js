@@ -248,23 +248,32 @@ var AddPmidModal = React.createClass({
     validateForm: function() {
         // Start with default validation
         var valid = this.validateDefault();
-        var formInput = this.getFormValue('pmid').replace(/^[0]+/g,"");
+        var rawInput = this.getFormValue('pmid');
+        var strippedInput = this.getFormValue('pmid').replace(/^[0]+/g,""); // strip leading 0s
 
         if (valid) {
-            valid = formInput.length > 0;
+            // valid if input isn't zero-filled
+            valid = strippedInput.length > 0;
             if (!valid) this.setFormErrors('pmid', 'This PMID does not exist');
             else {
-                // valid if the field has only numbers
-                valid = formInput.match(/^[0-9]*$/i);
-                if (!valid) this.setFormErrors('pmid', 'Only numbers allowed');
+                // valid if input isn't zero-leading (but not zero-filled)
+                valid = rawInput.length == strippedInput.length;
+                if (!valid) this.setFormErrors('pmid', 'Did you mean the PMID "' + strippedInput + '"? Please remove any leading 0\'s from your PMID');
                 else {
-                    valid = formInput.length < 9;
-                    if (!valid) this.setFormErrors('pmid', 'This PMID does not exist');
+                    // valid if the input has only numbers
+                    valid = rawInput.match(/^[0-9]*$/i);
+                    if (!valid) this.setFormErrors('pmid', 'Only numbers allowed');
                     else {
-                        for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
-                            if (this.props.currGdm.annotations[i].article.pmid == formInput) {
-                                valid = false;
-                                this.setFormErrors('pmid', 'This article has already been associated with this GDM');
+                        // valid if the input is at most 8 numbers long
+                        valid = rawInput.length < 9;
+                        if (!valid) this.setFormErrors('pmid', 'This PMID does not exist');
+                        else {
+                            // valid if input isn't already associated with GDM
+                            for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
+                                if (this.props.currGdm.annotations[i].article.pmid == rawInput) {
+                                    valid = false;
+                                    this.setFormErrors('pmid', 'This article has already been associated with this GDM');
+                                }
                             }
                         }
                     }
