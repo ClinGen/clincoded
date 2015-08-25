@@ -597,6 +597,11 @@ var IndividualCuration = React.createClass({
             newIndividual.otherPMIDs = individualArticles['@graph'].map(function(article) { return article['@id']; });
         }
 
+        // Assign the given variant array
+        if (individualVariants) {
+            newIndividual.variants = individualVariants;
+        }
+
         return newIndividual;
     },
 
@@ -1028,8 +1033,7 @@ var IndividualViewer = React.createClass({
     render: function() {
         var context = this.props.context;
         var method = context.method;
-        var segregation = context.segregation;
-        var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
+        var variants = (context.variants && context.variants.length) ? context.variants : [{}];
 
         return (
             <div className="container">
@@ -1076,13 +1080,8 @@ var IndividualViewer = React.createClass({
                     <Panel title="Family — Demographics" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
-                                <dt># Males</dt>
-                                <dd>{context.numberOfMale}</dd>
-                            </div>
-
-                            <div>
-                                <dt># Females</dt>
-                                <dd>{context.numberOfFemale}</dd>
+                                <dt>Sex</dt>
+                                <dd>{context.sex}</dd>
                             </div>
 
                             <div>
@@ -1101,18 +1100,18 @@ var IndividualViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Age Range Type</dt>
-                                <dd>{context.ageRangeType}</dd>
+                                <dt>Age Type</dt>
+                                <dd>{context.ageType}</dd>
                             </div>
 
                             <div>
-                                <dt>Age Range</dt>
-                                <dd>{context.ageRangeFrom || context.ageRangeTo ? <span>{context.ageRangeFrom + ' – ' + context.ageRangeTo}</span> : null}</dd>
+                                <dt>Value</dt>
+                                <dd>{context.ageValue}</dd>
                             </div>
 
                             <div>
-                                <dt>Age Range Unit</dt>
-                                <dd>{context.ageRangeUnit}</dd>
+                                <dt>Age Unit</dt>
+                                <dd>{context.ageUnit}</dd>
                             </div>
                         </dl>
                     </Panel>
@@ -1158,11 +1157,6 @@ var IndividualViewer = React.createClass({
                                 <dt>Method by which Specific Mutations Genotyped</dt>
                                 <dd>{method && method.specificMutationsGenotypedMethod}</dd>
                             </div>
-
-                            <div>
-                                <dt>Additional Information about Group Method</dt>
-                                <dd>{method && method.additionalInformation}</dd>
-                            </div>
                         </dl>
                     </Panel>
 
@@ -1185,6 +1179,41 @@ var IndividualViewer = React.createClass({
                                 })}
                             </dd>
                         </dl>
+                    </Panel>
+
+                    <Panel title="Individual - Variant Information" panelClassName="panel-data">
+                        {variants.map(function(variant, i) {
+                            return (
+                                <div className="variant-view-panel">
+                                    <h5>Variant {i + 1}</h5>
+                                    <dl className="dl-horizontal">
+                                        <div>
+                                            <dt>dbSNP ID</dt>
+                                            <dd>{variant.dbSNPId}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>ClinVar ID</dt>
+                                            <dd>{variant.clinVarRCV}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>HGVS term</dt>
+                                            <dd>
+                                                {variant.hgvsNames ?
+                                                    <span>{variant.hgvsNames.join(', ')}</span>
+                                                : null}
+                                            </dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Other description</dt>
+                                            <dd>{variant.otherDescription}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            );
+                        })}
                     </Panel>
                 </div>
             </div>
