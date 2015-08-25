@@ -445,6 +445,7 @@ class Individual(Item):
         'associatedFamilies',
         'associatedFamilies.associatedGroups',
         'associatedFamilies.commonDiagnosis',
+        'associatedFamilies.individualIncluded'
     ]
     rev = {
         'associatedGroups': ('group', 'individualIncluded'),

@@ -58,8 +58,16 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
                         stateObj.gdm = data;
                         break;
 
+                    case 'group':
+                        stateObj.group = data;
+                        break;
+
                     case 'family':
                         stateObj.family = data;
+                        break;
+
+                    case 'individual':
+                        stateObj.individual = data;
                         break;
 
                     case 'annotation':
@@ -113,7 +121,7 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
             addIndividualLink += '&family=' + family.uuid;
             addIndividualTitle = ' for this Family';
         } else if (group) {
-            addIndividualLink = '&group=' + group.uuid;
+            addIndividualLink += '&group=' + group.uuid;
             addIndividualTitle = ' for this Group';
         }
 

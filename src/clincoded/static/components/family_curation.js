@@ -169,7 +169,7 @@ var FamilyCuration = React.createClass({
                 var segregation = stateObj.family.segregation;
                 if (segregation && segregation.variants && segregation.variants.length) {
                     stateObj.variantCount = segregation.variants.length;
-                    this.setState({addVariantDisabled: false});
+                    stateObj.addVariantDisabled = false;
                 }
             }
 

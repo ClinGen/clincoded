@@ -57,7 +57,8 @@ var IndividualCuration = React.createClass({
             variantOption: [VAR_NONE], // One variant panel, and nothing entered
             individualName: '', // Currently entered individual name
             addVariantDisabled: true, // True if Add Another Variant button enabled
-            genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
+            genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
+            proband: null // If we have an associated family that has a proband, this points at it
         };
     },
 
@@ -180,10 +181,25 @@ var IndividualCuration = React.createClass({
             if (stateObj.individual && Object.keys(stateObj.individual).length) {
                 stateObj.genotyping2Disabled = !(stateObj.individual.method && stateObj.individual.method.genotypingMethods && stateObj.individual.method.genotypingMethods.length);
 
-                var segregation = stateObj.individual.segregation;
-                if (segregation && segregation.variants && segregation.variants.length) {
-                    stateObj.variantCount = segregation.variants.length;
-                    this.setState({addVariantDisabled: false});
+                if (stateObj.individual.variants && stateObj.individual.variants.length) {
+                    stateObj.variantCount = stateObj.individual.variants.length;
+                    stateObj.addVariantDisabled = false;
+                }
+            }
+
+            // If we didn't get a family in the query string, see if we're editing an individual, and it has associated
+            // families. If it does, get the first (really the only) one.
+            if (!stateObj.family && stateObj.individual && stateObj.individual.associatedFamilies && stateObj.individual.associatedFamilies.length) {
+                stateObj.family = stateObj.individual.associatedFamilies[0];
+            }
+
+            // If we have a family, see if it has a proband
+            if (stateObj.family && stateObj.family.individualIncluded && stateObj.family.individualIncluded.length) {
+                var proband = _(stateObj.family.individualIncluded).find(function(individual) {
+                    return individual.proband;
+                });
+                if (proband) {
+                    stateObj.proband = proband;
                 }
             }
 
@@ -607,6 +623,9 @@ var IndividualCuration = React.createClass({
             newIndividual.otherPMIDs = individualArticles['@graph'].map(function(article) { return article['@id']; });
         }
 
+        value = this.getFormValue('proband');
+        newIndividual.proband = value === 'Yes';
+
         // Assign the given variant array
         if (individualVariants) {
             newIndividual.variants = individualVariants;
@@ -700,11 +719,13 @@ var IndividualCuration = React.createClass({
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        <PanelGroup accordion>
-                                            <Panel title="Individual – Variant Information" open>
-                                                {IndividualVariantInfo.call(this)}
-                                            </Panel>
-                                        </PanelGroup>
+                                        {families && families.length ?
+                                            <PanelGroup accordion>
+                                                <Panel title="Individual – Variant Information" open>
+                                                    {IndividualVariantInfo.call(this)}
+                                                </Panel>
+                                            </PanelGroup>
+                                        : null}
                                         <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                     </Form>
@@ -940,20 +961,26 @@ var IndividualDemographics = function() {
 };
 
 
+// Only called if we have an associated family
 var IndividualVariantInfo = function() {
     var individual = Object.keys(this.state.individual).length ? this.state.individual : null;
+    var family = Object.keys(this.state.family).length ? this.state.family : null;
     var variants = individual && individual.variants;
 
     return (
         <div className="row">
-            <Input type="select" ref="proband" label="Is this individual the proband in the Family?:" defaultValue="none" value={individual && curator.booleanToDropdown(individual.proband)}
-                error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} required>
-                <option value="none" disabled="disabled">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
+            {this.state.proband && !(individual && individual.proband) ?
+                <p><strong>A proband ({this.state.proband.label}) already exists for this family</strong></p>
+            :
+                <Input type="select" ref="proband" label="Is this individual the proband in the Family?:" defaultValue="none" value={individual && curator.booleanToDropdown(individual.proband)}
+                    error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} required>
+                    <option value="none" disabled="disabled">No Selection</option>
+                    <option disabled="disabled"></option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </Input>
+            }
             {_.range(this.state.variantCount).map(i => {
                 var variant, hgvsNames;
 
@@ -1139,7 +1166,7 @@ var IndividualViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Family — Demographics" panelClassName="panel-data">
+                    <Panel title="Individual — Demographics" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Sex</dt>
@@ -1178,7 +1205,7 @@ var IndividualViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Family — Methods" panelClassName="panel-data">
+                    <Panel title="Individual — Methods" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Previous testing</dt>
@@ -1222,7 +1249,7 @@ var IndividualViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Family — Additional Information" panelClassName="panel-data">
+                    <Panel title="Individual — Additional Information" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Additional Information about Family</dt>
