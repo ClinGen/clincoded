@@ -25,5 +25,14 @@ var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 
 
-var GroupCuration = React.createClass({
+var ExperimentCuration = React.createClass({
+    mixins: [FormMixin, RestMixin],
+
+    render: function() {
+        return (
+            <div>Hello!</div>
+        );
+    }
 });
+
+globals.curator_page.register(ExperimentCuration, 'curator_page', 'experiment-curation');
