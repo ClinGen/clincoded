@@ -153,7 +153,9 @@ var FormMixin = module.exports.FormMixin = {
         var valid = true;
         Object.keys(this.refs).forEach(ref => {
             var props = this.refs[ref].props;
-            if (props.required && !this.getFormValue(ref)) {
+            var val = this.getFormValue(ref);
+            val = (props.type === 'select' && val === 'none') ? null : val;
+            if (props.required && !val) {
                 // Required field has no value. Set error state to render
                 // error, and remember to return false.
                 this.setFormErrors(ref, 'Required');

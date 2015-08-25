@@ -53,7 +53,7 @@ var IndividualCuration = React.createClass({
             annotation: {}, // Annotation object given in query string
             extraIndividualCount: 0, // Number of extra families to create
             extraIndividualNames: [], // Names of extra families to create
-            variantCount: 1, // Number of variants to display
+            variantCount: 0, // Number of variants to display
             variantOption: [VAR_NONE], // One variant panel, and nothing entered
             individualName: '', // Currently entered individual name
             addVariantDisabled: true, // True if Add Another Variant button enabled
@@ -70,6 +70,13 @@ var IndividualCuration = React.createClass({
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
         } else if (ref === 'individualname') {
             this.setState({individualName: this.refs[ref].getValue()});
+        } else if (ref === 'proband') {
+            var val = this.refs[ref].getValue();
+            if (val === 'Yes') {
+                this.setState({variantCount: 0});
+            } else {
+                this.setState({variantCount: 1});
+            }
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -673,17 +680,15 @@ var IndividualCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Individual Additional Information" open>
+                                            <Panel title="Individual — Additional Information" open>
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        {!this.queryValues.individualUuid ?
-                                            <PanelGroup accordion>
-                                                <Panel title="Individual – Number with identical information" open>
-                                                    {IndividualCount.call(this)}
-                                                </Panel>
-                                            </PanelGroup>
-                                        : null}
+                                        <PanelGroup accordion>
+                                            <Panel title="Individual – Variant Information" open>
+                                                {IndividualVariantInfo.call(this)}
+                                            </Panel>
+                                        </PanelGroup>
                                         <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                     </Form>
@@ -919,14 +924,20 @@ var IndividualDemographics = function() {
 };
 
 
-// Display the Individual variant panel. The number of copies depends on the variantCount state variable.
-var IndividualVariant = function() {
+var IndividualVariantInfo = function() {
     var individual = Object.keys(this.state.individual).length ? this.state.individual : null;
-    var segregation = individual && individual.segregation ? individual.segregation : null;
-    var variants = segregation && segregation.variants;
+    var variants = individual && individual.variants;
 
     return (
         <div className="row">
+            <Input type="select" ref="proband" label="Is this individual the proband in the Family?:" defaultValue="none" value={individual && curator.booleanToDropdown(individual.proband)}
+                error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} required>
+                <option value="none" disabled="disabled">No Selection</option>
+                <option disabled="disabled"></option>
+                <option>Yes</option>
+                <option>No</option>
+            </Input>
             {_.range(this.state.variantCount).map(i => {
                 var variant, hgvsNames;
 
@@ -958,6 +969,7 @@ var IndividualVariant = function() {
         </div>
     );
 };
+
 
 // HTML labels for inputs follow.
 var LabelDbSnp = React.createClass({
