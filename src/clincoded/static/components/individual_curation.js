@@ -528,7 +528,17 @@ var IndividualCuration = React.createClass({
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
                     this.resetAllFormValues();
-                    this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
+                    if (this.queryValues.editShortcut) {
+                        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
+                    } else {
+                        var submitLink = '/individual-submit/?gdm=' + this.state.gdm.uuid + '&evidence=' + this.state.annotation.uuid + '&individual=' + savedIndividuals[0].uuid;
+                        if (this.state.family && Object.keys(this.state.family).length) {
+                            submitLink += '&family=' + this.state.family.uuid;
+                        } else if (this.state.group && Object.keys(this.state.group).length) {
+                            submitLink += '&group=' + this.state.group.uuid;
+                        }
+                        this.context.navigate(submitLink);
+                    }
                 }).catch(function(e) {
                     console.log('INDIVIDUAL CREATION ERROR=: %o', e);
                 });
@@ -637,6 +647,7 @@ var IndividualCuration = React.createClass({
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
         this.queryValues.individualUuid = queryKeyValue('individual', this.props.href);
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
+        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "true";
 
         return (
             <div>

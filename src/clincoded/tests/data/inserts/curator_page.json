@@ -42,6 +42,12 @@
         "uuid": "8c1fc394-02fc-49bb-94bd-559988f5b69d"
     },
     {
+        "name": "individual-submit",
+        "title": "Individual Submit",
+        "status": "released",
+        "uuid": "d18e3995-abbf-4836-b82b-b23f887fc641"
+    },
+    {
         "name": "dashboard",
         "title": "Dashboard",
         "status": "released",

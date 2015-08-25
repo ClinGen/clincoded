@@ -323,7 +323,8 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             :
                 <div>No associations</div>
             }
-            <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>{curatorMatch ? <span> | <a href={'/individual-curation/?editsc=true&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
+            <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>
+            {curatorMatch ? <span> | <a href={'/individual-curation/?editsc=true&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
         </div>
     );
 };
