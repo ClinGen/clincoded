@@ -11,6 +11,7 @@ from .base import (
     Item,
     paths_filtered_by_status,
 )
+import json
 
 
 def includeme(config):
@@ -128,9 +129,12 @@ class Gdm(Item):
         'gene',
         'disease',
         'submitted_by',
-        'variantPathogenic.variant',
-        'variantPathogenic.assessments',
-        'variantPathogenic.assessments.submitted_by',
+        'variantPathogenicity',
+        'variantPathogenicity.submitted_by',
+        'variantPathogenicity.variant',
+        'variantPathogenicity.variant.submitted_by',
+        'variantPathogenicity.assessments',
+        'variantPathogenicity.assessments.submitted_by',
         'annotations',
         'annotations.article',
         'annotations.article.submitted_by',
@@ -463,6 +467,42 @@ class Experimental(Item):
         'rescue.assessments',
         'rescue.assessments.submitted_by'
     ]
+
+@collection(
+    name='pathogenicity',
+    unique_key='pathogenicity:uuid',
+    properties={
+        'title': 'Pathogenicity',
+        'description': 'List of variant pathogenicity',
+    })
+class Pathogenicity(Item):
+    item_type = 'pathogenicity'
+    schema = load_schema('clincoded:schemas/pathogenicity.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'variant',
+        'assessments',
+        'associatedGdm',
+    ]
+    rev = {
+        'associatedGdm': ('gdm', 'variantPathogenicity'),
+    }
+
+    @calculated_property(schema={
+        "title": "Associated GDM",
+        "type": "object",
+        "linkFrom": "gdm.variantPathogenicity"
+    })
+    def associatedGdm(self, request, associatedGdm):
+        return paths_filtered_by_status(request, associatedGdm)
+
+    @calculated_property(schema={
+        "title": "Number of Assessment",
+        "type": "integer"
+    })
+    def numberOfAssessmnet(self, assessments):
+        return len(assessments)
 
 @collection(
     name='assessment',

@@ -4,7 +4,7 @@
     "description": "Schema for storing gene:disease:mode data.",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["gene", "disease", "modeInheritance"],
+    "required": ["gene", "disease", "modeInheritance", "modeCode"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -51,6 +51,12 @@
                 "Other"
             ]
         },
+        "modeCode": {
+            "title": "Model Code",
+            "description": "Internal digital unique code for each model",
+            "type": "string",
+            "uniqueKey": true
+        },
         "omimId": {
             "title": "OMIM ID",
             "description": "OMIM id",
@@ -70,129 +76,15 @@
                 "linkTo": "annotation"
             }
         },
-        "variantPathogenic": {
-            "title": "Variant Pathogenic Data",
-            "description": "List of associated variants, their pathogenic data and assessments",
+        "variantPathogenicity": {
+            "title": "Variant Pathogenicity",
+            "description": "List of variant pathogenicity for the gdm",
             "type": "array",
             "default": [],
             "items": {
-                "title": "Variant And Pathogenic",
-                "description": "Variant pathogenic data",
-                "type": "object",
-                "properties": {
-                    "variant": {
-                        "title": "Varaint uuid",
-                        "type": "string",
-                        "linkTo": "variant"
-                    },
-                    "consistentWithDiseaseMechanism": {
-                        "title": "Is Variant Consistent with Disease Mechanism?",
-                        "description": "Is variant consistent with disease mechanism?",
-                        "type": "string",
-                        "default": "",
-                        "enum": [
-                            "",
-                            "Yes",
-                            "No"
-                        ]
-                    },
-                    "withinFunctionalDomain": {
-                        "title": "Variant within Functional Domain",
-                        "type": "string",
-                        "default": "",
-                        "enum": [
-                            "",
-                            "Yes",
-                            "No"
-                        ]
-                    },
-                    "frequencySupportPathogenicity": {
-                        "title": "Does Frequency Data Support Pathogenicity",
-                        "type": "string",
-                        "default": "",
-                        "enum": [
-                            "",
-                            "Yes",
-                            "No"
-                        ]
-                    },
-                    "previouslyReported": {
-                        "title": "Previously Reported",
-                        "type": "string",
-                        "default": "",
-                        "enum": [
-                            "",
-                            "Yes",
-                            "No"
-                        ]
-                    },
-                    "denovoType": {
-                        "title": "de novo Type",
-                        "type": "string",
-                        "default": "",
-                        "enum": [
-                            "",
-                            "Inferred",
-                            "Confirmed"
-                        ]
-                    },
-                    "intransWithAnotherVariant": {
-                         "title": "in trans with Another Variant",
-                        "type": "string",
-                        "default": "",
-                        "enum": [
-                            "",
-                            "Yes",
-                            "No"
-                        ]
-                    },
-                    "supportingSegregation": {
-                         "title": "Supporting Segregation Data",
-                        "type": "string",
-                        "default": "",
-                        "enum": [
-                            "",
-                            "Yes",
-                            "No"
-                        ]
-                    },
-                    "supportingStatistic": {
-                         "title": "Supporting Statistical Data",
-                        "type": "string",
-                        "default": "",
-                        "enum": [
-                            "",
-                            "Yes",
-                            "No"
-                        ]
-                    },
-                    "SupportingFunctional": {
-                         "title": "Supporting Functional Data",
-                        "type": "string",
-                        "default": "",
-                        "enum": [
-                            "",
-                            "Yes",
-                            "No"
-                        ]
-                    },
-                    "comment": {
-                        "title": "Comment",
-                        "type": "string",
-                        "default": ""
-                    },
-                    "assessments": {
-                        "title": "Assessments",
-                        "description": "List of assessments added from different curators",
-                        "type": "array",
-                        "default": [],
-                        "items": {
-                            "description": "Assessment uuid",
-                            "type": "string",
-                            "linkTo": "assessment"
-                        }
-                    }
-                }
+                "description": "uuid",
+                "type": "string",
+                "linkTo": "pathogenicity"
             }
         },
         "provisionalClassifications": {
@@ -244,6 +136,10 @@
             "title": "Mode of Inheritance",
             "type": "string"
         },
+        "modeCode": {
+            "title": "Model Code",
+            "type": "string"
+        },
         "omimId": {
             "title": "OMIM ID",
             "type": "string"
@@ -256,20 +152,12 @@
             "title": "Evidence",
             "type": "string"
         },
-        "variantPathogenic": {
+        "variantPathogenicity": {
             "title": "Variants",
             "type": "string"
         },
         "provisionalClassifications": {
             "title": "Provisional Assertion",
-            "type": "string"
-        },
-        "draftClassification": {
-            "title": "Draft Assertion",
-            "type": "string"
-        },
-        "finalClassification": {
-            "title": "Final Assertion",
             "type": "string"
         },
         "date_created": {
@@ -282,6 +170,9 @@
         }
     },
     "boost_values": {
+        "gene.symbol": 1.0,
+        "disease.orphaNumber": 1.0,
+        "modeCode": 1.0,
         "annotations.article": 1.0
     }
 }
