@@ -258,7 +258,7 @@ var AddPmidModal = React.createClass({
             else {
                 // valid if input isn't zero-leading (but not zero-filled)
                 valid = rawInput.length == strippedInput.length;
-                if (!valid) this.setFormErrors('pmid', 'Did you mean the PMID "' + strippedInput + '"? Please remove any leading 0\'s from your PMID');
+                if (!valid) this.setFormErrors('pmid', 'Please re-enter PubMed ID without any leading 0\'s');
                 else {
                     // valid if the input has only numbers
                     valid = rawInput.match(/^[0-9]*$/i);
@@ -272,7 +272,7 @@ var AddPmidModal = React.createClass({
                             for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
                                 if (this.props.currGdm.annotations[i].article.pmid == rawInput) {
                                     valid = false;
-                                    this.setFormErrors('pmid', 'This article has already been associated with this GDM');
+                                    this.setFormErrors('pmid', 'This article has already been associated with this Gene-Disease Record');
                                 }
                             }
                         }
