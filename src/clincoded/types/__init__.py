@@ -99,6 +99,7 @@ class Article(Item):
         'submitted_by'
     ]
 
+
 @collection(
     name='variants',
     unique_key='variant:uuid',
@@ -113,6 +114,7 @@ class Variant(Item):
     embedded = [
         'submitted_by'
     ]
+
 
 @collection(
     name='gdm',
@@ -235,6 +237,13 @@ class Gdm(Item):
         else:
             return 'Created'
 
+    @calculated_property(schema={
+        "title": "last_modified",
+        "type": "string",
+    })
+    def last_Modified(selft, date_created):
+        return date_created
+
 
 @collection(
     name='evidence',
@@ -327,6 +336,7 @@ class Annotation(Item):
         'experimentalData.rescue.assessments.submitted_by'
     ]
 
+
 @collection(
     name='groups',
     unique_key='group:uuid',
@@ -371,6 +381,7 @@ class Group(Item):
         #'control'
     ]
 
+
 @collection(
     name='families',
     unique_key='family:uuid',
@@ -414,6 +425,7 @@ class Family(Item):
     def associatedGroups(self, request, associatedGroups):
         return paths_filtered_by_status(request, associatedGroups)
 
+
 @collection(
     name='individuals',
     unique_key='individual:uuid',
@@ -433,6 +445,7 @@ class Individual(Item):
         'otherPMIDs',
         'otherPMIDs.submitted_by',
     ]
+
 
 @collection(
     name='experimental',
@@ -467,6 +480,7 @@ class Experimental(Item):
         'rescue.assessments',
         'rescue.assessments.submitted_by'
     ]
+
 
 @collection(
     name='pathogenicity',
@@ -503,6 +517,7 @@ class Pathogenicity(Item):
     })
     def numberOfAssessmnet(self, assessments):
         return len(assessments)
+
 
 @collection(
     name='assessment',
