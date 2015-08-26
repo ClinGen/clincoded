@@ -4,7 +4,7 @@
     "description": "Schema for storing gene:disease:mode data.",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["gene", "disease", "modeInheritance", "modeCode"],
+    "required": ["gene", "disease", "modeInheritance"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -134,10 +134,6 @@
             },
         "modeInheritance": {
             "title": "Mode of Inheritance",
-            "type": "string"
-        },
-        "modeCode": {
-            "title": "Model Code",
             "type": "string"
         },
         "omimId": {
