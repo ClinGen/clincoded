@@ -1346,3 +1346,18 @@ var IndividualViewer = React.createClass({
 });
 
 globals.content_views.register(IndividualViewer, 'individual');
+
+
+// Make a starter individual from the family; always called from family curation.
+var makeStarterIndividual = modules.exports.makeStarterIndividual(label, diseases, variants) {
+    var newIndividual = {};
+
+    newIndividual.label = label;
+    newIndividual.diagnosis = diseases.map(function(disease) { return disease['@id']; });
+    newIndividual.variants = variants.map(function(variant) { return variant['@id']});
+
+    // We created an individual; post it to the DB and return a promise with the new individual
+    return this.postRestData('/individuals/', newIndividual).then(data => {
+        return Promise.resolve(data['@graph'][0]);
+    });
+};
