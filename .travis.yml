@@ -44,7 +44,7 @@ before_script:
         --tunnel-identifier $TRAVIS_JOB_NUMBER \
         --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
       while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do 
-        sleep 1
+        sleep 0.5
       done
     fi
 script:
