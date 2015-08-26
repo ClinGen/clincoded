@@ -42,7 +42,6 @@ var Dashboard = React.createClass({
         // loop through an gdmSubItem and map its subitems' UUIDs to the GDM UUID and Disease/Gene/Mode data
         if (gdmSubItem.length > 0) {
             for (var i = 0; i < gdmSubItem.length; i++) {
-                var tempExtraInfo = {};
                 // create mapping object
                 gdmMapping[gdmSubItem[i].uuid] = {
                     uuid: gdmUuid,
@@ -198,7 +197,7 @@ var Dashboard = React.createClass({
                             <h3>Tools</h3>
                             <ul>
                                 <li><a href="/create-gene-disease/">Create Gene-Disease Record</a></li>
-                                <li><span className="disabled">View list of all Gene-Disease Records</span></li>
+                                <li><span className="disabled-gray">View list of all Gene-Disease Records</span></li>
                             </ul>
                         </Panel>
                         <Panel panelClassName="panel-dashboard">
