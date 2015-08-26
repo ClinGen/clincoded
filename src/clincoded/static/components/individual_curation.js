@@ -650,13 +650,48 @@ var IndividualCuration = React.createClass({
     render: function() {
         var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
         var individual = Object.keys(this.state.individual).length ? this.state.individual : null;
-        var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
-            (Object.keys(this.state.group).length ? [this.state.group] : null);
-        var families = (individual && individual.associatedFamilies) ? individual.associatedFamilies :
-            (Object.keys(this.state.family).length ? [this.state.family] : null);
         var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
         var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
+
+        // Get a list of associated groups if editing an individual, or the group in the query string if there was one, or null.
+        var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
+            (Object.keys(this.state.group).length ? [this.state.group] : null);
+
+        // Get a list of associated families if editing an individual, or the family in the query string if there was one, or null.
+        var families = (individual && individual.associatedFamilies) ? individual.associatedFamilies :
+            (Object.keys(this.state.family).length ? [this.state.family] : null);
+
+        // Figure out the family and group page titles
+        var familyTitles = [];
+        var groupTitles = [];
+        if (individual) {
+            // Editing an individual. get associated family titles, and associated group titles
+            groupTitles = groups.map(function(group) { return group.label; });
+            familyTitles = families.map(function(family) {
+                // If this family has associated groups, add their titles to groupTitles.
+                if (family.associatedGroups && family.associatedGroups.length) {
+                    groupTitles = groupTitles.concat(family.associatedGroups.map(function(group) { return group.label; }));
+                }
+                return family.label;
+            });
+        } else {
+            // Curating an individual.
+            if (families) {
+                // Given a family in the query string. Get title from first (only) family.
+                familyTitles[0] = families[0].label;
+
+                // If the given family has associated groups, add those to group titles
+                if (families[0].associatedGroups && families[0].associatedGroups.length) {
+                    groupTitles = families[0].associatedGroups.map(function(group) {
+                        return group.label;
+                    });
+                }
+            } else if (groups) {
+                // Given a group in the query string. Get title from first (only) group.
+                groupTitles[0] = groups[0].label;
+            }
+        }
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
@@ -682,14 +717,14 @@ var IndividualCuration = React.createClass({
                             <div className="viewer-titles">
                                 <h1>{(individual ? 'Edit' : 'Curate') + ' Individual Information'}</h1>
                                 <h2>Individual: {this.state.individualName ? <span>{this.state.individualName}</span> : <span className="no-entry">No entry</span>}</h2>
-                                {groups && groups.length ?
+                                {groupTitles.length ?
                                     <h2>
-                                        {'Group association: ' + groups.map(function(group) { return group.label; }).join(', ')}
+                                        {'Group association: ' + groupTitles.join(', ')}
                                     </h2>
                                 : null}
-                                {families && families.length ?
+                                {familyTitles.length ?
                                     <h2>
-                                        {'Family association: ' + families.map(function(family) { return family.label; }).join(', ')}
+                                        {'Family association: ' + familyTitles.join(', ')}
                                     </h2>
                                 : null}
                             </div>
@@ -849,7 +884,7 @@ var IndividualCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Common Disease(s) in Individual:</span>;
+        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Disease(s) for Individual:</span>;
     }
 });
 
@@ -862,7 +897,7 @@ var LabelHpoId = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
+                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : ''}
                 Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="PhenExplorer home page in a new tab">PhenExplorer</a>)</span>:
             </span>
         );
