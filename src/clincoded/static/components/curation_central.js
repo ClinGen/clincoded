@@ -258,7 +258,7 @@ var AddPmidModal = React.createClass({
             else {
                 // valid if input isn't zero-leading (but not zero-filled)
                 valid = rawInput.length == strippedInput.length;
-                if (!valid) this.setFormErrors('pmid', 'Please re-enter PubMed ID without any leading 0\'s');
+                if (!valid) this.setFormErrors('pmid', 'Please re-enter PMID without any leading 0\'s');
                 else {
                     // valid if the input has only numbers
                     valid = rawInput.match(/^[0-9]*$/i);
@@ -325,7 +325,7 @@ var AddPmidModal = React.createClass({
         return (
             <Form submitHandler={this.submitForm} formClassName="form-std">
                 <div className="modal-body">
-                    <Input type="text" ref="pmid" label="Enter a PubMed ID"
+                    <Input type="text" ref="pmid" label="Enter a PMID"
                         error={this.getFormError('pmid')} clearError={this.clrFormErrors.bind(null, 'pmid')}
                         labelClassName="control-label" groupClassName="form-group" required />
                 </div>
