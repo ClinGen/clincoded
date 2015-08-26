@@ -125,7 +125,7 @@ var CurationCentral = React.createClass({
                     <div className="row curation-content">
                         <div className="col-md-3">
                             <PmidSelectionList annotations={gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
-                                    protocol={this.props.href_url.protocol} updateGdmArticles={this.updateGdmArticles} />
+                                    protocol={this.props.href_url.protocol} updateGdmArticles={this.updateGdmArticles} currGdm={gdm} />
                         </div>
                         <div className="col-md-6">
                             {currArticle ?
@@ -198,7 +198,7 @@ var PmidSelectionList = React.createClass({
             <div className="pmid-selection-wrapper">
                 <div className="pmid-selection-add">
                     <Modal title='Add new PubMed Article'>
-                        <button className="btn btn-primary pmid-selection-add-btn" modal={<AddPmidModal protocol={this.props.protocol} closeModal={this.closeModal} updateGdmArticles={this.props.updateGdmArticles} />}>
+                        <button className="btn btn-primary pmid-selection-add-btn" modal={<AddPmidModal protocol={this.props.protocol} closeModal={this.closeModal} updateGdmArticles={this.props.updateGdmArticles} currGdm={this.props.currGdm} />}>
                             Add New PMID(s)
                         </button>
                     </Modal>
@@ -248,14 +248,33 @@ var AddPmidModal = React.createClass({
     validateForm: function() {
         // Start with default validation
         var valid = this.validateDefault();
+        var formInput = this.getFormValue('pmid');
 
-        // Valid if the field has only 10 or fewer digits
+        // valid if input isn't zero-filled or is not longer than 8 characters
+        if (valid && (formInput.match(/^0+$/) || formInput.length > 8)) {
+            valid = false;
+            this.setFormErrors('pmid', 'This PMID does not exist');
+        }
+        // valid if input isn't zero-leading
+        if (valid && formInput.match(/^0+/)) {
+            valid = false;
+            this.setFormErrors('pmid', 'Please re-enter PMID without any leading 0\'s');
+        }
+        // valid if the input only has numbers
+        if (valid && !formInput.match(/^[0-9]*$/)) {
+            valid = false;
+            this.setFormErrors('pmid', 'Only numbers allowed');
+        }
+        // valid if input isn't already associated with GDM
         if (valid) {
-            valid = this.getFormValue('pmid').match(/^[0-9]{1,10}$/i);
-            if (!valid) {
-                this.setFormErrors('pmid', 'Only numbers allowed');
+            for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
+                if (this.props.currGdm.annotations[i].article.pmid == formInput) {
+                    valid = false;
+                    this.setFormErrors('pmid', 'This article has already been associated with this Gene-Disease Record');
+                }
             }
         }
+
         return valid;
     },
 
@@ -275,6 +294,8 @@ var AddPmidModal = React.createClass({
                 // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
                     var newArticle = parsePubmed(xml, enteredPmid);
+                    // if the PubMed article for this PMID doesn't exist, display an error
+                    if (newArticle.length == undefined) this.setFormErrors('pmid', 'This PMID does not exist');
                     return this.postRestData('/articles/', newArticle).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });
@@ -299,13 +320,14 @@ var AddPmidModal = React.createClass({
         return (
             <Form submitHandler={this.submitForm} formClassName="form-std">
                 <div className="modal-body">
-                    <Input type="text" ref="pmid" label="Enter a PubMed ID"
+                    <Input type="text" ref="pmid" label="Enter a PMID"
                         error={this.getFormError('pmid')} clearError={this.clrFormErrors.bind(null, 'pmid')}
                         labelClassName="control-label" groupClassName="form-group" required />
                 </div>
                 <div className='modal-footer'>
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Add Article" />
+                    <Input type="submit" inputClassName={this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ?
+                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" />
                 </div>
             </Form>
         );
