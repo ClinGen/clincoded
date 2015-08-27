@@ -9,6 +9,7 @@ var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
+var makeStarterIndividual = require('./individual_curation').makeStarterIndividual;
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -325,11 +326,13 @@ var FamilyCuration = React.createClass({
         if (this.validateDefault() && this.validateVariants()) {
             var newFamily = {}; // Holds the new group object;
             var familyDiseases = null, familyArticles, familyVariants = [];
+            var individualDiseases = null;
             var savedFamilies; // Array of saved written to DB
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
             var orphaIds = curator.capture.orphas(this.getFormValue('orphanetid'));
+            var indOrphaIds = curator.capture.orphas(this.getFormValue('individualorphanetid'));
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
@@ -339,6 +342,13 @@ var FamilyCuration = React.createClass({
                 // ORPHA list is bad
                 formError = true;
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+            }
+
+            // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
+            if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
+                // Individual’s ORPHA list is bad
+                formError = true;
+                this.setFormErrors('individualorphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
             }
 
             // Check that all gene symbols have the proper format (will check for existence later)
@@ -382,6 +392,26 @@ var FamilyCuration = React.createClass({
                     // The given orpha IDs couldn't be retrieved for some reason.
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
+                }).then(diseases => {
+                    var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+
+                    // Verify given Orpha ID exists in DB
+                    return this.getRestData(searchStr).then(diseases => {
+                        if (diseases['@graph'].length === indOrphaIds.length) {
+                            // Successfully retrieved all diseases
+                            individualDiseases = diseases;
+                            return Promise.resolve(diseases);
+                        } else {
+                            // Get array of missing Orphanet IDs
+                            var missingOrphas = _.difference(indOrphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
+                            this.setFormErrors('individualorphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
+                            throw diseases;
+                        }
+                    }, e => {
+                        // The given orpha IDs couldn't be retrieved for some reason.
+                        this.setFormErrors('individualorphanetid', 'The given diseases not found');
+                        throw e;
+                    });
                 }).then(diseases => {
                     // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
                     if (pmids) {
@@ -450,6 +480,15 @@ var FamilyCuration = React.createClass({
                     // No variant search strings. Go to next THEN.
                     return Promise.resolve(null);
                 }).then(data => {
+                    // If we have proband variants, make the starter individual
+                    if (familyVariants.length) {
+                        var label = this.getFormValue('individualname');
+                        var diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
+
+                        return makeStarterIndividual(label, diseases, familyVariants, this);
+                    }
+                    return Promise.resolve(null);
+                }).then(data => {
                     // Make a new family object based on form fields.
                     var newFamily = this.createFamily(familyDiseases, familyArticles, familyVariants);
 
@@ -459,6 +498,12 @@ var FamilyCuration = React.createClass({
                     var familyPromises = [];
                     var familyCount = parseInt(this.getFormValue('extrafamilycount'), 10);
                     familyCount = familyCount ? familyCount + 1 : 1;
+
+                    // Assign the starter individual if we made one
+                    if (data) {
+                        newFamily.individualIncluded = [];
+                        newFamily.individualIncluded[0] = data['@id'];
+                    }
 
                     // Write the new family object to the DB
                     for (var i = 0; i < familyCount; ++i) {
@@ -1078,12 +1123,10 @@ var FamilyVariant = function() {
                 );
             })}
             {this.state.variantCount ?
-                <div>
-                    <div className="variant-panel">
-                        <Input type="text" ref="individualname" label="Individual Name"
-                            error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-                    </div>
+                <div className="variant-panel clearfix">
+                    <Input type="text" ref="individualname" label="Individual Name"
+                        error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
                     <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15"
                         error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
@@ -1092,8 +1135,10 @@ var FamilyVariant = function() {
                 </div>
             : null}
             {this.state.variantCount < MAX_VARIANTS ?
-                <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
-                    clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                <div>
+                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
+                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                </div>
             : null}
         </div>
     );

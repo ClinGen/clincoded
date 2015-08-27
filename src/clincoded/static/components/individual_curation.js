@@ -1337,15 +1337,15 @@ globals.content_views.register(IndividualViewer, 'individual');
 // Make a starter individual from the family and write it to the DB; always called from
 // family curation. Pass an array of disease objects to add, as well as an array of variants.
 // Returns a promise once the Individual object is written.
-var makeStarterIndividual = module.exports.makeStarterIndividual = function(label, diseases, variants) {
+var makeStarterIndividual = module.exports.makeStarterIndividual = function(label, diseases, variants, context) {
     var newIndividual = {};
 
     newIndividual.label = label;
-    newIndividual.diagnosis = diseases.map(function(disease) { return disease['@id']; });
-    newIndividual.variants = variants.map(function(variant) { return variant['@id']; });
+    newIndividual.diagnosis = diseases;
+    newIndividual.variants = variants;
 
     // We created an individual; post it to the DB and return a promise with the new individual
-    return this.postRestData('/individuals/', newIndividual).then(data => {
+    return context.postRestData('/individuals/', newIndividual).then(data => {
         return Promise.resolve(data['@graph'][0]);
     });
 };
