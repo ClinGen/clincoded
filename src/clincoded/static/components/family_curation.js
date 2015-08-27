@@ -345,10 +345,12 @@ var FamilyCuration = React.createClass({
             }
 
             // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
-            if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
-                // Individual’s ORPHA list is bad
-                formError = true;
-                this.setFormErrors('individualorphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+            if (this.state.variantCount > 0) {
+                if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
+                    // Individual’s ORPHA list is bad
+                    formError = true;
+                    this.setFormErrors('individualorphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+                }
             }
 
             // Check that all gene symbols have the proper format (will check for existence later)
@@ -393,25 +395,28 @@ var FamilyCuration = React.createClass({
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
-                    var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                    if (this.state.variantCount) {
+                        var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
 
-                    // Verify given Orpha ID exists in DB
-                    return this.getRestData(searchStr).then(diseases => {
-                        if (diseases['@graph'].length === indOrphaIds.length) {
-                            // Successfully retrieved all diseases
-                            individualDiseases = diseases;
-                            return Promise.resolve(diseases);
-                        } else {
-                            // Get array of missing Orphanet IDs
-                            var missingOrphas = _.difference(indOrphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
-                            this.setFormErrors('individualorphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
-                            throw diseases;
-                        }
-                    }, e => {
-                        // The given orpha IDs couldn't be retrieved for some reason.
-                        this.setFormErrors('individualorphanetid', 'The given diseases not found');
-                        throw e;
-                    });
+                        // Verify given Orpha ID exists in DB
+                        return this.getRestData(searchStr).then(diseases => {
+                            if (diseases['@graph'].length === indOrphaIds.length) {
+                                // Successfully retrieved all diseases
+                                individualDiseases = diseases;
+                                return Promise.resolve(diseases);
+                            } else {
+                                // Get array of missing Orphanet IDs
+                                var missingOrphas = _.difference(indOrphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
+                                this.setFormErrors('individualorphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
+                                throw diseases;
+                            }
+                        }, e => {
+                            // The given orpha IDs couldn't be retrieved for some reason.
+                            this.setFormErrors('individualorphanetid', 'The given diseases not found');
+                            throw e;
+                        });
+                    }
+                    return Promise.resolve(diseases);
                 }).then(diseases => {
                     // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
                     if (pmids) {
