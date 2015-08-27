@@ -52,10 +52,10 @@ var FamilyCuration = React.createClass({
             annotation: {}, // Annotation object given in query string
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
-            variantCount: 1, // Number of variants to display
+            variantCount: 0, // Number of variants to display
             variantOption: [VAR_NONE], // One variant panel, and nothing entered
             familyName: '', // Currently entered family name
-            addVariantDisabled: true, // True if Add Another Variant button enabled
+            addVariantDisabled: false, // True if Add Another Variant button enabled
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
     },
@@ -104,6 +104,13 @@ var FamilyCuration = React.createClass({
             }
             this.setState({variantOption: currVariantOption});
         }
+    },
+
+    // Handle a click on the copy orphanet button
+    handleClick: function(e) {
+        e.preventDefault(); e.stopPropagation();
+        var orphanetVal = this.refs['orphanetid'].getValue();
+        this.refs['individualorphanetid'].setValue(orphanetVal);
     },
 
     // Load objects from query string into the state variables. Must have already parsed the query string
@@ -737,7 +744,7 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family — Variant(s) associated with Proband" open>
+                                            <Panel title="Family — Variant(s) segregated with Proband" open>
                                                 {FamilyVariant.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -1067,13 +1074,27 @@ var FamilyVariant = function() {
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                        {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
-                            <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
-                                clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
-                        : null}
                     </div>
                 );
             })}
+            {this.state.variantCount ?
+                <div>
+                    <div className="variant-panel">
+                        <Input type="text" ref="individualname" label="Individual Name"
+                            error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                    </div>
+                    <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15"
+                        error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                    <Input type="button" ref="orphanetcopy" inputClassName="btn-default btn-last pull-right" title="Copy orphanet IDs from family"
+                        clickHandler={this.handleClick} />
+                </div>
+            : null}
+            {this.state.variantCount < MAX_VARIANTS ?
+                <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
+                    clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+            : null}
         </div>
     );
 };

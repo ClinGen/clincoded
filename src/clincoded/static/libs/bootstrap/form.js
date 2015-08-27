@@ -226,6 +226,13 @@ var Input = module.exports.Input = React.createClass({
         }
     },
 
+    // Set the value of an input
+    setValue: function(val) {
+        if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
+            React.findDOMNode(this.refs.input).value = val;
+        }
+    },
+
     resetValue: function() {
         if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
             React.findDOMNode(this.refs.input).value = '';

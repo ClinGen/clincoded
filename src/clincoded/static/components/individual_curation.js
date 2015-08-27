@@ -754,13 +754,11 @@ var IndividualCuration = React.createClass({
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        {families && families.length ?
-                                            <PanelGroup accordion>
-                                                <Panel title="Individual – Variant Information" open>
-                                                    {IndividualVariantInfo.call(this)}
-                                                </Panel>
-                                            </PanelGroup>
-                                        : null}
+                                        <PanelGroup accordion>
+                                            <Panel title="Individual – Variant Information" open>
+                                                {IndividualVariantInfo.call(this)}
+                                            </Panel>
+                                        </PanelGroup>
                                         <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                     </Form>
@@ -1004,18 +1002,6 @@ var IndividualVariantInfo = function() {
 
     return (
         <div className="row">
-            {this.state.proband && !(individual && individual.proband) ?
-                <p><strong>A proband ({this.state.proband.label}) already exists for this family</strong></p>
-            :
-                <Input type="select" ref="proband" label="Is this individual the proband in the Family?:" defaultValue="none" value={individual && curator.booleanToDropdown(individual.proband)}
-                    error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} required>
-                    <option value="none" disabled="disabled">No Selection</option>
-                    <option disabled="disabled"></option>
-                    <option>Yes</option>
-                    <option>No</option>
-                </Input>
-            }
             {_.range(this.state.variantCount).map(i => {
                 var variant, hgvsNames;
 
@@ -1348,13 +1334,15 @@ var IndividualViewer = React.createClass({
 globals.content_views.register(IndividualViewer, 'individual');
 
 
-// Make a starter individual from the family; always called from family curation.
-var makeStarterIndividual = modules.exports.makeStarterIndividual(label, diseases, variants) {
+// Make a starter individual from the family and write it to the DB; always called from
+// family curation. Pass an array of disease objects to add, as well as an array of variants.
+// Returns a promise once the Individual object is written.
+var makeStarterIndividual = module.exports.makeStarterIndividual = function(label, diseases, variants) {
     var newIndividual = {};
 
     newIndividual.label = label;
     newIndividual.diagnosis = diseases.map(function(disease) { return disease['@id']; });
-    newIndividual.variants = variants.map(function(variant) { return variant['@id']});
+    newIndividual.variants = variants.map(function(variant) { return variant['@id']; });
 
     // We created an individual; post it to the DB and return a promise with the new individual
     return this.postRestData('/individuals/', newIndividual).then(data => {
