@@ -26,6 +26,10 @@
                 "Contradicts"
             ]
         },
+        "evidence_url": {
+            "description": "URL of evidence assessed to",
+            "type": "string"
+        },
         "active": {
             "title": "Active",
             "description": "Boolean switch for activation of the assessment",
@@ -40,6 +44,18 @@
         },
         "value": {
             "Title": "Value",
+            "type": "string"
+        },
+        "sbumitted_by.uuid": {
+            "title": "Owner",
+            "type": "string"
+        },
+        "date_created": {
+            "title": "Creation Date",
+            "type": "string"
+        },
+        "last_modified": {
+            "title": "Last Modified",
             "type": "string"
         }
     }

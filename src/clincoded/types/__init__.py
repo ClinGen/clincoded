@@ -558,7 +558,7 @@ class Pathogenicity(Item):
 
 
 @collection(
-    name='assessment',
+    name='assessments',
     unique_key='assessment:uuid',
     properties={
         'title': 'Assessments',
