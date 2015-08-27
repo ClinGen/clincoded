@@ -238,11 +238,13 @@ class Gdm(Item):
             return 'Created'
 
     @calculated_property(schema={
-        "title": "last_modified",
+        "title": "GDM",
         "type": "string",
     })
-    def last_Modified(selft, date_created):
-        return date_created
+    def gdm_title(seft, gene, disease, modeCode):
+        gene_symbol = gene.replace('/genes/', '').replace('/', '')
+        orpha_id = disease.replace('/diseases/', '').replace('/', '')
+        return gene_symbol + '-' + orpha_id + '-' + modeCode
 
 
 @collection(
@@ -335,6 +337,42 @@ class Annotation(Item):
         'experimentalData.rescue.assessments',
         'experimentalData.rescue.assessments.submitted_by'
     ]
+
+    @calculated_property(schema={
+        "title": "Number of Group",
+        "type": "string",
+    })
+    def number_group(selft, groups):
+        if len(groups) > 0:
+            return len(groups)
+        return ""
+
+    @calculated_property(schema={
+        "title": "Number of Family",
+        "type": "string",
+    })
+    def number_family(selft, families):
+        if len(families) > 0:
+            return len(families)
+        return ""
+
+    @calculated_property(schema={
+        "title": "Number of Provisioinal Individual",
+        "type": "string",
+    })
+    def number_individual(selft, individuals):
+        if len(individuals) > 0:
+            return len(individuals)
+        return ""
+
+    @calculated_property(schema={
+        "title": "Number of Experimental",
+        "type": "string",
+    })
+    def number_experimental(selft, experimentalData):
+        if len(experimentalData) > 0:
+            return len(experimentalData)
+        return ""
 
 
 @collection(

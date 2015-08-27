@@ -53,9 +53,9 @@
         },
         "modeCode": {
             "title": "Model Code",
-            "description": "Internal digital unique code for each model",
+            "description": "Internal digital unique code for each Mode of Inheritance",
             "type": "string",
-            "uniqueKey": true
+            "default": "0"
         },
         "omimId": {
             "title": "OMIM ID",
@@ -110,14 +110,14 @@
             "default": ""
         },
         "active": {
-            "description": "boolean switch to set if the phenotype avaliable for curation.",
+            "description": "boolean switch to set if the gdm avaliable for curation.",
             "type": "boolean",
             "default": true
         }
     },
     "columns": {
         "uuid": {
-            "title": "Item",
+            "title": "ID",
             "type": "string"
         },
         "gene.symbol": {
@@ -136,6 +136,10 @@
             "title": "Mode of Inheritance",
             "type": "string"
         },
+        "modeCode": {
+            "title": "Mode Code",
+            "type": "string"
+        },
         "omimId": {
             "title": "OMIM ID",
             "type": "string"
@@ -146,14 +150,6 @@
         },
         "annotations": {
             "title": "Evidence",
-            "type": "string"
-        },
-        "variantPathogenicity": {
-            "title": "Variants",
-            "type": "string"
-        },
-        "provisionalClassifications": {
-            "title": "Provisional Assertion",
             "type": "string"
         },
         "date_created": {
