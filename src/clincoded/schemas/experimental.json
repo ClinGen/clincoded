@@ -34,7 +34,7 @@
                 "Rescue"
             ]
         },
-"biochemicalFunction": {
+        "biochemicalFunction": {
             "title": "Biochemical Function",
             "description": "Items in biochemical function type",
             "type": "object",

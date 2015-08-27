@@ -26,8 +26,16 @@
                 "Contradicts"
             ]
         },
-        "evidence_url": {
-            "description": "URL of evidence assessed to",
+        "evidence_type": {
+            "description": "Object type of assessed evidence",
+            "type": "string"
+        },
+        "evidence_id": {
+            "description": "uuidof assessed evidence",
+            "type": "string"
+        },
+        "evidence_gdm": {
+            "description": "uuid of GDM the assessed evidence belonging to",
             "type": "string"
         },
         "active": {
@@ -38,16 +46,20 @@
         }
     },
     "columns": {
-        "uuid": {
-            "title": "Assessment",
+        "submitted_by.title": {
+            "title": "Owner",
+            "type": "string"
+        },
+        "evidence_type": {
+            "title": "Evidence",
+            "type": "string"
+        },
+        "evidence_gdm": {
+            "title": "GDM",
             "type": "string"
         },
         "value": {
             "Title": "Value",
-            "type": "string"
-        },
-        "sbumitted_by.uuid": {
-            "title": "Owner",
             "type": "string"
         },
         "date_created": {
