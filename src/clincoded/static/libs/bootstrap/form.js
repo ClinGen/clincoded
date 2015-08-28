@@ -351,6 +351,18 @@ var Input = module.exports.Input = React.createClass({
                 );
                 break;
 
+            case 'checkbox':
+                input = (
+                    <div className={this.props.groupClassName}>
+                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
+                        <div className={this.props.wrapperClassName}>
+                            <input className={inputClasses} type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} defaultValue={this.props.value ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled} />
+                            <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
+                        </div>
+                    </div>
+                );
+                break;
+
             case 'submit':
                 title = this.props.title ? this.props.title : 'Submit';
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');

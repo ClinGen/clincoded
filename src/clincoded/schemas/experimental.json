@@ -34,7 +34,7 @@
                 "Rescue"
             ]
         },
-"biochemicalFunction": {
+        "biochemicalFunction": {
             "title": "Biochemical Function",
             "description": "Items in biochemical function type",
             "type": "object",
@@ -50,7 +50,7 @@
                     "description": "Evidence for function (required)",
                     "type": "string"
                 },
-                "evidenceForFunctionInPapaer": {
+                "evidenceForFunctionInPaper": {
                     "title": "Evidence Location in Article",
                     "description": "Where in article to find evidence",
                     "type": "string",
@@ -151,7 +151,7 @@
                 }
             }
         },
-        "proteinIneractions": {
+        "proteinInteractions": {
             "title": "Interactions",
             "description": "Items in interactions type",
             "type": "object",
@@ -238,6 +238,11 @@
                     "type": "object",
                     "default": {},
                     "properties": {
+                        "expressedInTissue": {
+                            "title": "Is gene normally expressed in tissue",
+                            "description": "Is the gene normally expressed in the tissue",
+                            "type": "boolean"
+                        },
                         "evidence": {
                             "title": "Evidence for Normal Expression",
                             "description": "Evidence for normal expression in tissue",
@@ -266,6 +271,11 @@
                     "type": "object",
                     "default": {},
                     "properties": {
+                        "expressedInPatients": {
+                            "title": "Is expression altered in patients with disease",
+                            "description": "Is expression altered in patients who have the disease",
+                            "type": "boolean"
+                        },
                         "evidence": {
                             "title": "Evidence for Altered Expression",
                             "description": "Evidence for altered expression in patients",
@@ -316,7 +326,7 @@
                     "description": "EFO terms",
                     "type": "string"
                 },
-                "descriptoinOfGeneAlteration": {
+                "descriptionOfGeneAlteration": {
                     "title": "Gene Alteration",
                     "description": "Description of gene alteration in engineered equivalent",
                     "type": "string"
@@ -433,7 +443,7 @@
                     "type": "string"
                 },
                 "evidenceInPaper": {
-                    "title": "Evidence in Papaer",
+                    "title": "Evidence in Paper",
                     "description": "Where evidence can be found in paper",
                     "type": "string",
                     "default": ""
