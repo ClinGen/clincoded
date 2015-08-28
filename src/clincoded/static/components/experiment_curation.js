@@ -173,6 +173,11 @@ var ExperimentCuration = React.createClass({
                                         {TypeFunctionalAlteration.call(this)}
                                     </Panel></PanelGroup>
                                 : null }
+                                {this.state.experimentType == 'Model Systems' ?
+                                    <PanelGroup accordion><Panel title="Model Systems" open>
+                                        {TypeModelSystems.call(this)}
+                                    </Panel></PanelGroup>
+                                : null }
                                 {this.state.experimentType != '' && this.state.experimentType != 'none' ?
                                     <PanelGroup accordion>
                                         <Panel title="Functional Data - Associated Variant(s)" open>
@@ -506,29 +511,53 @@ var TypeModelSystems = function() {
 
     return (
         <div className="row">
-            <Input type="text" ref="hpoid" label="Interacting gene(s) (HGNC):" value={proteinInteractions.interactingGenes} placeholder="e.g. GO:0008150"
+            <Input type="select" ref="abc" label="Non-human animal or cell-culture model?:" defaultValue="none" value={modelSystems.animalOrCellCulture} handleChange={this.handleChange}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option>Animal model</option>
+                <option>Engineered equivalent</option>
+            </Input>
+            <Input type="select" ref="abc" label="Animal model:" defaultValue="none" value={modelSystems.animalModel} handleChange={this.handleChange}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option>Cat (Felis catus) 9685</option>
+                <option>Chicken (Gallus gallus) 9031</option>
+                <option>Chimpanzee (Pan troglodytes) 9598</option>
+                <option>Cow (Bos taurus) 9913</option>
+                <option>Dog (Canis lupus familaris) 9615</option>
+                <option>Frog (Xenopus) 262014</option>
+                <option>Fruit fly (Drosophila) 7215</option>
+                <option>Gerbil (Gerbilinae) 10045</option>
+                <option>Guinea pig (Cavia porcellus) 10141</option>
+                <option>Hamster (Cricetinae) 10026</option>
+                <option>Macaque (Macaca) 9539</option>
+                <option>Mouse (Mus musculus) 10090</option>
+                <option>Pig (Sus scrofa) 9823</option>
+                <option>Rabbit (Oryctolagus crunicu) 9986</option>
+                <option>Rat (Rattus norvegicus) 10116</option>
+                <option>Round worm (Carnorhabditis elegans) 6239</option>
+                <option>Sheep (Ovis aries) 9940</option>
+                <option>Zebrafish (Daanio rerio) 7955</option>
+            </Input>
+            <Input type="text" ref="hpoid" label="Cell-culture type/line:" value={modelSystems.cellCulture} placeholder=""
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="select" ref="abc" label="Interaction Type:" defaultValue="none" value={proteinInteractions.interactionType} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>MI Term 1</option>
-                <option>MI Term 2</option>
-            </Input>
-            <Input type="select" ref="abc" label="Experimental interaction detection:" defaultValue="none" value={proteinInteractions.experimentalInteractionDetection} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>MI Term 1</option>
-                <option>MI Term 2</option>
-            </Input>
-            <Input type="checkbox" ref="hpoid" label="Has this gene or genes been implicated in the above disease?:" value={proteinInteractions.geneImplicatedInDisease} placeholder=""
+            <Input type="textarea" ref="phenoterms" label="Description of gene alteration:" rows="5" value={modelSystems.descriptionOfGeneAlteration}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Explanation of relationship of other gene(s) to the disease:" rows="5" value={proteinInteractions.relationshipOfOtherGenesToDisese}
+            <Input type="text" ref="hpoid" label={<LabelPatientPhenotype />} value={modelSystems.phenotypeHPO} placeholder="e.g. HP:0010704"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+            <Input type="textarea" ref="phenoterms" label="Patient phenotype:" rows="5" value={modelSystems.phenotypeFreeText}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found on paper" rows="5" value={proteinInteractions.evidenceInPaper}
+            <Input type="text" ref="hpoid" label={<LabelPhenotypeObserved />} value={modelSystems.phenotypeHPOObserved} placeholder="e.g. HP:0010704"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+            <Input type="textarea" ref="phenoterms" label="Phenotype observed in model system:" rows="5" value={modelSystems.phenotypeFreetextObserved}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <Input type="textarea" ref="phenoterms" label="Explanation:" rows="5" value={modelSystems.explanation}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found on paper" rows="5" value={modelSystems.evidenceInPaper}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="abc" label="Assessment:" defaultValue="none" value={proteinInteractions.assessments} handleChange={this.handleChange}
+            <Input type="select" ref="abc" label="Assessment:" defaultValue="none" value={modelSystems.assessments} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -539,6 +568,19 @@ var TypeModelSystems = function() {
     );
 }
 
+// HTML labels for inputs follow.
+var LabelPatientPhenotype = React.createClass({
+    render: function() {
+        return <span>Patient phenotype (<span style={{fontWeight: 'normal'}}><a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID</span>):</span>;
+    }
+});
+
+// HTML labels for inputs follow.
+var LabelPhenotypeObserved = React.createClass({
+    render: function() {
+        return <span>Phenotype observed in model system (<span style={{fontWeight: 'normal'}}><a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID</span>):</span>;
+    }
+});
 
 
 // Experimental Name group curation panel. Call with .call(this) to run in the same context
