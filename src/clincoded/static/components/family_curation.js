@@ -324,6 +324,7 @@ var FamilyCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault() && this.validateVariants()) {
+            var currFamily = (this.state.family && Object.keys(this.state.family).length) ? this.state.family : null;
             var newFamily = {}; // Holds the new group object;
             var familyDiseases = null, familyArticles, familyVariants = [];
             var individualDiseases = null;
@@ -485,11 +486,33 @@ var FamilyCuration = React.createClass({
                     // No variant search strings. Go to next THEN.
                     return Promise.resolve(null);
                 }).then(data => {
-                    // If we have proband variants, make the starter individual
-                    if (familyVariants.length) {
-                        var label = this.getFormValue('individualname');
-                        var diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
+                    var label, diseases;
 
+                    // If we have proband variants in the form, see if we need to make the starter individual
+                    if (familyVariants.length) {
+                        if (currFamily) {
+                            // Editing a family that has at least one variant entered on the form. Create a proband only if
+                            // the family currently has no variants and the associated individuals have no proband among them.
+                            if (currFamily.segregation && currFamily.segregation.variants && currFamily.segregation.variants.length) {
+                                // The family being edited already had variants; don't make a starter proband individual.
+                                return Promise.resolve(null);
+                            }
+
+                            // The family we're editing didn't have any variants. See if it has an individual that's already a proband
+                            // This is highly unlikely.
+                            var currProband = currFamily.individualIncluded && _(currFamily.individualIncluded).find(function(individual) {
+                                return individual.proband;
+                            });
+                            if (currProband) {
+                                // An individual in the family is already a proband, so don't make a starter proband individual.
+                                return Promise.resolve(null);
+                            }
+                        }
+
+                        // Creating or editing a form that has at least one variant. Create the starter individual and return a promise
+                        // from its creation.
+                        label = this.getFormValue('individualname');
+                        diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
                         return makeStarterIndividual(label, diseases, familyVariants, this);
                     }
                     return Promise.resolve(null);
@@ -505,7 +528,7 @@ var FamilyCuration = React.createClass({
                     familyCount = familyCount ? familyCount + 1 : 1;
 
                     // Assign the starter individual if we made one
-                    if (data) {
+                    if (data && data['@type'][0] === 'individual') {
                         newFamily.individualIncluded = [];
                         newFamily.individualIncluded[0] = data['@id'];
                     }

@@ -816,7 +816,7 @@ var individualSimpleProps = ["label", "sex", "hpoIdInDiagnosis", "termsInDiagnos
 
 function flattenIndividual(individual) {
     // First copy everything before fixing the special properties
-    var flat = cloneSimpleProps(individual, familySimpleProps);
+    var flat = cloneSimpleProps(individual, individualSimpleProps);
 
     // Flatten diseases
     flat.diagnosis = individual.diagnosis.map(function(disease) {

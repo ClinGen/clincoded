@@ -53,7 +53,7 @@ var IndividualCuration = React.createClass({
             annotation: {}, // Annotation object given in query string
             extraIndividualCount: 0, // Number of extra families to create
             extraIndividualNames: [], // Names of extra families to create
-            variantCount: 0, // Number of variants to display
+            variantCount: 1, // Number of variants to display
             variantOption: [VAR_NONE], // One variant panel, and nothing entered
             individualName: '', // Currently entered individual name
             addVariantDisabled: true, // True if Add Another Variant button enabled
@@ -346,6 +346,7 @@ var IndividualCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault() && this.validateVariants()) {
+            var currIndividual = this.state.individual && Object.keys(this.state.individual) ? this.state.individual : null;
             var newIndividual = {}; // Holds the new group object;
             var individualDiseases = null, individualArticles, individualVariants = [];
             var savedIndividuals; // Array of saved written to DB
@@ -426,48 +427,50 @@ var IndividualCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    // Handle variants; start by making an array of search terms, one for each variant in the form
-                    var newVariants = [];
-                    var variantTerms = this.makeVariantSearchStr();
+                    if (!currIndividual || !currIndividual.proband) {
+                        // Handle variants; start by making an array of search terms, one for each variant in the form
+                        var newVariants = [];
+                        var variantTerms = this.makeVariantSearchStr();
 
-                    // If at least one variant search string built, perform the search
-                    if (variantTerms.length) {
-                        // Search DB for all matching terms for all variants entered
-                        return this.getRestDatas(
-                            variantTerms
-                        ).then(results => {
-                            // 'result' is an array of search results, one per search string. There should only be one result per array element --
-                            // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
-                            results.forEach(function(result, i) {
-                                if (result.total) {
-                                    // Search got a result. Add a string for family.variants for this existing variant
-                                    individualVariants.push('/variants/' + result['@graph'][0].uuid);
-                                } else {
-                                    // Search got no result; make a new variant and save it in an array so we can write them.
-                                    var newVariant = this.makeVariant(i);
-                                    if (newVariant) {
-                                        newVariants.push(newVariant);
+                        // If at least one variant search string built, perform the search
+                        if (variantTerms.length) {
+                            // Search DB for all matching terms for all variants entered
+                            return this.getRestDatas(
+                                variantTerms
+                            ).then(results => {
+                                // 'result' is an array of search results, one per search string. There should only be one result per array element --
+                                // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
+                                results.forEach(function(result, i) {
+                                    if (result.total) {
+                                        // Search got a result. Add a string for family.variants for this existing variant
+                                        individualVariants.push('/variants/' + result['@graph'][0].uuid);
+                                    } else {
+                                        // Search got no result; make a new variant and save it in an array so we can write them.
+                                        var newVariant = this.makeVariant(i);
+                                        if (newVariant) {
+                                            newVariants.push(newVariant);
+                                        }
                                     }
+                                }, this);
+
+                                // If we have new variants, write them to the DB.
+                                if (newVariants) {
+                                    return this.postRestDatas(
+                                        '/variants/', newVariants
+                                    ).then(results => {
+                                        if (results && results.length) {
+                                            results.forEach(result => {
+                                                individualVariants.push('/variants/' + result['@graph'][0].uuid);
+                                            });
+                                        }
+                                        return Promise.resolve(results);
+                                    });
                                 }
-                            }, this);
 
-                            // If we have new variants, write them to the DB.
-                            if (newVariants) {
-                                return this.postRestDatas(
-                                    '/variants/', newVariants
-                                ).then(results => {
-                                    if (results && results.length) {
-                                        results.forEach(result => {
-                                            individualVariants.push('/variants/' + result['@graph'][0].uuid);
-                                        });
-                                    }
-                                    return Promise.resolve(results);
-                                });
-                            }
-
-                            // No new variants; just resolve the promise right away.
-                            return Promise.resolve(null);
-                        });
+                                // No new variants; just resolve the promise right away.
+                                return Promise.resolve(null);
+                            });
+                        }
                     }
 
                     // No variant search strings. Go to next THEN.
@@ -623,11 +626,8 @@ var IndividualCuration = React.createClass({
             newIndividual.otherPMIDs = individualArticles['@graph'].map(function(article) { return article['@id']; });
         }
 
-        value = this.getFormValue('proband');
-        newIndividual.proband = value === 'Yes';
-
         // Assign the given variant array
-        if (individualVariants) {
+        if (!newIndividual.proband && individualVariants) {
             newIndividual.variants = individualVariants;
         }
 
@@ -1002,34 +1002,73 @@ var IndividualVariantInfo = function() {
 
     return (
         <div className="row">
-            {_.range(this.state.variantCount).map(i => {
-                var variant, hgvsNames;
+            {individual && individual.proband ?
+                <div>
+                    {variants.map(function(variant, i) {
+                        return (
+                            <div className="variant-view-panel">
+                                <h5>Variant {i + 1}</h5>
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>dbSNP ID</dt>
+                                        <dd>{variant.dbSNPId}</dd>
+                                    </div>
 
-                if (variants && variants.length) {
-                    variant = variants[i];
-                    hgvsNames = variant ? variant && variant.hgvsNames && variant.hgvsNames.join() : null;
-                }
+                                    <div>
+                                        <dt>ClinVar ID</dt>
+                                        <dd>{variant.clinVarRCV}</dd>
+                                    </div>
 
-                return (
-                    <div key={i} className="variant-panel">
-                        <Input type="text" ref={'VARdbsnpid' + i} label={<LabelDbSnp />} value={variant && variant.dbSNPId} placeholder="e.g. rs1748" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
-                            error={this.getFormError('VARdbsnpid' + i)} clearError={this.clrFormErrors.bind(null, 'VARdbsnpid' + i)}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={variant && variant.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
-                            error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <Input type="text" ref={'VARhgvsterm' + i} label={<LabelHgvs />} value={hgvsNames} placeholder="e.g. NM_001009944.2:c.12420G>A" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
-                            error={this.getFormError('VARhgvsterm' + i)} clearError={this.clrFormErrors.bind(null, 'VARhgvsterm' + i)}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                        {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
-                            <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
-                                clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
-                        : null}
-                    </div>
-                );
-            })}
+                                    <div>
+                                        <dt>HGVS term</dt>
+                                        <dd>
+                                            {variant.hgvsNames ?
+                                                <span>{variant.hgvsNames.join(', ')}</span>
+                                            : null}
+                                        </dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>Other description</dt>
+                                        <dd>{variant.otherDescription}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                        );
+                    })}
+                </div>
+            :
+                <div>
+                    {_.range(this.state.variantCount).map(i => {
+                        var variant, hgvsNames;
+
+                        if (variants && variants.length) {
+                            variant = variants[i];
+                            hgvsNames = variant ? variant && variant.hgvsNames && variant.hgvsNames.join() : null;
+                        }
+
+                        return (
+                            <div key={i} className="variant-panel">
+                                <Input type="text" ref={'VARdbsnpid' + i} label={<LabelDbSnp />} value={variant && variant.dbSNPId} placeholder="e.g. rs1748" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
+                                    error={this.getFormError('VARdbsnpid' + i)} clearError={this.clrFormErrors.bind(null, 'VARdbsnpid' + i)}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={variant && variant.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
+                                    error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                                <Input type="text" ref={'VARhgvsterm' + i} label={<LabelHgvs />} value={hgvsNames} placeholder="e.g. NM_001009944.2:c.12420G>A" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
+                                    error={this.getFormError('VARhgvsterm' + i)} clearError={this.clrFormErrors.bind(null, 'VARhgvsterm' + i)}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                                <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
+                                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
+                                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                                : null}
+                            </div>
+                        );
+                    })}
+                </div>
+            }            
         </div>
     );
 };
@@ -1343,6 +1382,7 @@ var makeStarterIndividual = module.exports.makeStarterIndividual = function(labe
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
     newIndividual.variants = variants;
+    newIndividual.proband = true;
 
     // We created an individual; post it to the DB and return a promise with the new individual
     return context.postRestData('/individuals/', newIndividual).then(data => {
