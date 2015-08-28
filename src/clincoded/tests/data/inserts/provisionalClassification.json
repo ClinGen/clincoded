@@ -1,0 +1,24 @@
+[
+    {
+        "uuid": "157f6817-3175-11e5-8d11-60f81dc5b05a",
+        "submitted_by": "kgliu@stanford.edu",
+        "date_created": "2015-08-19T11:25:18.000000+00:00",
+        "last_modified": "2015-08-21T21:35:18.000000+00:00",
+        "totalScore": "17",
+        "autoClassification": "Definitive",
+        "alteredClassification": "Strong",
+        "Reasons": "some reasons here",
+        "active": true
+    },
+    {
+        "uuid": "3efff00a-3177-11e5-b11e-60f81dc5b05a",
+        "submitted_by": "selinad@stanford.edu",
+        "date_created": "2015-08-19T08:35:18.000000+00:00",
+        "last_modified": "2015-08-20T18:15:02.000000+00:00",
+        "totalScore": "15",
+        "autoClassification": "Strong",
+        "alteredClassification": "Definitive",
+        "Reasons": "some reasons here too",
+        "active": true
+    }
+]

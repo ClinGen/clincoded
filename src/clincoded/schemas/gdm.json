@@ -94,7 +94,8 @@
             "default": [],
             "items": {
                 "title": "Provisional Assertion",
-                "type": "string"
+                "type": "string",
+                "linkTo": "provisionalClassification"
             }
         },
         "draftClassification": {
@@ -150,6 +151,14 @@
         },
         "annotations": {
             "title": "Evidence",
+            "type": "string"
+        },
+        "number_pathogenicity": {
+            "title": "# Pathogenicity",
+            "type": "string"
+        },
+        "number_provisional": {
+            "title": "# Summary/Provisional",
             "type": "string"
         },
         "date_created": {

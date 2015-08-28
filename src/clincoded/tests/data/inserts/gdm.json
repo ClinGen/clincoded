@@ -41,7 +41,13 @@
             "5cd72a73-189e-11e5-9db5-60f81dc5b05a"
         ],
         "variantPathogenicity": [
-            "23a34abf-cd82-44de-a228-a604709315f9"
+            "23a34abf-cd82-44de-a228-a604709315f9",
+            "94184c52-38ab-4fdf-acc0-c1170d4d2427",
+            "82dcd58a-4493-4196-a234-93bda7aeee9f"
+        ],
+        "provisionalClassifications": [
+            "157f6817-3175-11e5-8d11-60f81dc5b05a",
+            "3efff00a-3177-11e5-b11e-60f81dc5b05a"
         ],
         "active": true
     },

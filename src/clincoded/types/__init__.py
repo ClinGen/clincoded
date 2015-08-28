@@ -137,6 +137,8 @@ class Gdm(Item):
         'variantPathogenicity.variant.submitted_by',
         'variantPathogenicity.assessments',
         'variantPathogenicity.assessments.submitted_by',
+        'provisionalClassifications',
+        'provisionalClassifications.submitted_by',
         'annotations',
         'annotations.article',
         'annotations.article.submitted_by',
@@ -236,6 +238,33 @@ class Gdm(Item):
             return 'In Progress'
         else:
             return 'Created'
+
+    @calculated_property(schema={
+        "title": "Number of Articles",
+        "type": "string",
+    })
+    def number_article(seft, annotations):
+        if len(annotations) > 0:
+            return str(len(annotations))
+        return ""
+
+    @calculated_property(schema={
+        "title": "Number of Pathogenicity",
+        "type": "string",
+    })
+    def number_pathogenicity(seft, variantPathogenicity):
+        if len(variantPathogenicity) > 0:
+            return str(len(variantPathogenicity))
+        return ""
+
+    @calculated_property(schema={
+        "title": "Number of Provisional",
+        "type": "string",
+    })
+    def number_provisional(seft, provisionalClassifications):
+        if len(provisionalClassifications) > 0:
+            return str(len(provisionalClassifications))
+        return ""
 
     @calculated_property(schema={
         "title": "GDM",
@@ -535,6 +564,7 @@ class Pathogenicity(Item):
         'submitted_by',
         'variant',
         'assessments',
+        'assessments.submitted_by',
         'associatedGdm',
     ]
     rev = {
@@ -569,7 +599,35 @@ class Assessment(Item):
     schema = load_schema('clincoded:schemas/assessment.json')
     name_key = 'uuid'
     embedded = [
-        'submitted_by'
+        'submitted_by',
+        'pathogenicity_assessed',
+    ]
+    rev = {
+        'pathogenicity_assessed': ('pathogenicity', 'assessments'),
+    }
+
+    @calculated_property(schema={
+        "title": "Pathogenicity Assessed",
+        "type": ["string", "object"],
+        "linkFrom": "pathogenicity.assessments"
+    })
+    def pathogenicity_assessed(self, request, pathogenicity_assessed):
+        return paths_filtered_by_status(request, pathogenicity_assessed)
+
+
+@collection(
+    name='provisional',
+    unique_key='provisionalClassification:uuid',
+    properties={
+        'title': 'Provisional Classifications',
+        'description': 'List of provisional classifications',
+    })
+class Provisional(Item):
+    item_type = 'provisionalClassification'
+    schema = load_schema('clincoded:schemas/provisionalClassification.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
     ]
 ### end of new collections for curation data
 
