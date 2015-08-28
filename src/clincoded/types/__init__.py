@@ -628,7 +628,19 @@ class Provisional(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'gdm_associated',
     ]
+    rev = {
+        'gdm_associated': ('gdm', 'provisionalClassifications'),
+    }
+
+    @calculated_property(schema={
+        "title": "GDM Associated",
+        "type": ["string", "object"],
+        "linkFrom": "gdm.provisionalClassifications"
+    })
+    def gdm_associated(self, request, gdm_associated):
+        return paths_filtered_by_status(request, gdm_associated)
 ### end of new collections for curation data
 
 
