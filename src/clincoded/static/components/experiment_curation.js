@@ -191,7 +191,7 @@ var ExperimentCuration = React.createClass({
                                     </PanelGroup>
                                 : null }
                                 {this.state.experimentType != '' && this.state.experimentType != 'none' ?
-                                    <div className="experiment-submit clearfix">
+                                    <div className="curation-submit clearfix">
                                         <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                     </div>
