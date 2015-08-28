@@ -178,6 +178,11 @@ var ExperimentCuration = React.createClass({
                                         {TypeModelSystems.call(this)}
                                     </Panel></PanelGroup>
                                 : null }
+                                {this.state.experimentType == 'Rescue' ?
+                                    <PanelGroup accordion><Panel title="Rescue" open>
+                                        {TypeRescue.call(this)}
+                                    </Panel></PanelGroup>
+                                : null }
                                 {this.state.experimentType != '' && this.state.experimentType != 'none' ?
                                     <PanelGroup accordion>
                                         <Panel title="Functional Data - Associated Variant(s)" open>
@@ -581,6 +586,69 @@ var LabelPhenotypeObserved = React.createClass({
         return <span>Phenotype observed in model system (<span style={{fontWeight: 'normal'}}><a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID</span>):</span>;
     }
 });
+
+
+
+
+var TypeRescue = function() {
+    var rescue = this.state.experiment.rescue ? this.state.experiment.rescue : {};
+
+    if (rescue) {
+        rescue.patientCellOrEngineeredEquivalent = rescue.patientCellOrEngineeredEquivalent ? rescue.patientCellOrEngineeredEquivalent.join() : null;
+        rescue.patientCellType = rescue.patientCellType ? rescue.patientCellType.join() : null;
+        rescue.engineeredEquivalentCellType = rescue.engineeredEquivalentCellType ? rescue.engineeredEquivalentCellType.join() : null;
+        rescue.descriptionOfGeneAlteration = rescue.descriptionOfGeneAlteration ? rescue.descriptionOfGeneAlteration.join() : null;
+        rescue.phenotypeHPO = rescue.phenotypeHPO ? rescue.phenotypeHPO.join() : null;
+        rescue.phenotypeFreeText = rescue.phenotypeFreeText ? rescue.phenotypeFreeText.join() : null;
+        rescue.rescueMethod = rescue.rescueMethod ? rescue.rescueMethod.join() : null;
+        rescue.wildTypeRescuePhenotype = rescue.wildTypeRescuePhenotype ? rescue.wildTypeRescuePhenotype.join() : null;
+        rescue.patientVariantRescue = rescue.patientVariantRescue ? rescue.patientVariantRescue.join() : null;
+        rescue.explanation = rescue.explanation ? rescue.explanation.join() : null;
+        rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper.join() : null;
+        rescue.assessments = rescue.assessments ? rescue.assessments.join() : null;
+    }
+
+    return (
+        <div className="row">
+            <Input type="select" ref="abc" label="Patient cells with or engineered equivalent?:" defaultValue="none" value={rescue.patientCellOrEngineeredEquivalent} handleChange={this.handleChange}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option>Patient cells</option>
+                <option>Engineered equivalent</option>
+            </Input>
+            <Input type="text" ref="hpoid" label={<LabelPatientCellType />} value={rescue.patientCellType} placeholder=""
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+            <Input type="text" ref="hpoid" label={<LabelEngineeredEquivalent />} value={rescue.engineeredEquivalentCellType} placeholder=""
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+            <Input type="textarea" ref="phenoterms" label="Description of gene alteration:" rows="5" value={rescue.descriptionOfGeneAlteration}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <Input type="text" ref="hpoid" label="Phenotype to rescue (HPO)" value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+            <Input type="textarea" ref="phenoterms" label="Phenotype to rescue:" rows="5" value={rescue.phenotypeFreeText}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <Input type="textarea" ref="phenoterms" label="Method used to rescue:" rows="5" value={rescue.rescueMethod}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <Input type="checkbox" ref="hpoid" label="Does the wild-type rescue the above phenotype?:" value={rescue.wildTypeRescuePhenotype}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <Input type="checkbox" ref="hpoid" label="Does patient variant rescue?:" value={rescue.patientVariantRescue}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <Input type="textarea" ref="phenoterms" label="Explanation:" rows="5" value={rescue.explanation}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found on paper" rows="5" value={rescue.evidenceInPaper}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="select" ref="abc" label="Assessment:" defaultValue="none" value={rescue.assessments} handleChange={this.handleChange}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option>Assessment 1</option>
+                <option>Assessment 2</option>
+            </Input>
+        </div>
+    );
+}
+
+
 
 
 // Experimental Name group curation panel. Call with .call(this) to run in the same context

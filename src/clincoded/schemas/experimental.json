@@ -522,7 +522,7 @@
                     "description": "Explanation",
                     "type": "string"
                 },
-                "evidenceLocationInPaper": {
+                "evidenceInPaper": {
                     "title": "Evidence Location in Paper",
                     "description": "Where can evidence be found in paper",
                     "type": "string",
