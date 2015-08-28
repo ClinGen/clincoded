@@ -383,7 +383,7 @@ var GroupCuration = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
-        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "true";
+        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
         return (
             <div>

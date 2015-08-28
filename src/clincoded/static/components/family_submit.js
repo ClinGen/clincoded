@@ -113,6 +113,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
         this.queryValues.annotationUuid = queryKeyValue('annotation', this.props.href);
+        this.queryValues.initialVariants = queryKeyValue('initvar', this.props.href) === ""; // True if variants in family for the first time
 
         // Build the link to go back and edit the newly created group page
         var editFamilyLink = (gdm && family && annotation) ? '/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid : '';

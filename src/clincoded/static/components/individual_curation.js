@@ -701,7 +701,7 @@ var IndividualCuration = React.createClass({
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
         this.queryValues.individualUuid = queryKeyValue('individual', this.props.href);
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
-        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "true";
+        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
         return (
             <div>

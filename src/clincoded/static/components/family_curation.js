@@ -339,10 +339,11 @@ var FamilyCuration = React.createClass({
             var individualDiseases = null;
             var savedFamilies; // Array of saved written to DB
             var formError = false;
+            var initvar = false; // T if edited family has variants for the first time, or if new family has variants
 
             // Parse the comma-separated list of Orphanet IDs
             var orphaIds = curator.capture.orphas(this.getFormValue('orphanetid'));
-            var indOrphaIds = this.state.probandIndividual ? curator.capture.orphas(this.getFormValue('individualorphanetid')) : null;
+            var indOrphaIds = curator.capture.orphas(this.getFormValue('individualorphanetid'));
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
@@ -449,7 +450,9 @@ var FamilyCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    // Handle variants; start by making an array of search terms, one for each variant in the form
+                    // Handle variants; start by making an array of search terms, one for each variant in the form.
+                    // For any that already exist, push them on the family's variants. For any that don't, write
+                    // them to the DB, and then push their IDs onto the family's variants.
                     var newVariants = [];
                     var variantTerms = this.makeVariantSearchStr();
 
@@ -525,11 +528,14 @@ var FamilyCuration = React.createClass({
                         }
 
                         // Creating or editing a form that has at least one variant. Create the starter individual and return a promise
-                        // from its creation.
+                        // from its creation. Also remember we have new variants.
+                        initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
                         return makeStarterIndividual(label, diseases, familyVariants, this);
                     }
+
+                    // Family doesn't have any variants
                     return Promise.resolve(null);
                 }).then(data => {
                     // Make a new family object based on form fields.
@@ -544,8 +550,10 @@ var FamilyCuration = React.createClass({
 
                     // Assign the starter individual if we made one
                     if (data && data['@type'][0] === 'individual') {
-                        newFamily.individualIncluded = [];
-                        newFamily.individualIncluded[0] = data['@id'];
+                        if (!newFamily.individualIncluded) {
+                            newFamily.individualIncluded = [];
+                        }
+                        newFamily.individualIncluded.push(data['@id']);
                     }
 
                     // Write the new family object to the DB
@@ -600,7 +608,7 @@ var FamilyCuration = React.createClass({
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                     } else {
-                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + savedFamilies[0].uuid + '&annotation=' + this.state.annotation.uuid);
+                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + savedFamilies[0].uuid + '&annotation=' + this.state.annotation.uuid + (initvar ? '&initvar' : ''));
                     }
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
@@ -783,7 +791,7 @@ var FamilyCuration = React.createClass({
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
         this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
-        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "true";
+        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
         return (
             <div>
