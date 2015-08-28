@@ -72,6 +72,10 @@ input[type=search] {
 // Group and Family Submit Result page styles
 .submit-results-panel {
     margin: 40px 0;
+
+    &.submit-results-response {
+        margin: -40px 0 40px;
+    }
 }
 
 .submit-results-panel-info {

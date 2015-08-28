@@ -24,9 +24,9 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
 
     getInitialState: function() {
         return {
-            gdm: {}, // GDM object given in query string
-            family: {}, // Group object given in query string
-            annotation: {}, // Annotation object given in query string
+            gdm: null, // GDM object given in query string
+            family: null, // Group object given in query string
+            annotation: null, // Annotation object given in query string
             haveIndividual: '' // Setting of have-individual switch
         };
     },
@@ -96,9 +96,16 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
     },
 
     render: function() {
-        var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
-        var family = Object.keys(this.state.family).length ? this.state.family : null;
-        var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
+        var gdm = this.state.gdm;
+        var family = this.state.family;
+        var group = (family && family.associatedGroups.length) ? family.associatedGroups[0] : null;
+        var annotation = this.state.annotation;
+        var hasVariants = !!(family && family.segregation && family.segregation.variants && family.segregation.variants.length);
+
+        // Get the given family's proband individual if it has one; null if it doesn't.
+        var probandIndividual = family && _(family.individualIncluded).find(function(individual) {
+            return individual.proband;
+        });
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
@@ -108,14 +115,19 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('annotation', this.props.href);
 
         // Build the link to go back and edit the newly created group page
-        var editGroupLink = (gdm && family && annotation) ? '/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid : '';
+        var editFamilyLink = (gdm && family && annotation) ? '/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid : '';
 
         return (
             <div>
                 <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} />
                 <div className="container">
                     {family ?
-                        <h1>Family Information: {family.label} <a href={family['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editGroupLink} className="btn btn-info">Edit</a></h1>
+                        <div className="viewer-titles">
+                            <h1>Family Information: {family.label} <a href={family['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editFamilyLink} className="btn btn-info">Edit</a></h1>
+                            {group ?
+                                <h2>{'Group association: ' + group.label}</h2>
+                            : null}
+                        </div>
                     : null}
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
@@ -124,42 +136,77 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                     : null}
                     <div className="row">
                         <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
-                            <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
-                                <Form formClassName="form-horizontal form-std">
-                                    <Input type="select" ref="haveindividual" label="No segregating variant information has been associated with the proband in this Family. Do you want to edit this family to add these associations (which will then add a proband Individual associated with these variant(s) to this Family) and/or add information for other individuals in this family?" defaultValue={this.state.haveIndividual}
-                                        handleChange={this.handleChange} labelClassName="family-submit-results-label" wrapperClassName="family-submit-results-switch" groupClassName="submit-results-wrapper">
-                                        <option value="" disabled="disabled">No Selection</option>
-                                        <option disabled="disabled"></option>
-                                        <option value="y">Yes</option>
-                                        <option value="n">No</option>
-                                    </Input>
-                                </Form>
-                                <p className="submit-results-panel-info">
-                                    <em><strong>Note</strong>: Individual Information includes additional phenotypic information, sex, age, etc. for the
-                                    proband or other family members, as well as other variants for the family members.</em>
-                                </p>
-                                {(this.state.haveIndividual === 'y' && gdm && annotation && family) ?
-                                    <div className="family-submit-results-choices row">
+                            {hasVariants ?
+                                <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
+                                    <div>
                                         <div className="col-md-4">
                                             <span className="family-submit-results-btn">
-                                                <a className="btn btn-default" href={'/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Edit this family</a>
+                                                <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + probandIndividual.uuid}>Edit proband Individual</a>
                                             </span>
                                         </div>
-                                        <div className="col-md-8">
+                                        <div className="col-md-4">
                                             <span className="family-submit-results-btn">
-                                                <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Add information for any Individual in this Family</a>
+                                                <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Add non-proband Individual</a>
+                                            </span>
+                                        </div>
+                                        <div className="col-md-4">
+                                            <span className="family-submit-results-btn">
+                                                <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
                                             </span>
                                         </div>
                                     </div>
-                                : ((this.state.haveIndividual === 'n' && gdm && annotation) ?
-                                    <div className="family-submit-results-choices row">
-                                        <span className="family-submit-results-btn">
-                                            <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
-                                        </span>
-                                        <div className="submit-results-note">Note: To add another family to this group or to associate an existing Individual with this Group, return to the Record Curation page.</div>
-                                    </div>
-                                : null)}
-                            </Panel>
+                                </Panel>
+                            :
+                                <div>
+                                    <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
+                                        <Form formClassName="form-horizontal form-std">
+                                            <Input type="select" ref="haveindividual" defaultValue={this.state.haveIndividual}
+                                                label="No segregating variant information has been associated with the proband in this Family. Would you like to do this?"
+                                                handleChange={this.handleChange} labelClassName="family-submit-results-label" wrapperClassName="family-submit-results-switch" groupClassName="submit-results-wrapper">
+                                                <option value="" disabled="disabled">No Selection</option>
+                                                <option disabled="disabled"></option>
+                                                <option value="y">Yes</option>
+                                                <option value="n">No</option>
+                                            </Input>
+                                        </Form>
+                                        <p className="submit-results-panel-info">
+                                            <em><strong>Note</strong>: If you want to associate variant(s) with the proband, you must edit the family and add variant(s) there. This creates an individual who is the proband for the family.</em>
+                                        </p>
+                                    </Panel>
+                                    {this.state.haveIndividual === 'y' || this.state.haveIndividual === 'n' ?
+                                        <Panel panelClassName="submit-results-panel submit-results-response">
+                                            {(this.state.haveIndividual === 'y' && gdm && annotation && family) ?
+                                                <div className="family-submit-results-choices">
+                                                    <span className="family-submit-results-btn">
+                                                        <a className="btn btn-default" href={'/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Edit this family</a>
+                                                    </span>
+                                                </div>
+                                            : ((this.state.haveIndividual === 'n' && gdm && annotation) ?
+                                                <div className="family-submit-results-choices">
+                                                    <div className="submit-results-panel-info">
+                                                        <p>
+                                                            You can add information about non-proband individuals in this family, including variant information by creating an Individual entry for them.
+                                                        </p>
+                                                        <p className="submit-results-panel-info">
+                                                            <strong>Note</strong>: Individual information includes associated variant(s), phenotypes, sex, etc.
+                                                        </p>
+                                                    </div>
+                                                    <div className="col-md-7">
+                                                        <span className="family-submit-results-btn">
+                                                            <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Add non-proband Individual</a>
+                                                        </span>
+                                                    </div>
+                                                    <div className="col-md-5">
+                                                        <span className="family-submit-results-btn">
+                                                            <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            : null)}
+                                        </Panel>
+                                    : null}
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>

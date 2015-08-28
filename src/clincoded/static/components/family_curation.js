@@ -9,7 +9,7 @@ var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
-var makeStarterIndividual = require('./individual_curation').makeStarterIndividual;
+var individual_curation = require('./individual_curation');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -24,7 +24,8 @@ var InputMixin = form.InputMixin;
 var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
-
+var makeStarterIndividual = individual_curation.makeStarterIndividual;
+var updateProbandVariants = individual_curation.updateProbandVariants;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 5;
@@ -55,6 +56,7 @@ var FamilyCuration = React.createClass({
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 0, // Number of variants to display
             variantOption: [VAR_NONE], // One variant panel, and nothing entered
+            probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
             addVariantDisabled: false, // True if Add Another Variant button enabled
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
@@ -169,15 +171,22 @@ var FamilyCuration = React.createClass({
                 this.setState({familyName: stateObj.family.label});
             }
 
-            // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
-            // Also see if we need to disable the Add Variant button
             if (stateObj.family && Object.keys(stateObj.family).length) {
+                // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
                 stateObj.genotyping2Disabled = !(stateObj.family.method && stateObj.family.method.genotypingMethods && stateObj.family.method.genotypingMethods.length);
 
+                // See if we need to disable the Add Variant button based on the number of variants configured
                 var segregation = stateObj.family.segregation;
                 if (segregation && segregation.variants && segregation.variants.length) {
                     stateObj.variantCount = segregation.variants.length;
                     stateObj.addVariantDisabled = false;
+                }
+
+                // See if any associated individual is a proband
+                if (stateObj.family.individualIncluded.length) {
+                    stateObj.probandIndividual = _(stateObj.family.individualIncluded).find(function(individual) {
+                        return individual.proband;
+                    });
                 }
             }
 
@@ -333,7 +342,7 @@ var FamilyCuration = React.createClass({
 
             // Parse the comma-separated list of Orphanet IDs
             var orphaIds = curator.capture.orphas(this.getFormValue('orphanetid'));
-            var indOrphaIds = curator.capture.orphas(this.getFormValue('individualorphanetid'));
+            var indOrphaIds = this.state.probandIndividual ? curator.capture.orphas(this.getFormValue('individualorphanetid')) : null;
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
@@ -346,7 +355,7 @@ var FamilyCuration = React.createClass({
             }
 
             // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
-            if (this.state.variantCount > 0) {
+            if (this.state.variantCount > 0 && !this.state.probandIndividual) {
                 if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
                     // Individual’s ORPHA list is bad
                     formError = true;
@@ -396,7 +405,8 @@ var FamilyCuration = React.createClass({
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
-                    if (this.state.variantCount) {
+                    // Check for individual orphanet IDs if we have variants and no existing proband
+                    if (this.state.variantCount && !this.state.probandIndividual) {
                         var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
 
                         // Verify given Orpha ID exists in DB
@@ -454,7 +464,7 @@ var FamilyCuration = React.createClass({
                             results.forEach(function(result, i) {
                                 if (result.total) {
                                     // Search got a result. Add a string for family.variants for this existing variant
-                                    familyVariants.push('/variants/' + result['@graph'][0].uuid);
+                                    familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                 } else {
                                     // Search got no result; make a new variant and save it in an array so we can write them.
                                     var newVariant = this.makeVariant(i);
@@ -470,8 +480,9 @@ var FamilyCuration = React.createClass({
                                     '/variants/', newVariants
                                 ).then(results => {
                                     if (results && results.length) {
+                                        // Add the newly written variants to the family
                                         results.forEach(result => {
-                                            familyVariants.push('/variants/' + result['@graph'][0].uuid);
+                                            familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                         });
                                     }
                                     return Promise.resolve(results);
@@ -494,16 +505,20 @@ var FamilyCuration = React.createClass({
                             // Editing a family that has at least one variant entered on the form. Create a proband only if
                             // the family currently has no variants and the associated individuals have no proband among them.
                             if (currFamily.segregation && currFamily.segregation.variants && currFamily.segregation.variants.length) {
-                                // The family being edited already had variants; don't make a starter proband individual.
+                                // The family being edited already had variants; don't make a starter proband individual, but update the
+                                // proband if needed.
+                                if (this.state.probandIndividual) {
+                                    // If we have a proband, update the proband individual with the new variants
+                                    return updateProbandVariants(this.state.probandIndividual, familyVariants, this);
+                                }
+
+                                // The family had variants, but no proband. Highly unlikely.
                                 return Promise.resolve(null);
                             }
 
                             // The family we're editing didn't have any variants. See if it has an individual that's already a proband
                             // This is highly unlikely.
-                            var currProband = currFamily.individualIncluded && _(currFamily.individualIncluded).find(function(individual) {
-                                return individual.proband;
-                            });
-                            if (currProband) {
+                            if (this.state.probandIndividual) {
                                 // An individual in the family is already a proband, so don't make a starter proband individual.
                                 return Promise.resolve(null);
                             }
@@ -1150,7 +1165,7 @@ var FamilyVariant = function() {
                     </div>
                 );
             })}
-            {this.state.variantCount ?
+            {this.state.variantCount && !this.state.probandIndividual ?
                 <div className="variant-panel clearfix">
                     <Input type="text" ref="individualname" label="Individual Name"
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}

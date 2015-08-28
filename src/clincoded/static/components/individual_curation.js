@@ -1389,3 +1389,27 @@ var makeStarterIndividual = module.exports.makeStarterIndividual = function(labe
         return Promise.resolve(data['@graph'][0]);
     });
 };
+
+
+// Update the individual with the variants, and write the updated individual to the DB.
+var updateProbandVariants = module.exports.updateProbandVariants = function(individual, variants, context) {
+    var updateNeeded = true;
+
+    // Check whether the variants from the family are different from the variants in the individual
+    if (individual.variants && (individual.variants.length === variants.length)) {
+        // Same number of variants; see if the contents are different.
+        // Need to convert individual variant array to array of variant @ids, because that's what's in the variants array.
+        var missing = _.difference(variants, individual.variants.map(function(variant) { return variant['@id']; }));
+        updateNeeded = !!missing.length;
+    }
+
+    if (updateNeeded) {
+        var writerIndividual = curator.flatten(individual);
+        writerIndividual.variants = variants;
+
+        return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
+            return Promise.resolve(data['@graph'][0]);
+        });
+    }
+    return Promise.resolve(null);
+};
