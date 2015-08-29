@@ -283,7 +283,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
 
     return (
         <div className="panel-evidence-group" key={individual.uuid}>
-            <h5>{individual.label}</h5>
+            <h5>{individual.label}{individual.proband ? ' [proband]' : ''}</h5>
             <div className="evidence-curation-info">
                 {individual.submitted_by ?
                     <p className="evidence-curation-info">{individual.submitted_by.title}</p>
