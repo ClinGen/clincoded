@@ -1292,7 +1292,7 @@
         "submits_for": [
             "/labs/curator/"
         ],
-        "timezone": "US/Pacific",
+        "timezone": "US/Pacific"
     },
     
     {
@@ -1309,7 +1309,7 @@
         "submits_for": [
             "/labs/curator/"
         ],
-        "timezone": "US/Pacific",
+        "timezone": "US/Pacific"
     },
     {
         "email": "baseifer@email.unc.edu",
@@ -1325,7 +1325,7 @@
         "submits_for": [
             "/labs/curator/"
         ],
-        "timezone": "US/Pacific",
+        "timezone": "US/Pacific"
     },
     {
         "email": "ahomstad@email.unc.edu",
@@ -1341,7 +1341,7 @@
         "submits_for": [
             "/labs/curator/"
         ],
-        "timezone": "US/Pacific",
+        "timezone": "US/Pacific"
     },
     {
         "email": "snehit@stanford.edu",
@@ -1357,6 +1357,6 @@
         "submits_for": [
             "/labs/curator/"
         ],
-        "timezone": "US/Pacific",
+        "timezone": "US/Pacific"
     }
 ]
