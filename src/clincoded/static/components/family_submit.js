@@ -141,7 +141,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                     : null}
                     <div className="row">
                         <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
-                            {hasVariants || this.queryValues.hadVariants ?
+                            {hasVariants || hadVariants ?
                                 <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
                                     <div>
                                         <div className="col-md-4">
