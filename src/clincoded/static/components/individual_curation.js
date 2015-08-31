@@ -759,8 +759,10 @@ var IndividualCuration = React.createClass({
                                                 {IndividualVariantInfo.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
-                                        <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                        <div className="curation-submit clearfix">
+                                            <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                            <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                        </div>
                                     </Form>
                                 </div>
                             </div>
