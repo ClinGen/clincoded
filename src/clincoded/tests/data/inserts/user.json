@@ -1326,5 +1326,37 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific",
+    },
+    {
+        "email": "ahomstad@email.unc.edu",
+        "first_name": "Alison",
+        "last_name": "Homstad",
+        "uuid": "7743d500-d120-4126-a5e7-840e7eb48cb6",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific",
+    },
+    {
+        "email": "snehit@stanford.edu",
+        "first_name": "Snehit",
+        "last_name": "Prabhu",
+        "uuid": "0855e814-ba10-4115-b10f-2a721ea39fe3",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific",
     }
 ]
