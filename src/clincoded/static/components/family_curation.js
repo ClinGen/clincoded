@@ -502,33 +502,35 @@ var FamilyCuration = React.createClass({
                 }).then(data => {
                     var label, diseases;
 
-                    // If we have proband variants in the form, see if we need to make the starter individual
-                    if (familyVariants.length) {
-                        if (currFamily) {
-                            // Editing a family that has at least one variant entered on the form. Create a proband only if
-                            // the family currently has no variants and the associated individuals have no proband among them.
-                            if (currFamily.segregation && currFamily.segregation.variants && currFamily.segregation.variants.length) {
-                                // The family being edited already had variants; don't make a starter proband individual, but update the
-                                // proband if needed.
-                                if (this.state.probandIndividual) {
-                                    // If we have a proband, update the proband individual with the new variants
-                                    return updateProbandVariants(this.state.probandIndividual, familyVariants, this);
-                                }
-
-                                // The family had variants, but no proband. Highly unlikely.
-                                return Promise.resolve(null);
-                            }
-
-                            // The family we're editing didn't have any variants. See if it has an individual that's already a proband
-                            // This is highly unlikely.
+                    // If we're editing a family, see if we need to update it and its proband individual
+                    if (currFamily) {
+                        // Editing a family that has at least one variant entered on the form. Create a proband only if
+                        // the family currently has no variants and the associated individuals have no proband among them.
+                        if (currFamily.segregation && currFamily.segregation.variants && currFamily.segregation.variants.length) {
+                            // The family being edited had variants; don't make a starter proband individual, but update the
+                            // proband if needed.
                             if (this.state.probandIndividual) {
-                                // An individual in the family is already a proband, so don't make a starter proband individual.
-                                return Promise.resolve(null);
+                                // If we have a proband, update the proband individual with the new variants
+                                return updateProbandVariants(this.state.probandIndividual, familyVariants, this);
                             }
+
+                            // The family had variants, but no proband. Highly unlikely.
+                            return Promise.resolve(null);
                         }
 
-                        // Creating or editing a form that has at least one variant. Create the starter individual and return a promise
-                        // from its creation. Also remember we have new variants.
+                        // The family we're editing didn't have any variants. See if it has an individual that's already a proband
+                        // This is highly unlikely.
+                        if (this.state.probandIndividual) {
+                            // An individual in the family is already a proband, so don't make a starter proband individual.
+                            return Promise.resolve(null);
+                        }
+
+                        // If we fall through to here, we're editing a family that had no variants and no proband individual.
+                    }
+
+                    // Creating or editing a family, and the form has at least one variant. Create the starter individual and return a promise
+                    // from its creation. Also remember we have new variants.
+                    if (familyVariants.length) {
                         initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
