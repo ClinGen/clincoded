@@ -505,32 +505,19 @@ var FamilyCuration = React.createClass({
 
                     // If we're editing a family, see if we need to update it and its proband individual
                     if (currFamily) {
-                        // Editing a family that has at least one variant entered on the form. Create a proband only if
-                        // the family currently has no variants and the associated individuals have no proband among them.
                         if (currFamily.segregation && currFamily.segregation.variants && currFamily.segregation.variants.length) {
-                            // The family being edited had variants; don't make a starter proband individual, but update the
-                            // proband if needed.
+                            // The family being edited had variants; remember that for passing a query string var to family-submit
                             hadvar = true;
-                            if (this.state.probandIndividual) {
-                                // If we have a proband, update the proband individual with the new variants
-                                updateProbandVariants(this.state.probandIndividual, familyVariants, this).then(data => {
-                                    return Promise.resolve(null);
-                                });
-                            }
-
-                            // The family had variants, but no proband. Highly unlikely.
-                            return Promise.resolve(null);
                         }
 
-                        // The family we're editing didn't have any variants. See if it has an individual that's already a proband
-                        // This is highly unlikely.
+                        // If the family has a proband, update it to the current variant list, and then immediately on to creating a family.
                         if (this.state.probandIndividual) {
-                            // An individual in the family is already a proband, so don't make a starter proband individual.
-                            return Promise.resolve(null);
+                            return updateProbandVariants(this.state.probandIndividual, familyVariants, this).then(data => {
+                                return Promise.resolve(null);
+                            });
                         }
-
-                        // If we fall through to here, we're editing a family that had no variants and no proband individual.
                     }
+                    // If we fall through to here, we know the family doesn't (yet) have a proband individual
 
                     // Creating or editing a family, and the form has at least one variant. Create the starter individual and return a promise
                     // from its creation. Also remember we have new variants.
