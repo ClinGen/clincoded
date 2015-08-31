@@ -300,8 +300,8 @@ var IndividualCuration = React.createClass({
             newVariant.otherDescription = othervariant;
         } else if (dbsnpid || clinvarid || hgvsterm) {
             if (dbsnpid) { newVariant.dbSNPId = dbsnpid; }
-            if (clinvarid) { newVariant.clinVarRCV = clinvarid; }
-            if (hgvsterm) { newVariant.hgvsNames = [hgvsterm]; }
+            if (clinvarid) { newVariant.clinVarRCV = clinvarid.toUpperCase(); }
+            if (hgvsterm) { newVariant.hgvsNames = [hgvsterm.toUpperCase()]; }
         }
         return Object.keys(newVariant).length ? newVariant : null;
     },
@@ -1006,7 +1006,7 @@ var IndividualVariantInfo = function() {
                 <div>
                     {variants.map(function(variant, i) {
                         return (
-                            <div className="variant-view-panel">
+                            <div key={i} className="variant-view-panel">
                                 <h5>Variant {i + 1}</h5>
                                 <dl className="dl-horizontal">
                                     <div>
@@ -1114,6 +1114,7 @@ var IndividualAdditional = function() {
             <Input type="textarea" ref="additionalinfoindividual" label="Additional Information about Individual:" rows="5" value={individual.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+                error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">
                 Note: Any variants associated with the proband in this Family that were captured above will be counted as
@@ -1333,7 +1334,7 @@ var IndividualViewer = React.createClass({
                     <Panel title="Individual - Variant Information" panelClassName="panel-data">
                         {variants.map(function(variant, i) {
                             return (
-                                <div className="variant-view-panel">
+                                <div key={i} className="variant-view-panel">
                                     <h5>Variant {i + 1}</h5>
                                     <dl className="dl-horizontal">
                                         <div>

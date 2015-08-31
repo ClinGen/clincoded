@@ -287,8 +287,8 @@ var FamilyCuration = React.createClass({
             newVariant.otherDescription = othervariant;
         } else if (dbsnpid || clinvarid || hgvsterm) {
             if (dbsnpid) { newVariant.dbSNPId = dbsnpid; }
-            if (clinvarid) { newVariant.clinVarRCV = clinvarid; }
-            if (hgvsterm) { newVariant.hgvsNames = [hgvsterm]; }
+            if (clinvarid) { newVariant.clinVarRCV = clinvarid.toUpperCase(); }
+            if (hgvsterm) { newVariant.hgvsNames = [hgvsterm.toUpperCase()]; }
         }
         return Object.keys(newVariant).length ? newVariant : null;
     },
@@ -1228,6 +1228,7 @@ var FamilyAdditional = function() {
             <Input type="textarea" ref="additionalinfofamily" label="Additional Information about Family:" rows="5" value={family.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+                error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">
                 Note: Any variants associated with the proband in this Family that were captured above will be counted as

@@ -144,7 +144,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                             {hasVariants || hadVariants ?
                                 <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
                                     <div className="submit-results-panel-info">
-                                        <p>An Individual entry for the proband and its associated variant(s) has been created. You can add additional information about the proband, create an entry for a different Individual in this Family, or return to the Record Curation page.</p>
+                                        <p>An Individual entry for the proband and its associated variant(s) has been created. You can add additional information about the proband, create an entry for a non-proband in this Family, or return to the Record Curation page.</p>
                                         <p>
                                             <em><strong>Note</strong>: Individual information includes associated variant(s), phenotypes, sex, etc. For a proband, variant information can only be added or edited on the Family page as it is associated with segregation information.</em>
                                         </p>
@@ -185,7 +185,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                             </Input>
                                         </Form>
                                         <p className="submit-results-panel-info">
-                                            <em><strong>Note</strong>: If you want to associate variant(s) with the proband, you must edit the family and add variant(s) there. This creates an individual who is the proband for the family.</em>
+                                            <em><strong>Note</strong>: If you want to associate variant(s) with the proband, you must edit the Family and add variant(s) there. This creates an Individual who is the proband for the Family.</em>
                                         </p>
                                     </Panel>
                                     {this.state.haveIndividual === 'y' || this.state.haveIndividual === 'n' ?
@@ -195,7 +195,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                                     <div className="row">
                                                         <div className="col-md-4 col-md-offset-4">
                                                             <span className="family-submit-results-btn">
-                                                                <a className="btn btn-default" href={'/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Edit this family</a>
+                                                                <a className="btn btn-default" href={'/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Edit this Family</a>
                                                             </span>
                                                         </div>
                                                     </div>
@@ -203,9 +203,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                             : ((this.state.haveIndividual === 'n' && gdm && annotation) ?
                                                 <div className="family-submit-results-choices">
                                                     <div className="submit-results-panel-info">
-                                                        <p>
-                                                            You can add information about non-proband individuals in this family, including variant information by creating an Individual entry for them.
-                                                        </p>
+                                                        <p>You can add information about non-proband Individuals in this Family, including variant information by creating an Individual entry for them.</p>
                                                         <p className="submit-results-panel-info">
                                                             <strong>Note</strong>: Individual information includes associated variant(s), phenotypes, sex, etc.
                                                         </p>
