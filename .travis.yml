@@ -74,14 +74,7 @@ after_script:
       echo "Sauce test page https://saucelabs.com/tests/$SAUCE_JOB_ID"
       # Wait for Sauce Connect to shut down its tunnel.
       echo "Closing Sauce Connect tunnel."
-      num_tries=0
-      max_tries=30
       SC_PID="$(cat $SC_PIDFILE)"
-      echo "Sauce Connect PID to stop is $SC_PID"
-      while [ $num_tries -le $max_tries ]; do
-        kill $SC_PID || break
-        num_tries=$((num_tries+1))
-        [ $num_tries -ge $max_tries ] && exit 1
-        sleep 1
-      done
+      kill $SC_PID
++     wait $SC_PID
     fi
