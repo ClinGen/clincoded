@@ -114,6 +114,10 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
         this.queryValues.familyUuid = queryKeyValue('family', this.props.href);
         this.queryValues.annotationUuid = queryKeyValue('annotation', this.props.href);
         this.queryValues.initialVariants = queryKeyValue('initvar', this.props.href) === ""; // True if variants in family for the first time
+        this.queryValues.hadVariants = queryKeyValue('hadvar', this.props.href) === ""; // True if family had variants even if it doesn't now
+
+        var hadVariants = (gdm && family) ? this.queryValues.hadVariants : false;
+        console.log('hadVariants: ' + hadVariants);
 
         // Build the link to go back and edit the newly created group page
         var editFamilyLink = (gdm && family && annotation) ? '/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid : '';
@@ -137,7 +141,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                     : null}
                     <div className="row">
                         <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
-                            {hasVariants ?
+                            {hasVariants || this.queryValues.hadVariants ?
                                 <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
                                     <div>
                                         <div className="col-md-4">

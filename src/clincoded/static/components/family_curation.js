@@ -340,6 +340,7 @@ var FamilyCuration = React.createClass({
             var savedFamilies; // Array of saved written to DB
             var formError = false;
             var initvar = false; // T if edited family has variants for the first time, or if new family has variants
+            var hadvar = false; // T if family had variants before being edited here.
 
             // Parse the comma-separated list of Orphanet IDs
             var orphaIds = curator.capture.orphas(this.getFormValue('orphanetid'));
@@ -509,9 +510,12 @@ var FamilyCuration = React.createClass({
                         if (currFamily.segregation && currFamily.segregation.variants && currFamily.segregation.variants.length) {
                             // The family being edited had variants; don't make a starter proband individual, but update the
                             // proband if needed.
+                            hadvar = true;
                             if (this.state.probandIndividual) {
                                 // If we have a proband, update the proband individual with the new variants
-                                return updateProbandVariants(this.state.probandIndividual, familyVariants, this);
+                                updateProbandVariants(this.state.probandIndividual, familyVariants, this).then(data => {
+                                    return Promise.resolve(null);
+                                });
                             }
 
                             // The family had variants, but no proband. Highly unlikely.
@@ -610,7 +614,7 @@ var FamilyCuration = React.createClass({
                     if (this.queryValues.editShortcut && !initvar) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                     } else {
-                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + savedFamilies[0].uuid + '&annotation=' + this.state.annotation.uuid + (initvar ? '&initvar' : ''));
+                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + savedFamilies[0].uuid + '&annotation=' + this.state.annotation.uuid + (initvar ? '&initvar' : '') + (hadvar ? '&hadvar' : ''));
                     }
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
