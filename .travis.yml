@@ -76,5 +76,5 @@ after_script:
       echo "Closing Sauce Connect tunnel."
       SC_PID="$(cat $SC_PIDFILE)"
       kill $SC_PID
-+     wait $SC_PID
+      wait $SC_PID
     fi
