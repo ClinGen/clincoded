@@ -7,7 +7,7 @@
         "authors": ["Shiang R"],
         "abstract": "Achondroplasia (ACH) is the most common genetic form of dwarfism. This disorder is inherited as an autosomal dominant trait, although the majority of cases are sporadic. A gene for ACH was recently localized to 4p16.3 by linkage analyses. The ACH candidate region includes the gene encoding fibroblast growth factor receptor 3 (FGFR3), which was originally considered as a candidate for the Huntington's disease gene. DNA studies revealed point mutations in the FGFR3 gene in ACH heterozygotes and homozygotes. The mutation on 15 of the 16 ACH-affected chromosomes was the same, a G-->A transition, at nucleotide 1138 of the cDNA. The mutation on the only ACH-affected chromosome 4 without the G-->A transition at nucleotide 1138 had a G-->C transversion at this same position. Both mutations result in the substitution of an arginine residue for a glycine at position 380 of the mature protein, which is in the transmembrane domain of FGFR3.",
         "uuid": "031d5b7a-1784-11e5-b51f-60f81dc5b05a",
-        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "date_created": "2015-07-21T22:47:10.000000+00:00"
     },
@@ -31,7 +31,7 @@
         "authors": ["Bellus GA", "Hefferon TW", "Ortiz de Luna RI", "Hecht JT", "Horton WA", "Machado M", "Kaitila I", "McIntosh I", "Francomano CA"],
         "abstract": "Genomic DNA from 154 unrelated individuals with achondroplasia was evaluated for mutations in the fibroblast growth factor receptor 3 (FGFR3) transmembrane domain. All but one, an atypical case, were found to have a glycine-to-arginine substitution at codon 380. Of these, 150 had a G-to-A transition at nt 1138, and 3 had a G-to-C transversion at this same position. On the basis of estimates of the prevalence of achondroplasia, the mutation rate at the FGFR3 1138 guanosine nucleotide is two to three orders of magnitude higher than that previously reported for tranversions and transitions in CpG dinucleotides. To date, this represents the most mutable single nucleotide reported in the human genome. The homogeneity of mutations in achondroplasia is unprecedented for an autosomal dominant disorder and may explain the relative lack of heterogeneity in the achondroplasia phenotype.",
         "uuid": "1149d254-1785-11e5-9ce5-60f81dc5b05a",
-        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "date_created": "2015-07-10T22:47:10.000000+00:00"
     },

@@ -4,6 +4,7 @@
         "gene": "RAD51C",
         "disease": "84",
         "modeInheritance": "Autosomal dominant inheritance (HP:0000006)",
+        "modeCode": "1",
         "omimId": "609054",
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "date_created": "2015-02-27T08:35:18.000000+00:00",
@@ -15,10 +16,14 @@
         "gene": "DICER1",
         "disease": "64742",
         "modeInheritance": "Autosomal dominant inheritance with maternal imprinting (HP:0012275)",
+        "modeCode": "2",
         "omimId": "601200",
         "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
         "date_created": "2015-03-19T16:52:38.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
+        "annotations": [
+            "5cd72a73-189e-11e5-9db5-60f81dc5b05a"
+        ],
         "active": true
     },
     {
@@ -26,6 +31,7 @@
         "gene": "FGFR3",
         "disease": "15",
         "modeInheritance": "Autosomal recessive inheritance (HP:0000007)",
+        "modeCode": "4",
         "omimId": "100800",
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "date_created": "2015-03-20T10:02:09.000000+00:00",
@@ -34,34 +40,30 @@
             "bb3432ca-1788-11e5-aefb-60f81dc5b05a",
             "5cd72a73-189e-11e5-9db5-60f81dc5b05a"
         ],
-        "variantPathogenic": [
-            {
-                "variant": "3b3af7f0-2685-11e5-bc56-60f81dc5b05a",
-                "consistentWithDiseaseMechanism": "Yes",
-                "withinFunctionalDomain": "Yes",
-                "frequencySupportPathogenicity": "No",
-                "previouslyReported": "No",
-                "denovoType": "Confirmed",
-                "intransWithAnotherVariant": "No",
-                "supportingSegregation": "Yes",
-                "supportingStatistic": "No",
-                "SupportingFunctional": "Yes",
-                "assessments": [
-                    "4519985e-2a4c-11e5-96a0-60f81dc5b05a",
-                    "4aec0dae-2a4c-11e5-a66f-60f81dc5b05a"
-                ]
-            }
-        ]
+        "variantPathogenicity": [
+            "23a34abf-cd82-44de-a228-a604709315f9",
+            "94184c52-38ab-4fdf-acc0-c1170d4d2427",
+            "82dcd58a-4493-4196-a234-93bda7aeee9f"
+        ],
+        "provisionalClassifications": [
+            "157f6817-3175-11e5-8d11-60f81dc5b05a",
+            "3efff00a-3177-11e5-b11e-60f81dc5b05a"
+        ],
+        "active": true
     },
     {
         "uuid": "aa005efa-16d9-11e5-97aa-60f81dc5b05a",
         "gene": "SMAD3",
         "disease": "284984",
         "modeInheritance": "Autosomal unknown",
+        "modeCode": "5",
         "omimId": "613795",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-03-13T17:23:22.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
+        "annotations": [
+            "4172f4ab-189e-11e5-a10f-60f81dc5b05a"
+        ],
         "active": true
     },
     {
@@ -69,6 +71,7 @@
         "gene": "AGTR2",
         "disease": "777",
         "modeInheritance": "Autosomal dominant inheritance with paternal imprinting (HP:0012274)",
+        "modeCode": "3",
         "omimId": "300046",
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "date_created": "2015-02-25T14:55:54.000000+00:00",
@@ -80,6 +83,7 @@
         "gene": "CD3E",
         "disease": "183660",
         "modeInheritance": "Codominant",
+        "modeCode": "6",
         "omimId": "",
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "date_created": "2015-05-04T08:11:18.000000+00:00",
@@ -91,6 +95,7 @@
         "gene": "FANCM",
         "disease": "84",
         "modeInheritance": "Other",
+        "modeCode": "16",
         "omimId": "609054",
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "date_created": "2015-03-19T15:25:49.000000+00:00",

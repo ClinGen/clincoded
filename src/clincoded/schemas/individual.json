@@ -248,6 +248,11 @@
             "description": "Whether or not associated with a proband variant to a family",
             "type": "boolean",
             "default": false
+        },
+        "active": {
+            "description": "boolean switch to set if the individual avaliable for curation.",
+            "type": "boolean",
+            "default": true
         }
     },
     "columns": {

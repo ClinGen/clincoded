@@ -379,6 +379,11 @@
                 "type": "string",
                 "linkTo": "individual"
             }
+        },
+        "active": {
+            "description": "boolean switch to set if the family avaliable for curation.",
+            "type": "boolean",
+            "default": true
         }
     },
     "columns": {
