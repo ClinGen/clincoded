@@ -122,6 +122,29 @@ var ExperimentCuration = React.createClass({
         this.loadData();
     },
 
+    submitForm: function(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+
+        // Save all form values from the DOM.
+        this.saveAllFormValues();
+
+        // Start with default validation; indicate errors on form if not, then bail
+        if (this.validateDefault()) {
+            var formError = false;
+
+            var geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
+
+            if (geneSymbols && geneSymbols.length && _(geneSymbols).any(function(id) { return id === null; })) {
+                // Gene symbol list is bad
+                formError = true;
+                this.setFormErrors('geneWithSameFunctionSameDisease.genes', 'Use gene symbols (e.g. SMAD3) separated by commas');
+            }
+
+            if (!formError) {
+            }
+        }
+    },
+
     render: function() {
         var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
         var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
@@ -190,12 +213,14 @@ var ExperimentCuration = React.createClass({
                                         </Panel>
                                     </PanelGroup>
                                 : null }
+                                /*
                                 {this.state.experimentType != '' && this.state.experimentType != 'none' ?
                                     <div className="curation-submit clearfix">
                                         <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                     </div>
                                 : null }
+                                */
                             </Form>
                         </div>
                     </div>
@@ -207,7 +232,7 @@ var ExperimentCuration = React.createClass({
 
 globals.curator_page.register(ExperimentCuration, 'curator_page', 'experiment-curation');
 
-// Experimental Name group curation panel. Call with .call(this) to run in the same context
+// Experimental Name curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var ExperimentNameType = function() {
     return (
@@ -230,9 +255,10 @@ var ExperimentNameType = function() {
     );
 };
 
+// Biochemical Function type curation panel. Call with .call(this) to run in the same context
+// as the calling component.
 var TypeBiochemicalFunction = function() {
     var biochemicalFunction = this.state.experiment.biochemicalFunction ? this.state.experiment.biochemicalFunction : {};
-
     if (biochemicalFunction) {
         biochemicalFunction.identifiedFunction = biochemicalFunction.identifiedFunction ? biochemicalFunction.identifiedFunction.join() : null;
         biochemicalFunction.evidenceForFunction = biochemicalFunction.evidenceForFunction ? biochemicalFunction.evidenceForFunction.join() : null;
@@ -256,72 +282,55 @@ var TypeBiochemicalFunction = function() {
     }
     return (
         <div className="row">
-            <Input type="text" ref="hpoid" label={<LabelIdentifiedFunction />} value={biochemicalFunction.identifiedFunction} placeholder="e.g. GO:0008150"
+            <Input type="text" ref="identifiedFunction" label={<LabelIdentifiedFunction />} value={biochemicalFunction.identifiedFunction} placeholder="e.g. GO:0008150"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenoterms" label="Evidence for function:" rows="5" value={biochemicalFunction.evidenceForFunction}
+            <Input type="textarea" ref="evidenceForFunction" label="Evidence for function:" rows="5" value={biochemicalFunction.evidenceForFunction}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.evidenceForFunctionInPaper}
+            <Input type="textarea" ref="evidenceForFunctionInPaper" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.evidenceForFunctionInPaper}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter evidence for A and/or B (at least one required)</p>
             <h4 className="col-sm-7 col-sm-offset-5">A. Gene(s) with same function implicated in same disease</h4>
-            <Input type="text" ref="hpoid" label="Gene (HGNC):" value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
+            <Input type="text" ref="geneWithSameFunctionSameDisease.genes" label="Gene (HGNC):" value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Evidence that other gene(s) have the same function:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}
+            <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that other gene(s) have the same function:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="hpoid" label="Shared disease (Orphanet):" value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
+            <Input type="text" ref="REMOVE" label="Shared disease (Orphanet):" value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required disabled />
-            <Input type="checkbox" ref="hpoid" label="Has this gene or genes been implicated in the above disease?:" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction} placeholder="e.g. DICER1"
+            <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene or genes been implicated in the above disease?:" value={biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease} placeholder="e.g. DICER1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Explanation of relationship of other gene(s) to the disease:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}
+            <Input type="textarea" ref="geneWithSameFunctionSameDisease.explanationOfOtherGenes" label="Explanation of relationship of other gene(s) to the disease:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}
+            <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">Note: Functional data will only be counted towards the summary if assessed.</p>
-            <Input type="select" ref="abc" label="Assessment:" defaultValue="none" value={biochemicalFunction.geneWithSameFunctionSameDisease.assessments} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Assessment 1</option>
-                <option>Assessment 2</option>
-            </Input>
             <h4 className="col-sm-7 col-sm-offset-5">B. Gene function consistent with phenotype</h4>
-            <Input type="text" ref="hpoid" label={<LabelHPOIDs />} value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704"
+            <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />} value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenoterms" label="Phenotype (free text):" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}
+            <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeFreeText" label="Phenotype (free text):" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="phenoterms" label="Explanation of how phenotype is consistent with disease (free text):" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}
+            <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.explanation" label="Explanation of how phenotype is consistent with disease (free text):" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}
+            <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">Note: Functional data will only be counted towards the summary if assessed.</p>
-            <Input type="select" ref="biochemicalFunction.geneFunctionConsistentWithPhenotypeAssessments" label="Assessment:" defaultValue="none" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Assessment 1</option>
-                <option>Assessment 2</option>
-            </Input>
         </div>
     );
 }
 
-// HTML labels for inputs follow.
+// HTML labels for Biochemical Functions panel
 var LabelIdentifiedFunction = React.createClass({
     render: function() {
         return <span>Identified Function (<span style={{fontWeight: 'normal'}}><a href="http://bit.ly/1fxDvhV" target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a></span>):</span>;
     }
 });
-
-// HTML labels for inputs follow.
 var LabelHPOIDs = React.createClass({
     render: function() {
         return <span><a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="Open PhenExplorer in new window">HPO</a> ID(s):</span>;
     }
 });
 
+// Protein Interaction type curation panel. Call with .call(this) to run in the same context
+// as the calling component.
 var TypeProteinInteractions = function() {
     var proteinInteractions = this.state.experiment.proteinInteractions ? this.state.experiment.proteinInteractions : {};
-
     if (proteinInteractions) {
         proteinInteractions.interactingGenes = proteinInteractions.interactingGenes ? proteinInteractions.interactingGenes.join() : null;
         proteinInteractions.interactionType = proteinInteractions.interactionType ? proteinInteractions.interactionType.join() : null;
@@ -331,46 +340,45 @@ var TypeProteinInteractions = function() {
         proteinInteractions.evidenceInPaper = proteinInteractions.evidenceInPaper ? proteinInteractions.evidenceInPaper.join() : null;
         proteinInteractions.assessments = proteinInteractions.assessments ? proteinInteractions.assessments.join() : null;
     }
-
     return (
         <div className="row">
-            <Input type="text" ref="hpoid" label="Interacting gene(s) (HGNC):" value={proteinInteractions.interactingGenes} placeholder="e.g. GO:0008150"
+            <Input type="text" ref="interactingGenes" label="Interacting gene(s) (HGNC):" value={proteinInteractions.interactingGenes} placeholder="e.g. GO:0008150"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="select" ref="abc" label="Interaction Type:" defaultValue="none" value={proteinInteractions.interactionType} handleChange={this.handleChange}
+            <Input type="select" ref="interactionType" label="Interaction Type:" defaultValue="none" value={proteinInteractions.interactionType} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>MI Term 1</option>
-                <option>MI Term 2</option>
+                <option>physical association (MI:0915)</option>
+                <option>genetic interaction (MI:0208)</option>
+                <option>negative genetic interaction (MI:0933)</option>
+                <option>positive genetic interaction (MI:0935)</option>
             </Input>
-            <Input type="select" ref="abc" label="Experimental interaction detection:" defaultValue="none" value={proteinInteractions.experimentalInteractionDetection} handleChange={this.handleChange}
+            <Input type="select" ref="experimentalInteractionDetection" label="Experimental interaction detection:" defaultValue="none" value={proteinInteractions.experimentalInteractionDetection} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>MI Term 1</option>
-                <option>MI Term 2</option>
+                <option>coimmunoprecipitation (M:0019)</option>
+                <option>pull down (M:0096)</option>
+                <option>affinity chromatography technology (M:0004)</option>
+                <option>protein cross-linking with a bifunctional reagent (M0031)</option>
+                <option>comigration in gel electrophoresis (M:0807)</option>
+                <option>x-ray crystallography (MI:0114)</option>
+                <option>electron microscopy (MI:0040)</option>
             </Input>
-            <Input type="checkbox" ref="hpoid" label="Has this gene or genes been implicated in the above disease?:" value={proteinInteractions.geneImplicatedInDisease} placeholder=""
+            <Input type="checkbox" ref="geneImplicatedInDisease" label="Has this gene or genes been implicated in the above disease?:" value={proteinInteractions.geneImplicatedInDisease} placeholder=""
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Explanation of relationship of other gene(s) to the disease:" rows="5" value={proteinInteractions.relationshipOfOtherGenesToDisese}
+            <Input type="textarea" ref="relationshipOfOtherGenesToDisese" label="Explanation of relationship of other gene(s) to the disease:" rows="5" value={proteinInteractions.relationshipOfOtherGenesToDisese}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found on paper" rows="5" value={proteinInteractions.evidenceInPaper}
+            <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper" rows="5" value={proteinInteractions.evidenceInPaper}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="abc" label="Assessment:" defaultValue="none" value={proteinInteractions.assessments} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Assessment 1</option>
-                <option>Assessment 2</option>
-            </Input>
         </div>
     );
 }
 
-
+// Expression type curation panel. Call with .call(this) to run in the same context
+// as the calling component.
 var TypeExpression = function() {
     var expression = this.state.experiment.expression ? this.state.experiment.expression : {};
-
     if (expression) {
         expression.organOfTissue = expression.organOfTissue ? expression.organOfTissue.join() : null;
         expression.normalExpression = expression.normalExpression ? expression.normalExpression : {};
@@ -390,53 +398,38 @@ var TypeExpression = function() {
     }
     return (
         <div className="row">
-            <Input type="text" ref="hpoid" label={<LabelUberonId />} value={expression.organOfTissue} placeholder="e.g. UBERON_0000948"
+            <Input type="text" ref="organOfTissue" label={<LabelUberonId />} value={expression.organOfTissue} placeholder="e.g. UBERON_0000948"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <p className="col-sm-7 col-sm-offset-5">Enter evidence for A and/or B (at least one required)</p>
             <h4 className="col-sm-7 col-sm-offset-5">A. Gene normally expressed in tissue relevant to the disease</h4>
-            <Input type="checkbox" ref="hpoid" label="Is gene normally expressed in tissues relevant to the disease?:" value={expression.normalExpression.expressedInTissue} placeholder="e.g. DICER1"
+            <Input type="checkbox" ref="normalExpression.expressedInTissue" label="Is gene normally expressed in tissues relevant to the disease?:" value={expression.normalExpression.expressedInTissue} placeholder="e.g. DICER1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Evidence for normal expression in tissue:" rows="5" value={expression.normalExpression.evidence}
+            <Input type="textarea" ref="normalExpression.evidence" label="Evidence for normal expression in tissue:" rows="5" value={expression.normalExpression.evidence}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found in paper:" rows="5" value={expression.normalExpression.evidenceInPaper}
+            <Input type="textarea" ref="normalExpression.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={expression.normalExpression.evidenceInPaper}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="select" ref="abc" label="Assessment:" defaultValue="none" value={expression.normalExpression.assessments} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Assessment 1</option>
-                <option>Assessment 2</option>
-            </Input>
             <h4 className="col-sm-7 col-sm-offset-5">B. Altered expression in Patients</h4>
-            <Input type="checkbox" ref="hpoid" label="Is gene normally expressed in tissues relevant to the disease?:" value={expression.alteredExpression.expressedInPatients} placeholder="e.g. DICER1"
+            <Input type="checkbox" ref="alteredExpression.expressedInPatients" label="Is gene normally expressed in tissues relevant to the disease?:" value={expression.alteredExpression.expressedInPatients} placeholder="e.g. DICER1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Evidence for normal expression in tissue:" rows="5" value={expression.alteredExpression.evidence}
+            <Input type="textarea" ref="alteredExpression.evidence" label="Evidence for normal expression in tissue:" rows="5" value={expression.alteredExpression.evidence}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found in paper:" rows="5" value={expression.alteredExpression.evidenceInPaper}
+            <Input type="textarea" ref="alteredExpression.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={expression.alteredExpression.evidenceInPaper}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="select" ref="abc" label="Assessment:" defaultValue="none" value={expression.alteredExpression.assessments} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Assessment 1</option>
-                <option>Assessment 2</option>
-            </Input>
         </div>
     );
 }
 
-// HTML labels for inputs follow.
+// HTML labels for Expression panel.
 var LabelUberonId = React.createClass({
     render: function() {
         return <span>Organ of tissue relevant to disease, in which gene expression is examined (<span style={{fontWeight: 'normal'}}><a href="https://bioportal.bioontology.org/ontologies/UBERON" target="_blank" title="Open Uberon in a new tab">Uberon</a> ID</span>):</span>;
     }
 });
 
-
-
+// Functional Alteration type curation panel. Call with .call(this) to run in the same context
+// as the calling component.
 var TypeFunctionalAlteration = function() {
     var functionalAlteration = this.state.experiment.functionalAlteration ? this.state.experiment.functionalAlteration : {};
-
     if (functionalAlteration) {
         functionalAlteration.cellMutationOrEngineeredEquivalent = functionalAlteration.cellMutationOrEngineeredEquivalent ? functionalAlteration.cellMutationOrEngineeredEquivalent.join() : null;
         functionalAlteration.patientCellType = functionalAlteration.patientCellType ? functionalAlteration.patientCellType.join() : null;
@@ -447,65 +440,52 @@ var TypeFunctionalAlteration = function() {
         functionalAlteration.evidenceInPaper = functionalAlteration.evidenceInPaper ? functionalAlteration.evidenceInPaper.join() : null;
         functionalAlteration.assessments = functionalAlteration.assessments ? functionalAlteration.assessments.join() : null;
     }
-
     return (
         <div className="row">
-            <Input type="select" ref="abc" label="Patient cells with candidate mutation or engineered equivalent?:" defaultValue="none" value={functionalAlteration.cellMutationOrEngineeredEquivalent} handleChange={this.handleChange}
+            <Input type="select" ref="cellMutationOrEngineeredEquivalent" label="Patient cells with candidate mutation or engineered equivalent?:" defaultValue="none" value={functionalAlteration.cellMutationOrEngineeredEquivalent} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Patient cells</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <Input type="text" ref="hpoid" label={<LabelPatientCellType />} value={functionalAlteration.patientCellType} placeholder="e.g. 0000001"
+            <Input type="text" ref="patientCellType" label={<LabelPatientCellType />} value={functionalAlteration.patientCellType} placeholder="e.g. 0000001"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="text" ref="hpoid" label={<LabelEngineeredEquivalent />} value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. 0000001"
+            <Input type="text" ref="engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. 0000001"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenoterms" label="Description of gene alteration:" rows="5" value={functionalAlteration.descriptoinOfGeneAlteration}
+            <Input type="textarea" ref="descriptoinOfGeneAlteration" label="Description of gene alteration:" rows="5" value={functionalAlteration.descriptoinOfGeneAlteration}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="hpoid" label={<LabelNormalFunctionOfGene />} value={functionalAlteration.normalFunctionOfGene} placeholder=""
+            <Input type="text" ref="normalFunctionOfGene" label={<LabelNormalFunctionOfGene />} value={functionalAlteration.normalFunctionOfGene} placeholder=""
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenoterms" label="Evidence for altered function:" rows="5" value={functionalAlteration.evidenceForNormalFunction}
+            <Input type="textarea" ref="evidenceForNormalFunction" label="Evidence for altered function:" rows="5" value={functionalAlteration.evidenceForNormalFunction}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found in paper:" rows="5" value={functionalAlteration.evidenceInPaper}
+            <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={functionalAlteration.evidenceInPaper}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="abc" label="Assessment:" defaultValue="none" value={functionalAlteration.assessments} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Assessment 1</option>
-                <option>Assessment 2</option>
-            </Input>
         </div>
     );
 }
 
-// HTML labels for inputs follow.
+// HTML labels for Functional Alterations panel.
 var LabelPatientCellType = React.createClass({
     render: function() {
         return <span>Patient cell type (<span style={{fontWeight: 'normal'}}><a href="https://bioportal.bioontology.org/ontologies/EFO" target="_blank" title="Open Uberon in a new tab">EFO</a></span>)</span>;
     }
 });
-
-// HTML labels for inputs follow.
 var LabelEngineeredEquivalent = React.createClass({
     render: function() {
         return <span>Engineered equivalent cell type/line (<span style={{fontWeight: 'normal'}}><a href="https://bioportal.bioontology.org/ontologies/EFO" target="_blank" title="Open Uberon in a new tab">EFO</a></span>)</span>;
     }
 });
-
-// HTML labels for inputs follow.
 var LabelNormalFunctionOfGene = React.createClass({
     render: function() {
         return <span>Normal function of gene/gene product (<span style={{fontWeight: 'normal'}}><a href="http://bit.ly/1fxDvhV" target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a></span>):</span>;
     }
 });
 
-
-
+// Model Systems type curation panel. Call with .call(this) to run in the same context
+// as the calling component.
 var TypeModelSystems = function() {
     var modelSystems = this.state.experiment.modelSystems ? this.state.experiment.modelSystems : {};
-
     if (modelSystems) {
         modelSystems.animalOrCellCulture = modelSystems.animalOrCellCulture ? modelSystems.animalOrCellCulture.join() : null;
         modelSystems.animalModel = modelSystems.animalModel ? modelSystems.animalModel.join() : null;
@@ -519,17 +499,16 @@ var TypeModelSystems = function() {
         modelSystems.evidenceInPaper = modelSystems.evidenceInPaper ? modelSystems.evidenceInPaper.join() : null;
         modelSystems.assessments = modelSystems.assessments ? modelSystems.assessments.join() : null;
     }
-
     return (
         <div className="row">
-            <Input type="select" ref="abc" label="Non-human animal or cell-culture model?:" defaultValue="none" value={modelSystems.animalOrCellCulture} handleChange={this.handleChange}
+            <Input type="select" ref="animalOrCellCulture" label="Non-human animal or cell-culture model?:" defaultValue="none" value={modelSystems.animalOrCellCulture} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Animal model</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <Input type="select" ref="abc" label="Animal model:" defaultValue="none" value={modelSystems.animalModel} handleChange={this.handleChange}
+            <Input type="select" ref="animalModel" label="Animal model:" defaultValue="none" value={modelSystems.animalModel} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -552,53 +531,42 @@ var TypeModelSystems = function() {
                 <option>Sheep (Ovis aries) 9940</option>
                 <option>Zebrafish (Daanio rerio) 7955</option>
             </Input>
-            <Input type="text" ref="hpoid" label="Cell-culture type/line:" value={modelSystems.cellCulture} placeholder=""
+            <Input type="text" ref="cellCulture" label="Cell-culture type/line:" value={modelSystems.cellCulture} placeholder=""
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenoterms" label="Description of gene alteration:" rows="5" value={modelSystems.descriptionOfGeneAlteration}
+            <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={modelSystems.descriptionOfGeneAlteration}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="hpoid" label={<LabelPatientPhenotype />} value={modelSystems.phenotypeHPO} placeholder="e.g. HP:0010704"
+            <Input type="text" ref="phenotypeHPO" label={<LabelPatientPhenotype />} value={modelSystems.phenotypeHPO} placeholder="e.g. HP:0010704"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenoterms" label="Patient phenotype:" rows="5" value={modelSystems.phenotypeFreeText}
+            <Input type="textarea" ref="phenotypeFreeText" label="Patient phenotype:" rows="5" value={modelSystems.phenotypeFreeText}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="hpoid" label={<LabelPhenotypeObserved />} value={modelSystems.phenotypeHPOObserved} placeholder="e.g. HP:0010704"
+            <Input type="text" ref="phenotypeHPOObserved" label={<LabelPhenotypeObserved />} value={modelSystems.phenotypeHPOObserved} placeholder="e.g. HP:0010704"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenoterms" label="Phenotype observed in model system:" rows="5" value={modelSystems.phenotypeFreetextObserved}
+            <Input type="textarea" ref="phenotypeFreetextObserved" label="Phenotype observed in model system:" rows="5" value={modelSystems.phenotypeFreetextObserved}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Explanation:" rows="5" value={modelSystems.explanation}
+            <Input type="textarea" ref="explanation" label="Explanation:" rows="5" value={modelSystems.explanation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found on paper" rows="5" value={modelSystems.evidenceInPaper}
+            <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper" rows="5" value={modelSystems.evidenceInPaper}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="abc" label="Assessment:" defaultValue="none" value={modelSystems.assessments} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Assessment 1</option>
-                <option>Assessment 2</option>
-            </Input>
         </div>
     );
 }
 
-// HTML labels for inputs follow.
+// HTML labels for Model Systems panel.
 var LabelPatientPhenotype = React.createClass({
     render: function() {
         return <span>Patient phenotype (<span style={{fontWeight: 'normal'}}><a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID</span>):</span>;
     }
 });
-
-// HTML labels for inputs follow.
 var LabelPhenotypeObserved = React.createClass({
     render: function() {
         return <span>Phenotype observed in model system (<span style={{fontWeight: 'normal'}}><a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID</span>):</span>;
     }
 });
 
-
-
-
+// Rescue type curation panel. Call with .call(this) to run in the same context
+// as the calling component.
 var TypeRescue = function() {
     var rescue = this.state.experiment.rescue ? this.state.experiment.rescue : {};
-
     if (rescue) {
         rescue.patientCellOrEngineeredEquivalent = rescue.patientCellOrEngineeredEquivalent ? rescue.patientCellOrEngineeredEquivalent.join() : null;
         rescue.patientCellType = rescue.patientCellType ? rescue.patientCellType.join() : null;
@@ -613,51 +581,41 @@ var TypeRescue = function() {
         rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper.join() : null;
         rescue.assessments = rescue.assessments ? rescue.assessments.join() : null;
     }
-
     return (
         <div className="row">
-            <Input type="select" ref="abc" label="Patient cells with or engineered equivalent?:" defaultValue="none" value={rescue.patientCellOrEngineeredEquivalent} handleChange={this.handleChange}
+            <Input type="select" ref="patientCellOrEngineeredEquivalent" label="Patient cells with or engineered equivalent?:" defaultValue="none" value={rescue.patientCellOrEngineeredEquivalent} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Patient cells</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <Input type="text" ref="hpoid" label={<LabelPatientCellType />} value={rescue.patientCellType} placeholder=""
+            <Input type="text" ref="patientCellType" label={<LabelPatientCellType />} value={rescue.patientCellType} placeholder=""
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="text" ref="hpoid" label={<LabelEngineeredEquivalent />} value={rescue.engineeredEquivalentCellType} placeholder=""
+            <Input type="text" ref="engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={rescue.engineeredEquivalentCellType} placeholder=""
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenoterms" label="Description of gene alteration:" rows="5" value={rescue.descriptionOfGeneAlteration}
+            <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={rescue.descriptionOfGeneAlteration}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="hpoid" label="Phenotype to rescue (HPO)" value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704"
+            <Input type="text" ref="phenotypeHPO" label="Phenotype to rescue (HPO)" value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenoterms" label="Phenotype to rescue:" rows="5" value={rescue.phenotypeFreeText}
+            <Input type="textarea" ref="phenotypeFreeText" label="Phenotype to rescue:" rows="5" value={rescue.phenotypeFreeText}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Method used to rescue:" rows="5" value={rescue.rescueMethod}
+            <Input type="textarea" ref="rescueMethod" label="Method used to rescue:" rows="5" value={rescue.rescueMethod}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="checkbox" ref="hpoid" label="Does the wild-type rescue the above phenotype?:" value={rescue.wildTypeRescuePhenotype}
+            <Input type="checkbox" ref="wildTypeRescuePhenotype" label="Does the wild-type rescue the above phenotype?:" value={rescue.wildTypeRescuePhenotype}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="checkbox" ref="hpoid" label="Does patient variant rescue?:" value={rescue.patientVariantRescue}
+            <Input type="checkbox" ref="patientVariantRescue" label="Does patient variant rescue?:" value={rescue.patientVariantRescue}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Explanation:" rows="5" value={rescue.explanation}
+            <Input type="textarea" ref="explanation" label="Explanation:" rows="5" value={rescue.explanation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="textarea" ref="phenoterms" label="Information about where evidence can be found on paper" rows="5" value={rescue.evidenceInPaper}
+            <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper" rows="5" value={rescue.evidenceInPaper}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="abc" label="Assessment:" defaultValue="none" value={rescue.assessments} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Assessment 1</option>
-                <option>Assessment 2</option>
-            </Input>
         </div>
     );
 }
 
 
-
-
-// Experimental Name group curation panel. Call with .call(this) to run in the same context
+// Associated Variants curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var AssociatedVariants = function() {
     return (
@@ -665,33 +623,29 @@ var AssociatedVariants = function() {
             <p className="col-sm-7 col-sm-offset-5">If your functional data was about one or more particular variants,
             please associated it with those variant(s) <em>(optional, and only when functional data is about this specific variant -
                 expression, functional alteration of gene/gene product, Model Systems, Rescue)</em></p>
-            <Input type="text" ref="hpoid" label={<LabelAssociatedVariantdbSNP />} value="" placeholder="e.g. rs1748"
+            <Input type="text" ref="variant.dbSNP" label={<LabelAssociatedVariantdbSNP />} value="" placeholder="e.g. rs1748"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="hpoid" label={<LabelAssociatedVariantClinVar />} value="" placeholder="e.g. RCV000162091"
+            <Input type="text" ref="variant.ClinVar" label={<LabelAssociatedVariantClinVar />} value="" placeholder="e.g. RCV000162091"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="text" ref="hpoid" label={<LabelAssociatedVariantHGVS />} value="" placeholder="e.g. NM_001009944.2:c.12420G>A"
+            <Input type="text" ref="variant.HGVS" label={<LabelAssociatedVariantHGVS />} value="" placeholder="e.g. NM_001009944.2:c.12420G>A"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="phenoterms" label="Other description (only when no ID available):" rows="5" value=""
+            <Input type="textarea" ref="variant.other" label="Other description (only when no ID available):" rows="5" value=""
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 }
 
-// HTML labels for inputs follow.
+// HTML labels for Associated Variants panel.
 var LabelAssociatedVariantdbSNP = React.createClass({
     render: function() {
         return <span><a href="" target="_blank" title="">dbSNP</a> ID:</span>;
     }
 });
-
-// HTML labels for inputs follow.
 var LabelAssociatedVariantClinVar = React.createClass({
     render: function() {
         return <span><a href="" target="_blank" title="">ClinVar</a> ID:</span>;
     }
 });
-
-// HTML labels for inputs follow.
 var LabelAssociatedVariantHGVS = React.createClass({
     render: function() {
         return <span><a href="" target="_blank" title="">HGVS</a> term (if no dbSNP or ClinVar ID):</span>;

@@ -77,6 +77,11 @@
                             "description": "Evidence for other genes (required)",
                             "type": "string"
                         },
+                        "geneImplicatedWithDisease": {
+                            "title": "Gene implicated in the disease",
+                            "description": "Has this gene or genes been implicated in the above disease",
+                            "type": "boolean"
+                        },
                         "explanationOfOtherGenes": {
                             "title": "Explanation of Other Genes",
                             "description": "Explanation of relationship of other genes to the diasease  (optional)",
