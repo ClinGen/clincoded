@@ -1358,5 +1358,53 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "keilbeck@genetics.utah.edu",
+        "first_name": "Karen",
+        "last_name": "Eilbeck",
+        "uuid": "a7512ad8-19bb-485a-b005-4313e059b843",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "rong.mao@aruplab.com",
+        "first_name": "Rong",
+        "last_name": "Mao",
+        "uuid": "5e0406c0-169b-42ba-b354-40b539d25919",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "ecorty@email.unc.edu",
+        "first_name": "Edward",
+        "last_name": "Corty",
+        "uuid": "470c2892-75f1-41c0-8ee7-4e7b86f76508",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
