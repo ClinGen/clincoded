@@ -336,6 +336,11 @@
             "description": "ID of control group associated to the group",
             "type": "string",
             "linkTo": "controlGroup"
+        },
+        "active": {
+            "description": "boolean switch to set if the group avaliable for curation.",
+            "type": "boolean",
+            "default": true
         }
     },
     "columns": {
