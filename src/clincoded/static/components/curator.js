@@ -466,7 +466,13 @@ var AddOmimIdModal = React.createClass({
     // nothing happened.
     cancelForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.props.closeModal();
+        
+        //only a mouse click on cancel button closes modal
+        //(do not let the enter key [which evaluates to 0 mouse 
+        //clicks] be accepted to close modal)
+        if (e.detail >= 1){
+            this.props.closeModal();
+        }
     },
 
     render: function() {
