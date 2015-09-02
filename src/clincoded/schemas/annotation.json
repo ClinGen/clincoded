@@ -72,42 +72,38 @@
         },
         "active": {
             "title": "Active",
-            "description": "Boolean switch for using the evidence",
+            "description": "Boolean switch for using the annotation",
             "type": "boolean",
             "default": true
         }
     },
     "columns": {
-        "uuid": {
-            "title": "Item",
+        "article.pmid": {
+            "title": "PMID",
             "type": "string"
         },
-        "article.pmid": {
-            "title": "Reference",
+        "submitted_by.title": {
+            "title": "Curator",
             "type": "string"
         },
         "date_created": {
-            "title": "Creation Date",
+            "title": "Date/Time",
             "type": "string"
         },
-        "groups": {
-            "title": "Group",
+        "number_group": {
+            "title": "# Group",
             "type": "string"
         },
-        "families": {
-            "title": "Family",
+        "number_family": {
+            "title": "# Family",
             "type": "string"
         },
-        "individuals": {
-            "title": "Individual",
+        "number_individual": {
+            "title": "# Individual",
             "type": "string"
         },
-        "experimentalData": {
-            "title": "Experimental",
-            "type": "string"
-        },
-        "submitted_by.uuid": {
-            "title": "Submitted by",
+        "number_experimental": {
+            "title": "# Experimental",
             "type": "string"
         }
     }

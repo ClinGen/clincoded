@@ -11,6 +11,7 @@ from .base import (
     Item,
     paths_filtered_by_status,
 )
+import json
 
 
 def includeme(config):
@@ -98,6 +99,7 @@ class Article(Item):
         'submitted_by'
     ]
 
+
 @collection(
     name='variants',
     unique_key='variant:uuid',
@@ -112,6 +114,7 @@ class Variant(Item):
     embedded = [
         'submitted_by'
     ]
+
 
 @collection(
     name='gdm',
@@ -128,9 +131,14 @@ class Gdm(Item):
         'gene',
         'disease',
         'submitted_by',
-        'variantPathogenic.variant',
-        'variantPathogenic.assessments',
-        'variantPathogenic.assessments.submitted_by',
+        'variantPathogenicity',
+        'variantPathogenicity.submitted_by',
+        'variantPathogenicity.variant',
+        'variantPathogenicity.variant.submitted_by',
+        'variantPathogenicity.assessments',
+        'variantPathogenicity.assessments.submitted_by',
+        'provisionalClassifications',
+        'provisionalClassifications.submitted_by',
         'annotations',
         'annotations.article',
         'annotations.article.submitted_by',
@@ -241,6 +249,42 @@ class Gdm(Item):
         else:
             return 'Created'
 
+    @calculated_property(schema={
+        "title": "Number of Articles",
+        "type": "string",
+    })
+    def number_article(seft, annotations):
+        if len(annotations) > 0:
+            return str(len(annotations))
+        return ""
+
+    @calculated_property(schema={
+        "title": "Number of Pathogenicity",
+        "type": "string",
+    })
+    def number_pathogenicity(seft, variantPathogenicity):
+        if len(variantPathogenicity) > 0:
+            return str(len(variantPathogenicity))
+        return ""
+
+    @calculated_property(schema={
+        "title": "Number of Provisional",
+        "type": "string",
+    })
+    def number_provisional(seft, provisionalClassifications):
+        if len(provisionalClassifications) > 0:
+            return str(len(provisionalClassifications))
+        return ""
+
+    @calculated_property(schema={
+        "title": "GDM",
+        "type": "string",
+    })
+    def gdm_title(seft, gene, disease, modeCode):
+        gene_symbol = gene.replace('/genes/', '').replace('/', '')
+        orpha_id = disease.replace('/diseases/', '').replace('/', '')
+        return gene_symbol + '-' + orpha_id + '-' + modeCode
+
 
 @collection(
     name='evidence',
@@ -335,6 +379,43 @@ class Annotation(Item):
         'experimentalData.rescue.assessments.submitted_by'
     ]
 
+    @calculated_property(schema={
+        "title": "Number of Group",
+        "type": "string",
+    })
+    def number_group(selft, groups):
+        if len(groups) > 0:
+            return len(groups)
+        return ""
+
+    @calculated_property(schema={
+        "title": "Number of Family",
+        "type": "string",
+    })
+    def number_family(selft, families):
+        if len(families) > 0:
+            return len(families)
+        return ""
+
+    @calculated_property(schema={
+        "title": "Number of Provisioinal Individual",
+        "type": "string",
+    })
+    def number_individual(selft, individuals):
+        if len(individuals) > 0:
+            return len(individuals)
+        return ""
+
+    @calculated_property(schema={
+        "title": "Number of Experimental",
+        "type": "string",
+    })
+    def number_experimental(selft, experimentalData):
+        if len(experimentalData) > 0:
+            return len(experimentalData)
+        return ""
+
+
 @collection(
     name='groups',
     unique_key='group:uuid',
@@ -378,6 +459,7 @@ class Group(Item):
         'individualIncluded.variants.submitted_by',
         #'control'
     ]
+
 
 @collection(
     name='families',
@@ -424,6 +506,7 @@ class Family(Item):
     })
     def associatedGroups(self, request, associatedGroups):
         return paths_filtered_by_status(request, associatedGroups)
+
 
 @collection(
     name='individuals',
@@ -477,6 +560,7 @@ class Individual(Item):
     def associatedFamilies(self, request, associatedFamilies):
         return paths_filtered_by_status(request, associatedFamilies)
 
+
 @collection(
     name='experimental',
     unique_key='experimental:uuid',
@@ -511,8 +595,47 @@ class Experimental(Item):
         'rescue.assessments.submitted_by'
     ]
 
+
 @collection(
-    name='assessment',
+    name='pathogenicity',
+    unique_key='pathogenicity:uuid',
+    properties={
+        'title': 'Pathogenicity',
+        'description': 'List of variant pathogenicity',
+    })
+class Pathogenicity(Item):
+    item_type = 'pathogenicity'
+    schema = load_schema('clincoded:schemas/pathogenicity.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'variant',
+        'assessments',
+        'assessments.submitted_by',
+        'associatedGdm',
+    ]
+    rev = {
+        'associatedGdm': ('gdm', 'variantPathogenicity'),
+    }
+
+    @calculated_property(schema={
+        "title": "Associated GDM",
+        "type": "object",
+        "linkFrom": "gdm.variantPathogenicity"
+    })
+    def associatedGdm(self, request, associatedGdm):
+        return paths_filtered_by_status(request, associatedGdm)
+
+    @calculated_property(schema={
+        "title": "Number of Assessment",
+        "type": "integer"
+    })
+    def numberOfAssessmnet(self, assessments):
+        return len(assessments)
+
+
+@collection(
+    name='assessments',
     unique_key='assessment:uuid',
     properties={
         'title': 'Assessments',
@@ -523,8 +646,48 @@ class Assessment(Item):
     schema = load_schema('clincoded:schemas/assessment.json')
     name_key = 'uuid'
     embedded = [
-        'submitted_by'
+        'submitted_by',
+        'pathogenicity_assessed',
     ]
+    rev = {
+        'pathogenicity_assessed': ('pathogenicity', 'assessments'),
+    }
+
+    @calculated_property(schema={
+        "title": "Pathogenicity Assessed",
+        "type": ["string", "object"],
+        "linkFrom": "pathogenicity.assessments"
+    })
+    def pathogenicity_assessed(self, request, pathogenicity_assessed):
+        return paths_filtered_by_status(request, pathogenicity_assessed)
+
+
+@collection(
+    name='provisional',
+    unique_key='provisionalClassification:uuid',
+    properties={
+        'title': 'Provisional Classifications',
+        'description': 'List of provisional classifications',
+    })
+class Provisional(Item):
+    item_type = 'provisionalClassification'
+    schema = load_schema('clincoded:schemas/provisionalClassification.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'gdm_associated',
+    ]
+    rev = {
+        'gdm_associated': ('gdm', 'provisionalClassifications'),
+    }
+
+    @calculated_property(schema={
+        "title": "GDM Associated",
+        "type": ["string", "object"],
+        "linkFrom": "gdm.provisionalClassifications"
+    })
+    def gdm_associated(self, request, gdm_associated):
+        return paths_filtered_by_status(request, gdm_associated)
 ### end of new collections for curation data
 
 

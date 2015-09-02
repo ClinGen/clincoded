@@ -64,6 +64,11 @@
             "descripton": "Abstract of article",
             "type": "string",
             "default": ""
+        },
+        "active": {
+            "description": "boolean switch to set if the article avaliable for curation.",
+            "type": "boolean",
+            "default": true
         }
     },
     "columns": {
