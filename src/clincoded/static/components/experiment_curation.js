@@ -130,14 +130,41 @@ var ExperimentCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
+            var GoSlimIDs, geneSymbols, hpoIDs;
             var formError = false;
 
-            var geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
+            if (this.state.experimentType == 'Biochemical Function') {
+                goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
+                geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
+                hpoIDs = curator.capture.hpoids(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
 
-            if (geneSymbols && geneSymbols.length && _(geneSymbols).any(function(id) { return id === null; })) {
-                // Gene symbol list is bad
-                formError = true;
-                this.setFormErrors('geneWithSameFunctionSameDisease.genes', 'Use gene symbols (e.g. SMAD3) separated by commas');
+                if (goSlimIDs && goSlimIDs.length && _(goSlimIDs).any(function(id) { return id === null; })) {
+                    // GO_Slim ID is bad
+                    formError = true;
+                    this.setFormErrors('identifiedFunction', 'Use GO_Slim ID (e.g. GO:0012345)');
+                }
+                if (goSlimIDs.length > 1) {
+                    // More than one GO_Slim ID specified
+                    this.setFormErrors('identifiedFunction', 'Enter only one GO_Slim ID');
+                }
+                if (geneSymbols && geneSymbols.length && _(geneSymbols).any(function(id) { return id === null; })) {
+                    // Gene symbol list is bad
+                    formError = true;
+                    this.setFormErrors('geneWithSameFunctionSameDisease.genes', 'Use gene symbols (e.g. SMAD3) separated by commas');
+                }
+                if (hpoIDs && hpoIDs.length && _(hpoIDs).any(function(id) { return id === null; })) {
+                    // Gene symbol list is bad
+                    formError = true;
+                    this.setFormErrors('geneFunctionConsistentWithPhenotype.phenotypeHPO', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+                }
+            }
+            else if (this.state.experimentType == 'Protein Interactions') {
+                geneSymbols = curator.capture.genes(this.getFormValue('interactingGenes'));
+                if (geneSymbols && geneSymbols.length && _(geneSymbols).any(function(id) { return id === null; })) {
+                    // Gene symbol list is bad
+                    formError = true;
+                    this.setFormErrors('interactingGenes', 'Use gene symbols (e.g. SMAD3) separated by commas');
+                }
             }
 
             if (!formError) {
@@ -156,6 +183,17 @@ var ExperimentCuration = React.createClass({
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.experimentUuid = queryKeyValue('experiment', this.props.href);
         this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "true";
+
+        // add to render() to re-enable the Associated Variants panel
+        /*
+        {this.state.experimentType != '' && this.state.experimentType != 'none' ?
+            <PanelGroup accordion>
+                <Panel title="Functional Data - Associated Variant(s)" open>
+                    {AssociatedVariants.call(this)}
+                </Panel>
+            </PanelGroup>
+        : null }
+        */
 
         return (
             <div>
@@ -207,20 +245,11 @@ var ExperimentCuration = React.createClass({
                                     </Panel></PanelGroup>
                                 : null }
                                 {this.state.experimentType != '' && this.state.experimentType != 'none' ?
-                                    <PanelGroup accordion>
-                                        <Panel title="Functional Data - Associated Variant(s)" open>
-                                            {AssociatedVariants.call(this)}
-                                        </Panel>
-                                    </PanelGroup>
-                                : null }
-                                /*
-                                {this.state.experimentType != '' && this.state.experimentType != 'none' ?
                                     <div className="curation-submit clearfix">
                                         <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                     </div>
                                 : null }
-                                */
                             </Form>
                         </div>
                     </div>
@@ -283,33 +312,46 @@ var TypeBiochemicalFunction = function() {
     return (
         <div className="row">
             <Input type="text" ref="identifiedFunction" label={<LabelIdentifiedFunction />} value={biochemicalFunction.identifiedFunction} placeholder="e.g. GO:0008150"
+                error={this.getFormError('identifiedFunction')} clearError={this.clrFormErrors.bind(null, 'identifiedFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <Input type="textarea" ref="evidenceForFunction" label="Evidence for function:" rows="5" value={biochemicalFunction.evidenceForFunction}
+                error={this.getFormError('evidenceForFunction')} clearError={this.clrFormErrors.bind(null, 'evidenceForFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="textarea" ref="evidenceForFunctionInPaper" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.evidenceForFunctionInPaper}
+                error={this.getFormError('evidenceForFunctionInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceForFunctionInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter evidence for A and/or B (at least one required)</p>
             <h4 className="col-sm-7 col-sm-offset-5">A. Gene(s) with same function implicated in same disease</h4>
-            <Input type="text" ref="geneWithSameFunctionSameDisease.genes" label="Gene (HGNC):" value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
+            <Input type="text" ref="geneWithSameFunctionSameDisease.genes" label="Genes (HGNC):" value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
+                error={this.getFormError('geneWithSameFunctionSameDisease.genes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.genes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that other gene(s) have the same function:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}
+                error={this.getFormError('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="REMOVE" label="Shared disease (Orphanet):" value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required disabled />
+            <Input type="text" ref="geneWithSameFunctionSameDisease.sharedDisease" label="Shared disease (Orphanet):" value="DICER1"
+                error={this.getFormError('geneWithSameFunctionSameDisease.sharedDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.sharedDisease')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required disabled="disabled" />
             <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene or genes been implicated in the above disease?:" value={biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease} placeholder="e.g. DICER1"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                error={this.getFormError('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.explanationOfOtherGenes" label="Explanation of relationship of other gene(s) to the disease:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}
+                error={this.getFormError('geneWithSameFunctionSameDisease.explanationOfOtherGenes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.explanationOfOtherGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}
+                error={this.getFormError('geneWithSameFunctionSameDisease.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <h4 className="col-sm-7 col-sm-offset-5">B. Gene function consistent with phenotype</h4>
             <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />} value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704"
+                error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeFreeText" label="Phenotype (free text):" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}
+                error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.explanation" label="Explanation of how phenotype is consistent with disease (free text):" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}
+                error={this.getFormError('geneFunctionConsistentWithPhenotype.explanation')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}
+                error={this.getFormError('geneFunctionConsistentWithPhenotype.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -342,9 +384,11 @@ var TypeProteinInteractions = function() {
     }
     return (
         <div className="row">
-            <Input type="text" ref="interactingGenes" label="Interacting gene(s) (HGNC):" value={proteinInteractions.interactingGenes} placeholder="e.g. GO:0008150"
+            <Input type="text" ref="interactingGenes" label="Interacting gene(s) (HGNC):" value={proteinInteractions.interactingGenes} placeholder="e.g. DICER1"
+                error={this.getFormError('interactingGenes')} clearError={this.clrFormErrors.bind(null, 'interactingGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <Input type="select" ref="interactionType" label="Interaction Type:" defaultValue="none" value={proteinInteractions.interactionType} handleChange={this.handleChange}
+                error={this.getFormError('interactionType')} clearError={this.clrFormErrors.bind(null, 'interactionType')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -354,6 +398,7 @@ var TypeProteinInteractions = function() {
                 <option>positive genetic interaction (MI:0935)</option>
             </Input>
             <Input type="select" ref="experimentalInteractionDetection" label="Experimental interaction detection:" defaultValue="none" value={proteinInteractions.experimentalInteractionDetection} handleChange={this.handleChange}
+                error={this.getFormError('experimentalInteractionDetection')} clearError={this.clrFormErrors.bind(null, 'experimentalInteractionDetection')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -366,10 +411,13 @@ var TypeProteinInteractions = function() {
                 <option>electron microscopy (MI:0040)</option>
             </Input>
             <Input type="checkbox" ref="geneImplicatedInDisease" label="Has this gene or genes been implicated in the above disease?:" value={proteinInteractions.geneImplicatedInDisease} placeholder=""
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                error={this.getFormError('geneImplicatedInDisease')} clearError={this.clrFormErrors.bind(null, 'geneImplicatedInDisease')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="relationshipOfOtherGenesToDisese" label="Explanation of relationship of other gene(s) to the disease:" rows="5" value={proteinInteractions.relationshipOfOtherGenesToDisese}
+                error={this.getFormError('relationshipOfOtherGenesToDisese')} clearError={this.clrFormErrors.bind(null, 'relationshipOfOtherGenesToDisese')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper" rows="5" value={proteinInteractions.evidenceInPaper}
+                error={this.getFormError('evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -403,14 +451,14 @@ var TypeExpression = function() {
             <p className="col-sm-7 col-sm-offset-5">Enter evidence for A and/or B (at least one required)</p>
             <h4 className="col-sm-7 col-sm-offset-5">A. Gene normally expressed in tissue relevant to the disease</h4>
             <Input type="checkbox" ref="normalExpression.expressedInTissue" label="Is gene normally expressed in tissues relevant to the disease?:" value={expression.normalExpression.expressedInTissue} placeholder="e.g. DICER1"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="normalExpression.evidence" label="Evidence for normal expression in tissue:" rows="5" value={expression.normalExpression.evidence}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="textarea" ref="normalExpression.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={expression.normalExpression.evidenceInPaper}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <h4 className="col-sm-7 col-sm-offset-5">B. Altered expression in Patients</h4>
             <Input type="checkbox" ref="alteredExpression.expressedInPatients" label="Is gene normally expressed in tissues relevant to the disease?:" value={expression.alteredExpression.expressedInPatients} placeholder="e.g. DICER1"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="alteredExpression.evidence" label="Evidence for normal expression in tissue:" rows="5" value={expression.alteredExpression.evidence}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="textarea" ref="alteredExpression.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={expression.alteredExpression.evidenceInPaper}
@@ -603,9 +651,9 @@ var TypeRescue = function() {
             <Input type="textarea" ref="rescueMethod" label="Method used to rescue:" rows="5" value={rescue.rescueMethod}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="checkbox" ref="wildTypeRescuePhenotype" label="Does the wild-type rescue the above phenotype?:" value={rescue.wildTypeRescuePhenotype}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="checkbox" ref="patientVariantRescue" label="Does patient variant rescue?:" value={rescue.patientVariantRescue}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="explanation" label="Explanation:" rows="5" value={rescue.explanation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper" rows="5" value={rescue.evidenceInPaper}
