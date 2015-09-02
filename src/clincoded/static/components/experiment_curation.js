@@ -130,10 +130,11 @@ var ExperimentCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
-            var GoSlimIDs, geneSymbols, hpoIDs, uberonIDs, efoIDs;
+            var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, efoIDs;
             var formError = false;
 
             if (this.state.experimentType == 'Biochemical Function') {
+                // Check form for Biochemical Function panel
                 goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
                 geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
                 hpoIDs = curator.capture.hpoids(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
@@ -158,6 +159,7 @@ var ExperimentCuration = React.createClass({
                 }
             }
             else if (this.state.experimentType == 'Protein Interactions') {
+                // Check form for Protein Interactions panel
                 geneSymbols = curator.capture.genes(this.getFormValue('interactingGenes'));
                 if (geneSymbols && geneSymbols.length && _(geneSymbols).any(function(id) { return id === null; })) {
                     // Gene symbol list is bad
@@ -166,7 +168,8 @@ var ExperimentCuration = React.createClass({
                 }
             }
             else if (this.state.experimentType == 'Expression') {
-                uberonIDs = curator.capture.genes(this.getFormValue('organOfTissue'));
+                // Check form for Expression panel
+                uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
                 if (uberonIDs && uberonIDs.length && _(uberonIDs).any(function(id) { return id === null; })) {
                     // Uberon ID is bad
                     formError = true;
@@ -177,27 +180,28 @@ var ExperimentCuration = React.createClass({
                     this.setFormErrors('organOfTissue', 'Enter only one Uberon ID');
                 }
             }
-            else if (this.state.experimentType == 'Functional Alterations') {
+            else if (this.state.experimentType == 'Functional alteration of gene/gene product') {
+                // Check form for Functional Alterations panel
                 goSlimIDs = curator.capture.goslims(this.getFormValue('normalFunctionOfGene'));
-                efoIDs = curator.capture.genes(this.getFormValue('patientCellType'));
+                efoIDs = curator.capture.efoids(this.getFormValue('funcalt.patientCellType'));
                 if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
                     // EFO ID is bad
                     formError = true;
-                    this.setFormErrors('patientCellType', 'Use EFO ID (e.g. 0000001)');
+                    this.setFormErrors('funcalt.patientCellType', 'Use EFO ID (e.g. 0000001)');
                 }
                 if (efoIDs.length > 1) {
                     // More than one EFO ID specified
-                    this.setFormErrors('patientCellType', 'Enter only one EFO ID');
+                    this.setFormErrors('funcalt.patientCellType', 'Enter only one EFO ID');
                 }
-                efoIDs = curator.capture.genes(this.getFormValue('engineeredEquivalentCellType'));
+                efoIDs = curator.capture.efoids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
                 if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
                     // EFO ID is bad
                     formError = true;
-                    this.setFormErrors('engineeredEquivalentCellType', 'Use EFO ID (e.g. 0000001)');
+                    this.setFormErrors('funcalt.engineeredEquivalentCellType', 'Use EFO ID (e.g. 0000001)');
                 }
                 if (efoIDs.length > 1) {
                     // More than one EFO ID specified
-                    this.setFormErrors('engineeredEquivalentCellType', 'Enter only one EFO ID');
+                    this.setFormErrors('funcalt.engineeredEquivalentCellType', 'Enter only one EFO ID');
                 }
                 if (goSlimIDs && goSlimIDs.length && _(goSlimIDs).any(function(id) { return id === null; })) {
                     // GO_Slim ID is bad
@@ -210,57 +214,59 @@ var ExperimentCuration = React.createClass({
                 }
             }
             else if (this.state.experimentType == 'Model Systems') {
-                hpoIDs = curator.capture.genes(this.getFormValue('phenotypeHPO'));
+                // Check form for Model Systems panel
+                hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPO'));
                 if (hpoIDs && hpoIDs.length && _(hpoIDs).any(function(id) { return id === null; })) {
                     // HPO ID is bad
                     formError = true;
-                    this.setFormErrors('phenotypeHPO', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+                    this.setFormErrors('model.phenotypeHPO', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
                 }
                 if (hpoIDs.length > 1) {
                     // More than one HPO ID specified
-                    this.setFormErrors('phenotypeHPO', 'Enter only one HPO ID');
+                    this.setFormErrors('model.phenotypeHPO', 'Enter only one HPO ID');
                 }
-                hpoIDs = curator.capture.genes(this.getFormValue('phenotypeHPOObserved'));
+                hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPOObserved'));
                 if (hpoIDs && hpoIDs.length && _(hpoIDs).any(function(id) { return id === null; })) {
                     // HPO ID is bad
                     formError = true;
-                    this.setFormErrors('phenotypeHPOObserved', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+                    this.setFormErrors('model.phenotypeHPOObserved', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
                 }
                 if (hpoIDs.length > 1) {
                     // More than one HPO ID specified
-                    this.setFormErrors('phenotypeHPOObserved', 'Enter only one HPO ID');
+                    this.setFormErrors('model.phenotypeHPOObserved', 'Enter only one HPO ID');
                 }
             }
             else if (this.state.experimentType == 'Rescue') {
-                hpoIDs = curator.capture.genes(this.getFormValue('phenotypeHPO'));
-                efoIDs = curator.capture.genes(this.getFormValue('patientCellType'));
+                // Check form for Rescue panel
+                hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
+                efoIDs = curator.capture.efoids(this.getFormValue('rescue.patientCellType'));
                 if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
                     // EFO ID is bad
                     formError = true;
-                    this.setFormErrors('patientCellType', 'Use EFO ID (e.g. 0000001)');
+                    this.setFormErrors('rescue.patientCellType', 'Use EFO ID (e.g. 0000001)');
                 }
                 if (efoIDs.length > 1) {
                     // More than one EFO ID specified
-                    this.setFormErrors('patientCellType', 'Enter only one EFO ID');
+                    this.setFormErrors('rescue.patientCellType', 'Enter only one EFO ID');
                 }
-                efoIDs = curator.capture.genes(this.getFormValue('engineeredEquivalentCellType'));
+                efoIDs = curator.capture.efoids(this.getFormValue('rescue.engineeredEquivalentCellType'));
                 if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
                     // EFO ID is bad
                     formError = true;
-                    this.setFormErrors('engineeredEquivalentCellType', 'Use EFO ID (e.g. 0000001)');
+                    this.setFormErrors('rescue.engineeredEquivalentCellType', 'Use EFO ID (e.g. 0000001)');
                 }
                 if (efoIDs.length > 1) {
                     // More than one EFO ID specified
-                    this.setFormErrors('engineeredEquivalentCellType', 'Enter only one EFO ID');
+                    this.setFormErrors('rescue.engineeredEquivalentCellType', 'Enter only one EFO ID');
                 }
                 if (hpoIDs && hpoIDs.length && _(hpoIDs).any(function(id) { return id === null; })) {
                     // HPO ID is bad
                     formError = true;
-                    this.setFormErrors('phenotypeHPO', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+                    this.setFormErrors('rescue.phenotypeHPO', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
                 }
                 if (hpoIDs.length > 1) {
                     // More than one HPO ID specified
-                    this.setFormErrors('phenotypeHPO', 'Enter only one HPO ID');
+                    this.setFormErrors('rescue.phenotypeHPO', 'Enter only one HPO ID');
                 }
             }
 
@@ -602,11 +608,11 @@ var TypeFunctionalAlteration = function() {
                 <option>Patient cells</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <Input type="text" ref="patientCellType" label={<LabelPatientCellType />} value={functionalAlteration.patientCellType} placeholder="e.g. 0000001"
-                error={this.getFormError('patientCellType')} clearError={this.clrFormErrors.bind(null, 'patientCellType')}
+            <Input type="text" ref="funcalt.patientCellType" label={<LabelPatientCellType />} value={functionalAlteration.patientCellType} placeholder="e.g. 0000001"
+                error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="text" ref="engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. 0000001"
-                error={this.getFormError('engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'engineeredEquivalentCellType')}
+            <Input type="text" ref="funcalt.engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. 0000001"
+                error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <Input type="textarea" ref="descriptoinOfGeneAlteration" label="Description of gene alteration:" rows="5" value={functionalAlteration.descriptoinOfGeneAlteration}
                 error={this.getFormError('descriptoinOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptoinOfGeneAlteration')}
@@ -698,14 +704,14 @@ var TypeModelSystems = function() {
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={modelSystems.descriptionOfGeneAlteration}
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="phenotypeHPO" label={<LabelPatientPhenotype />} value={modelSystems.phenotypeHPO} placeholder="e.g. HP:0010704"
-                error={this.getFormError('phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'phenotypeHPO')}
+            <Input type="text" ref="model.phenotypeHPO" label={<LabelPatientPhenotype />} value={modelSystems.phenotypeHPO} placeholder="e.g. HP:0010704"
+                error={this.getFormError('model.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <Input type="textarea" ref="phenotypeFreeText" label="Patient phenotype:" rows="5" value={modelSystems.phenotypeFreeText}
                 error={this.getFormError('phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="phenotypeHPOObserved" label={<LabelPhenotypeObserved />} value={modelSystems.phenotypeHPOObserved} placeholder="e.g. HP:0010704"
-                error={this.getFormError('phenotypeHPOObserved')} clearError={this.clrFormErrors.bind(null, 'phenotypeHPOObserved')}
+            <Input type="text" ref="model.phenotypeHPOObserved" label={<LabelPhenotypeObserved />} value={modelSystems.phenotypeHPOObserved} placeholder="e.g. HP:0010704"
+                error={this.getFormError('model.phenotypeHPOObserved')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPOObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <Input type="textarea" ref="phenotypeFreetextObserved" label="Phenotype observed in model system:" rows="5" value={modelSystems.phenotypeFreetextObserved}
                 error={this.getFormError('phenotypeFreetextObserved')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreetextObserved')}
@@ -760,17 +766,17 @@ var TypeRescue = function() {
                 <option>Patient cells</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <Input type="text" ref="patientCellType" label={<LabelPatientCellType />} value={rescue.patientCellType} placeholder=""
-                error={this.getFormError('patientCellType')} clearError={this.clrFormErrors.bind(null, 'patientCellType')}
+            <Input type="text" ref="rescue.patientCellType" label={<LabelPatientCellType />} value={rescue.patientCellType} placeholder=""
+                error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="text" ref="engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={rescue.engineeredEquivalentCellType} placeholder=""
-                error={this.getFormError('engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'engineeredEquivalentCellType')}
+            <Input type="text" ref="rescue.engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={rescue.engineeredEquivalentCellType} placeholder=""
+                error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={rescue.descriptionOfGeneAlteration}
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="phenotypeHPO" label="Phenotype to rescue (HPO)" value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704"
-                error={this.getFormError('phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'phenotypeHPO')}
+            <Input type="text" ref="rescue.phenotypeHPO" label="Phenotype to rescue (HPO)" value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704"
+                error={this.getFormError('rescue.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <Input type="textarea" ref="phenotypeFreeText" label="Phenotype to rescue:" rows="5" value={rescue.phenotypeFreeText}
                 error={this.getFormError('phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreeText')}

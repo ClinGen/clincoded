@@ -528,7 +528,7 @@ module.exports.capture = {
     },
 
     efoids: function(s) {
-        return captureBase(s, /^\s*(\d{7})\s*$/);
+        return captureBase(s, /^\s*(\d{7})\s*$/i, true);
     }
 };
 
