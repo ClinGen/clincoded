@@ -4,7 +4,7 @@
     "description": "Schema for storing and using variant data",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [],
+    "required": ["clinvarVariantId"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -15,6 +15,11 @@
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "clinvarVariantId": {
+            "title": "Variant ID",
+            "description": "ClinVar Variant ID",
+            "type": "string"
         },
         "dbSNPId": {
             "title": "dbSNP ID",
@@ -49,6 +54,10 @@
     "columns": {
         "uuid": {
             "title": "Variant",
+            "type": "string"
+        },
+        "clinvarVariantId": {
+            "title": "Variant ID",
             "type": "string"
         },
         "dbSNPId": {

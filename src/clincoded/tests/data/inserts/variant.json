@@ -2,6 +2,7 @@
     {
         "uuid": "c71fc085-2683-11e5-b9fe-60f81dc5b05a",
         "dbSNPId": "rs386833448",
+        "clinvarVariantId": "55966",
         "clinVarRCV": "RCV000049375",
         "hgvsNames": [
             "NM_000111.2:c.1306C>T",
@@ -16,6 +17,7 @@
     {
         "uuid": "3080772e-2685-11e5-ad92-60f81dc5b05a",
         "dbSNPId": "rs386833446",
+        "clinvarVariantId": "55964",
         "clinVarRCV": "RCV000049373",
         "hgvsNames": [
             "NM_000111.2:c.1136G>C",
@@ -30,6 +32,7 @@
     {
         "uuid": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
         "dbSNPId": "rs386833444",
+        "clinvarVariantId": "55962",
         "clinVarRCV": "RCV000049371",
         "hgvsNames": [
             "NM_000111.2:c.1028G>A",
@@ -44,6 +47,7 @@
     {
         "uuid": "3b3af7f0-2685-11e5-bc56-60f81dc5b05a",
         "dbSNPId": "rs387907373",
+        "clinvarVariantId": "55874",
         "clinVarRCV": "RCV000049288",
         "hgvsNames": [
             "NM_000475.4:c.1274G>T",
@@ -58,6 +62,7 @@
     {
         "uuid": "4113d4c5-2685-11e5-96a7-60f81dc5b05a",
         "dbSNPId": "rs147674680",
+        "clinvarVariantId": "55847",
         "clinVarRCV": "RCV000049263",
         "hgvsNames": [
             "NM_032682.5:c.1702C>T",
@@ -72,6 +77,7 @@
     {
         "uuid": "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a",
         "dbSNPId": "rs147674680",
+        "clinvarVariantId": "55847",
         "clinVarRCV": "RCV000049262",
         "hgvsNames": [
             "NM_032682.5:c.1702C>T",
@@ -86,6 +92,7 @@
     {
         "uuid": "e496545c-2685-11e5-a4b3-60f81dc5b05a",
         "dbSNPId": "rs76262710",
+        "clinvarVariantId": "38601",
         "clinVarRCV": "RCV000032040",
         "hgvsNames": [
             "NM_020975.4:c.1852T>A",
@@ -102,6 +109,7 @@
     {
         "uuid": "df8135d4-2685-11e5-af19-60f81dc5b05a",
         "dbSNPId": "rs2298771",
+        "clinvarVariantId": "36753",
         "clinVarRCV": "RCV000030432",
         "hgvsNames": [
             "LRG_8t1:c.3166G>A",
@@ -124,6 +132,7 @@
     {
         "uuid": "d9717187-2685-11e5-9eac-60f81dc5b05a",
         "dbSNPId": "rs193922686",
+        "clinvarVariantId": "36485",
         "clinVarRCV": "RCV000030157",
         "hgvsNames": [
             "NM_005912.2:c.677T>C",
@@ -138,6 +147,7 @@
     {
         "uuid": "d439f000-2685-11e5-9792-60f81dc5b05a",
         "dbSNPId": "rs138281308",
+        "clinvarVariantId": "36484",
         "clinVarRCV": "RCV000030156",
         "hgvsNames": [
             "NM_005912.2:c.606C>A",
