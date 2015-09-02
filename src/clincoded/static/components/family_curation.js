@@ -65,7 +65,7 @@ var FamilyCuration = React.createClass({
 
     // Handle value changes in various form fields
     handleChange: function(ref, e) {
-        var dbsnpid, clinvarid, hgvsterm, othervariant;
+        var clinvarid, othervariant;
 
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
             // Disable the Genotyping Method 2 if Genotyping Method 1 has no value
@@ -81,28 +81,25 @@ var FamilyCuration = React.createClass({
             if (refSuffix && (lastVariantSuffix === refSuffix)) {
                 // The changed item is in the last variant panel. If any fields in the last field have a value, disable
                 // the Add Another Variant button.
-                dbsnpid = this.refs['VARdbsnpid' + lastVariantSuffix].getValue();
                 clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                hgvsterm = this.refs['VARhgvsterm' + lastVariantSuffix].getValue();
                 othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
-                this.setState({addVariantDisabled: !(dbsnpid || clinvarid || hgvsterm || othervariant)});
+                this.setState({addVariantDisabled: !(clinvarid || othervariant)});
             }
 
             // Disable fields depending on what fields have values in them.
-            dbsnpid = this.refs['VARdbsnpid' + refSuffix].getValue();
             clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
-            hgvsterm = this.refs['VARhgvsterm' + refSuffix].getValue();
             othervariant = this.refs['VARothervariant' + refSuffix].getValue();
             var currVariantOption = this.state.variantOption;
             if (othervariant) {
-                this.refs['VARdbsnpid' + refSuffix].resetValue();
+                // Something entered in Other; clear the ClinVar ID and set the variantOption state to disable it.
                 this.refs['VARclinvarid' + refSuffix].resetValue();
-                this.refs['VARhgvsterm' + refSuffix].resetValue();
                 currVariantOption[refSuffix] = VAR_OTHER;
-            } else if (dbsnpid || clinvarid || hgvsterm) {
+            } else if (clinvarid) {
+                // Something entered in ClinCar ID; clear the Other field and set the variantOption state to disable it.
                 this.refs['VARothervariant' + refSuffix].resetValue();
                 currVariantOption[refSuffix] = VAR_SPEC;
             } else {
+                // Nothing entered anywhere; enable everything.
                 currVariantOption[refSuffix] = VAR_NONE;
             }
             this.setState({variantOption: currVariantOption});
@@ -245,28 +242,12 @@ var FamilyCuration = React.createClass({
 
         for (var i = 0; i < this.state.variantCount; i++) {
             // Grab the values from the variant form panel
-            var dbsnpid = this.getFormValue('VARdbsnpid' + i);
             var clinvarid = this.getFormValue('VARclinvarid' + i);
-            var hgvsterm = this.getFormValue('VARhgvsterm' + i);
-            var othervariant = this.getFormValue('VARothervariant' + i);
-            var searchStr = '/search/?type=variant';
 
             // Build the search string depending on what the user entered
-            if (othervariant) {
-                // Make a search string only for othervariant
-                searchStr += '&otherDescription=' + othervariant;
-            } else if (dbsnpid || clinvarid || hgvsterm) {
+            if (clinvarid) {
                 // Make a search string for these terms
-                searchStr += dbsnpid ? '&dbSNPId=' + dbsnpid : '';
-                searchStr += clinvarid ? '&clinVarRCV=' + clinvarid : '';
-                searchStr += hgvsterm ? '&hgvsNames=' + hgvsterm : '';
-            } else {
-                searchStr = '';
-            }
-
-            // If we built a search string, add it to array of search strings
-            if (searchStr) {
-                searchStrs.push(searchStr);
+                searchStrs.push('/search/?type=variant&clinVarRCV=' + clinvarid);
             }
         }
 
@@ -278,17 +259,13 @@ var FamilyCuration = React.createClass({
     makeVariant: function(i) {
         var newVariant = {};
 
-        var dbsnpid = this.getFormValue('VARdbsnpid' + i);
         var clinvarid = this.getFormValue('VARclinvarid' + i);
-        var hgvsterm = this.getFormValue('VARhgvsterm' + i);
         var othervariant = this.getFormValue('VARothervariant' + i);
 
         if (othervariant) {
             newVariant.otherDescription = othervariant;
-        } else if (dbsnpid || clinvarid || hgvsterm) {
-            if (dbsnpid) { newVariant.dbSNPId = dbsnpid; }
+        } else if (clinvarid) {
             if (clinvarid) { newVariant.clinVarRCV = clinvarid.toUpperCase(); }
-            if (hgvsterm) { newVariant.hgvsNames = [hgvsterm.toUpperCase()]; }
         }
         return Object.keys(newVariant).length ? newVariant : null;
     },
@@ -300,18 +277,7 @@ var FamilyCuration = React.createClass({
 
         // Check Variant panel inputs for correct formats
         for (var i = 0; i < this.state.variantCount; i++) {
-            // Check dbSNP ID for a valid format
-            var value = this.getFormValue('VARdbsnpid' + i);
-            if (value) {
-                valid = value.match(/^\s*(rs\d{1,9})\s*$/i);
-                if (!valid) {
-                    this.setFormErrors('VARdbsnpid' + i, 'Use dbSNP IDs (e.g. rs1748)');
-                    anyInvalid = true;
-                }
-            }
-
-            // Check dbSNP ID for a valid format
-            value = this.getFormValue('VARclinvarid' + i);
+            var value = this.getFormValue('VARclinvarid' + i);
             if (value) {
                 valid = value.match(/^\s*(RCV\d{9}(.\d){0,1})\s*$/i);
                 if (!valid) {
@@ -451,17 +417,29 @@ var FamilyCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    // Handle variants; start by making an array of search terms, one for each variant in the form.
-                    // For any that already exist, push them on the family's variants. For any that don't, write
-                    // them to the DB, and then push their IDs onto the family's variants.
+                    // See what variants from the form already exist in the DB (we don't search for "Other description"; each one
+                    // of those kinds of variants generates a new variant object). For any that already exist, push them onto
+                    // the array of the family's variants. For any that don't, pass them to the next THEN to write them to the DB.
                     var newVariants = [];
-                    var variantTerms = this.makeVariantSearchStr();
+
+                    // Build anb array of search strings for each of the ClinVar IDs entered in the form.
+                    var searchStrs = [];
+                    for (var i = 0; i < this.state.variantCount; i++) {
+                        // Grab the values from the variant form panel
+                        var clinvarId = this.getFormValue('VARclinvarid' + i);
+
+                        // Build the search string depending on what the user entered
+                        if (clinvarId) {
+                            // Make a search string for these terms
+                            searchStrs.push('/search/?type=variant&clinVarRCV=' + clinvarId);
+                        }
+                    }
 
                     // If at least one variant search string built, perform the search
-                    if (variantTerms.length) {
+                    if (searchStrs.length) {
                         // Search DB for all matching terms for all variants entered
                         return this.getRestDatas(
-                            variantTerms
+                            searchStrs
                         ).then(results => {
                             // 'result' is an array of search results, one per search string. There should only be one result per array element --
                             // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
@@ -471,34 +449,55 @@ var FamilyCuration = React.createClass({
                                     familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                 } else {
                                     // Search got no result; make a new variant and save it in an array so we can write them.
-                                    var newVariant = this.makeVariant(i);
-                                    if (newVariant) {
+                                    // Look for the term in the filters to see what term failed to find a match
+                                    var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinVarRCV'; });
+                                    if (termResult) {
+                                        var newVariant = {};
+                                        newVariant.clinVarRCV = termResult.term;
                                         newVariants.push(newVariant);
                                     }
                                 }
                             }, this);
 
-                            // If we have new variants, write them to the DB.
-                            if (newVariants) {
-                                return this.postRestDatas(
-                                    '/variants/', newVariants
-                                ).then(results => {
-                                    if (results && results.length) {
-                                        // Add the newly written variants to the family
-                                        results.forEach(result => {
-                                            familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
-                                        });
-                                    }
-                                    return Promise.resolve(results);
-                                });
-                            }
-
-                            // No new variants; just resolve the promise right away.
-                            return Promise.resolve(null);
+                            // Pass new variant array to the next THEN to write them.
+                            return Promise.resolve(newVariants);
                         });
                     }
 
-                    // No variant search strings. Go to next THEN.
+                    // No variant search strings. Go to next THEN indicating no new named variants
+                    return Promise.resolve(null);
+                }).then(newVariants => {
+                    // We're passed in a list of new clinVarRCV variant objects that need to be written to the DB.
+                    // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
+                    for (var i = 0; i < this.state.variantCount; i++) {
+                        // Grab the values from the variant form panel
+                        var otherVariantText = this.getFormValue('VARothervariant' + i).trim().toUpperCase();
+
+                        // Build the search string depending on what the user entered
+                        if (otherVariantText) {
+                            // Add this Other Description text to a new variant object
+                            var newVariant = {};
+                            newVariant.otherDescription = otherVariantText;
+                            newVariants.push(newVariant);
+                        }
+                    }
+
+                    // Now write the new variants to the DB, and push their @ids to the family variant
+                    if (newVariants && newVariants.length) {
+                        return this.postRestDatas(
+                            '/variants/', newVariants
+                        ).then(results => {
+                            if (results && results.length) {
+                                // Add the newly written variants to the family
+                                results.forEach(result => {
+                                    familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
+                                });
+                            }
+                            return Promise.resolve(results);
+                        });
+                    }
+
+                    // No variant search strings. Go to next THEN indicating no new named variants
                     return Promise.resolve(null);
                 }).then(data => {
                     var label, diseases;
@@ -1147,19 +1146,12 @@ var FamilyVariant = function() {
 
                 if (variants && variants.length) {
                     variant = variants[i];
-                    hgvsNames = variant ? variant && variant.hgvsNames && variant.hgvsNames.join() : null;
                 }
 
                 return (
                     <div key={i} className="variant-panel">
-                        <Input type="text" ref={'VARdbsnpid' + i} label={<LabelDbSnp />} value={variant && variant.dbSNPId} placeholder="e.g. rs1748" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
-                            error={this.getFormError('VARdbsnpid' + i)} clearError={this.clrFormErrors.bind(null, 'VARdbsnpid' + i)}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                         <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={variant && variant.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <Input type="text" ref={'VARhgvsterm' + i} label={<LabelHgvs />} value={hgvsNames} placeholder="e.g. NM_001009944.2:c.12420G>A" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
-                            error={this.getFormError('VARhgvsterm' + i)} clearError={this.clrFormErrors.bind(null, 'VARhgvsterm' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1180,7 +1172,7 @@ var FamilyVariant = function() {
             : null}
             {this.state.variantCount < MAX_VARIANTS ?
                 <div>
-                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
+                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add variant associated with proband" : "Add another variant associated with proband"}
                         clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                 </div>
             : null}
@@ -1188,22 +1180,9 @@ var FamilyVariant = function() {
     );
 };
 
-// HTML labels for inputs follow.
-var LabelDbSnp = React.createClass({
-    render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank" title="dbSNP Short Genetic Variations in a new tab">dbSNP</a> ID:</span>;
-    }
-});
-
 var LabelClinVar = React.createClass({
     render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> ID <span style={{fontWeight: 'normal'}}>(if no dbSNP, or in addition to dbSNP)</span>:</span>;
-    }
-});
-
-var LabelHgvs = React.createClass({
-    render: function() {
-        return <span><a href="http://www.hgvs.org/mutnomen/recs-DNA.html" target="_blank" title="Human Genome Variation Society home page in a new tab">HGVS</a> term: <span style={{fontWeight: 'normal'}}>(if no dbSNP or ClinVar ID)</span>:</span>;
+        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> ID:</span>;
     }
 });
 
@@ -1476,22 +1455,8 @@ var FamilyViewer = React.createClass({
                                     <h5>Variant {i + 1}</h5>
                                     <dl className="dl-horizontal">
                                         <div>
-                                            <dt>dbSNP ID</dt>
-                                            <dd>{variant.dbSNPId}</dd>
-                                        </div>
-
-                                        <div>
                                             <dt>ClinVar ID</dt>
                                             <dd>{variant.clinVarRCV}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>HGVS term</dt>
-                                            <dd>
-                                                {variant.hgvsNames ?
-                                                    <span>{variant.hgvsNames.join(', ')}</span>
-                                                : null}
-                                            </dd>
                                         </div>
 
                                         <div>

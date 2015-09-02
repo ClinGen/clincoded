@@ -144,10 +144,8 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                             {hasVariants || hadVariants ?
                                 <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
                                     <div className="submit-results-panel-info">
-                                        <p>An Individual entry for the proband and its associated variant(s) has been created. You can add additional information about the proband, create an entry for a non-proband in this Family, or return to the Record Curation page.</p>
-                                        <p>
-                                            <em><strong>Note</strong>: Individual information includes associated variant(s), phenotypes, sex, etc. For a proband, variant information can only be added or edited on the Family page as it is associated with segregation information.</em>
-                                        </p>
+                                        <p>An Individual entry named <strong>{probandIndividual.label}</strong> for the proband and its associated variant(s) has been created. You can add additional information about the proband, create an entry for a non-proband in this Family, or return to the Record Curation page.</p>
+                                        <p><em><strong>Note</strong>: Individual information includes associated variant(s), phenotypes, sex, etc. For a proband, variant information can only be added or edited on the Family page as it is associated with segregation information.</em></p>
                                     </div>
                                     <div className="submit-results-buttons">
                                         <div className="row">
