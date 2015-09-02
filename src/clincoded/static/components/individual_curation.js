@@ -482,32 +482,34 @@ var IndividualCuration = React.createClass({
                 }).then(newVariants => {
                     // We're passed in a list of new clinVarRCV variant objects that need to be written to the DB.
                     // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
-                    for (var i = 0; i < this.state.variantCount; i++) {
-                        // Grab the values from the variant form panel
-                        var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
+                    if (!currIndividual || !currIndividual.proband) {
+                        for (var i = 0; i < this.state.variantCount; i++) {
+                            // Grab the values from the variant form panel
+                            var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
 
-                        // Build the search string depending on what the user entered
-                        if (otherVariantText) {
-                            // Add this Other Description text to a new variant object
-                            var newVariant = {};
-                            newVariant.otherDescription = otherVariantText;
-                            newVariants.push(newVariant);
-                        }
-                    }
-
-                    // Now write the new variants to the DB, and push their @ids to the family variant
-                    if (newVariants && newVariants.length) {
-                        return this.postRestDatas(
-                            '/variants/', newVariants
-                        ).then(results => {
-                            if (results && results.length) {
-                                // Add the newly written variants to the family
-                                results.forEach(result => {
-                                    individualVariants.push('/variants/' + result['@graph'][0].uuid + '/');
-                                });
+                            // Build the search string depending on what the user entered
+                            if (otherVariantText) {
+                                // Add this Other Description text to a new variant object
+                                var newVariant = {};
+                                newVariant.otherDescription = otherVariantText;
+                                newVariants.push(newVariant);
                             }
-                            return Promise.resolve(results);
-                        });
+                        }
+
+                        // Now write the new variants to the DB, and push their @ids to the family variant
+                        if (newVariants && newVariants.length) {
+                            return this.postRestDatas(
+                                '/variants/', newVariants
+                            ).then(results => {
+                                if (results && results.length) {
+                                    // Add the newly written variants to the family
+                                    results.forEach(result => {
+                                        individualVariants.push('/variants/' + result['@graph'][0].uuid + '/');
+                                    });
+                                }
+                                return Promise.resolve(results);
+                            });
+                        }
                     }
 
                     // No variant search strings. Go to next THEN indicating no new named variants

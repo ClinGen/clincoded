@@ -141,7 +141,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                                 </p>
                             </Panel>
                             {(this.state.haveFamily === 'y' && gdm && annotation && group) ?
-                                <Panel panelClassName="submit-results-panel">
+                                <Panel panelClassName="submit-results-panel submit-results-response">
                                     <p>
                                         <em>Any variant associated with a proband in a Family is captured at the Family level. To associate segregation, variant,
                                         or any other information for a family, click <strong>Add New Family for this Group</strong>. If you have previously
@@ -159,7 +159,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                                     </div>
                                 </Panel>
                             : ((this.state.haveFamily === 'n' && gdm && annotation && group) ?
-                                <Panel panelClassName="submit-results-panel">
+                                <Panel panelClassName="submit-results-panel submit-results-response">
                                     <p>
                                         <em>Any variant associated with an individual that is a member of a Group but not part of a Family is captured at the
                                         Individual level. To associate a variant and/or information such as age, race, etc. with an individual in the Group,
