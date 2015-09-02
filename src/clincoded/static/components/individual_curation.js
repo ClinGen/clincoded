@@ -186,7 +186,7 @@ var IndividualCuration = React.createClass({
                     // Go through each variant to determine how its form fields should be disabled.
                     var currVariantOption = [];
                     for (var i = 0; i < variants.length; i++) {
-                        if (variants[i].clinVarRCV) {
+                        if (variants[i].clinvarVariantId) {
                             currVariantOption[i] = VAR_SPEC;
                         } else if (variants[i].otherDescription) {
                             currVariantOption[i] = VAR_OTHER;
@@ -262,53 +262,6 @@ var IndividualCuration = React.createClass({
         }
     },
 
-    // Return an array of variant search strings, one element per variant entered.
-    // Empty variant panels aren't included in the array of search strings.
-    makeVariantSearchStr: function() {
-        var searchStrs = [];
-
-        for (var i = 0; i < this.state.variantCount; i++) {
-            // Grab the values from the variant form panel
-            var clinvarid = this.getFormValue('VARclinvarid' + i);
-            var othervariant = this.getFormValue('VARothervariant' + i);
-            var searchStr = '/search/?type=variant';
-
-            // Build the search string depending on what the user entered
-            if (othervariant) {
-                // Make a search string only for othervariant
-                searchStr += '&otherDescription=' + othervariant;
-            } else if (clinvarid) {
-                // Make a search string for these terms
-                searchStr += clinvarid ? '&clinVarRCV=' + clinvarid : '';
-            } else {
-                searchStr = '';
-            }
-
-            // If we built a search string, add it to array of search strings
-            if (searchStr) {
-                searchStrs.push(searchStr);
-            }
-        }
-
-        return searchStrs;
-    },
-
-    // Make a variant object for writing to the DB. The index (0-based) of the Variant panel to get the
-    // variant data from is in the 'i' parameter.
-    makeVariant: function(i) {
-        var newVariant = {};
-
-        var clinvarid = this.getFormValue('VARclinvarid' + i);
-        var othervariant = this.getFormValue('VARothervariant' + i);
-
-        if (othervariant) {
-            newVariant.otherDescription = othervariant;
-        } else if (clinvarid) {
-            if (clinvarid) { newVariant.clinVarRCV = clinvarid.toUpperCase(); }
-        }
-        return Object.keys(newVariant).length ? newVariant : null;
-    },
-
     // Validate that all the variant panels have properly-formatted input. Return true if they all do.
     validateVariants: function() {
         var valid;
@@ -329,9 +282,9 @@ var IndividualCuration = React.createClass({
             // Check dbSNP ID for a valid format
             value = this.getFormValue('VARclinvarid' + i);
             if (value) {
-                valid = value.match(/^\s*(RCV\d{9}(.\d){0,1})\s*$/i);
+                valid = value.match(/^\s*(\d{1,10})\s*$/i);
                 if (!valid) {
-                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar IDs (e.g. RCV000162091 or RCV000049373.1)');
+                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariantIDs (e.g. 177676)');
                     anyInvalid = true;
                 }
             }
@@ -439,12 +392,12 @@ var IndividualCuration = React.createClass({
                         var searchStrs = [];
                         for (var i = 0; i < this.state.variantCount; i++) {
                             // Grab the values from the variant form panel
-                            var clinvarId = this.getFormValue('VARclinvarid' + i).toUpperCase();
+                            var clinvarId = this.getFormValue('VARclinvarid' + i);
 
                             // Build the search string depending on what the user entered
                             if (clinvarId) {
                                 // Make a search string for these terms
-                                searchStrs.push('/search/?type=variant&clinVarRCV=' + clinvarId);
+                                searchStrs.push('/search/?type=variant&clinvarVariantId=' + clinvarId);
                             }
                         }
 
@@ -1051,8 +1004,8 @@ var IndividualVariantInfo = function() {
                                 <h5>Variant {i + 1}</h5>
                                 <dl className="dl-horizontal">
                                     <div>
-                                        <dt>ClinVar ID</dt>
-                                        <dd>{variant.clinVarRCV}</dd>
+                                        <dt>ClinVar VariantID</dt>
+                                        <dd>{variant.clinvarVariantId}</dd>
                                     </div>
 
                                     <div>
@@ -1076,7 +1029,7 @@ var IndividualVariantInfo = function() {
 
                         return (
                             <div key={i} className="variant-panel">
-                                <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={variant && variant.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
+                                <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                                     error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
@@ -1095,9 +1048,9 @@ var IndividualVariantInfo = function() {
 };
 
 
-var LabelClinVar = React.createClass({
+var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> ID:</span>;
+        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariantID:</span>;
     }
 });
 
@@ -1127,7 +1080,7 @@ var IndividualAdditional = function() {
             <p className="col-sm-7 col-sm-offset-5">
                 Note: Any variants associated with the proband in this Family that were captured above will be counted as
                 probands — the proband does not need to be captured at the Individual level unless there is additional
-                information about the proband that you’d like to capture (e.g. phenotype, methods). Additional information
+                information about the proband that you&rsquo;d like to capture (e.g. phenotype, methods). Additional information
                 about other individuals in the Family may also be captured at the Individual level (including any additional
                 variant information).
             </p>
@@ -1346,8 +1299,8 @@ var IndividualViewer = React.createClass({
                                     <h5>Variant {i + 1}</h5>
                                     <dl className="dl-horizontal">
                                         <div>
-                                            <dt>ClinVar ID</dt>
-                                            <dd>{variant.clinVarRCV}</dd>
+                                            <dt>ClinVar VariantID</dt>
+                                            <dd>{variant.clinvarVariantId}</dd>
                                         </div>
 
                                         <div>

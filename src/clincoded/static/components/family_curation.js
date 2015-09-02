@@ -188,7 +188,7 @@ var FamilyCuration = React.createClass({
 
                     var currVariantOption = [];
                     for (var i = 0; i < segregation.variants.length; i++) {
-                        if (segregation.variants[i].clinVarRCV) {
+                        if (segregation.variants[i].clinvarVariantId) {
                             currVariantOption[i] = VAR_SPEC;
                         } else if (segregation.variants[i].otherDescription) {
                             currVariantOption[i] = VAR_OTHER;
@@ -260,9 +260,9 @@ var FamilyCuration = React.createClass({
         for (var i = 0; i < this.state.variantCount; i++) {
             var value = this.getFormValue('VARclinvarid' + i);
             if (value) {
-                valid = value.match(/^\s*(RCV\d{9}(.\d){0,1})\s*$/i);
+                valid = value.match(/^\s*(\d{1,10})\s*$/i);
                 if (!valid) {
-                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar IDs (e.g. RCV000162091 or RCV000049373.1)');
+                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariantIDs (e.g. 177676)');
                     anyInvalid = true;
                 }
             }
@@ -407,12 +407,12 @@ var FamilyCuration = React.createClass({
                     var searchStrs = [];
                     for (var i = 0; i < this.state.variantCount; i++) {
                         // Grab the values from the variant form panel
-                        var clinvarId = this.getFormValue('VARclinvarid' + i).toUpperCase();
+                        var clinvarId = this.getFormValue('VARclinvarid' + i);
 
                         // Build the search string depending on what the user entered
                         if (clinvarId) {
                             // Make a search string for these terms
-                            searchStrs.push('/search/?type=variant&clinVarRCV=' + clinvarId);
+                            searchStrs.push('/search/?type=variant&clinvarVariantId=' + clinvarId);
                         }
                     }
 
@@ -431,10 +431,10 @@ var FamilyCuration = React.createClass({
                                 } else {
                                     // Search got no result; make a new variant and save it in an array so we can write them.
                                     // Look for the term in the filters to see what term failed to find a match
-                                    var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinVarRCV'; });
+                                    var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinvarVariantId'; });
                                     if (termResult) {
                                         var newVariant = {};
-                                        newVariant.clinVarRCV = termResult.term;
+                                        newVariant.clinvarVariantId = termResult.term;
                                         newVariants.push(newVariant);
                                     }
                                 }
@@ -813,7 +813,7 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family — Variant(s) segregated with Proband" open>
+                                            <Panel title="Family — Variant(s) segregating with Proband" open>
                                                 {FamilyVariant.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -1131,7 +1131,7 @@ var FamilyVariant = function() {
 
                 return (
                     <div key={i} className="variant-panel">
-                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={variant && variant.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
+                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
@@ -1161,9 +1161,9 @@ var FamilyVariant = function() {
     );
 };
 
-var LabelClinVar = React.createClass({
+var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> ID:</span>;
+        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariantID:</span>;
     }
 });
 
@@ -1436,8 +1436,8 @@ var FamilyViewer = React.createClass({
                                     <h5>Variant {i + 1}</h5>
                                     <dl className="dl-horizontal">
                                         <div>
-                                            <dt>ClinVar ID</dt>
-                                            <dd>{variant.clinVarRCV}</dd>
+                                            <dt>ClinVar VariantID</dt>
+                                            <dd>{variant.clinvarVariantId}</dd>
                                         </div>
 
                                         <div>
