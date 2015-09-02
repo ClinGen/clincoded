@@ -87,23 +87,17 @@ var IndividualCuration = React.createClass({
             if (refSuffix && (lastVariantSuffix === refSuffix)) {
                 // The changed item is in the last variant panel. If any fields in the last field have a value, disable
                 // the Add Another Variant button.
-                dbsnpid = this.refs['VARdbsnpid' + lastVariantSuffix].getValue();
                 clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                hgvsterm = this.refs['VARhgvsterm' + lastVariantSuffix].getValue();
                 othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
-                this.setState({addVariantDisabled: !(dbsnpid || clinvarid || hgvsterm || othervariant)});
+                this.setState({addVariantDisabled: !(clinvarid || othervariant)});
             }
 
             // Disable fields depending on what fields have values in them.
-            dbsnpid = this.refs['VARdbsnpid' + refSuffix].getValue();
             clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
-            hgvsterm = this.refs['VARhgvsterm' + refSuffix].getValue();
             othervariant = this.refs['VARothervariant' + refSuffix].getValue();
             var currVariantOption = this.state.variantOption;
             if (othervariant) {
-                this.refs['VARdbsnpid' + refSuffix].resetValue();
                 this.refs['VARclinvarid' + refSuffix].resetValue();
-                this.refs['VARhgvsterm' + refSuffix].resetValue();
                 currVariantOption[refSuffix] = VAR_OTHER;
             } else if (dbsnpid || clinvarid || hgvsterm) {
                 this.refs['VARothervariant' + refSuffix].resetValue();
@@ -258,9 +252,7 @@ var IndividualCuration = React.createClass({
 
         for (var i = 0; i < this.state.variantCount; i++) {
             // Grab the values from the variant form panel
-            var dbsnpid = this.getFormValue('VARdbsnpid' + i);
             var clinvarid = this.getFormValue('VARclinvarid' + i);
-            var hgvsterm = this.getFormValue('VARhgvsterm' + i);
             var othervariant = this.getFormValue('VARothervariant' + i);
             var searchStr = '/search/?type=variant';
 
@@ -268,11 +260,9 @@ var IndividualCuration = React.createClass({
             if (othervariant) {
                 // Make a search string only for othervariant
                 searchStr += '&otherDescription=' + othervariant;
-            } else if (dbsnpid || clinvarid || hgvsterm) {
+            } else if (clinvarid) {
                 // Make a search string for these terms
-                searchStr += dbsnpid ? '&dbSNPId=' + dbsnpid : '';
                 searchStr += clinvarid ? '&clinVarRCV=' + clinvarid : '';
-                searchStr += hgvsterm ? '&hgvsNames=' + hgvsterm : '';
             } else {
                 searchStr = '';
             }
@@ -291,17 +281,13 @@ var IndividualCuration = React.createClass({
     makeVariant: function(i) {
         var newVariant = {};
 
-        var dbsnpid = this.getFormValue('VARdbsnpid' + i);
         var clinvarid = this.getFormValue('VARclinvarid' + i);
-        var hgvsterm = this.getFormValue('VARhgvsterm' + i);
         var othervariant = this.getFormValue('VARothervariant' + i);
 
         if (othervariant) {
             newVariant.otherDescription = othervariant;
-        } else if (dbsnpid || clinvarid || hgvsterm) {
-            if (dbsnpid) { newVariant.dbSNPId = dbsnpid; }
+        } else if (clinvarid) {
             if (clinvarid) { newVariant.clinVarRCV = clinvarid.toUpperCase(); }
-            if (hgvsterm) { newVariant.hgvsNames = [hgvsterm.toUpperCase()]; }
         }
         return Object.keys(newVariant).length ? newVariant : null;
     },
@@ -1012,22 +998,8 @@ var IndividualVariantInfo = function() {
                                 <h5>Variant {i + 1}</h5>
                                 <dl className="dl-horizontal">
                                     <div>
-                                        <dt>dbSNP ID</dt>
-                                        <dd>{variant.dbSNPId}</dd>
-                                    </div>
-
-                                    <div>
                                         <dt>ClinVar ID</dt>
                                         <dd>{variant.clinVarRCV}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>HGVS term</dt>
-                                        <dd>
-                                            {variant.hgvsNames ?
-                                                <span>{variant.hgvsNames.join(', ')}</span>
-                                            : null}
-                                        </dd>
                                     </div>
 
                                     <div>
@@ -1051,14 +1023,8 @@ var IndividualVariantInfo = function() {
 
                         return (
                             <div key={i} className="variant-panel">
-                                <Input type="text" ref={'VARdbsnpid' + i} label={<LabelDbSnp />} value={variant && variant.dbSNPId} placeholder="e.g. rs1748" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
-                                    error={this.getFormError('VARdbsnpid' + i)} clearError={this.clrFormErrors.bind(null, 'VARdbsnpid' + i)}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                 <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVar />} value={variant && variant.clinVarRCV} placeholder="e.g. RCV000162091" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                                     error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                                <Input type="text" ref={'VARhgvsterm' + i} label={<LabelHgvs />} value={hgvsNames} placeholder="e.g. NM_001009944.2:c.12420G>A" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
-                                    error={this.getFormError('VARhgvsterm' + i)} clearError={this.clrFormErrors.bind(null, 'VARhgvsterm' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1076,22 +1042,9 @@ var IndividualVariantInfo = function() {
 };
 
 
-// HTML labels for inputs follow.
-var LabelDbSnp = React.createClass({
-    render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank" title="dbSNP Short Genetic Variations in a new tab">dbSNP</a> ID:</span>;
-    }
-});
-
 var LabelClinVar = React.createClass({
     render: function() {
         return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> ID <span style={{fontWeight: 'normal'}}>(if no dbSNP, or in addition to dbSNP)</span>:</span>;
-    }
-});
-
-var LabelHgvs = React.createClass({
-    render: function() {
-        return <span><a href="http://www.hgvs.org/mutnomen/recs-DNA.html" target="_blank" title="Human Genome Variation Society home page in a new tab">HGVS</a> term: <span style={{fontWeight: 'normal'}}>(if no dbSNP or ClinVar ID)</span>:</span>;
     }
 });
 
@@ -1340,22 +1293,8 @@ var IndividualViewer = React.createClass({
                                     <h5>Variant {i + 1}</h5>
                                     <dl className="dl-horizontal">
                                         <div>
-                                            <dt>dbSNP ID</dt>
-                                            <dd>{variant.dbSNPId}</dd>
-                                        </div>
-
-                                        <div>
                                             <dt>ClinVar ID</dt>
                                             <dd>{variant.clinVarRCV}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>HGVS term</dt>
-                                            <dd>
-                                                {variant.hgvsNames ?
-                                                    <span>{variant.hgvsNames.join(', ')}</span>
-                                                : null}
-                                            </dd>
                                         </div>
 
                                         <div>

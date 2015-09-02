@@ -403,7 +403,7 @@ var FamilyCuration = React.createClass({
                     // the array of the family's variants. For any that don't, pass them to the next THEN to write them to the DB.
                     var newVariants = [];
 
-                    // Build anb array of search strings for each of the ClinVar IDs entered in the form.
+                    // Build an array of search strings for each of the ClinVar IDs entered in the form.
                     var searchStrs = [];
                     for (var i = 0; i < this.state.variantCount; i++) {
                         // Grab the values from the variant form panel
