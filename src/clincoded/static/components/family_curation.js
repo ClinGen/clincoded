@@ -1123,7 +1123,7 @@ var FamilyVariant = function() {
     return (
         <div className="row">
             {_.range(this.state.variantCount).map(i => {
-                var variant, hgvsNames;
+                var variant;
 
                 if (variants && variants.length) {
                     variant = variants[i];

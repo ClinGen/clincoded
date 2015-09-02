@@ -71,13 +71,6 @@ var IndividualCuration = React.createClass({
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
         } else if (ref === 'individualname') {
             this.setState({individualName: this.refs[ref].getValue()});
-        } else if (ref === 'proband') {
-            var val = this.refs[ref].getValue();
-            if (val === 'Yes') {
-                this.setState({variantCount: 0});
-            } else {
-                this.setState({variantCount: 1});
-            }
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -175,8 +168,8 @@ var IndividualCuration = React.createClass({
             if (stateObj.individual && Object.keys(stateObj.individual).length) {
                 stateObj.genotyping2Disabled = !(stateObj.individual.method && stateObj.individual.method.genotypingMethods && stateObj.individual.method.genotypingMethods.length);
 
-                // If this individual has variants and isn't the proband, handle the variant panels.
-                if (stateObj.individual.variants && stateObj.individual.variants.length && !stateObj.individual.proband) {
+                // If this individual has variants and isn't the proband in a family, handle the variant panels.
+                if (stateObj.individual.variants && stateObj.individual.variants.length && !(stateObj.individual.proband && stateObj.family)) {
                     var variants = stateObj.individual.variants;
 
                     // This individual has variants
@@ -302,6 +295,7 @@ var IndividualCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault() && this.validateVariants()) {
+            var family = (this.state.family && Object.keys(this.state.family).length) ? this.state.family : null;
             var currIndividual = this.state.individual && Object.keys(this.state.individual) ? this.state.individual : null;
             var newIndividual = {}; // Holds the new group object;
             var individualDiseases = null, individualArticles, individualVariants = [];
@@ -383,7 +377,7 @@ var IndividualCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    if (!currIndividual || !currIndividual.proband) {
+                    if (!currIndividual || !(currIndividual.proband && family)) {
                         // Handle variants; start by making an array of search terms, one for each variant in the form.
                         // If this is a proband individual, its variants can only be edited from its associated family.
                         var newVariants = [];
@@ -415,10 +409,10 @@ var IndividualCuration = React.createClass({
                                         individualVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                     } else {
                                         // Search got no result; make a new variant and save it in an array so we can write them.
-                                        var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinVarRCV'; });
+                                        var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinvarVariantId'; });
                                         if (termResult) {
                                             var newVariant = {};
-                                            newVariant.clinVarRCV = termResult.term;
+                                            newVariant.clinvarVariantId = termResult.term;
                                             newVariants.push(newVariant);
                                         }
                                     }
@@ -435,7 +429,7 @@ var IndividualCuration = React.createClass({
                 }).then(newVariants => {
                     // We're passed in a list of new clinVarRCV variant objects that need to be written to the DB.
                     // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
-                    if (!currIndividual || !currIndividual.proband) {
+                    if (!currIndividual || !(currIndividual.proband && family)) {
                         for (var i = 0; i < this.state.variantCount; i++) {
                             // Grab the values from the variant form panel
                             var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
@@ -618,10 +612,14 @@ var IndividualCuration = React.createClass({
             newIndividual.otherPMIDs = individualArticles['@graph'].map(function(article) { return article['@id']; });
         }
 
-        // Assign the given variant array
-        if (!newIndividual.proband && individualVariants) {
+        // Assign the given variant array if we're not 
+        if (individualVariants) {
             newIndividual.variants = individualVariants;
         }
+
+        // Set the proband boolean
+        value = this.getFormValue('proband');
+        if (value && value !== 'none') { newIndividual.proband = value === "Yes"; }
 
         return newIndividual;
     },
@@ -996,7 +994,7 @@ var IndividualVariantInfo = function() {
 
     return (
         <div className="row">
-            {individual && individual.proband ?
+            {individual && individual.proband && family ?
                 <div>
                     {variants.map(function(variant, i) {
                         return (
@@ -1020,15 +1018,24 @@ var IndividualVariantInfo = function() {
             :
                 <div>
                     {_.range(this.state.variantCount).map(i => {
-                        var variant, hgvsNames;
+                        var variant;
 
                         if (variants && variants.length) {
                             variant = variants[i];
-                            hgvsNames = variant ? variant && variant.hgvsNames && variant.hgvsNames.join() : null;
                         }
 
                         return (
                             <div key={i} className="variant-panel">
+                                {!family ?
+                                    <Input type="select" ref="proband" label="Is this Individual a proband:" value={individual && individual.proband ? "Yes" : (individual ? "No" : "none")}
+                                        error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
+                                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                                        <option value="none">No Selection</option>
+                                        <option disabled="disabled"></option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </Input>
+                                : null}
                                 <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                                     error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
