@@ -172,18 +172,21 @@ var FamilyCuration = React.createClass({
                 // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
                 stateObj.genotyping2Disabled = !(stateObj.family.method && stateObj.family.method.genotypingMethods && stateObj.family.method.genotypingMethods.length);
 
-                // See if we need to disable the Add Variant button based on the number of variants configured
-                var segregation = stateObj.family.segregation;
-                if (segregation && segregation.variants && segregation.variants.length) {
-                    stateObj.variantCount = segregation.variants.length;
-                    stateObj.addVariantDisabled = false;
-                }
-
                 // See if any associated individual is a proband
                 if (stateObj.family.individualIncluded.length) {
                     stateObj.probandIndividual = _(stateObj.family.individualIncluded).find(function(individual) {
                         return individual.proband;
                     });
+                }
+
+                // See if we need to disable the Add Variant button based on the number of variants configured
+                var segregation = stateObj.family.segregation;
+                if (segregation && segregation.variants && segregation.variants.length) {
+                    stateObj.variantCount = segregation.variants.length;
+                    stateObj.addVariantDisabled = false;
+                } else {
+                    // No variants in this family, but it does have a proband individual. Open one empty variant panel
+                    stateObj.variantCount = 1;
                 }
             }
 
@@ -465,7 +468,7 @@ var FamilyCuration = React.createClass({
                     }
 
                     // No variant search strings. Go to next THEN indicating no new named variants
-                    return Promise.resolve(null);
+                    return Promise.resolve(newVariants);
                 }).then(newVariants => {
                     // We're passed in a list of new clinVarRCV variant objects that need to be written to the DB.
                     // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
@@ -520,7 +523,7 @@ var FamilyCuration = React.createClass({
 
                     // Creating or editing a family, and the form has at least one variant. Create the starter individual and return a promise
                     // from its creation. Also remember we have new variants.
-                    if (familyVariants.length) {
+                    if (this.state.variantCount) {
                         initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
@@ -1172,7 +1175,7 @@ var FamilyVariant = function() {
             : null}
             {this.state.variantCount < MAX_VARIANTS ?
                 <div>
-                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add variant associated with proband" : "Add another variant associated with proband"}
+                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with proband" : "Add variant associated with proband"}
                         clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                 </div>
             : null}
