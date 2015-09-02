@@ -1406,5 +1406,69 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "cindy.si@aruplab.com",
+        "first_name": "Cindy",
+        "last_name": "Si",
+        "uuid": "d932f5e6-71a3-4505-bff9-c19cb73acce5",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "nicole.ruiz@utah.edu",
+        "first_name": "Nicole",
+        "last_name": "Ruiz",
+        "uuid": "a5802d0f-aafe-438d-bb4c-48ed43fc197d",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "kristy_lee@med.unc.edu",
+        "first_name": "Kristy",
+        "last_name": "Lee",
+        "uuid": "44c1e179-a0f1-4c88-b8be-df691f022ef5",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "lbabb@geneinsight.com",
+        "first_name": "Larry",
+        "last_name": "Babb",
+        "uuid": "353d62a5-d395-44b0-a580-017d9923480e",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
