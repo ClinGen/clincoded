@@ -55,7 +55,7 @@ var FamilyCuration = React.createClass({
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 0, // Number of variants to display
-            variantOption: [VAR_NONE], // One variant panel, and nothing entered
+            variantOption: [], // One variant panel, and nothing entered
             probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
             addVariantDisabled: false, // True if Add Another Variant button enabled
@@ -182,9 +182,22 @@ var FamilyCuration = React.createClass({
                 // See if we need to disable the Add Variant button based on the number of variants configured
                 var segregation = stateObj.family.segregation;
                 if (segregation && segregation.variants && segregation.variants.length) {
+                    // We have variants
                     stateObj.variantCount = segregation.variants.length;
                     stateObj.addVariantDisabled = false;
-                } else {
+
+                    var currVariantOption = [];
+                    for (var i = 0; i < segregation.variants.length; i++) {
+                        if (segregation.variants[i].clinVarRCV) {
+                            currVariantOption[i] = VAR_SPEC;
+                        } else if (segregation.variants[i].otherDescription) {
+                            currVariantOption[i] = VAR_OTHER;
+                        } else {
+                            currVariantOption[i] = VAR_NONE;
+                        }
+                    }
+                    stateObj.variantOption = currVariantOption;
+                } else if (stateObj.probandIndividual) {
                     // No variants in this family, but it does have a proband individual. Open one empty variant panel
                     stateObj.variantCount = 1;
                 }
@@ -236,41 +249,6 @@ var FamilyCuration = React.createClass({
                 return Promise.resolve(data['@graph'][0]);
             });
         }
-    },
-
-    // Return an array of variant search strings, one element per variant entered.
-    // Empty variant panels aren't included in the array of search strings.
-    makeVariantSearchStr: function() {
-        var searchStrs = [];
-
-        for (var i = 0; i < this.state.variantCount; i++) {
-            // Grab the values from the variant form panel
-            var clinvarid = this.getFormValue('VARclinvarid' + i);
-
-            // Build the search string depending on what the user entered
-            if (clinvarid) {
-                // Make a search string for these terms
-                searchStrs.push('/search/?type=variant&clinVarRCV=' + clinvarid);
-            }
-        }
-
-        return searchStrs;
-    },
-
-    // Make a variant object for writing to the DB. The index (0-based) of the Variant panel to get the
-    // variant data from is in the 'i' parameter.
-    makeVariant: function(i) {
-        var newVariant = {};
-
-        var clinvarid = this.getFormValue('VARclinvarid' + i);
-        var othervariant = this.getFormValue('VARothervariant' + i);
-
-        if (othervariant) {
-            newVariant.otherDescription = othervariant;
-        } else if (clinvarid) {
-            if (clinvarid) { newVariant.clinVarRCV = clinvarid.toUpperCase(); }
-        }
-        return Object.keys(newVariant).length ? newVariant : null;
     },
 
     // Validate that all the variant panels have properly-formatted input. Return true if they all do.
@@ -429,7 +407,7 @@ var FamilyCuration = React.createClass({
                     var searchStrs = [];
                     for (var i = 0; i < this.state.variantCount; i++) {
                         // Grab the values from the variant form panel
-                        var clinvarId = this.getFormValue('VARclinvarid' + i);
+                        var clinvarId = this.getFormValue('VARclinvarid' + i).toUpperCase();
 
                         // Build the search string depending on what the user entered
                         if (clinvarId) {
@@ -474,7 +452,7 @@ var FamilyCuration = React.createClass({
                     // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
                     for (var i = 0; i < this.state.variantCount; i++) {
                         // Grab the values from the variant form panel
-                        var otherVariantText = this.getFormValue('VARothervariant' + i).trim().toUpperCase();
+                        var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
 
                         // Build the search string depending on what the user entered
                         if (otherVariantText) {
