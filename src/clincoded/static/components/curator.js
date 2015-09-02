@@ -521,6 +521,15 @@ module.exports.capture = {
     goslims: function(s) {
         return captureBase(s, /^\s*(GO:\d{7})\s*$/i, true);
     },
+
+    // Find all the comma-separated Uberon ID occurences. Return all valid Uberon ID in an array.
+    uberonids: function(s) {
+        return captureBase(s, /^\s*(UBERON_\d{7})\s*$/i, true);
+    },
+
+    efoids: function(s) {
+        return captureBase(s, /^\s*(\d{7})\s*$/);
+    }
 };
 
 
