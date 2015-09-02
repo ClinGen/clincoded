@@ -1017,6 +1017,17 @@ var IndividualVariantInfo = function() {
                 </div>
             :
                 <div>
+                    {!family ?
+                        <Input type="select" ref="proband" label="Is this Individual a proband:" value={individual && individual.proband ? "Yes" : (individual ? "No" : "none")}
+                            error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                            <option value="none">No Selection</option>
+                            <option disabled="disabled"></option>
+                            <option>Yes</option>
+                            <option>No</option>
+                        </Input>
+                    : null}
+
                     {_.range(this.state.variantCount).map(i => {
                         var variant;
 
@@ -1026,16 +1037,6 @@ var IndividualVariantInfo = function() {
 
                         return (
                             <div key={i} className="variant-panel">
-                                {!family ?
-                                    <Input type="select" ref="proband" label="Is this Individual a proband:" value={individual && individual.proband ? "Yes" : (individual ? "No" : "none")}
-                                        error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
-                                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                                        <option value="none">No Selection</option>
-                                        <option disabled="disabled"></option>
-                                        <option>Yes</option>
-                                        <option>No</option>
-                                    </Input>
-                                : null}
                                 <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                                     error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
