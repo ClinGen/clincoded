@@ -175,9 +175,26 @@ var IndividualCuration = React.createClass({
             if (stateObj.individual && Object.keys(stateObj.individual).length) {
                 stateObj.genotyping2Disabled = !(stateObj.individual.method && stateObj.individual.method.genotypingMethods && stateObj.individual.method.genotypingMethods.length);
 
-                if (stateObj.individual.variants && stateObj.individual.variants.length) {
-                    stateObj.variantCount = stateObj.individual.variants.length;
+                // If this individual has variants and isn't the proband, handle the variant panels.
+                if (stateObj.individual.variants && stateObj.individual.variants.length && !stateObj.individual.proband) {
+                    var variants = stateObj.individual.variants;
+
+                    // This individual has variants
+                    stateObj.variantCount = variants.length;
                     stateObj.addVariantDisabled = false;
+
+                    // Go through each variant to determine how its form fields should be disabled.
+                    var currVariantOption = [];
+                    for (var i = 0; i < variants.length; i++) {
+                        if (variants[i].clinVarRCV) {
+                            currVariantOption[i] = VAR_SPEC;
+                        } else if (variants[i].otherDescription) {
+                            currVariantOption[i] = VAR_OTHER;
+                        } else {
+                            currVariantOption[i] = VAR_NONE;
+                        }
+                    }
+                    stateObj.variantOption = currVariantOption;
                 }
             }
 
@@ -414,52 +431,86 @@ var IndividualCuration = React.createClass({
                     }
                 }).then(data => {
                     if (!currIndividual || !currIndividual.proband) {
-                        // Handle variants; start by making an array of search terms, one for each variant in the form
+                        // Handle variants; start by making an array of search terms, one for each variant in the form.
+                        // If this is a proband individual, its variants can only be edited from its associated family.
                         var newVariants = [];
-                        var variantTerms = this.makeVariantSearchStr();
+
+                        // Build an array of search strings for each of the ClinVar IDs entered in the form.
+                        var searchStrs = [];
+                        for (var i = 0; i < this.state.variantCount; i++) {
+                            // Grab the values from the variant form panel
+                            var clinvarId = this.getFormValue('VARclinvarid' + i).toUpperCase();
+
+                            // Build the search string depending on what the user entered
+                            if (clinvarId) {
+                                // Make a search string for these terms
+                                searchStrs.push('/search/?type=variant&clinVarRCV=' + clinvarId);
+                            }
+                        }
 
                         // If at least one variant search string built, perform the search
-                        if (variantTerms.length) {
+                        if (searchStrs.length) {
                             // Search DB for all matching terms for all variants entered
                             return this.getRestDatas(
-                                variantTerms
+                                searchStrs
                             ).then(results => {
                                 // 'result' is an array of search results, one per search string. There should only be one result per array element --
                                 // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
                                 results.forEach(function(result, i) {
                                     if (result.total) {
                                         // Search got a result. Add a string for family.variants for this existing variant
-                                        individualVariants.push('/variants/' + result['@graph'][0].uuid);
+                                        individualVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                     } else {
                                         // Search got no result; make a new variant and save it in an array so we can write them.
-                                        var newVariant = this.makeVariant(i);
-                                        if (newVariant) {
+                                        var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinVarRCV'; });
+                                        if (termResult) {
+                                            var newVariant = {};
+                                            newVariant.clinVarRCV = termResult.term;
                                             newVariants.push(newVariant);
                                         }
                                     }
                                 }, this);
 
-                                // If we have new variants, write them to the DB.
-                                if (newVariants) {
-                                    return this.postRestDatas(
-                                        '/variants/', newVariants
-                                    ).then(results => {
-                                        if (results && results.length) {
-                                            results.forEach(result => {
-                                                individualVariants.push('/variants/' + result['@graph'][0].uuid);
-                                            });
-                                        }
-                                        return Promise.resolve(results);
-                                    });
-                                }
-
-                                // No new variants; just resolve the promise right away.
-                                return Promise.resolve(null);
+                                // Pass new variant array to the next THEN to write them.
+                                return Promise.resolve(newVariants);
                             });
                         }
                     }
 
                     // No variant search strings. Go to next THEN.
+                    return Promise.resolve([]);
+                }).then(newVariants => {
+                    // We're passed in a list of new clinVarRCV variant objects that need to be written to the DB.
+                    // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
+                    for (var i = 0; i < this.state.variantCount; i++) {
+                        // Grab the values from the variant form panel
+                        var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
+
+                        // Build the search string depending on what the user entered
+                        if (otherVariantText) {
+                            // Add this Other Description text to a new variant object
+                            var newVariant = {};
+                            newVariant.otherDescription = otherVariantText;
+                            newVariants.push(newVariant);
+                        }
+                    }
+
+                    // Now write the new variants to the DB, and push their @ids to the family variant
+                    if (newVariants && newVariants.length) {
+                        return this.postRestDatas(
+                            '/variants/', newVariants
+                        ).then(results => {
+                            if (results && results.length) {
+                                // Add the newly written variants to the family
+                                results.forEach(result => {
+                                    individualVariants.push('/variants/' + result['@graph'][0].uuid + '/');
+                                });
+                            }
+                            return Promise.resolve(results);
+                        });
+                    }
+
+                    // No variant search strings. Go to next THEN indicating no new named variants
                     return Promise.resolve(null);
                 }).then(data => {
                     // Make a new individual object based on form fields.
@@ -1044,7 +1095,7 @@ var IndividualVariantInfo = function() {
 
 var LabelClinVar = React.createClass({
     render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> ID <span style={{fontWeight: 'normal'}}>(if no dbSNP, or in addition to dbSNP)</span>:</span>;
+        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> ID:</span>;
     }
 });
 
