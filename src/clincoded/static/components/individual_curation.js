@@ -653,6 +653,7 @@ var IndividualCuration = React.createClass({
         var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var probandLabel = (individual && individual.proband ? ' [proband]' : '');
+        var variantTitle = (individual && !individual.proband) ? 'Individual — Associated Variant(s)' : 'Individual' + probandLabel + ' – Variant(s) segregating with Proband';
 
         // Get a list of associated groups if editing an individual, or the group in the query string if there was one, or null.
         var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
@@ -755,7 +756,7 @@ var IndividualCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + ' – Variant Information'} open>
+                                            <Panel title={variantTitle} open>
                                                 {IndividualVariantInfo.call(this)}
                                             </Panel>
                                         </PanelGroup>
