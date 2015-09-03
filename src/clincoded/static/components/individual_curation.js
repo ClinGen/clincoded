@@ -1296,12 +1296,12 @@ var IndividualViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Specific Mutations Genotyped</dt>
+                                <dt>Specific mutations genotyped</dt>
                                 <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
-                                <dt>Method by which Specific Mutations Genotyped</dt>
+                                <dt>Description of Methods by which specific mutations genotyped</dt>
                                 <dd>{method && method.specificMutationsGenotypedMethod}</dd>
                             </div>
                         </dl>
