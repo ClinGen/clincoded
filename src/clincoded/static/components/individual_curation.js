@@ -1326,11 +1326,11 @@ var IndividualViewer = React.createClass({
                     <Panel title={'Individual' + probandLabel + ' — Additional Information'} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
-                                <dt>Additional Information about Family</dt>
+                                <dt>Additional Information about Individual</dt>
                                 <dd>{individual.additionalInformation}</dd>
                             </div>
 
-                            <dt>Other PMID(s) that report evidence about this same Family</dt>
+                            <dt>Other PMID(s) that report evidence about this same Individual</dt>
                             <dd>
                                 {individual.otherPMIDs && individual.otherPMIDs.map(function(article, i) {
                                     return (
