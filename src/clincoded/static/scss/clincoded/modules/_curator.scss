@@ -307,6 +307,12 @@
         border-bottom: 1px solid #c0c0c0;
         font-size: 1.3rem;
     }
+
+    @media screen and (min-width: $screen-sm-min) {
+        &.variant-view-panel-edit {
+            margin-bottom: 40px;
+        }
+    }
 }
 
 .viewer-titles {

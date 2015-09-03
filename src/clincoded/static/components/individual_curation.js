@@ -652,6 +652,7 @@ var IndividualCuration = React.createClass({
         var annotation = this.state.annotation;
         var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
+        var probandLabel = (individual && individual.proband ? ' [proband]' : '');
 
         // Get a list of associated groups if editing an individual, or the group in the query string if there was one, or null.
         var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
@@ -714,7 +715,7 @@ var IndividualCuration = React.createClass({
                                 </div>
                             : null}
                             <div className="viewer-titles">
-                                <h1>{(individual ? 'Edit' : 'Curate') + ' Individual Information'}</h1>
+                                <h1>{(individual ? 'Edit' : 'Curate') + ' Individual' + probandLabel + ' Information'}</h1>
                                 <h2>Individual: {this.state.individualName ? <span>{this.state.individualName}</span> : <span className="no-entry">No entry</span>}</h2>
                                 {groupTitles.length ?
                                     <h2>
@@ -734,27 +735,27 @@ var IndividualCuration = React.createClass({
                                             {IndividualName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title="Individual – Common Disease & Phenotypes" open>
+                                            <Panel title={'Individual' + probandLabel + ' – Common Disease & Phenotypes'} open>
                                                 {IndividualCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Individual — Demographics" open>
+                                            <Panel title={'Individual' + probandLabel + '— Demographics'} open>
                                                 {IndividualDemographics.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Individual — Methods" open>
+                                            <Panel title={'Individual' + probandLabel + '— Methods'} open>
                                                 {methods.render.call(this, method)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Individual — Additional Information" open>
+                                            <Panel title={'Individual' + probandLabel + ' — Additional Information'} open>
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Individual – Variant Information" open>
+                                            <Panel title={'Individual' + probandLabel + ' – Variant Information'} open>
                                                 {IndividualVariantInfo.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -780,10 +781,11 @@ globals.curator_page.register(IndividualCuration, 'curator_page', 'individual-cu
 // as the calling component.
 var IndividualName = function(displayNote) {
     var individual = this.state.individual;
+    var probandLabel = (individual && individual.proband ? ' [proband]' : '');
 
     return (
         <div className="row">
-            <Input type="text" ref="individualname" label="Individual Name:" value={individual && individual.label} handleChange={this.handleChange}
+            <Input type="text" ref="individualname" label={'Individual' + probandLabel + ' Name:'} value={individual && individual.label} handleChange={this.handleChange}
                 error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {displayNote ?
@@ -829,6 +831,7 @@ var IndividualCommonDiseases = function() {
     var family = this.state.family;
     var group = this.state.group;
     var orphanetidVal, hpoidVal, nothpoidVal, associatedGroups, associatedFamilies;
+    var probandLabel = (individual && individual.proband ? ' [proband]' : '');
 
     // If we're editing an individual, make editable values of the complex properties
     if (individual) {
@@ -862,7 +865,7 @@ var IndividualCommonDiseases = function() {
             {curator.renderOrphanets(associatedGroups, 'Group')}
             {curator.renderOrphanets(associatedFamilies, 'Family')}
 
-            <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
+            <Input type="text" ref="orphanetid" label={<LabelOrphanetId probandLabel={probandLabel} />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
@@ -883,7 +886,7 @@ var IndividualCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Disease(s) for Individual:</span>;
+        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Disease(s) for Individual{this.props.probandLabel}:</span>;
     }
 });
 
@@ -1007,7 +1010,8 @@ var IndividualVariantInfo = function() {
                 <div>
                     {variants.map(function(variant, i) {
                         return (
-                            <div key={i} className="variant-view-panel">
+                            <div key={i} className="variant-view-panel variant-view-panel-edit">
+                                <p>To edit variants(s) for this proband, you must edit its Family because the variant is associated with the Family’s segregation.</p>
                                 <h5>Variant {i + 1}</h5>
                                 <dl className="dl-horizontal">
                                     <div>
@@ -1046,6 +1050,10 @@ var IndividualVariantInfo = function() {
 
                         return (
                             <div key={i} className="variant-panel">
+                                <p className="col-sm-7 col-sm-offset-5">
+                                    ClinVar VariantID should be provided in all instances it exists. This is the only way to associate probands from different studies with
+                                    the same variant, and ensures the accurate counting of probands.
+                                </p>
                                 <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                                     error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
@@ -1083,15 +1091,18 @@ var LabelOtherVariant = React.createClass({
 var IndividualAdditional = function() {
     var otherpmidsVal;
     var individual = this.state.individual;
+    var probandLabel = (individual && individual.proband ? ' [proband]' : '');
+
+    // If editing an individual, get its existing articles
     if (individual) {
         otherpmidsVal = individual.otherPMIDs ? individual.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
     }
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfoindividual" label="Additional Information about Individual:" rows="5" value={individual && individual.additionalInformation}
+            <Input type="textarea" ref="additionalinfoindividual" label={'Additional Information about Individual ' + probandLabel + ':'} rows="5" value={individual && individual.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+            <Input type="textarea" ref="otherpmids" label={'Enter PMID(s) that report evidence about this same individual' + probandLabel + ':'} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">
