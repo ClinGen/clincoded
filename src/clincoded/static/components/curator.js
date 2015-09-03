@@ -899,7 +899,9 @@ function flattenGdm(gdm) {
 
     // Flatten provisional classifications
     if (gdm.provisionalClassifications && gdm.provisionalClassifications.length) {
-        flat.provisionalClassifications = gdm.provisionalClassifications;
+        flat.provisionalClassifications = gdm.provisionalClassifications.map(function(classification) {
+            return classification['@id'];
+        });
     }
 
     return flat;
