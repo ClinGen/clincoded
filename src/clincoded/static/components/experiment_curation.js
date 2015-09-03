@@ -300,7 +300,9 @@ var ExperimentCuration = React.createClass({
                     newExperiment.evidenceType = this.getFormValue('experimenttype');
 
                     console.log(newExperiment);
-                });
+                }).catch(function(e) {
+                    console.log('GROUP CREATION ERROR=: %o', e);
+                });;
             }
         }
     },
