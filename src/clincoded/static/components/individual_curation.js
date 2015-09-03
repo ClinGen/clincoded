@@ -296,7 +296,7 @@ var IndividualCuration = React.createClass({
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault() && this.validateVariants()) {
             var family = (this.state.family && Object.keys(this.state.family).length) ? this.state.family : null;
-            var currIndividual = this.state.individual && Object.keys(this.state.individual) ? this.state.individual : null;
+            var currIndividual = (this.state.individual && Object.keys(this.state.individual).length) ? this.state.individual : null;
             var newIndividual = {}; // Holds the new group object;
             var individualDiseases = null, individualArticles, individualVariants = [];
             var savedIndividuals; // Array of saved written to DB
@@ -377,10 +377,11 @@ var IndividualCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
+                    var newVariants = [];
                     if (!currIndividual || !(currIndividual.proband && family)) {
+                        // We're not editing a variant, or we're editing an individual that's not a proband in a family.
                         // Handle variants; start by making an array of search terms, one for each variant in the form.
                         // If this is a proband individual, its variants can only be edited from its associated family.
-                        var newVariants = [];
 
                         // Build an array of search strings for each of the ClinVar IDs entered in the form.
                         var searchStrs = [];
@@ -422,6 +423,10 @@ var IndividualCuration = React.createClass({
                                 return Promise.resolve(newVariants);
                             });
                         }
+                    } else if (currIndividual && currIndividual.proband && family) {
+                        // Editing a proband in a family. Just pass through existing variants
+                        newVariants = currIndividual.variants.map(function(variant) { return '/variants/' + variant.uuid + '/'; });
+                        Promise.resolve(newVariants);
                     }
 
                     // No variant search strings. Go to next THEN.
@@ -555,6 +560,8 @@ var IndividualCuration = React.createClass({
     // in the form. The created object is returned from the function.
     createIndividual: function(individualDiseases, individualArticles, individualVariants, hpoids, nothpoids) {
         var value;
+        var currIndividual = (this.state.individual && Object.keys(this.state.individual).length) ? this.state.individual : null;
+        var family = (this.state.family && Object.keys(this.state.family).length) ? this.state.family : null;
 
         // Make a new family. If we're editing the form, first copy the old family
         // to make sure we have everything not from the form.
@@ -612,9 +619,11 @@ var IndividualCuration = React.createClass({
             newIndividual.otherPMIDs = individualArticles['@graph'].map(function(article) { return article['@id']; });
         }
 
-        // Assign the given variant array if we're not 
-        if (individualVariants) {
-            newIndividual.variants = individualVariants;
+        // Assign the given variant array if we're not editing an individual proband in a family
+        if (!currIndividual || !(currIndividual.proband && family)) {
+            if (individualVariants) {
+                newIndividual.variants = individualVariants;
+            }
         }
 
         // Set the proband boolean

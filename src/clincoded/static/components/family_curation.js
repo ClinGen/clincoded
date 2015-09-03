@@ -1349,7 +1349,7 @@ var FamilyViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Additional Information about Group Method</dt>
+                                <dt>Additional Information about Family Method</dt>
                                 <dd>{method && method.additionalInformation}</dd>
                             </div>
                         </dl>
