@@ -998,6 +998,7 @@ var FamilyDemographics = function() {
                 <option disabled="disabled"></option>
                 <option>Hispanic or Latino</option>
                 <option>Not Hispanic or Latino</option>
+                <option>Unknown</option>
             </Input>
             <Input type="select" ref="race" label="Race:" defaultValue="none" value={family && family.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1206,13 +1207,6 @@ var FamilyAdditional = function() {
             <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">
-                Note: Any variants associated with the proband in this Family that were captured above will be counted as
-                probands — the proband does not need to be captured at the Individual level unless there is additional
-                information about the proband that you’d like to capture (e.g. phenotype, methods). Additional information
-                about other individuals in the Family may also be captured at the Individual level (including any additional
-                variant information).
-            </p>
         </div>
     );
 };

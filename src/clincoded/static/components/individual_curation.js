@@ -901,7 +901,7 @@ var LabelHpoId = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT </span> : ''}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="PhenExplorer home page in a new tab">PhenExplorer</a>)</span>:
+                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000118" target="_blank" title="HPO Browser in a new tab">HPO Browser</a>)</span>:
             </span>
         );
     }
@@ -957,6 +957,7 @@ var IndividualDemographics = function() {
                 <option disabled="disabled"></option>
                 <option>Hispanic or Latino</option>
                 <option>Not Hispanic or Latino</option>
+                <option>Unknown</option>
             </Input>
             <Input type="select" ref="race" label="Race:" defaultValue="none" value={individual && individual.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1111,13 +1112,6 @@ var IndividualAdditional = function() {
             <Input type="textarea" ref="otherpmids" label={'Enter PMID(s) that report evidence about this same individual' + probandLabel + ':'} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">
-                Note: Any variants associated with the proband in this Family that were captured above will be counted as
-                probands — the proband does not need to be captured at the Individual level unless there is additional
-                information about the proband that you&rsquo;d like to capture (e.g. phenotype, methods). Additional information
-                about other individuals in the Family may also be captured at the Individual level (including any additional
-                variant information).
-            </p>
         </div>
     );
 };
