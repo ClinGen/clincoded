@@ -1,0 +1,82 @@
+{
+    "title": "Provisional Classification",
+    "description": "Schema for storing and using assertions",
+    "id": "/profiles/provisionalClassification.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["totalScore"],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "totalScore": {
+            "title": "Total Score",
+            "description": "Total score calculated from all selected evidences",
+            "type": "string"
+        },
+        "autoClassification": {
+            "title": "Classification assigned automatically",
+            "description": "Classification based on the calculation",
+            "type": "string"
+        },
+        "alteredClassification": {
+            "title": "Classification Altered",
+            "description": "Classification assigned by curator",
+            "type": "string",
+            "default": ""
+        },
+        "Reasons": {
+            "title": "Reasons",
+            "description": "Reasons for changing the classification",
+            "type": "string",
+            "default": ""
+        },
+        "active": {
+            "title": "Active",
+            "description": "Boolean switch for usage",
+            "type": "boolean",
+            "default": true
+        }
+    },
+    "columns": {
+        "submitted_by": {
+            "title": "Owner",
+            "type": "string"
+        },
+        "date_created": {
+            "title": "Created Date",
+            "type": "string"
+        },
+        "last_modified": {
+            "title": "Last Modified",
+            "type": "string"
+        },
+        "totalScore": {
+            "title": "Total Score",
+            "type": "string"
+        },
+        "autoClassification": {
+            "title": "Assigned Classification",
+            "type": "string"
+        },
+        "alteredClassification": {
+            "title": "Altered Classification",
+            "type": "string"
+        },
+        "Reasons": {
+            "title": "Reasons",
+            "type": "string"
+        },
+        "active": {
+            "title": "Active",
+            "type": "boolean"
+        }
+    }
+}

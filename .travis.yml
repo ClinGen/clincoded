@@ -32,7 +32,7 @@ before_script:
     if test -n "$BROWSER"; then
       CONNECT_URL=https://saucelabs.com/downloads/sc-4.3.11-linux.tar.gz
       CONNECT_DOWNLOAD=sc.tar.gz
-      SC_READYFILE=sauce-connect-ready-$RANDOM
+      SC_READYFILE=$HOME/sauce-connect-ready-$RANDOM
       SC_LOGFILE=$HOME/sauce-connect.log
       SC_PIDFILE=$HOME/sauce-connect.pid
       curl $CONNECT_URL > $CONNECT_DOWNLOAD
@@ -43,21 +43,23 @@ before_script:
         --pidfile $SC_PIDFILE \
         --tunnel-identifier $TRAVIS_JOB_NUMBER \
         --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
-      while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep 5; done
+      while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do 
+        sleep 0.5
+      done
     fi
 script:
   - if test -z "$BROWSER"; then npm test; fi
-  - if test -z "$BROWSER"; then bin/test -v -v --timeout=1000 -m "not bdd"; fi
+  - if test -z "$BROWSER"; then bin/test -v -v --timeout=300 -m "not bdd"; fi
   - >
     if test -n "$BROWSER"; then
-      test -f "$SC_PIDFILE" && bin/test -v -v --timeout=1000 -m "bdd" --tb=short \
-        --splinter-implicit-wait 1000 \
+      test -s "$SC_PIDFILE" && bin/test -v -v --timeout=300 -m "bdd" --tb=short \
+        --splinter-implicit-wait 10 \
         --splinter-webdriver remote \
         --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@localhost:4445/wd/hub" \
-        --splinter-socket-timeout 1000 \
+        --splinter-socket-timeout 300 \
         --browser-arg tunnel-identifier "$TRAVIS_JOB_NUMBER" \
         --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
-        --browser-arg-int idleTimeout 1000 \
+        --browser-arg-int idleTimeout 300 \
         --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
         --browser-arg browser "$BROWSER"
     fi
@@ -72,14 +74,7 @@ after_script:
       echo "Sauce test page https://saucelabs.com/tests/$SAUCE_JOB_ID"
       # Wait for Sauce Connect to shut down its tunnel.
       echo "Closing Sauce Connect tunnel."
-      num_tries=0
-      max_tries=30
       SC_PID="$(cat $SC_PIDFILE)"
-      echo "Sauce Connect PID to stop is $SC_PID"
-      while [ $num_tries -le $max_tries ]; do
-        kill $SC_PID || break
-        num_tries=$((num_tries+1))
-        [ $num_tries -ge $max_tries ] && exit 1
-        sleep 1
-      done
+      kill $SC_PID
+      wait $SC_PID
     fi
