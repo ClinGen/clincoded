@@ -665,7 +665,7 @@ var GroupAdditional = function() {
         <div className="row">
             <Input type="textarea" ref="additionalinfogroup" label="Additional Information about Group:" rows="5" value={group && group.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same group:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+            <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same Group:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">

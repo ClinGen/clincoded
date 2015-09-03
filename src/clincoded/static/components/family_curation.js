@@ -1129,6 +1129,10 @@ var FamilyVariant = function() {
                         The proband (an Individual) will be created upon submission using the name you supply here. You will be able to add additional information about the proband
                         following submission of Family information.
                     </p>
+                    <p className="col-sm-7 col-sm-offset-5">
+                        ClinVar VariantID should be provided in all instances it exists. This is the only way to associate probands from different studies with
+                        the same variant, and ensures the accurate counting of probands.
+                    </p>
                 </div>
             : null}
             {_.range(this.state.variantCount).map(i => {
@@ -1143,6 +1147,9 @@ var FamilyVariant = function() {
                         <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                        <p className="col-sm-7 col-sm-offset-5 input-note-below">
+                            The VariantID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href="http://www.ncbi.nlm.nih.gov/clinvar/variation/139214/" target="_blank">example</a>: 139214).
+                        </p>
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                     </div>
