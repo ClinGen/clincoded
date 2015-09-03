@@ -130,6 +130,7 @@ var ExperimentCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
+            var groupGenes;
             var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, efoIDs;
             var formError = false;
 
@@ -271,6 +272,35 @@ var ExperimentCuration = React.createClass({
             }
 
             if (!formError) {
+                console.log('form pass');
+                var searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
+
+                this.getRestData(searchStr).then(diseases => {
+                    if (geneSymbols && geneSymbols.length) {
+                        // At least one gene symbol entered; search the DB for them.
+                        searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
+                        return this.getRestData(searchStr).then(genes => {
+                            if (genes['@graph'].length === geneSymbols.length) {
+                                // Successfully retrieved all genes
+                                groupGenes = genes;
+                                return Promise.resolve(genes);
+                            } else {
+                                var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
+                                this.setFormErrors('othergenevariants', missingGenes.join(', ') + ' not found');
+                                throw genes;
+                            }
+                        });
+                    } else {
+                        // No genes entered; just pass null to the next then
+                        return Promise.resolve(null);
+                    }
+                }).then(data => {
+                    var newExperiment = Object.keys(this.state.experiment).length ? curator.flatten(this.state.experiment) : {};
+                    newExperiment.label = this.getFormValue('experimentname');
+                    newExperiment.evidenceType = this.getFormValue('experimenttype');
+
+                    console.log(newExperiment);
+                });
             }
         }
     },

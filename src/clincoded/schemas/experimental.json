@@ -15,6 +15,11 @@
         "schema_version": {
             "default": "1"
         },
+        "label": {
+            "title": "Label",
+            "description": "A user entered label for the experiment",
+            "type": "string"
+        },
         "active": {
             "title": "Active",
             "description": "Switch to set if the experimental data is avaliable for curation",
