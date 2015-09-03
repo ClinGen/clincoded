@@ -1156,7 +1156,7 @@ var FamilyVariant = function() {
                     <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15"
                         error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                    <Input type="button" ref="orphanetcopy" inputClassName="btn-default btn-last pull-right" title="Copy orphanet IDs from family"
+                    <Input type="button" ref="orphanetcopy" inputClassName="btn-default btn-last pull-right" title="Copy Orphanet IDs from Family"
                         clickHandler={this.handleClick} />
                 </div>
             : null}

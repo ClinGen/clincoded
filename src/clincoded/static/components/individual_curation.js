@@ -718,14 +718,14 @@ var IndividualCuration = React.createClass({
                             <div className="viewer-titles">
                                 <h1>{(individual ? 'Edit' : 'Curate') + ' Individual' + probandLabel + ' Information'}</h1>
                                 <h2>Individual: {this.state.individualName ? <span>{this.state.individualName}</span> : <span className="no-entry">No entry</span>}</h2>
-                                {groupTitles.length ?
-                                    <h2>
-                                        {'Group association: ' + groupTitles.join(', ')}
-                                    </h2>
-                                : null}
                                 {familyTitles.length ?
                                     <h2>
                                         {'Family association: ' + familyTitles.join(', ')}
+                                    </h2>
+                                : null}
+                                {groupTitles.length ?
+                                    <h2>
+                                        {'Group association: ' + groupTitles.join(', ')}
                                     </h2>
                                 : null}
                             </div>
@@ -751,13 +751,13 @@ var IndividualCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + ' — Additional Information'} open>
-                                                {IndividualAdditional.call(this)}
+                                            <Panel title={variantTitle} open>
+                                                {IndividualVariantInfo.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={variantTitle} open>
-                                                {IndividualVariantInfo.call(this)}
+                                            <Panel title={'Individual' + probandLabel + ' — Additional Information'} open>
+                                                {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
@@ -1120,14 +1120,16 @@ var IndividualAdditional = function() {
 
 var IndividualViewer = React.createClass({
     render: function() {
-        var context = this.props.context;
-        var method = context.method;
-        var variants = (context.variants && context.variants.length) ? context.variants : [{}];
+        var individual = this.props.context;
+        var method = individual.method;
+        var variants = (individual.variants && individual.variants.length) ? individual.variants : [{}];
         var i = 0;
         var groupRenders = [];
+        var probandLabel = (individual && individual.proband ? ' [proband]' : '');
+        var variantTitle = (individual && !individual.proband) ? 'Individual — Associated Variant(s)' : 'Individual' + probandLabel + ' – Variant(s) segregating with Proband';
 
         // Collect all families to render, as well as groups associated with these families
-        var familyRenders = context.associatedFamilies.map(function(family, j) {
+        var familyRenders = individual.associatedFamilies.map(function(family, j) {
             groupRenders = family.associatedGroups.map(function(group) {
                 return (
                     <span key={group.uuid}>
@@ -1147,7 +1149,7 @@ var IndividualViewer = React.createClass({
         });
 
         // Collect all groups associated with these individuals directly
-        var directGroupRenders = context.associatedGroups.map(function(group) {
+        var directGroupRenders = individual.associatedGroups.map(function(group) {
             return (
                 <span key={group.uuid}>
                     {i++ > 0 ? ', ' : ''}
@@ -1161,7 +1163,7 @@ var IndividualViewer = React.createClass({
             <div className="container">
                 <div className="row group-curation-content">
                     <div className="viewer-titles">
-                        <h1>View Individual: {context.label}</h1>
+                        <h1>View Individual{probandLabel} {individual.label}</h1>
                         <h2>
                             {familyRenders.length ?
                                 <div>
@@ -1179,12 +1181,12 @@ var IndividualViewer = React.createClass({
                             : null}
                         </h2>
                     </div>
-                    <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
+                    <Panel title={'Individual' + probandLabel + ' — Common diseases &amp; phenotypes'} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
                                 <dd>
-                                    {context.diagnosis.map(function(disease, i) {
+                                    {individual.diagnosis.map(function(disease, i) {
                                         return (
                                             <span key={disease.orphaNumber}>
                                                 {i > 0 ? ', ' : ''}
@@ -1197,66 +1199,66 @@ var IndividualViewer = React.createClass({
 
                             <div>
                                 <dt>HPO IDs</dt>
-                                <dd>{context.hpoIdInDiagnosis.join(', ')}</dd>
+                                <dd>{individual.hpoIdInDiagnosis.join(', ')}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype Terms</dt>
-                                <dd>{context.termsInDiagnosis}</dd>
+                                <dd>{individual.termsInDiagnosis}</dd>
                             </div>
 
                             <div>
                                 <dt>NOT HPO IDs</dt>
-                                <dd>{context.hpoIdInElimination.join(', ')}</dd>
+                                <dd>{individual.hpoIdInElimination.join(', ')}</dd>
                             </div>
 
                             <div>
                                 <dt>NOT phenotype terms</dt>
-                                <dd>{context.termsInElimination}</dd>
+                                <dd>{individual.termsInElimination}</dd>
                             </div>
                         </dl>
                     </Panel>
 
-                    <Panel title="Individual — Demographics" panelClassName="panel-data">
+                    <Panel title={'Individual' + probandLabel + ' — Demographics'} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Sex</dt>
-                                <dd>{context.sex}</dd>
+                                <dd>{individual.sex}</dd>
                             </div>
 
                             <div>
                                 <dt>Country of Origin</dt>
-                                <dd>{context.countryOfOrigin}</dd>
+                                <dd>{individual.countryOfOrigin}</dd>
                             </div>
 
                             <div>
                                 <dt>Ethnicity</dt>
-                                <dd>{context.ethnicity}</dd>
+                                <dd>{individual.ethnicity}</dd>
                             </div>
 
                             <div>
                                 <dt>Race</dt>
-                                <dd>{context.race}</dd>
+                                <dd>{individual.race}</dd>
                             </div>
 
                             <div>
                                 <dt>Age Type</dt>
-                                <dd>{context.ageType}</dd>
+                                <dd>{individual.ageType}</dd>
                             </div>
 
                             <div>
                                 <dt>Value</dt>
-                                <dd>{context.ageValue}</dd>
+                                <dd>{individual.ageValue}</dd>
                             </div>
 
                             <div>
                                 <dt>Age Unit</dt>
-                                <dd>{context.ageUnit}</dd>
+                                <dd>{individual.ageUnit}</dd>
                             </div>
                         </dl>
                     </Panel>
 
-                    <Panel title="Individual — Methods" panelClassName="panel-data">
+                    <Panel title={'Individual' + probandLabel + ' — Methods'} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Previous testing</dt>
@@ -1300,28 +1302,7 @@ var IndividualViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Individual — Additional Information" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Additional Information about Family</dt>
-                                <dd>{context.additionalInformation}</dd>
-                            </div>
-
-                            <dt>Other PMID(s) that report evidence about this same Family</dt>
-                            <dd>
-                                {context.otherPMIDs && context.otherPMIDs.map(function(article, i) {
-                                    return (
-                                        <span key={i}>
-                                            {i > 0 ? ', ' : ''}
-                                            {article.pmid}
-                                        </span>
-                                    );
-                                })}
-                            </dd>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Individual - Variant Information" panelClassName="panel-data">
+                    <Panel title={variantTitle} panelClassName="panel-data">
                         {variants.map(function(variant, i) {
                             return (
                                 <div key={i} className="variant-view-panel">
@@ -1340,6 +1321,27 @@ var IndividualViewer = React.createClass({
                                 </div>
                             );
                         })}
+                    </Panel>
+
+                    <Panel title={'Individual' + probandLabel + ' — Additional Information'} panelClassName="panel-data">
+                        <dl className="dl-horizontal">
+                            <div>
+                                <dt>Additional Information about Family</dt>
+                                <dd>{individual.additionalInformation}</dd>
+                            </div>
+
+                            <dt>Other PMID(s) that report evidence about this same Family</dt>
+                            <dd>
+                                {individual.otherPMIDs && individual.otherPMIDs.map(function(article, i) {
+                                    return (
+                                        <span key={i}>
+                                            {i > 0 ? ', ' : ''}
+                                            {article.pmid}
+                                        </span>
+                                    );
+                                })}
+                            </dd>
+                        </dl>
                     </Panel>
                 </div>
             </div>
