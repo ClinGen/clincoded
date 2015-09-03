@@ -48,10 +48,10 @@ var FamilyCuration = React.createClass({
 
     getInitialState: function() {
         return {
-            gdm: {}, // GDM object given in query string
-            group: {}, // Group object given in query string
-            family: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
-            annotation: {}, // Annotation object given in query string
+            gdm: null, // GDM object given in query string
+            group: null, // Group object given in query string
+            family: null, // If we're editing a group, this gets the fleshed-out group object we're editing
+            annotation: null, // Annotation object given in query string
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 0, // Number of variants to display
@@ -164,11 +164,11 @@ var FamilyCuration = React.createClass({
             }
 
             // Update the family name
-            if (stateObj.family && Object.keys(stateObj.family).length) {
+            if (stateObj.family) {
                 this.setState({familyName: stateObj.family.label});
             }
 
-            if (stateObj.family && Object.keys(stateObj.family).length) {
+            if (stateObj.family) {
                 // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
                 stateObj.genotyping2Disabled = !(stateObj.family.method && stateObj.family.method.genotypingMethods && stateObj.family.method.genotypingMethods.length);
 
@@ -238,7 +238,7 @@ var FamilyCuration = React.createClass({
         }
 
         // Either update or create the family object in the DB
-        if (this.state.family && Object.keys(this.state.family).length) {
+        if (this.state.family) {
             // We're editing a family. PUT the new family object to the DB to update the existing one.
             return this.putRestData('/families/' + this.state.family.uuid, writerFamily).then(data => {
                 return Promise.resolve(data['@graph'][0]);
@@ -280,7 +280,7 @@ var FamilyCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault() && this.validateVariants()) {
-            var currFamily = (this.state.family && Object.keys(this.state.family).length) ? this.state.family : null;
+            var currFamily = this.state.family;
             var newFamily = {}; // Holds the new group object;
             var familyDiseases = null, familyArticles, familyVariants = [];
             var individualDiseases = null;
@@ -544,8 +544,8 @@ var FamilyCuration = React.createClass({
 
                     // If we're adding this family to a group, update the group with this family; otherwise update the annotation
                     // with the family.
-                    if (!this.state.family || Object.keys(this.state.family).length === 0) {
-                        if (Object.keys(this.state.group).length) {
+                    if (!this.state.family) {
+                        if (this.state.group) {
                             // Add the newly saved families to the group
                             var group = curator.flatten(this.state.group);
                             if (!group.familyIncluded) {
@@ -665,7 +665,7 @@ var FamilyCuration = React.createClass({
     createFamily: function(familyDiseases, familyArticles, familyVariants) {
         // Make a new family. If we're editing the form, first copy the old family
         // to make sure we have everything not from the form.
-        var newFamily = Object.keys(this.state.family).length ? curator.flatten(this.state.family) : {};
+        var newFamily = this.state.family ? curator.flatten(this.state.family) : {};
 
         // Method and/or segregation successfully created if needed (null if not); passed in 'methSeg' object. Now make the new family.
         newFamily.label = this.getFormValue('familyname');
@@ -749,11 +749,11 @@ var FamilyCuration = React.createClass({
     },
 
     render: function() {
-        var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
-        var family = Object.keys(this.state.family).length ? this.state.family : null;
+        var gdm = this.state.gdm;
+        var family = this.state.family;
         var groups = (family && family.associatedGroups) ? family.associatedGroups :
-            (Object.keys(this.state.group).length ? [this.state.group] : null);
-        var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
+            (this.state.group ? [this.state.group] : null);
+        var annotation = this.state.annotation;
         var method = (family && family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
@@ -768,7 +768,7 @@ var FamilyCuration = React.createClass({
 
         return (
             <div>
-                {(!this.queryValues.familyUuid || Object.keys(this.state.family).length) ?
+                {(!this.queryValues.familyUuid || this.state.family) ?
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
@@ -847,7 +847,7 @@ var FamilyName = function(displayNote) {
 
     return (
         <div className="row">
-            <Input type="text" ref="familyname" label="Family Name:" value={family.label} handleChange={this.handleChange}
+            <Input type="text" ref="familyname" label="Family Name:" value={family && family.label} handleChange={this.handleChange}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {displayNote ?
@@ -894,7 +894,7 @@ var FamilyCommonDiseases = function() {
     var orphanetidVal, hpoidVal, nothpoidVal, associatedGroups;
 
     // If we're editing a family, make editable values of the complex properties
-    if (family && Object.keys(family).length) {
+    if (family) {
         orphanetidVal = family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
         hpoidVal = family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join() : null;
         nothpoidVal = family.hpoIdInElimination ? family.hpoIdInElimination.join() : null;
@@ -902,7 +902,7 @@ var FamilyCommonDiseases = function() {
 
     // Make a list of diseases from the group, either from the given group,
     // or the family if we're editing one that has associated groups.
-    if (Object.keys(group).length) {
+    if (group) {
         // We have a group, so get the disease array from it.
         associatedGroups = [group];
     } else if (family && family.associatedGroups && family.associatedGroups.length) {
@@ -919,13 +919,13 @@ var FamilyCommonDiseases = function() {
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={family.termsInDiagnosis}
+            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={family && family.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Family</em> if they are specifically noted in the paper.</p>
             <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={family.termsInElimination}
+            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={family && family.termsInElimination}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -978,13 +978,13 @@ var FamilyDemographics = function() {
 
     return (
         <div className="row">
-            <Input type="number" ref="malecount" label="# males:" value={family.numberOfMale}
+            <Input type="number" ref="malecount" label="# males:" value={family && family.numberOfMale}
                 error={this.getFormError('malecount')} clearError={this.clrFormErrors.bind(null, 'malecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="femalecount" label="# females:" value={family.numberOfFemale}
+            <Input type="number" ref="femalecount" label="# females:" value={family && family.numberOfFemale}
                 error={this.getFormError('femalecount')} clearError={this.clrFormErrors.bind(null, 'femalecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family.countryOfOrigin}
+            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family && family.countryOfOrigin}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -992,14 +992,14 @@ var FamilyDemographics = function() {
                     return <option key={country_code.code}>{country_code.name}</option>;
                 })}
             </Input>
-            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family.ethnicity}
+            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family && family.ethnicity}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Hispanic or Latino</option>
                 <option>Not Hispanic or Latino</option>
             </Input>
-            <Input type="select" ref="race" label="Race:" defaultValue="none" value={family.race}
+            <Input type="select" ref="race" label="Race:" defaultValue="none" value={family && family.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1013,7 +1013,7 @@ var FamilyDemographics = function() {
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
             <div className="demographics-age-range">
-                <Input type="select" ref="agerangetype" label="Type:" defaultValue="none" value={family.ageRangeType}
+                <Input type="select" ref="agerangetype" label="Type:" defaultValue="none" value={family && family.ageRangeType}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -1024,12 +1024,12 @@ var FamilyDemographics = function() {
                 </Input>
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
                     <Input type="number" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" maxVal={150}
-                        error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={family.ageRangeFrom} />
+                        error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={family && family.ageRangeFrom} />
                     <span className="group-age-inter">to</span>
                     <Input type="number" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" maxVal={150}
-                        error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={family.ageRangeTo} />
+                        error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={family && family.ageRangeTo} />
                 </Input>
-                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={family.ageRangeUnit}
+                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={family && family.ageRangeUnit}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -1048,7 +1048,7 @@ var FamilyDemographics = function() {
 // as the calling component.
 var FamilySegregation = function() {
     var family = this.state.family;
-    var segregation = (family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
+    var segregation = (family && family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
 
     return (
         <div className="row">
@@ -1116,7 +1116,7 @@ var FamilySegregation = function() {
 
 // Display the Family variant panel. The number of copies depends on the variantCount state variable.
 var FamilyVariant = function() {
-    var family = Object.keys(this.state.family).length ? this.state.family : null;
+    var family = this.state.family;
     var segregation = family && family.segregation ? family.segregation : null;
     var variants = segregation && segregation.variants;
 
@@ -1179,13 +1179,13 @@ var LabelOtherVariant = React.createClass({
 var FamilyAdditional = function() {
     var otherpmidsVal;
     var family = this.state.family;
-    if (Object.keys(family).length) {
+    if (family) {
         otherpmidsVal = family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
     }
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfofamily" label="Additional Information about Family:" rows="5" value={family.additionalInformation}
+            <Input type="textarea" ref="additionalinfofamily" label="Additional Information about Family:" rows="5" value={family && family.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}

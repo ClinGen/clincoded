@@ -46,11 +46,11 @@ var IndividualCuration = React.createClass({
 
     getInitialState: function() {
         return {
-            gdm: {}, // GDM object given in query string
-            group: {}, // Group object given in query string
-            family: {}, // Family object given in query string
-            individual: {}, // If we're editing an individual, this gets the fleshed-out individual object we're editing
-            annotation: {}, // Annotation object given in query string
+            gdm: null, // GDM object given in query string
+            group: null, // Group object given in query string
+            family: null, // Family object given in query string
+            individual: null, // If we're editing an individual, this gets the fleshed-out individual object we're editing
+            annotation: null, // Annotation object given in query string
             extraIndividualCount: 0, // Number of extra families to create
             extraIndividualNames: [], // Names of extra families to create
             variantCount: 1, // Number of variants to display
@@ -159,13 +159,13 @@ var IndividualCuration = React.createClass({
             }
 
             // Update the individual name
-            if (stateObj.individual && Object.keys(stateObj.individual).length) {
+            if (stateObj.individual) {
                 this.setState({individualName: stateObj.individual.label});
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
             // Also see if we need to disable the Add Variant button
-            if (stateObj.individual && Object.keys(stateObj.individual).length) {
+            if (stateObj.individual) {
                 stateObj.genotyping2Disabled = !(stateObj.individual.method && stateObj.individual.method.genotypingMethods && stateObj.individual.method.genotypingMethods.length);
 
                 // If this individual has variants and isn't the proband in a family, handle the variant panels.
@@ -242,7 +242,7 @@ var IndividualCuration = React.createClass({
         }
 
         // Either update or create the individual object in the DB
-        if (this.state.individual && Object.keys(this.state.individual).length) {
+        if (this.state.individual) {
             // We're editing a family. PUT the new family object to the DB to update the existing one.
             return this.putRestData('/individuals/' + this.state.individual.uuid, writerIndividual).then(data => {
                 return Promise.resolve(data['@graph'][0]);
@@ -295,8 +295,8 @@ var IndividualCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault() && this.validateVariants()) {
-            var family = (this.state.family && Object.keys(this.state.family).length) ? this.state.family : null;
-            var currIndividual = (this.state.individual && Object.keys(this.state.individual).length) ? this.state.individual : null;
+            var family = this.state.family;
+            var currIndividual = this.state.individual;
             var newIndividual = {}; // Holds the new group object;
             var individualDiseases = null, individualArticles, individualVariants = [];
             var savedIndividuals; // Array of saved written to DB
@@ -492,8 +492,8 @@ var IndividualCuration = React.createClass({
 
                     // If we're adding this individual to a group, update the group with this family; otherwise update the annotation
                     // with the family.
-                    if (!this.state.individual || Object.keys(this.state.individual).length === 0) {
-                        if (Object.keys(this.state.group).length) {
+                    if (!this.state.individual) {
+                        if (this.state.group) {
                             // Add the newly saved families to the group
                             var group = curator.flatten(this.state.group);
                             if (!group.individualIncluded) {
@@ -505,7 +505,7 @@ var IndividualCuration = React.createClass({
 
                             // Post the modified annotation to the DB, then go back to Curation Central
                             promise = this.putRestData('/groups/' + this.state.group.uuid, group);
-                        } else if (Object.keys(this.state.family).length) {
+                        } else if (this.state.family) {
                             // Add the newly saved families to the group
                             var family = curator.flatten(this.state.family);
                             if (!family.individualIncluded) {
@@ -542,9 +542,9 @@ var IndividualCuration = React.createClass({
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                     } else {
                         var submitLink = '/individual-submit/?gdm=' + this.state.gdm.uuid + '&evidence=' + this.state.annotation.uuid + '&individual=' + savedIndividuals[0].uuid;
-                        if (this.state.family && Object.keys(this.state.family).length) {
+                        if (this.state.family) {
                             submitLink += '&family=' + this.state.family.uuid;
-                        } else if (this.state.group && Object.keys(this.state.group).length) {
+                        } else if (this.state.group) {
                             submitLink += '&group=' + this.state.group.uuid;
                         }
                         this.context.navigate(submitLink);
@@ -560,12 +560,12 @@ var IndividualCuration = React.createClass({
     // in the form. The created object is returned from the function.
     createIndividual: function(individualDiseases, individualArticles, individualVariants, hpoids, nothpoids) {
         var value;
-        var currIndividual = (this.state.individual && Object.keys(this.state.individual).length) ? this.state.individual : null;
-        var family = (this.state.family && Object.keys(this.state.family).length) ? this.state.family : null;
+        var currIndividual = this.state.individual;
+        var family = this.state.family;
 
         // Make a new family. If we're editing the form, first copy the old family
         // to make sure we have everything not from the form.
-        var newIndividual = Object.keys(this.state.individual).length ? curator.flatten(this.state.individual) : {};
+        var newIndividual = this.state.individual ? curator.flatten(this.state.individual) : {};
         newIndividual.label = this.getFormValue('individualname');
 
         // Get an array of all given disease IDs
@@ -647,19 +647,19 @@ var IndividualCuration = React.createClass({
     },
 
     render: function() {
-        var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
-        var individual = Object.keys(this.state.individual).length ? this.state.individual : null;
-        var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
+        var gdm = this.state.gdm;
+        var individual = this.state.individual;
+        var annotation = this.state.annotation;
         var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
         // Get a list of associated groups if editing an individual, or the group in the query string if there was one, or null.
         var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
-            (Object.keys(this.state.group).length ? [this.state.group] : null);
+            (this.state.group ? [this.state.group] : null);
 
         // Get a list of associated families if editing an individual, or the family in the query string if there was one, or null.
         var families = (individual && individual.associatedFamilies) ? individual.associatedFamilies :
-            (Object.keys(this.state.family).length ? [this.state.family] : null);
+            (this.state.family ? [this.state.family] : null);
 
         // Figure out the family and group page titles
         var familyTitles = [];
@@ -783,7 +783,7 @@ var IndividualName = function(displayNote) {
 
     return (
         <div className="row">
-            <Input type="text" ref="individualname" label="Individual Name:" value={individual.label} handleChange={this.handleChange}
+            <Input type="text" ref="individualname" label="Individual Name:" value={individual && individual.label} handleChange={this.handleChange}
                 error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {displayNote ?
@@ -831,7 +831,7 @@ var IndividualCommonDiseases = function() {
     var orphanetidVal, hpoidVal, nothpoidVal, associatedGroups, associatedFamilies;
 
     // If we're editing an individual, make editable values of the complex properties
-    if (individual && Object.keys(individual).length) {
+    if (individual) {
         orphanetidVal = individual.diagnosis ? individual.diagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
         hpoidVal = individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis.join() : null;
         nothpoidVal = individual.hpoIdInElimination ? individual.hpoIdInElimination.join() : null;
@@ -839,7 +839,7 @@ var IndividualCommonDiseases = function() {
 
     // Make a list of diseases from the group, either from the given group,
     // or the individual if we're editing one that has associated groups.
-    if (Object.keys(group).length) {
+    if (group) {
         // We have a group, so get the disease array from it.
         associatedGroups = [group];
     } else if (individual && individual.associatedGroups && individual.associatedGroups.length) {
@@ -849,7 +849,7 @@ var IndividualCommonDiseases = function() {
 
     // Make a list of diseases from the family, either from the given family,
     // or the individual if we're editing one that has associated families.
-    if (Object.keys(family).length) {
+    if (family) {
         // We have a group, so get the disease array from it.
         associatedFamilies = [family];
     } else if (individual && individual.associatedFamilies && individual.associatedFamilies.length) {
@@ -868,13 +868,13 @@ var IndividualCommonDiseases = function() {
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={individual.termsInDiagnosis}
+            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={individual && individual.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Individual</em> if they are specifically noted in the paper.</p>
             <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={individual.termsInElimination}
+            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={individual && individual.termsInElimination}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -926,7 +926,7 @@ var IndividualDemographics = function() {
 
     return (
         <div className="row">
-            <Input type="select" ref="sex" label="Sex:" defaultValue="none" value={individual.sex}
+            <Input type="select" ref="sex" label="Sex:" defaultValue="none" value={individual && individual.sex}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -939,7 +939,7 @@ var IndividualDemographics = function() {
                 <option>Unknown</option>
                 <option>Other</option>
             </Input>
-            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={individual.countryOfOrigin}
+            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={individual && individual.countryOfOrigin}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -947,14 +947,14 @@ var IndividualDemographics = function() {
                     return <option key={country_code.code}>{country_code.name}</option>;
                 })}
             </Input>
-            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={individual.ethnicity}
+            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={individual && individual.ethnicity}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Hispanic or Latino</option>
                 <option>Not Hispanic or Latino</option>
             </Input>
-            <Input type="select" ref="race" label="Race:" defaultValue="none" value={individual.race}
+            <Input type="select" ref="race" label="Race:" defaultValue="none" value={individual && individual.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -968,7 +968,7 @@ var IndividualDemographics = function() {
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age</h4>
             <div className="demographics-age-range">
-                <Input type="select" ref="agetype" label="Type:" defaultValue="none" value={individual.ageType}
+                <Input type="select" ref="agetype" label="Type:" defaultValue="none" value={individual && individual.ageType}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -977,10 +977,10 @@ var IndividualDemographics = function() {
                     <option>Diagnosis</option>
                     <option>Death</option>
                 </Input>
-                <Input type="number" ref="agevalue" label="Value:" value={individual.ageValue} maxVal={150}
+                <Input type="number" ref="agevalue" label="Value:" value={individual && individual.ageValue} maxVal={150}
                     error={this.getFormError('agevalue')} clearError={this.clrFormErrors.bind(null, 'agevalue')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={individual.ageUnit}
+                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={individual && individual.ageUnit}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -997,8 +997,8 @@ var IndividualDemographics = function() {
 
 // Only called if we have an associated family
 var IndividualVariantInfo = function() {
-    var individual = Object.keys(this.state.individual).length ? this.state.individual : null;
-    var family = Object.keys(this.state.family).length ? this.state.family : null;
+    var individual = this.state.individual;
+    var family = this.state.family;
     var variants = individual && individual.variants;
 
     return (
@@ -1083,13 +1083,13 @@ var LabelOtherVariant = React.createClass({
 var IndividualAdditional = function() {
     var otherpmidsVal;
     var individual = this.state.individual;
-    if (Object.keys(individual).length) {
+    if (individual) {
         otherpmidsVal = individual.otherPMIDs ? individual.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
     }
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfoindividual" label="Additional Information about Individual:" rows="5" value={individual.additionalInformation}
+            <Input type="textarea" ref="additionalinfoindividual" label="Additional Information about Individual:" rows="5" value={individual && individual.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
