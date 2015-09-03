@@ -75,7 +75,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
     render: function() {
         var gdm = this.props.gdm;
 
-        if (gdm && Object.keys(gdm).length > 0 && gdm['@type'][0] === 'gdm') {
+        if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
@@ -91,8 +91,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                     <div className="container curation-data">
                         <div className="row equal-height">
                             <GeneRecordHeader gene={gene} />
-                            <DiseaseRecordHeader gdm={this.props.gdm} omimId={this.props.omimId} updateOmimId={this.props.updateOmimId} />
-                            <CuratorRecordHeader gdm={this.props.gdm} />
+                            <DiseaseRecordHeader gdm={gdm} omimId={this.props.omimId} updateOmimId={this.props.updateOmimId} />
+                            <CuratorRecordHeader gdm={gdm} />
                         </div>
                     </div>
                 </div>
@@ -154,7 +154,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var groupRenders = [], familyRenders = [], individualRenders = [];
 
         // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
-        if (annotation.groups) {
+        if (annotation && annotation.groups) {
             var groupAnnotationRenders = annotation.groups.map(group => {
                 if (group.familyIncluded) {
                     // Collect up family renders that are associated with the group, and individuals that are associated with those families.
@@ -183,7 +183,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         }
 
         // Add to the array of family renders the unassociated families, and individuals that associate with them.
-        if (annotation.families) {
+        if (annotation && annotation.families) {
             var familyAnnotationRenders = annotation.families.map(family => {
                 if (family.individualIncluded) {
                     // Add to individual renders the individuals that are associated with this family
@@ -198,7 +198,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         }
 
         // Add to the array of individual renders the unassociated individuals.
-        if (annotation.individuals) {
+        if (annotation && annotation.individuals) {
             var individualAnnotationRenders = annotation.individuals.map(individual => {
                 return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
             });
@@ -206,17 +206,21 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         }
 
         return (
-            <Panel panelClassName="panel-evidence-groups" title={'Evidence for PMID:' + this.props.annotation.article.pmid}>
-                <Panel title={<CurationPaletteTitles title="Group" url={groupUrl} />} panelClassName="panel-evidence">
-                    {groupRenders}
-                </Panel>
-                <Panel title={<CurationPaletteTitles title="Family" url={familyUrl} />} panelClassName="panel-evidence">
-                    {familyRenders}
-                </Panel>
-                <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
-                    {individualRenders}
-                </Panel>
-            </Panel>
+            <div>
+                {annotation ?
+                    <Panel panelClassName="panel-evidence-groups" title={'Evidence for PMID:' + annotation.article.pmid}>
+                        <Panel title={<CurationPaletteTitles title="Group" url={groupUrl} />} panelClassName="panel-evidence">
+                            {groupRenders}
+                        </Panel>
+                        <Panel title={<CurationPaletteTitles title="Family" url={familyUrl} />} panelClassName="panel-evidence">
+                            {familyRenders}
+                        </Panel>
+                        <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
+                            {individualRenders}
+                        </Panel>
+                    </Panel>
+                : null}
+            </div>
         );
     }
 });
@@ -394,7 +398,7 @@ var DiseaseRecordHeader = React.createClass({
 
     render: function() {
         var gdm = this.props.gdm;
-        var disease = gdm.disease;
+        var disease = gdm && gdm.disease;
         var addEdit = this.props.omimId ? 'Edit' : 'Add';
 
         return (
@@ -501,7 +505,8 @@ var CuratorRecordHeader = React.createClass({
 
     // Return the latest annotation in the given GDM
     findLatestAnnotation: function() {
-        var annotations = this.props.gdm.annotations;
+        var gdm = this.props.gdm;
+        var annotations = gdm && gdm.annotations;
         var latestAnnotation = {};
         var latestTime = 0;
         if (annotations && annotations.length) {
@@ -519,7 +524,7 @@ var CuratorRecordHeader = React.createClass({
 
     render: function() {
         var gdm = this.props.gdm;
-        var owners = gdm.annotations.map(function(annotation) {
+        var owners = gdm && gdm.annotations.map(function(annotation) {
             return annotation.submitted_by;
         });
         var annotationOwners = _.chain(owners).uniq(function(owner) {

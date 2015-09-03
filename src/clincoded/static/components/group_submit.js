@@ -24,9 +24,9 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
 
     getInitialState: function() {
         return {
-            gdm: {}, // GDM object given in query string
-            group: {}, // Group object given in query string
-            annotation: {}, // Annotation object given in query string
+            gdm: null, // GDM object given in query string
+            group: null, // Group object given in query string
+            annotation: null, // Annotation object given in query string
             haveFamily: '' // Setting of have-family switch
         };
     },
@@ -96,9 +96,9 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
     },
 
     render: function() {
-        var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
-        var group = Object.keys(this.state.group).length ? this.state.group : null;
-        var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
+        var gdm = this.state.gdm;
+        var group = this.state.group;
+        var annotation = this.state.annotation;
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the

@@ -387,7 +387,7 @@ var GroupCuration = React.createClass({
 
         return (
             <div>
-                {(!this.queryValues.groupUuid || Object.keys(this.state.group).length) ?
+                {(!this.queryValues.groupUuid || this.state.group) ?
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
