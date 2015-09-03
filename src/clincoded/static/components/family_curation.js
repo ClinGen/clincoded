@@ -1122,6 +1122,15 @@ var FamilyVariant = function() {
 
     return (
         <div className="row">
+            {!family || !family.segregation || !family.segregation.variants || family.segregation.variants.length === 0 ?
+                <div className="clearfix">
+                    <p className="col-sm-7 col-sm-offset-5">
+                        To create and have the option to count a proband associated with a variant(s) for this Family, you need to add variant information in this section.
+                        The proband (an Individual) will be created upon submission using the name you supply here. You will be able to add additional information about the proband
+                        following submission of Family information.
+                    </p>
+                </div>
+            : null}
             {_.range(this.state.variantCount).map(i => {
                 var variant;
 
