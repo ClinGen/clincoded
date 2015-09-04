@@ -307,6 +307,12 @@
         border-bottom: 1px solid #c0c0c0;
         font-size: 1.3rem;
     }
+
+    @media screen and (min-width: $screen-sm-min) {
+        &.variant-view-panel-edit {
+            margin-bottom: 40px;
+        }
+    }
 }
 
 .viewer-titles {
@@ -316,7 +322,7 @@
 
     h2 {
         margin-top: 0;
-        font-size: 1.5rem;
+        font-size: 1.3rem;
     }
 }
 
@@ -334,4 +340,12 @@
 
 .disabled-gray {
     color: $gray-light;
+}
+
+.btn-individual-submit {
+    width: 100%;
+}
+
+.input-note-below {
+    margin-top: -20px;
 }

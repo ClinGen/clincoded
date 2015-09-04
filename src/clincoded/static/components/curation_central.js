@@ -33,7 +33,7 @@ var CurationCentral = React.createClass({
     getInitialState: function() {
         return {
             currPmid: queryKeyValue('pmid', this.props.href),
-            currGdm: {}
+            currGdm: null
         };
     },
 
@@ -42,7 +42,7 @@ var CurationCentral = React.createClass({
         if (pmid !== undefined) {
             var gdm = this.state.currGdm;
 
-            if (Object.keys(gdm).length) {
+            if (gdm) {
                 // Find the annotation in the GDM matching the given pmid
                 var currAnnotation = _(gdm.annotations).find(annotation => {
                     return annotation.article.pmid === pmid;
@@ -52,7 +52,7 @@ var CurationCentral = React.createClass({
                     this.setState({currPmid: currAnnotation.article.pmid});
                 }
             }
-            if (this.state.currGdm && Object.keys(this.state.currGdm).length) {
+            if (this.state.currGdm) {
                 window.history.replaceState(window.state, '', '/curation-central/?gdm=' + this.state.currGdm.uuid + '&pmid=' + pmid);
             }
         }
@@ -113,7 +113,7 @@ var CurationCentral = React.createClass({
         var pmid = this.state.currPmid;
 
         // Find the GDM's annotation for the article with the curren PMID
-        var annotation = gdm.annotations && gdm.annotations.length && _(gdm.annotations).find(function(annotation) {
+        var annotation = gdm && gdm.annotations && gdm.annotations.length && _(gdm.annotations).find(function(annotation) {
             return pmid === annotation.article.pmid;
         });
         var currArticle = annotation ? annotation.article : null;
@@ -124,7 +124,7 @@ var CurationCentral = React.createClass({
                 <div className="container">
                     <div className="row curation-content">
                         <div className="col-md-3">
-                            <PmidSelectionList annotations={gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
+                            <PmidSelectionList annotations={gdm && gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
                                     protocol={this.props.href_url.protocol} updateGdmArticles={this.updateGdmArticles} currGdm={gdm} />
                         </div>
                         <div className="col-md-6">
@@ -295,7 +295,7 @@ var AddPmidModal = React.createClass({
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
                     var newArticle = parsePubmed(xml, enteredPmid);
                     // if the PubMed article for this PMID doesn't exist, display an error
-                    if (newArticle.length == undefined) this.setFormErrors('pmid', 'This PMID does not exist');
+                    if (newArticle.length === undefined) this.setFormErrors('pmid', 'This PMID does not exist');
                     return this.postRestData('/articles/', newArticle).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });

@@ -23,6 +23,8 @@ require('./group_curation');
 require('./group_submit');
 require('./family_curation');
 require('./family_submit');
+require('./individual_curation');
+require('./individual_submit');
 require('./testing');
 require('./edit');
 require('./inputs');

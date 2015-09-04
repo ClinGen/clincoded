@@ -37,9 +37,9 @@ var GroupCuration = React.createClass({
 
     getInitialState: function() {
         return {
-            gdm: {}, // GDM object given in UUID
-            annotation: {}, // Annotation object given in UUID
-            group: {}, // If we're editing a group, this gets the fleshed-out group object we're editing
+            gdm: null, // GDM object given in UUID
+            annotation: null, // Annotation object given in UUID
+            group: null, // If we're editing a group, this gets the fleshed-out group object we're editing
             groupName: '', // Currently entered name of the group
             genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
         };
@@ -99,7 +99,7 @@ var GroupCuration = React.createClass({
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
-            if (stateObj.group && Object.keys(stateObj.group).length) {
+            if (stateObj.group) {
                 stateObj.genotyping2Disabled = !(stateObj.group.method && stateObj.group.method.genotypingMethods && stateObj.group.method.genotypingMethods.length);
                 this.setState({groupName: stateObj.group.label});
             }
@@ -238,7 +238,7 @@ var GroupCuration = React.createClass({
                 }).then(data => {
                     // Now make the new group. If we're editing the form, first copy the old group
                     // to make sure we have everything not from the form.
-                    var newGroup = Object.keys(this.state.group).length ? curator.flatten(this.state.group) : {};
+                    var newGroup = this.state.group ? curator.flatten(this.state.group) : {};
                     newGroup.label = this.getFormValue('groupname');
 
                     // Get an array of all given disease IDs
@@ -328,7 +328,7 @@ var GroupCuration = React.createClass({
                     }
 
                     // Either update or create the group object in the DB
-                    if (this.state.group && Object.keys(this.state.group).length) {
+                    if (this.state.group) {
                         // We're editing a group. PUT the new group object to the DB to update the existing one.
                         return this.putRestData('/groups/' + this.state.group.uuid, newGroup).then(data => {
                             return Promise.resolve(data['@graph'][0]);
@@ -341,7 +341,7 @@ var GroupCuration = React.createClass({
                     }
                 }).then(newGroup => {
                     savedGroup = newGroup;
-                    if (!this.state.group || Object.keys(this.state.group).length === 0) {
+                    if (!this.state.group) {
                         // Get a flattened copy of the annotation and put our new group into it,
                         // ready for writing.
                         var annotation = curator.flatten(this.state.annotation);
@@ -354,7 +354,7 @@ var GroupCuration = React.createClass({
                         // Post the modified annotation to the DB, then go back to Curation Central
                         return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
                     } else {
-                        return Promise.resolve(this.state.annotation);
+                        return Promise.resolve(null);
                     }
                 }).then(data => {
                     // Navigate back to Curation Central page.
@@ -373,9 +373,9 @@ var GroupCuration = React.createClass({
     },
 
     render: function() {
-        var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
-        var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
-        var group = Object.keys(this.state.group).length ? this.state.group : null;
+        var gdm = this.state.gdm;
+        var annotation = this.state.annotation;
+        var group = this.state.group;
         var method = (group && group.method && Object.keys(group.method).length) ? group.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
@@ -383,11 +383,11 @@ var GroupCuration = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.groupUuid = queryKeyValue('group', this.props.href);
-        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "true";
+        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
         return (
             <div>
-                {(!this.queryValues.groupUuid || Object.keys(this.state.group).length) ?
+                {(!this.queryValues.groupUuid || this.state.group) ?
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
@@ -452,9 +452,11 @@ globals.curator_page.register(GroupCuration, 'curator_page', 'group-curation');
 // Group Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var GroupName = function() {
+    var group = this.state.group;
+
     return (
         <div className="row">
-            <Input type="text" ref="groupname" label="Group name:" value={this.state.group.label} handleChange={this.handleChange}
+            <Input type="text" ref="groupname" label="Group name:" value={group && group.label} handleChange={this.handleChange}
                 error={this.getFormError('groupname')} clearError={this.clrFormErrors.bind(null, 'groupname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
         </div>
@@ -482,13 +484,13 @@ var GroupCommonDiseases = function() {
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={group.termsInDiagnosis}
+            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={group && group.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Group</em> if they are specifically noted in the paper.</p>
             <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={group.termsInElimination}
+            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={group && group.termsInElimination}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -512,7 +514,7 @@ var LabelHpoId = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="PhenExplorer home page in a new tab">PhenExplorer</a>)</span>:
+                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000118" target="_blank" title="HPO Browser home page in a new tab">HPO Browser</a>)</span>:
             </span>
         );
     }
@@ -541,13 +543,13 @@ var GroupDemographics = function() {
 
     return (
         <div className="row">
-            <Input type="text" ref="malecount" label="# males:" format="number" value={group.numberOfMale}
+            <Input type="number" ref="malecount" label="# males:" value={group && group.numberOfMale}
                 error={this.getFormError('malecount')} clearError={this.clrFormErrors.bind(null, 'malecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref="femalecount" label="# females:" format="number" value={group.numberOfFemale}
+            <Input type="number" ref="femalecount" label="# females:" value={group && group.numberOfFemale}
                 error={this.getFormError('femalecount')} clearError={this.clrFormErrors.bind(null, 'femalecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={group.countryOfOrigin}
+            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={group && group.countryOfOrigin}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -555,7 +557,7 @@ var GroupDemographics = function() {
                     return <option key={country_code.code}>{country_code.name}</option>;
                 })}
             </Input>
-            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={group.ethnicity}
+            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={group && group.ethnicity}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -563,7 +565,7 @@ var GroupDemographics = function() {
                 <option>Not Hispanic or Latino</option>
                 <option>Unknown</option>
             </Input>
-            <Input type="select" ref="race" label="Race:" defaultValue="none" value={group.race}
+            <Input type="select" ref="race" label="Race:" defaultValue="none" value={group && group.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -577,7 +579,7 @@ var GroupDemographics = function() {
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
             <div className="demographics-age-range">
-                <Input type="select" ref="agerangetype" label="Type:" defaultValue="none" value={group.ageRangeType}
+                <Input type="select" ref="agerangetype" label="Type:" defaultValue="none" value={group && group.ageRangeType}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -587,13 +589,13 @@ var GroupDemographics = function() {
                     <option>Death</option>
                 </Input>
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
-                    <Input type="text" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number"
-                        error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={group.ageRangeFrom} />
+                    <Input type="number" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input"
+                        error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={group && group.ageRangeFrom} />
                     <span className="group-age-inter">to</span>
-                    <Input type="text" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" format="number"
-                        error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={group.ageRangeTo} />
+                    <Input type="number" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input"
+                        error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={group && group.ageRangeTo} />
                 </Input>
-                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={group.ageRangeUnit}
+                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={group && group.ageRangeUnit}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -616,22 +618,22 @@ var GroupProbandInfo = function() {
 
     return(
         <div className="row">
-            <Input type="text" ref="indcount" label="Total number individuals in group:" format="number" value={group.totalNumberIndividuals}
+            <Input type="number" ref="indcount" label="Total number individuals in group:" value={group && group.totalNumberIndividuals}
                 error={this.getFormError('indcount')} clearError={this.clrFormErrors.bind(null, 'indcount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="indfamilycount" label="# individuals with family information:" format="number" value={group.numberOfIndividualsWithFamilyInformation}
+            <Input type="number" ref="indfamilycount" label="# individuals with family information:" value={group && group.numberOfIndividualsWithFamilyInformation}
                 error={this.getFormError('indfamilycount')} clearError={this.clrFormErrors.bind(null, 'indfamilycount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="notindfamilycount" label="# individuals WITHOUT family information:" format="number" value={group.numberOfIndividualsWithoutFamilyInformation}
+            <Input type="number" ref="notindfamilycount" label="# individuals WITHOUT family information:" value={group && group.numberOfIndividualsWithoutFamilyInformation}
                 error={this.getFormError('notindfamilycount')} clearError={this.clrFormErrors.bind(null, 'notindfamilycount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="indvariantgenecount" label="# individuals with variant in gene being curated:" format="number" value={group.numberOfIndividualsWithVariantInCuratedGene}
+            <Input type="number" ref="indvariantgenecount" label="# individuals with variant in gene being curated:" value={group && group.numberOfIndividualsWithVariantInCuratedGene}
                 error={this.getFormError('indvariantgenecount')} clearError={this.clrFormErrors.bind(null, 'indvariantgenecount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="notindvariantgenecount" label="# individuals without variant in gene being curated:" format="number" value={group.numberOfIndividualsWithoutVariantInCuratedGene}
+            <Input type="number" ref="notindvariantgenecount" label="# individuals without variant in gene being curated:" value={group && group.numberOfIndividualsWithoutVariantInCuratedGene}
                 error={this.getFormError('notindvariantgenecount')} clearError={this.clrFormErrors.bind(null, 'notindvariantgenecount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
-            <Input type="text" ref="indvariantothercount" label="# individuals with variant found in other gene:" format="number" value={group.numberOfIndividualsWithVariantInOtherGene}
+            <Input type="number" ref="indvariantothercount" label="# individuals with variant found in other gene:" value={group && group.numberOfIndividualsWithVariantInOtherGene}
                 error={this.getFormError('indvariantothercount')} clearError={this.clrFormErrors.bind(null, 'indvariantothercount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
             <Input type="text" ref="othergenevariants" label={<LabelOtherGenes />} inputClassName="uppercase-input" value={othergenevariantsVal} placeholder="e.g. DICER1, SMAD3"
@@ -661,9 +663,9 @@ var GroupAdditional = function() {
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfogroup" label="Additional Information about Group:" rows="5" value={group.additionalInformation}
+            <Input type="textarea" ref="additionalinfogroup" label="Additional Information about Group:" rows="5" value={group && group.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same group:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+            <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same Group:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">
@@ -840,12 +842,12 @@ var GroupViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Specific Mutations Genotyped</dt>
+                                <dt>Specific mutations genotyped</dt>
                                 <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
                             </div>
 
                             <div>
-                                <dt>Method by which Specific Mutations Genotyped</dt>
+                                <dt>Description of Methods by which specific mutations genotyped</dt>
                                 <dd>{method && method.specificMutationsGenotypedMethod}</dd>
                             </div>
 
