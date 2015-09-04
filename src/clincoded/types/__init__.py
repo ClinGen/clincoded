@@ -162,6 +162,9 @@ class Gdm(Item):
         'annotations.groups.familyIncluded.segregation.assessments',
         'annotations.groups.familyIncluded.segregation.assessments.submitted_by',
         'annotations.groups.familyIncluded.individualIncluded',
+        'annotations.groups.familyIncluded.individualIncluded.associatedGroups',
+        'annotations.groups.familyIncluded.individualIncluded.associatedFamilies',
+        'annotations.groups.familyIncluded.individualIncluded.associatedFamilies.associatedGroups',
         'annotations.groups.familyIncluded.individualIncluded.diagnosis',
         'annotations.groups.familyIncluded.individualIncluded.submitted_by',
         'annotations.groups.familyIncluded.individualIncluded.variants',
@@ -169,6 +172,7 @@ class Gdm(Item):
         'annotations.groups.familyIncluded.individualIncluded.otherPMIDs',
         'annotations.groups.familyIncluded.individualIncluded.otherPMIDs.submitted_by',
         'annotations.groups.individualIncluded',
+        'annotations.groups.individualIncluded.associatedGroups',
         'annotations.groups.individualIncluded.diagnosis',
         'annotations.groups.individualIncluded.submitted_by',
         'annotations.groups.individualIncluded.variants',
@@ -187,6 +191,9 @@ class Gdm(Item):
         'annotations.families.segregation.assessments',
         'annotations.families.segregation.assessments.submitted_by',
         'annotations.families.individualIncluded',
+        'annotations.families.individualIncluded.associatedGroups',
+        'annotations.families.individualIncluded.associatedFamilies',
+        'annotations.families.individualIncluded.associatedFamilies.associatedGroups',
         'annotations.families.individualIncluded.diagnosis',
         'annotations.families.individualIncluded.submitted_by',
         'annotations.families.individualIncluded.variants',
@@ -194,6 +201,9 @@ class Gdm(Item):
         'annotations.families.individualIncluded.otherPMIDs',
         'annotations.families.individualIncluded.otherPMIDs.submitted_by',
         'annotations.individuals',
+        'annotations.individuals.associatedGroups',
+        'annotations.individuals.associatedFamilies',
+        'annotations.individuals.associatedFamilies.associatedGroups',
         'annotations.individuals.diagnosis',
         'annotations.individuals.submitted_by',
         'annotations.individuals.variants',
@@ -338,6 +348,8 @@ class Annotation(Item):
         'families.individualIncluded.otherPMIDs',
         'families.individualIncluded.otherPMIDs.submitted_by',
         'individuals',
+        'individuals.associatedGroups',
+        'individuals.associatedFamilies',
         'individuals.diagnosis',
         'individuals.submitted_by',
         'individuals.variants',
@@ -471,6 +483,9 @@ class Family(Item):
         'otherPMIDs.submitted_by',
         'individualIncluded',
         'individualIncluded.diagnosis',
+        'individualIncluded.associatedFamilies',
+        'individualIncluded.associatedGroups',
+        'individualIncluded.otherPMIDs',
         'individualIncluded.submitted_by',
         'individualIncluded.variants',
         'associatedGroups',
@@ -511,7 +526,39 @@ class Individual(Item):
         'variants.submitted_by',
         'otherPMIDs',
         'otherPMIDs.submitted_by',
+        'associatedGroups',
+        'associatedGroups.commonDiagnosis',
+        'associatedFamilies',
+        'associatedFamilies.associatedGroups',
+        'associatedFamilies.commonDiagnosis',
+        'associatedFamilies.individualIncluded'
     ]
+    rev = {
+        'associatedGroups': ('group', 'individualIncluded'),
+        'associatedFamilies': ('family', 'individualIncluded'),
+    }
+
+    @calculated_property(schema={
+        "title": "Associated groups",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "group.individualIncluded",
+        },
+    })
+    def associatedGroups(self, request, associatedGroups):
+        return paths_filtered_by_status(request, associatedGroups)
+
+    @calculated_property(schema={
+        "title": "Associated families",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "family.individualIncluded",
+        },
+    })
+    def associatedFamilies(self, request, associatedFamilies):
+        return paths_filtered_by_status(request, associatedFamilies)
 
 
 @collection(

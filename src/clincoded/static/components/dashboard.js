@@ -49,24 +49,17 @@ var Dashboard = React.createClass({
                     displayName2: this.cleanGdmModelName(modeInheritance),
                     extraInfo: extraInfo
                 };
-                if (gdmSubItem[i].familyIncluded) {
-                    // families that are associated with groups show up in the familyIncluded address
-                    if (gdmSubItem[i].familyIncluded.length > 0) {
-                        gdmMapping[gdmSubItem[i].familyIncluded[0].uuid] = {
-                            uuid: gdmUuid,
-                            displayName: this.cleanGdmGeneDiseaseName(geneSymbol, diseaseTerm),
-                            displayName2: this.cleanGdmModelName(modeInheritance),
-                            extraInfo: extraInfo
-                        };
-                        gdmMapping[gdmSubItem[i].familyIncluded[0].uuid].extraInfo['group'] = gdmSubItem[i].label;
-                        gdmMapping[gdmSubItem[i].familyIncluded[0].uuid].extraInfo['groupUuid'] = gdmSubItem[i].uuid;
-                    }
-                }
-                // recursively loop through the annotations' families (not associated with groups) and groups
+                // recursively loop through the annotations' groups, families, individuals
+                if (gdmSubItem[i].individuals) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].individuals,
+                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
                 if (gdmSubItem[i].families) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].families,
                     gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
                 if (gdmSubItem[i].groups) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].groups,
                     gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
+                if (gdmSubItem[i].familyIncluded) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].familyIncluded,
+                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, _.extend({}, extraInfo, {parent: gdmSubItem[i].label, parentUrl: gdmSubItem[i]['@id'], parentType: gdmSubItem[i]['@type'][0]}));
+                if (gdmSubItem[i].individualIncluded) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].individualIncluded,
+                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, _.extend({}, extraInfo, {parent: gdmSubItem[i].label, parentUrl: gdmSubItem[i]['@id'], parentType: gdmSubItem[i]['@type'][0]}));
             }
         }
         return gdmMapping;
@@ -83,7 +76,7 @@ var Dashboard = React.createClass({
 
     getData: function(session) {
         // Retrieve all GDMs and other objects related to user via search
-        this.getRestDatas(['/gdm/', '/search/?type=gdm&type=annotation&type=group&type=family&limit=10&submitted_by.uuid=' +
+        this.getRestDatas(['/gdm/', '/search/?type=gdm&type=annotation&type=group&type=family&type=individual&limit=10&submitted_by.uuid=' +
             session.user_properties.uuid], [function() {}, function() {}]).then(data => {
             // Search objects successfully retrieved; process results
             // GDM results; finds GDMs created by user, and also creates PMID-GDM mapping table
@@ -129,9 +122,9 @@ var Dashboard = React.createClass({
                             tempUrl = "/families/" + result.uuid + "/";
                             tempTimestamp = "added " + tempDateTime;
                             display = true;
-                            if (gdmMapping[result.uuid].extraInfo.group) {
+                            if (gdmMapping[result.uuid].extraInfo.parent) {
                                 // for families associated with a group
-                                tempDisplayText = <span><a href={tempUrl}>{result.label}</a> associated with <a href={"/groups/" + gdmMapping[result.uuid].extraInfo.groupUuid + "/"}>{gdmMapping[result.uuid].extraInfo.group}</a> in <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
+                                tempDisplayText = <span><a href={tempUrl}>{result.label}</a> associated with <a href={gdmMapping[result.uuid].extraInfo.parentUrl}>{gdmMapping[result.uuid].extraInfo.parent}</a> in <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
                             }
                             else {
                                 // for families not associated with a group
@@ -151,6 +144,20 @@ var Dashboard = React.createClass({
                             tempDisplayText = <span><a href={tempUrl}>{result.label}</a> added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
                             tempTimestamp = "added " + tempDateTime;
                             display = true;
+                        }
+                        break;
+                    case 'individual':
+                        if (result.uuid in gdmMapping) {
+                            tempUrl = "/individual/" + result.uuid + "/";
+                            tempTimestamp = "added " + tempDateTime;
+                            display = true;
+                            if (gdmMapping[result.uuid].extraInfo.parent) {
+                                tempDisplayText = <span><a href={tempUrl}>{result.label}</a> associated with <a href={gdmMapping[result.uuid].extraInfo.parentUrl}>{gdmMapping[result.uuid].extraInfo.parent}</a> in <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
+                            }
+                            else {
+                                // for individuals not associated with a group or family
+                                tempDisplayText = <span><a href={tempUrl}>{result.label}</a> added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
+                            }
                         }
                         break;
                     default:
