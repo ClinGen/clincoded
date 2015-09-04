@@ -14,7 +14,8 @@ var Input = form.Input;
 // with <method>.call(this).
 module.exports = {
 
-    render: function(method) {
+    // Render a method panel. 'family' is boolean true if this is a method for family.
+    render: function(method, family) {
         return (
             <div className="row">
                 <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={curator.booleanToDropdown(method.previousTesting)}
@@ -70,17 +71,19 @@ module.exports = {
                     <option>Yes</option>
                     <option>No</option>
                 </Input>
-                <Input type="select" ref="mutationsgenotyped" label="Specific Mutations Genotyped?:" defaultValue="none" value={curator.booleanToDropdown(method.specificMutationsGenotyped)}
+                <Input type="select" ref="mutationsgenotyped" label="Specific mutations genotyped?:" defaultValue="none" value={curator.booleanToDropdown(method.specificMutationsGenotyped)}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>Yes</option>
                     <option>No</option>
                 </Input>
-                <Input type="textarea" ref="specificmutation" label="Method by which Specific Mutations Genotyped:" rows="5" value={method.specificMutationsGenotypedMethod}
+                <Input type="textarea" ref="specificmutation" label="Description of Methods by which specific mutations genotyped:" rows="5" value={method.specificMutationsGenotypedMethod}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                <Input type="textarea" ref="additionalinfomethod" label="Additional Information about Family Method:" rows="8" value={method.additionalInformation}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                {family ?
+                    <Input type="textarea" ref="additionalinfomethod" label="Additional Information about Family Method:" rows="8" value={method.additionalInformation}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                : null}
             </div>
         );
     },
