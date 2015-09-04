@@ -72,6 +72,11 @@ input[type=search] {
 // Group and Family Submit Result page styles
 .submit-results-panel {
     margin: 40px 0;
+
+    &.submit-results-response {
+        margin: -40px 0 40px;
+        border-top: none;
+    }
 }
 
 .submit-results-panel-info {
@@ -168,6 +173,12 @@ input[type=search] {
     }
 }
 
+.family-submit-results-btn {
+    a {
+        width: 100%;
+    }
+}
+
 
 .group-submit-results-btn {
     display: block;
@@ -189,7 +200,11 @@ input[type=search] {
     font-style: italic;
 }
 
-.family-submit-results-btn {
-    display: block;
-    text-align: center;
+.submit-results-buttons {
+    margin-top: -40px;
+    margin-bottom: 40px;
+
+    .row {
+        margin: 20px 0;
+    }
 }
