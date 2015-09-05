@@ -24,43 +24,21 @@
         "consistentWithDiseaseMechanism": {
             "title": "Is Variant Consistent with Disease Mechanism?",
             "description": "Is variant consistent with disease mechanism?",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "withinFunctionalDomain": {
             "title": "Variant within Functional Domain",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "frequencySupportPathogenicity": {
             "title": "Does Frequency Data Support Pathogenicity",
             "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "default": "boolean"
         },
         "previouslyReported": {
             "title": "Previously Reported",
             "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "default": "boolean"
         },
         "denovoType": {
             "title": "de novo Type",
@@ -74,43 +52,19 @@
         },
         "intransWithAnotherVariant": {
              "title": "in trans with Another Variant",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "supportingSegregation": {
              "title": "Supporting Segregation Data",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "supportingStatistic": {
              "title": "Supporting Statistical Data",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "SupportingFunctional": {
              "title": "Supporting Functional Data",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "comment": {
             "title": "Comment",
