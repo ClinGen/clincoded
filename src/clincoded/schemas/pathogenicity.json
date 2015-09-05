@@ -32,13 +32,11 @@
         },
         "frequencySupportPathogenicity": {
             "title": "Does Frequency Data Support Pathogenicity",
-            "type": "string",
-            "default": "boolean"
+            "type": "boolean"
         },
         "previouslyReported": {
             "title": "Previously Reported",
-            "type": "string",
-            "default": "boolean"
+            "type": "boolean"
         },
         "denovoType": {
             "title": "de novo Type",
@@ -51,19 +49,19 @@
             ]
         },
         "intransWithAnotherVariant": {
-             "title": "in trans with Another Variant",
+            "title": "in trans with Another Variant",
             "type": "boolean"
         },
         "supportingSegregation": {
-             "title": "Supporting Segregation Data",
+            "title": "Supporting Segregation Data",
             "type": "boolean"
         },
         "supportingStatistic": {
-             "title": "Supporting Statistical Data",
+            "title": "Supporting Statistical Data",
             "type": "boolean"
         },
         "SupportingFunctional": {
-             "title": "Supporting Functional Data",
+            "title": "Supporting Functional Data",
             "type": "boolean"
         },
         "comment": {

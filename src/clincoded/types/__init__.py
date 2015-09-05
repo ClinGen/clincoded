@@ -457,9 +457,24 @@ class Group(Item):
         'individualIncluded.otherPMIDs.submitted_by',
         'individualIncluded.variants',
         'individualIncluded.variants.submitted_by',
+        'associatedAnnotations',
+        'associatedAnnotations.article'
         #'control'
     ]
+    rev = {
+        'associatedAnnotations': ('annotation', 'groups')
+    }
 
+    @calculated_property(schema={
+        "title": "Associated annotations",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.groups",
+        },
+    })
+    def associatedAnnotations(self, request, associatedAnnotations):
+        return paths_filtered_by_status(request, associatedAnnotations)
 
 @collection(
     name='families',
@@ -488,12 +503,17 @@ class Family(Item):
         'individualIncluded.otherPMIDs',
         'individualIncluded.submitted_by',
         'individualIncluded.variants',
+        'individualIncluded.variants.submitted_by',
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
-        'individualIncluded.variants.submitted_by',
+        'associatedGroups.associatedAnnotations',
+        'associatedGroups.associatedAnnotations.article',
+        'associatedAnnotations',
+        'associatedAnnotations.article',
     ]
     rev = {
         'associatedGroups': ('group', 'familyIncluded'),
+        'associatedAnnotations': ('annotation', 'families'),
     }
 
     @calculated_property(schema={
@@ -506,6 +526,17 @@ class Family(Item):
     })
     def associatedGroups(self, request, associatedGroups):
         return paths_filtered_by_status(request, associatedGroups)
+
+    @calculated_property(schema={
+        "title": "Associated annotations",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.families",
+        },
+    })
+    def associatedAnnotations(self, request, associatedAnnotations):
+        return paths_filtered_by_status(request, associatedAnnotations)
 
 
 @collection(
@@ -528,14 +559,22 @@ class Individual(Item):
         'otherPMIDs.submitted_by',
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
+        'associatedGroups.associatedAnnotations',
+        'associatedGroups.associatedAnnotations.article',
         'associatedFamilies',
         'associatedFamilies.associatedGroups',
+        'associatedFamilies.associatedGroups.associatedAnnotations',
+        'associatedFamilies.associatedGroups.associatedAnnotations.article',
+        'associatedFamilies.associatedAnnotations',
+        'associatedFamilies.associatedAnnotations.article',
         'associatedFamilies.commonDiagnosis',
-        'associatedFamilies.individualIncluded'
+        'associatedAnnotations',
+        'associatedAnnotations.article'
     ]
     rev = {
         'associatedGroups': ('group', 'individualIncluded'),
         'associatedFamilies': ('family', 'individualIncluded'),
+        'associatedAnnotations': ('annotation', 'individuals')
     }
 
     @calculated_property(schema={
@@ -559,6 +598,17 @@ class Individual(Item):
     })
     def associatedFamilies(self, request, associatedFamilies):
         return paths_filtered_by_status(request, associatedFamilies)
+
+    @calculated_property(schema={
+        "title": "Associated annotations",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.individuals",
+        },
+    })
+    def associatedAnnotations(self, request, associatedAnnotations):
+        return paths_filtered_by_status(request, associatedAnnotations)
 
 
 @collection(
