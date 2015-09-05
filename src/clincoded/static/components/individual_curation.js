@@ -653,7 +653,7 @@ var IndividualCuration = React.createClass({
         var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var probandLabel = (individual && individual.proband ? ' [proband]' : '');
-        var variantTitle = (individual && !individual.proband) ? 'Individual — Associated Variant(s)' : 'Individual' + probandLabel + ' – Variant(s) segregating with Proband';
+        var variantTitle = (individual && individual.associatedFamilies.length && individual.proband) ? 'Individual' + probandLabel + ' – Variant(s) segregating with Proband' : 'Individual — Associated Variant(s)';
 
         // Get a list of associated groups if editing an individual, or the group in the query string if there was one, or null.
         var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
@@ -1180,7 +1180,7 @@ var IndividualViewer = React.createClass({
                             : null}
                         </h2>
                     </div>
-                    <Panel title={'Individual' + probandLabel + ' — Common diseases &amp; phenotypes'} panelClassName="panel-data">
+                    <Panel title={'Individual' + probandLabel + ' — Common diseases & phenotypes'} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
