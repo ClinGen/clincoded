@@ -573,7 +573,7 @@ var IndividualCuration = React.createClass({
             newIndividual.diagnosis = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
         }
 
-        // Fill in the individual fields from the Common Diseases & Phenotypes panel
+        // Fill in the individual fields from the Diseases & Phenotypes panel
         if (hpoids && hpoids.length) {
             newIndividual.hpoIdInDiagnosis = hpoids;
         }
@@ -736,7 +736,7 @@ var IndividualCuration = React.createClass({
                                             {IndividualName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + ' – Common Disease & Phenotypes'} open>
+                                            <Panel title={'Individual' + probandLabel + ' – Disease & Phenotype(s)'} open>
                                                 {IndividualCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -825,7 +825,7 @@ var IndividualCount = function() {
 };
 
 
-// Common diseases individual curation panel. Call with .call(this) to run in the same context
+// Diseases individual curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var IndividualCommonDiseases = function() {
     var individual = this.state.individual;
@@ -1180,7 +1180,7 @@ var IndividualViewer = React.createClass({
                             : null}
                         </h2>
                     </div>
-                    <Panel title={'Individual' + probandLabel + ' — Common diseases & phenotypes'} panelClassName="panel-data">
+                    <Panel title={'Individual' + probandLabel + ' — Diseases & phenotype(s)'} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
