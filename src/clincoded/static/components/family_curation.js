@@ -813,7 +813,7 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family — Variant(s) segregating with Proband" open>
+                                            <Panel title="Family — Variant(s) Segregating with Proband" open>
                                                 {FamilyVariant.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -1234,7 +1234,7 @@ var FamilyViewer = React.createClass({
                             </h2>
                         : null}
                     </div>
-                    <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
+                    <Panel title="Common Diseases &amp; Phenotypes" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
@@ -1439,7 +1439,7 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Family - Variant(s) associated with Proband" panelClassName="panel-data">
+                    <Panel title="Family - Variant(s) Associated with Proband" panelClassName="panel-data">
                         {variants.map(function(variant, i) {
                             return (
                                 <div className="variant-view-panel">

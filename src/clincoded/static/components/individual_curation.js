@@ -1125,7 +1125,7 @@ var IndividualViewer = React.createClass({
         var i = 0;
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? ' [proband]' : '');
-        var variantTitle = (individual && !individual.proband) ? 'Individual — Associated Variant(s)' : 'Individual' + probandLabel + ' – Variant(s) segregating with Proband';
+        var variantTitle = (individual && !individual.proband) ? 'Individual — Associated Variant(s)' : 'Individual' + probandLabel + ' – Variant(s) Segregating with Proband';
 
         // Collect all families to render, as well as groups associated with these families
         var familyRenders = individual.associatedFamilies.map(function(family, j) {
@@ -1180,7 +1180,7 @@ var IndividualViewer = React.createClass({
                             : null}
                         </h2>
                     </div>
-                    <Panel title={'Individual' + probandLabel + ' — Diseases & phenotype(s)'} panelClassName="panel-data">
+                    <Panel title={'Individual' + probandLabel + ' — Diseases & Phenotype(s)'} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>

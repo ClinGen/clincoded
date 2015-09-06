@@ -407,7 +407,7 @@ var GroupCuration = React.createClass({
                                             {GroupName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title="Common diseases &amp; phenotypes" open>
+                                            <Panel title="Common Diseases &amp; Phenotypes" open>
                                                 {GroupCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -688,7 +688,7 @@ var GroupViewer = React.createClass({
             <div className="container">
                 <div className="row curation-content-viewer">
                     <h1>View Group: {context.label}</h1>
-                    <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
+                    <Panel title="Common Diseases &amp; Phenotypes" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
