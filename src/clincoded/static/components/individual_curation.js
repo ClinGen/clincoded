@@ -736,7 +736,7 @@ var IndividualCuration = React.createClass({
                                             {IndividualName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + ' – Disease & Phenotype(s)'} open>
+                                            <Panel title={'Individual' + probandLabel + ' – Disease & Phenotypes'} open>
                                                 {IndividualCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
