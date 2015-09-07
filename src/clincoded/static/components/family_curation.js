@@ -262,7 +262,7 @@ var FamilyCuration = React.createClass({
             if (value) {
                 valid = value.match(/^\s*(\d{1,10})\s*$/i);
                 if (!valid) {
-                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariantIDs (e.g. 177676)');
+                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariationIDs (e.g. 177676)');
                     anyInvalid = true;
                 }
             }
@@ -813,7 +813,7 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family — Variant(s) segregating with Proband" open>
+                                            <Panel title="Family — Variant(s) Segregating with Proband" open>
                                                 {FamilyVariant.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -949,7 +949,7 @@ var LabelHpoId = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000118" target="_blank" title="HPO Browser in a new tab">HPO Browser</a>)</span>:
+                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://bioportal.bioontology.org/ontologies/HP?p=classes&conceptid=root" target="_blank" title="Bioportal Human Phenotype Ontology in a new tab">HPO lookup at Bioportal</a>)</span>:
             </span>
         );
     }
@@ -1131,7 +1131,7 @@ var FamilyVariant = function() {
                         following submission of Family information.
                     </p>
                     <p className="col-sm-7 col-sm-offset-5">
-                        ClinVar VariantID should be provided in all instances it exists. This is the only way to associate probands from different studies with
+                        ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
                         the same variant, and ensures the accurate counting of probands.
                     </p>
                 </div>
@@ -1149,7 +1149,7 @@ var FamilyVariant = function() {
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                         <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                            The VariantID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href="http://www.ncbi.nlm.nih.gov/clinvar/variation/139214/" target="_blank">example</a>: 139214).
+                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href="http://www.ncbi.nlm.nih.gov/clinvar/variation/139214/" target="_blank">example</a>: 139214).
                         </p>
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1180,7 +1180,7 @@ var FamilyVariant = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariantID:</span>;
+        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
     }
 });
 
@@ -1234,7 +1234,7 @@ var FamilyViewer = React.createClass({
                             </h2>
                         : null}
                     </div>
-                    <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
+                    <Panel title="Common Diseases &amp; Phenotypes" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
@@ -1439,14 +1439,14 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Family - Variant(s) associated with Proband" panelClassName="panel-data">
+                    <Panel title="Family - Variant(s) Associated with Proband" panelClassName="panel-data">
                         {variants.map(function(variant, i) {
                             return (
                                 <div className="variant-view-panel">
                                     <h5>Variant {i + 1}</h5>
                                     <dl className="dl-horizontal">
                                         <div>
-                                            <dt>ClinVar VariantID</dt>
+                                            <dt>ClinVar VariationID</dt>
                                             <dd>{variant.clinvarVariantId}</dd>
                                         </div>
 
