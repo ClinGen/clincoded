@@ -355,9 +355,9 @@ var Input = module.exports.Input = React.createClass({
                 //   clickHandler: Method to call when button is clicked
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
-                    <div className={this.props.wrapperClassName}>
+                    <span className={this.props.wrapperClassName}>
                         <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} disabled={this.props.inputDisabled} />
-                    </div>
+                    </span>
                 );
                 break;
 
@@ -365,9 +365,9 @@ var Input = module.exports.Input = React.createClass({
                 title = this.props.title ? this.props.title : 'Submit';
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
-                    <div className={this.props.wrapperClassName}>
+                    <span className={this.props.wrapperClassName}>
                         <button className={inputClasses} onClick={this.props.submitHandler} disabled={this.props.inputDisabled}>{title}</button>
-                    </div>
+                    </span>
                 );
                 break;
 
@@ -375,9 +375,9 @@ var Input = module.exports.Input = React.createClass({
                 title = this.props.title ? this.props.title : 'Cancel';
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
-                    <div className={this.props.wrapperClassName}>
+                    <span className={this.props.wrapperClassName}>
                         <button className={inputClasses} onClick={this.props.cancelHandler} disabled={this.props.inputDisabled}>{title}</button>
-                    </div>
+                    </span>
                 );
                 break;
 
