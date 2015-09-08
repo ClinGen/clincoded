@@ -205,6 +205,16 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             individualRenders = individualRenders.concat(individualAnnotationRenders);
         }
 
+        // Render variants
+        var variantRenders;
+        var allVariants = collectAnnotationVariants(annotation);
+        if (Object.keys(allVariants).length) {
+            variantRenders = Object.keys(allVariants).map(function(variantId) {
+                return <div key={variantId}>{renderVariant(allVariants[variantId])}</div>;
+            });
+        }
+
+
         return (
             <div>
                 {annotation ?
@@ -217,6 +227,9 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                         </Panel>
                         <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
                             {individualRenders}
+                        </Panel>
+                        <Panel title={<CurationPaletteTitles title="Variants" />} panelClassName="panel-evidence">
+                            {variantRenders}
                         </Panel>
                     </Panel>
                 : null}
@@ -333,6 +346,21 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
     );
 };
 
+
+// Render a family in the curator palette.
+var renderVariant = function(variant) {
+    return (
+        <div className="panel-evidence-group">
+            <h5>{variant.clinvarVariantId ? <span>{'VariationId: ' + variant.clinvarVariantId}</span> : <span>{'Description: ' + variant.otherDescription}</span>}</h5>
+            <div className="evidence-curation-info">
+                {variant.submitted_by ?
+                    <p className="evidence-curation-info">{variant.submitted_by.title}</p>
+                : null}
+                <p>{moment(variant.date_created).format('YYYY MMM DD, h:mm a')}</p>
+            </div>
+        </div>
+    );
+};
 
 // Title for each section of the curation palette. Contains the title and an Add button.
 var CurationPaletteTitles = React.createClass({
@@ -582,6 +610,68 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
         );
     }
 });
+
+
+// Returns object keyed by variant ID that points to each variant in all family segmentations
+// and individuals related to the given annotation (evidence/article). There's plenty of opportunity
+// for duplicate variants, but all variants are de-duped in the returned object.
+var collectAnnotationVariants = function(annotation) {
+    var allVariants = {};
+
+    if (annotation && Object.keys(annotation).length) {
+        // Search unassociated individuals
+        annotation.individuals.forEach(function(individual) {
+            individual.variants.forEach(function(variant) {
+                allVariants[variant['@id']] = variant;
+            });
+        });
+
+        // Search unassociated families
+        annotation.families.forEach(function(family) {
+            // Collect variants in the family's segregation
+            if (family.segregation && family.segregation.variants) {
+                family.segregation.variants.forEach(function(variant) {
+                    allVariants[variant['@id']] = variant;
+                });
+            }
+
+            // Collect variants in the family's individual's
+            family.individualIncluded.forEach(function(individual) {
+                individual.variants.forEach(function(variant) {
+                    allVariants[variant['@id']] = variant;
+                });
+            });
+        });
+
+        // Search groups
+        annotation.groups.forEach(function(group) {
+            // Collect variants in group's individuals
+            group.individualIncluded.forEach(function(individual) {
+                individual.variants.forEach(function(variant) {
+                    allVariants[variant['@id']] = variant;
+                });
+            });
+
+            // Collect variants in associated families' segregations
+            group.familyIncluded.forEach(function(family) {
+                // Collect variants in the family's segregation
+                if (family.segregation && family.segregation.variants) {
+                    family.segregation.variants.forEach(function(variant) {
+                        allVariants[variant['@id']] = variant;
+                    });
+                }
+
+                // Collect variants in the family's individual's
+                family.individualIncluded.forEach(function(individual) {
+                    individual.variants.forEach(function(variant) {
+                        allVariants[variant['@id']] = variant;
+                    });
+                });
+            });
+        });
+    }
+    return allVariants;
+};
 
 
 // Convert a boolean value to a Yes/No dropdown value
