@@ -736,7 +736,7 @@ var IndividualCuration = React.createClass({
                                             {IndividualName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + ' – Disease & Phenotypes'} open>
+                                            <Panel title={'Individual' + probandLabel + ' – Disease & Phenotype(s)'} open>
                                                 {IndividualCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -887,7 +887,7 @@ var IndividualCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Disease(s) for Individual{this.props.probandLabel}:</span>;
+        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Disease for Individual{this.props.probandLabel}:</span>;
     }
 });
 
@@ -1042,10 +1042,6 @@ var IndividualVariantInfo = function() {
                                 <option>Yes</option>
                                 <option>No</option>
                             </Input>
-                            <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                                ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
-                                the same variant, and ensures the accurate counting of probands.
-                            </p>
                         </div>
                     : null}
 
@@ -1058,6 +1054,14 @@ var IndividualVariantInfo = function() {
 
                         return (
                             <div key={i} className="variant-panel">
+                                <div className="row">
+                                    <div className="col-sm-7 col-sm-offset-5">
+                                        <p className="alert alert-warning">
+                                            ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
+                                            the same variant, and ensures the accurate counting of probands.
+                                        </p>
+                                    </div>
+                                </div>
                                 <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                                     error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
@@ -1109,7 +1113,7 @@ var IndividualAdditional = function() {
         <div className="row">
             <Input type="textarea" ref="additionalinfoindividual" label={'Additional Information about Individual ' + probandLabel + ':'} rows="5" value={individual && individual.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="otherpmids" label={'Enter PMID(s) that report evidence about this same individual' + probandLabel + ':'} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+            <Input type="textarea" ref="otherpmids" label={'Enter PMID(s) that report evidence about this same Individual' + probandLabel + ':'} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
@@ -1180,7 +1184,7 @@ var IndividualViewer = React.createClass({
                             : null}
                         </h2>
                     </div>
-                    <Panel title={'Individual' + probandLabel + ' — Diseases & Phenotype(s)'} panelClassName="panel-data">
+                    <Panel title={'Individual' + probandLabel + ' – Disease & Phenotype(s)'} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
@@ -1295,7 +1299,7 @@ var IndividualViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Description of Methods by which specific mutations genotyped</dt>
+                                <dt>Description of Method(s)</dt>
                                 <dd>{method && method.specificMutationsGenotypedMethod}</dd>
                             </div>
                         </dl>
