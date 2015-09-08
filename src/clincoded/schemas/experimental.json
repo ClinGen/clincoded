@@ -18,7 +18,8 @@
         "label": {
             "title": "Label",
             "description": "A user entered label for the experiment",
-            "type": "string"
+            "type": "string",
+            "default": ""
         },
         "active": {
             "title": "Active",
@@ -565,6 +566,10 @@
         }
     },
     "columns": {
+        "label": {
+            "title": "Label",
+            "type": "string"
+        },
         "uuid": {
             "title": "ExperimentalData",
             "type": "string"

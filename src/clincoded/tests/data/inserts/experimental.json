@@ -5,6 +5,7 @@
         "date_created": "2015-04-13T10:10:37.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
+        "label": "Experiment 1",
         "evidenceType": "Expression",
         "expression": {
             "organOfTissue" : "T-cells",
@@ -24,6 +25,7 @@
         "date_created": "2015-04-13T12:32:57.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
+        "label": "Experiment 2",
         "evidenceType": "Protein Interactions",
         "proteinInteractions": {
             "interactingGenes" : [
@@ -44,6 +46,7 @@
         "date_created": "2015-04-13T16:43:12.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
+        "label": "Experiment 3",
         "evidenceType": "Biochemical function",
         "biochemicalFunction": {
             "identifiedFunction": "GO_Slim term here",
@@ -86,6 +89,7 @@
         "date_created": "2015-04-13T16:43:12.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
+        "label": "Experiment 4",
         "evidenceType": "Rescue",
         "rescue": {
             "patientCellOrEngineeredEquivalent": "Patient cells",
@@ -111,6 +115,7 @@
         "date_created": "2015-04-13T16:43:12.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
+        "label": "Experiment 5",
         "evidenceType": "Functional alteration of gene/gene product",
         "functionalAleration": {
             "cellMutationOrEngineeredEquivalent": "Patient cells",
@@ -134,6 +139,7 @@
         "date_created": "2015-04-13T16:43:12.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
+        "label": "Experiment 6",
         "evidenceType": "Model systems",
         "modelSystems": {
             "animalOrCellCulture": "Engineered equivalent",

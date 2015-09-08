@@ -26,7 +26,7 @@ var country_codes = globals.country_codes;
 
 
 var ExperimentCuration = React.createClass({
-    mixins: [FormMixin, RestMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -37,19 +37,19 @@ var ExperimentCuration = React.createClass({
 
     getInitialState: function() {
         return {
-            gdm: {}, // GDM object given in UUID
-            annotation: {}, // Annotation object given in UUID
-            experiment: {}, // If we're editing an experiment, this gets the fleshed-out experiment object we're editing
-            experimentName: '', // Currently entered name of the experiment
-            experimentType: '' // specifies the experiment type
+            gdm: null, // GDM object given in UUID
+            annotation: null, // Annotation object given in UUID
+            experiment: null, // If we're editing a group, this gets the fleshed-out group object we're editing
+            experimentName: '', // Currently entered name of the group
+            experimentType: ''
         };
     },
 
     // Handle value changes in genotyping method 1
     handleChange: function(ref, e) {
-        if (ref === 'experimentname' && this.refs[ref].getValue()) {
+        if (ref === 'experimentName' && this.refs[ref].getValue()) {
             this.setState({experimentName: this.refs[ref].getValue()});
-        } else if (ref === 'experimenttype') {
+        } else if (ref === 'experimentType') {
             this.setState({experimentType: this.refs[ref].getValue()});
         }
     },
@@ -80,7 +80,7 @@ var ExperimentCuration = React.createClass({
                         stateObj.gdm = data;
                         break;
 
-                    case 'experiment':
+                    case 'experimental':
                         stateObj.experiment = data;
                         break;
 
@@ -99,9 +99,11 @@ var ExperimentCuration = React.createClass({
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
-            if (stateObj.experiment && Object.keys(stateObj.experiment).length) {
-                stateObj.genotyping2Disabled = !(stateObj.experiment.method && stateObj.experiment.method.genotypingMethods && stateObj.experiment.method.genotypingMethods.length);
-                this.setState({experimentName: stateObj.experiment.label});
+            if (stateObj.experiment) {
+                this.setState({
+                    experimentName: stateObj.experiment.label,
+                    experimentType: stateObj.experiment.evidenceType
+                });
             }
 
             // Set all the state variables we've collected
@@ -302,93 +304,94 @@ var ExperimentCuration = React.createClass({
                     console.log(newExperiment);
                 }).catch(function(e) {
                     console.log('GROUP CREATION ERROR=: %o', e);
-                });;
+                });
             }
         }
     },
 
     render: function() {
-        var gdm = Object.keys(this.state.gdm).length ? this.state.gdm : null;
-        var annotation = Object.keys(this.state.annotation).length ? this.state.annotation : null;
-        var experiment = Object.keys(this.state.experiment).length ? this.state.experiment : null;
+        var gdm = this.state.gdm;
+        var annotation = this.state.annotation;
+        var experiment = this.state.experiment;
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
         // Get the 'evidence', 'gdm', and 'experiment' UUIDs from the query string and save them locally.
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.experimentUuid = queryKeyValue('experiment', this.props.href);
-        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "true";
-
-        // add to render() to re-enable the Associated Variants panel
-        /*
-        {this.state.experimentType != '' && this.state.experimentType != 'none' ?
-            <PanelGroup accordion>
-                <Panel title="Functional Data - Associated Variant(s)" open>
-                    {AssociatedVariants.call(this)}
-                </Panel>
-            </PanelGroup>
-        : null }
-        */
+        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
-                <div className="container">
-                    {annotation && annotation.article ?
-                        <div className="curation-pmid-summary">
-                            <PmidSummary article={this.state.annotation.article} displayJournal />
+                {(!this.queryValues.experimentUuid || this.state.experiment) ?
+                    <div>
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                        <div className="container">
+                            {annotation && annotation.article ?
+                                <div className="curation-pmid-summary">
+                                    <PmidSummary article={this.state.annotation.article} displayJournal />
+                                </div>
+                            : null}
+                            <div className="viewer-titles">
+                                <h1>{(experiment ? 'Edit' : 'Curate') + ' Group Information'}</h1>
+                                <h2>Experiment: {this.state.experimentName ? <span>{this.state.experimentName}</span> : <span className="no-entry">No entry</span>}{this.state.experimentType ? <span> ({this.state.experimentType})</span> : null}</h2>
+                            </div>
+                            <div className="row group-curation-content">
+                                <div className="col-sm-12">
+                                    <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                        <Panel>
+                                            {GroupName.call(this)}
+                                        </Panel>
+
+
+                                        {this.state.experimentType == 'Biochemical Function' ?
+                                            <PanelGroup accordion><Panel title="Biochemical Function" open>
+                                                {TypeBiochemicalFunction.call(this)}
+                                            </Panel></PanelGroup>
+                                        : null }
+                                        {this.state.experimentType == 'Protein Interactions' ?
+                                            <PanelGroup accordion><Panel title="Protein Interactions" open>
+                                                {TypeProteinInteractions.call(this)}
+                                            </Panel></PanelGroup>
+                                        : null }
+                                        {this.state.experimentType == 'Expression' ?
+                                            <PanelGroup accordion><Panel title="Expression" open>
+                                                {TypeExpression.call(this)}
+                                            </Panel></PanelGroup>
+                                        : null }
+                                        {this.state.experimentType == 'Functional alteration of gene/gene product' ?
+                                            <PanelGroup accordion><Panel title="Functional alteration of gene/gene product" open>
+                                                {TypeFunctionalAlteration.call(this)}
+                                            </Panel></PanelGroup>
+                                        : null }
+                                        {this.state.experimentType == 'Model Systems' ?
+                                            <PanelGroup accordion><Panel title="Model Systems" open>
+                                                {TypeModelSystems.call(this)}
+                                            </Panel></PanelGroup>
+                                        : null }
+                                        {this.state.experimentType == 'Rescue' ?
+                                            <PanelGroup accordion><Panel title="Rescue" open>
+                                                {TypeRescue.call(this)}
+                                            </Panel></PanelGroup>
+                                        : null }
+
+
+
+
+
+
+                                        {this.state.experimentType != '' && this.state.experimentType != 'none' ?
+                                            <div className="curation-submit clearfix">
+                                                <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                                <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                            </div>
+                                        : null }
+                                    </Form>
+                                </div>
+                            </div>
                         </div>
-                    : null}
-                    <div className="viewer-titles">
-                        <h1>{(experiment ? 'Edit' : 'Curate') + ' Experiment Information'}</h1>
-                        <h2>Experiment: {this.state.experimentName ? <span>{this.state.experimentName}</span> : <span className="no-entry">No entry</span>}{this.state.experimentType ? <span> ({this.state.experimentType})</span> : null}</h2>
                     </div>
-                    <div className="row experiment-curation-content">
-                        <div className="col-sm-12">
-                            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                <Panel>
-                                    {ExperimentNameType.call(this)}
-                                </Panel>
-                                {this.state.experimentType == 'Biochemical Function' ?
-                                    <PanelGroup accordion><Panel title="Biochemical Function" open>
-                                        {TypeBiochemicalFunction.call(this)}
-                                    </Panel></PanelGroup>
-                                : null }
-                                {this.state.experimentType == 'Protein Interactions' ?
-                                    <PanelGroup accordion><Panel title="Protein Interactions" open>
-                                        {TypeProteinInteractions.call(this)}
-                                    </Panel></PanelGroup>
-                                : null }
-                                {this.state.experimentType == 'Expression' ?
-                                    <PanelGroup accordion><Panel title="Expression" open>
-                                        {TypeExpression.call(this)}
-                                    </Panel></PanelGroup>
-                                : null }
-                                {this.state.experimentType == 'Functional alteration of gene/gene product' ?
-                                    <PanelGroup accordion><Panel title="Functional alteration of gene/gene product" open>
-                                        {TypeFunctionalAlteration.call(this)}
-                                    </Panel></PanelGroup>
-                                : null }
-                                {this.state.experimentType == 'Model Systems' ?
-                                    <PanelGroup accordion><Panel title="Model Systems" open>
-                                        {TypeModelSystems.call(this)}
-                                    </Panel></PanelGroup>
-                                : null }
-                                {this.state.experimentType == 'Rescue' ?
-                                    <PanelGroup accordion><Panel title="Rescue" open>
-                                        {TypeRescue.call(this)}
-                                    </Panel></PanelGroup>
-                                : null }
-                                {this.state.experimentType != '' && this.state.experimentType != 'none' ?
-                                    <div className="curation-submit clearfix">
-                                        <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
-                                        <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
-                                    </div>
-                                : null }
-                            </Form>
-                        </div>
-                    </div>
-                </div>
+                : null}
             </div>
         );
     }
@@ -396,15 +399,18 @@ var ExperimentCuration = React.createClass({
 
 globals.curator_page.register(ExperimentCuration, 'curator_page', 'experiment-curation');
 
-// Experimental Name curation panel. Call with .call(this) to run in the same context
+
+// Group Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var ExperimentNameType = function() {
+var GroupName = function() {
+    var experiment = this.state.experiment;
+
     return (
         <div className="row">
-            <Input type="text" ref="experimentname" label="Experiment name:" value={this.state.experiment.label} handleChange={this.handleChange}
-                error={this.getFormError('experimentname')} clearError={this.clrFormErrors.bind(null, 'experimentname')}
+            <Input type="text" ref="experimentName" label="Experiment name:" value={experiment && experiment.label} handleChange={this.handleChange}
+                error={this.getFormError('experimentName')} clearError={this.clrFormErrors.bind(null, 'experimentName')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="select" ref="experimenttype" label="Experiment type:" defaultValue="none" value={this.state.experiment.evidenceType} handleChange={this.handleChange}
+            <Input type="select" ref="experimentType" label="Experiment type:" defaultValue="none" value={experiment && experiment.evidenceType} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -775,18 +781,18 @@ var LabelPhenotypeObserved = React.createClass({
 var TypeRescue = function() {
     var rescue = this.state.experiment.rescue ? this.state.experiment.rescue : {};
     if (rescue) {
-        rescue.patientCellOrEngineeredEquivalent = rescue.patientCellOrEngineeredEquivalent ? rescue.patientCellOrEngineeredEquivalent.join() : null;
-        rescue.patientCellType = rescue.patientCellType ? rescue.patientCellType.join() : null;
-        rescue.engineeredEquivalentCellType = rescue.engineeredEquivalentCellType ? rescue.engineeredEquivalentCellType.join() : null;
-        rescue.descriptionOfGeneAlteration = rescue.descriptionOfGeneAlteration ? rescue.descriptionOfGeneAlteration.join() : null;
-        rescue.phenotypeHPO = rescue.phenotypeHPO ? rescue.phenotypeHPO.join() : null;
-        rescue.phenotypeFreeText = rescue.phenotypeFreeText ? rescue.phenotypeFreeText.join() : null;
-        rescue.rescueMethod = rescue.rescueMethod ? rescue.rescueMethod.join() : null;
-        rescue.wildTypeRescuePhenotype = rescue.wildTypeRescuePhenotype ? rescue.wildTypeRescuePhenotype.join() : null;
-        rescue.patientVariantRescue = rescue.patientVariantRescue ? rescue.patientVariantRescue.join() : null;
-        rescue.explanation = rescue.explanation ? rescue.explanation.join() : null;
-        rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper.join() : null;
-        rescue.assessments = rescue.assessments ? rescue.assessments.join() : null;
+        rescue.patientCellOrEngineeredEquivalent = rescue.patientCellOrEngineeredEquivalent ? rescue.patientCellOrEngineeredEquivalent : null;
+        rescue.patientCellType = rescue.patientCellType ? rescue.patientCellType : null;
+        rescue.engineeredEquivalentCellType = rescue.engineeredEquivalentCellType ? rescue.engineeredEquivalentCellType : null;
+        rescue.descriptionOfGeneAlteration = rescue.descriptionOfGeneAlteration ? rescue.descriptionOfGeneAlteration : null;
+        rescue.phenotypeHPO = rescue.phenotypeHPO ? rescue.phenotypeHPO : null;
+        rescue.phenotypeFreeText = rescue.phenotypeFreeText ? rescue.phenotypeFreeText : null;
+        rescue.rescueMethod = rescue.rescueMethod ? rescue.rescueMethod : null;
+        rescue.wildTypeRescuePhenotype = rescue.wildTypeRescuePhenotype ? rescue.wildTypeRescuePhenotype : null;
+        rescue.patientVariantRescue = rescue.patientVariantRescue ? rescue.patientVariantRescue : null;
+        rescue.explanation = rescue.explanation ? rescue.explanation : null;
+        rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper : null;
+        rescue.assessments = rescue.assessments ? rescue.assessments : null;
     }
     return (
         <div className="row">
