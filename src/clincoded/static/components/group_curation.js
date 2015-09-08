@@ -407,27 +407,27 @@ var GroupCuration = React.createClass({
                                             {GroupName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title="Common Diseases &amp; Phenotypes" open>
+                                            <Panel title="Group — Common Disease(s) & Phenotype(s)" open>
                                                 {GroupCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Group Demographics" open>
+                                            <Panel title="Group — Demographics" open>
                                                 {GroupDemographics.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Group Information" open>
+                                            <Panel title="Group — Information" open>
                                                 {GroupProbandInfo.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Group Methods" open>
+                                            <Panel title="Group — Methods" open>
                                                 {methods.render.call(this, method)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Group Additional Information" open>
+                                            <Panel title="Group — Additional Information" open>
                                                 {GroupAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -688,7 +688,7 @@ var GroupViewer = React.createClass({
             <div className="container">
                 <div className="row curation-content-viewer">
                     <h1>View Group: {context.label}</h1>
-                    <Panel title="Common Diseases &amp; Phenotypes" panelClassName="panel-data">
+                    <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
@@ -847,7 +847,7 @@ var GroupViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Description of Methods by which specific mutations genotyped</dt>
+                                <dt>Description of Method(s)</dt>
                                 <dd>{method && method.specificMutationsGenotypedMethod}</dd>
                             </div>
 

@@ -135,9 +135,8 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                                     </Input>
                                 </Form>
                                 <p className="submit-results-panel-info">
-                                    <em><strong>Note</strong>: Family Information includes any information about a proband in the group that is part of family 
-                                    and any relatives of the proband (e.g. presence of phenotypes, average age of onset, race, family ethnicity and/or any
-                                    information about the segregation of phenotypes and/or variants) and/or any information about segregation e.g. de novo status.</em>
+                                    <em><strong>Note</strong>: Family Information includes any information about a proband in the group that is part of family and any relatives of the proband
+                                    (e.g. average age of onset, race, family ethnicity, etc.) and information about segregation of phenotype(s) and variant(s).</em>
                                 </p>
                             </Panel>
                             {(this.state.haveFamily === 'y' && gdm && annotation && group) ?
