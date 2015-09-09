@@ -407,27 +407,27 @@ var GroupCuration = React.createClass({
                                             {GroupName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title="Common diseases &amp; phenotypes" open>
+                                            <Panel title="Group — Common Disease(s) & Phenotype(s)" open>
                                                 {GroupCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Group Demographics" open>
+                                            <Panel title="Group — Demographics" open>
                                                 {GroupDemographics.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Group Information" open>
+                                            <Panel title="Group — Information" open>
                                                 {GroupProbandInfo.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Group Methods" open>
+                                            <Panel title="Group — Methods" open>
                                                 {methods.render.call(this, method)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Group Additional Information" open>
+                                            <Panel title="Group — Additional Information" open>
                                                 {GroupAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -514,7 +514,7 @@ var LabelHpoId = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000118" target="_blank" title="HPO Browser home page in a new tab">HPO Browser</a>)</span>:
+                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://bioportal.bioontology.org/ontologies/HP?p=classes&conceptid=root" target="_blank" title="Bioportal Human Phenotype Ontology in a new tab">HPO lookup at Bioportal</a>)</span>:
             </span>
         );
     }
@@ -688,7 +688,7 @@ var GroupViewer = React.createClass({
             <div className="container">
                 <div className="row curation-content-viewer">
                     <h1>View Group: {context.label}</h1>
-                    <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
+                    <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
@@ -847,7 +847,7 @@ var GroupViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Description of Methods by which specific mutations genotyped</dt>
+                                <dt>Description of Method(s)</dt>
                                 <dd>{method && method.specificMutationsGenotypedMethod}</dd>
                             </div>
 
