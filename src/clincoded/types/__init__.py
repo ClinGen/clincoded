@@ -112,8 +112,24 @@ class Variant(Item):
     schema = load_schema('clincoded:schemas/variant.json')
     name_key = 'uuid'
     embedded = [
-        'submitted_by'
+        'submitted_by',
+        'associatedPathogenicities',
+        'associatedPathogenicities.submitted_by'
     ]
+    rev = {
+        'associatedPathogenicities': ('pathogenicity', 'variant')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated pathogenicities",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "pathogenicity.variant",
+        },
+    })
+    def associatedPathogenicities(self, request, associatedPathogenicities):
+        return paths_filtered_by_status(request, associatedPathogenicities)
 
 
 @collection(

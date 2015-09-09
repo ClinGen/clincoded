@@ -214,7 +214,6 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             });
         }
 
-
         return (
             <div>
                 {annotation ?
@@ -228,7 +227,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                         <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
                             {individualRenders}
                         </Panel>
-                        <Panel title={<CurationPaletteTitles title="Variants" />} panelClassName="panel-evidence">
+                        <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence">
                             {variantRenders}
                         </Panel>
                     </Panel>
@@ -244,7 +243,7 @@ var renderGroup = function(group, gdm, annotation, curatorMatch) {
     var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
 
     return (
-        <div className="panel-evidence-group" key={group.uuid}>
+        <div className="panel-evidence-group">
             <h5>{group.label}</h5>
             <div className="evidence-curation-info">
                 {group.submitted_by ?
@@ -264,7 +263,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
     var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
 
     return (
-        <div className="panel-evidence-group" key={family.uuid}>
+        <div className="panel-evidence-group">
             <h5>{family.label}</h5>
             <div className="evidence-curation-info">
                 {family.submitted_by ?
@@ -299,7 +298,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
     var i = 0;
 
     return (
-        <div className="panel-evidence-group" key={individual.uuid}>
+        <div className="panel-evidence-group">
             <h5>{individual.label}{individual.proband ? ' [proband]' : ''}</h5>
             <div className="evidence-curation-info">
                 {individual.submitted_by ?
@@ -348,7 +347,11 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
 
 
 // Render a family in the curator palette.
-var renderVariant = function(variant) {
+var renderVariant = function(variant, session) {
+    var pathogenicity = _(variant.associatedPathogenicities).find(function(pathogenicity) {
+        return userMatch(pathogenicity.submitted_by, session);
+    });
+
     return (
         <div className="panel-evidence-group">
             <h5>{variant.clinvarVariantId ? <span>{'VariationId: ' + variant.clinvarVariantId}</span> : <span>{'Description: ' + variant.otherDescription}</span>}</h5>
@@ -358,6 +361,7 @@ var renderVariant = function(variant) {
                 : null}
                 <p>{moment(variant.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
+            {pathogenicity ? <span><a href="#">View</a> | <a href="#">Edit</a></span> : <a href="#">Curate</a> }
         </div>
     );
 };
