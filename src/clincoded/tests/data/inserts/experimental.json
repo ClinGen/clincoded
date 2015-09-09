@@ -26,7 +26,7 @@
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
         "label": "Experiment 2",
-        "evidenceType": "Protein Interactions",
+        "evidenceType": "Protein interactions",
         "proteinInteractions": {
             "interactingGenes" : [
                 "NGLY1"

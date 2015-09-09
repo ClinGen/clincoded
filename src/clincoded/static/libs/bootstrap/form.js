@@ -61,7 +61,6 @@ var FormMixin = module.exports.FormMixin = {
     // Retrieves the saved value of the Input with the given 'ref' value. saveFormValue
     // must already have been called with this Input's value.
     getFormValue: function(ref) {
-        //console.log(this.formValues);
         return this.formValues[ref];
     },
 
@@ -225,8 +224,15 @@ var Input = module.exports.Input = React.createClass({
         } else if (this.props.type === 'select') {
             return this.getSelectedOption().trim();
         } else if (this.props.type === 'checkbox') {
-            console.log(this.props);
             return this.props.checked;
+        }
+    },
+
+    // Toggles value for checkboxes
+    toggleValue: function() {
+        if (this.props.type === 'checkbox') {
+            if (this.props.checked === true) { return false; }
+            else { return true; }
         }
     },
 
@@ -370,11 +376,15 @@ var Input = module.exports.Input = React.createClass({
                 break;
 
             case 'checkbox':
+                var checkboxInput = (this.props.checked ?
+                    <input className={inputClasses} type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} checked />
+                    : <input className={inputClasses} type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} />
+                );
                 input = (
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <input className={inputClasses} type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} defaultChecked={this.props.value ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled} />
+                            {checkboxInput}
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                         </div>
                     </div>

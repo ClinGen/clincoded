@@ -33,7 +33,7 @@
             "type": "string",
             "enum": [
                 "Biochemical function",
-                "Protein Interactions",
+                "Protein interactions",
                 "Expression",
                 "Functional alteration of gene/gene product",
                 "Model systems",
