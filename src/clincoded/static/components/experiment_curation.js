@@ -51,6 +51,12 @@ var ExperimentCuration = React.createClass({
             this.setState({experimentName: this.refs[ref].getValue()});
         } else if (ref === 'experimentType') {
             this.setState({experimentType: this.refs[ref].getValue()});
+        } else if (ref === 'wildTypeRescuePhenotype') {
+            console.log(this.refs[ref].getValue());
+            console.log(this.refs[ref]);
+            this.refs[ref].checked = this.refs[ref].getValue() === false ? true : false;
+        } else if (ref === 'patientVariantRescue') {
+            this.refs[ref].checked = this.refs[ref].getValue() === false ? true : false;
         }
     },
 
@@ -275,36 +281,123 @@ var ExperimentCuration = React.createClass({
 
             if (!formError) {
                 console.log('form pass');
-                var searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
 
-                this.getRestData(searchStr).then(diseases => {
-                    if (geneSymbols && geneSymbols.length) {
-                        // At least one gene symbol entered; search the DB for them.
-                        searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
-                        return this.getRestData(searchStr).then(genes => {
-                            if (genes['@graph'].length === geneSymbols.length) {
-                                // Successfully retrieved all genes
-                                groupGenes = genes;
-                                return Promise.resolve(genes);
-                            } else {
-                                var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
-                                this.setFormErrors('othergenevariants', missingGenes.join(', ') + ' not found');
-                                throw genes;
-                            }
-                        });
-                    } else {
-                        // No genes entered; just pass null to the next then
-                        return Promise.resolve(null);
+                var newExperiment = {};
+                newExperiment.label = this.getFormValue('experimentName');
+                newExperiment.evidenceType = this.getFormValue('experimentType');
+
+                if (this.getFormValue('experimentType') === '') {
+                    var searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
+
+
+                    this.getRestData(searchStr).then(diseases => {
+                        if (geneSymbols && geneSymbols.length) {
+                            // At least one gene symbol entered; search the DB for them.
+                            searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
+                            return this.getRestData(searchStr).then(genes => {
+                                if (genes['@graph'].length === geneSymbols.length) {
+                                    // Successfully retrieved all genes
+                                    groupGenes = genes;
+                                    return Promise.resolve(genes);
+                                } else {
+                                    var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
+                                    this.setFormErrors('othergenevariants', missingGenes.join(', ') + ' not found');
+                                    throw genes;
+                                }
+                            });
+                        } else {
+                            // No genes entered; just pass null to the next then
+                            return Promise.resolve(null);
+                        }
+                    }).then(data => {
+                        var newExperiment = Object.keys(this.state.annotation).length ? curator.flatten(this.state.annotation) : {};
+
+
+                        console.log(newExperiment);
+                    }).catch(function(e) {
+                        console.log('GROUP CREATION ERROR=: %o', e);
+                    });
+
+
+
+
+                }
+                else if (this.getFormValue('experimentType') == 'Rescue') {
+                    newExperiment.rescue = {};
+                    var patientCellOrEngineeredEquivalent = this.getFormValue('patientCellOrEngineeredEquivalent');
+                    if (patientCellOrEngineeredEquivalent) {
+                        newExperiment.rescue.patientCellOrEngineeredEquivalent = patientCellOrEngineeredEquivalent;
                     }
-                }).then(data => {
-                    var newExperiment = Object.keys(this.state.experiment).length ? curator.flatten(this.state.experiment) : {};
-                    newExperiment.label = this.getFormValue('experimentname');
-                    newExperiment.evidenceType = this.getFormValue('experimenttype');
+                    var patientCellType = this.getFormValue('rescue.patientCellType');
+                    if (patientCellType) {
+                        newExperiment.rescue.patientCellType = patientCellType;
+                    }
+                    var engineeredEquivalentCellType = this.getFormValue('rescue.engineeredEquivalentCellType');
+                    if (engineeredEquivalentCellType) {
+                        newExperiment.rescue.engineeredEquivalentCellType = engineeredEquivalentCellType;
+                    }
+                    var descriptionOfGeneAlteration = this.getFormValue('descriptionOfGeneAlteration');
+                    if (descriptionOfGeneAlteration) {
+                        newExperiment.rescue.descriptionOfGeneAlteration = descriptionOfGeneAlteration;
+                    }
+                    var phenotypeHPO = this.getFormValue('rescue.phenotypeHPO');
+                    if (phenotypeHPO) {
+                        newExperiment.rescue.phenotypeHPO = phenotypeHPO;
+                    }
+                    var phenotypeFreeText = this.getFormValue('phenotypeFreeText');
+                    if (phenotypeFreeText) {
+                        newExperiment.rescue.phenotypeFreeText = phenotypeFreeText;
+                    }
+                    var rescueMethod = this.getFormValue('rescueMethod');
+                    if (rescueMethod) {
+                        newExperiment.rescue.rescueMethod = rescueMethod;
+                    }
+                    var wildTypeRescuePhenotype = this.getFormValue('wildTypeRescuePhenotype');
+                    newExperiment.rescue.wildTypeRescuePhenotype = wildTypeRescuePhenotype;
+                    var patientVariantRescue = this.getFormValue('patientVariantRescue');
+                    newExperiment.rescue.patientVariantRescue = patientVariantRescue;
+                    var explanation = this.getFormValue('explanation');
+                    if (explanation) {
+                        newExperiment.rescue.explanation = explanation;
+                    }
+                    var evidenceInPaper = this.getFormValue('evidenceInPaper');
+                    if (evidenceInPaper) {
+                        newExperiment.rescue.evidenceInPaper = evidenceInPaper;
+                    }
+                }
 
-                    console.log(newExperiment);
-                }).catch(function(e) {
-                    console.log('GROUP CREATION ERROR=: %o', e);
-                });
+                console.log(newExperiment);
+
+                if (this.state.experiment) {
+                    // We're editing a experiment. PUT the new group object to the DB to update the existing one.
+                    this.putRestData('/experimental/' + this.state.experiment.uuid, newExperiment).then(data => {
+                        return Promise.resolve(data['@graph'][0]);
+                    });
+
+                } else {
+                    // We created a group; post it to the DB
+                    this.postRestData('/experimental/', newExperiment).then(data => {
+                        return Promise.resolve(data['@graph'][0]);
+                    }).then(newExperiment => {
+                        var savedExperiment = newExperiment;
+                        if (!this.state.experiment) {
+                            // Get a flattened copy of the annotation and put our new group into it,
+                            // ready for writing.
+                            var annotation = curator.flatten(this.state.annotation);
+                            if (annotation.experimentalData) {
+                                annotation.experimentalData.push(newExperiment['@id']);
+                            } else {
+                                annotation.experimentalData = [newExperiment['@id']];
+                            }
+
+                            // Post the modified annotation to the DB, then go back to Curation Central
+                            return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
+                        } else {
+                            return Promise.resolve(null);
+                        }
+                    });
+                }
+
             }
         }
     },
@@ -779,7 +872,8 @@ var LabelPhenotypeObserved = React.createClass({
 // Rescue type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var TypeRescue = function() {
-    var rescue = this.state.experiment.rescue ? this.state.experiment.rescue : {};
+    var experiment = this.state.experiment ? this.state.experiment : {};
+    var rescue = experiment.rescue ? experiment.rescue : {};
     if (rescue) {
         rescue.patientCellOrEngineeredEquivalent = rescue.patientCellOrEngineeredEquivalent ? rescue.patientCellOrEngineeredEquivalent : null;
         rescue.patientCellType = rescue.patientCellType ? rescue.patientCellType : null;
@@ -788,8 +882,8 @@ var TypeRescue = function() {
         rescue.phenotypeHPO = rescue.phenotypeHPO ? rescue.phenotypeHPO : null;
         rescue.phenotypeFreeText = rescue.phenotypeFreeText ? rescue.phenotypeFreeText : null;
         rescue.rescueMethod = rescue.rescueMethod ? rescue.rescueMethod : null;
-        rescue.wildTypeRescuePhenotype = rescue.wildTypeRescuePhenotype ? rescue.wildTypeRescuePhenotype : null;
-        rescue.patientVariantRescue = rescue.patientVariantRescue ? rescue.patientVariantRescue : null;
+        rescue.wildTypeRescuePhenotype = rescue.wildTypeRescuePhenotype ? rescue.wildTypeRescuePhenotype : false;
+        rescue.patientVariantRescue = rescue.patientVariantRescue ? rescue.patientVariantRescue : false;
         rescue.explanation = rescue.explanation ? rescue.explanation : null;
         rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper : null;
         rescue.assessments = rescue.assessments ? rescue.assessments : null;
@@ -822,11 +916,11 @@ var TypeRescue = function() {
             <Input type="textarea" ref="rescueMethod" label="Method used to rescue:" rows="5" value={rescue.rescueMethod}
                 error={this.getFormError('rescueMethod')} clearError={this.clrFormErrors.bind(null, 'rescueMethod')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="checkbox" ref="wildTypeRescuePhenotype" label="Does the wild-type rescue the above phenotype?:" value={rescue.wildTypeRescuePhenotype}
-                error={this.getFormError('wildTypeRescuePhenotype')} clearError={this.clrFormErrors.bind(null, 'wildTypeRescuePhenotype')}
+            <Input type="checkbox" ref="wildTypeRescuePhenotype" label="Does the wild-type rescue the above phenotype?:" checked={rescue.wildTypeRescuePhenotype}
+                error={this.getFormError('wildTypeRescuePhenotype')} clearError={this.clrFormErrors.bind(null, 'wildTypeRescuePhenotype')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="checkbox" ref="patientVariantRescue" label="Does patient variant rescue?:" value={rescue.patientVariantRescue}
-                error={this.getFormError('patientVariantRescue')} clearError={this.clrFormErrors.bind(null, 'patientVariantRescue')}
+            <Input type="checkbox" ref="patientVariantRescue" label="Does patient variant rescue?:" checked={rescue.patientVariantRescue}
+                error={this.getFormError('patientVariantRescue')} clearError={this.clrFormErrors.bind(null, 'patientVariantRescue')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="explanation" label="Explanation:" rows="5" value={rescue.explanation}
                 error={this.getFormError('explanation')} clearError={this.clrFormErrors.bind(null, 'explanation')}

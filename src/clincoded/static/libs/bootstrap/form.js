@@ -61,6 +61,7 @@ var FormMixin = module.exports.FormMixin = {
     // Retrieves the saved value of the Input with the given 'ref' value. saveFormValue
     // must already have been called with this Input's value.
     getFormValue: function(ref) {
+        //console.log(this.formValues);
         return this.formValues[ref];
     },
 
@@ -223,6 +224,9 @@ var Input = module.exports.Input = React.createClass({
             return React.findDOMNode(this.refs.input).value.trim();
         } else if (this.props.type === 'select') {
             return this.getSelectedOption().trim();
+        } else if (this.props.type === 'checkbox') {
+            console.log(this.props);
+            return this.props.checked;
         }
     },
 
@@ -230,6 +234,8 @@ var Input = module.exports.Input = React.createClass({
     setValue: function(val) {
         if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
             React.findDOMNode(this.refs.input).value = val;
+        } else if (this.props.type === 'checkbox') {
+            React.findDOMNode(this.refs.input).checked = val;
         }
     },
 
@@ -238,6 +244,8 @@ var Input = module.exports.Input = React.createClass({
             React.findDOMNode(this.refs.input).value = '';
         } else if (this.props.type === 'select') {
             this.resetSelectedOption();
+        } else if (this.props.type === 'checkbx') {
+            React.findDOMNode(this.refs.input).checked = false;
         }
     },
 
@@ -364,7 +372,7 @@ var Input = module.exports.Input = React.createClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <input className={inputClasses} type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} defaultValue={this.props.value ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled} />
+                            <input className={inputClasses} type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} defaultChecked={this.props.value ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled} />
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                         </div>
                     </div>
