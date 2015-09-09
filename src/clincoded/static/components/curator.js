@@ -210,7 +210,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var allVariants = collectAnnotationVariants(annotation);
         if (Object.keys(allVariants).length) {
             variantRenders = Object.keys(allVariants).map(function(variantId) {
-                return <div key={variantId}>{renderVariant(allVariants[variantId])}</div>;
+                return <div key={variantId}>{renderVariant(allVariants[variantId], gdm, annotation, curatorMatch, session)}</div>;
             });
         }
 
@@ -346,11 +346,14 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
 };
 
 
-// Render a family in the curator palette.
-var renderVariant = function(variant, session) {
-    var pathogenicity = _(variant.associatedPathogenicities).find(function(pathogenicity) {
+// Render a variant in the curator palette.
+var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
+    var variantCurated = variant.associatedPathogenicities.length > 0;
+
+    // Get the pathogenicity record this user made for this variant if the current annotation belongs to the current user
+    var associatedPathogenicity = (curatorMatch && variantCurated) ? _(variant.associatedPathogenicities).find(function(pathogenicity) {
         return userMatch(pathogenicity.submitted_by, session);
-    });
+    }) : null;
 
     return (
         <div className="panel-evidence-group">
@@ -361,7 +364,22 @@ var renderVariant = function(variant, session) {
                 : null}
                 <p>{moment(variant.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            {pathogenicity ? <span><a href="#">View</a> | <a href="#">Edit</a></span> : <a href="#">Curate</a> }
+            {curatorMatch ?
+                <span>
+                    {variantCurated ?
+                        <span><a href={variant['@id']}>View</a> | <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant' + variant.uuid}>Edit/Assess</a></span>
+                    :
+                        <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant' + variant.uuid}>Curate/Assess</a>
+                    }
+                </span>
+            :
+                <span>
+                    {variantCurated ?
+                        <a href={variant['@id']}>View</a>
+                    :
+                        <span className="palette-not-curated">Not Curated/Assessed</span>}
+                </span>
+            }
         </div>
     );
 };
