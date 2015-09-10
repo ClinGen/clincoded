@@ -321,7 +321,7 @@ var ExperimentCuration = React.createClass({
                 newExperiment.evidenceType = this.getFormValue('experimentType');
 
                 if (this.getFormValue('experimentType') === '') {
-                    // NOT USED ATM
+                    // NOT USED ATM; REMOVE EVENTUALLY
                     var searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
 
 
@@ -358,7 +358,7 @@ var ExperimentCuration = React.createClass({
 
                 } else if (this.getFormValue('experimentType') == 'Biochemical function') {
                     // newExperiment object for type Rescue
-                    newExperiment.identifiedFunction = {geneWithSameFunctionSameDisease: {}, geneFunctionConsistentWithPhenotype: {}};
+                    newExperiment.biochemicalFunction = {geneWithSameFunctionSameDisease: {}, geneFunctionConsistentWithPhenotype: {}};
                     var BFidentifiedFunction = this.getFormValue('identifiedFunction');
                     if (BFidentifiedFunction) {
                         newExperiment.biochemicalFunction.identifiedFunction = BFidentifiedFunction;
@@ -586,6 +586,17 @@ var ExperimentCuration = React.createClass({
                     // We're editing a experiment. PUT the new group object to the DB to update the existing one.
                     this.putRestData('/experimental/' + this.state.experiment.uuid, newExperiment).then(data => {
                         return Promise.resolve(data['@graph'][0]);
+                    }).then(data => {
+                        // Navigate back to Curation Central page.
+                        // FUTURE: Need to navigate to Group Submit page.
+                        this.resetAllFormValues();
+                        if (this.queryValues.editShortcut) {
+                            this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
+                        } else {
+                            this.context.navigate('/experiment-submit/?gdm=' + this.state.gdm.uuid + '&experiment=' + this.state.experiment.uuid + '&evidence=' + this.state.annotation.uuid);
+                        }
+                    }).catch(function(e) {
+                        console.log('EXPERIMENTAL MODIFICATION ERROR=: %o', e);
                     });
 
                 } else {
@@ -609,9 +620,19 @@ var ExperimentCuration = React.createClass({
                         } else {
                             return Promise.resolve(null);
                         }
+                    }).then(data => {
+                        // Navigate back to Curation Central page.
+                        // FUTURE: Need to navigate to Group Submit page.
+                        this.resetAllFormValues();
+                        if (this.queryValues.editShortcut) {
+                            this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
+                        } else {
+                            this.context.navigate('/experiment-submit/?gdm=' + this.state.gdm.uuid + '&experiment=' + savedExperiment.uuid + '&evidence=' + this.state.annotation.uuid);
+                        }
+                    }).catch(function(e) {
+                        console.log('EXPERIMENTAL CREATION ERROR=: %o', e);
                     });
                 }
-
             }
         }
     },
@@ -649,8 +670,6 @@ var ExperimentCuration = React.createClass({
                                         <Panel>
                                             {GroupName.call(this)}
                                         </Panel>
-
-
                                         {this.state.experimentType == 'Biochemical function' ?
                                             <PanelGroup accordion><Panel title="Biochemical function" open>
                                                 {TypeBiochemicalFunction.call(this)}
@@ -681,12 +700,6 @@ var ExperimentCuration = React.createClass({
                                                 {TypeRescue.call(this)}
                                             </Panel></PanelGroup>
                                         : null }
-
-
-
-
-
-
                                         {this.state.experimentType != '' && this.state.experimentType != 'none' ?
                                             <div className="curation-submit clearfix">
                                                 <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
@@ -781,7 +794,7 @@ var TypeBiochemicalFunction = function() {
                 error={this.getFormError('geneWithSameFunctionSameDisease.sharedDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.sharedDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required disabled="disabled" />
             <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene or genes been implicated in the above disease?:"
-                checked={this.state.geneImplicatedWithDisease} defaultChecked="false"
+                checked={this.state.geneImplicatedWithDisease} defaultChecked="false" handleChange={this.handleChange}
                 error={this.getFormError('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.explanationOfOtherGenes" label="Explanation of relationship of other gene(s) to the disease:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}
@@ -861,7 +874,7 @@ var TypeProteinInteractions = function() {
                 <option>electron microscopy (MI:0040)</option>
             </Input>
             <Input type="checkbox" ref="geneImplicatedInDisease" label="Has this gene or genes been implicated in the above disease?:"
-                checked={this.state.geneImplicatedInDisease} defaultChecked="false"
+                checked={this.state.geneImplicatedInDisease} defaultChecked="false" handleChange={this.handleChange}
                 error={this.getFormError('geneImplicatedInDisease')} clearError={this.clrFormErrors.bind(null, 'geneImplicatedInDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="relationshipOfOtherGenesToDisese" label="Explanation of relationship of other gene(s) to the disease:" rows="5" value={proteinInteractions.relationshipOfOtherGenesToDisese}
@@ -902,7 +915,7 @@ var TypeExpression = function() {
             <p className="col-sm-7 col-sm-offset-5">Enter evidence for A and/or B (at least one required)</p>
             <h4 className="col-sm-7 col-sm-offset-5">A. Gene normally expressed in tissue relevant to the disease</h4>
             <Input type="checkbox" ref="normalExpression.expressedInTissue" label="Is gene normally expressed in tissues relevant to the disease?:"
-                checked={this.state.expressedInTissue} defaultChecked="false"
+                checked={this.state.expressedInTissue} defaultChecked="false" handleChange={this.handleChange}
                 error={this.getFormError('normalExpression.expressedInTissue')} clearError={this.clrFormErrors.bind(null, 'normalExpression.expressedInTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="normalExpression.evidence" label="Evidence for normal expression in tissue:" rows="5" value={expression.normalExpression.evidence}
@@ -913,7 +926,7 @@ var TypeExpression = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <h4 className="col-sm-7 col-sm-offset-5">B. Altered expression in Patients</h4>
             <Input type="checkbox" ref="alteredExpression.expressedInPatients" label="Is gene normally expressed in tissues relevant to the disease?:"
-                checked={this.state.expressedInPatients} defaultChecked="false"
+                checked={this.state.expressedInPatients} defaultChecked="false" handleChange={this.handleChange}
                 error={this.getFormError('alteredExpression.expressedInPatients')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.expressedInPatients')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="alteredExpression.evidence" label="Evidence for normal expression in tissue:" rows="5" value={expression.alteredExpression.evidence}

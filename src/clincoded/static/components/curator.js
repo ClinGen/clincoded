@@ -151,7 +151,8 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var groupRenders = [], familyRenders = [], individualRenders = [];
+        var experimentUrl = curatorMatch ? ('/experiment-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var groupRenders = [], familyRenders = [], individualRenders = [], experimentalRenders = [];
 
         // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
         if (annotation && annotation.groups) {
@@ -205,6 +206,14 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             individualRenders = individualRenders.concat(individualAnnotationRenders);
         }
 
+        // Add to the array of experiment renders.
+        if (annotation && annotation.experimentalData) {
+            var experimentAnnotationRenders = annotation.experimentalData.map(experimental => {
+                return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch)}</div>;
+            });
+            experimentalRenders = experimentalRenders.concat(experimentAnnotationRenders);
+        }
+
         return (
             <div>
                 {annotation ?
@@ -217,6 +226,9 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                         </Panel>
                         <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
                             {individualRenders}
+                        </Panel>
+                        <Panel title={<CurationPaletteTitles title="Experimental Data" url={experimentUrl} />} panelClassName="panel-evidence">
+                            {experimentalRenders}
                         </Panel>
                     </Panel>
                 : null}
@@ -329,6 +341,25 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             }
             <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
+        </div>
+    );
+};
+
+// Render an experimental data in the curator palette.
+var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
+    var i = 0;
+
+    return (
+        <div className="panel-evidence-group" key={experimental.uuid}>
+            <h5>{experimental.label}</h5>
+            <div className="evidence-curation-info">
+                {experimental.submitted_by ?
+                    <p className="evidence-curation-info">{experimental.submitted_by.title}</p>
+                : null}
+                <p>{moment(experimental.date_created).format('YYYY MMM DD, h:mm a')}</p>
+            </div>
+            <a href={'/experimental/' + experimental.uuid} target="_blank" title="View experimental data in a new tab">View</a>
+            {curatorMatch ? <span> | <a href={'/experiment-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experiment=' + experimental.uuid} title="Edit this experiment">Edit</a></span> : null}
         </div>
     );
 };
