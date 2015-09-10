@@ -117,11 +117,11 @@
         "active": true,
         "label": "Experiment 5",
         "evidenceType": "Functional alteration of gene/gene product",
-        "functionalAleration": {
+        "functionalAlteration": {
             "cellMutationOrEngineeredEquivalent": "Patient cells",
             "patientCellType": "EFO_13579",
             "normalFunctionOfGene": "GO_Slim term here",
-            "descriptoinOfGeneAlteration": "some description here",
+            "descriptionOfGeneAlteration": "some description here",
             "normalFunctionOfGene": "GO_Slim term for normal function",
             "evidenceForNormalFunction": "evidence 007",
             "evidenceInPaper": "Paragraph 2-5, page 5",

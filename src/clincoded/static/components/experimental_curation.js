@@ -39,9 +39,9 @@ var ExperimentCuration = React.createClass({
         return {
             gdm: null, // GDM object given in UUID
             annotation: null, // Annotation object given in UUID
-            experiment: null, // If we're editing a group, this gets the fleshed-out group object we're editing
-            experimentName: '', // Currently entered name of the group
-            experimentType: '',
+            experimental: null, // If we're editing a group, this gets the fleshed-out group object we're editing
+            experimentalName: '', // Currently entered name of the group
+            experimentalType: '',
             geneImplicatedWithDisease: false, // checkbox state values start here
             geneImplicatedInDisease: false,
             expressedInTissue: false,
@@ -53,10 +53,10 @@ var ExperimentCuration = React.createClass({
 
     // Handle value changes in genotyping method 1
     handleChange: function(ref, e) {
-        if (ref === 'experimentName' && this.refs[ref].getValue()) {
-            this.setState({experimentName: this.refs[ref].getValue()});
-        } else if (ref === 'experimentType') {
-            this.setState({experimentType: this.refs[ref].getValue()});
+        if (ref === 'experimentalName' && this.refs[ref].getValue()) {
+            this.setState({experimentalName: this.refs[ref].getValue()});
+        } else if (ref === 'experimentalType') {
+            this.setState({experimentalType: this.refs[ref].getValue()});
         } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
             this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()});
         } else if (ref === 'geneImplicatedInDisease') {
@@ -72,17 +72,25 @@ var ExperimentCuration = React.createClass({
         }
     },
 
+    joinItems: function(input) {
+        var outputArray = [];
+        for (var i = 0; i < input.length; i++) {
+            outputArray.push(input[i].symbol);
+        }
+        return outputArray.join(",");
+    },
+
     // Load objects from query string into the state variables. Must have already parsed the query string
     // and set the queryValues property of this React class.
     loadData: function() {
         var gdmUuid = this.queryValues.gdmUuid;
-        var experimentUuid = this.queryValues.experimentUuid;
+        var experimentalUuid = this.queryValues.experimentalUuid;
         var annotationUuid = this.queryValues.annotationUuid;
 
         // Make an array of URIs to query the database. Don't include any that didn't include a query string.
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '',
-            experimentUuid ? '/experimental/' + experimentUuid : '',
+            experimentalUuid ? '/experimental/' + experimentalUuid : '',
             annotationUuid ? '/evidence/' + annotationUuid : ''
         ]);
 
@@ -99,7 +107,7 @@ var ExperimentCuration = React.createClass({
                         break;
 
                     case 'experimental':
-                        stateObj.experiment = data;
+                        stateObj.experimental = data;
                         break;
 
                     case 'annotation':
@@ -117,32 +125,32 @@ var ExperimentCuration = React.createClass({
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
-            if (stateObj.experiment) {
+            if (stateObj.experimental) {
                 this.setState({
-                    experimentName: stateObj.experiment.label,
-                    experimentType: stateObj.experiment.evidenceType
+                    experimentalName: stateObj.experimental.label,
+                    experimentalType: stateObj.experimental.evidenceType
                 });
-                if (stateObj.experiment.evidenceType === 'Biochemical function') {
-                    if (stateObj.experiment.biochemicalFunction.geneWithSameFunctionSameDisease.wildTypeRescuePhenotype) {
-                        this.setState({geneImplicatedWithDisease: stateObj.experiment.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease});
+                if (stateObj.experimental.evidenceType === 'Biochemical function') {
+                    if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease) {
+                        this.setState({geneImplicatedWithDisease: stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease});
                     }
-                } else if (stateObj.experiment.evidenceType === 'Protein interactions') {
-                    if (stateObj.experiment.proteinInteractions.geneImplicatedInDisease) {
-                        this.setState({geneImplicatedInDisease: stateObj.experiment.biochemicalFunction.geneImplicatedInDisease});
+                } else if (stateObj.experimental.evidenceType === 'Protein interactions') {
+                    if (stateObj.experimental.proteinInteractions.geneImplicatedInDisease) {
+                        this.setState({geneImplicatedInDisease: stateObj.experimental.proteinInteractions.geneImplicatedInDisease});
                     }
-                } else if (stateObj.experiment.evidenceType === 'Expression') {
-                    if (stateObj.experiment.expression.normalExpression.expressedInTissue) {
-                        this.setState({expressedInTissue: stateObj.experiment.expression.normalExpression.expressedInTissue});
+                } else if (stateObj.experimental.evidenceType === 'Expression') {
+                    if (stateObj.experimental.expression.normalExpression.expressedInTissue) {
+                        this.setState({expressedInTissue: stateObj.experimental.expression.normalExpression.expressedInTissue});
                     }
-                    if (stateObj.experiment.expression.alteredExpression.expressedInPatients) {
-                        this.setState({expressedInPatients: stateObj.experiment.expression.alteredExpression.expressedInPatients});
+                    if (stateObj.experimental.expression.alteredExpression.expressedInPatients) {
+                        this.setState({expressedInPatients: stateObj.experimental.expression.alteredExpression.expressedInPatients});
                     }
-                } else if (stateObj.experiment.evidenceType === 'Rescue') {
-                    if (stateObj.experiment.rescue.wildTypeRescuePhenotype) {
-                        this.setState({wildTypeRescuePhenotype: stateObj.experiment.rescue.wildTypeRescuePhenotype});
+                } else if (stateObj.experimental.evidenceType === 'Rescue') {
+                    if (stateObj.experimental.rescue.wildTypeRescuePhenotype) {
+                        this.setState({wildTypeRescuePhenotype: stateObj.experimental.rescue.wildTypeRescuePhenotype});
                     }
-                    if (stateObj.experiment.rescue.patientVariantRescue) {
-                        this.setState({patientVariantRescue: stateObj.experiment.rescue.patientVariantRescue});
+                    if (stateObj.experimental.rescue.patientVariantRescue) {
+                        this.setState({patientVariantRescue: stateObj.experimental.rescue.patientVariantRescue});
                     }
                 }
             }
@@ -177,7 +185,7 @@ var ExperimentCuration = React.createClass({
             var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, efoIDs;
             var formError = false;
 
-            if (this.state.experimentType == 'Biochemical function') {
+            if (this.state.experimentalType == 'Biochemical function') {
                 // Check form for Biochemical Function panel
                 goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
                 geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
@@ -202,7 +210,7 @@ var ExperimentCuration = React.createClass({
                     this.setFormErrors('geneFunctionConsistentWithPhenotype.phenotypeHPO', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
                 }
             }
-            else if (this.state.experimentType == 'Protein interactions') {
+            else if (this.state.experimentalType == 'Protein interactions') {
                 // Check form for Protein Interactions panel
                 geneSymbols = curator.capture.genes(this.getFormValue('interactingGenes'));
                 if (geneSymbols && geneSymbols.length && _(geneSymbols).any(function(id) { return id === null; })) {
@@ -211,7 +219,7 @@ var ExperimentCuration = React.createClass({
                     this.setFormErrors('interactingGenes', 'Use gene symbols (e.g. SMAD3) separated by commas');
                 }
             }
-            else if (this.state.experimentType == 'Expression') {
+            else if (this.state.experimentalType == 'Expression') {
                 // Check form for Expression panel
                 uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
                 if (uberonIDs && uberonIDs.length && _(uberonIDs).any(function(id) { return id === null; })) {
@@ -224,7 +232,7 @@ var ExperimentCuration = React.createClass({
                     this.setFormErrors('organOfTissue', 'Enter only one Uberon ID');
                 }
             }
-            else if (this.state.experimentType == 'Functional alteration of gene/gene product') {
+            else if (this.state.experimentalType == 'Functional alteration of gene/gene product') {
                 // Check form for Functional Alterations panel
                 goSlimIDs = curator.capture.goslims(this.getFormValue('normalFunctionOfGene'));
                 efoIDs = curator.capture.efoids(this.getFormValue('funcalt.patientCellType'));
@@ -257,7 +265,7 @@ var ExperimentCuration = React.createClass({
                     this.setFormErrors('normalFunctionOfGene', 'Enter only one GO_Slim ID');
                 }
             }
-            else if (this.state.experimentType == 'Model systems') {
+            else if (this.state.experimentalType == 'Model systems') {
                 // Check form for Model Systems panel
                 hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPO'));
                 if (hpoIDs && hpoIDs.length && _(hpoIDs).any(function(id) { return id === null; })) {
@@ -280,7 +288,7 @@ var ExperimentCuration = React.createClass({
                     this.setFormErrors('model.phenotypeHPOObserved', 'Enter only one HPO ID');
                 }
             }
-            else if (this.state.experimentType == 'Rescue') {
+            else if (this.state.experimentalType == 'Rescue') {
                 // Check form for Rescue panel
                 hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
                 efoIDs = curator.capture.efoids(this.getFormValue('rescue.patientCellType'));
@@ -316,11 +324,12 @@ var ExperimentCuration = React.createClass({
 
             if (!formError) {
                 // form passed error checking
-                var newExperiment = {};
-                newExperiment.label = this.getFormValue('experimentName');
-                newExperiment.evidenceType = this.getFormValue('experimentType');
+                var newExperimental = {};
+                var savedExperimental;
+                newExperimental.label = this.getFormValue('experimentalName');
+                newExperimental.evidenceType = this.getFormValue('experimentalType');
 
-                if (this.getFormValue('experimentType') === '') {
+                if (this.getFormValue('experimentalType') === '') {
                     // NOT USED ATM; REMOVE EVENTUALLY
                     var searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
 
@@ -345,10 +354,10 @@ var ExperimentCuration = React.createClass({
                             return Promise.resolve(null);
                         }
                     }).then(data => {
-                        var newExperiment = Object.keys(this.state.annotation).length ? curator.flatten(this.state.annotation) : {};
+                        var newExperimental = Object.keys(this.state.annotation).length ? curator.flatten(this.state.annotation) : {};
 
 
-                        console.log(newExperiment);
+                        console.log(newExperimental);
                     }).catch(function(e) {
                         console.log('GROUP CREATION ERROR=: %o', e);
                     });
@@ -356,235 +365,235 @@ var ExperimentCuration = React.createClass({
 
 
 
-                } else if (this.getFormValue('experimentType') == 'Biochemical function') {
-                    // newExperiment object for type Rescue
-                    newExperiment.biochemicalFunction = {geneWithSameFunctionSameDisease: {}, geneFunctionConsistentWithPhenotype: {}};
+                } else if (this.getFormValue('experimentalType') == 'Biochemical function') {
+                    // newExperimental object for type Rescue
+                    newExperimental.biochemicalFunction = {geneWithSameFunctionSameDisease: {}, geneFunctionConsistentWithPhenotype: {}};
                     var BFidentifiedFunction = this.getFormValue('identifiedFunction');
                     if (BFidentifiedFunction) {
-                        newExperiment.biochemicalFunction.identifiedFunction = BFidentifiedFunction;
+                        newExperimental.biochemicalFunction.identifiedFunction = BFidentifiedFunction;
                     }
                     var BFevidenceForFunction = this.getFormValue('evidenceForFunction');
                     if (BFevidenceForFunction) {
-                        newExperiment.biochemicalFunction.evidenceForFunction = BFevidenceForFunction;
+                        newExperimental.biochemicalFunction.evidenceForFunction = BFevidenceForFunction;
                     }
                     var BFevidenceForFunctionInPaper = this.getFormValue('evidenceForFunctionInPaper');
                     if (BFevidenceForFunctionInPaper) {
-                        newExperiment.biochemicalFunction.evidenceForFunctionInPaper = BFevidenceForFunctionInPaper;
+                        newExperimental.biochemicalFunction.evidenceForFunctionInPaper = BFevidenceForFunctionInPaper;
                     }
-                    var BFgenes = this.getFormValue('geneWithSameFunctionSameDisease.genes');
+                    var BFgenes = geneSymbols;
                     if (BFgenes) {
-                        newExperiment.biochemicalFunction.geneWithSameFunctionSameDisease.genes = BFgenes;
+                        newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes = BFgenes;
                     }
                     var BFevidenceForOtherGenesWithSameFunction = this.getFormValue('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction');
                     if (BFevidenceForOtherGenesWithSameFunction) {
-                        newExperiment.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = BFevidenceForOtherGenesWithSameFunction;
+                        newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = BFevidenceForOtherGenesWithSameFunction;
                     }
                     var BFsharedDisease = this.getFormValue('geneWithSameFunctionSameDisease.sharedDisease');
                     if (BFsharedDisease) {
-                        newExperiment.biochemicalFunction.geneWithSameFunctionSameDisease.sharedDisease = BFsharedDisease;
+                        newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.sharedDisease = BFsharedDisease;
                     }
                     var BFgeneImplicatedWithDisease = this.getFormValue('geneWithSameFunctionSameDisease.geneImplicatedWithDisease');
-                    newExperiment.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease = BFgeneImplicatedWithDisease;
+                    newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease = BFgeneImplicatedWithDisease;
                     var BFexplanationOfOtherGenes = this.getFormValue('geneWithSameFunctionSameDisease.explanationOfOtherGenes');
                     if (BFexplanationOfOtherGenes) {
-                        newExperiment.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = BFexplanationOfOtherGenes;
+                        newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = BFexplanationOfOtherGenes;
                     }
                     var BFGWSFSDevidenceInPaper = this.getFormValue('geneWithSameFunctionSameDisease.evidenceInPaper');
                     if (BFGWSFSDevidenceInPaper) {
-                        newExperiment.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = BFGWSFSDevidenceInPaper;
+                        newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = BFGWSFSDevidenceInPaper;
                     }
-                    var BFphenotypeHPO = this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO');
+                    var BFphenotypeHPO = hpoIDs;
                     if (BFphenotypeHPO) {
-                        newExperiment.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO = BFphenotypeHPO;
+                        newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO = BFphenotypeHPO;
                     }
                     var BFphenotypeFreeText = this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeFreeText');
                     if (BFphenotypeFreeText) {
-                        newExperiment.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText = BFphenotypeFreeText;
+                        newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText = BFphenotypeFreeText;
                     }
                     var BFexplanation = this.getFormValue('geneFunctionConsistentWithPhenotype.explanation');
                     if (BFexplanation) {
-                        newExperiment.biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation = BFexplanation;
+                        newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation = BFexplanation;
                     }
                     var BFGFCWPevidenceInPaper = this.getFormValue('geneFunctionConsistentWithPhenotype.evidenceInPaper');
                     if (BFGFCWPevidenceInPaper) {
-                        newExperiment.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = BFGFCWPevidenceInPaper;
+                        newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = BFGFCWPevidenceInPaper;
                     }
-                } else if (this.getFormValue('experimentType') == 'Protein interactions') {
-                    // newExperiment object for type Rescue
-                    newExperiment.proteinInteractions = {};
-                    var PIinteractingGenes = this.getFormValue('interactingGenes');
+                } else if (this.getFormValue('experimentalType') == 'Protein interactions') {
+                    // newExperimental object for type Rescue
+                    newExperimental.proteinInteractions = {};
+                    var PIinteractingGenes = geneSymbols;
                     if (PIinteractingGenes) {
-                        newExperiment.proteinInteractions.interactingGenes = PIinteractingGenes;
+                        newExperimental.proteinInteractions.interactingGenes = PIinteractingGenes;
                     }
                     var PIinteractionType = this.getFormValue('interactionType');
                     if (PIinteractionType) {
-                        newExperiment.proteinInteractions.interactionType = PIinteractionType;
+                        newExperimental.proteinInteractions.interactionType = PIinteractionType;
                     }
                     var PIexperimentalInteractionDetection = this.getFormValue('experimentalInteractionDetection');
                     if (PIexperimentalInteractionDetection) {
-                        newExperiment.proteinInteractions.experimentalInteractionDetection = PIexperimentalInteractionDetection;
+                        newExperimental.proteinInteractions.experimentalInteractionDetection = PIexperimentalInteractionDetection;
                     }
                     var PIgeneImplicatedInDisease = this.getFormValue('geneImplicatedInDisease');
-                    newExperiment.proteinInteractions.geneImplicatedInDisease = PIgeneImplicatedInDisease;
+                    newExperimental.proteinInteractions.geneImplicatedInDisease = PIgeneImplicatedInDisease;
                     var PIrelationshipOfOtherGenesToDisese = this.getFormValue('relationshipOfOtherGenesToDisese');
                     if (PIrelationshipOfOtherGenesToDisese) {
-                        newExperiment.proteinInteractions.relationshipOfOtherGenesToDisese = PIrelationshipOfOtherGenesToDisese;
+                        newExperimental.proteinInteractions.relationshipOfOtherGenesToDisese = PIrelationshipOfOtherGenesToDisese;
                     }
                     var PIevidenceInPaper = this.getFormValue('evidenceInPaper');
                     if (PIevidenceInPaper) {
-                        newExperiment.proteinInteractions.evidenceInPaper = PIevidenceInPaper;
+                        newExperimental.proteinInteractions.evidenceInPaper = PIevidenceInPaper;
                     }
-                } else if (this.getFormValue('experimentType') == 'Expression') {
-                    // newExperiment object for type Rescue
-                    newExperiment.expression = {normalExpression: {}, alteredExpression: {}};
+                } else if (this.getFormValue('experimentalType') == 'Expression') {
+                    // newExperimental object for type Rescue
+                    newExperimental.expression = {normalExpression: {}, alteredExpression: {}};
                     var EorganOfTissue = this.getFormValue('organOfTissue');
                     if (EorganOfTissue) {
-                        newExperiment.expression.organOfTissue = EorganOfTissue;
+                        newExperimental.expression.organOfTissue = EorganOfTissue;
                     }
                     var EexpressedInTissue = this.getFormValue('normalExpression.expressedInTissue');
-                    newExperiment.expression.normalExpression.expressedInTissue = EexpressedInTissue;
+                    newExperimental.expression.normalExpression.expressedInTissue = EexpressedInTissue;
                     var ENEevidence = this.getFormValue('normalExpression.evidence');
                     if (ENEevidence) {
-                        newExperiment.expression.normalExpression.evidence = ENEevidence;
+                        newExperimental.expression.normalExpression.evidence = ENEevidence;
                     }
                     var ENEevidenceInPaper = this.getFormValue('normalExpression.evidenceInPaper');
                     if (ENEevidenceInPaper) {
-                        newExperiment.expression.normalExpression.evidenceInPaper = ENEevidenceInPaper;
+                        newExperimental.expression.normalExpression.evidenceInPaper = ENEevidenceInPaper;
                     }
                     var EexpressedInPatients = this.getFormValue('alteredExpression.expressedInPatients');
-                    newExperiment.expression.alteredExpression.expressedInPatients = EexpressedInPatients;
+                    newExperimental.expression.alteredExpression.expressedInPatients = EexpressedInPatients;
                     var EAEevidence = this.getFormValue('alteredExpression.evidence');
                     if (EAEevidence) {
-                        newExperiment.expression.alteredExpression.evidence = EAEevidence;
+                        newExperimental.expression.alteredExpression.evidence = EAEevidence;
                     }
                     var EAEevidenceInPaper = this.getFormValue('alteredExpression.evidenceInPaper');
                     if (EAEevidenceInPaper) {
-                        newExperiment.expression.alteredExpression.evidenceInPaper = EAEevidenceInPaper;
+                        newExperimental.expression.alteredExpression.evidenceInPaper = EAEevidenceInPaper;
                     }
-                } else if (this.getFormValue('experimentType') == 'Functional alteration of gene/gene product') {
-                    // newExperiment object for type Rescue
-                    newExperiment.functionalAlteration = {};
+                } else if (this.getFormValue('experimentalType') == 'Functional alteration of gene/gene product') {
+                    // newExperimental object for type Rescue
+                    newExperimental.functionalAlteration = {};
                     var FAcellMutationOrEngineeredEquivalent = this.getFormValue('cellMutationOrEngineeredEquivalent');
                     if (FAcellMutationOrEngineeredEquivalent) {
-                        newExperiment.modelSystems.cellMutationOrEngineeredEquivalent = FAcellMutationOrEngineeredEquivalent;
+                        newExperimental.functionalAlteration.cellMutationOrEngineeredEquivalent = FAcellMutationOrEngineeredEquivalent;
                     }
                     var FApatientCellType = this.getFormValue('funcalt.patientCellType');
                     if (FApatientCellType) {
-                        newExperiment.modelSystems.funcalt.patientCellType = FApatientCellType;
+                        newExperimental.functionalAlteration.patientCellType = FApatientCellType;
                     }
                     var FAengineeredEquivalentCellType = this.getFormValue('funcalt.engineeredEquivalentCellType');
                     if (FAengineeredEquivalentCellType) {
-                        newExperiment.modelSystems.funcalt.engineeredEquivalentCellType = FAengineeredEquivalentCellType;
+                        newExperimental.functionalAlteration.engineeredEquivalentCellType = FAengineeredEquivalentCellType;
                     }
                     var FAdescriptionOfGeneAlteration = this.getFormValue('descriptionOfGeneAlteration');
                     if (FAdescriptionOfGeneAlteration) {
-                        newExperiment.modelSystems.descriptionOfGeneAlteration = FAdescriptionOfGeneAlteration;
+                        newExperimental.functionalAlteration.descriptionOfGeneAlteration = FAdescriptionOfGeneAlteration;
                     }
                     var FAnormalFunctionOfGene = this.getFormValue('normalFunctionOfGene');
                     if (FAnormalFunctionOfGene) {
-                        newExperiment.modelSystems.normalFunctionOfGene = FAnormalFunctionOfGene;
+                        newExperimental.functionalAlteration.normalFunctionOfGene = FAnormalFunctionOfGene;
                     }
                     var FAevidenceForNormalFunction = this.getFormValue('evidenceForNormalFunction');
                     if (FAevidenceForNormalFunction) {
-                        newExperiment.modelSystems.evidenceForNormalFunction = FAevidenceForNormalFunction;
+                        newExperimental.functionalAlteration.evidenceForNormalFunction = FAevidenceForNormalFunction;
                     }
                     var FAevidenceInPaper = this.getFormValue('evidenceInPaper');
                     if (FAevidenceInPaper) {
-                        newExperiment.modelSystems.evidenceInPaper = FAevidenceInPaper;
+                        newExperimental.functionalAlteration.evidenceInPaper = FAevidenceInPaper;
                     }
-                } else if (this.getFormValue('experimentType') == 'Model systems') {
-                    // newExperiment object for type Rescue
-                    newExperiment.modelSystems = {};
+                } else if (this.getFormValue('experimentalType') == 'Model systems') {
+                    // newExperimental object for type Rescue
+                    newExperimental.modelSystems = {};
                     var MSanimalOrCellCulture = this.getFormValue('animalOrCellCulture');
                     if (MSanimalOrCellCulture) {
-                        newExperiment.modelSystems.animalOrCellCulture = MSanimalOrCellCulture;
+                        newExperimental.modelSystems.animalOrCellCulture = MSanimalOrCellCulture;
                     }
                     var MSanimalModel = this.getFormValue('animalModel');
                     if (MSanimalModel) {
-                        newExperiment.modelSystems.animalModel = MSanimalModel;
+                        newExperimental.modelSystems.animalModel = MSanimalModel;
                     }
                     var MScellCulture = this.getFormValue('cellCulture');
                     if (MScellCulture) {
-                        newExperiment.modelSystems.cellCulture = MScellCulture;
+                        newExperimental.modelSystems.cellCulture = MScellCulture;
                     }
                     var MSdescriptionOfGeneAlteration = this.getFormValue('descriptionOfGeneAlteration');
                     if (MSdescriptionOfGeneAlteration) {
-                        newExperiment.modelSystems.descriptionOfGeneAlteration = MSdescriptionOfGeneAlteration;
+                        newExperimental.modelSystems.descriptionOfGeneAlteration = MSdescriptionOfGeneAlteration;
                     }
                     var MSphenotypeHPO = this.getFormValue('model.phenotypeHPO');
                     if (MSphenotypeHPO) {
-                        newExperiment.modelSystems.model.phenotypeHPO = MSphenotypeHPO;
+                        newExperimental.modelSystems.phenotypeHPO = MSphenotypeHPO;
                     }
                     var MSphenotypeFreeText = this.getFormValue('phenotypeFreeText');
                     if (MSphenotypeFreeText) {
-                        newExperiment.modelSystems.phenotypeFreeText = MSphenotypeFreeText;
+                        newExperimental.modelSystems.phenotypeFreeText = MSphenotypeFreeText;
                     }
                     var MSphenotypeHPOObserved = this.getFormValue('model.phenotypeHPOObserved');
                     if (MSphenotypeHPOObserved) {
-                        newExperiment.modelSystems.model.phenotypeHPOObserved = MSphenotypeHPOObserved;
+                        newExperimental.modelSystems.phenotypeHPOObserved = MSphenotypeHPOObserved;
                     }
                     var MSphenotypeFreetextObserved = this.getFormValue('phenotypeFreetextObserved');
                     if (MSphenotypeFreetextObserved) {
-                        newExperiment.modelSystems.phenotypeFreetextObserved = MSphenotypeFreetextObserved;
+                        newExperimental.modelSystems.phenotypeFreetextObserved = MSphenotypeFreetextObserved;
                     }
                     var MSexplanation = this.getFormValue('explanation');
                     if (MSexplanation) {
-                        newExperiment.modelSystems.explanation = MSexplanation;
+                        newExperimental.modelSystems.explanation = MSexplanation;
                     }
                     var MSevidenceInPaper = this.getFormValue('evidenceInPaper');
                     if (MSevidenceInPaper) {
-                        newExperiment.modelSystems.evidenceInPaper = MSevidenceInPaper;
+                        newExperimental.modelSystems.evidenceInPaper = MSevidenceInPaper;
                     }
-                } else if (this.getFormValue('experimentType') == 'Rescue') {
-                    // newExperiment object for type Rescue
-                    newExperiment.rescue = {};
+                } else if (this.getFormValue('experimentalType') == 'Rescue') {
+                    // newExperimental object for type Rescue
+                    newExperimental.rescue = {};
                     var RpatientCellOrEngineeredEquivalent = this.getFormValue('patientCellOrEngineeredEquivalent');
                     if (RpatientCellOrEngineeredEquivalent) {
-                        newExperiment.rescue.patientCellOrEngineeredEquivalent = RpatientCellOrEngineeredEquivalent;
+                        newExperimental.rescue.patientCellOrEngineeredEquivalent = RpatientCellOrEngineeredEquivalent;
                     }
                     var RpatientCellType = this.getFormValue('rescue.patientCellType');
                     if (RpatientCellType) {
-                        newExperiment.rescue.patientCellType = RpatientCellType;
+                        newExperimental.rescue.patientCellType = RpatientCellType;
                     }
                     var RengineeredEquivalentCellType = this.getFormValue('rescue.engineeredEquivalentCellType');
                     if (RengineeredEquivalentCellType) {
-                        newExperiment.rescue.engineeredEquivalentCellType = RengineeredEquivalentCellType;
+                        newExperimental.rescue.engineeredEquivalentCellType = RengineeredEquivalentCellType;
                     }
                     var RdescriptionOfGeneAlteration = this.getFormValue('descriptionOfGeneAlteration');
                     if (RdescriptionOfGeneAlteration) {
-                        newExperiment.rescue.descriptionOfGeneAlteration = RdescriptionOfGeneAlteration;
+                        newExperimental.rescue.descriptionOfGeneAlteration = RdescriptionOfGeneAlteration;
                     }
                     var RphenotypeHPO = this.getFormValue('rescue.phenotypeHPO');
                     if (RphenotypeHPO) {
-                        newExperiment.rescue.phenotypeHPO = RphenotypeHPO;
+                        newExperimental.rescue.phenotypeHPO = RphenotypeHPO;
                     }
                     var RphenotypeFreeText = this.getFormValue('phenotypeFreeText');
                     if (RphenotypeFreeText) {
-                        newExperiment.rescue.phenotypeFreeText = RphenotypeFreeText;
+                        newExperimental.rescue.phenotypeFreeText = RphenotypeFreeText;
                     }
                     var RrescueMethod = this.getFormValue('rescueMethod');
                     if (RrescueMethod) {
-                        newExperiment.rescue.rescueMethod = RrescueMethod;
+                        newExperimental.rescue.rescueMethod = RrescueMethod;
                     }
                     var RwildTypeRescuePhenotype = this.getFormValue('wildTypeRescuePhenotype');
-                    newExperiment.rescue.wildTypeRescuePhenotype = RwildTypeRescuePhenotype;
+                    newExperimental.rescue.wildTypeRescuePhenotype = RwildTypeRescuePhenotype;
                     var RpatientVariantRescue = this.getFormValue('patientVariantRescue');
-                    newExperiment.rescue.patientVariantRescue = RpatientVariantRescue;
+                    newExperimental.rescue.patientVariantRescue = RpatientVariantRescue;
                     var Rexplanation = this.getFormValue('explanation');
                     if (Rexplanation) {
-                        newExperiment.rescue.explanation = Rexplanation;
+                        newExperimental.rescue.explanation = Rexplanation;
                     }
                     var RevidenceInPaper = this.getFormValue('evidenceInPaper');
                     if (RevidenceInPaper) {
-                        newExperiment.rescue.evidenceInPaper = RevidenceInPaper;
+                        newExperimental.rescue.evidenceInPaper = RevidenceInPaper;
                     }
                 }
 
-                console.log(newExperiment);
+                console.log(newExperimental);
 
-                if (this.state.experiment) {
-                    // We're editing a experiment. PUT the new group object to the DB to update the existing one.
-                    this.putRestData('/experimental/' + this.state.experiment.uuid, newExperiment).then(data => {
+                if (this.state.experimental) {
+                    // We're editing a experimental. PUT the new group object to the DB to update the existing one.
+                    this.putRestData('/experimental/' + this.state.experimental.uuid, newExperimental).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     }).then(data => {
                         // Navigate back to Curation Central page.
@@ -593,7 +602,7 @@ var ExperimentCuration = React.createClass({
                         if (this.queryValues.editShortcut) {
                             this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                         } else {
-                            this.context.navigate('/experiment-submit/?gdm=' + this.state.gdm.uuid + '&experiment=' + this.state.experiment.uuid + '&evidence=' + this.state.annotation.uuid);
+                            this.context.navigate('/experimental-submit/?gdm=' + this.state.gdm.uuid + '&experimental=' + this.state.experimental.uuid + '&evidence=' + this.state.annotation.uuid);
                         }
                     }).catch(function(e) {
                         console.log('EXPERIMENTAL MODIFICATION ERROR=: %o', e);
@@ -601,18 +610,18 @@ var ExperimentCuration = React.createClass({
 
                 } else {
                     // We created a group; post it to the DB
-                    this.postRestData('/experimental/', newExperiment).then(data => {
+                    this.postRestData('/experimental/', newExperimental).then(data => {
                         return Promise.resolve(data['@graph'][0]);
-                    }).then(newExperiment => {
-                        var savedExperiment = newExperiment;
-                        if (!this.state.experiment) {
+                    }).then(newExperimental => {
+                        savedExperimental = newExperimental;
+                        if (!this.state.experimental) {
                             // Get a flattened copy of the annotation and put our new group into it,
                             // ready for writing.
                             var annotation = curator.flatten(this.state.annotation);
                             if (annotation.experimentalData) {
-                                annotation.experimentalData.push(newExperiment['@id']);
+                                annotation.experimentalData.push(newExperimental['@id']);
                             } else {
-                                annotation.experimentalData = [newExperiment['@id']];
+                                annotation.experimentalData = [newExperimental['@id']];
                             }
 
                             // Post the modified annotation to the DB, then go back to Curation Central
@@ -627,7 +636,7 @@ var ExperimentCuration = React.createClass({
                         if (this.queryValues.editShortcut) {
                             this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                         } else {
-                            this.context.navigate('/experiment-submit/?gdm=' + this.state.gdm.uuid + '&experiment=' + savedExperiment.uuid + '&evidence=' + this.state.annotation.uuid);
+                            this.context.navigate('/experimental-submit/?gdm=' + this.state.gdm.uuid + '&experimental=' + savedExperimental.uuid + '&evidence=' + this.state.annotation.uuid);
                         }
                     }).catch(function(e) {
                         console.log('EXPERIMENTAL CREATION ERROR=: %o', e);
@@ -640,18 +649,18 @@ var ExperimentCuration = React.createClass({
     render: function() {
         var gdm = this.state.gdm;
         var annotation = this.state.annotation;
-        var experiment = this.state.experiment;
+        var experimental = this.state.experimental;
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
 
-        // Get the 'evidence', 'gdm', and 'experiment' UUIDs from the query string and save them locally.
+        // Get the 'evidence', 'gdm', and 'experimental' UUIDs from the query string and save them locally.
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        this.queryValues.experimentUuid = queryKeyValue('experiment', this.props.href);
+        this.queryValues.experimentalUuid = queryKeyValue('experimental', this.props.href);
         this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
         return (
             <div>
-                {(!this.queryValues.experimentUuid || this.state.experiment) ?
+                {(!this.queryValues.experimentalUuid || this.state.experimental) ?
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                         <div className="container">
@@ -661,8 +670,8 @@ var ExperimentCuration = React.createClass({
                                 </div>
                             : null}
                             <div className="viewer-titles">
-                                <h1>{(experiment ? 'Edit' : 'Curate') + ' Group Information'}</h1>
-                                <h2>Experiment: {this.state.experimentName ? <span>{this.state.experimentName}</span> : <span className="no-entry">No entry</span>}{this.state.experimentType ? <span> ({this.state.experimentType})</span> : null}</h2>
+                                <h1>{(experimental ? 'Edit' : 'Curate') + ' Group Information'}</h1>
+                                <h2>Experiment: {this.state.experimentalName ? <span>{this.state.experimentalName}</span> : <span className="no-entry">No entry</span>}{this.state.experimentalType ? <span> ({this.state.experimentalType})</span> : null}</h2>
                             </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
@@ -670,37 +679,37 @@ var ExperimentCuration = React.createClass({
                                         <Panel>
                                             {GroupName.call(this)}
                                         </Panel>
-                                        {this.state.experimentType == 'Biochemical function' ?
+                                        {this.state.experimentalType == 'Biochemical function' ?
                                             <PanelGroup accordion><Panel title="Biochemical function" open>
                                                 {TypeBiochemicalFunction.call(this)}
                                             </Panel></PanelGroup>
                                         : null }
-                                        {this.state.experimentType == 'Protein interactions' ?
+                                        {this.state.experimentalType == 'Protein interactions' ?
                                             <PanelGroup accordion><Panel title="Protein interactions" open>
                                                 {TypeProteinInteractions.call(this)}
                                             </Panel></PanelGroup>
                                         : null }
-                                        {this.state.experimentType == 'Expression' ?
+                                        {this.state.experimentalType == 'Expression' ?
                                             <PanelGroup accordion><Panel title="Expression" open>
                                                 {TypeExpression.call(this)}
                                             </Panel></PanelGroup>
                                         : null }
-                                        {this.state.experimentType == 'Functional alteration of gene/gene product' ?
+                                        {this.state.experimentalType == 'Functional alteration of gene/gene product' ?
                                             <PanelGroup accordion><Panel title="Functional alteration of gene/gene product" open>
                                                 {TypeFunctionalAlteration.call(this)}
                                             </Panel></PanelGroup>
                                         : null }
-                                        {this.state.experimentType == 'Model systems' ?
+                                        {this.state.experimentalType == 'Model systems' ?
                                             <PanelGroup accordion><Panel title="Model systems" open>
                                                 {TypeModelSystems.call(this)}
                                             </Panel></PanelGroup>
                                         : null }
-                                        {this.state.experimentType == 'Rescue' ?
+                                        {this.state.experimentalType == 'Rescue' ?
                                             <PanelGroup accordion><Panel title="Rescue" open>
                                                 {TypeRescue.call(this)}
                                             </Panel></PanelGroup>
                                         : null }
-                                        {this.state.experimentType != '' && this.state.experimentType != 'none' ?
+                                        {this.state.experimentalType != '' && this.state.experimentalType != 'none' ?
                                             <div className="curation-submit clearfix">
                                                 <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                                 <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
@@ -717,20 +726,20 @@ var ExperimentCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(ExperimentCuration, 'curator_page', 'experiment-curation');
+globals.curator_page.register(ExperimentCuration, 'curator_page', 'experimental-curation');
 
 
 // Group Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var GroupName = function() {
-    var experiment = this.state.experiment;
+    var experimental = this.state.experimental;
 
     return (
         <div className="row">
-            <Input type="text" ref="experimentName" label="Experiment name:" value={experiment && experiment.label} handleChange={this.handleChange}
-                error={this.getFormError('experimentName')} clearError={this.clrFormErrors.bind(null, 'experimentName')}
+            <Input type="text" ref="experimentalName" label="Experiment name:" value={experimental && experimental.label} handleChange={this.handleChange}
+                error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="select" ref="experimentType" label="Experiment type:" defaultValue="none" value={experiment && experiment.evidenceType} handleChange={this.handleChange}
+            <Input type="select" ref="experimentalType" label="Experiment type:" defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -748,15 +757,15 @@ var GroupName = function() {
 // Biochemical Function type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var TypeBiochemicalFunction = function() {
-    var experiment = this.state.experiment ? this.state.experiment : {};
-    var biochemicalFunction = experiment.biochemicalFunction ? experiment.biochemicalFunction : {};
+    var experimental = this.state.experimental ? this.state.experimental : {};
+    var biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
     if (biochemicalFunction) {
         biochemicalFunction.identifiedFunction = biochemicalFunction.identifiedFunction ? biochemicalFunction.identifiedFunction : null;
         biochemicalFunction.evidenceForFunction = biochemicalFunction.evidenceForFunction ? biochemicalFunction.evidenceForFunction : null;
-        biochemicalFunction.evidenceForFunctionInPaper = biochemicalFunction.evidenceForFunctionInPaper ? biochemicalFunction.evidenceForFunctionInPaper.join() : null;
+        biochemicalFunction.evidenceForFunctionInPaper = biochemicalFunction.evidenceForFunctionInPaper ? biochemicalFunction.evidenceForFunctionInPaper : null;
         biochemicalFunction.geneWithSameFunctionSameDisease = biochemicalFunction.geneWithSameFunctionSameDisease ? biochemicalFunction.geneWithSameFunctionSameDisease : {};
         if (biochemicalFunction.geneWithSameFunctionSameDisease) {
-            biochemicalFunction.geneWithSameFunctionSameDisease.genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? biochemicalFunction.geneWithSameFunctionSameDisease.genes : null;
+            biochemicalFunction.geneWithSameFunctionSameDisease.genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? this.joinItems(biochemicalFunction.geneWithSameFunctionSameDisease.genes) : null;
             biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction : null;
             biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes ? biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes : null;
             biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper : null;
@@ -790,9 +799,8 @@ var TypeBiochemicalFunction = function() {
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that other gene(s) have the same function:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="geneWithSameFunctionSameDisease.sharedDisease" label="Shared disease (Orphanet):" value="DICER1"
-                error={this.getFormError('geneWithSameFunctionSameDisease.sharedDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.sharedDisease')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required disabled="disabled" />
+            <p className="col-sm-5 control-label">Shared disease (Orphanet):</p>
+            <p className="col-sm-7 col-sm-offset-5">1</p>
             <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene or genes been implicated in the above disease?:"
                 checked={this.state.geneImplicatedWithDisease} defaultChecked="false" handleChange={this.handleChange}
                 error={this.getFormError('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease')}
@@ -835,10 +843,10 @@ var LabelHPOIDs = React.createClass({
 // Protein Interaction type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var TypeProteinInteractions = function() {
-    var experiment = this.state.experiment ? this.state.experiment : {};
-    var proteinInteractions = experiment.proteinInteractions ? experiment.proteinInteractions : {};
+    var experimental = this.state.experimental ? this.state.experimental : {};
+    var proteinInteractions = experimental.proteinInteractions ? experimental.proteinInteractions : {};
     if (proteinInteractions) {
-        proteinInteractions.interactingGenes = proteinInteractions.interactingGenes ? proteinInteractions.interactingGenes : null;
+        proteinInteractions.interactingGenes = proteinInteractions.interactingGenes ? this.joinItems(proteinInteractions.interactingGenes) : null;
         proteinInteractions.interactionType = proteinInteractions.interactionType ? proteinInteractions.interactionType : null;
         proteinInteractions.experimentalInteractionDetection = proteinInteractions.experimentalInteractionDetection ? proteinInteractions.experimentalInteractionDetection : null;
         proteinInteractions.relationshipOfOtherGenesToDisese = proteinInteractions.relationshipOfOtherGenesToDisese ? proteinInteractions.relationshipOfOtherGenesToDisese : null;
@@ -890,8 +898,8 @@ var TypeProteinInteractions = function() {
 // Expression type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var TypeExpression = function() {
-    var experiment = this.state.experiment ? this.state.experiment : {};
-    var expression = experiment.expression ? experiment.expression : {};
+    var experimental = this.state.experimental ? this.state.experimental : {};
+    var expression = experimental.expression ? experimental.expression : {};
     if (expression) {
         expression.organOfTissue = expression.organOfTissue ? expression.organOfTissue : null;
         expression.normalExpression = expression.normalExpression ? expression.normalExpression : {};
@@ -949,8 +957,8 @@ var LabelUberonId = React.createClass({
 // Functional Alteration type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var TypeFunctionalAlteration = function() {
-    var experiment = this.state.experiment ? this.state.experiment : {};
-    var functionalAlteration = experiment.functionalAlteration ? experiment.functionalAlteration : {};
+    var experimental = this.state.experimental ? this.state.experimental : {};
+    var functionalAlteration = experimental.functionalAlteration ? experimental.functionalAlteration : {};
     if (functionalAlteration) {
         functionalAlteration.cellMutationOrEngineeredEquivalent = functionalAlteration.cellMutationOrEngineeredEquivalent ? functionalAlteration.cellMutationOrEngineeredEquivalent : null;
         functionalAlteration.patientCellType = functionalAlteration.patientCellType ? functionalAlteration.patientCellType : null;
@@ -1013,8 +1021,8 @@ var LabelNormalFunctionOfGene = React.createClass({
 // Model Systems type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var TypeModelSystems = function() {
-    var experiment = this.state.experiment ? this.state.experiment : {};
-    var modelSystems = experiment.modelSystems ? experiment.modelSystems : {};
+    var experimental = this.state.experimental ? this.state.experimental : {};
+    var modelSystems = experimental.modelSystems ? experimental.modelSystems : {};
     if (modelSystems) {
         modelSystems.animalOrCellCulture = modelSystems.animalOrCellCulture ? modelSystems.animalOrCellCulture : null;
         modelSystems.animalModel = modelSystems.animalModel ? modelSystems.animalModel : null;
@@ -1105,8 +1113,8 @@ var LabelPhenotypeObserved = React.createClass({
 // Rescue type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var TypeRescue = function() {
-    var experiment = this.state.experiment ? this.state.experiment : {};
-    var rescue = experiment.rescue ? experiment.rescue : {};
+    var experimental = this.state.experimental ? this.state.experimental : {};
+    var rescue = experimental.rescue ? experimental.rescue : {};
     if (rescue) {
         rescue.patientCellOrEngineeredEquivalent = rescue.patientCellOrEngineeredEquivalent ? rescue.patientCellOrEngineeredEquivalent : null;
         rescue.patientCellType = rescue.patientCellType ? rescue.patientCellType : null;
@@ -1164,4 +1172,3 @@ var TypeRescue = function() {
         </div>
     );
 }
-

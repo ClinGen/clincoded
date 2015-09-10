@@ -312,7 +312,7 @@
                 }
             }
         },
-        "functionalAleration": {
+        "functionalAlteration": {
             "title": "Functional Alteration",
             "description": "Items in Functional Alteration type",
             "type": "object",

@@ -48,14 +48,14 @@
         "uuid": "d18e3995-abbf-4836-b82b-b23f887fc641"
     },
     {
-        "name": "experiment-curation",
-        "title": "Experiment Curation",
+        "name": "experimental-curation",
+        "title": "Experimental Curation",
         "status": "released",
         "uuid": "6ab8fdbf-ad8f-484d-8516-5dd33d65318f"
     },
     {
-        "name": "experiment-submit",
-        "title": "Experiment Submit Results",
+        "name": "experimental-submit",
+        "title": "Experimental Submit Results",
         "status": "released",
         "uuid": "469b4d4f-c5d4-4dbe-9ced-d3a0f6ce644c"
     },
