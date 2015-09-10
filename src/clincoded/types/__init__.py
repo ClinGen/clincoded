@@ -581,6 +581,7 @@ class Experimental(Item):
         'biochemicalFunction.geneWithSameFunctionSameDisease.assessments.submitted_by',
         'biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments',
         'biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments.submitted_by',
+        'proteinInteractions.interactingGenes',
         'proteinInteractions.assessments',
         'proteinInteractions.assessments.submitted_by',
         'expression.normalExpression.assessments',
