@@ -48,9 +48,9 @@ var ExperimentalCuration = React.createClass({
             expressedInPatients: false,
             wildTypeRescuePhenotype: false,
             patientVariantRescue: false,
+            biochemicalFunctionsAOn: false, // form checks
+            biochemicalFunctionsBOn: false
 
-            functionalAlterationAOn: false,
-            functionalAlterationBOn: false
         };
     },
 
@@ -74,24 +74,24 @@ var ExperimentalCuration = React.createClass({
             this.setState({patientVariantRescue: this.refs[ref].toggleValue()});
         } else if (ref === 'geneWithSameFunctionSameDisease.genes') {
             if (this.refs[ref].getValue() !== '' ) {
-                this.setState({functionalAlterationAOn: true});
+                this.setState({biochemicalFunctionsAOn: true});
             }
             else {
-                this.setState({functionalAlterationAOn: false});
+                this.setState({biochemicalFunctionsAOn: false});
             }
         } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeHPO') {
             if (this.refs[ref].getValue() !== '' || this.refs['geneFunctionConsistentWithPhenotype.phenotypeFreeText'].getValue()) {
-                this.setState({functionalAlterationBOn: true});
+                this.setState({biochemicalFunctionsBOn: true});
             }
             else {
-                this.setState({functionalAlterationBOn: false});
+                this.setState({biochemicalFunctionsBOn: false});
             }
         } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeFreeText') {
             if (this.refs[ref].getValue() !== '' || this.refs['geneFunctionConsistentWithPhenotype.phenotypeHPO'].getValue()) {
-                this.setState({functionalAlterationBOn: true});
+                this.setState({biochemicalFunctionsBOn: true});
             }
             else {
-                this.setState({functionalAlterationBOn: false});
+                this.setState({biochemicalFunctionsBOn: false});
             }
         }
     },
@@ -159,10 +159,10 @@ var ExperimentalCuration = React.createClass({
                         this.setState({geneImplicatedWithDisease: stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease});
                     }
                     if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes !== '') {
-                        this.setState({'functionalAlterationAOn': true});
+                        this.setState({'biochemicalFunctionsAOn': true});
                     }
                     if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO !== '' || stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '') {
-                        this.setState({'functionalAlterationBOn': true});
+                        this.setState({'biochemicalFunctionsBOn': true});
                     }
                 } else if (stateObj.experimental.evidenceType === 'Protein interactions') {
                     if (stateObj.experimental.proteinInteractions.geneImplicatedInDisease) {
@@ -220,7 +220,7 @@ var ExperimentalCuration = React.createClass({
                 goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
                 geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
                 hpoIDs = curator.capture.hpoids(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
-                if (this.state.functionalAlterationAOn === false && this.state.functionalAlterationBOn === false){
+                if (this.state.biochemicalFunctionsAOn === false && this.state.biochemicalFunctionsBOn === false){
                     formError = true;
                     this.setFormErrors('geneWithSameFunctionSameDisease.genes', 'One of these fields must be filled in');
                     this.setFormErrors('geneFunctionConsistentWithPhenotype.phenotypeHPO', 'One of these fields must be filled in');
@@ -834,7 +834,7 @@ var TypeBiochemicalFunction = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that other gene(s) have the same function:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.functionalAlterationAOn} />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.biochemicalFunctionsAOn} />
             <p className="col-sm-5 control-label">Shared disease (Orphanet):</p>
             <p className="col-sm-7 col-sm-offset-5">1</p>
             <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene or genes been implicated in the above disease?:"
@@ -856,10 +856,10 @@ var TypeBiochemicalFunction = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.explanation" label="Explanation of how phenotype is consistent with disease (free text):" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.explanation')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.explanation')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.functionalAlterationBOn} required={this.state.functionalAlterationBOn} />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.biochemicalFunctionsBOn} required={this.state.biochemicalFunctionsBOn} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.evidenceInPaper')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.functionalAlterationBOn} />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.biochemicalFunctionsBOn} />
         </div>
     );
 }
@@ -923,10 +923,10 @@ var TypeProteinInteractions = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="relationshipOfOtherGenesToDisese" label="Explanation of relationship of other gene(s) to the disease:" rows="5" value={proteinInteractions.relationshipOfOtherGenesToDisese}
                 error={this.getFormError('relationshipOfOtherGenesToDisese')} clearError={this.clrFormErrors.bind(null, 'relationshipOfOtherGenesToDisese')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.geneImplicatedInDisease} required={this.state.geneImplicatedInDisease} />
             <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper" rows="5" value={proteinInteractions.evidenceInPaper}
                 error={this.getFormError('evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceInPaper')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.geneImplicatedInDisease} />
         </div>
     );
 }
