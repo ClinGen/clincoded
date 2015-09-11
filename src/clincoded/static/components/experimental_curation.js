@@ -98,49 +98,49 @@ var ExperimentalCuration = React.createClass({
             }
         } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
             if (this.refs['geneWithSameFunctionSameDisease.geneImplicatedWithDisease'].getValue() === false) {
-                this.refs['geneWithSameFunctionSameDisease.explanationOfOtherGenes'].resetValue();
-                this.refs['geneWithSameFunctionSameDisease.evidenceInPaper'].resetValue();
+                //this.refs['geneWithSameFunctionSameDisease.explanationOfOtherGenes'].resetValue();
+                //this.refs['geneWithSameFunctionSameDisease.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeHPO' || ref ==='geneFunctionConsistentWithPhenotype.phenotypeFreeText') {
             if (this.refs['geneFunctionConsistentWithPhenotype.phenotypeHPO'].getValue() === false && this.refs['geneFunctionConsistentWithPhenotype.phenotypeFreeText'].getValue() === false) {
-                this.refs['geneFunctionConsistentWithPhenotype.explanation'].resetValue();
-                this.refs['geneFunctionConsistentWithPhenotype.evidenceInPaper'].resetValue();
+                //this.refs['geneFunctionConsistentWithPhenotype.explanation'].resetValue();
+                //this.refs['geneFunctionConsistentWithPhenotype.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'geneImplicatedInDisease') {
             if (this.refs['geneImplicatedInDisease'].getValue() === false) {
-                this.refs['relationshipOfOtherGenesToDisese'].resetValue();
-                this.refs['evidenceInPaper'].resetValue();
+                //this.refs['relationshipOfOtherGenesToDisese'].resetValue();
+                //this.refs['evidenceInPaper'].resetValue();
             }
         } else if (ref === 'normalExpression.expressedInTissue') {
             if (this.refs['normalExpression.expressedInTissue'].getValue() === false) {
-                this.refs['normalExpression.evidence'].resetValue();
-                this.refs['normalExpression.evidenceInPaper'].resetValue();
+                //this.refs['normalExpression.evidence'].resetValue();
+                //this.refs['normalExpression.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'alteredExpression.expressedInPatients') {
             if (this.refs['alteredExpression.expressedInPatients'].getValue() === false) {
-                this.refs['alteredExpression.evidence'].resetValue();
-                this.refs['alteredExpression.evidenceInPaper'].resetValue();
+                //this.refs['alteredExpression.evidence'].resetValue();
+                //this.refs['alteredExpression.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'cellMutationOrEngineeredEquivalent') {
             this.setState({functionalAlterationPCEE: this.refs['cellMutationOrEngineeredEquivalent'].getValue()});
             if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() === 'Patient cells') {
-                this.refs['funcalt.engineeredEquivalentCellType'].resetValue();
+                //this.refs['funcalt.engineeredEquivalentCellType'].resetValue();
             } else if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() === 'Engineered equivalent') {
-                this.refs['funcalt.patientCellType'].resetValue();
+                //this.refs['funcalt.patientCellType'].resetValue();
             }
         } else if (ref === 'animalOrCellCulture') {
             this.setState({modelSystemsNHACCM: this.refs['animalOrCellCulture'].getValue()});
             if (this.refs['animalOrCellCulture'].getValue() === 'Animal model') {
-                this.refs['cellCulture'].resetValue();
+                //this.refs['cellCulture'].resetValue();
             } else if (this.refs['animalOrCellCulture'].getValue() === 'Engineered equivalent') {
                 this.refs['animalModel'].resetValue();
             }
         } else if (ref === 'patientCellOrEngineeredEquivalent') {
             this.setState({rescuePCEE: this.refs['patientCellOrEngineeredEquivalent'].getValue()});
             if (this.refs['patientCellOrEngineeredEquivalent'].getValue() === 'Patient cells') {
-                this.refs['rescue.patientCellType'].resetValue();
+                //this.refs['rescue.patientCellType'].resetValue();
             } else if (this.refs['patientCellOrEngineeredEquivalent'].getValue() === 'Engineered equivalent') {
-                this.refs['rescue.engineeredEquivalentCellType'].resetValue();
+                //this.refs['rescue.engineeredEquivalentCellType'].resetValue();
             }
         }
     },
@@ -225,9 +225,9 @@ var ExperimentalCuration = React.createClass({
                         this.setState({expressedInPatients: stateObj.experimental.expression.alteredExpression.expressedInPatients});
                     }
                 } else if (stateObj.experimental.evidenceType === 'Functional alteration of gene/gene product') {
-                    this.setState({functionalAlterationPCEE: stateObj.functionalAlteration.cellMutationOrEngineeredEquivalent});
+                    this.setState({functionalAlterationPCEE: stateObj.experimental.functionalAlteration.cellMutationOrEngineeredEquivalent});
                 } else if (stateObj.experimental.evidenceType === 'Model systems') {
-                    this.setState({modelSystemsNHACCM: stateObj.modelSystems.animalOrCellCulture});
+                    this.setState({modelSystemsNHACCM: stateObj.experimental.modelSystems.animalOrCellCulture});
                 } else if (stateObj.experimental.evidenceType === 'Rescue') {
                     if (stateObj.experimental.rescue.wildTypeRescuePhenotype) {
                         this.setState({wildTypeRescuePhenotype: stateObj.experimental.rescue.wildTypeRescuePhenotype});
@@ -244,7 +244,7 @@ var ExperimentalCuration = React.createClass({
             // No one’s waiting but the user; just resolve with an empty promise.
             return Promise.resolve();
         }).catch(function(e) {
-            console.log('OBJECT LOAD ERROR: %s — %s', e.statusText, e.url);
+            console.log('OBJECT LOAD ERROR: %s', e);
         });
     },
 
@@ -455,9 +455,6 @@ var ExperimentalCuration = React.createClass({
                         }
                     }).then(data => {
                         var newExperimental = Object.keys(this.state.annotation).length ? curator.flatten(this.state.annotation) : {};
-
-
-                        console.log(newExperimental);
                     }).catch(function(e) {
                         console.log('GROUP CREATION ERROR=: %o', e);
                     });
@@ -688,8 +685,6 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.rescue.evidenceInPaper = RevidenceInPaper;
                     }
                 }
-
-                console.log(newExperimental);
 
                 if (this.state.experimental) {
                     // We're editing a experimental. PUT the new group object to the DB to update the existing one.

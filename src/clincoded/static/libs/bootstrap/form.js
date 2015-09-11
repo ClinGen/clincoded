@@ -251,7 +251,7 @@ var Input = module.exports.Input = React.createClass({
         } else if (this.props.type === 'select') {
             this.resetSelectedOption();
         } else if (this.props.type === 'checkbox') {
-            React.findDOMNode(this.refs.input).checked = false;
+            this.props.checked = false;
         }
     },
 
