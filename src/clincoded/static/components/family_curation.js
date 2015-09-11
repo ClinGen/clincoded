@@ -262,7 +262,7 @@ var FamilyCuration = React.createClass({
             if (value) {
                 valid = value.match(/^\s*(\d{1,10})\s*$/i);
                 if (!valid) {
-                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariantIDs (e.g. 177676)');
+                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariationIDs (e.g. 177676)');
                     anyInvalid = true;
                 }
             }
@@ -793,7 +793,7 @@ var FamilyCuration = React.createClass({
                                             {FamilyName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title="Family – Common Disease & Phenotypes" open>
+                                            <Panel title="Family – Common Disease(s) & Phenotype(s)" open>
                                                 {FamilyCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -813,7 +813,7 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family — Variant(s) segregating with Proband" open>
+                                            <Panel title="Family — Variant(s) Segregating with Proband" open>
                                                 {FamilyVariant.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -949,7 +949,7 @@ var LabelHpoId = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000118" target="_blank" title="HPO Browser in a new tab">HPO Browser</a>)</span>:
+                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://bioportal.bioontology.org/ontologies/HP?p=classes&conceptid=root" target="_blank" title="Bioportal Human Phenotype Ontology in a new tab">HPO lookup at Bioportal</a>)</span>:
             </span>
         );
     }
@@ -1124,15 +1124,11 @@ var FamilyVariant = function() {
     return (
         <div className="row">
             {!family || !family.segregation || !family.segregation.variants || family.segregation.variants.length === 0 ?
-                <div className="clearfix">
+                <div className="row">
                     <p className="col-sm-7 col-sm-offset-5">
                         To create and have the option to count a proband associated with a variant(s) for this Family, you need to add variant information in this section.
                         The proband (an Individual) will be created upon submission using the name you supply here. You will be able to add additional information about the proband
                         following submission of Family information.
-                    </p>
-                    <p className="col-sm-7 col-sm-offset-5">
-                        ClinVar VariantID should be provided in all instances it exists. This is the only way to associate probands from different studies with
-                        the same variant, and ensures the accurate counting of probands.
                     </p>
                 </div>
             : null}
@@ -1145,11 +1141,19 @@ var FamilyVariant = function() {
 
                 return (
                     <div key={i} className="variant-panel">
+                        <div className="row">
+                            <div className="col-sm-7 col-sm-offset-5">
+                                <p className="alert alert-warning">
+                                    ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
+                                    the same variant, and ensures the accurate counting of probands.
+                                </p>
+                            </div>
+                        </div>
                         <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                         <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                            The VariantID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href="http://www.ncbi.nlm.nih.gov/clinvar/variation/139214/" target="_blank">example</a>: 139214).
+                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href="http://www.ncbi.nlm.nih.gov/clinvar/variation/139214/" target="_blank">example</a>: 139214).
                         </p>
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1163,8 +1167,9 @@ var FamilyVariant = function() {
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
                     <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15"
                         error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
+                        buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                    <Input type="button" ref="orphanetcopy" inputClassName="btn-default btn-last pull-right" title="Copy Orphanet IDs from Family"
+                    <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
                         clickHandler={this.handleClick} />
                 </div>
             : null}
@@ -1180,7 +1185,7 @@ var FamilyVariant = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariantID:</span>;
+        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
     }
 });
 
@@ -1234,7 +1239,7 @@ var FamilyViewer = React.createClass({
                             </h2>
                         : null}
                     </div>
-                    <Panel title="Common diseases &amp; phenotypes" panelClassName="panel-data">
+                    <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
@@ -1354,7 +1359,7 @@ var FamilyViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Description of Methods by which specific mutations genotyped</dt>
+                                <dt>Description of Method(s)</dt>
                                 <dd>{method && method.specificMutationsGenotypedMethod}</dd>
                             </div>
 
@@ -1439,14 +1444,14 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Family - Variant(s) associated with Proband" panelClassName="panel-data">
+                    <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                         {variants.map(function(variant, i) {
                             return (
                                 <div className="variant-view-panel">
                                     <h5>Variant {i + 1}</h5>
                                     <dl className="dl-horizontal">
                                         <div>
-                                            <dt>ClinVar VariantID</dt>
+                                            <dt>ClinVar VariationID</dt>
                                             <dd>{variant.clinvarVariantId}</dd>
                                         </div>
 
