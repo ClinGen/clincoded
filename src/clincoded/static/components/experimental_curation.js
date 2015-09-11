@@ -25,7 +25,7 @@ var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 
 
-var ExperimentCuration = React.createClass({
+var ExperimentalCuration = React.createClass({
     mixins: [FormMixin, RestMixin, CurationMixin],
 
     contextTypes: {
@@ -77,7 +77,7 @@ var ExperimentCuration = React.createClass({
         for (var i = 0; i < input.length; i++) {
             outputArray.push(input[i].symbol);
         }
-        return outputArray.join(",");
+        return outputArray.join(', ');
     },
 
     // Load objects from query string into the state variables. Must have already parsed the query string
@@ -726,7 +726,7 @@ var ExperimentCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(ExperimentCuration, 'curator_page', 'experimental-curation');
+globals.curator_page.register(ExperimentalCuration, 'curator_page', 'experimental-curation');
 
 
 // Group Name group curation panel. Call with .call(this) to run in the same context
@@ -1172,3 +1172,108 @@ var TypeRescue = function() {
         </div>
     );
 }
+
+
+var ExperimentalViewer = React.createClass({
+    render: function() {
+        var context = this.props.context;
+        var method = context.method;
+
+        return (
+            <div className="container">
+                <div className="row curation-content-viewer">
+                    <h1>View Experimental Data: {context.label}</h1>
+                    <Panel panelClassName="panel-data">
+                        <dl className="dl-horizontal">
+                            <div>
+                                <dt>Experimental Evidence Type</dt>
+                                <dd>{context.evidenceType}</dd>
+                            </div>
+                        </dl>
+                    </Panel>
+
+                    {context.evidenceType == 'Biochemical function' ?
+                    <Panel title="Biochemical function" panelClassName="panel-data">
+                        <dl className="dl-horizontal">
+                            <div>
+                                <dt>Identified Function</dt>
+                                <dd>{context.biochemicalFunction.identifiedFunction}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Evidence for function</dt>
+                                <dd>{context.biochemicalFunction.evidenceForFunction}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Information about where evidence can be found in paper</dt>
+                                <dd>{context.biochemicalFunction.evidenceForFunctionInPaper}</dd>
+                            </div>
+                        </dl>
+                    </Panel>
+                    : null }
+                    {context.evidenceType == 'Biochemical function' ?
+                    <Panel title="Gene(s) with same function implicated in same disease" panelClassName="panel-data">
+                        <dl className="dl-horizontal">
+                            <div>
+                                <dt>Genes</dt>
+                                <dd></dd>
+                            </div>
+
+                            <div>
+                                <dt>Evidence that other gene(s) have the same function</dt>
+                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Has this gene or genes been implicated in the above disease?</dt>
+                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Explanation of relationship of other gene(s) to the disease</dt>
+                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Information about where evidence can be found in paper</dt>
+                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}</dd>
+                            </div>
+                        </dl>
+                    </Panel>
+                    : null }
+                    {context.evidenceType == 'Biochemical function' ?
+                    <Panel title="Gene function consistent with phenotype" panelClassName="panel-data">
+                        <dl className="dl-horizontal">
+                            <div>
+                                <dt>HPO ID(s)</dt>
+                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ')}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Phenotype</dt>
+                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Explanation of how phenotype is consistent with disease</dt>
+                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Information about where evidence can be found in paper</dt>
+                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}</dd>
+                            </div>
+                        </dl>
+                    </Panel>
+                    : null }
+
+
+
+                </div>
+            </div>
+        );
+    }
+});
+
+globals.content_views.register(ExperimentalViewer, 'experimental');
