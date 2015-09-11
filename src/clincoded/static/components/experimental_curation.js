@@ -47,7 +47,10 @@ var ExperimentalCuration = React.createClass({
             expressedInTissue: false,
             expressedInPatients: false,
             wildTypeRescuePhenotype: false,
-            patientVariantRescue: false
+            patientVariantRescue: false,
+
+            functionalAlterationAOn: false,
+            functionalAlterationBOn: false
         };
     },
 
@@ -69,6 +72,27 @@ var ExperimentalCuration = React.createClass({
             this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()});
         } else if (ref === 'patientVariantRescue') {
             this.setState({patientVariantRescue: this.refs[ref].toggleValue()});
+        } else if (ref === 'geneWithSameFunctionSameDisease.genes') {
+            if (this.refs[ref].getValue() !== '' ) {
+                this.setState({functionalAlterationAOn: true});
+            }
+            else {
+                this.setState({functionalAlterationAOn: false});
+            }
+        } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeHPO') {
+            if (this.refs[ref].getValue() !== '' || this.refs['geneFunctionConsistentWithPhenotype.phenotypeFreeText'].getValue()) {
+                this.setState({functionalAlterationBOn: true});
+            }
+            else {
+                this.setState({functionalAlterationBOn: false});
+            }
+        } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeFreeText') {
+            if (this.refs[ref].getValue() !== '' || this.refs['geneFunctionConsistentWithPhenotype.phenotypeHPO'].getValue()) {
+                this.setState({functionalAlterationBOn: true});
+            }
+            else {
+                this.setState({functionalAlterationBOn: false});
+            }
         }
     },
 
@@ -134,6 +158,12 @@ var ExperimentalCuration = React.createClass({
                     if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease) {
                         this.setState({geneImplicatedWithDisease: stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease});
                     }
+                    if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes !== '') {
+                        this.setState({'functionalAlterationAOn': true});
+                    }
+                    if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO !== '' || stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '') {
+                        this.setState({'functionalAlterationBOn': true});
+                    }
                 } else if (stateObj.experimental.evidenceType === 'Protein interactions') {
                     if (stateObj.experimental.proteinInteractions.geneImplicatedInDisease) {
                         this.setState({geneImplicatedInDisease: stateObj.experimental.proteinInteractions.geneImplicatedInDisease});
@@ -190,6 +220,12 @@ var ExperimentalCuration = React.createClass({
                 goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
                 geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
                 hpoIDs = curator.capture.hpoids(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
+                if (this.state.functionalAlterationAOn === false && this.state.functionalAlterationBOn === false){
+                    formError = true;
+                    this.setFormErrors('geneWithSameFunctionSameDisease.genes', 'One of these fields must be filled in');
+                    this.setFormErrors('geneFunctionConsistentWithPhenotype.phenotypeHPO', 'One of these fields must be filled in');
+                    this.setFormErrors('geneFunctionConsistentWithPhenotype.phenotypeFreeText', 'One of these fields must be filled in');
+                }
                 if (goSlimIDs && goSlimIDs.length && _(goSlimIDs).any(function(id) { return id === null; })) {
                     // GO_Slim ID is bad
                     formError = true;
@@ -694,7 +730,7 @@ var ExperimentalCuration = React.createClass({
                                                 {TypeExpression.call(this)}
                                             </Panel></PanelGroup>
                                         : null }
-                                        {this.state.experimentalType == 'Functional alteration of gene/gene product' ?
+                                        {this.state.experimentalType == 'TypeFunctionalAlteration' ?
                                             <PanelGroup accordion><Panel title="Functional alteration of gene/gene product" open>
                                                 {TypeFunctionalAlteration.call(this)}
                                             </Panel></PanelGroup>
@@ -794,11 +830,11 @@ var TypeBiochemicalFunction = function() {
             <p className="col-sm-7 col-sm-offset-5">Enter evidence for A and/or B (at least one required)</p>
             <h4 className="col-sm-7 col-sm-offset-5">A. Gene(s) with same function implicated in same disease</h4>
             <Input type="text" ref="geneWithSameFunctionSameDisease.genes" label="Genes (HGNC):" value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
-                error={this.getFormError('geneWithSameFunctionSameDisease.genes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.genes')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                error={this.getFormError('geneWithSameFunctionSameDisease.genes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.genes')} handleChange={this.handleChange}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that other gene(s) have the same function:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.functionalAlterationAOn} />
             <p className="col-sm-5 control-label">Shared disease (Orphanet):</p>
             <p className="col-sm-7 col-sm-offset-5">1</p>
             <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene or genes been implicated in the above disease?:"
@@ -807,23 +843,23 @@ var TypeBiochemicalFunction = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.explanationOfOtherGenes" label="Explanation of relationship of other gene(s) to the disease:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}
                 error={this.getFormError('geneWithSameFunctionSameDisease.explanationOfOtherGenes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.explanationOfOtherGenes')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.geneImplicatedWithDisease} required={this.state.geneImplicatedWithDisease} />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceInPaper')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.geneImplicatedWithDisease} />
             <h4 className="col-sm-7 col-sm-offset-5">B. Gene function consistent with phenotype</h4>
             <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />} value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" handleChange={this.handleChange} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeFreeText" label="Phenotype (free text):" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeFreeText')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.explanation" label="Explanation of how phenotype is consistent with disease (free text):" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.explanation')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.explanation')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.functionalAlterationBOn} required={this.state.functionalAlterationBOn} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.evidenceInPaper')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.functionalAlterationBOn} />
         </div>
     );
 }
@@ -1212,7 +1248,7 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null }
-                    {context.evidenceType == 'Biochemical function' ?
+                    {context.evidenceType == 'Biochemical function' && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction !== '' ?
                     <Panel title="Gene(s) with same function implicated in same disease" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
@@ -1227,7 +1263,7 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>Has this gene or genes been implicated in the above disease?</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease}</dd>
+                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease.toString()}</dd>
                             </div>
 
                             <div>
@@ -1242,7 +1278,7 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null }
-                    {context.evidenceType == 'Biochemical function' ?
+                    {context.evidenceType == 'Biochemical function' && ((context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ') !== '') || (context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) ?
                     <Panel title="Gene function consistent with phenotype" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
@@ -1268,8 +1304,240 @@ var ExperimentalViewer = React.createClass({
                     </Panel>
                     : null }
 
+                    {context.evidenceType == 'Protein interactions' ?
+                    <Panel title="Protein interactions" panelClassName="panel-data">
+                        <dl className="dl-horizontal">
+                            <div>
+                                <dt>Interacting Gene(s)</dt>
+                                <dd>{context.proteinInteractions.interactingGenes.join(', ')}</dd>
+                            </div>
 
+                            <div>
+                                <dt>Interaction Type</dt>
+                                <dd>{context.proteinInteractions.interactionType}</dd>
+                            </div>
 
+                            <div>
+                                <dt>Experimental interaction detection</dt>
+                                <dd>{context.proteinInteractions.experimentalInteractionDetection}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Has this gene or genes been implicated in the above disease</dt>
+                                <dd>{context.proteinInteractions.geneImplicatedInDisease.toString()}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Explanation of relationship of other gene(s) to the disease</dt>
+                                <dd>{context.proteinInteractions.relationshipOfOtherGenesToDisese}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Information about where evidence can be found on paper</dt>
+                                <dd>{context.proteinInteractions.evidenceInPaper}</dd>
+                            </div>
+                        </dl>
+                    </Panel>
+                    : null }
+
+                    {context.evidenceType == 'Expression' ?
+                    <Panel title="Expression" panelClassName="panel-data">
+                        <dl className="dl-horizontal">
+                            <div>
+                                <dt>Uberon ID of Tissue Organ</dt>
+                                <dd>{context.expression.organOfTissue}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Gene normally expressed in tissue relevant to the disease</dt>
+                                <dd>{context.expression.normalExpression.expressedInTissue.toString()}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Evidence for normal expression in tissue</dt>
+                                <dd>{context.expression.normalExpression.evidence}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Information about where evidence can be found in paper</dt>
+                                <dd>{context.expression.normalExpression.evidenceInPaper}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Altered expression in Patients</dt>
+                                <dd>{context.expression.alteredExpression.expressedInPatients.toString()}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Evidence for normal expression in tissue</dt>
+                                <dd>{context.expression.alteredExpression.evidence}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Information about where evidence can be found in paper</dt>
+                                <dd>{context.expression.alteredExpression.evidenceInPaper}</dd>
+                            </div>
+                        </dl>
+                    </Panel>
+                    : null }
+
+                    {context.evidenceType == 'Functional alteration of gene/gene product' ?
+                    <Panel title="Functional alteration of gene/gene product" panelClassName="panel-data">
+                        <dl className="dl-horizontal">
+                            <div>
+                                <dt>Patient cells with candidate mutation or engineered equivalent</dt>
+                                <dd>{context.functionalAlteration.cellMutationOrEngineeredEquivalent}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Patient cell type</dt>
+                                <dd>{context.functionalAlteration.patientCellType}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Engineered cell type</dt>
+                                <dd>{context.functionalAlteration.engineeredEquivalentCellType}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Description of gene alteration</dt>
+                                <dd>{context.functionalAlteration.descriptionOfGeneAlteration}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Normal function of gene</dt>
+                                <dd>{context.functionalAlteration.normalFunctionOfGene}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Evidence for altered function</dt>
+                                <dd>{context.functionalAlteration.evidenceForNormalFunction}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Information about where evidence can be found in paper</dt>
+                                <dd>{context.functionalAlteration.evidenceInPaper}</dd>
+                            </div>
+                        </dl>
+                    </Panel>
+                    : null }
+
+                    {context.evidenceType == 'Model systems' ?
+                    <Panel title="Model systems" panelClassName="panel-data">
+                        <dl className="dl-horizontal">
+                            <div>
+                                <dt>Non-human animal or cell-culture model?</dt>
+                                <dd>{context.modelSystems.animalOrCellCulture}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Animal model</dt>
+                                <dd>{context.modelSystems.animalModel}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Cell-culture type/line</dt>
+                                <dd>{context.modelSystems.cellCulture}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Description of gene alteration</dt>
+                                <dd>{context.modelSystems.descriptionOfGeneAlteration}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Patient phenotype HPO</dt>
+                                <dd>{context.modelSystems.phenotypeHPO}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Patient phenotype</dt>
+                                <dd>{context.modelSystems.phenotypeFreeText}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Phenotype HPO observed</dt>
+                                <dd>{context.modelSystems.phenotypeHPOObserved}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Phenotype observed in model system</dt>
+                                <dd>{context.modelSystems.phenotypeFreetextObserved}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Explanation</dt>
+                                <dd>{context.modelSystems.explanation}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Information about where evidence can be found on paper</dt>
+                                <dd>{context.modelSystems.evidenceInPaper}</dd>
+                            </div>
+                        </dl>
+                    </Panel>
+                    : null }
+
+                    {context.evidenceType == 'Rescue' ?
+                    <Panel title="Rescue" panelClassName="panel-data">
+                        <dl className="dl-horizontal">
+                            <div>
+                                <dt>Patient cells with or engineered equivalent?</dt>
+                                <dd>{context.modelSystems.patientCellOrEngineeredEquivalent}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Patient cell type</dt>
+                                <dd>{context.modelSystems.patientCellType}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Engineered equivalent cell type</dt>
+                                <dd>{context.modelSystems.engineeredEquivalentCellType}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Description of gene alteration</dt>
+                                <dd>{context.modelSystems.descriptionOfGeneAlteration}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Phenotype to rescue</dt>
+                                <dd>{context.modelSystems.phenotypeHPO}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Phenotype to rescue</dt>
+                                <dd>{context.modelSystems.phenotypeFreeText}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Method used to rescue</dt>
+                                <dd>{context.modelSystems.rescueMethod}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Does the wild-type rescue the above phenotype?</dt>
+                                <dd>{context.modelSystems.wildTypeRescuePhenotype.toString()}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Does patient variant rescue?</dt>
+                                <dd>{context.modelSystems.patientVariantRescue.toString()}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Explanation</dt>
+                                <dd>{context.modelSystems.explanation}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Information about where evidence can be found on paper</dt>
+                                <dd>{context.modelSystems.evidenceInPaper}</dd>
+                            </div>
+                        </dl>
+                    </Panel>
+                    : null }
                 </div>
             </div>
         );
