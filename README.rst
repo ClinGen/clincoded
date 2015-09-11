@@ -62,7 +62,7 @@ Note: These will all be installed locally for the application and should never c
 Step 1b: Run buildout::
 
     $ python3.4 bootstrap.py -v 2.3.1 --setuptools-version 15.2
-    $ bin/buildout
+    $ bin/buildout -c buildout-dev.cfg
 
 If you see a clang error like this::
 
@@ -140,8 +140,8 @@ If you wish a clean db wipe for DEVELOPMENT::
 
 Database setup on VMs::
 
-    # service postgresql-9.3 initdb
-    # service postgresql-9.3 start
+    # service postgresql-9.4 initdb
+    # service postgresql-9.4 start
     # sudo -u postgres createuser --createdb clincoded
 
 Then as the clincoded user::

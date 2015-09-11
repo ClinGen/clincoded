@@ -13,6 +13,9 @@ module.exports = function(grunt) {
         return '../../' + p;
     }
 
+    grunt.config('env', grunt.option('env') || process.env.GRUNT_ENV || 'production');
+    var minifyEnabled = grunt.config('minifyEnabled', grunt.config('env') === 'production');
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         browserify: {
@@ -25,6 +28,7 @@ module.exports = function(grunt) {
                 ],
                 plugin: [
                     ['minifyify', {
+                        minify: minifyEnabled,
                         map: 'brace.js.map',
                         output: './src/clincoded/static/build/brace.js.map',
                         compressPath: compressPath,
@@ -48,6 +52,7 @@ module.exports = function(grunt) {
                 ],
                 plugin: [
                     ['minifyify', {
+                        minify: minifyEnabled,
                         map: '/static/build/inline.js.map',
                         output: './src/clincoded/static/build/inline.js.map',
                         compressPath: compressPath,
@@ -77,6 +82,7 @@ module.exports = function(grunt) {
                 ],
                 plugin: [
                     ['minifyify', {
+                        minify: minifyEnabled,
                         map: 'bundle.js.map',
                         output: './src/clincoded/static/build/bundle.js.map',
                         compressPath: compressPath,
@@ -97,8 +103,9 @@ module.exports = function(grunt) {
                     'envify',
                 ],
                 plugin: [
-                    ['minifyify', {map:
-                        'renderer.js.map',
+                    ['minifyify', {
+                        minify: minifyEnabled,
+                        map:'renderer.js.map',
                         output: './src/clincoded/static/build/renderer.js.map',
                         compressPath: compressPath,
                         uglify: {mangle: process.env.NODE_ENV == 'production'},
