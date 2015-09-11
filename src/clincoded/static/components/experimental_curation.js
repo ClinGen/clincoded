@@ -210,7 +210,7 @@ var ExperimentalCuration = React.createClass({
                     if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes && stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.length > 0) {
                         this.setState({'biochemicalFunctionsAOn': true});
                     }
-                    if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO !== '') {
+                    if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.length > 0) {
                         this.setState({'biochemicalFunctionsBOn': true});
                     }
                     if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '') {
