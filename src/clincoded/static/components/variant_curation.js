@@ -174,6 +174,13 @@ var VariantCuration = React.createClass({
             delete newPathogenicity.supportingExperimental;
         }
 
+        value = this.getFormValue('comments');
+        if (value) {
+            newPathogenicity.comment = value;
+        } else {
+            delete newPathogenicity.comment;
+        }
+
         return newPathogenicity;
     },
 
@@ -185,6 +192,7 @@ var VariantCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
+            // Convert form values to new flattened pathogenicity object.
             var newPathogenicity = this.formToPathogenicity(this.state.pathogenicity);
             console.log(newPathogenicity);
         }
@@ -213,8 +221,7 @@ var VariantCuration = React.createClass({
                         </div>
                     : null}
                     <div className="viewer-titles">
-                        <h1>{(variant ? 'Edit' : 'Curate') + ' Variant Information'}</h1>
-                        <h2>Group: {this.state.groupName ? <span>{this.state.groupName}</span> : <span className="no-entry">No entry</span>}</h2>
+                        <h1>{(pathogenicity ? 'Edit' : 'Curate') + ' Variant Information'}</h1>
                     </div>
                     <div className="row group-curation-content">
                         <div className="col-sm-12">
@@ -279,6 +286,8 @@ var VariantCuration = React.createClass({
                                                     <option>Yes</option>
                                                     <option>No</option>
                                                 </Input>
+                                                <Input type="textarea" ref="comments" label="Variant comments:" rows="5" value={pathogenicity && pathogenicity.comment}
+                                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                             </div>
                                         </Panel>
                                         <div className="curation-submit clearfix">
@@ -305,25 +314,10 @@ var VariantCuration = React.createClass({
 globals.curator_page.register(VariantCuration, 'curator_page', 'variant-curation');
 
 
-// Group Name group curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var GroupName = function() {
-    var group = this.state.group;
-
-    return (
-        <div className="row">
-            <Input type="text" ref="groupname" label="Group name:" value={group && group.label} handleChange={this.handleChange}
-                error={this.getFormError('groupname')} clearError={this.clrFormErrors.bind(null, 'groupname')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-        </div>
-    );
-};
-
-
 // Display a single variant curation viewer panel
 var VariantCurationView = React.createClass({
     propTypes: {
-        pathogenicity: React.PropTypes.object
+        pathogenicity: React.PropTypes.object.isRequired // Variant pathogenicity to display
     },
 
     render: function() {
