@@ -49,7 +49,10 @@ var ExperimentalCuration = React.createClass({
             wildTypeRescuePhenotype: false,
             patientVariantRescue: false,
             biochemicalFunctionsAOn: false, // form checks
-            biochemicalFunctionsBOn: false
+            biochemicalFunctionsBOn: false,
+            functionalAlterationPCEE: '',
+            modelSystemsNHACCM: '',
+            rescuePCEE: ''
 
         };
     },
@@ -92,6 +95,52 @@ var ExperimentalCuration = React.createClass({
             }
             else {
                 this.setState({biochemicalFunctionsBOn: false});
+            }
+        } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
+            if (this.refs['geneWithSameFunctionSameDisease.geneImplicatedWithDisease'].getValue() === false) {
+                this.refs['geneWithSameFunctionSameDisease.explanationOfOtherGenes'].resetValue();
+                this.refs['geneWithSameFunctionSameDisease.evidenceInPaper'].resetValue();
+            }
+        } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeHPO' || ref ==='geneFunctionConsistentWithPhenotype.phenotypeFreeText') {
+            if (this.refs['geneFunctionConsistentWithPhenotype.phenotypeHPO'].getValue() === false && this.refs['geneFunctionConsistentWithPhenotype.phenotypeFreeText'].getValue() === false) {
+                this.refs['geneFunctionConsistentWithPhenotype.explanation'].resetValue();
+                this.refs['geneFunctionConsistentWithPhenotype.evidenceInPaper'].resetValue();
+            }
+        } else if (ref === 'geneImplicatedInDisease') {
+            if (this.refs['geneImplicatedInDisease'].getValue() === false) {
+                this.refs['relationshipOfOtherGenesToDisese'].resetValue();
+                this.refs['evidenceInPaper'].resetValue();
+            }
+        } else if (ref === 'normalExpression.expressedInTissue') {
+            if (this.refs['normalExpression.expressedInTissue'].getValue() === false) {
+                this.refs['normalExpression.evidence'].resetValue();
+                this.refs['normalExpression.evidenceInPaper'].resetValue();
+            }
+        } else if (ref === 'alteredExpression.expressedInPatients') {
+            if (this.refs['alteredExpression.expressedInPatients'].getValue() === false) {
+                this.refs['alteredExpression.evidence'].resetValue();
+                this.refs['alteredExpression.evidenceInPaper'].resetValue();
+            }
+        } else if (ref === 'cellMutationOrEngineeredEquivalent') {
+            this.setState({functionalAlterationPCEE: this.refs['cellMutationOrEngineeredEquivalent'].getValue()});
+            if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() === 'Patient cells') {
+                this.refs['funcalt.engineeredEquivalentCellType'].resetValue();
+            } else if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() === 'Engineered equivalent') {
+                this.refs['funcalt.patientCellType'].resetValue();
+            }
+        } else if (ref === 'animalOrCellCulture') {
+            this.setState({modelSystemsNHACCM: this.refs['animalOrCellCulture'].getValue()});
+            if (this.refs['animalOrCellCulture'].getValue() === 'Animal model') {
+                this.refs['cellCulture'].resetValue();
+            } else if (this.refs['animalOrCellCulture'].getValue() === 'Engineered equivalent') {
+                this.refs['animalModel'].resetValue();
+            }
+        } else if (ref === 'patientCellOrEngineeredEquivalent') {
+            this.setState({rescuePCEE: this.refs['patientCellOrEngineeredEquivalent'].getValue()});
+            if (this.refs['patientCellOrEngineeredEquivalent'].getValue() === 'Patient cells') {
+                this.refs['rescue.patientCellType'].resetValue();
+            } else if (this.refs['patientCellOrEngineeredEquivalent'].getValue() === 'Engineered equivalent') {
+                this.refs['rescue.engineeredEquivalentCellType'].resetValue();
             }
         }
     },
@@ -175,6 +224,10 @@ var ExperimentalCuration = React.createClass({
                     if (stateObj.experimental.expression.alteredExpression.expressedInPatients) {
                         this.setState({expressedInPatients: stateObj.experimental.expression.alteredExpression.expressedInPatients});
                     }
+                } else if (stateObj.experimental.evidenceType === 'Functional alteration of gene/gene product') {
+                    this.setState({functionalAlterationPCEE: stateObj.functionalAlteration.cellMutationOrEngineeredEquivalent});
+                } else if (stateObj.experimental.evidenceType === 'Model systems') {
+                    this.setState({modelSystemsNHACCM: stateObj.modelSystems.animalOrCellCulture});
                 } else if (stateObj.experimental.evidenceType === 'Rescue') {
                     if (stateObj.experimental.rescue.wildTypeRescuePhenotype) {
                         this.setState({wildTypeRescuePhenotype: stateObj.experimental.rescue.wildTypeRescuePhenotype});
@@ -195,7 +248,7 @@ var ExperimentalCuration = React.createClass({
         });
     },
 
-    // After the Group Curation page component mounts, grab the GDM and annotation UUIDs from the query
+    // After the Experimental Data Curation page component mounts, grab the GDM and annotation UUIDs from the query
     // string and retrieve the corresponding annotation from the DB, if they exist.
     // Note, we have to do this after the component mounts because AJAX DB queries can't be
     // done from unmounted components.
@@ -258,6 +311,11 @@ var ExperimentalCuration = React.createClass({
             else if (this.state.experimentalType == 'Expression') {
                 // Check form for Expression panel
                 uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
+                if (this.state.expressedInTissue === false && this.state.expressedInPatients === false) {
+                    formError = true;
+                    this.setFormErrors('normalExpression.expressedInTissue', 'One of these evidences must be submitted');
+                    this.setFormErrors('alteredExpression.expressedInPatients', 'One of these evidences must be submitted');
+                }
                 if (uberonIDs && uberonIDs.length && _(uberonIDs).any(function(id) { return id === null; })) {
                     // Uberon ID is bad
                     formError = true;
@@ -632,8 +690,6 @@ var ExperimentalCuration = React.createClass({
                     this.putRestData('/experimental/' + this.state.experimental.uuid, newExperimental).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     }).then(data => {
-                        // Navigate back to Curation Central page.
-                        // FUTURE: Need to navigate to Group Submit page.
                         this.resetAllFormValues();
                         if (this.queryValues.editShortcut) {
                             this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -645,7 +701,7 @@ var ExperimentalCuration = React.createClass({
                     });
 
                 } else {
-                    // We created a group; post it to the DB
+                    // We created an experimental data item; post it to the DB
                     this.postRestData('/experimental/', newExperimental).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     }).then(newExperimental => {
@@ -666,8 +722,6 @@ var ExperimentalCuration = React.createClass({
                             return Promise.resolve(null);
                         }
                     }).then(data => {
-                        // Navigate back to Curation Central page.
-                        // FUTURE: Need to navigate to Group Submit page.
                         this.resetAllFormValues();
                         if (this.queryValues.editShortcut) {
                             this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -706,14 +760,14 @@ var ExperimentalCuration = React.createClass({
                                 </div>
                             : null}
                             <div className="viewer-titles">
-                                <h1>{(experimental ? 'Edit' : 'Curate') + ' Group Information'}</h1>
+                                <h1>{(experimental ? 'Edit' : 'Curate') + ' Experimental Data Information'}</h1>
                                 <h2>Experiment: {this.state.experimentalName ? <span>{this.state.experimentalName}</span> : <span className="no-entry">No entry</span>}{this.state.experimentalType ? <span> ({this.state.experimentalType})</span> : null}</h2>
                             </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                         <Panel>
-                                            {GroupName.call(this)}
+                                            {ExperimentalNameType.call(this)}
                                         </Panel>
                                         {this.state.experimentalType == 'Biochemical function' ?
                                             <PanelGroup accordion><Panel title="Biochemical function" open>
@@ -730,7 +784,7 @@ var ExperimentalCuration = React.createClass({
                                                 {TypeExpression.call(this)}
                                             </Panel></PanelGroup>
                                         : null }
-                                        {this.state.experimentalType == 'TypeFunctionalAlteration' ?
+                                        {this.state.experimentalType == 'Functional alteration of gene/gene product' ?
                                             <PanelGroup accordion><Panel title="Functional alteration of gene/gene product" open>
                                                 {TypeFunctionalAlteration.call(this)}
                                             </Panel></PanelGroup>
@@ -765,9 +819,9 @@ var ExperimentalCuration = React.createClass({
 globals.curator_page.register(ExperimentalCuration, 'curator_page', 'experimental-curation');
 
 
-// Group Name group curation panel. Call with .call(this) to run in the same context
+// Experimental Data Name and Type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var GroupName = function() {
+var ExperimentalNameType = function() {
     var experimental = this.state.experimental;
 
     return (
@@ -964,10 +1018,10 @@ var TypeExpression = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="normalExpression.evidence" label="Evidence for normal expression in tissue:" rows="5" value={expression.normalExpression.evidence}
                 error={this.getFormError('normalExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidence')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.expressedInTissue} required={this.state.expressedInTissue} />
             <Input type="textarea" ref="normalExpression.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={expression.normalExpression.evidenceInPaper}
                 error={this.getFormError('normalExpression.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidenceInPaper')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.expressedInTissue} required={this.state.expressedInTissue} />
             <h4 className="col-sm-7 col-sm-offset-5">B. Altered expression in Patients</h4>
             <Input type="checkbox" ref="alteredExpression.expressedInPatients" label="Is gene normally expressed in tissues relevant to the disease?:"
                 checked={this.state.expressedInPatients} defaultChecked="false" handleChange={this.handleChange}
@@ -975,10 +1029,10 @@ var TypeExpression = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="alteredExpression.evidence" label="Evidence for normal expression in tissue:" rows="5" value={expression.alteredExpression.evidence}
                 error={this.getFormError('alteredExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.evidence')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.expressedInPatients} required={this.state.expressedInPatients} />
             <Input type="textarea" ref="alteredExpression.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={expression.alteredExpression.evidenceInPaper}
                 error={this.getFormError('alteredExpression.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.evidenceInPaper')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.expressedInPatients} required={this.state.expressedInPatients} />
         </div>
     );
 }
@@ -1017,10 +1071,10 @@ var TypeFunctionalAlteration = function() {
             </Input>
             <Input type="text" ref="funcalt.patientCellType" label={<LabelPatientCellType />} value={functionalAlteration.patientCellType} placeholder="e.g. 0000001"
                 error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" inputDisabled={this.state.functionalAlterationPCEE != 'Patient cells'} required={this.state.functionalAlterationPCEE == 'Patient cells'} />
             <Input type="text" ref="funcalt.engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. 0000001"
                 error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" inputDisabled={this.state.functionalAlterationPCEE != 'Engineered equivalent'} required={this.state.functionalAlterationPCEE == 'Engineered equivalent'} />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={functionalAlteration.descriptionOfGeneAlteration}
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
@@ -1084,7 +1138,7 @@ var TypeModelSystems = function() {
             </Input>
             <Input type="select" ref="animalModel" label="Animal model:" defaultValue="none" value={modelSystems.animalModel} handleChange={this.handleChange}
                 error={this.getFormError('animalModel')} clearError={this.clrFormErrors.bind(null, 'animalModel')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.modelSystemsNHACCM != 'Animal model'} required={this.state.modelSystemsNHACCM == 'Animal model'}>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Cat (Felis catus) 9685</option>
@@ -1108,7 +1162,7 @@ var TypeModelSystems = function() {
             </Input>
             <Input type="text" ref="cellCulture" label="Cell-culture type/line:" value={modelSystems.cellCulture} placeholder=""
                 error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" inputDisabled={this.state.modelSystemsNHACCM != 'Engineered equivalent'} required={this.state.modelSystemsNHACCM == 'Engineered equivalent'} />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={modelSystems.descriptionOfGeneAlteration}
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
@@ -1167,7 +1221,7 @@ var TypeRescue = function() {
         <div className="row">
             <Input type="select" ref="patientCellOrEngineeredEquivalent" label="Patient cells with or engineered equivalent?:" defaultValue="none" value={rescue.patientCellOrEngineeredEquivalent} handleChange={this.handleChange}
                 error={this.getFormError('patientCellOrEngineeredEquivalent')} clearError={this.clrFormErrors.bind(null, 'patientCellOrEngineeredEquivalent')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required >
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Patient cells</option>
@@ -1175,10 +1229,10 @@ var TypeRescue = function() {
             </Input>
             <Input type="text" ref="rescue.patientCellType" label={<LabelPatientCellType />} value={rescue.patientCellType} placeholder=""
                 error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" inputDisabled={this.state.rescuePCEE != 'Patient cells'} required={this.state.rescuePCEE == 'Patient cells'} />
             <Input type="text" ref="rescue.engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={rescue.engineeredEquivalentCellType} placeholder=""
                 error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" inputDisabled={this.state.rescuePCEE != 'Engineered equivalent'} required={this.state.rescuePCEE == 'Engineered equivalent'} />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={rescue.descriptionOfGeneAlteration}
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
