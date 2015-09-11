@@ -207,10 +207,13 @@ var ExperimentalCuration = React.createClass({
                     if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease) {
                         this.setState({geneImplicatedWithDisease: stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease});
                     }
-                    if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes !== '') {
+                    if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes && stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.length > 0) {
                         this.setState({'biochemicalFunctionsAOn': true});
                     }
-                    if ((stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO !== '') || (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) {
+                    if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO !== '') {
+                        this.setState({'biochemicalFunctionsBOn': true});
+                    }
+                    if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '') {
                         this.setState({'biochemicalFunctionsBOn': true});
                     }
                 } else if (stateObj.experimental.evidenceType === 'Protein interactions') {
