@@ -379,7 +379,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
                     <span>Assocations: </span>
                     {variantAssociations.map(function(association, i) {
                         return (
-                            <span>
+                            <span key={i}>
                                 {i > 0 ? ', ' : ''}
                                 <a href={association['@id']} title={'View ' + association['@type'][0] + ' in a new tab'} target="_blank">{association.label}</a>
                             </span>
