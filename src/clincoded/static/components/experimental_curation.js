@@ -210,7 +210,7 @@ var ExperimentalCuration = React.createClass({
                     if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes !== '') {
                         this.setState({'biochemicalFunctionsAOn': true});
                     }
-                    if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO !== '' || stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '') {
+                    if ((stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO !== '') || (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) {
                         this.setState({'biochemicalFunctionsBOn': true});
                     }
                 } else if (stateObj.experimental.evidenceType === 'Protein interactions') {
@@ -329,25 +329,28 @@ var ExperimentalCuration = React.createClass({
             else if (this.state.experimentalType == 'Functional alteration of gene/gene product') {
                 // Check form for Functional Alterations panel
                 goSlimIDs = curator.capture.goslims(this.getFormValue('normalFunctionOfGene'));
-                efoIDs = curator.capture.efoids(this.getFormValue('funcalt.patientCellType'));
-                if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
-                    // EFO ID is bad
-                    formError = true;
-                    this.setFormErrors('funcalt.patientCellType', 'Use EFO ID (e.g. 0000001)');
-                }
-                if (efoIDs.length > 1) {
-                    // More than one EFO ID specified
-                    this.setFormErrors('funcalt.patientCellType', 'Enter only one EFO ID');
-                }
-                efoIDs = curator.capture.efoids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
-                if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
-                    // EFO ID is bad
-                    formError = true;
-                    this.setFormErrors('funcalt.engineeredEquivalentCellType', 'Use EFO ID (e.g. 0000001)');
-                }
-                if (efoIDs.length > 1) {
-                    // More than one EFO ID specified
-                    this.setFormErrors('funcalt.engineeredEquivalentCellType', 'Enter only one EFO ID');
+                if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Patient cells') {
+                    efoIDs = curator.capture.efoids(this.getFormValue('funcalt.patientCellType'));
+                    if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
+                        // EFO ID is bad
+                        formError = true;
+                        this.setFormErrors('funcalt.patientCellType', 'Use EFO ID (e.g. 0000001)');
+                    }
+                    if (efoIDs.length > 1) {
+                        // More than one EFO ID specified
+                        this.setFormErrors('funcalt.patientCellType', 'Enter only one EFO ID');
+                    }
+                } else if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Engineered equivalent') {
+                    efoIDs = curator.capture.efoids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
+                    if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
+                        // EFO ID is bad
+                        formError = true;
+                        this.setFormErrors('funcalt.engineeredEquivalentCellType', 'Use EFO ID (e.g. 0000001)');
+                    }
+                    if (efoIDs.length > 1) {
+                        // More than one EFO ID specified
+                        this.setFormErrors('funcalt.engineeredEquivalentCellType', 'Enter only one EFO ID');
+                    }
                 }
                 if (goSlimIDs && goSlimIDs.length && _(goSlimIDs).any(function(id) { return id === null; })) {
                     // GO_Slim ID is bad
@@ -385,25 +388,28 @@ var ExperimentalCuration = React.createClass({
             else if (this.state.experimentalType == 'Rescue') {
                 // Check form for Rescue panel
                 hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
-                efoIDs = curator.capture.efoids(this.getFormValue('rescue.patientCellType'));
-                if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
-                    // EFO ID is bad
-                    formError = true;
-                    this.setFormErrors('rescue.patientCellType', 'Use EFO ID (e.g. 0000001)');
-                }
-                if (efoIDs.length > 1) {
-                    // More than one EFO ID specified
-                    this.setFormErrors('rescue.patientCellType', 'Enter only one EFO ID');
-                }
+                if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Patient cells') {
+                    efoIDs = curator.capture.efoids(this.getFormValue('rescue.patientCellType'));
+                    if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
+                        // EFO ID is bad
+                        formError = true;
+                        this.setFormErrors('rescue.patientCellType', 'Use EFO ID (e.g. 0000001)');
+                    }
+                    if (efoIDs.length > 1) {
+                        // More than one EFO ID specified
+                        this.setFormErrors('rescue.patientCellType', 'Enter only one EFO ID');
+                    }
+                } else if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Engineered equivalent') {
                 efoIDs = curator.capture.efoids(this.getFormValue('rescue.engineeredEquivalentCellType'));
-                if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
-                    // EFO ID is bad
-                    formError = true;
-                    this.setFormErrors('rescue.engineeredEquivalentCellType', 'Use EFO ID (e.g. 0000001)');
-                }
-                if (efoIDs.length > 1) {
-                    // More than one EFO ID specified
-                    this.setFormErrors('rescue.engineeredEquivalentCellType', 'Enter only one EFO ID');
+                    if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
+                        // EFO ID is bad
+                        formError = true;
+                        this.setFormErrors('rescue.engineeredEquivalentCellType', 'Use EFO ID (e.g. 0000001)');
+                    }
+                    if (efoIDs.length > 1) {
+                        // More than one EFO ID specified
+                        this.setFormErrors('rescue.engineeredEquivalentCellType', 'Enter only one EFO ID');
+                    }
                 }
                 if (hpoIDs && hpoIDs.length && _(hpoIDs).any(function(id) { return id === null; })) {
                     // HPO ID is bad
