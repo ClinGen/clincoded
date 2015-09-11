@@ -147,10 +147,10 @@ var VariantCuration = React.createClass({
         }
 
         value = this.getFormValue('denovo');
-        if (value) {
-            newPathogenicity.previouslyReported = value;
+        if (value !== 'none') {
+            newPathogenicity.denovoType = value;
         } else {
-            delete newPathogenicity.previouslyReported;
+            delete newPathogenicity.denovoType;
         }
 
         value = this.getFormValue('intrans');
@@ -186,6 +186,7 @@ var VariantCuration = React.createClass({
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
             var newPathogenicity = this.formToPathogenicity(this.state.pathogenicity);
+            console.log(newPathogenicity);
         }
     },
 

@@ -346,13 +346,24 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
 };
 
 // Render a variant in the curator palette.
-var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
+//   variant: variant to display
+//   gdm: Currently viewed GDM
+//   annotation: Currently selected annotation (paper)
+//   curatorMatch: True if annotation owner matches currently logged-in user
+var renderVariant = function(variant, gdm, annotation, curatorMatch) {
     var variantCurated = variant.associatedPathogenicities.length > 0;
 
-    // Get the pathogenicity record this user made for this variant if the current annotation belongs to the current user
+    // Get the pathogenicity record with an owner that matches the annotation's owner.
     var associatedPathogenicity = variantCurated ? _(variant.associatedPathogenicities).find(function(pathogenicity) {
-        return userMatch(pathogenicity.submitted_by, session);
+        return pathogenicity.submitted_by.uuid === annotation.submitted_by.uuid;
     }) : null;
+
+    // Get all families and individuals that reference this variant into variantAssocations array of families and individuals
+    var variantAssociations = collectVariantAssociations(annotation, variant).sort(function(associationA, associationB) {
+        var labelA = associationA.label.toLowerCase();
+        var labelB = associationB.label.toLowerCase();
+        return (labelA < labelB) ? -1 : ((labelA > labelB ? 1 : 0));
+    });
 
     return (
         <div className="panel-evidence-group">
@@ -363,6 +374,19 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
                 : null}
                 <p>{moment(variant.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
+            {variantAssociations ?
+                <div>
+                    <span>Assocations: </span>
+                    {variantAssociations.map(function(association, i) {
+                        return (
+                            <span>
+                                {i > 0 ? ', ' : ''}
+                                <a href={association['@id']} title={'View ' + association['@type'][0] + ' in a new tab'} target="_blank">{association.label}</a>
+                            </span>
+                        );
+                    })}
+                </div>
+            : null}
             {curatorMatch ?
                 <span>
                     {variantCurated ?
@@ -634,6 +658,80 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
 });
 
 
+// Collect references to all families and individuals within an annotation that reference the given variant
+var collectVariantAssociations = function(annotation, targetVariant) {
+    var allAssociations = [];
+
+    // Find any variants matching the target variant in the given individual.
+    // Any matching variant pushes its individual onto the associations array as a side effect
+    function surveyIndividual(individual, targetVariant, associations) {
+        // Search for variant in individual matching variant we're looking for
+        var matchingVariant = _(individual.variants).find(function(variant) {
+            return variant.uuid === targetVariant.uuid;
+        });
+
+        // Found a matching variant; push its parent individual
+        if (matchingVariant) {
+            associations.push(individual);
+        }
+    }
+
+    // Find any variants matching the target variant in the given family's segregation.
+    // Any matching variant pushes its family onto the associations array as a side effect
+    function surveyFamily(family, targetVariant, associations) {
+        if (family.segregation && family.segregation.variants) {
+            var matchingVariant = _(family.segregation.variants).find(function(variant) {
+                return variant.uuid === targetVariant.uuid;
+            });
+
+            // Found a matching variant; push its parent family
+            if (matchingVariant) {
+                allAssociations.push(family);
+            }
+        }
+    }
+
+    if (annotation && Object.keys(annotation).length) {
+        // Search unassociated individuals
+        annotation.individuals.forEach(function(individual) {
+            // Add any variants matching targetVariant in the individual to allAssociations
+            surveyIndividual(individual, targetVariant, allAssociations);
+        });
+
+        // Search unassociated families
+        annotation.families.forEach(function(family) {
+            // Add any variants matching targetVariant in the family to allAssociations
+            surveyFamily(family, targetVariant, allAssociations);
+
+            // Search for variant in the family's individuals matching variant we're looking for
+            family.individualIncluded.forEach(function(individual) {
+                surveyIndividual(individual, targetVariant, allAssociations);
+            });
+        });
+
+        // Search groups
+        annotation.groups.forEach(function(group) {
+            // Search variants in group's individuals
+            group.individualIncluded.forEach(function(individual) {
+                surveyIndividual(individual, targetVariant, allAssociations);
+            });
+
+            // Search variants in group's families' segregations
+            group.familyIncluded.forEach(function(family) {
+                surveyFamily(family, targetVariant, allAssociations);
+
+                // Search for variant in the group's families' individuals matching variant we're looking for
+                family.individualIncluded.forEach(function(individual) {
+                    surveyIndividual(individual, targetVariant, allAssociations);
+                });
+            });
+        });
+    }
+
+    return allAssociations.length ? allAssociations : null;
+};
+
+
 // Returns object keyed by variant @id, each of which points to each variant in all family segmentations
 // and individuals in all annotations in the given GDM. All variants are de-duped in the returned object.
 var collectGdmVariants = function(gdm) {
@@ -678,7 +776,7 @@ var collectAnnotationVariants = function(annotation) {
                 });
             }
 
-            // Collect variants in the family's individual's
+            // Collect variants in the family's individuals
             family.individualIncluded.forEach(function(individual) {
                 individual.variants.forEach(function(variant) {
                     allVariants[variant['@id']] = variant;
