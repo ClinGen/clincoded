@@ -345,13 +345,12 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
     );
 };
 
-
 // Render a variant in the curator palette.
 var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
     var variantCurated = variant.associatedPathogenicities.length > 0;
 
     // Get the pathogenicity record this user made for this variant if the current annotation belongs to the current user
-    var associatedPathogenicity = (curatorMatch && variantCurated) ? _(variant.associatedPathogenicities).find(function(pathogenicity) {
+    var associatedPathogenicity = variantCurated ? _(variant.associatedPathogenicities).find(function(pathogenicity) {
         return userMatch(pathogenicity.submitted_by, session);
     }) : null;
 
@@ -367,17 +366,18 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
             {curatorMatch ?
                 <span>
                     {variantCurated ?
-                        <span><a href={variant['@id']}>View</a> | <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant' + variant.uuid}>Edit/Assess</a></span>
+                        <span><a href={variant['@id']}>View</a> | <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a></span>
                     :
-                        <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant' + variant.uuid}>Curate/Assess</a>
+                        <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid}>Curate/Assess</a>
                     }
                 </span>
             :
                 <span>
-                    {variantCurated ?
-                        <a href={variant['@id']}>View</a>
+                    {variantCurated && associatedPathogenicity ?
+                        <a href={associatedPathogenicity['@id']}>View</a>
                     :
-                        <span className="palette-not-curated">Not Curated/Assessed</span>}
+                        <span className="palette-not-curated">Not Curated/Assessed</span>
+                    }
                 </span>
             }
         </div>
@@ -634,9 +634,30 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
 });
 
 
-// Returns object keyed by variant ID that points to each variant in all family segmentations
+// Returns object keyed by variant @id, each of which points to each variant in all family segmentations
+// and individuals in all annotations in the given GDM. All variants are de-duped in the returned object.
+var collectGdmVariants = function(gdm) {
+    var allVariants = {};
+
+    if (gdm.annotations && gdm.annotations.length) {
+        gdm.annotations.forEach(function(annotation) {
+            // Get all variants in each annotation
+            var annotationVariants = collectAnnotationVariants(annotation);
+
+            // Merge them into the collection of all annotations' variants
+            Object.keys(annotationVariants).forEach(function(variantId) {
+                allVariants[variantId] = annotationVariants[variantId];
+            });
+        });
+    }
+    return allVariants;
+};
+
+
+// Returns object keyed by variant @id that points to each variant in all family segmentations
 // and individuals related to the given annotation (evidence/article). There's plenty of opportunity
 // for duplicate variants, but all variants are de-duped in the returned object.
+// returnvalue.a -> a{}.
 var collectAnnotationVariants = function(annotation) {
     var allVariants = {};
 
@@ -769,6 +790,10 @@ var flatten = module.exports.flatten = function(obj) {
 
         case 'individual':
             flat = flattenIndividual(obj);
+            break;
+
+        case 'pathogenicity':
+            flat = flattenPathogenicity(obj);
             break;
 
         default:
@@ -1018,6 +1043,30 @@ function flattenGdm(gdm) {
 
     return flat;
 }
+
+
+var pathogenicitySimpleProps = [
+    "date_created", "consistentWithDiseaseMechanism", "withinFunctionalDomain", "frequencySupportPathogenicity", "previouslyReported",
+    "denovoType", "intransWithAnotherVariant", "supportingSegregation", "supportingStatistic", "supportingExperimental", "comment"
+];
+
+function flattenPathogenicity(pathogenicity) {
+    // First copy all the simple properties
+    var flat = cloneSimpleProps(pathogenicity, pathogenicitySimpleProps);
+
+    // Flatten variant
+    flat.variant = pathogenicity.variant['@id'];
+
+    // Flatten assessments
+    if (pathogenicity.assessments && pathogenicity.assessments.length) {
+        flat.assessments = pathogenicity.assessments.map(function(assessment) {
+            return assessment['@id'];
+        });
+    }
+
+    return flat;
+}
+
 
 // Given an array of group or families in 'objList', render a list of Orphanet IDs for all diseases in those
 // groups or families.

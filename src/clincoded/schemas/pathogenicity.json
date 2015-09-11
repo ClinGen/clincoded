@@ -60,7 +60,7 @@
             "title": "Supporting Statistical Data",
             "type": "boolean"
         },
-        "SupportingExperimental": {
+        "supportingExperimental": {
             "title": "Supporting Functional Data",
             "type": "boolean"
         },
