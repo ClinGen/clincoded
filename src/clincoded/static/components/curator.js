@@ -1090,10 +1090,6 @@ function flattenIndividual(individual) {
 var gdmSimpleProps = [
     "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active"
 ];
-var variantPathogenicSimpleProps = [
-    "consistentWithDiseaseMechanism", "withinFunctionalDomain", "frequencySupportPathogenicity", "previouslyReported", "denovoType",
-    "intransWithAnotherVariant", "supportingSegregation", "supportingStatistic", "SupportingFunctional", "comment"
-];
 
 function flattenGdm(gdm) {
     // First copy all the simple properties
@@ -1116,18 +1112,10 @@ function flattenGdm(gdm) {
         });
     }
 
-    // Flatten variant pathogenics
-    if (gdm.variantPathogenic && gdm.variantPathogenic.length) {
-        flat.variantPathogenic = gdm.variantPathogenic.map(function(vp) {
-            var flat_vp = cloneSimpleProps(vp, variantPathogenicSimpleProps);
-            if (vp.variant) {
-                flat_vp.variant = vp.variant['@id'];
-            }
-            if (vp.assessments && vp.assessments.length) {
-                flat_vp.assessments = vp.assessments.map(function(assessment) {
-                    return assessment['@id'];
-                });
-            }
+    // Flatten variant pathogenicities
+    if (gdm.variantPathogenicity && gdm.variantPathogenicity.length) {
+        flat.variantPathogenicity = gdm.variantPathogenicity.map(function(vp) {
+            var flat_vp = flattenPathogenicity(vp);
             return flat_vp;
         });
     }

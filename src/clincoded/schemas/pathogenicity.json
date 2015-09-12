@@ -4,7 +4,7 @@
     "description": "Schema for storing variant pathogenic data.",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["variant", "submitted_by", "date_created", "last_modified"],
+    "required": ["variant"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [

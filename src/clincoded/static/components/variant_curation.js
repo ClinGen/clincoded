@@ -9,10 +9,12 @@ var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
+var assessment = require('./assessment');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
+var AssessmentPanel = assessment.AssessmentPanel;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -35,6 +37,10 @@ var VariantCuration = React.createClass({
 
     // Keeps track of values from the query string
     queryValues: {},
+
+    componentVars: {
+        assessment: '' // Value of assessment
+    },
 
     getInitialState: function() {
         return {
@@ -113,6 +119,10 @@ var VariantCuration = React.createClass({
         this.loadData();
     },
 
+    updateAssessment: function(value) {
+        this.componentVars.assessment = value;
+    },
+
     // Convert filled-out form values to pathonegicity object, which is returned. Any existing pathogenicity object
     // (editing a variant) gets passed in currPathogenicity and gets modified with the new values.
     formToPathogenicity: function(currPathogenicity) {
@@ -181,10 +191,13 @@ var VariantCuration = React.createClass({
             delete newPathogenicity.comment;
         }
 
+
         return newPathogenicity;
     },
 
     submitForm: function(e) {
+        var promise;
+
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
         // Save all form values from the DOM.
@@ -194,7 +207,46 @@ var VariantCuration = React.createClass({
         if (this.validateDefault()) {
             // Convert form values to new flattened pathogenicity object.
             var newPathogenicity = this.formToPathogenicity(this.state.pathogenicity);
-            console.log(newPathogenicity);
+
+            // Assign a link to the pathogenicity's variant if new
+            if (!newPathogenicity.variant && this.state.variant) {
+                newPathogenicity.variant = this.state.variant['@id'];
+            }
+
+            // Either update or create the pathogenicity object in the DB
+            if (this.state.pathogenicity) {
+                // We're editing a pathogenicity. PUT the new pathogenicity object to the DB to update the existing one.
+                promise = this.putRestData('/pathogenicity/' + this.state.pathogenicity.uuid, newPathogenicity).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
+            } else {
+                // We created a pathogenicity; POST it to the DB
+                promise = this.postRestData('/pathogenicity/', newPathogenicity).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
+            }
+
+            // Execute THEN after pathogenicty written
+            promise.then(pathogenicity => {
+                // Given pathogenicity has been saved (created or updated).
+                if (!this.state.pathogenicity && this.state.gdm) {
+                    // New pathogenicity; add it to the GDM’s pathogenicity array.
+                    var newGdm = curator.flatten(this.state.gdm);
+                    if (newGdm.variantPathogenicity && newGdm.variantPathogenicity.length) {
+                        newGdm.variantPathogenicity.push(pathogenicity['@id']);
+                    } else {
+                        newGdm.variantPathogenicity = [pathogenicity['@id']];
+                    }
+
+                    // Write the updated GDM
+                    return this.putRestData('/gdm/' + this.state.gdm.uuid, newGdm).then(data => {
+                        return Promise.resolve(data['@graph'][0]);
+                    });
+                }
+                return Promise.resolve(null);
+            }).catch(function(e) {
+                console.log('PATHOGENICITY CREATION ERROR=: %o', e);
+            });
         }
     },
 
@@ -290,6 +342,7 @@ var VariantCuration = React.createClass({
                                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                             </div>
                                         </Panel>
+                                        <AssessmentPanel panelTitle="Variant Assessment" updateValue={this.updateAssessment} />
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         </div>
