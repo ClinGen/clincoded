@@ -136,10 +136,10 @@ runcmd:
 #TEMP for inital tests --restore from backup
 - sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-fetch /var/lib/postgresql/9.4/main LATEST
 - sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
-- sudo -u postgres chmod 0700 /var/lib/postgresql/9.4/main
+#- sudo -u postgres chmod 0700 /var/lib/postgresql/9.4/main
 #/TEMP
 - /etc/init.d/postgresql start
-- sudo -u postgres chmod 0755 /var/lib/postgresql/9.4/main
+#- sudo -u postgres chmod 0755 /var/lib/postgresql/9.4/main
 - sudo -u clincoded python3.4 bootstrap.py -v 2.3.1 --setuptools-version 15.2
 - sudo -u clincoded LANG=en_US.UTF-8 bin/buildout -c %(ROLE)s.cfg
 #TEMP for inital tests --commented out
