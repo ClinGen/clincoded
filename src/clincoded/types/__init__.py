@@ -708,7 +708,7 @@ class Pathogenicity(Item):
         "title": "Number of Assessment",
         "type": "integer"
     })
-    def numberOfAssessmnet(self, assessments):
+    def numberOfAssessment(self, assessments):
         return len(assessments)
 
 

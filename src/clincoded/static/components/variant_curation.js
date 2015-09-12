@@ -244,6 +244,10 @@ var VariantCuration = React.createClass({
                     });
                 }
                 return Promise.resolve(null);
+            }).then(data => {
+                var gdmQs = this.state.gdm ? '?gdm=' + this.state.gdm.uuid : '';
+                var pmidQs = this.state.annotation ? '&pmid=' + this.state.annotation.article.pmid : '';
+                this.context.navigate('/curation-central/' + gdmQs + pmidQs);
             }).catch(function(e) {
                 console.log('PATHOGENICITY CREATION ERROR=: %o', e);
             });
@@ -261,7 +265,7 @@ var VariantCuration = React.createClass({
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.variantUuid = queryKeyValue('variant', this.props.href);
         this.queryValues.pathogenicityUuid = queryKeyValue('pathogenicity', this.props.href);
-        this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
+        this.queryValues.all = queryKeyValue('all', this.props.href) === "";
 
         return (
             <div>
@@ -347,10 +351,10 @@ var VariantCuration = React.createClass({
                                             <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         </div>
                                     </Form>
-                                    {gdm && gdm.variantPathogenicity ?
+                                    {gdm && gdm.variantPathogenicity && this.queryValues.all ?
                                         <div>
                                             {gdm.variantPathogenicity.map(function(pathogenicity) {
-                                                return <VariantCurationView pathogenicity={pathogenicity} />;
+                                                return <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} />;
                                             })}
                                         </div>
                                     : null}

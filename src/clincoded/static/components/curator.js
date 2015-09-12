@@ -390,7 +390,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
             {curatorMatch ?
                 <span>
                     {variantCurated ?
-                        <span><a href={variant['@id']}>View</a> | <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a></span>
+                        <span><a href={associatedPathogenicity['@id']}>View</a> | <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a></span>
                     :
                         <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid}>Curate/Assess</a>
                     }
@@ -1115,8 +1115,7 @@ function flattenGdm(gdm) {
     // Flatten variant pathogenicities
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length) {
         flat.variantPathogenicity = gdm.variantPathogenicity.map(function(vp) {
-            var flat_vp = flattenPathogenicity(vp);
-            return flat_vp;
+            return vp['@id'];
         });
     }
 
