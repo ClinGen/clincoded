@@ -37,7 +37,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                 <div className="row">
                     <Input type="select" ref="assessment" label={label + ':'} defaultValue="none" value={this.props.currVal} handleChange={this.handleChange}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                        <option disabled="disabled" value="none">No Selection</option>
+                        <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
                         <option>Supports</option>
                         <option>Review</option>

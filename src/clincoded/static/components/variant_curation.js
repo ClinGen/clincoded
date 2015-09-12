@@ -128,6 +128,7 @@ var VariantCuration = React.createClass({
     formToPathogenicity: function(currPathogenicity) {
         var newPathogenicity = currPathogenicity ? curator.flatten(currPathogenicity) : {};
 
+        // For each form field, put its non-default value into the new, flattened pathogenicity object
         var value = this.getFormValue('consistentdisease');
         if (value !== 'none') {
             newPathogenicity.consistentWithDiseaseMechanism = value === 'Yes';
@@ -191,6 +192,8 @@ var VariantCuration = React.createClass({
             delete newPathogenicity.comment;
         }
 
+        // Handle assessment
+        // Find assessment matching current user
 
         return newPathogenicity;
     },
