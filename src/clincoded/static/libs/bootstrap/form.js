@@ -242,19 +242,11 @@ var Input = module.exports.Input = React.createClass({
     },
 
     resetSelectedOption: function() {
-        var optionNodes = this.refs.input.getDOMNode().getElementsByTagName('option');
-
-        // Get the DOM node for the selected <option>
-        var selectedOptionNode = _(optionNodes).find(function(option) {
-            return option.selected;
-        });
-
-        // Clear the selected option and set it to the first option
-        if (selectedOptionNode) {
-            selectedOptionNode.selected = false;
-            optionNodes[0] = true;
+        var selectNode = this.refs.input.getDOMNode();
+        var optionNodes = selectNode.getElementsByTagName('option');
+        if (optionNodes && optionNodes.length) {
+            selectNode.value = optionNodes[0].value;
         }
-
     },
 
     // Get the selected option from a <select> list
