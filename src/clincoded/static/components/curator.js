@@ -104,6 +104,34 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 });
 
 
+var VariantHeader = module.exports.VariantHeader = React.createClass({
+    propTypes: {
+        gdm: React.PropTypes.object // GDM whose collected variants to display
+    },
+
+    render: function() {
+        var gdm = this.props.gdm;
+
+        return (
+            <div>
+                {gdm && gdm.variantPathogenicity && gdm.variantPathogenicity.length ?
+                    <div>
+                        {gdm.variantPathogenicity.map(function(pathogenicity) {
+                            var variantName = pathogenicity.variant.clinvarVariantId ? pathogenicity.variant.clinvarVariantId : pathogenicity.variant.otherDescription;
+                            return (
+                                <div key={pathogenicity.uuid}>
+                                    <a href="#" className="btn btn-info btn-xs">{variantName}</a>
+                                </div>
+                            );
+                        })}
+                    </div>
+                : null}
+            </div>
+        );
+    }
+});
+
+
 // Displays the PM item summary, with authors, title, citation
 var PmidSummary = module.exports.PmidSummary = React.createClass({
     propTypes: {
