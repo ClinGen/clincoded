@@ -21,6 +21,7 @@
             "description": "Value of assessment",
             "type": "string",
             "enum": [
+                "Not Assessed",
                 "Supports",
                 "Review",
                 "Contradicts"

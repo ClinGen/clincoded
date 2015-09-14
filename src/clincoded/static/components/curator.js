@@ -866,40 +866,48 @@ module.exports.capture = {
 
 // Take an object and make a flattened version ready for writing.
 // SCHEMA: This might need to change when the schema changes.
-var flatten = module.exports.flatten = function(obj) {
-    var flat;
+var flatten = module.exports.flatten = function(obj, type) {
+    var flat = null;
 
-    switch(obj['@type'][0]) {
-        case 'gdm':
-            flat = flattenGdm(obj);
-            break;
+    // Normally don't pass in a type; we'll get it from the object itself. Pass in a type only
+    // if there might not be one -- rare but possible.
+    if (!type) {
+        type = obj['@type'][0];
+    }
 
-        case 'annotation':
-            flat = flattenAnnotation(obj);
-            break;
+    if (obj) {
+        switch(type) {
+            case 'gdm':
+                flat = flattenGdm(obj);
+                break;
 
-        case 'group':
-            flat = flattenGroup(obj);
-            break;
+            case 'annotation':
+                flat = flattenAnnotation(obj);
+                break;
 
-        case 'family':
-            flat = flattenFamily(obj);
-            break;
+            case 'group':
+                flat = flattenGroup(obj);
+                break;
 
-        case 'individual':
-            flat = flattenIndividual(obj);
-            break;
+            case 'family':
+                flat = flattenFamily(obj);
+                break;
 
-        case 'pathogenicity':
-            flat = flattenPathogenicity(obj);
-            break;
+            case 'individual':
+                flat = flattenIndividual(obj);
+                break;
 
-        case 'assessment':
-            flat = flattenAssessment(obj);
-            break;
+            case 'pathogenicity':
+                flat = flattenPathogenicity(obj);
+                break;
 
-        default:
-            break;
+            case 'assessment':
+                flat = flattenAssessment(obj);
+                break;
+
+            default:
+                break;
+        }
     }
 
     return flat;
@@ -1162,7 +1170,7 @@ var assessmentSimpleProps = [
 ];
 
 function flattenAssessment(assessment) {
-    var flat = cloneSimpleProps(assessment);
+    var flat = cloneSimpleProps(assessment, assessmentSimpleProps);
 
     return flat;
 }

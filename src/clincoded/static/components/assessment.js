@@ -10,6 +10,8 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 
+module.exports.DEFAULT_VALUE = 'Not Assessed';
+
 
 var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     mixins: [FormMixin],
@@ -35,9 +37,9 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         return (
             <Panel title={panelTitle}>
                 <div className="row">
-                    <Input type="select" ref="assessment" label={label + ':'} defaultValue="none" value={this.props.currVal} handleChange={this.handleChange}
+                    <Input type="select" ref="assessment" label={label + ':'} defaultValue="Not Assessed" value={this.props.currVal} handleChange={this.handleChange}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                        <option value="none">No Selection</option>
+                        <option>Not Assessed</option>
                         <option disabled="disabled"></option>
                         <option>Supports</option>
                         <option>Review</option>
