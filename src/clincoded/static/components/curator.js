@@ -390,7 +390,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
             {curatorMatch ?
                 <span>
                     {variantCurated ?
-                        <span><a href={associatedPathogenicity['@id']} target="_blank">View</a> | <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a></span>
+                        <span><a href={associatedPathogenicity['@id']} target="_blank">View</a> | <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + (associatedPathogenicity ? '' : '&variant=' + variant.uuid) + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a></span>
                     :
                         <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid}>Curate/Assess</a>
                     }

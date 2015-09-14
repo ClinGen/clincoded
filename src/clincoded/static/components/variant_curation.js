@@ -39,7 +39,7 @@ var VariantCuration = React.createClass({
     queryValues: {},
 
     componentVars: {
-        assessment: '' // Value of assessment
+        orgAssessmentVal: '' // Value of assessment on page load
     },
 
     getInitialState: function() {
@@ -47,7 +47,8 @@ var VariantCuration = React.createClass({
             gdm: null, // GDM object given in UUID
             annotation: null, // Annotation object given in UUID
             variant: null, // Variant object given in UUID
-            pathogenicity: null // If editing curation, pathogenicity we're editing
+            pathogenicity: null, // If editing curation, pathogenicity we're editing
+            assessment: null // Assessment of pathogenicity belonging to user
         };
     },
 
@@ -106,6 +107,27 @@ var VariantCuration = React.createClass({
                 this.setOmimIdState(stateObj.gdm.omimId);
             }
 
+            // If the pathogenicity's assessment list has an entry belonging to user, save it in state
+            if (stateObj.pathogenicity && stateObj.pathogenicity.assessments && stateObj.pathogenicity.assessments.length) {
+                stateObj.assessment = _(stateObj.pathogenicity.assessments).find(function(assessment) {
+                    return assessment.submitted_by.uuid === this.props.session.user_properties.uuid;
+                });
+            }
+
+            if (stateObj.assessment) {
+                // Loaded an assessment; save it's original value
+                this.componentVars.orgAssessmentVal = stateObj.assessment.value;
+            } else {
+                // No assessment foound for user; make an initial one
+                stateObj.assessment = {
+                    evidence_type: 'Pathenogicity',
+                    evidence_id: stateObj.pathenogicity ? stateObj.pathenogicity.uuid : '',
+                    evidence_gdm: stateObj.gdm ? stateObj.gdm.uuid : '',
+                    value: '',
+                    active: true
+                };
+            }
+
             // Set all the state variables we've collected
             this.setState(stateObj);
 
@@ -124,8 +146,11 @@ var VariantCuration = React.createClass({
         this.loadData();
     },
 
+    // When the user changes the assessment value, this gets called
     updateAssessment: function(value) {
-        this.componentVars.assessment = value;
+        var assessment = this.state.assessment;
+        assessment.value = value;
+        this.setState({assessment: assessment});
     },
 
     // Convert filled-out form values to pathonegicity object, which is returned. Any existing pathogenicity object
@@ -199,41 +224,6 @@ var VariantCuration = React.createClass({
         return newPathogenicity;
     },
 
-    // Make a new assessment object based on the form value
-    formToAssessment: function(currAssessment) {
-        var newAssessment;
-
-        // Copy the current assessment, or make a new one if there isn't a current assessment.
-        if (currAssessment) {
-            newAssessment = curator.flatten(currAssessment);
-        } else {
-            newAssessment = {
-                evidence_type:'Pathenogicity',
-                evidence_id: this.state.pathenogicity ? this.state.pathenogicity.uuid : '',
-                evidence_gdm: this.state.gdm ? this.state.gdm.uuid : '',
-                active: true
-            };
-        }
-
-        // Set the assessment's value to the one from the form
-        newAssessment.value = this.componentVars.assessment;
-
-        return newAssessment;
-    },
-
-    // Get pathogenicity assessment matching currently logged-in user
-    getUserAssessment: function() {
-        var pathogenicity = this.state.pathogenicity;
-        var assessment = null;
-
-        if (pathogenicity && pathogenicity.assessments && pathogenicity.assessments.length) {
-            assessment = _(pathogenicity.assessments).find(function(assessment) {
-                return assessment.submitted_by.uuid === this.props.session.user_properties.uuid;
-            });
-        }
-        return assessment;
-    },
-
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
@@ -244,18 +234,17 @@ var VariantCuration = React.createClass({
         if (this.validateDefault()) {
             // If pathogenicity object has no assessment object found with currently logged-in user
             // and form assessment has non-default value
-            var userPathogenicityAssessment = this.getUserAssessment();
-            var newAssessment = this.formToAssessment(userPathogenicityAssessment);
+            var currAssessment = this.state.assessment;
             var promise = new Promise(function(resolve, reject) {
                 var assessmentPromise = null;
 
-                if (userPathogenicityAssessment && (userPathogenicityAssessment.value !== newAssessment.value)) {
+                if (currAssessment.uuid && (currAssessment.value !== this.componentVars.orgAssessmentVal)) {
                     // Updating an existing assessment, and the value of the assessment has changed
-                    assessmentPromise = this.putRestData('/assessments/' + userPathogenicityAssessment.uuid, newAssessment).then(data => {
+                    assessmentPromise = this.putRestData('/assessments/' + currAssessment.uuid, currAssessment).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });
-                } else if (!userPathogenicityAssessment && newAssessment.value) {
-                    // New assessment; write it to the DB.
+                } else if (!currAssessment.uuid && currAssessment.value) {
+                    // New assessment and form has non-default value; write it to the DB.
                     assessmentPromise = this.postRestData('/assessments/', newAssessment).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });
@@ -414,7 +403,7 @@ var VariantCuration = React.createClass({
                                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                             </div>
                                         </Panel>
-                                        <AssessmentPanel panelTitle="Variant Assessment" updateValue={this.updateAssessment} />
+                                        <AssessmentPanel panelTitle="Variant Assessment" currVal={this.state.assessment.value} updateValue={this.updateAssessment} />
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         </div>
