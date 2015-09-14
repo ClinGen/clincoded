@@ -63,7 +63,7 @@ var VariantCuration = React.createClass({
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '',
             annotationUuid ? '/evidence/' + annotationUuid : '',
-            variantUuid ? '/variants/' + variantUuid : '',
+            variantUuid && !pathogenicityUuid ? '/variants/' + variantUuid : '', // If we're loading a pathogenicity, it'll have the variant built in
             pathogenicityUuid ? '/pathogenicity/' + pathogenicityUuid : ''
         ]);
 
@@ -95,6 +95,11 @@ var VariantCuration = React.createClass({
                         break;
                 }
             });
+
+            // If we loaded a pathgenicity, get its variant as if we had loaded it separately
+            if (stateObj.pathogenicity) {
+                stateObj.variant = _.clone(stateObj.pathogenicity.variant);
+            }
 
             // Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
             if (stateObj.gdm && stateObj.gdm.omimId) {
@@ -178,7 +183,6 @@ var VariantCuration = React.createClass({
             delete newPathogenicity.supportingSegregation;
         }
 
-        value = this.getFormValue('supportexperimental');
         if (value !== 'none') {
             newPathogenicity.supportingExperimental = value === 'Yes';
         } else {
@@ -192,15 +196,45 @@ var VariantCuration = React.createClass({
             delete newPathogenicity.comment;
         }
 
-        // Handle assessment
-        // Find assessment matching current user
-
         return newPathogenicity;
     },
 
-    submitForm: function(e) {
-        var promise;
+    // Make a new assessment object based on the form value
+    formToAssessment: function(currAssessment) {
+        var newAssessment;
 
+        // Copy the current assessment, or make a new one if there isn't a current assessment.
+        if (currAssessment) {
+            newAssessment = curator.flatten(currAssessment);
+        } else {
+            newAssessment = {
+                evidence_type:'Pathenogicity',
+                evidence_id: this.state.pathenogicity ? this.state.pathenogicity.uuid : '',
+                evidence_gdm: this.state.gdm ? this.state.gdm.uuid : '',
+                active: true
+            };
+        }
+
+        // Set the assessment's value to the one from the form
+        newAssessment.value = this.componentVars.assessment;
+
+        return newAssessment;
+    },
+
+    // Get pathogenicity assessment matching currently logged-in user
+    getUserAssessment: function() {
+        var pathogenicity = this.state.pathogenicity;
+        var assessment = null;
+
+        if (pathogenicity && pathogenicity.assessments && pathogenicity.assessments.length) {
+            assessment = _(pathogenicity.assessments).find(function(assessment) {
+                return assessment.submitted_by.uuid === this.props.session.user_properties.uuid;
+            });
+        }
+        return assessment;
+    },
+
+    submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
         // Save all form values from the DOM.
@@ -208,30 +242,60 @@ var VariantCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
-            // Convert form values to new flattened pathogenicity object.
-            var newPathogenicity = this.formToPathogenicity(this.state.pathogenicity);
+            // If pathogenicity object has no assessment object found with currently logged-in user
+            // and form assessment has non-default value
+            var userPathogenicityAssessment = this.getUserAssessment();
+            var newAssessment = this.formToAssessment(userPathogenicityAssessment);
+            var promise = new Promise(function(resolve, reject) {
+                var assessmentPromise = null;
 
-            // Assign a link to the pathogenicity's variant if new
-            if (!newPathogenicity.variant && this.state.variant) {
-                newPathogenicity.variant = this.state.variant['@id'];
-            }
+                if (userPathogenicityAssessment && (userPathogenicityAssessment.value !== newAssessment.value)) {
+                    // Updating an existing assessment, and the value of the assessment has changed
+                    assessmentPromise = this.putRestData('/assessments/' + userPathogenicityAssessment.uuid, newAssessment).then(data => {
+                        return Promise.resolve(data['@graph'][0]);
+                    });
+                } else if (!userPathogenicityAssessment && newAssessment.value) {
+                    // New assessment; write it to the DB.
+                    assessmentPromise = this.postRestData('/assessments/', newAssessment).then(data => {
+                        return Promise.resolve(data['@graph'][0]);
+                    });
+                }
+                resolve(assessmentPromise);
+            }.bind(this));
 
-            // Either update or create the pathogenicity object in the DB
-            if (this.state.pathogenicity) {
-                // We're editing a pathogenicity. PUT the new pathogenicity object to the DB to update the existing one.
-                promise = this.putRestData('/pathogenicity/' + this.state.pathogenicity.uuid, newPathogenicity).then(data => {
-                    return Promise.resolve(data['@graph'][0]);
-                });
-            } else {
-                // We created a pathogenicity; POST it to the DB
-                promise = this.postRestData('/pathogenicity/', newPathogenicity).then(data => {
-                    return Promise.resolve(data['@graph'][0]);
-                });
-            }
+            // Wait for the assessment to finish writing if needed, then handle the pathenogicity object
+            promise.then(assessment => {
+                // Convert form values to new flattened pathogenicity object.
+                var newPathogenicity = this.formToPathogenicity(this.state.pathogenicity);
 
-            // Execute THEN after pathogenicty written
-            promise.then(pathogenicity => {
+                // If we made a new assessment, add it to the pathogenicity's assessments
+                if (!userPathogenicityAssessment && assessment) {
+                    if (!newPathogenicity.assessments) {
+                        newPathogenicity.assessments = [];
+                    }
+                    newPathogenicity.assessments.push(assessment['@id']);
+                }
+
+                // Assign a link to the pathogenicity's variant if new
+                if (!newPathogenicity.variant && this.state.variant) {
+                    newPathogenicity.variant = this.state.variant['@id'];
+                }
+
+                // Either update or create the pathogenicity object in the DB
+                if (this.state.pathogenicity) {
+                    // We're editing a pathogenicity. PUT the new pathogenicity object to the DB to update the existing one.
+                    return this.putRestData('/pathogenicity/' + this.state.pathogenicity.uuid, newPathogenicity).then(data => {
+                        return Promise.resolve(data['@graph'][0]);
+                    });
+                } else {
+                    // We created a pathogenicity; POST it to the DB
+                    return this.postRestData('/pathogenicity/', newPathogenicity).then(data => {
+                        return Promise.resolve(data['@graph'][0]);
+                    });
+                }
+            }).then(pathogenicity => {
                 // Given pathogenicity has been saved (created or updated).
+                // Now update the GDM to include the pathogenicity if it's new
                 if (!this.state.pathogenicity && this.state.gdm) {
                     // New pathogenicity; add it to the GDM’s pathogenicity array.
                     var newGdm = curator.flatten(this.state.gdm);
@@ -248,6 +312,7 @@ var VariantCuration = React.createClass({
                 }
                 return Promise.resolve(null);
             }).then(data => {
+                // Now go back to Record Curation
                 var gdmQs = this.state.gdm ? '?gdm=' + this.state.gdm.uuid : '';
                 var pmidQs = this.state.annotation ? '&pmid=' + this.state.annotation.article.pmid : '';
                 this.context.navigate('/curation-central/' + gdmQs + pmidQs);

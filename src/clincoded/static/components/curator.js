@@ -390,7 +390,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
             {curatorMatch ?
                 <span>
                     {variantCurated ?
-                        <span><a href={associatedPathogenicity['@id']}>View</a> | <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a></span>
+                        <span><a href={associatedPathogenicity['@id']} target="_blank">View</a> | <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a></span>
                     :
                         <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid}>Curate/Assess</a>
                     }
@@ -398,7 +398,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
             :
                 <span>
                     {variantCurated && associatedPathogenicity ?
-                        <a href={associatedPathogenicity['@id']}>View</a>
+                        <a href={associatedPathogenicity['@id']} target="_blank">View</a>
                     :
                         <span className="palette-not-curated">Not Curated/Assessed</span>
                     }
@@ -894,6 +894,10 @@ var flatten = module.exports.flatten = function(obj) {
             flat = flattenPathogenicity(obj);
             break;
 
+        case 'assessment':
+            flat = flattenAssessment(obj);
+            break;
+
         default:
             break;
     }
@@ -1148,6 +1152,17 @@ function flattenPathogenicity(pathogenicity) {
             return assessment['@id'];
         });
     }
+
+    return flat;
+}
+
+
+var assessmentSimpleProps = [
+    "date_created", "value", "evidence_type", "evidence_id", "evidence_gdm", "active"
+];
+
+function flattenAssessment(assessment) {
+    var flat = cloneSimpleProps(assessment);
 
     return flat;
 }
