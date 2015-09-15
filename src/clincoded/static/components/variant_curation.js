@@ -120,7 +120,7 @@ var VariantCuration = React.createClass({
             } else {
                 // No assessment foound for user; make an initial one and save it in the component state
                 stateObj.assessment = {
-                    evidence_type: 'pathenogicity',
+                    evidence_type: 'pathogenicity',
                     evidence_id: stateObj.pathogenicity ? stateObj.pathogenicity.uuid : '',
                     evidence_gdm: stateObj.gdm ? stateObj.gdm.uuid : '',
                     value: assessment.DEFAULT_VALUE,
@@ -333,6 +333,11 @@ var VariantCuration = React.createClass({
         this.queryValues.pathogenicityUuid = queryKeyValue('pathogenicity', this.props.href);
         this.queryValues.all = queryKeyValue('all', this.props.href) === "";
 
+        // If requested, get a list of all pathogenicities related to the variant being curated
+        if (this.queryValues.all) {
+
+        }
+
         return (
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
@@ -421,9 +426,9 @@ var VariantCuration = React.createClass({
                                             <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         </div>
                                     </Form>
-                                    {gdm && gdm.variantPathogenicity && this.queryValues.all ?
+                                    {this.queryValues.all && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length ?
                                         <div>
-                                            {gdm.variantPathogenicity.map(function(pathogenicity) {
+                                            {variant.associatedPathogenicities.map(function(pathogenicity) {
                                                 return <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} />;
                                             })}
                                         </div>

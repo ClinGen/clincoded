@@ -16,6 +16,7 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
+var truncateString = globals.truncateString;
 
 
 var CurationMixin = module.exports.CurationMixin = {
@@ -104,6 +105,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 });
 
 
+// Display the header of all variants involved with the current GDM.
 var VariantHeader = module.exports.VariantHeader = React.createClass({
     propTypes: {
         gdm: React.PropTypes.object // GDM whose collected variants to display
@@ -111,16 +113,25 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
 
     render: function() {
         var gdm = this.props.gdm;
+        var collectedVariants = collectGdmVariants(gdm);
 
         return (
             <div>
-                {gdm && gdm.variantPathogenicity && gdm.variantPathogenicity.length ?
-                    <div>
-                        {gdm.variantPathogenicity.map(function(pathogenicity) {
-                            var variantName = pathogenicity.variant.clinvarVariantId ? pathogenicity.variant.clinvarVariantId : pathogenicity.variant.otherDescription;
+                {collectedVariants ?
+                    <div className="variant-header clearfix">
+                        <h2>Gene-Disease Record Variants</h2>
+                        <p>Click a variant to View, Curate, or Edit/Assess it. The icon indicates curation by one or more curators.</p>
+                        {Object.keys(collectedVariants).map(function(variantId) {
+                            var variant = collectedVariants[variantId];
+                            var variantName = variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 20);
+                            var associatedPathogenicity = getPathogenicityFromVariant(variant, gdm.submitted_by.uuid);
+
                             return (
-                                <div key={pathogenicity.uuid}>
-                                    <a href="#" className="btn btn-info btn-xs">{variantName}</a>
+                                <div className="col-sm-6 col-md-3 col-lg-2" key={variant.uuid}>
+                                    <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid}>
+                                        {variant.associatedPathogenicities.length ? <i className="icon icon-sticky-note"></i> : null}
+                                        {variantName}
+                                    </a>
                                 </div>
                             );
                         })}
@@ -382,9 +393,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
     var variantCurated = variant.associatedPathogenicities.length > 0;
 
     // Get the pathogenicity record with an owner that matches the annotation's owner.
-    var associatedPathogenicity = variantCurated ? _(variant.associatedPathogenicities).find(function(pathogenicity) {
-        return pathogenicity.submitted_by.uuid === annotation.submitted_by.uuid;
-    }) : null;
+    var associatedPathogenicity = getPathogenicityFromVariant(variant, annotation.submitted_by.uuid);
 
     // Get all families and individuals that reference this variant into variantAssocations array of families and individuals
     var variantAssociations = collectVariantAssociations(annotation, variant).sort(function(associationA, associationB) {
@@ -686,6 +695,20 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
 });
 
 
+// Get the pathogenicity made by the curator with the given user UUID from the given variant.
+var getPathogenicityFromVariant = function(variant, curatorUuid) {
+    var pathogenicity = null;
+
+    if (variant && variant.associatedPathogenicities.length > 0) {
+        // At this point, we know the variant has a curation (pathogenicity)
+        pathogenicity = _(variant.associatedPathogenicities).find(function(pathogenicity) {
+            return pathogenicity.submitted_by.uuid === curatorUuid;
+        });
+    }
+    return pathogenicity;
+};
+
+
 // Collect references to all families and individuals within an annotation that reference the given variant
 var collectVariantAssociations = function(annotation, targetVariant) {
     var allAssociations = [];
@@ -765,7 +788,7 @@ var collectVariantAssociations = function(annotation, targetVariant) {
 var collectGdmVariants = function(gdm) {
     var allVariants = {};
 
-    if (gdm.annotations && gdm.annotations.length) {
+    if (gdm && gdm.annotations && gdm.annotations.length) {
         gdm.annotations.forEach(function(annotation) {
             // Get all variants in each annotation
             var annotationVariants = collectAnnotationVariants(annotation);
@@ -776,7 +799,7 @@ var collectGdmVariants = function(gdm) {
             });
         });
     }
-    return allVariants;
+    return Object.keys(allVariants).length ? allVariants : null;
 };
 
 

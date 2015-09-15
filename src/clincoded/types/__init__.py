@@ -114,6 +114,7 @@ class Variant(Item):
     embedded = [
         'submitted_by',
         'associatedPathogenicities',
+        'associatedPathogenicities.variant',
         'associatedPathogenicities.submitted_by'
     ]
     rev = {
