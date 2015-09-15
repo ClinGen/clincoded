@@ -65,12 +65,28 @@ var ExperimentalCuration = React.createClass({
             this.setState({experimentalType: this.refs[ref].getValue()});
         } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
             this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()});
+            if (this.refs['geneWithSameFunctionSameDisease.geneImplicatedWithDisease'].getValue() === false) {
+                this.refs['geneWithSameFunctionSameDisease.explanationOfOtherGenes'].resetValue();
+                this.refs['geneWithSameFunctionSameDisease.evidenceInPaper'].resetValue();
+            }
         } else if (ref === 'geneImplicatedInDisease') {
             this.setState({geneImplicatedInDisease: this.refs[ref].toggleValue()});
+            if (this.refs['geneImplicatedInDisease'].getValue() === false) {
+                this.refs['relationshipOfOtherGenesToDisese'].resetValue();
+                this.refs['evidenceInPaper'].resetValue();
+            }
         } else if (ref === 'normalExpression.expressedInTissue') {
             this.setState({expressedInTissue: this.refs[ref].toggleValue()});
+            if (this.refs['normalExpression.expressedInTissue'].getValue() === false) {
+                this.refs['normalExpression.evidence'].resetValue();
+                this.refs['normalExpression.evidenceInPaper'].resetValue();
+            }
         } else if (ref === 'alteredExpression.expressedInPatients') {
             this.setState({expressedInPatients: this.refs[ref].toggleValue()});
+            if (this.refs['alteredExpression.expressedInPatients'].getValue() === false) {
+                this.refs['alteredExpression.evidence'].resetValue();
+                this.refs['alteredExpression.evidenceInPaper'].resetValue();
+            }
         } else if (ref === 'wildTypeRescuePhenotype') {
             this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()});
         } else if (ref === 'patientVariantRescue') {
@@ -88,6 +104,8 @@ var ExperimentalCuration = React.createClass({
             }
             else {
                 this.setState({biochemicalFunctionsBOn: false});
+                this.refs['geneFunctionConsistentWithPhenotype.explanation'].resetValue();
+                this.refs['geneFunctionConsistentWithPhenotype.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeFreeText') {
             if (this.refs[ref].getValue() !== '' || this.refs['geneFunctionConsistentWithPhenotype.phenotypeHPO'].getValue()) {
@@ -95,52 +113,29 @@ var ExperimentalCuration = React.createClass({
             }
             else {
                 this.setState({biochemicalFunctionsBOn: false});
-            }
-        } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
-            if (this.refs['geneWithSameFunctionSameDisease.geneImplicatedWithDisease'].getValue() === false) {
-                //this.refs['geneWithSameFunctionSameDisease.explanationOfOtherGenes'].resetValue();
-                //this.refs['geneWithSameFunctionSameDisease.evidenceInPaper'].resetValue();
-            }
-        } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeHPO' || ref ==='geneFunctionConsistentWithPhenotype.phenotypeFreeText') {
-            if (this.refs['geneFunctionConsistentWithPhenotype.phenotypeHPO'].getValue() === false && this.refs['geneFunctionConsistentWithPhenotype.phenotypeFreeText'].getValue() === false) {
-                //this.refs['geneFunctionConsistentWithPhenotype.explanation'].resetValue();
-                //this.refs['geneFunctionConsistentWithPhenotype.evidenceInPaper'].resetValue();
-            }
-        } else if (ref === 'geneImplicatedInDisease') {
-            if (this.refs['geneImplicatedInDisease'].getValue() === false) {
-                //this.refs['relationshipOfOtherGenesToDisese'].resetValue();
-                //this.refs['evidenceInPaper'].resetValue();
-            }
-        } else if (ref === 'normalExpression.expressedInTissue') {
-            if (this.refs['normalExpression.expressedInTissue'].getValue() === false) {
-                //this.refs['normalExpression.evidence'].resetValue();
-                //this.refs['normalExpression.evidenceInPaper'].resetValue();
-            }
-        } else if (ref === 'alteredExpression.expressedInPatients') {
-            if (this.refs['alteredExpression.expressedInPatients'].getValue() === false) {
-                //this.refs['alteredExpression.evidence'].resetValue();
-                //this.refs['alteredExpression.evidenceInPaper'].resetValue();
+                this.refs['geneFunctionConsistentWithPhenotype.explanation'].resetValue();
+                this.refs['geneFunctionConsistentWithPhenotype.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'cellMutationOrEngineeredEquivalent') {
             this.setState({functionalAlterationPCEE: this.refs['cellMutationOrEngineeredEquivalent'].getValue()});
-            if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() === 'Patient cells') {
-                //this.refs['funcalt.engineeredEquivalentCellType'].resetValue();
-            } else if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() === 'Engineered equivalent') {
-                //this.refs['funcalt.patientCellType'].resetValue();
+            if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() == 'Patient cells') {
+                this.refs['funcalt.engineeredEquivalentCellType'].setValue(null);
+            } else if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() == 'Engineered equivalent') {
+                this.refs['funcalt.patientCellType'].setValue(null);
             }
         } else if (ref === 'animalOrCellCulture') {
             this.setState({modelSystemsNHACCM: this.refs['animalOrCellCulture'].getValue()});
             if (this.refs['animalOrCellCulture'].getValue() === 'Animal model') {
-                //this.refs['cellCulture'].resetValue();
+                this.refs['cellCulture'].resetValue();
             } else if (this.refs['animalOrCellCulture'].getValue() === 'Engineered equivalent') {
                 this.refs['animalModel'].resetValue();
             }
         } else if (ref === 'patientCellOrEngineeredEquivalent') {
             this.setState({rescuePCEE: this.refs['patientCellOrEngineeredEquivalent'].getValue()});
             if (this.refs['patientCellOrEngineeredEquivalent'].getValue() === 'Patient cells') {
-                //this.refs['rescue.patientCellType'].resetValue();
+                this.refs['rescue.patientCellType'].resetValue();
             } else if (this.refs['patientCellOrEngineeredEquivalent'].getValue() === 'Engineered equivalent') {
-                //this.refs['rescue.engineeredEquivalentCellType'].resetValue();
+                this.refs['rescue.engineeredEquivalentCellType'].resetValue();
             }
         }
     },
