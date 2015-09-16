@@ -93,15 +93,15 @@ module.exports.queryKeyValue = function (key, href) {
     return undefined;
 };
 
-// Order that antibody statuses should be displayed
-module.exports.statusOrder = [
-    'eligible for new data',
-    'not eligible for new data',
-    'pending dcc review',
-    'awaiting lab characterization',
-    'not pursued',
-    'not reviewed'
-];
+// Add a key-value pair as a query string to the given href. If href already
+// has query string values, this function adds the given key value to it.
+module.exports.addQueryKey = function(href, key, value) {
+    var existingQuery = href.split(/\?(.+)?/)[1];
+    if (existingQuery) {
+        return href + '&' + key + '=' + value;
+    }
+    return href + '?' + key + '=' + value;
+};
 
 
 module.exports.productionHost = {'curation.clinicalgenome.org':1};
