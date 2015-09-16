@@ -43,15 +43,17 @@ var ExperimentalCuration = React.createClass({
             experimentalName: '', // Currently entered name of the group
             experimentalType: '',
             experimentalTypeDescription: '',
-            geneImplicatedWithDisease: false, // checkbox state values start here
+            geneImplicatedWithDisease: false, // checkbox state values
             geneImplicatedInDisease: false,
             expressedInTissue: false,
             expressedInPatients: false,
             wildTypeRescuePhenotype: false,
             patientVariantRescue: false,
-            biochemicalFunctionsAOn: false, // form checks
+            biochemicalFunctionsAOn: false, // form enabled/disabled checks
             biochemicalFunctionsBOn: false,
             functionalAlterationPCEE: '',
+            functionalAlterationPC: null,
+            functionalAlterationEE: null,
             modelSystemsNHACCM: '',
             rescuePCEE: ''
         };
@@ -135,9 +137,9 @@ var ExperimentalCuration = React.createClass({
         } else if (ref === 'cellMutationOrEngineeredEquivalent') {
             this.setState({functionalAlterationPCEE: this.refs['cellMutationOrEngineeredEquivalent'].getValue()});
             if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() == 'Patient cells') {
-                this.refs['funcalt.engineeredEquivalentCellType'].setValue(null);
+                this.setState({functionalAlterationEE: null});
             } else if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() == 'Engineered equivalent') {
-                this.refs['funcalt.patientCellType'].setValue(null);
+                this.setState({functionalAlterationPC: null});
             }
         } else if (ref === 'animalOrCellCulture') {
             this.setState({modelSystemsNHACCM: this.refs['animalOrCellCulture'].getValue()});
@@ -240,6 +242,11 @@ var ExperimentalCuration = React.createClass({
                     }
                 } else if (stateObj.experimental.evidenceType === 'Functional alteration of gene/gene product') {
                     this.setState({functionalAlterationPCEE: stateObj.experimental.functionalAlteration.cellMutationOrEngineeredEquivalent});
+                    if (stateObj.experimental.functionalAlteration.patientCellType && stateObj.experimental.functionalAlteration.patientCellType !== '') {
+                        this.setState({functionalAlterationPC: stateObj.experimental.functionalAlteration.patientCellType});
+                    } else if (stateObj.experimental.functionalAlteration.engineeredEquivalentCellType && stateObj.experimental.functionalAlteration.engineeredEquivalentCellType !== '') {
+                        this.setState({functionalAlterationEE: stateObj.experimental.functionalAlteration.engineeredEquivalentCellType});
+                    }
                 } else if (stateObj.experimental.evidenceType === 'Model systems') {
                     this.setState({modelSystemsNHACCM: stateObj.experimental.modelSystems.animalOrCellCulture});
                 } else if (stateObj.experimental.evidenceType === 'Rescue') {
@@ -1145,10 +1152,10 @@ var TypeFunctionalAlteration = function() {
                 <option>Patient cells</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <Input type="text" ref="funcalt.patientCellType" label={<LabelPatientCellType />} value={functionalAlteration.patientCellType} placeholder="e.g. 0000001"
+            <Input type="text" ref="funcalt.patientCellType" label={<LabelPatientCellType />} value={this.state.functionalAlterationPC} placeholder="e.g. 0000001"
                 error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" inputDisabled={this.state.functionalAlterationPCEE != 'Patient cells'} required={this.state.functionalAlterationPCEE == 'Patient cells'} />
-            <Input type="text" ref="funcalt.engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. 0000001"
+            <Input type="text" ref="funcalt.engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={this.state.functionalAlterationEE} placeholder="e.g. 0000001"
                 error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" inputDisabled={this.state.functionalAlterationPCEE != 'Engineered equivalent'} required={this.state.functionalAlterationPCEE == 'Engineered equivalent'} />
             <Input type="text" ref="normalFunctionOfGene" label={<LabelNormalFunctionOfGene />} value={functionalAlteration.normalFunctionOfGene} placeholder=""
