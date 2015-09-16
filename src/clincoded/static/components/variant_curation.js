@@ -498,7 +498,7 @@ var VariantCurationView = React.createClass({
 
                             <div>
                                 <dt>de novo Type</dt>
-                                <dd>{pathogenicity.denovoType === true ? 'Yes' : (pathogenicity.denovoType === false ? 'No' : '')}</dd>
+                                <dd>{pathogenicity.denovoType}</dd>
                             </div>
 
                             <div>
