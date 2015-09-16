@@ -133,7 +133,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             }
                             return (
                                 <div className="col-sm-6 col-md-3 col-lg-2" key={variant.uuid}>
-                                    <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}>
+                                    <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}>
                                         {variant.associatedPathogenicities.length ? <i className="icon icon-sticky-note"></i> : null}
                                         {variantName}
                                     </a>

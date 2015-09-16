@@ -112,6 +112,7 @@ var CurationCentral = React.createClass({
     render: function() {
         var gdm = this.state.currGdm;
         var pmid = this.state.currPmid;
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Find the GDM's annotation for the article with the curren PMID
         var annotation = gdm && gdm.annotations && gdm.annotations.length && _(gdm.annotations).find(function(annotation) {
@@ -123,7 +124,7 @@ var CurationCentral = React.createClass({
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                 <div className="container">
-                    <VariantHeader gdm={gdm} session={this.props.session} />
+                    <VariantHeader gdm={gdm} session={session} />
                     <div className="row curation-content">
                         <div className="col-md-3">
                             <PmidSelectionList annotations={gdm && gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
@@ -134,7 +135,7 @@ var CurationCentral = React.createClass({
                                 <div className="curr-pmid-overview">
                                     <PmidSummary article={currArticle} displayJournal />
                                     <PmidDoiButtons pmid={currArticle.pmid} />
-                                    <BetaNote annotation={annotation} session={this.props.session} />
+                                    <BetaNote annotation={annotation} session={session} />
                                     {currArticle.abstract ?
                                         <div className="pmid-overview-abstract">
                                             <h4>Abstract</h4>
@@ -146,7 +147,7 @@ var CurationCentral = React.createClass({
                         </div>
                         {currArticle ?
                             <div className="col-md-3">
-                                <CurationPalette gdm={gdm} annotation={annotation} session={this.props.session} />
+                                <CurationPalette gdm={gdm} annotation={annotation} session={session} />
                             </div>
                         : null}
                     </div>

@@ -332,13 +332,17 @@ var VariantCuration = React.createClass({
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.variantUuid = queryKeyValue('variant', this.props.href);
         this.queryValues.pathogenicityUuid = queryKeyValue('pathogenicity', this.props.href);
+        this.queryValues.session_user = queryKeyValue('user', this.props.href);
         this.queryValues.all = queryKeyValue('all', this.props.href) === "";
+
+        // Get the user's UUID, either from the query string or from the annotation
+        var user = this.queryValues.session_user ? this.queryValues.session_user : (annotation ? annotation.submitted_by.uuid : '');
 
         // If we're editing a pathogenicity, get a list of all the variant's pathogenicities, except for the one
         // we're editing. This is to display the list of past curations.
-        if (this.queryValues.all && pathogenicity && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length) {
+        if (this.queryValues.all && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length) {
             otherPathogenicityList = _(variant.associatedPathogenicities).filter(function(fp) {
-                return fp.uuid !== pathogenicity.uuid;
+                return fp.submitted_by.uuid !== user;
             });
         }
 
@@ -430,7 +434,10 @@ var VariantCuration = React.createClass({
                                         }
                                         <AssessmentPanel panelTitle="Variant Assessment" currVal={this.state.assessment && this.state.assessment.value} updateValue={this.updateAssessment} />
                                         <div className="curation-submit clearfix">
-                                            <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" />
+                                            {gdm ?
+                                                <a href={'/curation-central/?gdm=' + gdm.uuid + (annotation ? '&pmid=' + annotation.article.pmid : '')} className="btn btn-default btn-inline-spacer pull-right">Cancel</a>
+                                            : null}
                                         </div>
                                     </Form>
                                     {otherPathogenicityList ?
