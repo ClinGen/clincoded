@@ -95,8 +95,8 @@ runcmd:
 # Ideally this would build as a different user so clincoded only has read
 # permissions
 - set -e
-# - echo "America/Los_Angeles" | sudo tee /etc/timezone
-# - sudo dpkg-reconfigure --frontend noninteractive tzdata
+- echo "America/Los_Angeles" | sudo tee /etc/timezone
+- sudo dpkg-reconfigure --frontend noninteractive tzdata
 - sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
 - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - 
 - sudo apt-get update
