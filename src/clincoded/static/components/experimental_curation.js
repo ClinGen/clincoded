@@ -42,6 +42,7 @@ var ExperimentalCuration = React.createClass({
             experimental: null, // If we're editing a group, this gets the fleshed-out group object we're editing
             experimentalName: '', // Currently entered name of the group
             experimentalType: '',
+            experimentalTypeDescription: '',
             geneImplicatedWithDisease: false, // checkbox state values start here
             geneImplicatedInDisease: false,
             expressedInTissue: false,
@@ -53,8 +54,19 @@ var ExperimentalCuration = React.createClass({
             functionalAlterationPCEE: '',
             modelSystemsNHACCM: '',
             rescuePCEE: ''
-
         };
+    },
+
+    getExperimentalTypeDescription: function(item) {
+        var experimentalTypeDescriptionList = {
+            'Biochemical function': 'The gene product performs a biochemical function shared with other known genes in the disease of interest, or consistent with the phenotype',
+            'Protein interactions': 'The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest',
+            'Expression': 'The gene is expressed in tissues relevant to the disease of interest and/or is altered in expression in patients who have the disease',
+            'Functional alteration of gene/gene product': 'The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents',
+            'Model systems': 'Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state',
+            'Rescue': 'The cellular phenotype in patient-derived cells or engineered equivalents can be rescued by addition of the wild-type gene product'
+        };
+        return experimentalTypeDescriptionList[item];
     },
 
     // Handle value changes in genotyping method 1
@@ -62,7 +74,11 @@ var ExperimentalCuration = React.createClass({
         if (ref === 'experimentalName' && this.refs[ref].getValue()) {
             this.setState({experimentalName: this.refs[ref].getValue()});
         } else if (ref === 'experimentalType') {
-            this.setState({experimentalType: this.refs[ref].getValue()});
+            var tempExperimentalType = this.refs[ref].getValue();
+            this.setState({
+                experimentalType: tempExperimentalType,
+                experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType)
+            });
         } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
             this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()});
             if (this.refs['geneWithSameFunctionSameDisease.geneImplicatedWithDisease'].getValue() === false) {
@@ -760,7 +776,8 @@ var ExperimentalCuration = React.createClass({
                             : null}
                             <div className="viewer-titles">
                                 <h1>{(experimental ? 'Edit' : 'Curate') + ' Experimental Data Information'}</h1>
-                                <h2>Experiment: {this.state.experimentalName ? <span>{this.state.experimentalName}</span> : <span className="no-entry">No entry</span>}{this.state.experimentalType ? <span> ({this.state.experimentalType})</span> : null}</h2>
+                                <h2>Experiment Type: {this.state.experimentalType && this.state.experimentalType != 'none' ? <span><strong>{this.state.experimentalType}</strong></span> : <span className="no-entry">None specified</span>}</h2>
+                                <h2>Experiment Name: {this.state.experimentalName ? <span>{this.state.experimentalName}</span> : <span className="no-entry">No entry</span>}</h2>
                             </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
@@ -769,9 +786,17 @@ var ExperimentalCuration = React.createClass({
                                             {ExperimentalNameType.call(this)}
                                         </Panel>
                                         {this.state.experimentalType == 'Biochemical function' ?
-                                            <PanelGroup accordion><Panel title="Biochemical function" open>
-                                                {TypeBiochemicalFunction.call(this)}
-                                            </Panel></PanelGroup>
+                                            <PanelGroup accordion>
+                                                <Panel title="Biochemical function" open>
+                                                    {TypeBiochemicalFunction.call(this)}
+                                                </Panel>
+                                                <Panel title="A. Gene(s) with same function implicated in same disease" open>
+                                                    {TypeBiochemicalFunctionA.call(this)}
+                                                </Panel>
+                                                <Panel title="B. Gene function consistent with phenotype" open>
+                                                    {TypeBiochemicalFunctionB.call(this)}
+                                                </Panel>
+                                            </PanelGroup>
                                         : null }
                                         {this.state.experimentalType == 'Protein interactions' ?
                                             <PanelGroup accordion><Panel title="Protein interactions" open>
@@ -779,9 +804,17 @@ var ExperimentalCuration = React.createClass({
                                             </Panel></PanelGroup>
                                         : null }
                                         {this.state.experimentalType == 'Expression' ?
-                                            <PanelGroup accordion><Panel title="Expression" open>
-                                                {TypeExpression.call(this)}
-                                            </Panel></PanelGroup>
+                                            <PanelGroup accordion>
+                                                <Panel title="Expression" open>
+                                                    {TypeExpression.call(this)}
+                                                </Panel>
+                                                <Panel title="A. Gene normally expressed in tissue relevant to the disease" open>
+                                                    {TypeExpressionA.call(this)}
+                                                </Panel>
+                                                <Panel title="B. Altered expression in Patients" open>
+                                                    {TypeExpressionB.call(this)}
+                                                </Panel>
+                                            </PanelGroup>
                                         : null }
                                         {this.state.experimentalType == 'Functional alteration of gene/gene product' ?
                                             <PanelGroup accordion><Panel title="Functional alteration of gene/gene product" open>
@@ -825,9 +858,6 @@ var ExperimentalNameType = function() {
 
     return (
         <div className="row">
-            <Input type="text" ref="experimentalName" label="Experiment name:" value={experimental && experimental.label} handleChange={this.handleChange}
-                error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="select" ref="experimentalType" label="Experiment type:" defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
@@ -839,6 +869,12 @@ var ExperimentalNameType = function() {
                 <option>Model systems</option>
                 <option>Rescue</option>
             </Input>
+            <Input type="text" ref="experimentalName" label="Experiment name:" value={experimental && experimental.label} handleChange={this.handleChange}
+                error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            {this.state.experimentalType && this.state.experimentalType != 'none' ?
+                <p className="col-sm-7 col-sm-offset-5">{this.state.experimentalTypeDescription}</p>
+                : null}
         </div>
     );
 };
@@ -852,22 +888,6 @@ var TypeBiochemicalFunction = function() {
         biochemicalFunction.identifiedFunction = biochemicalFunction.identifiedFunction ? biochemicalFunction.identifiedFunction : null;
         biochemicalFunction.evidenceForFunction = biochemicalFunction.evidenceForFunction ? biochemicalFunction.evidenceForFunction : null;
         biochemicalFunction.evidenceForFunctionInPaper = biochemicalFunction.evidenceForFunctionInPaper ? biochemicalFunction.evidenceForFunctionInPaper : null;
-        biochemicalFunction.geneWithSameFunctionSameDisease = biochemicalFunction.geneWithSameFunctionSameDisease ? biochemicalFunction.geneWithSameFunctionSameDisease : {};
-        if (biochemicalFunction.geneWithSameFunctionSameDisease) {
-            biochemicalFunction.geneWithSameFunctionSameDisease.genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? this.joinItems(biochemicalFunction.geneWithSameFunctionSameDisease.genes) : null;
-            biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction : null;
-            biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes ? biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes : null;
-            biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper : null;
-            biochemicalFunction.geneWithSameFunctionSameDisease.assessments = biochemicalFunction.geneWithSameFunctionSameDisease.assessments ? biochemicalFunction.geneWithSameFunctionSameDisease.assessments : null;
-        }
-        biochemicalFunction.geneFunctionConsistentWithPhenotype = biochemicalFunction.geneFunctionConsistentWithPhenotype ? biochemicalFunction.geneFunctionConsistentWithPhenotype : {};
-        if (biochemicalFunction.geneFunctionConsistentWithPhenotype) {
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO : null;
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText : null;
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation = biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation ? biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation : null;
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper ? biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper : null;
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments = biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments ? biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments : null;
-        }
     }
     return (
         <div className="row">
@@ -880,8 +900,26 @@ var TypeBiochemicalFunction = function() {
             <Input type="textarea" ref="evidenceForFunctionInPaper" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.evidenceForFunctionInPaper}
                 error={this.getFormError('evidenceForFunctionInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceForFunctionInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">Enter evidence for A and/or B (at least one required)</p>
-            <h4 className="col-sm-7 col-sm-offset-5">A. Gene(s) with same function implicated in same disease</h4>
+            <p className="col-sm-7 col-sm-offset-5">There are 2 kinds of evidence that support Biochemical Function (see A. and B.). You can collect either or both - each kind counts as one piece of Biochemical Function evidence. Fill out the top section and then curate on A. and/or B.</p>
+        </div>
+    );
+}
+
+var TypeBiochemicalFunctionA = function() {
+    var experimental = this.state.experimental ? this.state.experimental : {};
+    var biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
+    if (biochemicalFunction) {
+        biochemicalFunction.geneWithSameFunctionSameDisease = biochemicalFunction.geneWithSameFunctionSameDisease ? biochemicalFunction.geneWithSameFunctionSameDisease : {};
+        if (biochemicalFunction.geneWithSameFunctionSameDisease) {
+            biochemicalFunction.geneWithSameFunctionSameDisease.genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? this.joinItems(biochemicalFunction.geneWithSameFunctionSameDisease.genes) : null;
+            biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction : null;
+            biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes ? biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes : null;
+            biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper : null;
+            biochemicalFunction.geneWithSameFunctionSameDisease.assessments = biochemicalFunction.geneWithSameFunctionSameDisease.assessments ? biochemicalFunction.geneWithSameFunctionSameDisease.assessments : null;
+        }
+    }
+    return (
+        <div className="row">
             <Input type="text" ref="geneWithSameFunctionSameDisease.genes" label="Genes (HGNC):" value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
                 error={this.getFormError('geneWithSameFunctionSameDisease.genes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.genes')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -900,7 +938,25 @@ var TypeBiochemicalFunction = function() {
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.geneImplicatedWithDisease} />
-            <h4 className="col-sm-7 col-sm-offset-5">B. Gene function consistent with phenotype</h4>
+        </div>
+    );
+}
+
+var TypeBiochemicalFunctionB = function() {
+    var experimental = this.state.experimental ? this.state.experimental : {};
+    var biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
+    if (biochemicalFunction) {
+        biochemicalFunction.geneFunctionConsistentWithPhenotype = biochemicalFunction.geneFunctionConsistentWithPhenotype ? biochemicalFunction.geneFunctionConsistentWithPhenotype : {};
+        if (biochemicalFunction.geneFunctionConsistentWithPhenotype) {
+            biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO : null;
+            biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText : null;
+            biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation = biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation ? biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation : null;
+            biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper ? biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper : null;
+            biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments = biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments ? biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments : null;
+        }
+    }
+    return (
+        <div className="row">
             <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />} value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" handleChange={this.handleChange} />
@@ -991,26 +1047,30 @@ var TypeExpression = function() {
     var expression = experimental.expression ? experimental.expression : {};
     if (expression) {
         expression.organOfTissue = expression.organOfTissue ? expression.organOfTissue : null;
-        expression.normalExpression = expression.normalExpression ? expression.normalExpression : {};
-        if (expression.normalExpression) {
-            expression.normalExpression.evidence = expression.normalExpression.evidence ? expression.normalExpression.evidence : null;
-            expression.normalExpression.evidenceInPaper = expression.normalExpression.evidenceInPaper ? expression.normalExpression.evidenceInPaper : null;
-            expression.normalExpression.assessments = expression.normalExpression.assessments ? expression.normalExpression.assessments : null;
-        }
-        expression.alteredExpression = expression.alteredExpression ? expression.alteredExpression : {};
-        if (expression.alteredExpression) {
-            expression.alteredExpression.evidence = expression.alteredExpression.evidence ? expression.alteredExpression.evidence : null;
-            expression.alteredExpression.evidenceInPaper = expression.alteredExpression.evidenceInPaper ? expression.alteredExpression.evidenceInPaper : null;
-            expression.alteredExpression.assessments = expression.alteredExpression.assessments ? expression.alteredExpression.assessments : null;
-        }
     }
     return (
         <div className="row">
             <Input type="text" ref="organOfTissue" label={<LabelUberonId />} value={expression.organOfTissue} placeholder="e.g. UBERON_0000948"
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <p className="col-sm-7 col-sm-offset-5">Enter evidence for A and/or B (at least one required)</p>
-            <h4 className="col-sm-7 col-sm-offset-5">A. Gene normally expressed in tissue relevant to the disease</h4>
+            <p className="col-sm-7 col-sm-offset-5">There are 2 kinds of evidence that support Expression (see A. and B.). You can collect either or both - each kind counts as one piece of Expression evidence. Fill out the top section and then curate on A. and/or B.</p>
+        </div>
+    );
+}
+
+var TypeExpressionA = function() {
+    var experimental = this.state.experimental ? this.state.experimental : {};
+    var expression = experimental.expression ? experimental.expression : {};
+    if (expression) {
+        expression.normalExpression = expression.normalExpression ? expression.normalExpression : {};
+        if (expression.normalExpression) {
+            expression.normalExpression.evidence = expression.normalExpression.evidence ? expression.normalExpression.evidence : null;
+            expression.normalExpression.evidenceInPaper = expression.normalExpression.evidenceInPaper ? expression.normalExpression.evidenceInPaper : null;
+            expression.normalExpression.assessments = expression.normalExpression.assessments ? expression.normalExpression.assessments : null;
+        }
+    }
+    return (
+        <div className="row">
             <Input type="checkbox" ref="normalExpression.expressedInTissue" label="Is gene normally expressed in tissues relevant to the disease?:"
                 checked={this.state.expressedInTissue} defaultChecked="false" handleChange={this.handleChange}
                 error={this.getFormError('normalExpression.expressedInTissue')} clearError={this.clrFormErrors.bind(null, 'normalExpression.expressedInTissue')}
@@ -1021,7 +1081,23 @@ var TypeExpression = function() {
             <Input type="textarea" ref="normalExpression.evidenceInPaper" label="Information about where evidence can be found in paper:" rows="5" value={expression.normalExpression.evidenceInPaper}
                 error={this.getFormError('normalExpression.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.expressedInTissue} required={this.state.expressedInTissue} />
-            <h4 className="col-sm-7 col-sm-offset-5">B. Altered expression in Patients</h4>
+        </div>
+    );
+}
+
+var TypeExpressionB = function() {
+    var experimental = this.state.experimental ? this.state.experimental : {};
+    var expression = experimental.expression ? experimental.expression : {};
+    if (expression) {
+        expression.alteredExpression = expression.alteredExpression ? expression.alteredExpression : {};
+        if (expression.alteredExpression) {
+            expression.alteredExpression.evidence = expression.alteredExpression.evidence ? expression.alteredExpression.evidence : null;
+            expression.alteredExpression.evidenceInPaper = expression.alteredExpression.evidenceInPaper ? expression.alteredExpression.evidenceInPaper : null;
+            expression.alteredExpression.assessments = expression.alteredExpression.assessments ? expression.alteredExpression.assessments : null;
+        }
+    }
+    return (
+        <div className="row">
             <Input type="checkbox" ref="alteredExpression.expressedInPatients" label="Is gene normally expressed in tissues relevant to the disease?:"
                 checked={this.state.expressedInPatients} defaultChecked="false" handleChange={this.handleChange}
                 error={this.getFormError('alteredExpression.expressedInPatients')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.expressedInPatients')}
@@ -1271,15 +1347,7 @@ var ExperimentalViewer = React.createClass({
         return (
             <div className="container">
                 <div className="row curation-content-viewer">
-                    <h1>View Experimental Data: {context.label}</h1>
-                    <Panel panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Experimental Evidence Type</dt>
-                                <dd>{context.evidenceType}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
+                    <h1>View Experimental Data: {context.label} ({context.evidenceType})</h1>
 
                     {context.evidenceType == 'Biochemical function' ?
                     <Panel title="Biochemical function" panelClassName="panel-data">
