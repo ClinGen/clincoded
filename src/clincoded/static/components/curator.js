@@ -708,6 +708,11 @@ var flatten = module.exports.flatten = function(obj) {
             break;
     }
 
+    // Flatten submitted_by
+    if (obj.submitted_by) {
+        flat.submitted_by = obj.submitted_by['@id'];
+    }
+
     return flat;
 };
 
