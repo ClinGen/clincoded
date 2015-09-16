@@ -114,6 +114,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
 
     render: function() {
         var gdm = this.props.gdm;
+        var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
         var collectedVariants = collectGdmVariants(gdm);
 
         return (
@@ -127,8 +128,8 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             var variantName = variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 20);
                             var userPathogenicity = null;
 
-                            if (this.props.session) {
-                                userPathogenicity = getPathogenicityFromVariant(variant, this.props.session.user_properties.uuid);
+                            if (session) {
+                                userPathogenicity = getPathogenicityFromVariant(variant, session.user_properties.uuid);
                             }
                             return (
                                 <div className="col-sm-6 col-md-3 col-lg-2" key={variant.uuid}>
