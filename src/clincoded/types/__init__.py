@@ -689,6 +689,9 @@ class Pathogenicity(Item):
     embedded = [
         'submitted_by',
         'variant',
+        'variant.associatedPathogenicities',
+        'variant.associatedPathogenicities.submitted_by',
+        'variant.associatedPathogenicities.variant',
         'assessments',
         'assessments.submitted_by',
         'associatedGdm',

@@ -108,7 +108,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 // Display the header of all variants involved with the current GDM.
 var VariantHeader = module.exports.VariantHeader = React.createClass({
     propTypes: {
-        gdm: React.PropTypes.object // GDM whose collected variants to display
+        gdm: React.PropTypes.object, // GDM whose collected variants to display
+        session: React.PropTypes.object // Logged-in session
     },
 
     render: function() {
@@ -121,14 +122,17 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                     <div className="variant-header clearfix">
                         <h2>Gene-Disease Record Variants</h2>
                         <p>Click a variant to View, Curate, or Edit/Assess it. The icon indicates curation by one or more curators.</p>
-                        {Object.keys(collectedVariants).map(function(variantId) {
+                        {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
                             var variantName = variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 20);
-                            var associatedPathogenicity = getPathogenicityFromVariant(variant, gdm.submitted_by.uuid);
+                            var userPathogenicity = null;
 
+                            if (this.props.session) {
+                                userPathogenicity = getPathogenicityFromVariant(variant, this.props.session.user_properties.uuid);
+                            }
                             return (
                                 <div className="col-sm-6 col-md-3 col-lg-2" key={variant.uuid}>
-                                    <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid}>
+                                    <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}>
                                         {variant.associatedPathogenicities.length ? <i className="icon icon-sticky-note"></i> : null}
                                         {variantName}
                                     </a>

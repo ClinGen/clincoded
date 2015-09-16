@@ -325,6 +325,7 @@ var VariantCuration = React.createClass({
         var annotation = this.state.annotation;
         var variant = this.state.variant;
         var pathogenicity = this.state.pathogenicity;
+        var otherPathogenicityList;
 
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
@@ -333,9 +334,12 @@ var VariantCuration = React.createClass({
         this.queryValues.pathogenicityUuid = queryKeyValue('pathogenicity', this.props.href);
         this.queryValues.all = queryKeyValue('all', this.props.href) === "";
 
-        // If requested, get a list of all pathogenicities related to the variant being curated
-        if (this.queryValues.all) {
-
+        // If we're editing a pathogenicity, get a list of all the variant's pathogenicities, except for the one
+        // we're editing. This is to display the list of past curations.
+        if (this.queryValues.all && pathogenicity && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length) {
+            otherPathogenicityList = _(variant.associatedPathogenicities).filter(function(fp) {
+                return fp.uuid !== pathogenicity.uuid;
+            });
         }
 
         return (
@@ -349,6 +353,9 @@ var VariantCuration = React.createClass({
                     : null}
                     <div className="viewer-titles">
                         <h1>{(pathogenicity ? 'Edit' : 'Curate') + ' Variant Information'}</h1>
+                        {variant ?
+                            <h2>{variant.clinvarVariantId ? <span>{'VariationId: ' + variant.clinvarVariantId}</span> : <span>{'Description: ' + variant.otherDescription}</span>}</h2>
+                        : null}
                     </div>
                     <div className="row group-curation-content">
                         <div className="col-sm-12">
@@ -426,9 +433,9 @@ var VariantCuration = React.createClass({
                                             <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                         </div>
                                     </Form>
-                                    {this.queryValues.all && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length ?
+                                    {otherPathogenicityList ?
                                         <div>
-                                            {variant.associatedPathogenicities.map(function(pathogenicity) {
+                                            {otherPathogenicityList.map(function(pathogenicity) {
                                                 return <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} />;
                                             })}
                                         </div>
@@ -460,46 +467,46 @@ var VariantCurationView = React.createClass({
         return (
             <div>
                 {pathogenicity && variant ?
-                    <Panel title={'Variant “' + variantTitle + '” curated by ' + pathogenicity.submitted_by.title} panelClassName="panel-data">
+                    <Panel title={'Curated by ' + pathogenicity.submitted_by.title} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Variant type consistent with disease mechanism</dt>
-                                <dd>{pathogenicity.consistentWithDiseaseMechanism ? 'Yes' : 'No'}</dd>
+                                <dd>{pathogenicity.consistentWithDiseaseMechanism === true ? 'Yes' : (pathogenicity.consistentWithDiseaseMechanism === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
                                 <dt>Variant within functional domain</dt>
-                                <dd>{pathogenicity.withinFunctionalDomain ? 'Yes' : 'No'}</dd>
+                                <dd>{pathogenicity.withinFunctionalDomain === true ? 'Yes' : (pathogenicity.withinFunctionalDomain === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
                                 <dt>Frequency data supports pathogenicity</dt>
-                                <dd>{pathogenicity.frequencySupportPathogenicity ? 'Yes' : 'No'}</dd>
+                                <dd>{pathogenicity.frequencySupportPathogenicity === true ? 'Yes' : (pathogenicity.frequencySupportPathogenicity === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
                                 <dt>Previously reported</dt>
-                                <dd>{pathogenicity.previouslyReported ? 'Yes' : 'No'}</dd>
+                                <dd>{pathogenicity.previouslyReported === true ? 'Yes' : (pathogenicity.previouslyReported === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
                                 <dt>de novo Type</dt>
-                                <dd>{pathogenicity.denovoType}</dd>
+                                <dd>{pathogenicity.denovoType === true ? 'Yes' : (pathogenicity.denovoType === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
                                 <dt>In trans with another variant</dt>
-                                <dd>{pathogenicity.intransWithAnotherVariant ? 'Yes' : 'No'}</dd>
+                                <dd>{pathogenicity.intransWithAnotherVariant === true ? 'Yes' : (pathogenicity.intransWithAnotherVariant === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
                                 <dt>Supporting segregation data</dt>
-                                <dd>{pathogenicity.supportingSegregation ? 'Yes' : 'No'}</dd>
+                                <dd>{pathogenicity.supportingSegregation === true ? 'Yes' : (pathogenicity.supportingSegregation === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
                                 <dt>Supporting experimental data</dt>
-                                <dd>{pathogenicity.supportingExperimental ? 'Yes' : 'No'}</dd>
+                                <dd>{pathogenicity.supportingExperimental === true ? 'Yes' : (pathogenicity.supportingExperimental === false ? 'No' : '')}</dd>
                             </div>
 
                             <div>
