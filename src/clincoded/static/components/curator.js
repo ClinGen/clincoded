@@ -167,15 +167,23 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                 // Get all associations (families, individuals) for this annotation and variant
                 var associations = collectVariantAssociations(annotation, variant);
                 if (associations) {
+                    // Sort by probands first
+                    var sortedAssociations = _(associations).sortBy(function(association) {
+                        if (association['@type'][0] === 'individual') {
+                            return association.proband ? 0 : 1;
+                        }
+                        return 1;
+                    });
                     var render = (
                         <div>
                             <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> → </span>
-                            {associations.map(function(association, i) {
+                            {sortedAssociations.map(function(association, i) {
                                 var associationType = association['@type'][0];
+                                var probandLabel = (associationType === 'individual' && association.proband) ? <i className="icon icon-proband"></i> : null;
                                 return (
                                     <span key={i}>
                                         {i > 0 ? ', ' : ''}
-                                        <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>
+                                        <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>{probandLabel}
                                     </span>
                                 );
                             })}
