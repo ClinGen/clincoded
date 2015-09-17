@@ -313,13 +313,7 @@ var ExperimentalCuration = React.createClass({
                             }
                         }
                         stateObj.variantOption = currVariantOption;
-                    } else {
-                        // variant object exists, but it's empty. Open one empty variant panel
-                        stateObj.variantCount = 1;
                     }
-                } else {
-                    // variant object does not exist. Open one empty variant panel
-                    stateObj.variantCount = 1;
                 }
             }
 
@@ -516,7 +510,7 @@ var ExperimentalCuration = React.createClass({
                 newExperimental.evidenceType = this.getFormValue('experimentalType');
 
                 // prepare experimental object for post/putting to db
-                if (this.getFormValue('experimentalType') == 'Biochemical function') {
+                if (newExperimental.evidenceType == 'Biochemical function') {
                     // newExperimental object for type Rescue
                     newExperimental.biochemicalFunction = {geneWithSameFunctionSameDisease: {}, geneFunctionConsistentWithPhenotype: {}};
                     var BFidentifiedFunction = this.getFormValue('identifiedFunction');
@@ -565,7 +559,7 @@ var ExperimentalCuration = React.createClass({
                     if (BFGFCWPevidenceInPaper) {
                         newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = BFGFCWPevidenceInPaper;
                     }
-                } else if (this.getFormValue('experimentalType') == 'Protein interactions') {
+                } else if (newExperimental.evidenceType == 'Protein interactions') {
                     // newExperimental object for type Rescue
                     newExperimental.proteinInteractions = {};
                     var PIinteractingGenes = geneSymbols;
@@ -590,7 +584,7 @@ var ExperimentalCuration = React.createClass({
                     if (PIevidenceInPaper) {
                         newExperimental.proteinInteractions.evidenceInPaper = PIevidenceInPaper;
                     }
-                } else if (this.getFormValue('experimentalType') == 'Expression') {
+                } else if (newExperimental.evidenceType == 'Expression') {
                     // newExperimental object for type Rescue
                     newExperimental.expression = {normalExpression: {}, alteredExpression: {}};
                     var EorganOfTissue = this.getFormValue('organOfTissue');
@@ -617,7 +611,7 @@ var ExperimentalCuration = React.createClass({
                     if (EAEevidenceInPaper) {
                         newExperimental.expression.alteredExpression.evidenceInPaper = EAEevidenceInPaper;
                     }
-                } else if (this.getFormValue('experimentalType') == 'Functional alteration of gene/gene product') {
+                } else if (newExperimental.evidenceType == 'Functional alteration of gene/gene product') {
                     // newExperimental object for type Rescue
                     newExperimental.functionalAlteration = {};
                     var FAcellMutationOrEngineeredEquivalent = this.getFormValue('cellMutationOrEngineeredEquivalent');
@@ -648,7 +642,7 @@ var ExperimentalCuration = React.createClass({
                     if (FAevidenceInPaper) {
                         newExperimental.functionalAlteration.evidenceInPaper = FAevidenceInPaper;
                     }
-                } else if (this.getFormValue('experimentalType') == 'Model systems') {
+                } else if (newExperimental.evidenceType == 'Model systems') {
                     // newExperimental object for type Rescue
                     newExperimental.modelSystems = {};
                     var MSanimalOrCellCulture = this.getFormValue('animalOrCellCulture');
@@ -691,7 +685,7 @@ var ExperimentalCuration = React.createClass({
                     if (MSevidenceInPaper) {
                         newExperimental.modelSystems.evidenceInPaper = MSevidenceInPaper;
                     }
-                } else if (this.getFormValue('experimentalType') == 'Rescue') {
+                } else if (newExperimental.evidenceType == 'Rescue') {
                     // newExperimental object for type Rescue
                     newExperimental.rescue = {};
                     var RpatientCellOrEngineeredEquivalent = this.getFormValue('patientCellOrEngineeredEquivalent');
@@ -736,10 +730,33 @@ var ExperimentalCuration = React.createClass({
                     }
                 }
 
+                var searchStr = '';
                 // Begin with empty promise
                 new Promise(function(resolve, reject) {
-                    console.log(newExperimental);
                     resolve(1);
+                }).then(diseases => {
+                    if (geneSymbols && geneSymbols.length) {
+                        // At least one gene symbol entered; search the DB for them.
+                        searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
+                        return this.getRestData(searchStr).then(genes => {
+                            if (genes['@graph'].length === geneSymbols.length) {
+                                // Successfully retrieved all genes
+                                return Promise.resolve(genes);
+                            } else {
+                                var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
+                                if (newExperimental.evidenceType == 'Biochemical function') {
+                                    this.setFormErrors('geneWithSameFunctionSameDisease.genes', missingGenes.join(', ') + ' not found');
+                                } else if (newExperimental.evidenceType == 'Protein interactions') {
+                                    this.setFormErrors('interactingGenes', missingGenes.join(', ') + ' not found');
+                                }
+
+                                throw genes;
+                            }
+                        });
+                    } else {
+                        // No genes entered; just pass null to the next then
+                        return Promise.resolve(null);
+                    }
                 }).then(data => {
                     // See what variants from the form already exist in the DB (we don't search for "Other description"; each one
                     // of those kinds of variants generates a new variant object). For any that already exist, push them onto
@@ -866,10 +883,10 @@ var ExperimentalCuration = React.createClass({
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                     } else {
-                        this.context.navigate('/experimental-submit/?gdm=' + this.state.gdm.uuid + '&experimental=' + this.state.experimental.uuid + '&evidence=' + this.state.annotation.uuid);
+                        var tempExperimentalUuid = savedExperimental ? savedExperimental.uuid : this.state.experimental.uuid;
+                        this.context.navigate('/experimental-submit/?gdm=' + this.state.gdm.uuid + '&experimental=' + tempExperimentalUuid + '&evidence=' + this.state.annotation.uuid);
                     }
                 }).catch(function(e) {
-                    console.log(e);
                     console.log('EXPERIMENTAL DATA ERROR=: %o', e);
                 });
             }
@@ -1598,7 +1615,9 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Genes</dt>
-                                <dd></dd>
+                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(function(gene, i) {
+                                        return (<span>{gene.symbol} </span>);
+                                    })}</dd>
                             </div>
 
                             <div>
@@ -1655,7 +1674,9 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Interacting Gene(s)</dt>
-                                <dd>{context.proteinInteractions.interactingGenes.join(', ')}</dd>
+                                <dd>{context.proteinInteractions.interactingGenes.map(function(gene, i) {
+                                        return (<span>{gene.symbol} </span>);
+                                    })}</dd>
                             </div>
 
                             <div>
