@@ -1057,6 +1057,9 @@ var IndividualVariantInfo = function() {
                                 <option>Yes</option>
                                 <option>No</option>
                             </Input>
+                            <p className="col-sm-7 col-sm-offset-5 input-note-below">
+                                Note: Probands are indicated by the following icon: <i className="icon icon-proband"></i>
+                            </p>
                         </div>
                     : null}
 
