@@ -652,8 +652,9 @@ var IndividualCuration = React.createClass({
         var annotation = this.state.annotation;
         var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
-        var probandLabel = (individual && individual.proband ? <i className="icon icon-proband-white"></i> : null);
-        var variantTitle = (individual && individual.proband) ? <h4>Individual{probandLabel} – Variant(s) segregating with Proband</h4> : <h4>Individual — Associated Variant(s)</h4>;
+        var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
+        var probandLabelWhite = (individual && individual.proband ? <i className="icon icon-proband-white"></i> : null);
+        var variantTitle = (individual && individual.proband) ? <h4>Individual{probandLabelWhite} – Variant(s) segregating with Proband</h4> : <h4>Individual — Associated Variant(s)</h4>;
 
         // Get a list of associated groups if editing an individual, or the group in the query string if there was one, or null.
         var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
@@ -736,17 +737,17 @@ var IndividualCuration = React.createClass({
                                             {IndividualName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title={<LabelPanelTitle probandLabel={probandLabel} labelText="Disease & Phenotype(s)" />} open>
+                                            <Panel title={<LabelPanelTitle probandLabel={probandLabelWhite} labelText="Disease & Phenotype(s)" />} open>
                                                 {IndividualCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={<LabelPanelTitle probandLabel={probandLabel} labelText="Individual — Demographics" />} open>
+                                            <Panel title={<LabelPanelTitle probandLabel={probandLabelWhite} labelText="Individual — Demographics" />} open>
                                                 {IndividualDemographics.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={<LabelPanelTitle probandLabel={probandLabel} labelText="Individual — Methods" />} open>
+                                            <Panel title={<LabelPanelTitle probandLabel={probandLabelWhite} labelText="Individual — Methods" />} open>
                                                 {methods.render.call(this, method)}
                                             </Panel>
                                         </PanelGroup>
@@ -756,7 +757,7 @@ var IndividualCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={<LabelPanelTitle probandLabel={probandLabel} labelText="Individual — Additional Information" />} open>
+                                            <Panel title={<LabelPanelTitle probandLabel={probandLabelWhite} labelText="Individual — Additional Information" />} open>
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
