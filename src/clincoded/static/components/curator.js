@@ -385,6 +385,19 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
             :
                 <div>No associations</div>
             }
+            {(family && family.segregation && family.segregation.variants && family.segregation.variants.length) ?
+                <div>
+                    <span>Variants: </span>
+                    {family.segregation.variants.map(function(variant, j) {
+                        return (
+                            <span key={j}>
+                                {j > 0 ? ', ' : ''}
+                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
+                            </span>
+                        );
+                    })}
+                </div>
+            : null}
             <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
             {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
@@ -438,6 +451,19 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             :
                 <div>No associations</div>
             }
+            {(individual.variants && individual.variants.length) ?
+                <div>
+                    <span>Variants: </span>
+                    {individual.variants.map(function(variant, j) {
+                        return (
+                            <span key={j}>
+                                {j > 0 ? ', ' : ''}
+                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
+                            </span>
+                        );
+                    })}
+                </div>
+            : null}
             <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
         </div>

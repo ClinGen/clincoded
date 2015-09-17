@@ -53,11 +53,13 @@ module.exports.userMatch = function(user, session) {
     return false;
 };
 
+// Trancate the given string to the given number of characters, but pull the truncation back to
+// the word boundary before the truncation point.
 module.exports.truncateString = function (str, len) {
     if (str.length > len) {
         str = str.replace(/(^\s)|(\s$)/gi, ''); // Trim leading/trailing white space
-        var isOneWord = str.match(/\s/gi) === null; // Detect single-word string
         str = str.substr(0, len - 1); // Truncate to length ignoring word boundary
+        var isOneWord = str.match(/\s/gi) === null; // Detect single-word string
         str = (!isOneWord ? str.substr(0, str.lastIndexOf(' ')) : str) + '…'; // Back up to word boundary
     }
     return str;
