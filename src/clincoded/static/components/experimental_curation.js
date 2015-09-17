@@ -24,6 +24,13 @@ var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 
+// Will be great to convert to 'const' when available
+var MAX_VARIANTS = 5;
+
+// Settings for this.state.varOption
+var VAR_NONE = 0; // No variants entered in a panel
+var VAR_SPEC = 1; // A specific variant (dbSNP, ClinVar, HGVS) entered in a panel
+var VAR_OTHER = 2; // Other description entered in a panel
 
 var ExperimentalCuration = React.createClass({
     mixins: [FormMixin, RestMixin, CurationMixin],
@@ -53,7 +60,10 @@ var ExperimentalCuration = React.createClass({
             biochemicalFunctionsBOn: false,
             functionalAlterationPCEE: '',
             modelSystemsNHACCM: '',
-            rescuePCEE: ''
+            rescuePCEE: '',
+            variantCount: 0, // Number of variants to display
+            variantOption: [], // One variant panel, and nothing entered
+            addVariantDisabled: false, // True if Add Another Variant button enabled
         };
     },
 
@@ -71,6 +81,8 @@ var ExperimentalCuration = React.createClass({
 
     // Handle value changes in genotyping method 1
     handleChange: function(ref, e) {
+        var clinvarid, othervariant;
+
         if (ref === 'experimentalName' && this.refs[ref].getValue()) {
             this.setState({experimentalName: this.refs[ref].getValue()});
         } else if (ref === 'experimentalType') {
@@ -153,6 +165,37 @@ var ExperimentalCuration = React.createClass({
             } else if (this.refs['patientCellOrEngineeredEquivalent'].getValue() === 'Engineered equivalent') {
                 this.refs['rescue.patientCellType'].resetValue();
             }
+        } else if (ref.substring(0, 3) === 'VAR') {
+            // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
+            // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
+            var lastVariantSuffix = (this.state.variantCount - 1) + '';
+            var refSuffix = ref.match(/\d+$/);
+            refSuffix = refSuffix && refSuffix[0];
+            if (refSuffix && (lastVariantSuffix === refSuffix)) {
+                // The changed item is in the last variant panel. If any fields in the last field have a value, disable
+                // the Add Another Variant button.
+                clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
+                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
+                this.setState({addVariantDisabled: !(clinvarid || othervariant)});
+            }
+
+            // Disable fields depending on what fields have values in them.
+            clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
+            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
+            var currVariantOption = this.state.variantOption;
+            if (othervariant) {
+                // Something entered in Other; clear the ClinVar ID and set the variantOption state to disable it.
+                this.refs['VARclinvarid' + refSuffix].resetValue();
+                currVariantOption[refSuffix] = VAR_OTHER;
+            } else if (clinvarid) {
+                // Something entered in ClinCar ID; clear the Other field and set the variantOption state to disable it.
+                this.refs['VARothervariant' + refSuffix].resetValue();
+                currVariantOption[refSuffix] = VAR_SPEC;
+            } else {
+                // Nothing entered anywhere; enable everything.
+                currVariantOption[refSuffix] = VAR_NONE;
+            }
+            this.setState({variantOption: currVariantOption});
         }
     },
 
@@ -251,6 +294,33 @@ var ExperimentalCuration = React.createClass({
                         this.setState({patientVariantRescue: stateObj.experimental.rescue.patientVariantRescue});
                     }
                 }
+                // See if we need to disable the Add Variant button based on the number of variants configured
+                if (stateObj.experimental.variants) {
+                    var variants = stateObj.experimental.variants;
+                    if (variants && variants.length > 0) {
+                        // We have variants
+                        stateObj.variantCount = variants.length;
+                        stateObj.addVariantDisabled = false;
+
+                        var currVariantOption = [];
+                        for (var i = 0; i < variants.length; i++) {
+                            if (variants[i].clinvarVariantId) {
+                                currVariantOption[i] = VAR_SPEC;
+                            } else if (variants[i].otherDescription) {
+                                currVariantOption[i] = VAR_OTHER;
+                            } else {
+                                currVariantOption[i] = VAR_NONE;
+                            }
+                        }
+                        stateObj.variantOption = currVariantOption;
+                    } else {
+                        // variant object exists, but it's empty. Open one empty variant panel
+                        stateObj.variantCount = 1;
+                    }
+                } else {
+                    // variant object does not exist. Open one empty variant panel
+                    stateObj.variantCount = 1;
+                }
             }
 
             // Set all the state variables we've collected
@@ -278,7 +348,7 @@ var ExperimentalCuration = React.createClass({
         this.saveAllFormValues();
 
         // Start with default validation; indicate errors on form if not, then bail
-        if (this.validateDefault()) {
+        if (this.validateDefault() && this.validateVariants()) {
             var groupGenes;
             var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, efoIDs;
             var formError = false;
@@ -748,6 +818,31 @@ var ExperimentalCuration = React.createClass({
         }
     },
 
+    // Add another variant section to the FamilyVariant panel
+    handleAddVariant: function() {
+        this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
+    },
+
+    // Validate that all the variant panels have properly-formatted input. Return true if they all do.
+    validateVariants: function() {
+        var valid;
+        var anyInvalid = false;
+
+        // Check Variant panel inputs for correct formats
+        for (var i = 0; i < this.state.variantCount; i++) {
+            var value = this.getFormValue('VARclinvarid' + i);
+            if (value) {
+                valid = value.match(/^\s*(\d{1,10})\s*$/i);
+                if (!valid) {
+                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariationIDs (e.g. 177676)');
+                    anyInvalid = true;
+                }
+            }
+        }
+
+        return !anyInvalid;
+    },
+
     render: function() {
         var gdm = this.state.gdm;
         var annotation = this.state.annotation;
@@ -794,12 +889,12 @@ var ExperimentalCuration = React.createClass({
                                                     {TypeBiochemicalFunctionB.call(this)}
                                                 </Panel>
                                             </PanelGroup>
-                                        : null }
+                                        : null}
                                         {this.state.experimentalType == 'Protein interactions' ?
                                             <PanelGroup accordion><Panel title="Protein interactions" open>
                                                 {TypeProteinInteractions.call(this)}
                                             </Panel></PanelGroup>
-                                        : null }
+                                        : null}
                                         {this.state.experimentalType == 'Expression' ?
                                             <PanelGroup accordion>
                                                 <Panel title="Expression" open>
@@ -812,28 +907,33 @@ var ExperimentalCuration = React.createClass({
                                                     {TypeExpressionB.call(this)}
                                                 </Panel>
                                             </PanelGroup>
-                                        : null }
+                                        : null}
                                         {this.state.experimentalType == 'Functional alteration of gene/gene product' ?
                                             <PanelGroup accordion><Panel title="Functional alteration of gene/gene product" open>
                                                 {TypeFunctionalAlteration.call(this)}
                                             </Panel></PanelGroup>
-                                        : null }
+                                        : null}
                                         {this.state.experimentalType == 'Model systems' ?
                                             <PanelGroup accordion><Panel title="Model systems" open>
                                                 {TypeModelSystems.call(this)}
                                             </Panel></PanelGroup>
-                                        : null }
+                                        : null}
                                         {this.state.experimentalType == 'Rescue' ?
                                             <PanelGroup accordion><Panel title="Rescue" open>
                                                 {TypeRescue.call(this)}
                                             </Panel></PanelGroup>
-                                        : null }
+                                        : null}
+                                        {this.state.experimentalType != '' && this.state.experimentalType != 'none' ?
+                                            <PanelGroup accordion><Panel title="Experimental Data - Associated Variant(s)" open>
+                                                {ExperimentalDataVariant.call(this)}
+                                            </Panel></PanelGroup>
+                                        : null}
                                         {this.state.experimentalType != '' && this.state.experimentalType != 'none' ?
                                             <div className="curation-submit clearfix">
                                                 <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                                 <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                             </div>
-                                        : null }
+                                        : null}
                                     </Form>
                                 </div>
                             </div>
@@ -1340,6 +1440,70 @@ var TypeRescue = function() {
     );
 }
 
+// Display the Family variant panel. The number of copies depends on the variantCount state variable.
+var ExperimentalDataVariant = function() {
+    var experimental = this.state.experimental;
+    var variants = experimental && experimental.variants;
+
+    return (
+        <div className="row">
+            {!experimental || !experimental.variants || experimental.variants.length === 0 ?
+                <div className="row">
+                    <p className="col-sm-7 col-sm-offset-5">
+                        If your functional data was about one or more particular variants, please associate it with those variant(s) (optional, and only when functional data is about this specific variant – Expression, Functional alteration of gene/gene product, Model systems, or Rescue)
+                    </p>
+                </div>
+            : null}
+            {_.range(this.state.variantCount).map(i => {
+                var variant;
+
+                if (variants && variants.length) {
+                    variant = variants[i];
+                }
+
+                return (
+                    <div key={i} className="variant-panel">
+                        <div className="row">
+                            <div className="col-sm-7 col-sm-offset-5">
+                                <p className="alert alert-warning">
+                                    ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
+                                    the same variant, and ensures the accurate counting of probands.
+                                </p>
+                            </div>
+                        </div>
+                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
+                            error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                        <p className="col-sm-7 col-sm-offset-5 input-note-below">
+                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href="http://www.ncbi.nlm.nih.gov/clinvar/variation/139214/" target="_blank">example</a>: 139214).
+                        </p>
+                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                    </div>
+                );
+            })}
+            {this.state.variantCount < MAX_VARIANTS ?
+                <div>
+                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with experimental data" : "Add variant associated with experimental data"}
+                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                </div>
+            : null}
+        </div>
+    );
+};
+
+var LabelClinVarVariant = React.createClass({
+    render: function() {
+        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+    }
+});
+
+var LabelOtherVariant = React.createClass({
+    render: function() {
+        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when no ID available)</span>:</span>;
+    }
+});
+
 
 var ExperimentalViewer = React.createClass({
     render: function() {
@@ -1370,7 +1534,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
                         </dl>
                     </Panel>
-                    : null }
+                    : null}
                     {context.evidenceType == 'Biochemical function' && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction !== '' ?
                     <Panel title="Gene(s) with same function implicated in same disease" panelClassName="panel-data">
                         <dl className="dl-horizontal">
@@ -1402,7 +1566,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
                         </dl>
                     </Panel>
-                    : null }
+                    : null}
                     {context.evidenceType == 'Biochemical function' && ((context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ') !== '') || (context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) ?
                     <Panel title="Gene function consistent with phenotype" panelClassName="panel-data">
                         <dl className="dl-horizontal">
@@ -1427,7 +1591,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
                         </dl>
                     </Panel>
-                    : null }
+                    : null}
 
                     {context.evidenceType == 'Protein interactions' ?
                     <Panel title="Protein interactions" panelClassName="panel-data">
@@ -1465,7 +1629,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
                         </dl>
                     </Panel>
-                    : null }
+                    : null}
 
                     {context.evidenceType == 'Expression' ?
                     <Panel title="Expression" panelClassName="panel-data">
@@ -1510,7 +1674,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
                         </dl>
                     </Panel>
-                    : null }
+                    : null}
 
                     {context.evidenceType == 'Functional alteration of gene/gene product' ?
                     <Panel title="Functional alteration of gene/gene product" panelClassName="panel-data">
@@ -1551,7 +1715,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
                         </dl>
                     </Panel>
-                    : null }
+                    : null}
 
                     {context.evidenceType == 'Model systems' ?
                     <Panel title="Model systems" panelClassName="panel-data">
@@ -1607,7 +1771,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
                         </dl>
                     </Panel>
-                    : null }
+                    : null}
 
                     {context.evidenceType == 'Rescue' ?
                     <Panel title="Rescue" panelClassName="panel-data">
@@ -1672,7 +1836,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
                         </dl>
                     </Panel>
-                    : null }
+                    : null}
                 </div>
             </div>
         );
