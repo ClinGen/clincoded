@@ -395,3 +395,17 @@
         }
     }
 }
+
+// Display inline icon for proband. Change @extend to change icon site-wide.
+.icon-proband {
+    @extend .icon-user-md;
+    margin-left: 3px;
+    margin-right: 3px;
+    color: #ce1d1d;
+    font-size: 1.1em !important; // To make its size relative to the surrounding text.
+}
+
+.icon-proband-white {
+    @extend .icon-proband;
+    color: #fff;
+}

@@ -652,8 +652,8 @@ var IndividualCuration = React.createClass({
         var annotation = this.state.annotation;
         var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
-        var probandLabel = (individual && individual.proband ? ' [proband]' : '');
-        var variantTitle = (individual && individual.associatedFamilies.length && individual.proband) ? 'Individual' + probandLabel + ' – Variant(s) segregating with Proband' : 'Individual — Associated Variant(s)';
+        var probandLabel = (individual && individual.proband ? <i className="icon icon-proband-white"></i> : null);
+        var variantTitle = (individual && individual.proband) ? <h4>Individual{probandLabel} – Variant(s) segregating with Proband</h4> : <h4>Individual — Associated Variant(s)</h4>;
 
         // Get a list of associated groups if editing an individual, or the group in the query string if there was one, or null.
         var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
@@ -716,8 +716,8 @@ var IndividualCuration = React.createClass({
                                 </div>
                             : null}
                             <div className="viewer-titles">
-                                <h1>{(individual ? 'Edit' : 'Curate') + ' Individual' + probandLabel + ' Information'}</h1>
-                                <h2>Individual: {this.state.individualName ? <span>{this.state.individualName}</span> : <span className="no-entry">No entry</span>}</h2>
+                                <h1>{individual ? 'Edit' : 'Curate'} Individual Information</h1>
+                                <h2>Individual: {this.state.individualName ? <span>{this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</h2>
                                 {familyTitles.length ?
                                     <h2>
                                         {'Family association: ' + familyTitles.join(', ')}
@@ -736,17 +736,17 @@ var IndividualCuration = React.createClass({
                                             {IndividualName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + ' – Disease & Phenotype(s)'} open>
+                                            <Panel title={<LabelPanelTitle probandLabel={probandLabel} labelText="Disease & Phenotype(s)" />} open>
                                                 {IndividualCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + '— Demographics'} open>
+                                            <Panel title={<LabelPanelTitle probandLabel={probandLabel} labelText="Individual — Demographics" />} open>
                                                 {IndividualDemographics.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + '— Methods'} open>
+                                            <Panel title={<LabelPanelTitle probandLabel={probandLabel} labelText="Individual — Methods" />} open>
                                                 {methods.render.call(this, method)}
                                             </Panel>
                                         </PanelGroup>
@@ -756,7 +756,7 @@ var IndividualCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + ' — Additional Information'} open>
+                                            <Panel title={<LabelPanelTitle probandLabel={probandLabel} labelText="Individual — Additional Information" />} open>
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -777,16 +777,24 @@ var IndividualCuration = React.createClass({
 
 globals.curator_page.register(IndividualCuration, 'curator_page', 'individual-curation');
 
+// HTML labels for inputs follow.
+var LabelPanelTitle = React.createClass({
+    render: function() {
+        return <h4>Individual{this.props.probandLabel} — {this.props.labelText}:</h4>;
+    }
+});
+
+
 
 // Individual Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var IndividualName = function(displayNote) {
     var individual = this.state.individual;
-    var probandLabel = (individual && individual.proband ? ' [proband]' : '');
+    var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     return (
         <div className="row">
-            <Input type="text" ref="individualname" label={'Individual' + probandLabel + ' Name:'} value={individual && individual.label} handleChange={this.handleChange}
+            <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
                 error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {displayNote ?
@@ -795,6 +803,13 @@ var IndividualName = function(displayNote) {
         </div>
     );
 };
+
+// HTML labels for inputs follow.
+var LabelIndividualName = React.createClass({
+    render: function() {
+        return <span>{this.props.probandLabel}Individual Name:</span>;
+    }
+});
 
 
 // If the individual is being edited (we know this because there was an individual
@@ -832,7 +847,7 @@ var IndividualCommonDiseases = function() {
     var family = this.state.family;
     var group = this.state.group;
     var orphanetidVal, hpoidVal, nothpoidVal, associatedGroups, associatedFamilies;
-    var probandLabel = (individual && individual.proband ? ' [proband]' : '');
+    var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     // If we're editing an individual, make editable values of the complex properties
     if (individual) {
@@ -1102,7 +1117,7 @@ var LabelOtherVariant = React.createClass({
 var IndividualAdditional = function() {
     var otherpmidsVal;
     var individual = this.state.individual;
-    var probandLabel = (individual && individual.proband ? ' [proband]' : '');
+    var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     // If editing an individual, get its existing articles
     if (individual) {
@@ -1128,7 +1143,7 @@ var IndividualViewer = React.createClass({
         var variants = (individual.variants && individual.variants.length) ? individual.variants : [{}];
         var i = 0;
         var groupRenders = [];
-        var probandLabel = (individual && individual.proband ? ' [proband]' : '');
+        var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
         var variantTitle = (individual && individual.associatedFamilies.length && individual.proband) ? 'Individual' + probandLabel + ' – Variant(s) segregating with Proband' : 'Individual — Associated Variant(s)';
 
         // Collect all families to render, as well as groups associated with these families
@@ -1166,7 +1181,7 @@ var IndividualViewer = React.createClass({
             <div className="container">
                 <div className="row group-curation-content">
                     <div className="viewer-titles">
-                        <h1>View Individual{probandLabel} {individual.label}</h1>
+                        <h1>View Individual: {individual.label}{probandLabel}</h1>
                         <h2>
                             {familyRenders.length ?
                                 <div>

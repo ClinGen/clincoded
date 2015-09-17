@@ -169,11 +169,14 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                 if (associations) {
                     var render = (
                         <div>
-                            <span>PMID: {annotation.article.pmid}</span>
-                            {associations.map(function(association) {
+                            <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> → </span>
+                            {associations.map(function(association, i) {
                                 var associationType = association['@type'][0];
                                 return (
-                                    <span>, <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a></span>
+                                    <span key={i}>
+                                        {i > 0 ? ', ' : ''}
+                                        <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>
+                                    </span>
                                 );
                             })}
                         </div>
@@ -387,7 +390,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
 
     return (
         <div className="panel-evidence-group">
-            <h5>{individual.label}{individual.proband ? ' [proband]' : ''}</h5>
+            <h5>{individual.label}{individual.proband ? <i className="icon icon-proband"></i> : null}</h5>
             <div className="evidence-curation-info">
                 {individual.submitted_by ?
                     <p className="evidence-curation-info">{individual.submitted_by.title}</p>
@@ -470,7 +473,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
                             <span key={i}>
                                 {i > 0 ? ', ' : ''}
                                 <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>
-                                {probandIndividual ? ' [proband]' : ''}
+                                {probandIndividual ? <i className="icon icon-proband"></i> : null}
                             </span>
                         );
                     })}
