@@ -171,8 +171,9 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                         <div>
                             <span>PMID: {annotation.article.pmid}</span>
                             {associations.map(function(association) {
+                                var associationType = association['@type'][0];
                                 return (
-                                    <span>{', ' + association.label}</span>
+                                    <span>, <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a></span>
                                 );
                             })}
                         </div>
@@ -468,7 +469,8 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
                         return (
                             <span key={i}>
                                 {i > 0 ? ', ' : ''}
-                                <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}{probandIndividual ? ' [proband]' : ''}</a>
+                                <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>
+                                {probandIndividual ? ' [proband]' : ''}
                             </span>
                         );
                     })}

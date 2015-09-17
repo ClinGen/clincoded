@@ -209,6 +209,7 @@ var VariantCuration = React.createClass({
             delete newPathogenicity.supportingSegregation;
         }
 
+        value = this.getFormValue('supportexperimental');
         if (value !== 'none') {
             newPathogenicity.supportingExperimental = value === 'Yes';
         } else {
