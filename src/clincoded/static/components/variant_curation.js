@@ -14,6 +14,7 @@ var assessment = require('./assessment');
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
+var VariantAssociationsHeader = curator.VariantAssociationsHeader;
 var AssessmentPanel = assessment.AssessmentPanel;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
@@ -361,6 +362,7 @@ var VariantCuration = React.createClass({
                             <h2>{variant.clinvarVariantId ? <span>{'VariationId: ' + variant.clinvarVariantId}</span> : <span>{'Description: ' + variant.otherDescription}</span>}</h2>
                         : null}
                     </div>
+                    <VariantAssociationsHeader gdm={gdm} variant={variant} />
                     <div className="row group-curation-content">
                         <div className="col-sm-12">
                             {!this.queryValues.pathogenicityUuid || pathogenicity ?

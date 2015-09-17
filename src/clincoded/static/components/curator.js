@@ -148,6 +148,49 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
 });
 
 
+// Render the Variant Associations header.
+var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React.createClass({
+    propTypes: {
+        gdm: React.PropTypes.object, // GDM containing the PMIDs we're searching
+        variant: React.PropTypes.object // Variant whose associations we're searching for
+    },
+
+    render: function() {
+        var gdm = this.props.gdm;
+        var variant = this.props.variant;
+        var annotations = gdm && gdm.annotations;
+        var annotationAssociations = [];
+
+        if (annotations && variant) {
+            // Search all annotations in the GDM for all associations for the given variant
+            annotations.forEach(function(annotation) {
+                // Get all associations (families, individuals) for this annotation and variant
+                var associations = collectVariantAssociations(annotation, variant);
+                if (associations) {
+                    var render = (
+                        <div>
+                            <span>PMID: {annotation.article.pmid}</span>
+                            {associations.map(function(association) {
+                                return (
+                                    <span>{', ' + association.label}</span>
+                                );
+                            })}
+                        </div>
+                    );
+                    annotationAssociations.push(render);
+                }
+            });
+        }
+
+        return (
+            <div>
+                {annotationAssociations}
+            </div>
+        );
+    }
+});
+
+
 // Displays the PM item summary, with authors, title, citation
 var PmidSummary = module.exports.PmidSummary = React.createClass({
     propTypes: {
