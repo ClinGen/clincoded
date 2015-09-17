@@ -420,10 +420,12 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
                 <div>
                     <span>Assocations: </span>
                     {variantAssociations.map(function(association, i) {
+                        var associationType = association['@type'][0];
+                        var probandIndividual = associationType === 'individual' && association.proband;
                         return (
                             <span key={i}>
                                 {i > 0 ? ', ' : ''}
-                                <a href={association['@id']} title={'View ' + association['@type'][0] + ' in a new tab'} target="_blank">{association.label}</a>
+                                <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}{probandIndividual ? ' [proband]' : ''}</a>
                             </span>
                         );
                     })}
