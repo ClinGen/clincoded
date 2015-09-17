@@ -432,7 +432,7 @@ var VariantCuration = React.createClass({
                                                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                                 </div>
                                             </Panel>
-                                        : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} /> : null) }
+                                        : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} note="Note: In order to Edit the pathogenicity fields, you must first change your assessment of the variant to “Not assessed” and hit Save, then Edit the Variant again; at this time, you will be able to reassess."/> : null) }
                                         <AssessmentPanel panelTitle="Variant Assessment" currVal={this.state.assessment && this.state.assessment.value} updateValue={this.updateAssessment} />
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" />
@@ -464,7 +464,8 @@ globals.curator_page.register(VariantCuration, 'curator_page', 'variant-curation
 // Display a single variant curation viewer panel
 var VariantCurationView = React.createClass({
     propTypes: {
-        pathogenicity: React.PropTypes.object.isRequired // Variant pathogenicity to display
+        pathogenicity: React.PropTypes.object.isRequired, // Variant pathogenicity to display
+        note: React.PropTypes.string // Note to display above key-value pairs.
     },
 
     render: function() {
@@ -476,6 +477,9 @@ var VariantCurationView = React.createClass({
             <div>
                 {pathogenicity && variant ?
                     <Panel title={'Curated/Assessed by: ' + pathogenicity.submitted_by.title} panelClassName="panel-data">
+                        {this.props.note ?
+                            <p>{this.props.note}</p>
+                        : null}
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Variant type consistent with disease mechanism</dt>
