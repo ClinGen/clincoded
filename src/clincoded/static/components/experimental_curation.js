@@ -514,40 +514,8 @@ var ExperimentalCuration = React.createClass({
                 newExperimental.label = this.getFormValue('experimentalName');
                 newExperimental.evidenceType = this.getFormValue('experimentalType');
 
-                if (this.getFormValue('experimentalType') === '') {
-                    // NOT USED ATM; REMOVE EVENTUALLY
-                    var searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
-
-
-                    this.getRestData(searchStr).then(diseases => {
-                        if (geneSymbols && geneSymbols.length) {
-                            // At least one gene symbol entered; search the DB for them.
-                            searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
-                            return this.getRestData(searchStr).then(genes => {
-                                if (genes['@graph'].length === geneSymbols.length) {
-                                    // Successfully retrieved all genes
-                                    groupGenes = genes;
-                                    return Promise.resolve(genes);
-                                } else {
-                                    var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
-                                    this.setFormErrors('othergenevariants', missingGenes.join(', ') + ' not found');
-                                    throw genes;
-                                }
-                            });
-                        } else {
-                            // No genes entered; just pass null to the next then
-                            return Promise.resolve(null);
-                        }
-                    }).then(data => {
-                        var newExperimental = Object.keys(this.state.annotation).length ? curator.flatten(this.state.annotation) : {};
-                    }).catch(function(e) {
-                        console.log('GROUP CREATION ERROR=: %o', e);
-                    });
-
-
-
-
-                } else if (this.getFormValue('experimentalType') == 'Biochemical function') {
+                // prepare experimental object for post/putting to db
+                if (this.getFormValue('experimentalType') == 'Biochemical function') {
                     // newExperimental object for type Rescue
                     newExperimental.biochemicalFunction = {geneWithSameFunctionSameDisease: {}, geneFunctionConsistentWithPhenotype: {}};
                     var BFidentifiedFunction = this.getFormValue('identifiedFunction');
@@ -767,6 +735,15 @@ var ExperimentalCuration = React.createClass({
                     }
                 }
 
+
+
+
+
+
+
+
+
+
                 if (this.state.experimental) {
                     // We're editing a experimental. PUT the new group object to the DB to update the existing one.
                     this.putRestData('/experimental/' + this.state.experimental.uuid, newExperimental).then(data => {
@@ -814,6 +791,15 @@ var ExperimentalCuration = React.createClass({
                         console.log('EXPERIMENTAL CREATION ERROR=: %o', e);
                     });
                 }
+
+
+
+
+
+
+
+
+
             }
         }
     },
