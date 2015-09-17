@@ -431,9 +431,7 @@ var VariantCuration = React.createClass({
                                                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                                 </div>
                                             </Panel>
-                                        :
-                                            <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} />
-                                        }
+                                        : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} /> : null) }
                                         <AssessmentPanel panelTitle="Variant Assessment" currVal={this.state.assessment && this.state.assessment.value} updateValue={this.updateAssessment} />
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" />
