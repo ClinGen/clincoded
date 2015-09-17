@@ -475,7 +475,7 @@ var VariantCurationView = React.createClass({
         return (
             <div>
                 {pathogenicity && variant ?
-                    <Panel title={'Curated by ' + pathogenicity.submitted_by.title} panelClassName="panel-data">
+                    <Panel title={'Curated/Assessed by: ' + pathogenicity.submitted_by.title} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Variant type consistent with disease mechanism</dt>
