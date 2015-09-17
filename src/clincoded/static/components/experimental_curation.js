@@ -510,6 +510,7 @@ var ExperimentalCuration = React.createClass({
             if (!formError) {
                 // form passed error checking
                 var newExperimental = {};
+                var experimentalDataVariants = [];
                 var savedExperimental;
                 newExperimental.label = this.getFormValue('experimentalName');
                 newExperimental.evidenceType = this.getFormValue('experimentalType');
@@ -735,14 +736,149 @@ var ExperimentalCuration = React.createClass({
                     }
                 }
 
+                // Begin with empty promise
+                new Promise(function(resolve, reject) {
+                    console.log(newExperimental);
+                    resolve(1);
+                }).then(data => {
+                    // See what variants from the form already exist in the DB (we don't search for "Other description"; each one
+                    // of those kinds of variants generates a new variant object). For any that already exist, push them onto
+                    // the array of the family's variants. For any that don't, pass them to the next THEN to write them to the DB.
+                    var newVariants = [];
+
+                    // Build an array of search strings for each of the ClinVar IDs entered in the form.
+                    var searchStrs = [];
+                    for (var i = 0; i < this.state.variantCount; i++) {
+                        // Grab the values from the variant form panel
+                        var clinvarId = this.getFormValue('VARclinvarid' + i);
+
+                        // Build the search string depending on what the user entered
+                        if (clinvarId) {
+                            // Make a search string for these terms
+                            searchStrs.push('/search/?type=variant&clinvarVariantId=' + clinvarId);
+                        }
+                    }
+
+                    // If at least one variant search string built, perform the search
+                    if (searchStrs.length) {
+                        // Search DB for all matching terms for all variants entered
+                        return this.getRestDatas(
+                            searchStrs
+                        ).then(results => {
+                            // 'result' is an array of search results, one per search string. There should only be one result per array element --
+                            // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
+                            results.forEach(function(result, i) {
+                                if (result.total) {
+                                    // Search got a result. Add a string for family.variants for this existing variant
+                                    experimentalDataVariants.push('/variants/' + result['@graph'][0].uuid + '/');
+                                } else {
+                                    // Search got no result; make a new variant and save it in an array so we can write them.
+                                    // Look for the term in the filters to see what term failed to find a match
+                                    var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinvarVariantId'; });
+                                    if (termResult) {
+                                        var newVariant = {};
+                                        newVariant.clinvarVariantId = termResult.term;
+                                        newVariants.push(newVariant);
+                                    }
+                                }
+                            }, this);
+
+                            // Pass new variant array to the next THEN to write them.
+                            return Promise.resolve(newVariants);
+                        });
+                    }
+
+                    // No variant search strings. Go to next THEN indicating no new named variants
+                    return Promise.resolve(newVariants);
+                }).then(newVariants => {
+                    // We're passed in a list of new clinVarRCV variant objects that need to be written to the DB.
+                    // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
+                    for (var i = 0; i < this.state.variantCount; i++) {
+                        // Grab the values from the variant form panel
+                        var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
+
+                        // Build the search string depending on what the user entered
+                        if (otherVariantText) {
+                            // Add this Other Description text to a new variant object
+                            var newVariant = {};
+                            newVariant.otherDescription = otherVariantText;
+                            newVariants.push(newVariant);
+                        }
+                    }
+
+                    // Now write the new variants to the DB, and push their @ids to the family variant
+                    if (newVariants && newVariants.length) {
+                        return this.postRestDatas(
+                            '/variants/', newVariants
+                        ).then(results => {
+                            if (results && results.length) {
+                                // Add the newly written variants to the family
+                                results.forEach(result => {
+                                    experimentalDataVariants.push('/variants/' + result['@graph'][0].uuid + '/');
+                                });
+                            }
+                            return Promise.resolve(results);
+                        });
+                    }
+
+                    // No variant search strings. Go to next THEN indicating no new named variants
+                    return Promise.resolve(null);
+                }).then(data => {
+                    var promise;
+
+                    // Add variants if they've been found
+                    if (experimentalDataVariants.length > 0) {
+                        newExperimental.variants = experimentalDataVariants;
+                    }
+
+                    if (this.state.experimental) {
+                        // We're editing a experimental. PUT the new group object to the DB to update the existing one.
+                        promise = this.putRestData('/experimental/' + this.state.experimental.uuid, newExperimental).then(data => {
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    } else {
+                        // We created an experimental data item; post it to the DB
+                        promise = this.postRestData('/experimental/', newExperimental).then(data => {
+                            return Promise.resolve(data['@graph'][0]);
+                        }).then(newExperimental => {
+                            savedExperimental = newExperimental;
+                            if (!this.state.experimental) {
+                                // Get a flattened copy of the annotation and put our new group into it,
+                                // ready for writing.
+                                var annotation = curator.flatten(this.state.annotation);
+                                if (annotation.experimentalData) {
+                                    annotation.experimentalData.push(newExperimental['@id']);
+                                } else {
+                                    annotation.experimentalData = [newExperimental['@id']];
+                                }
+
+                                // Post the modified annotation to the DB, then go back to Curation Central
+                                return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
+                            } else {
+                                return Promise.resolve(null);
+                            }
+                        });
+                    }
+
+                    return promise;
+                }).then(data => {
+                    this.resetAllFormValues();
+                    if (this.queryValues.editShortcut) {
+                        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
+                    } else {
+                        this.context.navigate('/experimental-submit/?gdm=' + this.state.gdm.uuid + '&experimental=' + this.state.experimental.uuid + '&evidence=' + this.state.annotation.uuid);
+                    }
+                }).catch(function(e) {
+                    console.log(e);
+                    console.log('EXPERIMENTAL DATA ERROR=: %o', e);
+                });
 
 
 
 
 
 
-
-
+                /*
 
                 if (this.state.experimental) {
                     // We're editing a experimental. PUT the new group object to the DB to update the existing one.
@@ -792,7 +928,7 @@ var ExperimentalCuration = React.createClass({
                     });
                 }
 
-
+                */
 
 
 
@@ -1578,7 +1714,6 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null}
-
                     {context.evidenceType == 'Protein interactions' ?
                     <Panel title="Protein interactions" panelClassName="panel-data">
                         <dl className="dl-horizontal">
@@ -1616,7 +1751,6 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null}
-
                     {context.evidenceType == 'Expression' ?
                     <Panel title="Expression" panelClassName="panel-data">
                         <dl className="dl-horizontal">
@@ -1661,7 +1795,6 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null}
-
                     {context.evidenceType == 'Functional alteration of gene/gene product' ?
                     <Panel title="Functional alteration of gene/gene product" panelClassName="panel-data">
                         <dl className="dl-horizontal">
@@ -1702,7 +1835,6 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null}
-
                     {context.evidenceType == 'Model systems' ?
                     <Panel title="Model systems" panelClassName="panel-data">
                         <dl className="dl-horizontal">
@@ -1758,7 +1890,6 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null}
-
                     {context.evidenceType == 'Rescue' ?
                     <Panel title="Rescue" panelClassName="panel-data">
                         <dl className="dl-horizontal">
@@ -1821,6 +1952,28 @@ var ExperimentalViewer = React.createClass({
                                 <dd>{context.rescue.evidenceInPaper}</dd>
                             </div>
                         </dl>
+                    </Panel>
+                    : null}
+                    {context.variants && context.variants.length > 0 ?
+                    <Panel title="Associated Variants" panelClassName="panel-data">
+                        {context.variants.map(function(variant, i) {
+                            return (
+                                <div className="variant-view-panel">
+                                    <h5>Variant {i + 1}</h5>
+                                    <dl className="dl-horizontal">
+                                        <div>
+                                            <dt>ClinVar VariationID</dt>
+                                            <dd>{variant.clinvarVariantId}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Other description</dt>
+                                            <dd>{variant.otherDescription}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            );
+                        })}
                     </Panel>
                     : null}
                 </div>
