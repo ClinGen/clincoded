@@ -1149,7 +1149,6 @@ var IndividualViewer = React.createClass({
         var i = 0;
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
-        var variantTitle = (individual && individual.associatedFamilies.length && individual.proband) ? 'Individual' + probandLabel + ' – Variant(s) segregating with Proband' : 'Individual — Associated Variant(s)';
 
         // Collect all families to render, as well as groups associated with these families
         var familyRenders = individual.associatedFamilies.map(function(family, j) {
@@ -1204,7 +1203,7 @@ var IndividualViewer = React.createClass({
                             : null}
                         </h2>
                     </div>
-                    <Panel title={<LabelPanelTitle individual={individual} labelText="Disease & Phenotype(s)" />} panelClassName="panel-data">
+                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Disease & Phenotype(s)" />} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
@@ -1242,7 +1241,7 @@ var IndividualViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title={'Individual' + probandLabel + ' — Demographics'} panelClassName="panel-data">
+                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Demographics" />} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Sex</dt>
@@ -1281,7 +1280,7 @@ var IndividualViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title={'Individual' + probandLabel + ' — Methods'} panelClassName="panel-data">
+                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Methods" />} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Previous testing</dt>
@@ -1325,7 +1324,7 @@ var IndividualViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title={variantTitle} panelClassName="panel-data">
+                    <Panel title={<LabelPanelTitleView individual={individual} variant />} panelClassName="panel-data">
                         {variants.map(function(variant, i) {
                             return (
                                 <div key={i} className="variant-view-panel">
@@ -1346,7 +1345,7 @@ var IndividualViewer = React.createClass({
                         })}
                     </Panel>
 
-                    <Panel title={'Individual' + probandLabel + ' — Additional Information'} panelClassName="panel-data">
+                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Additional Information" />} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Additional Information about Individual</dt>
@@ -1373,6 +1372,24 @@ var IndividualViewer = React.createClass({
 });
 
 globals.content_views.register(IndividualViewer, 'individual');
+
+
+// HTML labels for inputs follow.
+var LabelPanelTitleView = React.createClass({
+    render: function() {
+        var individual = this.props.individual;
+        var probandLabel = <span>{individual && individual.proband ? <i className="icon icon-proband"></i> : null}</span>;
+        var labelText = this.props.labelText;
+
+        if (this.props.variant) {
+            labelText = (individual && individual.associatedFamilies.length && individual.proband) ?
+                'Variant(s) segregating with Proband' :
+                'Associated Variant(s)';
+        }
+
+        return <h4><span className="panel-title-std">Individual{probandLabel} — {labelText}</span></h4>;
+    }
+});
 
 
 // Make a starter individual from the family and write it to the DB; always called from
