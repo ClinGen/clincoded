@@ -110,9 +110,12 @@ var VariantCuration = React.createClass({
 
             // If the pathogenicity's assessment list has an entry belonging to user, save it in state
             if (stateObj.pathogenicity && stateObj.pathogenicity.assessments && stateObj.pathogenicity.assessments.length) {
-                stateObj.assessment = _(stateObj.pathogenicity.assessments).find(oneAssessment => {
-                    return oneAssessment.submitted_by.uuid === this.props.session.user_properties.uuid;
-                });
+                stateObj.assessment = _.chain(stateObj.pathogenicity.assessments)
+                    .find(oneAssessment => {
+                        return oneAssessment.submitted_by.uuid === this.props.session.user_properties.uuid;
+                    })
+                    .clone()
+                    .value();
             }
 
             if (stateObj.assessment) {
@@ -127,7 +130,6 @@ var VariantCuration = React.createClass({
                     value: assessmentMod.DEFAULT_VALUE,
                     active: true
                 };
-                    console.log('stateObj.assessment %o', stateObj.assessment);
             }
 
             // Set all the state variables we've collected
@@ -434,7 +436,7 @@ var VariantCuration = React.createClass({
                                                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                                 </div>
                                             </Panel>
-                                        : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} note="Note: In order to Edit the pathogenicity fields, you must first change your assessment of the variant to “Not assessed” and hit Save, then Edit the Variant again; at this time, you will be able to reassess."/> : null) }
+                                        : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} note="Note: To Edit the pathogenicity evaluation, first change your assessment to “Not assessed” and click Save, then Edit the Variant again."/> : null) }
                                         <AssessmentPanel panelTitle="Variant Assessment" currVal={this.state.assessment && this.state.assessment.value} updateValue={this.updateAssessment} />
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" />
