@@ -521,7 +521,11 @@
                 "wildTypeRescuePhenotype": {
                     "title": "Wild-type Rescue the Phenotype",
                     "description": "Does the wild-type rescue the above phenotype?",
-                    "type": "boolean"
+                    "type": "string",
+                    "enum": [
+                        "Yes",
+                        "No"
+                    ]
                 },
                 "patientVariantRescue": {
                     "title": "Does Patient Variant Rescue",

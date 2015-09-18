@@ -97,7 +97,7 @@
             "descriptionOfGeneAlteration": "some description about cell here",
             "phenotypeHPO": "HP:xxxxxxx",
             "rescueMethod": "rescue method here (not method object in clinical data)",
-            "wildTypeRescuePhenotype": true,
+            "wildTypeRescuePhenotype": "Yes",
             "patientVariantRescue": true,
             "explanation": "some explanation here",
             "evidenceLocationInPaper": "Paragraph 31-32, page 2",

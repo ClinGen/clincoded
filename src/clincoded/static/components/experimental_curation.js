@@ -54,7 +54,6 @@ var ExperimentalCuration = React.createClass({
             geneImplicatedInDisease: false,
             expressedInTissue: false,
             expressedInPatients: false,
-            wildTypeRescuePhenotype: false,
             patientVariantRescue: false,
             biochemicalFunctionsAOn: false, // form enabled/disabled checks
             biochemicalFunctionsBOn: false,
@@ -115,8 +114,6 @@ var ExperimentalCuration = React.createClass({
                 this.refs['alteredExpression.evidence'].resetValue();
                 this.refs['alteredExpression.evidenceInPaper'].resetValue();
             }
-        } else if (ref === 'wildTypeRescuePhenotype') {
-            this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()});
         } else if (ref === 'patientVariantRescue') {
             this.setState({patientVariantRescue: this.refs[ref].toggleValue()});
         } else if (ref === 'geneWithSameFunctionSameDisease.genes') {
@@ -287,9 +284,6 @@ var ExperimentalCuration = React.createClass({
                     this.setState({modelSystemsNHACCM: stateObj.experimental.modelSystems.animalOrCellCulture});
                 } else if (stateObj.experimental.evidenceType === 'Rescue') {
                     this.setState({rescuePCEE: stateObj.experimental.rescue.patientCellOrEngineeredEquivalent});
-                    if (stateObj.experimental.rescue.wildTypeRescuePhenotype) {
-                        this.setState({wildTypeRescuePhenotype: stateObj.experimental.rescue.wildTypeRescuePhenotype});
-                    }
                     if (stateObj.experimental.rescue.patientVariantRescue) {
                         this.setState({patientVariantRescue: stateObj.experimental.rescue.patientVariantRescue});
                     }
@@ -717,7 +711,9 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.rescue.rescueMethod = RrescueMethod;
                     }
                     var RwildTypeRescuePhenotype = this.getFormValue('wildTypeRescuePhenotype');
-                    newExperimental.rescue.wildTypeRescuePhenotype = RwildTypeRescuePhenotype;
+                    if (RwildTypeRescuePhenotype) {
+                        newExperimental.rescue.wildTypeRescuePhenotype = RwildTypeRescuePhenotype;
+                    }
                     var RpatientVariantRescue = this.getFormValue('patientVariantRescue');
                     newExperimental.rescue.patientVariantRescue = RpatientVariantRescue;
                     var Rexplanation = this.getFormValue('explanation');
@@ -1099,7 +1095,6 @@ var TypeBiochemicalFunctionA = function() {
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.biochemicalFunctionsAOn} />
             <Input type="text" ref="geneWithSameFunctionSameDisease.sharedDisease" label="Shared disease (Orphanet):" value={this.state.gdm.gene.symbol}
-                error={this.getFormError('geneWithSameFunctionSameDisease.genes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.genes')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={true} />
             <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene or genes been implicated in the above disease?:"
                 checked={this.state.geneImplicatedWithDisease} defaultChecked="false" handleChange={this.handleChange}
@@ -1464,6 +1459,7 @@ var TypeRescue = function() {
         rescue.phenotypeHPO = rescue.phenotypeHPO ? rescue.phenotypeHPO : null;
         rescue.phenotypeFreeText = rescue.phenotypeFreeText ? rescue.phenotypeFreeText : null;
         rescue.rescueMethod = rescue.rescueMethod ? rescue.rescueMethod : null;
+        rescue.wildTypeRescuePhenotype = rescue.wildTypeRescuePhenotype ? rescue.wildTypeRescuePhenotype : null;
         rescue.explanation = rescue.explanation ? rescue.explanation : null;
         rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper : null;
         rescue.assessments = rescue.assessments ? rescue.assessments : null;
@@ -1496,10 +1492,14 @@ var TypeRescue = function() {
             <Input type="textarea" ref="rescueMethod" label="Method used to rescue:" rows="5" value={rescue.rescueMethod}
                 error={this.getFormError('rescueMethod')} clearError={this.clrFormErrors.bind(null, 'rescueMethod')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="checkbox" ref="wildTypeRescuePhenotype" label="Does the wild-type rescue the above phenotype?:"
-                checked={this.state.wildTypeRescuePhenotype} defaultChecked="false"
-                error={this.getFormError('wildTypeRescuePhenotype')} clearError={this.clrFormErrors.bind(null, 'wildTypeRescuePhenotype')} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="select" ref="wildTypeRescuePhenotype" label="Does the wild-type rescue the above phenotype?:" defaultValue="none" value={rescue.wildTypeRescuePhenotype} handleChange={this.handleChange}
+                error={this.getFormError('wildTypeRescuePhenotype')} clearError={this.clrFormErrors.bind(null, 'wildTypeRescuePhenotype')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required >
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option>Yes</option>
+                <option>No</option>
+            </Input>
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the wild-type version of the gene does not rescue the phenotype, the criteria of counting this experimental evidence has not been met and cannot be submitted. Return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Curation Central</a>.</p>
             <Input type="checkbox" ref="patientVariantRescue" label="Does patient variant rescue?:"
                 checked={this.state.patientVariantRescue} defaultChecked="false"
@@ -1887,9 +1887,7 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>Does the wild-type rescue the above phenotype?</dt>
-                                <dd>{context.rescue.wildTypeRescuePhenotype ?
-                                    context.rescue.wildTypeRescuePhenotype.toString()
-                                : null}</dd>
+                                <dd>{context.rescue.wildTypeRescuePhenotype}</dd>
                             </div>
 
                             <div>
