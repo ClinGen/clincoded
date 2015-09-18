@@ -45,9 +45,7 @@ var CurationCentral = React.createClass({
 
             if (gdm) {
                 // Find the annotation in the GDM matching the given pmid
-                var currAnnotation = _(gdm.annotations).find(annotation => {
-                    return annotation.article.pmid === pmid;
-                });
+                var currAnnotation = curator.pmidToAnnotation(gdm,pmid);
 
                 if (currAnnotation) {
                     this.setState({currPmid: currAnnotation.article.pmid});
@@ -124,7 +122,7 @@ var CurationCentral = React.createClass({
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                 <div className="container">
-                    <VariantHeader gdm={gdm} session={session} />
+                    <VariantHeader gdm={gdm} pmid={this.state.currPmid} session={session} />
                     <div className="row curation-content">
                         <div className="col-md-3">
                             <PmidSelectionList annotations={gdm && gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}

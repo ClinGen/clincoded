@@ -109,11 +109,13 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 var VariantHeader = module.exports.VariantHeader = React.createClass({
     propTypes: {
         gdm: React.PropTypes.object, // GDM whose collected variants to display
+        pmid: React.PropTypes.string, // PMID of currently selected article
         session: React.PropTypes.object // Logged-in session
     },
 
     render: function() {
         var gdm = this.props.gdm;
+        var pmid = this.props.pmid;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
         var collectedVariants = collectGdmVariants(gdm);
 
@@ -133,7 +135,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             }
                             return (
                                 <div className="col-sm-6 col-md-3 col-lg-2" key={variant.uuid}>
-                                    <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}>
+                                    <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}>
                                         {variant.associatedPathogenicities.length ? <i className="icon icon-sticky-note"></i> : null}
                                         {variantName}
                                     </a>
@@ -516,9 +518,9 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
             {curatorMatch ?
                 <span>
                     {variantCurated ?
-                        <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + (associatedPathogenicity ? '' : '&variant=' + variant.uuid) + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a>
+                        <a href={'/variant-curation/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid + (associatedPathogenicity ? '' : '&variant=' + variant.uuid) + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a>
                     :
-                        <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid}>Curate/Assess</a>
+                        <a href={'/variant-curation/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid + '&variant=' + variant.uuid}>Curate/Assess</a>
                     }
                 </span>
             :
@@ -1001,6 +1003,14 @@ module.exports.capture = {
     hpoids: function(s) {
         return captureBase(s, /^\s*(HP:\d{7})\s*$/i, true);
     }
+};
+
+
+// Given a PMID for a paper in a GDM, find its annotation object.
+module.exports.pmidToAnnotation = function(gdm, pmid) {
+    return _(gdm.annotations).find(annotation => {
+        return annotation.article.pmid === pmid;
+    });
 };
 
 

@@ -40,17 +40,18 @@ var VariantCuration = React.createClass({
     queryValues: {},
 
     componentVars: {
-        orgAssessment: null // User's assessment -- if any -- on page load
+        orgAssessment: null, // User's assessment -- if any -- on page load
+        annotation: null // Annotation from the given PMID
     },
 
     getInitialState: function() {
         this.componentVars = {
-            orgAssessment: null
+            orgAssessment: null,
+            annotation: null
         };
 
         return {
             gdm: null, // GDM object given in UUID
-            annotation: null, // Annotation object given in UUID
             variant: null, // Variant object given in UUID
             pathogenicity: null, // If editing curation, pathogenicity we're editing
             assessment: null // Assessment of pathogenicity
@@ -61,14 +62,12 @@ var VariantCuration = React.createClass({
     // and set the queryValues property of this React class.
     loadData: function() {
         var gdmUuid = this.queryValues.gdmUuid;
-        var annotationUuid = this.queryValues.annotationUuid;
         var variantUuid = this.queryValues.variantUuid;
         var pathogenicityUuid = this.queryValues.pathogenicityUuid;
 
         // Make an array of URIs to query the database. Don't include any that didn't include a query string.
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '',
-            annotationUuid ? '/evidence/' + annotationUuid : '',
             variantUuid && !pathogenicityUuid ? '/variants/' + variantUuid : '', // If we're loading a pathogenicity, it'll have the variant built in
             pathogenicityUuid ? '/pathogenicity/' + pathogenicityUuid : ''
         ]);
@@ -83,10 +82,6 @@ var VariantCuration = React.createClass({
                 switch(data['@type'][0]) {
                     case 'gdm':
                         stateObj.gdm = data;
-                        break;
-
-                    case 'annotation':
-                        stateObj.annotation = data;
                         break;
 
                     case 'variant':
@@ -321,7 +316,7 @@ var VariantCuration = React.createClass({
             }).then(data => {
                 // Now go back to Record Curation
                 var gdmQs = this.state.gdm ? '?gdm=' + this.state.gdm.uuid : '';
-                var pmidQs = this.state.annotation ? '&pmid=' + this.state.annotation.article.pmid : '';
+                var pmidQs = this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
                 this.context.navigate('/curation-central/' + gdmQs + pmidQs);
             }).catch(function(e) {
                 console.log('PATHOGENICITY CREATION ERROR=: %o', e);
@@ -331,18 +326,20 @@ var VariantCuration = React.createClass({
 
     render: function() {
         var gdm = this.state.gdm;
-        var annotation = this.state.annotation;
         var variant = this.state.variant;
         var pathogenicity = this.state.pathogenicity;
         var otherPathogenicityList;
 
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
-        this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
+        this.queryValues.pmid = queryKeyValue('pmid', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.variantUuid = queryKeyValue('variant', this.props.href);
         this.queryValues.pathogenicityUuid = queryKeyValue('pathogenicity', this.props.href);
         this.queryValues.session_user = queryKeyValue('user', this.props.href);
         this.queryValues.all = queryKeyValue('all', this.props.href) === "";
+
+        // Get the currently selected annotation from the PMID, converted to the corresponding annotation object.
+        var annotation = (gdm && this.queryValues.pmid) ? curator.pmidToAnnotation(gdm, this.queryValues.pmid) : null;
 
         // Get the user's UUID, either from the query string or from the annotation
         var user = this.queryValues.session_user ? this.queryValues.session_user : (annotation ? annotation.submitted_by.uuid : '');
@@ -361,7 +358,7 @@ var VariantCuration = React.createClass({
                 <div className="container">
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
-                            <PmidSummary article={this.state.annotation.article} displayJournal />
+                            <PmidSummary article={annotation.article} displayJournal />
                         </div>
                     : null}
                     <div className="viewer-titles">
@@ -445,7 +442,7 @@ var VariantCuration = React.createClass({
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" />
                                             {gdm ?
-                                                <a href={'/curation-central/?gdm=' + gdm.uuid + (annotation ? '&pmid=' + annotation.article.pmid : '')} className="btn btn-default btn-inline-spacer pull-right">Cancel</a>
+                                                <a href={'/curation-central/?gdm=' + gdm.uuid + (this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '')} className="btn btn-default btn-inline-spacer pull-right">Cancel</a>
                                             : null}
                                         </div>
                                     </Form>
