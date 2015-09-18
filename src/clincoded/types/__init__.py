@@ -692,6 +692,8 @@ class Pathogenicity(Item):
         'submitted_by',
         'variant',
         'variant.associatedPathogenicities',
+        'variant.associatedPathogenicities.assessments',
+        'variant.associatedPathogenicities.assessments.submitted_by',
         'variant.associatedPathogenicities.submitted_by',
         'variant.associatedPathogenicities.variant',
         'assessments',

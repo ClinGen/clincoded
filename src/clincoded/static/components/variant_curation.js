@@ -44,6 +44,10 @@ var VariantCuration = React.createClass({
     },
 
     getInitialState: function() {
+        this.componentVars = {
+            orgAssessment: null
+        };
+
         return {
             gdm: null, // GDM object given in UUID
             annotation: null, // Annotation object given in UUID
@@ -538,7 +542,7 @@ var VariantCurationView = React.createClass({
                                 <dd>
                                     {assessments.map(function(assessment, i) {
                                         return (
-                                            <span>
+                                            <span key={assessment.uuid}>
                                                 {i > 0 ? <br /> : null}
                                                 {assessment.value} ({assessment.submitted_by.title})
                                             </span>
