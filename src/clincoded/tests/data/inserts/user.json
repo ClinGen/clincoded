@@ -1044,6 +1044,21 @@
         "uuid": "04d1cd63-d5d9-4ea4-8d9b-7adad3d5377d"
     },
     {
+        "email": "forrest@forrest-tanaka.com",
+        "first_name": "良雄",
+        "groups": [
+            "admin"
+        ],
+        "job_title": "Software Engineer",
+        "lab": "/labs/j-michael-cherry/",
+        "last_name": "田中",
+        "submits_for": [
+            "/labs/j-michael-cherry/"
+        ],
+        "timezone": "US/Pacific",
+        "uuid": "9a61b43c-0e79-4f25-a7ce-c969cdf9e5ee"
+    },
+    {
         "email": "fytanaka@stanford.edu",
         "first_name": "Forrest",
         "groups": [
