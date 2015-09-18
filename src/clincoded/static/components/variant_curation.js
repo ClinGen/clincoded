@@ -9,13 +9,13 @@ var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
-var assessment = require('./assessment');
+var assessmentMod = require('./assessment');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
 var VariantAssociationsHeader = curator.VariantAssociationsHeader;
-var AssessmentPanel = assessment.AssessmentPanel;
+var AssessmentPanel = assessmentMod.AssessmentPanel;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -110,8 +110,8 @@ var VariantCuration = React.createClass({
 
             // If the pathogenicity's assessment list has an entry belonging to user, save it in state
             if (stateObj.pathogenicity && stateObj.pathogenicity.assessments && stateObj.pathogenicity.assessments.length) {
-                stateObj.assessment = _(stateObj.pathogenicity.assessments).find(assessment => {
-                    return assessment.submitted_by.uuid === this.props.session.user_properties.uuid;
+                stateObj.assessment = _(stateObj.pathogenicity.assessments).find(oneAssessment => {
+                    return oneAssessment.submitted_by.uuid === this.props.session.user_properties.uuid;
                 });
             }
 
@@ -124,9 +124,10 @@ var VariantCuration = React.createClass({
                     evidence_type: 'pathogenicity',
                     evidence_id: stateObj.pathogenicity ? stateObj.pathogenicity.uuid : '',
                     evidence_gdm: stateObj.gdm ? stateObj.gdm.uuid : '',
-                    value: assessment.DEFAULT_VALUE,
+                    value: assessmentMod.DEFAULT_VALUE,
                     active: true
                 };
+                    console.log('stateObj.assessment %o', stateObj.assessment);
             }
 
             // Set all the state variables we've collected
@@ -246,7 +247,7 @@ var VariantCuration = React.createClass({
                     assessmentPromise = this.putRestData('/assessments/' + this.componentVars.orgAssessment.uuid, newAssessment).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });
-                } else if (!this.componentVars.orgAssessment && newAssessment.value !== assessment.DEFAULT_VALUE) {
+                } else if (!this.componentVars.orgAssessment && newAssessment.value !== assessmentMod.DEFAULT_VALUE) {
                     // New assessment and form has non-default value; write it to the DB.
                     assessmentPromise = this.postRestData('/assessments/', newAssessment).then(data => {
                         return Promise.resolve(data['@graph'][0]);
@@ -260,7 +261,7 @@ var VariantCuration = React.createClass({
             // Wait for the assessment to finish writing if needed, then handle the pathenogicity object
             promise.then(newAssessment => {
                 // If this pathogenicity had an assessment that wasn't default, then there was no form, so don't write the pathogenicity.
-                if (!this.componentVars.orgAssessment || this.componentVars.orgAssessment.value === assessment.DEFAULT_VALUE) {
+                if (!this.componentVars.orgAssessment || this.componentVars.orgAssessment.value === assessmentMod.DEFAULT_VALUE) {
                     // Convert form values to new flattened pathogenicity object.
                     var newPathogenicity = this.formToPathogenicity(this.state.pathogenicity);
 
@@ -362,6 +363,7 @@ var VariantCuration = React.createClass({
                         {variant ?
                             <h2>{variant.clinvarVariantId ? <span>{'VariationId: ' + variant.clinvarVariantId}</span> : <span>{'Description: ' + variant.otherDescription}</span>}</h2>
                         : null}
+                        {pathogenicity ? <h2>{'Curated/Assessed by: ' + pathogenicity.submitted_by.title}</h2> : null}
                     </div>
                     <VariantAssociationsHeader gdm={gdm} variant={variant} />
                     <div className="row group-curation-content">
@@ -369,8 +371,8 @@ var VariantCuration = React.createClass({
                             {!this.queryValues.pathogenicityUuid || pathogenicity ?
                                 <div>
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                        {!this.componentVars.orgAssessment || this.componentVars.orgAssessment.value === assessment.DEFAULT_VALUE ?
-                                            <Panel>
+                                        {!this.componentVars.orgAssessment || this.componentVars.orgAssessment.value === assessmentMod.DEFAULT_VALUE ?
+                                            <Panel title="Evaluation of Pathogenicity">
                                                 <div className="row">
                                                     <Input type="select" ref="consistentdisease" label="Is variant type consistent with disease mechanism?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.consistentWithDiseaseMechanism)}
                                                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -444,7 +446,7 @@ var VariantCuration = React.createClass({
                                     {otherPathogenicityList ?
                                         <div>
                                             {otherPathogenicityList.map(function(pathogenicity) {
-                                                return <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} />;
+                                                return <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} named />;
                                             })}
                                         </div>
                                     : null}
@@ -465,18 +467,21 @@ globals.curator_page.register(VariantCuration, 'curator_page', 'variant-curation
 var VariantCurationView = React.createClass({
     propTypes: {
         pathogenicity: React.PropTypes.object.isRequired, // Variant pathogenicity to display
-        note: React.PropTypes.string // Note to display above key-value pairs.
+        note: React.PropTypes.string, // Note to display above key-value pairs.
+        named: React.PropTypes.bool // TRUE to put curator's name in title bar
     },
 
     render: function() {
         var pathogenicity = this.props.pathogenicity;
         var variant = pathogenicity && pathogenicity.variant;
         var variantTitle = variant ? (variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 50)) : '';
+        var title = this.props.named ? <h4><span className="panel-title-std">{'Curated/Assessed by: ' + pathogenicity.submitted_by.title}</span></h4> : <h4><span className="panel-title-std">Evaluation of Pathogenicity</span></h4>;
+        var assessments = pathogenicity.assessments && pathogenicity.assessments.length ? pathogenicity.assessments : [];
 
         return (
             <div>
                 {pathogenicity && variant ?
-                    <Panel title={'Curated/Assessed by: ' + pathogenicity.submitted_by.title} panelClassName="panel-data">
+                    <Panel title={title} panelClassName="panel-data">
                         {this.props.note ?
                             <p>{this.props.note}</p>
                         : null}
@@ -524,6 +529,20 @@ var VariantCurationView = React.createClass({
                             <div>
                                 <dt>Variant comments</dt>
                                 <dd>{pathogenicity.comment}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Assessments</dt>
+                                <dd>
+                                    {assessments.map(function(assessment, i) {
+                                        return (
+                                            <span>
+                                                {i > 0 ? <br /> : null}
+                                                {assessment.value} ({assessment.submitted_by.title})
+                                            </span>
+                                        );
+                                    })}
+                                </dd>
                             </div>
                         </dl>
                     </Panel>

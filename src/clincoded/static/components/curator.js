@@ -175,13 +175,13 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                         return 1;
                     });
                     var render = (
-                        <div>
+                        <div key={annotation.uuid}>
                             <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> → </span>
                             {sortedAssociations.map(function(association, i) {
                                 var associationType = association['@type'][0];
                                 var probandLabel = (associationType === 'individual' && association.proband) ? <i className="icon icon-proband"></i> : null;
                                 return (
-                                    <span key={i}>
+                                    <span key={association.uuid}>
                                         {i > 0 ? ', ' : ''}
                                         <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>{probandLabel}
                                     </span>
@@ -516,7 +516,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
             {curatorMatch ?
                 <span>
                     {variantCurated ?
-                        <span><a href={associatedPathogenicity['@id']} target="_blank">View</a> | <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + (associatedPathogenicity ? '' : '&variant=' + variant.uuid) + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a></span>
+                        <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + (associatedPathogenicity ? '' : '&variant=' + variant.uuid) + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a>
                     :
                         <a href={'/variant-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&variant=' + variant.uuid}>Curate/Assess</a>
                     }
