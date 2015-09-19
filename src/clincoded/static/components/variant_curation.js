@@ -240,6 +240,7 @@ var VariantCuration = React.createClass({
             // and form assessment has non-default value. The assessment might be a new one without a type,
             // so pass in the type.
             var newAssessment = curator.flatten(this.state.assessment, 'assessment');
+            newAssessment.evidence_id = this.state.pathogenicity ? this.state.pathogenicity.uuid : '';
             var promise = new Promise(function(resolve, reject) {
                 var assessmentPromise = null;
 
@@ -283,22 +284,38 @@ var VariantCuration = React.createClass({
                     if (this.state.pathogenicity) {
                         // We're editing a pathogenicity. PUT the new pathogenicity object to the DB to update the existing one.
                         return this.putRestData('/pathogenicity/' + this.state.pathogenicity.uuid, newPathogenicity).then(data => {
-                            return Promise.resolve(data['@graph'][0]);
+                            return Promise.resolve({pathogenicity: data['@graph'][0], assessment: newAssessment});
                         });
                     } else {
                         // We created a pathogenicity; POST it to the DB
                         return this.postRestData('/pathogenicity/', newPathogenicity).then(data => {
-                            return Promise.resolve(data['@graph'][0]);
+                            return Promise.resolve({pathogenicity: data['@graph'][0], assessment: newAssessment});
                         });
                     }
                 }
 
-                // No pathogenicity to write
-                Promise.resolve(null);
+                // No pathogenicity to write because the pathogenicity form is read-only (assessed).
+                return Promise.resolve({pathogenicity: null, assessment: newAssessment});
+            }).then(pa => {
+                // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
+                var newPathogenicity = pa.pathogenicity;
+                var newAssessment = pa.assessment;
+
+                if (newPathogenicity && newAssessment && !newAssessment.evidence_id) {
+                    var flatAssessment = curator.flatten(newAssessment);
+                    flatAssessment.evidence_id = newPathogenicity.uuid;
+                    return this.putRestData('/assessments/' + newAssessment.uuid, flatAssessment).then(data => {
+                        // Need the pathogenicity in the next step, not the assessment.
+                        return Promise.resolve(newPathogenicity);
+                    });
+                }
+
+                // Not updating the assessment
+                Promise.resolve(newPathogenicity);
             }).then(pathogenicity => {
                 // Given pathogenicity has been saved (created or updated).
                 // Now update the GDM to include the pathogenicity if it's new
-                if (!this.state.pathogenicity && this.state.gdm) {
+                if (!this.state.pathogenicity && this.state.gdm && pathogenicity) {
                     // New pathogenicity; add it to the GDM’s pathogenicity array.
                     var newGdm = curator.flatten(this.state.gdm);
                     if (newGdm.variantPathogenicity && newGdm.variantPathogenicity.length) {
