@@ -347,6 +347,8 @@ var VariantCuration = React.createClass({
         var pathogenicity = this.state.pathogenicity;
         var otherPathogenicityList;
 
+        var curatorName = this.props.session && this.props.session.user_properties ? this.props.session.user_properties.title : '';
+
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
         this.queryValues.pmid = queryKeyValue('pmid', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
@@ -383,7 +385,7 @@ var VariantCuration = React.createClass({
                         {variant ?
                             <h2>{variant.clinvarVariantId ? <span>{'VariationId: ' + variant.clinvarVariantId}</span> : <span>{'Description: ' + variant.otherDescription}</span>}</h2>
                         : null}
-                        {pathogenicity ? <h2>{'Curated/Assessed by: ' + pathogenicity.submitted_by.title}</h2> : null}
+                        {curatorName ? <h2>{'Curated: ' + curatorName}</h2> : null}
                     </div>
                     <VariantAssociationsHeader gdm={gdm} variant={variant} />
                     <div className="row group-curation-content">

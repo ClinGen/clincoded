@@ -329,6 +329,9 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                             {individualRenders}
                         </Panel>
                         <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence">
+                            <div className="evidence-curation-info">
+                                <p>Curate Variants from the <em>Gene-Disease Record Variants</em> section above.</p>
+                            </div>
                             {variantRenders}
                         </Panel>
                     </Panel>
@@ -515,23 +518,6 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
                     })}
                 </div>
             : null}
-            {curatorMatch ?
-                <span>
-                    {variantCurated ?
-                        <a href={'/variant-curation/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid + (associatedPathogenicity ? '' : '&variant=' + variant.uuid) + (associatedPathogenicity ? ('&pathogenicity=' + associatedPathogenicity.uuid) : '')}>Edit/Assess</a>
-                    :
-                        <a href={'/variant-curation/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid + '&variant=' + variant.uuid}>Curate/Assess</a>
-                    }
-                </span>
-            :
-                <span>
-                    {variantCurated && associatedPathogenicity ?
-                        <a href={associatedPathogenicity['@id']} target="_blank">View</a>
-                    :
-                        <span className="palette-not-curated">Not Curated/Assessed</span>
-                    }
-                </span>
-            }
         </div>
     );
 };
