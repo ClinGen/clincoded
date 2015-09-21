@@ -20,6 +20,7 @@ var Input = form.Input;
 var PmidDoiButtons = curator.PmidDoiButtons;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
+var VariantHeader = curator.VariantHeader;
 var PmidSummary = curator.PmidSummary;
 var queryKeyValue = globals.queryKeyValue;
 var external_url_map = globals.external_url_map;
@@ -44,9 +45,7 @@ var CurationCentral = React.createClass({
 
             if (gdm) {
                 // Find the annotation in the GDM matching the given pmid
-                var currAnnotation = _(gdm.annotations).find(annotation => {
-                    return annotation.article.pmid === pmid;
-                });
+                var currAnnotation = curator.pmidToAnnotation(gdm,pmid);
 
                 if (currAnnotation) {
                     this.setState({currPmid: currAnnotation.article.pmid});
@@ -60,7 +59,7 @@ var CurationCentral = React.createClass({
 
     // Retrieve the GDM object from the DB with the given uuid
     getGdm: function(uuid, pmid) {
-        this.getRestData('/gdm/' + uuid).then(gdm => {
+        this.getRestData('/gdm/' + uuid, null, true).then(gdm => {
             // The GDM object successfully retrieved; set the Curator Central component
             this.setState({currGdm: gdm, currOmimId: gdm.omimId});
             this.currPmidChange(pmid);
@@ -111,6 +110,7 @@ var CurationCentral = React.createClass({
     render: function() {
         var gdm = this.state.currGdm;
         var pmid = this.state.currPmid;
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Find the GDM's annotation for the article with the curren PMID
         var annotation = gdm && gdm.annotations && gdm.annotations.length && _(gdm.annotations).find(function(annotation) {
@@ -122,6 +122,7 @@ var CurationCentral = React.createClass({
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
                 <div className="container">
+                    <VariantHeader gdm={gdm} pmid={this.state.currPmid} session={session} />
                     <div className="row curation-content">
                         <div className="col-md-3">
                             <PmidSelectionList annotations={gdm && gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
@@ -132,7 +133,7 @@ var CurationCentral = React.createClass({
                                 <div className="curr-pmid-overview">
                                     <PmidSummary article={currArticle} displayJournal />
                                     <PmidDoiButtons pmid={currArticle.pmid} />
-                                    <BetaNote annotation={annotation} session={this.props.session} />
+                                    <BetaNote annotation={annotation} session={session} />
                                     {currArticle.abstract ?
                                         <div className="pmid-overview-abstract">
                                             <h4>Abstract</h4>
@@ -144,7 +145,7 @@ var CurationCentral = React.createClass({
                         </div>
                         {currArticle ?
                             <div className="col-md-3">
-                                <CurationPalette gdm={gdm} annotation={annotation} session={this.props.session} />
+                                <CurationPalette gdm={gdm} annotation={annotation} session={session} />
                             </div>
                         : null}
                     </div>

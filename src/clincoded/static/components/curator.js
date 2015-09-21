@@ -16,6 +16,7 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
+var truncateString = globals.truncateString;
 
 
 var CurationMixin = module.exports.CurationMixin = {
@@ -100,6 +101,106 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         } else {
             return null;
         }
+    }
+});
+
+
+// Display the header of all variants involved with the current GDM.
+var VariantHeader = module.exports.VariantHeader = React.createClass({
+    propTypes: {
+        gdm: React.PropTypes.object, // GDM whose collected variants to display
+        pmid: React.PropTypes.string, // PMID of currently selected article
+        session: React.PropTypes.object // Logged-in session
+    },
+
+    render: function() {
+        var gdm = this.props.gdm;
+        var pmid = this.props.pmid;
+        var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
+        var collectedVariants = collectGdmVariants(gdm);
+
+        return (
+            <div>
+                {collectedVariants ?
+                    <div className="variant-header clearfix">
+                        <h2>Gene-Disease Record Variants</h2>
+                        <p>Click a variant to View, Curate, or Edit/Assess it. The icon indicates curation by one or more curators.</p>
+                        {Object.keys(collectedVariants).map(variantId => {
+                            var variant = collectedVariants[variantId];
+                            var variantName = variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 20);
+                            var userPathogenicity = null;
+
+                            if (session) {
+                                userPathogenicity = getPathogenicityFromVariant(variant, session.user_properties.uuid);
+                            }
+                            return (
+                                <div className="col-sm-6 col-md-3 col-lg-2" key={variant.uuid}>
+                                    <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}>
+                                        {variant.associatedPathogenicities.length ? <i className="icon icon-sticky-note"></i> : null}
+                                        {variantName}
+                                    </a>
+                                </div>
+                            );
+                        })}
+                    </div>
+                : null}
+            </div>
+        );
+    }
+});
+
+
+// Render the Variant Associations header.
+var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React.createClass({
+    propTypes: {
+        gdm: React.PropTypes.object, // GDM containing the PMIDs we're searching
+        variant: React.PropTypes.object // Variant whose associations we're searching for
+    },
+
+    render: function() {
+        var gdm = this.props.gdm;
+        var variant = this.props.variant;
+        var annotations = gdm && gdm.annotations;
+        var annotationAssociations = [];
+
+        if (annotations && variant) {
+            // Search all annotations in the GDM for all associations for the given variant
+            annotations.forEach(function(annotation) {
+                // Get all associations (families, individuals) for this annotation and variant
+                var associations = collectVariantAssociations(annotation, variant);
+                if (associations) {
+                    // Sort by probands first
+                    var sortedAssociations = _(associations).sortBy(function(association) {
+                        if (association['@type'][0] === 'individual') {
+                            return association.proband ? 0 : 1;
+                        }
+                        return 1;
+                    });
+                    var render = (
+                        <div key={annotation.uuid}>
+                            <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> → </span>
+                            {sortedAssociations.map(function(association, i) {
+                                var associationType = association['@type'][0];
+                                var probandLabel = (associationType === 'individual' && association.proband) ? <i className="icon icon-proband"></i> : null;
+                                return (
+                                    <span key={association.uuid}>
+                                        {i > 0 ? ', ' : ''}
+                                        <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>{probandLabel}
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    );
+                    annotationAssociations.push(render);
+                }
+            });
+        }
+
+        return (
+            <div>
+                {annotationAssociations}
+            </div>
+        );
     }
 });
 
@@ -206,12 +307,13 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             individualRenders = individualRenders.concat(individualAnnotationRenders);
         }
 
-        // Add to the array of experiment renders.
-        if (annotation && annotation.experimentalData) {
-            var experimentalAnnotationRenders = annotation.experimentalData.map(experimental => {
-                return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch)}</div>;
+        // Render variants
+        var variantRenders;
+        var allVariants = collectAnnotationVariants(annotation);
+        if (Object.keys(allVariants).length) {
+            variantRenders = Object.keys(allVariants).map(function(variantId) {
+                return <div key={variantId}>{renderVariant(allVariants[variantId], gdm, annotation, curatorMatch, session)}</div>;
             });
-            experimentalRenders = experimentalRenders.concat(experimentalAnnotationRenders);
         }
 
         return (
@@ -230,6 +332,18 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                         <Panel title={<CurationPaletteTitles title="Experimental Data" url={experimentalUrl} />} panelClassName="panel-evidence">
                             {experimentalRenders}
                         </Panel>
+                        {variantRenders && variantRenders.length ?
+                            <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence">
+                                {variantRenders && variantRenders.length ?
+                                    <div className="evidence-curation-info">
+                                        <p>Curate Variants from the “Gene-Disease Record Variants” section above.</p>
+                                    </div>
+                                : null}
+                                {variantRenders}
+                            </Panel>
+                        :
+                            <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence"></Panel>
+                        }
                     </Panel>
                 : null}
             </div>
@@ -243,7 +357,7 @@ var renderGroup = function(group, gdm, annotation, curatorMatch) {
     var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
 
     return (
-        <div className="panel-evidence-group" key={group.uuid}>
+        <div className="panel-evidence-group">
             <h5>{group.label}</h5>
             <div className="evidence-curation-info">
                 {group.submitted_by ?
@@ -263,7 +377,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
     var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
 
     return (
-        <div className="panel-evidence-group" key={family.uuid}>
+        <div className="panel-evidence-group">
             <h5>{family.label}</h5>
             <div className="evidence-curation-info">
                 {family.submitted_by ?
@@ -286,6 +400,19 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
             :
                 <div>No associations</div>
             }
+            {(family && family.segregation && family.segregation.variants && family.segregation.variants.length) ?
+                <div>
+                    <span>Variants: </span>
+                    {family.segregation.variants.map(function(variant, j) {
+                        return (
+                            <span key={j}>
+                                {j > 0 ? ', ' : ''}
+                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
+                            </span>
+                        );
+                    })}
+                </div>
+            : null}
             <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
             {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
@@ -298,8 +425,8 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
     var i = 0;
 
     return (
-        <div className="panel-evidence-group" key={individual.uuid}>
-            <h5>{individual.label}{individual.proband ? ' [proband]' : ''}</h5>
+        <div className="panel-evidence-group">
+            <h5>{individual.label}{individual.proband ? <i className="icon icon-proband"></i> : null}</h5>
             <div className="evidence-curation-info">
                 {individual.submitted_by ?
                     <p className="evidence-curation-info">{individual.submitted_by.title}</p>
@@ -339,6 +466,19 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             :
                 <div>No associations</div>
             }
+            {(individual.variants && individual.variants.length) ?
+                <div>
+                    <span>Variants: </span>
+                    {individual.variants.map(function(variant, j) {
+                        return (
+                            <span key={j}>
+                                {j > 0 ? ', ' : ''}
+                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
+                            </span>
+                        );
+                    })}
+                </div>
+            : null}
             <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
         </div>
@@ -364,6 +504,52 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
     );
 };
 
+// Render a variant in the curator palette.
+//   variant: variant to display
+//   gdm: Currently viewed GDM
+//   annotation: Currently selected annotation (paper)
+//   curatorMatch: True if annotation owner matches currently logged-in user
+var renderVariant = function(variant, gdm, annotation, curatorMatch) {
+    var variantCurated = variant.associatedPathogenicities.length > 0;
+
+    // Get the pathogenicity record with an owner that matches the annotation's owner.
+    var associatedPathogenicity = getPathogenicityFromVariant(variant, annotation.submitted_by.uuid);
+
+    // Get all families and individuals that reference this variant into variantAssocations array of families and individuals
+    var variantAssociations = collectVariantAssociations(annotation, variant).sort(function(associationA, associationB) {
+        var labelA = associationA.label.toLowerCase();
+        var labelB = associationB.label.toLowerCase();
+        return (labelA < labelB) ? -1 : ((labelA > labelB ? 1 : 0));
+    });
+
+    return (
+        <div className="panel-evidence-group">
+            <h5>{variant.clinvarVariantId ? <span>{'VariationId: ' + variant.clinvarVariantId}</span> : <span>{'Description: ' + variant.otherDescription}</span>}</h5>
+            <div className="evidence-curation-info">
+                {variant.submitted_by ?
+                    <p className="evidence-curation-info">{variant.submitted_by.title}</p>
+                : null}
+                <p>{moment(variant.date_created).format('YYYY MMM DD, h:mm a')}</p>
+            </div>
+            {variantAssociations ?
+                <div>
+                    <span>Assocations: </span>
+                    {variantAssociations.map(function(association, i) {
+                        var associationType = association['@type'][0];
+                        var probandIndividual = associationType === 'individual' && association.proband;
+                        return (
+                            <span key={i}>
+                                {i > 0 ? ', ' : ''}
+                                <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>
+                                {probandIndividual ? <i className="icon icon-proband"></i> : null}
+                            </span>
+                        );
+                    })}
+                </div>
+            : null}
+        </div>
+    );
+};
 
 // Title for each section of the curation palette. Contains the title and an Add button.
 var CurationPaletteTitles = React.createClass({
@@ -615,6 +801,177 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
 });
 
 
+// Get the pathogenicity made by the curator with the given user UUID from the given variant.
+var getPathogenicityFromVariant = function(variant, curatorUuid) {
+    var pathogenicity = null;
+
+    if (variant && variant.associatedPathogenicities.length > 0) {
+        // At this point, we know the variant has a curation (pathogenicity)
+        pathogenicity = _(variant.associatedPathogenicities).find(function(pathogenicity) {
+            return pathogenicity.submitted_by.uuid === curatorUuid;
+        });
+    }
+    return pathogenicity;
+};
+
+
+// Collect references to all families and individuals within an annotation that reference the given variant
+var collectVariantAssociations = function(annotation, targetVariant) {
+    var allAssociations = [];
+
+    // Find any variants matching the target variant in the given individual.
+    // Any matching variant pushes its individual onto the associations array as a side effect
+    function surveyIndividual(individual, targetVariant, associations) {
+        // Search for variant in individual matching variant we're looking for
+        var matchingVariant = _(individual.variants).find(function(variant) {
+            return variant.uuid === targetVariant.uuid;
+        });
+
+        // Found a matching variant; push its parent individual
+        if (matchingVariant) {
+            associations.push(individual);
+        }
+    }
+
+    // Find any variants matching the target variant in the given family's segregation.
+    // Any matching variant pushes its family onto the associations array as a side effect
+    function surveyFamily(family, targetVariant, associations) {
+        if (family.segregation && family.segregation.variants) {
+            var matchingVariant = _(family.segregation.variants).find(function(variant) {
+                return variant.uuid === targetVariant.uuid;
+            });
+
+            // Found a matching variant; push its parent family
+            if (matchingVariant) {
+                allAssociations.push(family);
+            }
+        }
+    }
+
+    if (annotation && Object.keys(annotation).length) {
+        // Search unassociated individuals
+        annotation.individuals.forEach(function(individual) {
+            // Add any variants matching targetVariant in the individual to allAssociations
+            surveyIndividual(individual, targetVariant, allAssociations);
+        });
+
+        // Search unassociated families
+        annotation.families.forEach(function(family) {
+            // Add any variants matching targetVariant in the family to allAssociations
+            surveyFamily(family, targetVariant, allAssociations);
+
+            // Search for variant in the family's individuals matching variant we're looking for
+            family.individualIncluded.forEach(function(individual) {
+                surveyIndividual(individual, targetVariant, allAssociations);
+            });
+        });
+
+        // Search groups
+        annotation.groups.forEach(function(group) {
+            // Search variants in group's individuals
+            group.individualIncluded.forEach(function(individual) {
+                surveyIndividual(individual, targetVariant, allAssociations);
+            });
+
+            // Search variants in group's families' segregations
+            group.familyIncluded.forEach(function(family) {
+                surveyFamily(family, targetVariant, allAssociations);
+
+                // Search for variant in the group's families' individuals matching variant we're looking for
+                family.individualIncluded.forEach(function(individual) {
+                    surveyIndividual(individual, targetVariant, allAssociations);
+                });
+            });
+        });
+    }
+
+    return allAssociations.length ? allAssociations : null;
+};
+
+
+// Returns object keyed by variant @id, each of which points to each variant in all family segmentations
+// and individuals in all annotations in the given GDM. All variants are de-duped in the returned object.
+var collectGdmVariants = function(gdm) {
+    var allVariants = {};
+
+    if (gdm && gdm.annotations && gdm.annotations.length) {
+        gdm.annotations.forEach(function(annotation) {
+            // Get all variants in each annotation
+            var annotationVariants = collectAnnotationVariants(annotation);
+
+            // Merge them into the collection of all annotations' variants
+            Object.keys(annotationVariants).forEach(function(variantId) {
+                allVariants[variantId] = annotationVariants[variantId];
+            });
+        });
+    }
+    return Object.keys(allVariants).length ? allVariants : null;
+};
+
+
+// Returns object keyed by variant @id that points to each variant in all family segmentations
+// and individuals related to the given annotation (evidence/article). There's plenty of opportunity
+// for duplicate variants, but all variants are de-duped in the returned object.
+// returnvalue.a -> a{}.
+var collectAnnotationVariants = function(annotation) {
+    var allVariants = {};
+
+    if (annotation && Object.keys(annotation).length) {
+        // Search unassociated individuals
+        annotation.individuals.forEach(function(individual) {
+            individual.variants.forEach(function(variant) {
+                allVariants[variant['@id']] = variant;
+            });
+        });
+
+        // Search unassociated families
+        annotation.families.forEach(function(family) {
+            // Collect variants in the family's segregation
+            if (family.segregation && family.segregation.variants) {
+                family.segregation.variants.forEach(function(variant) {
+                    allVariants[variant['@id']] = variant;
+                });
+            }
+
+            // Collect variants in the family's individuals
+            family.individualIncluded.forEach(function(individual) {
+                individual.variants.forEach(function(variant) {
+                    allVariants[variant['@id']] = variant;
+                });
+            });
+        });
+
+        // Search groups
+        annotation.groups.forEach(function(group) {
+            // Collect variants in group's individuals
+            group.individualIncluded.forEach(function(individual) {
+                individual.variants.forEach(function(variant) {
+                    allVariants[variant['@id']] = variant;
+                });
+            });
+
+            // Collect variants in associated families' segregations
+            group.familyIncluded.forEach(function(family) {
+                // Collect variants in the family's segregation
+                if (family.segregation && family.segregation.variants) {
+                    family.segregation.variants.forEach(function(variant) {
+                        allVariants[variant['@id']] = variant;
+                    });
+                }
+
+                // Collect variants in the family's individual's
+                family.individualIncluded.forEach(function(individual) {
+                    individual.variants.forEach(function(variant) {
+                        allVariants[variant['@id']] = variant;
+                    });
+                });
+            });
+        });
+    }
+    return allVariants;
+};
+
+
 // Convert a boolean value to a Yes/No dropdown value
 var booleanToDropdown = module.exports.booleanToDropdown = function booleanToDropdown(boolVal) {
     return boolVal === true ? 'Yes' : (boolVal === false ? 'No' : 'none');
@@ -678,34 +1035,58 @@ module.exports.capture = {
 };
 
 
+// Given a PMID for a paper in a GDM, find its annotation object.
+module.exports.pmidToAnnotation = function(gdm, pmid) {
+    return _(gdm.annotations).find(annotation => {
+        return annotation.article.pmid === pmid;
+    });
+};
+
+
 // Take an object and make a flattened version ready for writing.
 // SCHEMA: This might need to change when the schema changes.
-var flatten = module.exports.flatten = function(obj) {
-    var flat;
+var flatten = module.exports.flatten = function(obj, type) {
+    var flat = null;
 
-    switch(obj['@type'][0]) {
-        case 'gdm':
-            flat = flattenGdm(obj);
-            break;
+    // Normally don't pass in a type; we'll get it from the object itself. Pass in a type only
+    // if there might not be one -- rare but possible.
+    if (!type) {
+        type = obj['@type'][0];
+    }
 
-        case 'annotation':
-            flat = flattenAnnotation(obj);
-            break;
+    if (obj) {
+        switch(type) {
+            case 'gdm':
+                flat = flattenGdm(obj);
+                break;
 
-        case 'group':
-            flat = flattenGroup(obj);
-            break;
+            case 'annotation':
+                flat = flattenAnnotation(obj);
+                break;
 
-        case 'family':
-            flat = flattenFamily(obj);
-            break;
+            case 'group':
+                flat = flattenGroup(obj);
+                break;
 
-        case 'individual':
-            flat = flattenIndividual(obj);
-            break;
+            case 'family':
+                flat = flattenFamily(obj);
+                break;
 
-        default:
-            break;
+            case 'individual':
+                flat = flattenIndividual(obj);
+                break;
+
+            case 'pathogenicity':
+                flat = flattenPathogenicity(obj);
+                break;
+
+            case 'assessment':
+                flat = flattenAssessment(obj);
+                break;
+
+            default:
+                break;
+        }
     }
 
     // Flatten submitted_by
@@ -905,10 +1286,6 @@ function flattenIndividual(individual) {
 var gdmSimpleProps = [
     "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active"
 ];
-var variantPathogenicSimpleProps = [
-    "consistentWithDiseaseMechanism", "withinFunctionalDomain", "frequencySupportPathogenicity", "previouslyReported", "denovoType",
-    "intransWithAnotherVariant", "supportingSegregation", "supportingStatistic", "SupportingFunctional", "comment"
-];
 
 function flattenGdm(gdm) {
     // First copy all the simple properties
@@ -931,19 +1308,10 @@ function flattenGdm(gdm) {
         });
     }
 
-    // Flatten variant pathogenics
-    if (gdm.variantPathogenic && gdm.variantPathogenic.length) {
-        flat.variantPathogenic = gdm.variantPathogenic.map(function(vp) {
-            var flat_vp = cloneSimpleProps(vp, variantPathogenicSimpleProps);
-            if (vp.variant) {
-                flat_vp.variant = vp.variant['@id'];
-            }
-            if (vp.assessments && vp.assessments.length) {
-                flat_vp.assessments = vp.assessments.map(function(assessment) {
-                    return assessment['@id'];
-                });
-            }
-            return flat_vp;
+    // Flatten variant pathogenicities
+    if (gdm.variantPathogenicity && gdm.variantPathogenicity.length) {
+        flat.variantPathogenicity = gdm.variantPathogenicity.map(function(vp) {
+            return vp['@id'];
         });
     }
 
@@ -956,6 +1324,41 @@ function flattenGdm(gdm) {
 
     return flat;
 }
+
+
+var pathogenicitySimpleProps = [
+    "date_created", "consistentWithDiseaseMechanism", "withinFunctionalDomain", "frequencySupportPathogenicity", "previouslyReported",
+    "denovoType", "intransWithAnotherVariant", "supportingSegregation", "supportingStatistic", "supportingExperimental", "comment"
+];
+
+function flattenPathogenicity(pathogenicity) {
+    // First copy all the simple properties
+    var flat = cloneSimpleProps(pathogenicity, pathogenicitySimpleProps);
+
+    // Flatten variant
+    flat.variant = pathogenicity.variant['@id'];
+
+    // Flatten assessments
+    if (pathogenicity.assessments && pathogenicity.assessments.length) {
+        flat.assessments = pathogenicity.assessments.map(function(assessment) {
+            return assessment['@id'];
+        });
+    }
+
+    return flat;
+}
+
+
+var assessmentSimpleProps = [
+    "date_created", "value", "evidence_type", "evidence_id", "evidence_gdm", "active"
+];
+
+function flattenAssessment(assessment) {
+    var flat = cloneSimpleProps(assessment, assessmentSimpleProps);
+
+    return flat;
+}
+
 
 // Given an array of group or families in 'objList', render a list of Orphanet IDs for all diseases in those
 // groups or families.

@@ -60,6 +60,12 @@
         "uuid": "469b4d4f-c5d4-4dbe-9ced-d3a0f6ce644c"
     },
     {
+        "name": "variant-curation",
+        "title": "Variant Curation",
+        "status": "released",
+        "uuid": "f99759f0-6928-4d3c-907c-6376885c288a"
+    },
+    {
         "name": "dashboard",
         "title": "Dashboard",
         "status": "released",
