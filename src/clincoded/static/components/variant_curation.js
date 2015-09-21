@@ -385,7 +385,7 @@ var VariantCuration = React.createClass({
                         {variant ?
                             <h2>{variant.clinvarVariantId ? <span>{'VariationId: ' + variant.clinvarVariantId}</span> : <span>{'Description: ' + variant.otherDescription}</span>}</h2>
                         : null}
-                        {curatorName ? <h2>{'Curated: ' + curatorName}</h2> : null}
+                        {curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null}
                     </div>
                     <VariantAssociationsHeader gdm={gdm} variant={variant} />
                     <div className="row group-curation-content">

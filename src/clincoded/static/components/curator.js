@@ -330,7 +330,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                         </Panel>
                         <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence">
                             <div className="evidence-curation-info">
-                                <p>Curate Variants from the <em>Gene-Disease Record Variants</em> section above.</p>
+                                <p>Curate Variants from the “Gene-Disease Record Variants” section above.</p>
                             </div>
                             {variantRenders}
                         </Panel>
