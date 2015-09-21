@@ -1131,14 +1131,28 @@ var IndividualAdditional = function() {
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfoindividual" label={'Additional Information about Individual ' + probandLabel + ':'} rows="5" value={individual && individual.additionalInformation}
+            <Input type="textarea" ref="additionalinfoindividual" label={<LabelAdditional probandLabel={probandLabel} />} rows="5" value={individual && individual.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="otherpmids" label={'Enter PMID(s) that report evidence about this same Individual' + probandLabel + ':'} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+            <Input type="textarea" ref="otherpmids" label={<LabelOtherPmids probandLabel={probandLabel} />} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 };
+
+
+// HTML labels for inputs follow.
+var LabelAdditional = React.createClass({
+    render: function() {
+        return <span>Additional Information about Individual{this.props.probandLabel}:</span>;
+    }
+});
+
+var LabelOtherPmids = React.createClass({
+    render: function() {
+        return <span>Enter PMID(s) that report evidence about this Individual{this.props.probandLabel}:</span>;
+    }
+});
 
 
 var IndividualViewer = React.createClass({
