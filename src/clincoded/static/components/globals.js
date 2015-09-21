@@ -53,11 +53,13 @@ module.exports.userMatch = function(user, session) {
     return false;
 };
 
+// Trancate the given string to the given number of characters, but pull the truncation back to
+// the word boundary before the truncation point.
 module.exports.truncateString = function (str, len) {
     if (str.length > len) {
         str = str.replace(/(^\s)|(\s$)/gi, ''); // Trim leading/trailing white space
-        var isOneWord = str.match(/\s/gi) === null; // Detect single-word string
         str = str.substr(0, len - 1); // Truncate to length ignoring word boundary
+        var isOneWord = str.match(/\s/gi) === null; // Detect single-word string
         str = (!isOneWord ? str.substr(0, str.lastIndexOf(' ')) : str) + '…'; // Back up to word boundary
     }
     return str;
@@ -93,15 +95,15 @@ module.exports.queryKeyValue = function (key, href) {
     return undefined;
 };
 
-// Order that antibody statuses should be displayed
-module.exports.statusOrder = [
-    'eligible for new data',
-    'not eligible for new data',
-    'pending dcc review',
-    'awaiting lab characterization',
-    'not pursued',
-    'not reviewed'
-];
+// Add a key-value pair as a query string to the given href. If href already
+// has query string values, this function adds the given key value to it.
+module.exports.addQueryKey = function(href, key, value) {
+    var existingQuery = href.split(/\?(.+)?/)[1];
+    if (existingQuery) {
+        return href + '&' + key + '=' + value;
+    }
+    return href + '?' + key + '=' + value;
+};
 
 
 module.exports.productionHost = {'curation.clinicalgenome.org':1};

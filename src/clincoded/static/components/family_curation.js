@@ -1130,6 +1130,9 @@ var FamilyVariant = function() {
                         The proband (an Individual) will be created upon submission using the name you supply here. You will be able to add additional information about the proband
                         following submission of Family information.
                     </p>
+                    <p className="col-sm-7 col-sm-offset-5">
+                        Note: Probands are indicated by the following icon: <i className="icon icon-proband"></i>
+                    </p>
                 </div>
             : null}
             {_.range(this.state.variantCount).map(i => {

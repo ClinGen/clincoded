@@ -4,7 +4,7 @@
     "description": "Schema for storing variant pathogenic data.",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["variant", "submitted_by", "date_created", "last_modified"],
+    "required": ["variant"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -24,43 +24,19 @@
         "consistentWithDiseaseMechanism": {
             "title": "Is Variant Consistent with Disease Mechanism?",
             "description": "Is variant consistent with disease mechanism?",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "withinFunctionalDomain": {
             "title": "Variant within Functional Domain",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "frequencySupportPathogenicity": {
             "title": "Does Frequency Data Support Pathogenicity",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "previouslyReported": {
             "title": "Previously Reported",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "type": "boolean"
         },
         "denovoType": {
             "title": "de novo Type",
@@ -73,44 +49,20 @@
             ]
         },
         "intransWithAnotherVariant": {
-             "title": "in trans with Another Variant",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "title": "in trans with Another Variant",
+            "type": "boolean"
         },
         "supportingSegregation": {
-             "title": "Supporting Segregation Data",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "title": "Supporting Segregation Data",
+            "type": "boolean"
         },
         "supportingStatistic": {
-             "title": "Supporting Statistical Data",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+            "title": "Supporting Statistical Data",
+            "type": "boolean"
         },
-        "SupportingFunctional": {
-             "title": "Supporting Functional Data",
-            "type": "string",
-            "default": "",
-            "enum": [
-                "",
-                "Yes",
-                "No"
-            ]
+        "supportingExperimental": {
+            "title": "Supporting Functional Data",
+            "type": "boolean"
         },
         "comment": {
             "title": "Comment",

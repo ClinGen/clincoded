@@ -112,8 +112,27 @@ class Variant(Item):
     schema = load_schema('clincoded:schemas/variant.json')
     name_key = 'uuid'
     embedded = [
-        'submitted_by'
+        'submitted_by',
+        'associatedPathogenicities',
+        'associatedPathogenicities.assessments',
+        'associatedPathogenicities.assessments.submitted_by',
+        'associatedPathogenicities.variant',
+        'associatedPathogenicities.submitted_by'
     ]
+    rev = {
+        'associatedPathogenicities': ('pathogenicity', 'variant')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated pathogenicities",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "pathogenicity.variant",
+        },
+    })
+    def associatedPathogenicities(self, request, associatedPathogenicities):
+        return paths_filtered_by_status(request, associatedPathogenicities)
 
 
 @collection(
@@ -159,6 +178,8 @@ class Gdm(Item):
         'annotations.groups.familyIncluded.otherPMIDs.submitted_by',
         'annotations.groups.familyIncluded.segregation.variants',
         'annotations.groups.familyIncluded.segregation.variants.submitted_by',
+        'annotations.groups.familyIncluded.segregation.variants.associatedPathogenicities',
+        'annotations.groups.familyIncluded.segregation.variants.associatedPathogenicities.submitted_by',
         'annotations.groups.familyIncluded.segregation.assessments',
         'annotations.groups.familyIncluded.segregation.assessments.submitted_by',
         'annotations.groups.familyIncluded.individualIncluded',
@@ -169,6 +190,8 @@ class Gdm(Item):
         'annotations.groups.familyIncluded.individualIncluded.submitted_by',
         'annotations.groups.familyIncluded.individualIncluded.variants',
         'annotations.groups.familyIncluded.individualIncluded.variants.submitted_by',
+        'annotations.groups.familyIncluded.individualIncluded.variants.associatedPathogenicities',
+        'annotations.groups.familyIncluded.individualIncluded.variants.associatedPathogenicities.submitted_by',
         'annotations.groups.familyIncluded.individualIncluded.otherPMIDs',
         'annotations.groups.familyIncluded.individualIncluded.otherPMIDs.submitted_by',
         'annotations.groups.individualIncluded',
@@ -177,6 +200,8 @@ class Gdm(Item):
         'annotations.groups.individualIncluded.submitted_by',
         'annotations.groups.individualIncluded.variants',
         'annotations.groups.individualIncluded.variants.submitted_by',
+        'annotations.groups.individualIncluded.variants.associatedPathogenicities',
+        'annotations.groups.individualIncluded.variants.associatedPathogenicities.submitted_by',
         'annotations.groups.individualIncluded.otherPMIDs',
         'annotations.groups.individualIncluded.otherPMIDs.submitted_by',
         #'annotations.groups.control',
@@ -188,6 +213,8 @@ class Gdm(Item):
         'annotations.families.otherPMIDs.submitted_by',
         'annotations.families.segregation.variants',
         'annotations.families.segregation.variants.submitted_by',
+        'annotations.families.segregation.variants.associatedPathogenicities',
+        'annotations.families.segregation.variants.associatedPathogenicities.submitted_by',
         'annotations.families.segregation.assessments',
         'annotations.families.segregation.assessments.submitted_by',
         'annotations.families.individualIncluded',
@@ -198,6 +225,8 @@ class Gdm(Item):
         'annotations.families.individualIncluded.submitted_by',
         'annotations.families.individualIncluded.variants',
         'annotations.families.individualIncluded.variants.submitted_by',
+        'annotations.families.individualIncluded.variants.associatedPathogenicities',
+        'annotations.families.individualIncluded.variants.associatedPathogenicities.submitted_by',
         'annotations.families.individualIncluded.otherPMIDs',
         'annotations.families.individualIncluded.otherPMIDs.submitted_by',
         'annotations.individuals',
@@ -208,6 +237,8 @@ class Gdm(Item):
         'annotations.individuals.submitted_by',
         'annotations.individuals.variants',
         'annotations.individuals.variants.submitted_by',
+        'annotations.individuals.variants.associatedPathogenicities',
+        'annotations.individuals.variants.associatedPathogenicities.submitted_by',
         'annotations.individuals.otherPMIDs',
         'annotations.individuals.otherPMIDs.submitted_by',
         'annotations.experimentalData',
@@ -457,9 +488,24 @@ class Group(Item):
         'individualIncluded.otherPMIDs.submitted_by',
         'individualIncluded.variants',
         'individualIncluded.variants.submitted_by',
+        'associatedAnnotations',
+        'associatedAnnotations.article'
         #'control'
     ]
+    rev = {
+        'associatedAnnotations': ('annotation', 'groups')
+    }
 
+    @calculated_property(schema={
+        "title": "Associated annotations",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.groups",
+        },
+    })
+    def associatedAnnotations(self, request, associatedAnnotations):
+        return paths_filtered_by_status(request, associatedAnnotations)
 
 @collection(
     name='families',
@@ -488,12 +534,17 @@ class Family(Item):
         'individualIncluded.otherPMIDs',
         'individualIncluded.submitted_by',
         'individualIncluded.variants',
+        'individualIncluded.variants.submitted_by',
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
-        'individualIncluded.variants.submitted_by',
+        'associatedGroups.associatedAnnotations',
+        'associatedGroups.associatedAnnotations.article',
+        'associatedAnnotations',
+        'associatedAnnotations.article',
     ]
     rev = {
         'associatedGroups': ('group', 'familyIncluded'),
+        'associatedAnnotations': ('annotation', 'families'),
     }
 
     @calculated_property(schema={
@@ -506,6 +557,17 @@ class Family(Item):
     })
     def associatedGroups(self, request, associatedGroups):
         return paths_filtered_by_status(request, associatedGroups)
+
+    @calculated_property(schema={
+        "title": "Associated annotations",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.families",
+        },
+    })
+    def associatedAnnotations(self, request, associatedAnnotations):
+        return paths_filtered_by_status(request, associatedAnnotations)
 
 
 @collection(
@@ -528,14 +590,22 @@ class Individual(Item):
         'otherPMIDs.submitted_by',
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
+        'associatedGroups.associatedAnnotations',
+        'associatedGroups.associatedAnnotations.article',
         'associatedFamilies',
         'associatedFamilies.associatedGroups',
+        'associatedFamilies.associatedGroups.associatedAnnotations',
+        'associatedFamilies.associatedGroups.associatedAnnotations.article',
+        'associatedFamilies.associatedAnnotations',
+        'associatedFamilies.associatedAnnotations.article',
         'associatedFamilies.commonDiagnosis',
-        'associatedFamilies.individualIncluded'
+        'associatedAnnotations',
+        'associatedAnnotations.article'
     ]
     rev = {
         'associatedGroups': ('group', 'individualIncluded'),
         'associatedFamilies': ('family', 'individualIncluded'),
+        'associatedAnnotations': ('annotation', 'individuals')
     }
 
     @calculated_property(schema={
@@ -559,6 +629,17 @@ class Individual(Item):
     })
     def associatedFamilies(self, request, associatedFamilies):
         return paths_filtered_by_status(request, associatedFamilies)
+
+    @calculated_property(schema={
+        "title": "Associated annotations",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.individuals",
+        },
+    })
+    def associatedAnnotations(self, request, associatedAnnotations):
+        return paths_filtered_by_status(request, associatedAnnotations)
 
 
 @collection(
@@ -610,6 +691,11 @@ class Pathogenicity(Item):
     embedded = [
         'submitted_by',
         'variant',
+        'variant.associatedPathogenicities',
+        'variant.associatedPathogenicities.assessments',
+        'variant.associatedPathogenicities.assessments.submitted_by',
+        'variant.associatedPathogenicities.submitted_by',
+        'variant.associatedPathogenicities.variant',
         'assessments',
         'assessments.submitted_by',
         'associatedGdm',
@@ -630,7 +716,7 @@ class Pathogenicity(Item):
         "title": "Number of Assessment",
         "type": "integer"
     })
-    def numberOfAssessmnet(self, assessments):
+    def numberOfAssessment(self, assessments):
         return len(assessments)
 
 
