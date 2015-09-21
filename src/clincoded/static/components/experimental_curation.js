@@ -949,10 +949,12 @@ var ExperimentalCuration = React.createClass({
                                             {ExperimentalNameType.call(this)}
                                         </Panel>
                                         {this.state.experimentalType == 'Biochemical function' ?
+                                            <Panel title="Biochemical function" open>
+                                                {TypeBiochemicalFunction.call(this)}
+                                            </Panel>
+                                        : null}
+                                        {this.state.experimentalType == 'Biochemical function' ?
                                             <PanelGroup accordion>
-                                                <Panel title="Biochemical function" open>
-                                                    {TypeBiochemicalFunction.call(this)}
-                                                </Panel>
                                                 <Panel title="A. Gene(s) with same function implicated in same disease" open>
                                                     {TypeBiochemicalFunctionA.call(this)}
                                                 </Panel>
@@ -1041,7 +1043,9 @@ var ExperimentalNameType = function() {
                 error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {this.state.experimentalType && this.state.experimentalType != 'none' ?
-                <p className="col-sm-7 col-sm-offset-5">{this.state.experimentalTypeDescription}</p>
+                <div className="col-sm-7 col-sm-offset-5">
+                    <p className="alert alert-info">{this.state.experimentalTypeDescription}</p>
+                </div>
                 : null}
         </div>
     );
@@ -1059,6 +1063,7 @@ var TypeBiochemicalFunction = function() {
     }
     return (
         <div className="row experimental-data-form">
+            <p className="col-sm-7 col-sm-offset-5">There are 2 kinds of evidence that support Biochemical Function (see A. and B.). You can collect either or both - each kind counts as one piece of Biochemical Function evidence. Fill out this section and then curate on A. and/or B.</p>
             <Input type="text" ref="identifiedFunction" label={<LabelIdentifiedFunction />} value={biochemicalFunction.identifiedFunction} placeholder="e.g. GO:0008150"
                 error={this.getFormError('identifiedFunction')} clearError={this.clrFormErrors.bind(null, 'identifiedFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
@@ -1068,7 +1073,6 @@ var TypeBiochemicalFunction = function() {
             <Input type="textarea" ref="evidenceForFunctionInPaper" label="Notes on where evidence found in paper:" rows="5" value={biochemicalFunction.evidenceForFunctionInPaper}
                 error={this.getFormError('evidenceForFunctionInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceForFunctionInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">There are 2 kinds of evidence that support Biochemical Function (see A. and B.). You can collect either or both - each kind counts as one piece of Biochemical Function evidence. Fill out the top section and then curate on A. and/or B.</p>
         </div>
     );
 }
@@ -1088,7 +1092,7 @@ var TypeBiochemicalFunctionA = function() {
     }
     return (
         <div className="row experimental-data-form">
-            <Input type="text" ref="geneWithSameFunctionSameDisease.genes" label="Genes (HGNC):" value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
+            <Input type="text" ref="geneWithSameFunctionSameDisease.genes" label={<LabelGenesWithSameFunction />} value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
                 error={this.getFormError('geneWithSameFunctionSameDisease.genes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.genes')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that above gene(s) share same function:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}
@@ -1100,13 +1104,14 @@ var TypeBiochemicalFunctionA = function() {
                 checked={this.state.geneImplicatedWithDisease} defaultChecked="false" handleChange={this.handleChange}
                 error={this.getFormError('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the other gene(s) have not been implicated in the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Proceed to section B below or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Curation Central</a>.</p>
+            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the gene(s) entered above in this section have not been implicated in the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Proceed to section B below or return to the <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.explanationOfOtherGenes" label="How has this gene(s) been implicated in the above disease?:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}
                 error={this.getFormError('geneWithSameFunctionSameDisease.explanationOfOtherGenes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.explanationOfOtherGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.geneImplicatedWithDisease} required={this.state.geneImplicatedWithDisease} />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Notes on where evidence found in paper:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.geneImplicatedWithDisease} />
+            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> You may submit now by scrolling to bottom of page OR enter a new piece of Biochemical Function evidence in B, below.</p>
         </div>
     );
 }
@@ -1143,6 +1148,11 @@ var TypeBiochemicalFunctionB = function() {
 }
 
 // HTML labels for Biochemical Functions panel
+var LabelGenesWithSameFunction = React.createClass({
+    render: function() {
+        return <span>Gene(s) with same function (<span style={{fontWeight: 'normal'}}><a href="http://www.genenames.org/" target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol</span>):</span>;
+    }
+});
 var LabelIdentifiedFunction = React.createClass({
     render: function() {
         return <span>Identified Function (<span style={{fontWeight: 'normal'}}><a href="http://bit.ly/1fxDvhV" target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a></span>):</span>;
@@ -1524,9 +1534,7 @@ var ExperimentalDataVariant = function() {
         <div className="row">
             {!experimental || !experimental.variants || experimental.variants.length === 0 ?
                 <div className="row">
-                    <p className="col-sm-7 col-sm-offset-5">
-                        If your functional data was about one or more particular variants, please associate it with those variant(s) (optional, and only when functional data is about this specific variant – Expression, Functional alteration of gene/gene product, Model systems, or Rescue)
-                    </p>
+                    <p className="col-sm-7 col-sm-offset-5">If your Experimental data is about one or more variants, please add these variant(s) below</p>
                 </div>
             : null}
             {_.range(this.state.variantCount).map(i => {
@@ -1559,7 +1567,7 @@ var ExperimentalDataVariant = function() {
             })}
             {this.state.variantCount < MAX_VARIANTS ?
                 <div>
-                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with experimental data" : "Add variant associated with experimental data"}
+                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Experimental data" : "Add variant associated with Experimental data"}
                         clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                 </div>
             : null}
@@ -1588,7 +1596,7 @@ var ExperimentalViewer = React.createClass({
         return (
             <div className="container">
                 <div className="row curation-content-viewer">
-                    <h1>View Experimental Data: {context.label} ({context.evidenceType})</h1>
+                    <h1>View Experimental Data: {context.label}<br />{context.evidenceType}</h1>
 
                     {context.evidenceType == 'Biochemical function' ?
                     <Panel title="Biochemical function" panelClassName="panel-data">
