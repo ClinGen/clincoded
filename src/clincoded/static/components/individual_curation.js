@@ -1140,6 +1140,19 @@ var IndividualAdditional = function() {
     );
 };
 
+// HTML labels for inputs follow.
+var LabelAdditional = React.createClass({
+    render: function() {
+        return <span>Additional Information about Individual{this.props.probandLabel}:</span>;
+    }
+});
+
+var LabelOtherPmids = React.createClass({
+    render: function() {
+        return <span>Enter PMID(s) that report evidence about this Individual{this.props.probandLabel}:</span>;
+    }
+});
+
 
 // HTML labels for inputs follow.
 var LabelAdditional = React.createClass({
