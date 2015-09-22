@@ -16,7 +16,7 @@ var DEFAULT_VALUE = module.exports.DEFAULT_VALUE = 'Not Assessed';
 
 // Object to track and maintain a single assessment. If you pass null/undefined in 'assessment',
 // provide all parameters from 'gdm' and after to properly initialize new assessment, if possible.
-class Assessment {
+class AssessmentTracker {
     constructor(assessment, user, evidenceType) {
         this.original = assessment ? _.clone(assessment) : null; // Original assessment -- the existing one for a parent object
         this.updated = null; // Updated assessment that's been saved to DB.
@@ -41,23 +41,57 @@ class Assessment {
     setCurrentVal(value) {
         this.currentVal = value;
     }
+}
+
+module.exports.Assessment = AssessmentTracker;
+
+
+// Mixin to handle React states for assessments
+var AssessmentMixin = module.exports.AssessmentMixin = {
+    // Do not call; called by React.
+    getInitialState: function() {
+        return {
+            currentAssessmentVal: '' // Currently chosen assessment value in the form
+        };
+    },
+
+    // Sets the current component's assessment value state. Call at load and when assessment form value changes.
+    // Also assigns the value to the given assessment object. If no value's given; then the current value
+    // is taken from the given assessment object.
+    setAssessmentValue: function(assessmentTracker, value) {
+        if (!value) {
+            // No value given; get it from the given assessment object
+            value = assessmentTracker.getCurrentVal();
+        } else {
+            // There was a value given; assign it to the given assessment object in addition to setting
+            // the component state.
+            assessmentTracker.setCurrentVal(value);
+        }
+
+        // Set the component state to cause a rerender
+        this.setState({currentAssessmentVal: value});
+    },
+
+    // When the user changes the assessment value, this gets called
+    updateAssessmentValue: function(assessmentTracker, value) {
+        this.setAssessmentValue(assessmentTracker, value);
+    },
 
     // Write the assessment for the given pathogenicity to the DB, and pass the new assessment in the promise, along
     // With a boolean indicating if this is a new assessment or if we updated one. If we don't write an assessment
-    // (either because we had already written the assessment, and the new assessment's value is no different, or
+    // (either because we had already written the assessment, and the new assessment's value is no different; or
     // because we haven't written an assessment, and the current assessment's value is default), the the promise has
     // a null assessment.
-    // For new assessments, pass in the current GDM object, or null if you know you have an assessment already and
-    // want to use its existing GDM reference. Also pass in the current evidence object. If you don't yet have it,
-    // pass nothing or null, but make sure you update with that later.
-    saveAssessment(gdm, evidence) {
-        return this.saveAnAssessment(null, gdm, evidence);
-    }
-
-    saveAnAssessment(anAssessment, gdm, evidence) {
+    // For new assessments, pass in the assessment tracking object, the current GDM object, or null if you know you
+    // have an assessment already and want to use its existing GDM reference. Also pass in the current evidence object.
+    // If you don't yet have it, pass nothing or null, but make sure you update with that later. If you want to write
+    // an existing assessment, pass that in the 'assessment' parameter. This is useful for when you've written the
+    // assessment without an evidence_id, but now have it. In that case, pass the assessment tracker, null for the
+    // GDM (use the existing one), the evidence object, and the assessment object to write with the new evidence ID.
+    saveAssessment: function(assessmentTracker, gdm, evidence, assessment) {
         // Flatten the original assessment if any; will modify with updated values
-        var newAssessment = anAssessment ? curator.flatten(anAssessment) : (this.original ? curator.flatten(this.original, 'assessment') : {});
-        newAssessment.value = this.currentVal;
+        var newAssessment = assessment ? curator.flatten(assessment) : (assessmentTracker.original ? curator.flatten(assessmentTracker.original, 'assessment') : {});
+        newAssessment.value = assessmentTracker.currentVal;
         if (evidence) {
             newAssessment.evidence_id = evidence.uuid;
             newAssessment.evidence_type = evidence['@type'][0];
@@ -73,12 +107,12 @@ class Assessment {
         return new Promise(function(resolve, reject) {
             var assessmentPromise;
 
-            if (this.original && (newAssessment.value !== this.original.value)) {
+            if (assessmentTracker.original && (newAssessment.value !== assessmentTracker.original.value)) {
                 // Updating an existing assessment, and the value of the assessment has changed
-                assessmentPromise = this.putRestData('/assessments/' + this.original.uuid, newAssessment).then(data => {
+                assessmentPromise = this.putRestData('/assessments/' + assessmentTracker.original.uuid, newAssessment).then(data => {
                     return Promise.resolve({assessment: data['@graph'][0], update: true});
                 });
-            } else if (!this.original && newAssessment.value !== DEFAULT_VALUE) {
+            } else if (!assessmentTracker.original && newAssessment.value !== DEFAULT_VALUE) {
                 // New assessment and form has non-default value; write it to the DB.
                 assessmentPromise = this.postRestData('/assessments/', newAssessment).then(data => {
                     return Promise.resolve({assessment: data['@graph'][0], update: false});
@@ -92,41 +126,6 @@ class Assessment {
             resolve(assessmentPromise);
         }.bind(this));
     }
-}
-
-module.exports.Assessment = Assessment;
-
-
-// Mixin to handle React states for assessments
-var AssessmentMixin = module.exports.AssessmentMixin = {
-    // Do not call; called by React.
-    getInitialState: function() {
-        return {
-            currentAssessmentVal: '' // Currently chosen assessment value in the form
-        };
-    },
-
-    // Sets the current component's assessment value state. Call at load and when assessment form value changes.
-    // Also assigns the value to the given assessment object. If no value's given; then the current value
-    // is taken from the given assessment object.
-    setAssessmentValue: function(assessmentObj, value) {
-        if (!value) {
-            // No value given; get it from the given assessment object
-            value = assessmentObj.getCurrentVal();
-        } else {
-            // There was a value given; assign it to the given assessment object in addition to setting
-            // the component state.
-            assessmentObj.setCurrentVal(value);
-        }
-
-        // Set the component state to cause a rerender
-        this.setState({currentAssessmentVal: value});
-    },
-
-    // When the user changes the assessment value, this gets called
-    updateAssessmentValue: function(assessmentObj, value) {
-        this.setAssessmentValue(assessmentObj, value);
-    }
 };
 
 
@@ -134,7 +133,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     mixins: [FormMixin],
 
     propTypes: {
-        currVal: React.PropTypes.string, // Current value of assessment
+        assessmentTracker: React.PropTypes.object.isRequired, // Current value of assessment
         panelTitle: React.PropTypes.string, // Title of Assessment panel; 'Assessment' default
         label: React.PropTypes.string, // Label for dropdown; 'Assessment' default
         note: React.PropTypes.string, // Note to display below the dropdown
@@ -150,11 +149,12 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     render: function() {
         var panelTitle = this.props.panelTitle ? this.props.panelTitle : 'Assessment';
         var label = this.props.label ? this.props.label : 'Assessment';
+        var value = this.props.assessmentTracker && this.props.assessmentTracker.currentVal;
 
         return (
             <Panel title={panelTitle}>
                 <div className="row">
-                    <Input type="select" ref="assessment" label={label + ':'} defaultValue="Not Assessed" value={this.props.currVal} handleChange={this.handleChange}
+                    <Input type="select" ref="assessment" label={label + ':'} defaultValue="Not Assessed" value={value} handleChange={this.handleChange}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                         <option>Not Assessed</option>
                         <option disabled="disabled"></option>

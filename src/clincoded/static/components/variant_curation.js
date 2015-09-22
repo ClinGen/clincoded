@@ -42,7 +42,7 @@ var VariantCuration = React.createClass({
     queryValues: {},
 
     cv: {
-        assessment: null, // Tracking object for a single assessment
+        assessmentTracker: null, // Tracking object for a single assessment
         annotation: null // Annotation from the given PMID
     },
 
@@ -67,7 +67,6 @@ var VariantCuration = React.createClass({
         var gdmUuid = this.queryValues.gdmUuid;
         var variantUuid = this.queryValues.variantUuid;
         var pathogenicityUuid = this.queryValues.pathogenicityUuid;
-        var user = this.props.session && this.props.session.user_properties;
 
         // Make an array of URIs to query the database. Don't include any that didn't include a query string.
         var uris = _.compact([
@@ -112,18 +111,18 @@ var VariantCuration = React.createClass({
             }
 
             // Find the current user's pathogenicity's assessment from the pathogenicity's assessment list
+            var user = this.props.session && this.props.session.user_properties;
             if (stateObj.pathogenicity && stateObj.pathogenicity.assessments && stateObj.pathogenicity.assessments.length) {
-                userAssessment = Assessments.userAssessment(stateObj.pathogenicity.assessments, user && user.uuid, stateObj.pathogenicity && stateObj.pathogenicity.uuid);
+                userAssessment = Assessments.userAssessment(stateObj.pathogenicity.assessments, user && user.uuid);
             }
 
             // Make a new tracking object for the current assessment. Either or both of the original assessment or user can be blank
             // and assigned later. Then set the component state's assessment value to the assessment's value -- default if there was no
             // assessment.
-            var assessmentObj = this.cv.assessment = new Assessment(userAssessment, user, 'pathogenicity');
-            Assessments.setAssessmentValue(assessmentObj);
+            var assessmentObj = this.cv.assessmentTracker = new Assessment(userAssessment, user, 'pathogenicity');
+            this.setAssessmentValue(assessmentObj);
 
             // Set all the state variables we've collected
-            console.log(stateObj);
             this.setState(stateObj);
 
             // No one’s waiting but the user; just resolve with an empty promise.
@@ -224,12 +223,12 @@ var VariantCuration = React.createClass({
             // If pathogenicity object has no assessment object found with currently logged-in user
             // and form assessment has non-default value. The assessment might be a new one without a type,
             // so pass in the type.
-            var promise = this.cv.assessment.saveAssessment(this.state.gdm, this.state.pathogenicity);
+            var promise = this.saveAssessment(this.cv.assessmentTracker, this.state.gdm, this.state.pathogenicity);
 
             // Wait for the assessment to finish writing if needed, then handle the pathenogicity object
             promise.then(newAssessmentInfo => {
                 // If this pathogenicity was assessed, then there was no form, so don't write the pathogenicity.
-                if (!this.cv.assessment.isAssessed()) {
+                if (!this.cv.assessmentTracker.isAssessed()) {
                     // Convert form values to new flattened pathogenicity object.
                     var newPathogenicity = this.formToPathogenicity(this.state.pathogenicity);
 
@@ -269,9 +268,7 @@ var VariantCuration = React.createClass({
                 if (newPathogenicity && newAssessment && !newAssessment.evidence_id) {
                     // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
                     // Nothing relies on this operation completing, so don't wait for a promise from it.
-                    var flatAssessment = curator.flatten(newAssessment);
-                    flatAssessment.evidence_id = newPathogenicity.uuid;
-                    this.cv.assessment.saveAnAssessment(flatAssessment);
+                    this.saveAssessment(this.cv.assessmentTracker, this.state.pathogenicity, newAssessment);
                 }
 
                 // Next step relies on the pathogenicity, not the updated assessment
@@ -357,7 +354,7 @@ var VariantCuration = React.createClass({
                             {!this.queryValues.pathogenicityUuid || pathogenicity ?
                                 <div>
                                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                        {!this.cv.orgAssessment || this.cv.orgAssessment.value === Assessments.DEFAULT_VALUE ?
+                                        {this.cv && this.cv.assessmentTracker && !this.cv.assessmentTracker.isAssessed() ?
                                             <Panel title="Evaluation of Pathogenicity">
                                                 <div className="row">
                                                     <Input type="select" ref="consistentdisease" label="Is variant type consistent with disease mechanism?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.consistentWithDiseaseMechanism)}
@@ -421,7 +418,7 @@ var VariantCuration = React.createClass({
                                                 </div>
                                             </Panel>
                                         : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} note="Note: To Edit the pathogenicity evaluation, first change your assessment to “Not assessed” and click Save, then Edit the Variant again."/> : null) }
-                                        <AssessmentPanel panelTitle="Variant Assessment" currVal={this.state.assessment && this.state.assessment.value} updateValue={this.updateAssessmentValue.bind(null, this.cv.assessment)} />
+                                        {this.cv.assessmentTracker ? <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue.bind(null, this.cv.assessmentTracker)} /> : null}
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" />
                                             {gdm ?
