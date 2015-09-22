@@ -307,6 +307,14 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             individualRenders = individualRenders.concat(individualAnnotationRenders);
         }
 
+        // Add to the array of experiment renders.
+        if (annotation && annotation.experimentalData) {
+            var experimentalAnnotationRenders = annotation.experimentalData.map(experimental => {
+                return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch)}</div>;
+            });
+            experimentalRenders = experimentalRenders.concat(experimentalAnnotationRenders);
+        }
+
         // Render variants
         var variantRenders;
         var allVariants = collectAnnotationVariants(annotation);
