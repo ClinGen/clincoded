@@ -55,6 +55,7 @@ var ExperimentalCuration = React.createClass({
             expressedInTissue: false,
             expressedInPatients: false,
             patientVariantRescue: false,
+            wildTypeRescuePhenotype: false,
             biochemicalFunctionsAOn: false, // form enabled/disabled checks
             biochemicalFunctionsBOn: false,
             functionalAlterationPCEE: '',
@@ -114,6 +115,8 @@ var ExperimentalCuration = React.createClass({
                 this.refs['alteredExpression.evidence'].resetValue();
                 this.refs['alteredExpression.evidenceInPaper'].resetValue();
             }
+        } else if (ref === 'wildTypeRescuePhenotype') {
+            this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()});
         } else if (ref === 'patientVariantRescue') {
             this.setState({patientVariantRescue: this.refs[ref].toggleValue()});
         } else if (ref === 'geneWithSameFunctionSameDisease.genes') {
@@ -252,7 +255,8 @@ var ExperimentalCuration = React.createClass({
             if (stateObj.experimental) {
                 this.setState({
                     experimentalName: stateObj.experimental.label,
-                    experimentalType: stateObj.experimental.evidenceType
+                    experimentalType: stateObj.experimental.evidenceType,
+                    experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType)
                 });
                 if (stateObj.experimental.evidenceType === 'Biochemical function') {
                     if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease) {
@@ -284,6 +288,9 @@ var ExperimentalCuration = React.createClass({
                     this.setState({modelSystemsNHACCM: stateObj.experimental.modelSystems.animalOrCellCulture});
                 } else if (stateObj.experimental.evidenceType === 'Rescue') {
                     this.setState({rescuePCEE: stateObj.experimental.rescue.patientCellOrEngineeredEquivalent});
+                    if (stateObj.experimental.rescue.wildTypeRescuePhenotype) {
+                        this.setState({wildTypeRescuePhenotype: stateObj.experimental.rescue.wildTypeRescuePhenotype});
+                    }
                     if (stateObj.experimental.rescue.patientVariantRescue) {
                         this.setState({patientVariantRescue: stateObj.experimental.rescue.patientVariantRescue});
                     }
@@ -711,9 +718,7 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.rescue.rescueMethod = RrescueMethod;
                     }
                     var RwildTypeRescuePhenotype = this.getFormValue('wildTypeRescuePhenotype');
-                    if (RwildTypeRescuePhenotype) {
-                        newExperimental.rescue.wildTypeRescuePhenotype = RwildTypeRescuePhenotype;
-                    }
+                    newExperimental.rescue.wildTypeRescuePhenotype = RwildTypeRescuePhenotype;
                     var RpatientVariantRescue = this.getFormValue('patientVariantRescue');
                     newExperimental.rescue.patientVariantRescue = RpatientVariantRescue;
                     var Rexplanation = this.getFormValue('explanation');
@@ -939,7 +944,7 @@ var ExperimentalCuration = React.createClass({
                             : null}
                             <div className="viewer-titles">
                                 <h1>{(experimental ? 'Edit' : 'Curate') + ' Experimental Data Information'}</h1>
-                                <h2>Experiment Type: {this.state.experimentalType && this.state.experimentalType != 'none' ? <span><strong>{this.state.experimentalType}</strong></span> : <span className="no-entry">None specified</span>}</h2>
+                                <h3>Experiment Type: {this.state.experimentalType && this.state.experimentalType != 'none' ? <span>{this.state.experimentalType}</span> : <span className="no-entry">None specified</span>}</h3>
                                 <h2>Experiment Name: {this.state.experimentalName ? <span>{this.state.experimentalName}</span> : <span className="no-entry">No entry</span>}</h2>
                             </div>
                             <div className="row group-curation-content">
@@ -969,10 +974,12 @@ var ExperimentalCuration = React.createClass({
                                             </Panel></PanelGroup>
                                         : null}
                                         {this.state.experimentalType == 'Expression' ?
+                                            <Panel title="Expression" open>
+                                                {TypeExpression.call(this)}
+                                            </Panel>
+                                        : null}
+                                        {this.state.experimentalType == 'Expression' ?
                                             <PanelGroup accordion>
-                                                <Panel title="Expression" open>
-                                                    {TypeExpression.call(this)}
-                                                </Panel>
                                                 <Panel title="A. Gene normally expressed in tissue relevant to the disease" open>
                                                     {TypeExpressionA.call(this)}
                                                 </Panel>
@@ -1296,7 +1303,7 @@ var TypeExpressionB = function() {
 // HTML labels for Expression panel.
 var LabelUberonId = React.createClass({
     render: function() {
-        return <span>Organ of tissue relevant to disease, in which gene expression is examined (<span style={{fontWeight: 'normal'}}><a href="https://bioportal.bioontology.org/ontologies/UBERON" target="_blank" title="Open Uberon in a new tab">Uberon</a> ID</span>):</span>;
+        return <span>Organ of tissue relevant to disease, in which gene expression is examined (<span style={{fontWeight: 'normal'}}><a href="http://uberon.github.io/" target="_blank" title="Open Uberon in a new tab">Uberon</a> ID</span>):</span>;
     }
 });
 
@@ -1469,7 +1476,6 @@ var TypeRescue = function() {
         rescue.phenotypeHPO = rescue.phenotypeHPO ? rescue.phenotypeHPO : null;
         rescue.phenotypeFreeText = rescue.phenotypeFreeText ? rescue.phenotypeFreeText : null;
         rescue.rescueMethod = rescue.rescueMethod ? rescue.rescueMethod : null;
-        rescue.wildTypeRescuePhenotype = rescue.wildTypeRescuePhenotype ? rescue.wildTypeRescuePhenotype : null;
         rescue.explanation = rescue.explanation ? rescue.explanation : null;
         rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper : null;
         rescue.assessments = rescue.assessments ? rescue.assessments : null;
@@ -1502,14 +1508,10 @@ var TypeRescue = function() {
             <Input type="textarea" ref="rescueMethod" label="Description of method used to rescue:" rows="5" value={rescue.rescueMethod}
                 error={this.getFormError('rescueMethod')} clearError={this.clrFormErrors.bind(null, 'rescueMethod')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="select" ref="wildTypeRescuePhenotype" label="Does the wild-type rescue the above phenotype?:" defaultValue="none" value={rescue.wildTypeRescuePhenotype} handleChange={this.handleChange}
-                error={this.getFormError('wildTypeRescuePhenotype')} clearError={this.clrFormErrors.bind(null, 'wildTypeRescuePhenotype')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required >
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
-            </Input>
+            <Input type="checkbox" ref="wildTypeRescuePhenotype" label="Does the wild-type rescue the above phenotype?:"
+                checked={this.state.patientVariantRescue} defaultChecked="false"
+                error={this.getFormError('wildTypeRescuePhenotype')} clearError={this.clrFormErrors.bind(null, 'wildTypeRescuePhenotype')} handleChange={this.handleChange}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the wild-type version of the gene does not rescue the phenotype, the criteria of counting this experimental evidence has not been met and cannot be submitted. Return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
             <Input type="checkbox" ref="patientVariantRescue" label="Does patient variant rescue?:"
                 checked={this.state.patientVariantRescue} defaultChecked="false"
@@ -1723,7 +1725,12 @@ var ExperimentalViewer = React.createClass({
                                 <dt>Uberon ID of Tissue Organ</dt>
                                 <dd>{context.expression.organOfTissue}</dd>
                             </div>
-
+                        </dl>
+                    </Panel>
+                    : null}
+                    {context.evidenceType == 'Expression' && context.expression.normalExpression.expressedInTissue && context.expression.normalExpression.expressedInTissue == true ?
+                    <Panel title="A. Gene normally expressed in tissue relevant to the disease" panelClassName="panel-data">
+                        <dl className="dl-horizontal">
                             <div>
                                 <dt>Is the gene normally expressed in the above tissue?</dt>
                                 <dd>{context.expression.normalExpression.expressedInTissue ?
@@ -1740,7 +1747,12 @@ var ExperimentalViewer = React.createClass({
                                 <dt>Notes on where evidence found in paper</dt>
                                 <dd>{context.expression.normalExpression.evidenceInPaper}</dd>
                             </div>
-
+                        </dl>
+                    </Panel>
+                    : null}
+                    {context.evidenceType == 'Expression' && context.expression.alteredExpression.expressedInPatients && context.expression.alteredExpression.expressedInPatients == true ?
+                    <Panel title="B. Altered expression in patients" panelClassName="panel-data">
+                        <dl className="dl-horizontal">
                             <div>
                                 <dt>Altered expression in Patients</dt>
                                 <dd>{context.expression.alteredExpression.expressedInPatients ?
@@ -1895,7 +1907,9 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>Does the wild-type rescue the above phenotype?</dt>
-                                <dd>{context.rescue.wildTypeRescuePhenotype}</dd>
+                                <dd>{context.rescue.wildTypeRescuePhenotype ?
+                                    context.rescue.wildTypeRescuePhenotype.toString()
+                                : null}</dd>
                             </div>
 
                             <div>
