@@ -133,7 +133,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     mixins: [FormMixin],
 
     propTypes: {
-        assessmentTracker: React.PropTypes.object.isRequired, // Current value of assessment
+        assessmentTracker: React.PropTypes.object, // Current value of assessment
         panelTitle: React.PropTypes.string, // Title of Assessment panel; 'Assessment' default
         label: React.PropTypes.string, // Label for dropdown; 'Assessment' default
         note: React.PropTypes.string, // Note to display below the dropdown
@@ -152,21 +152,25 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         var value = this.props.assessmentTracker && this.props.assessmentTracker.currentVal;
 
         return (
-            <Panel title={panelTitle}>
-                <div className="row">
-                    <Input type="select" ref="assessment" label={label + ':'} defaultValue="Not Assessed" value={value} handleChange={this.handleChange}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                        <option>Not Assessed</option>
-                        <option disabled="disabled"></option>
-                        <option>Supports</option>
-                        <option>Review</option>
-                        <option>Contradicts</option>
-                    </Input>
-                    {this.props.note ?
-                        <p className="col-sm-7 col-sm-offset-5">{this.props.note}</p>
-                    : null}
-                </div>
-            </Panel>
+            <div>
+                {this.props.assessmentTracker ?
+                    <Panel title={panelTitle}>
+                        <div className="row">
+                            <Input type="select" ref="assessment" label={label + ':'} defaultValue="Not Assessed" value={value} handleChange={this.handleChange}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                <option>Not Assessed</option>
+                                <option disabled="disabled"></option>
+                                <option>Supports</option>
+                                <option>Review</option>
+                                <option>Contradicts</option>
+                            </Input>
+                            {this.props.note ?
+                                <p className="col-sm-7 col-sm-offset-5">{this.props.note}</p>
+                            : null}
+                        </div>
+                    </Panel>
+                : null}
+            </div>
         );
     }
 });
