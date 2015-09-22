@@ -1,6 +1,7 @@
 'use strict';
 var React = require('react');
 var _ = require('underscore');
+var curator = require('./curator');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 
@@ -10,7 +11,123 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 
-module.exports.DEFAULT_VALUE = 'Not Assessed';
+var DEFAULT_VALUE = module.exports.DEFAULT_VALUE = 'Not Assessed';
+
+
+// Object to track and maintain a single assessment. If you pass null/undefined in 'assessment',
+// provide all parameters from 'gdm' and after to properly initialize new assessment, if possible.
+class Assessment {
+    constructor(assessment, user, evidenceType) {
+        this.original = assessment ? _.clone(assessment) : null; // Original assessment -- the existing one for a parent object
+        this.updated = null; // Updated assessment that's been saved to DB.
+        this.type = assessment ? assessment.evidence_type : evidenceType;
+        this.user = user; // User object for currently logged-in user.
+        this.currentVal = assessment ? assessment.value : DEFAULT_VALUE;
+    }
+
+    // Does this assessment show it has been assessed?
+    isAssessed() {
+        return  !!this.original && this.original.value !== DEFAULT_VALUE;
+    }
+
+    // Get the current (non-saved) value of the assessment; normally from the page's assessment form
+    getCurrentVal() {
+        return this.currentVal;
+    }
+
+    // Set the current (non-saved) value of the assessment; normally from the page's assessment form.
+    // Automatically called when the component sets the current state of the assessment value on
+    // the assessment form's value change.
+    setCurrentVal(value) {
+        this.currentVal = value;
+    }
+
+    // Write the assessment for the given pathogenicity to the DB, and pass the new assessment in the promise, along
+    // With a boolean indicating if this is a new assessment or if we updated one. If we don't write an assessment
+    // (either because we had already written the assessment, and the new assessment's value is no different, or
+    // because we haven't written an assessment, and the current assessment's value is default), the the promise has
+    // a null assessment.
+    // For new assessments, pass in the current GDM object, or null if you know you have an assessment already and
+    // want to use its existing GDM reference. Also pass in the current evidence object. If you don't yet have it,
+    // pass nothing or null, but make sure you update with that later.
+    saveAssessment(gdm, evidence) {
+        return this.saveAnAssessment(null, gdm, evidence);
+    }
+
+    saveAnAssessment(anAssessment, gdm, evidence) {
+        // Flatten the original assessment if any; will modify with updated values
+        var newAssessment = anAssessment ? curator.flatten(anAssessment) : (this.original ? curator.flatten(this.original, 'assessment') : {});
+        newAssessment.value = this.currentVal;
+        if (evidence) {
+            newAssessment.evidence_id = evidence.uuid;
+            newAssessment.evidence_type = evidence['@type'][0];
+        }
+        if (gdm) {
+            newAssessment.evidence_gdm = gdm.uuid;
+        }
+        newAssessment.active = true;
+
+        // Start a write of the record to the DB, returning a promise object with:
+        //   assessment: fleshed-out assessment as written to the DB.
+        //   update: true if an existing object was updated, false if a new object was written.
+        return new Promise(function(resolve, reject) {
+            var assessmentPromise;
+
+            if (this.original && (newAssessment.value !== this.original.value)) {
+                // Updating an existing assessment, and the value of the assessment has changed
+                assessmentPromise = this.putRestData('/assessments/' + this.original.uuid, newAssessment).then(data => {
+                    return Promise.resolve({assessment: data['@graph'][0], update: true});
+                });
+            } else if (!this.original && newAssessment.value !== DEFAULT_VALUE) {
+                // New assessment and form has non-default value; write it to the DB.
+                assessmentPromise = this.postRestData('/assessments/', newAssessment).then(data => {
+                    return Promise.resolve({assessment: data['@graph'][0], update: false});
+                });
+            } else {
+                // Not writing an assessment
+                assessmentPromise = Promise.resolve({assessment: null, update: false});
+            }
+
+            // Pass to the next THEN, with null if we didn't write an assessment
+            resolve(assessmentPromise);
+        }.bind(this));
+    }
+}
+
+module.exports.Assessment = Assessment;
+
+
+// Mixin to handle React states for assessments
+var AssessmentMixin = module.exports.AssessmentMixin = {
+    // Do not call; called by React.
+    getInitialState: function() {
+        return {
+            currentAssessmentVal: '' // Currently chosen assessment value in the form
+        };
+    },
+
+    // Sets the current component's assessment value state. Call at load and when assessment form value changes.
+    // Also assigns the value to the given assessment object. If no value's given; then the current value
+    // is taken from the given assessment object.
+    setAssessmentValue: function(assessmentObj, value) {
+        if (!value) {
+            // No value given; get it from the given assessment object
+            value = assessmentObj.getCurrentVal();
+        } else {
+            // There was a value given; assign it to the given assessment object in addition to setting
+            // the component state.
+            assessmentObj.setCurrentVal(value);
+        }
+
+        // Set the component state to cause a rerender
+        this.setState({currentAssessmentVal: value});
+    },
+
+    // When the user changes the assessment value, this gets called
+    updateAssessmentValue: function(assessmentObj, value) {
+        this.setAssessmentValue(assessmentObj, value);
+    }
+};
 
 
 var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
@@ -56,9 +173,13 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
 
 
 // Return the assessment from the given array of assessments that's owned by the curator with the
-// given UUID.
-module.exports.findAssessment = function(assessments, curatorUuid) {
-    return _(assessments).find(function(assessment) {
-        return assessment.submitted_by.uuid === curatorUuid;
-    });
+// given UUID. The returned assessment is a clone of the original object, so it can be modified
+// without side effects.
+module.exports.userAssessment = function(assessments, curatorUuid) {
+    if (curatorUuid) {
+        return _.chain(assessments).find(function(assessment) {
+            return assessment.submitted_by.uuid === curatorUuid;
+        }).clone().value();
+    }
+    return null;
 };
