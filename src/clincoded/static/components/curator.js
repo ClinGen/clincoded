@@ -328,12 +328,18 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                         <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
                             {individualRenders}
                         </Panel>
-                        <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence">
-                            <div className="evidence-curation-info">
-                                <p>Curate Variants from the “Gene-Disease Record Variants” section above.</p>
-                            </div>
-                            {variantRenders}
-                        </Panel>
+                        {variantRenders && variantRenders.length ?
+                            <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence">
+                                {variantRenders && variantRenders.length ?
+                                    <div className="evidence-curation-info">
+                                        <p>Curate Variants from the “Gene-Disease Record Variants” section above.</p>
+                                    </div>
+                                : null}
+                                {variantRenders}
+                            </Panel>
+                        : 
+                            <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence"></Panel>
+                        }
                     </Panel>
                 : null}
             </div>
