@@ -61,7 +61,13 @@ var ExperimentalCuration = React.createClass({
             biochemicalFunctionsBOn: false,
             functionalAlterationPCEE: '',
             modelSystemsNHACCM: '',
+            modelSystemsPOMSHPO: false,
+            modelSystemsPOMSFT: false,
+            modelSystemsPPHPO: false,
+            modelSystemsPPFT: false,
             rescuePCEE: '',
+            rescuePRHPO: false,
+            rescuePRFT: false,
             variantCount: 0, // Number of variants to display
             variantOption: [], // One variant panel, and nothing entered
             addVariantDisabled: false, // True if Add Another Variant button enabled
@@ -158,6 +164,42 @@ var ExperimentalCuration = React.createClass({
                 this.refs['cellCulture'].resetValue();
             } else if (this.refs['animalOrCellCulture'].getValue() === 'Engineered equivalent') {
                 this.refs['animalModel'].resetValue();
+            }
+        } else if (ref === 'model.phenotypeHPOObserved') {
+            if (this.refs['model.phenotypeHPOObserved'].getValue() === '') {
+                this.setState({modelSystemsPOMSHPO: false});
+            } else {
+                this.setState({modelSystemsPOMSHPO: true});
+            }
+        } else if (ref === 'phenotypeFreetextObserved') {
+            if (this.refs['phenotypeFreetextObserved'].getValue() === '') {
+                this.setState({modelSystemsPOMSFT: false});
+            } else {
+                this.setState({modelSystemsPOMSFT: true});
+            }
+        } else if (ref === 'model.phenotypeHPO') {
+            if (this.refs['model.phenotypeHPO'].getValue() === '') {
+                this.setState({modelSystemsPPHPO: false});
+            } else {
+                this.setState({modelSystemsPPHPO: true});
+            }
+        } else if (ref === 'model.phenotypeFreeText') {
+            if (this.refs['model.phenotypeFreeText'].getValue() === '') {
+                this.setState({modelSystemsPPFT: false});
+            } else {
+                this.setState({modelSystemsPPFT: true});
+            }
+        } else if (ref === 'rescue.phenotypeHPO') {
+            if (this.refs['rescue.phenotypeHPO'].getValue() === '') {
+                this.setState({rescuePRHPO: false});
+            } else {
+                this.setState({rescuePRHPO: true});
+            }
+        } else if (ref === 'rescue.phenotypeFreeText') {
+            if (this.refs['rescue.phenotypeFreeText'].getValue() === '') {
+                this.setState({rescuePRFT: false});
+            } else {
+                this.setState({rescuePRFT: true});
             }
         } else if (ref === 'patientCellOrEngineeredEquivalent') {
             this.setState({rescuePCEE: this.refs['patientCellOrEngineeredEquivalent'].getValue()});
@@ -287,6 +329,18 @@ var ExperimentalCuration = React.createClass({
                     this.setState({functionalAlterationPCEE: stateObj.experimental.functionalAlteration.cellMutationOrEngineeredEquivalent});
                 } else if (stateObj.experimental.evidenceType === 'Model systems') {
                     this.setState({modelSystemsNHACCM: stateObj.experimental.modelSystems.animalOrCellCulture});
+                    if (stateObj.experimental.modelSystems.phenotypeHPOObserved !== '') {
+                        this.setState({modelSystemsPOMSHPO: true});
+                    }
+                    if (stateObj.experimental.modelSystems.phenotypeFreetextObserved !== '') {
+                        this.setState({modelSystemsPOMSFT: true});
+                    }
+                    if (stateObj.experimental.modelSystems.phenotypeHPO !== '') {
+                        this.setState({modelSystemsPPHPO: true});
+                    }
+                    if (stateObj.experimental.modelSystems.phenotypeFreeText !== '') {
+                        this.setState({modelSystemsPPFT: true});
+                    }
                 } else if (stateObj.experimental.evidenceType === 'Rescue') {
                     this.setState({rescuePCEE: stateObj.experimental.rescue.patientCellOrEngineeredEquivalent});
                     if (stateObj.experimental.rescue.wildTypeRescuePhenotype) {
@@ -294,6 +348,12 @@ var ExperimentalCuration = React.createClass({
                     }
                     if (stateObj.experimental.rescue.patientVariantRescue) {
                         this.setState({patientVariantRescue: stateObj.experimental.rescue.patientVariantRescue});
+                    }
+                    if (stateObj.experimental.rescue.phenotypeHPO !== '') {
+                        this.setState({rescuePRHPO: true});
+                    }
+                    if (stateObj.experimental.rescue.phenotypeFreeText !== '') {
+                        this.setState({rescuePRFT: true});
                     }
                 }
                 // See if we need to disable the Add Variant button based on the number of variants configured
@@ -649,7 +709,7 @@ var ExperimentalCuration = React.createClass({
                     if (MSphenotypeHPO) {
                         newExperimental.modelSystems.phenotypeHPO = MSphenotypeHPO;
                     }
-                    var MSphenotypeFreeText = this.getFormValue('phenotypeFreeText');
+                    var MSphenotypeFreeText = this.getFormValue('model.phenotypeFreeText');
                     if (MSphenotypeFreeText) {
                         newExperimental.modelSystems.phenotypeFreeText = MSphenotypeFreeText;
                     }
@@ -692,7 +752,7 @@ var ExperimentalCuration = React.createClass({
                     if (RphenotypeHPO) {
                         newExperimental.rescue.phenotypeHPO = RphenotypeHPO;
                     }
-                    var RphenotypeFreeText = this.getFormValue('phenotypeFreeText');
+                    var RphenotypeFreeText = this.getFormValue('rescue.phenotypeFreeText');
                     if (RphenotypeFreeText) {
                         newExperimental.rescue.phenotypeFreeText = RphenotypeFreeText;
                     }
@@ -1159,7 +1219,7 @@ var TypeBiochemicalFunctionB = function() {
 // HTML labels for Biochemical Functions panel B
 var LabelHPOIDs = React.createClass({
     render: function() {
-        return <span>Phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID)</span>:</span>
+        return <span>Phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
     }
 });
 var LabelPhenotypesFT = React.createClass({
@@ -1433,18 +1493,18 @@ var TypeModelSystems = function() {
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={modelSystems.descriptionOfGeneAlteration}
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="model.phenotypeHPOObserved" label={<LabelPhenotypeObserved />} value={modelSystems.phenotypeHPOObserved} placeholder="e.g. HP:0010704"
+            <Input type="text" ref="model.phenotypeHPOObserved" label={<LabelPhenotypeObserved />} value={modelSystems.phenotypeHPOObserved} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
                 error={this.getFormError('model.phenotypeHPOObserved')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPOObserved')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenotypeFreetextObserved" label={<LabelPhenotypeObservedFT />} rows="5" value={modelSystems.phenotypeFreetextObserved}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required={!this.state.modelSystemsPOMSFT} />
+            <Input type="textarea" ref="phenotypeFreetextObserved" label={<LabelPhenotypeObservedFT />} rows="5" value={modelSystems.phenotypeFreetextObserved} handleChange={this.handleChange}
                 error={this.getFormError('phenotypeFreetextObserved')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreetextObserved')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="model.phenotypeHPO" label={<LabelPatientPhenotype />} value={modelSystems.phenotypeHPO} placeholder="e.g. HP:0010704"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={!this.state.modelSystemsPOMSHPO} />
+            <Input type="text" ref="model.phenotypeHPO" label={<LabelPatientPhenotype />} value={modelSystems.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
                 error={this.getFormError('model.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPO')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenotypeFreeText" label={<LabelPatientPhenotypeFT />} rows="5" value={modelSystems.phenotypeFreeText}
-                error={this.getFormError('phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreeText')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required={!this.state.modelSystemsPPFT} />
+            <Input type="textarea" ref="model.phenotypeFreeText" label={<LabelPatientPhenotypeFT />} rows="5" value={modelSystems.phenotypeFreeText} handleChange={this.handleChange}
+                error={this.getFormError('model.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeFreeText')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={!this.state.modelSystemsPPHPO} />
             <Input type="textarea" ref="explanation" label="Explanation of how model system phenotype is similar to phenotype observed in patient:" rows="5" value={modelSystems.explanation}
                 error={this.getFormError('explanation')} clearError={this.clrFormErrors.bind(null, 'explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
@@ -1463,7 +1523,7 @@ var LabelCellCulture = React.createClass({
 });
 var LabelPhenotypeObserved = React.createClass({
     render: function() {
-        return <span>Phenotype observed in model system <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID)</span>:</span>;
+        return <span>Phenotype observed in model system <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
 });
 var LabelPhenotypeObservedFT = React.createClass({
@@ -1473,7 +1533,7 @@ var LabelPhenotypeObservedFT = React.createClass({
 });
 var LabelPatientPhenotype = React.createClass({
     render: function() {
-        return <span>Patient phenotype <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID)</span>:</span>;
+        return <span>Patient phenotype <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
 });
 var LabelPatientPhenotypeFT = React.createClass({
@@ -1518,17 +1578,17 @@ var TypeRescue = function() {
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={rescue.descriptionOfGeneAlteration}
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="rescue.phenotypeHPO" label={<LabelPhenotypeRescue />} value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704"
+            <Input type="text" ref="rescue.phenotypeHPO" label={<LabelPhenotypeRescue />} value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
                 error={this.getFormError('rescue.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeHPO')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenotypeFreeText" label={<LabelPhenotypeRescueFT />} rows="5" value={rescue.phenotypeFreeText}
-                error={this.getFormError('phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreeText')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required={!this.state.rescuePRFT} />
+            <Input type="textarea" ref="rescue.phenotypeFreeText" label={<LabelPhenotypeRescueFT />} rows="5" value={rescue.phenotypeFreeText} handleChange={this.handleChange}
+                error={this.getFormError('rescue.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeFreeText')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={!this.state.rescuePRHPO} />
             <Input type="textarea" ref="rescueMethod" label="Description of method used to rescue:" rows="5" value={rescue.rescueMethod}
                 error={this.getFormError('rescueMethod')} clearError={this.clrFormErrors.bind(null, 'rescueMethod')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="checkbox" ref="wildTypeRescuePhenotype" label="Does the wild-type rescue the above phenotype?:"
-                checked={this.state.patientVariantRescue} defaultChecked="false"
+                checked={this.state.wildTypeRescuePhenotype} defaultChecked="false"
                 error={this.getFormError('wildTypeRescuePhenotype')} clearError={this.clrFormErrors.bind(null, 'wildTypeRescuePhenotype')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the wild-type version of the gene does not rescue the phenotype, the criteria of counting this experimental evidence has not been met and cannot be submitted. Return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
@@ -1559,7 +1619,7 @@ var LabelREngineeredEquivalent = React.createClass({
 });
 var LabelPhenotypeRescue = React.createClass({
     render: function() {
-        return <span>Phenotype to rescue <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID)</span>:</span>;
+        return <span>Phenotype to rescue <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
 });
 var LabelPhenotypeRescueFT = React.createClass({
