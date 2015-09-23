@@ -1089,14 +1089,16 @@ var ExperimentalNameType = function() {
                 <option>Model systems</option>
                 <option>Rescue</option>
             </Input>
-            <Input type="text" ref="experimentalName" label="Experiment name:" value={experimental && experimental.label} handleChange={this.handleChange}
-                error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {this.state.experimentalType && this.state.experimentalType != 'none' ?
                 <div className="col-sm-7 col-sm-offset-5">
                     <p className="alert alert-info">{this.state.experimentalTypeDescription}</p>
                 </div>
-                : null}
+            : null}
+            {this.state.experimentalType !== '' ?
+                <Input type="text" ref="experimentalName" label="Experiment name:" value={experimental && experimental.label} handleChange={this.handleChange}
+                    error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            : null }
         </div>
     );
 };
