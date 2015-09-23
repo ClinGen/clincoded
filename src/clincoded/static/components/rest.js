@@ -1,5 +1,8 @@
 'use strict';
 var React = require('react');
+var globals = require('./globals');
+
+var addQueryKey = globals.addQueryKey;
 
 
 // Mixin to use REST APIs conveniently. In this project, this is mostly used to read or write data
@@ -39,7 +42,10 @@ var RestMixin = module.exports.RestMixin = {
 
     // GET JSON data from the given URI. Returns data in the promise.
     // Non-OK error response calls the optional errorHandler function.
-    getRestData: function(uri, errorHandler) {
+    getRestData: function(uri, errorHandler, dbSearch) {
+        if (dbSearch) {
+            uri = addQueryKey(uri, 'datastore', 'database');
+        }
         return this.context.fetch(uri, {
             method: 'GET',
             headers: {'Accept': 'application/json'}
@@ -58,10 +64,10 @@ var RestMixin = module.exports.RestMixin = {
     // Get JSON data from the given URIs (in an array), and return a promise once all GET REST requests
     // have succeeded. Optionally, if any GET requests fail, call the corresponding function in the
     // 'handlers' array.
-    getRestDatas: function(uris, handlers) {
+    getRestDatas: function(uris, handlers, dbSearch) {
         return Promise.all(uris.map(function(uri, i) {
             var handler = (handlers && handlers.length) ? handlers[i] : null;
-            return this.getRestData(uri, handler);
+            return this.getRestData(uri, handler, dbSearch);
         }.bind(this)));
     },
 

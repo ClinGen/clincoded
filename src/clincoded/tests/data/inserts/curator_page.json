@@ -48,6 +48,12 @@
         "uuid": "d18e3995-abbf-4836-b82b-b23f887fc641"
     },
     {
+        "name": "variant-curation",
+        "title": "Variant Curation",
+        "status": "released",
+        "uuid": "f99759f0-6928-4d3c-907c-6376885c288a"
+    },
+    {
         "name": "dashboard",
         "title": "Dashboard",
         "status": "released",

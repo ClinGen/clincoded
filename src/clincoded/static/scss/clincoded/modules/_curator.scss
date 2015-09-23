@@ -358,3 +358,54 @@
         margin-left: -3px;
     }
 }
+
+.palette-not-curated {
+    color: #909090;
+}
+
+
+// Variant Header Styles
+.variant-header {
+    margin-top: 2px;
+    padding: 5px 0;
+    background-color: #c0c0c0;
+
+    h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    p {
+        margin-bottom: 0;
+        text-align: center;
+    }
+
+    .btn {
+        position: relative;
+        margin: 5px 0;
+        width: 100%;
+
+        i {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            font-size: 1rem;
+        }
+    }
+}
+
+// Display inline icon for proband. Change @extend to change icon site-wide.
+.icon-proband {
+    @extend .icon-user-md;
+    margin-left: 3px;
+    margin-right: 3px;
+    color: #ce1d1d;
+    font-size: 1.1em !important; // To make its size relative to the surrounding text.
+}
+
+.icon-proband-white {
+    @extend .icon-proband;
+    color: #fff;
+}

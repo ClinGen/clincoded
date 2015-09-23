@@ -652,8 +652,8 @@ var IndividualCuration = React.createClass({
         var annotation = this.state.annotation;
         var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
-        var probandLabel = (individual && individual.proband ? ' [proband]' : '');
-        var variantTitle = (individual && individual.associatedFamilies.length && individual.proband) ? 'Individual' + probandLabel + ' – Variant(s) segregating with Proband' : 'Individual — Associated Variant(s)';
+        var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
+        var variantTitle = (individual && individual.proband) ? <h4>Individual<i className="icon icon-proband-white"></i>  – Variant(s) segregating with Proband</h4> : <h4>Individual — Associated Variant(s)</h4>;
 
         // Get a list of associated groups if editing an individual, or the group in the query string if there was one, or null.
         var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
@@ -716,8 +716,8 @@ var IndividualCuration = React.createClass({
                                 </div>
                             : null}
                             <div className="viewer-titles">
-                                <h1>{(individual ? 'Edit' : 'Curate') + ' Individual' + probandLabel + ' Information'}</h1>
-                                <h2>Individual: {this.state.individualName ? <span>{this.state.individualName}</span> : <span className="no-entry">No entry</span>}</h2>
+                                <h1>{individual ? 'Edit' : 'Curate'} Individual Information</h1>
+                                <h2>Individual: {this.state.individualName ? <span>{this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</h2>
                                 {familyTitles.length ?
                                     <h2>
                                         {'Family association: ' + familyTitles.join(', ')}
@@ -736,17 +736,17 @@ var IndividualCuration = React.createClass({
                                             {IndividualName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + ' – Disease & Phenotype(s)'} open>
+                                            <Panel title={<LabelPanelTitle individual={individual} labelText="Disease & Phenotype(s)" />} open>
                                                 {IndividualCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + '— Demographics'} open>
+                                            <Panel title={<LabelPanelTitle individual={individual} labelText="Demographics" />} open>
                                                 {IndividualDemographics.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + '— Methods'} open>
+                                            <Panel title={<LabelPanelTitle individual={individual} labelText="Methods" />} open>
                                                 {methods.render.call(this, method)}
                                             </Panel>
                                         </PanelGroup>
@@ -756,7 +756,7 @@ var IndividualCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={'Individual' + probandLabel + ' — Additional Information'} open>
+                                            <Panel title={<LabelPanelTitle individual={individual} labelText="Additional Information" />} open>
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -777,16 +777,26 @@ var IndividualCuration = React.createClass({
 
 globals.curator_page.register(IndividualCuration, 'curator_page', 'individual-curation');
 
+// HTML labels for inputs follow.
+var LabelPanelTitle = React.createClass({
+    render: function() {
+        var individual = this.props.individual;
+        var probandLabelWhite = <span>{individual && individual.proband ? <i className="icon icon-proband-white"></i> : null}</span>;
+
+        return <h4>Individual{probandLabelWhite} — {this.props.labelText}</h4>;
+    }
+});
+
 
 // Individual Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var IndividualName = function(displayNote) {
     var individual = this.state.individual;
-    var probandLabel = (individual && individual.proband ? ' [proband]' : '');
+    var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     return (
         <div className="row">
-            <Input type="text" ref="individualname" label={'Individual' + probandLabel + ' Name:'} value={individual && individual.label} handleChange={this.handleChange}
+            <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
                 error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {displayNote ?
@@ -795,6 +805,13 @@ var IndividualName = function(displayNote) {
         </div>
     );
 };
+
+// HTML labels for inputs follow.
+var LabelIndividualName = React.createClass({
+    render: function() {
+        return <span>{this.props.probandLabel}Individual Name:</span>;
+    }
+});
 
 
 // If the individual is being edited (we know this because there was an individual
@@ -832,7 +849,7 @@ var IndividualCommonDiseases = function() {
     var family = this.state.family;
     var group = this.state.group;
     var orphanetidVal, hpoidVal, nothpoidVal, associatedGroups, associatedFamilies;
-    var probandLabel = (individual && individual.proband ? ' [proband]' : '');
+    var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     // If we're editing an individual, make editable values of the complex properties
     if (individual) {
@@ -1042,6 +1059,9 @@ var IndividualVariantInfo = function() {
                                 <option>Yes</option>
                                 <option>No</option>
                             </Input>
+                            <p className="col-sm-7 col-sm-offset-5 input-note-below">
+                                Note: Probands are indicated by the following icon: <i className="icon icon-proband"></i>
+                            </p>
                         </div>
                     : null}
 
@@ -1102,7 +1122,7 @@ var LabelOtherVariant = React.createClass({
 var IndividualAdditional = function() {
     var otherpmidsVal;
     var individual = this.state.individual;
-    var probandLabel = (individual && individual.proband ? ' [proband]' : '');
+    var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     // If editing an individual, get its existing articles
     if (individual) {
@@ -1111,14 +1131,41 @@ var IndividualAdditional = function() {
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfoindividual" label={'Additional Information about Individual ' + probandLabel + ':'} rows="5" value={individual && individual.additionalInformation}
+            <Input type="textarea" ref="additionalinfoindividual" label={<LabelAdditional probandLabel={probandLabel} />} rows="5" value={individual && individual.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="otherpmids" label={'Enter PMID(s) that report evidence about this same Individual' + probandLabel + ':'} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+            <Input type="textarea" ref="otherpmids" label={<LabelOtherPmids probandLabel={probandLabel} />} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 };
+
+// HTML labels for inputs follow.
+var LabelAdditional = React.createClass({
+    render: function() {
+        return <span>Additional Information about Individual{this.props.probandLabel}:</span>;
+    }
+});
+
+var LabelOtherPmids = React.createClass({
+    render: function() {
+        return <span>Enter PMID(s) that report evidence about this Individual{this.props.probandLabel}:</span>;
+    }
+});
+
+
+// HTML labels for inputs follow.
+var LabelAdditional = React.createClass({
+    render: function() {
+        return <span>Additional Information about Individual{this.props.probandLabel}:</span>;
+    }
+});
+
+var LabelOtherPmids = React.createClass({
+    render: function() {
+        return <span>Enter PMID(s) that report evidence about this Individual{this.props.probandLabel}:</span>;
+    }
+});
 
 
 var IndividualViewer = React.createClass({
@@ -1128,8 +1175,7 @@ var IndividualViewer = React.createClass({
         var variants = (individual.variants && individual.variants.length) ? individual.variants : [{}];
         var i = 0;
         var groupRenders = [];
-        var probandLabel = (individual && individual.proband ? ' [proband]' : '');
-        var variantTitle = (individual && individual.associatedFamilies.length && individual.proband) ? 'Individual' + probandLabel + ' – Variant(s) segregating with Proband' : 'Individual — Associated Variant(s)';
+        var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
         // Collect all families to render, as well as groups associated with these families
         var familyRenders = individual.associatedFamilies.map(function(family, j) {
@@ -1166,7 +1212,7 @@ var IndividualViewer = React.createClass({
             <div className="container">
                 <div className="row group-curation-content">
                     <div className="viewer-titles">
-                        <h1>View Individual{probandLabel} {individual.label}</h1>
+                        <h1>View Individual: {individual.label}{probandLabel}</h1>
                         <h2>
                             {familyRenders.length ?
                                 <div>
@@ -1184,7 +1230,7 @@ var IndividualViewer = React.createClass({
                             : null}
                         </h2>
                     </div>
-                    <Panel title={'Individual' + probandLabel + ' – Disease & Phenotype(s)'} panelClassName="panel-data">
+                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Disease & Phenotype(s)" />} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
@@ -1222,7 +1268,7 @@ var IndividualViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title={'Individual' + probandLabel + ' — Demographics'} panelClassName="panel-data">
+                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Demographics" />} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Sex</dt>
@@ -1261,7 +1307,7 @@ var IndividualViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title={'Individual' + probandLabel + ' — Methods'} panelClassName="panel-data">
+                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Methods" />} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Previous testing</dt>
@@ -1305,7 +1351,7 @@ var IndividualViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title={variantTitle} panelClassName="panel-data">
+                    <Panel title={<LabelPanelTitleView individual={individual} variant />} panelClassName="panel-data">
                         {variants.map(function(variant, i) {
                             return (
                                 <div key={i} className="variant-view-panel">
@@ -1326,7 +1372,7 @@ var IndividualViewer = React.createClass({
                         })}
                     </Panel>
 
-                    <Panel title={'Individual' + probandLabel + ' — Additional Information'} panelClassName="panel-data">
+                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Additional Information" />} panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Additional Information about Individual</dt>
@@ -1353,6 +1399,24 @@ var IndividualViewer = React.createClass({
 });
 
 globals.content_views.register(IndividualViewer, 'individual');
+
+
+// HTML labels for inputs follow.
+var LabelPanelTitleView = React.createClass({
+    render: function() {
+        var individual = this.props.individual;
+        var probandLabel = <span>{individual && individual.proband ? <i className="icon icon-proband"></i> : null}</span>;
+        var labelText = this.props.labelText;
+
+        if (this.props.variant) {
+            labelText = (individual && individual.associatedFamilies.length && individual.proband) ?
+                'Variant(s) segregating with Proband' :
+                'Associated Variant(s)';
+        }
+
+        return <h4><span className="panel-title-std">Individual{probandLabel} — {labelText}</span></h4>;
+    }
+});
 
 
 // Make a starter individual from the family and write it to the DB; always called from

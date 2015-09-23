@@ -4,7 +4,7 @@
     "description": "Schema for storing and using assessments",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["submitted_by", "value", "date_created"],
+    "required": ["value"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -21,6 +21,7 @@
             "description": "Value of assessment",
             "type": "string",
             "enum": [
+                "Not Assessed",
                 "Supports",
                 "Review",
                 "Contradicts"
