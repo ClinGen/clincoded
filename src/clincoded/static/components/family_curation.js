@@ -10,6 +10,7 @@ var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var individual_curation = require('./individual_curation');
+var Assessments = require('./assessment');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -17,6 +18,9 @@ var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
+var Assessment = Assessments.Assessment;
+var AssessmentPanel = Assessments.AssessmentPanel;
+var AssessmentMixin = Assessments.AssessmentMixin;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
@@ -37,11 +41,16 @@ var VAR_OTHER = 2; // Other description entered in a panel
 
 
 var FamilyCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
 
     contextTypes: {
         navigate: React.PropTypes.func
     },
+
+    cv: {
+        assessmentTracker: null // Tracking object for a single assessment
+    },
+
 
     // Keeps track of values from the query string
     queryValues: {},
@@ -202,6 +211,13 @@ var FamilyCuration = React.createClass({
                     stateObj.variantCount = 1;
                 }
             }
+
+            // Make a new tracking object for the current assessment. Either or both of the original assessment or user can be blank
+            // and assigned later. Then set the component state's assessment value to the assessment's value -- default if there was no
+            // assessment.
+            var user = this.props.session && this.props.session.user_properties;
+            var assessmentTracker = this.cv.assessmentTracker = new Assessment(null, user, 'segregation');
+            this.setAssessmentValue(assessmentTracker);
 
             // Set all the state variables we've collected
             this.setState(stateObj);
@@ -510,6 +526,10 @@ var FamilyCuration = React.createClass({
 
                     // Family doesn't have any variants
                     return Promise.resolve(null);
+                }).then(individual => {
+                    return this.saveAssessment(this.cv.assessmentTracker, this.state.gdm, this.state.family).then(assessmentInfo => {
+                        return Promise.resolve({individual: individual, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
+                    });
                 }).then(data => {
                     // Make a new family object based on form fields.
                     var newFamily = this.createFamily(familyDiseases, familyArticles, familyVariants);
@@ -522,25 +542,39 @@ var FamilyCuration = React.createClass({
                     familyCount = familyCount ? familyCount + 1 : 1;
 
                     // Assign the starter individual if we made one
-                    if (data && data['@type'][0] === 'individual') {
+                    if (data.individual) {
                         if (!newFamily.individualIncluded) {
                             newFamily.individualIncluded = [];
                         }
-                        newFamily.individualIncluded.push(data['@id']);
+                        newFamily.individualIncluded.push(data.individual['@id']);
+                    }
+
+                    // If we made a new assessment, add it to the pathogenicity's assessments
+                    if (data.assessment && !data.updatedAssessment) {
+                        if (!newFamily.segregation.assessments) {
+                            newFamily.segregation.assessments = [];
+                        }
+                        newFamily.segregation.assessments.push(data.assessment['@id']);
                     }
 
                     // Write the new family object to the DB
-                    for (var i = 0; i < familyCount; ++i) {
-                        var familyLabel;
-                        if (i > 0) {
-                            familyLabel = this.getFormValue('extrafamilyname' + (i - 1));
-                        }
-                        familyPromises.push(this.writeFamilyObj(newFamily, familyLabel));
+                    return this.writeFamilyObj(newFamily).then(newFamily => {
+                        return Promise.resolve({family: newFamily, assessment: data.assessment});
+                    });
+                }).then(data => {
+                    // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
+                    var newFamily = data.family;
+                    var newAssessment = data.assessment;
+                    if (newFamily && newAssessment && !newAssessment.evidence_id) {
+                        // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
+                        // Nothing relies on this operation completing, so don't wait for a promise from it.
+                        this.saveAssessment(this.cv.assessmentTracker, this.state.gdm, newFamily, newAssessment);
                     }
-                    return Promise.all(familyPromises);
-                }).then(newFamilies => {
+
+                    // Next step relies on the pathogenicity, not the updated assessment
+                    return Promise.resolve(newFamily);
+                }).then(newFamily => {
                     var promise;
-                    savedFamilies = newFamilies;
 
                     // If we're adding this family to a group, update the group with this family; otherwise update the annotation
                     // with the family.
@@ -553,7 +587,7 @@ var FamilyCuration = React.createClass({
                             }
 
                             // Merge existing families in the annotation with the new set of families.
-                            Array.prototype.push.apply(group.familyIncluded, savedFamilies.map(function(family) { return family['@id']; }));
+                            group.familyIncluded.push(newFamily['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
                             promise = this.putRestData('/groups/' + this.state.group.uuid, group);
@@ -565,7 +599,7 @@ var FamilyCuration = React.createClass({
                             }
 
                             // Merge existing families in the annotation with the new set of families.
-                            Array.prototype.push.apply(annotation.families, savedFamilies.map(function(family) { return family['@id']; }));
+                            annotation.families.push(newFamily['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
                             promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
@@ -1110,6 +1144,7 @@ var FamilySegregation = function() {
             </Input>
             <Input type="textarea" ref="addedsegregationinfo" label="Additional Segregation Information:" rows="5" value={segregation.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue.bind(null, this.cv.assessmentTracker)} />
         </div>
     );
 };
