@@ -121,24 +121,37 @@ runcmd:
 - chown postgres:postgres /opt/wal-e
 - sudo -u postgres virtualenv --python=python2.7 /opt/wal-e
 - sudo -u postgres /opt/wal-e/bin/pip install -r wal-e-requirements.txt
-##TEMP for inital tests --load test data from test data backup
-# - if test "%(BACKUPDB)s" = "gene_and_disease_data"
-# - then
-# -   echo "====== restoring test data plus gene_and_disease_data"
-# -   sudo -u clincoded psql clincoded < DEV_TEST_DB_DUMP_GENES_9.4
-# - else
-# -   echo "====== restoring test data"
-# -   sudo -u clincoded psql clincoded < DEV_TEST_DB_DUMP_9.4
-# - fi
-# - sudo -u clincoded psql -c 'update transactions set xid = NULL'
+##TEMP for inital tests --load data from s3
+- if test "%(BACKUPDB)s" = "s3_data"
+- then 
+-   echo "====== restoring data from backup"
+-   /etc/init.d/postgresql stop
+-   sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-fetch /var/lib/postgresql/9.4/main LATEST
+-   sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
+-   /etc/init.d/postgresql start
+##TEMP for inital tests --load test data from test data backups
+##(test data plus all genes and diseases)
+- elif test "%(BACKUPDB)s" = "test_gene_and_disease_data"
+- then
+-   echo "====== restoring local test data plus gene and disease data"
+-   sudo -u clincoded psql clincoded < DEV_TEST_DB_DUMP_GENES_9.4
+-   sudo -u clincoded psql -c 'update transactions set xid = NULL'
+- else
+##TEMP for inital tests --load test data from test data backups
+###(test data [minimal])
+-   echo "====== restoring local test data"
+-   sudo -u clincoded psql clincoded < DEV_TEST_DB_DUMP_9.4
+-   sudo -u clincoded psql -c 'update transactions set xid = NULL'
+- fi
+#- sudo -u clincoded psql -c 'update transactions set xid = NULL'
 # ##/TEMP
-- /etc/init.d/postgresql stop
+#- /etc/init.d/postgresql stop
 #TEMP for inital tests --restore from backup
-- sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-fetch /var/lib/postgresql/9.4/main LATEST
-- sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
+# - sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-fetch /var/lib/postgresql/9.4/main LATEST
+# - sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
 #- sudo -u postgres chmod 0700 /var/lib/postgresql/9.4/main
 #/TEMP
-- /etc/init.d/postgresql start
+#- /etc/init.d/postgresql start
 #- sudo -u postgres chmod 0755 /var/lib/postgresql/9.4/main
 - sudo -u clincoded python3.4 bootstrap.py -v 2.3.1 --setuptools-version 15.2
 - sudo -u clincoded LANG=en_US.UTF-8 bin/buildout -c %(ROLE)s.cfg

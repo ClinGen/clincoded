@@ -99,25 +99,35 @@ def main():
     parser = argparse.ArgumentParser(
         description="Deploy clincoded on AWS",
     )
-    parser.add_argument('-b', '--branch', default=None, help="Git branch or tag")
-    parser.add_argument('-n', '--name', type=hostname, help="Instance name")
-    parser.add_argument('--wale-s3-prefix', default='s3://clincoded-backups-prod/production')
     parser.add_argument(
-        '--candidate', action='store_const', default='demo', const='candidate', dest='role',
+        '-b', '--branch', default=None, help="Git branch or tag")
+    parser.add_argument(
+        '-n', '--name', type=hostname, help="Instance name")
+    parser.add_argument(
+        '--wale-s3-prefix', default='s3://clincoded-backups/production')
+    parser.add_argument(
+        '--candidate', action='store_const',
+        default='demo', const='candidate', dest='role',
         help="Deploy candidate instance")
     parser.add_argument(
-        '--test', action='store_const', default='demo', const='test', dest='role',
+        '--test', action='store_const',
+        default='demo', const='test', dest='role',
         help="Deploy to production AWS")
     parser.add_argument(
         '--image-id', default='ami-5189a661',
         help="ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20150325")
     parser.add_argument(
         '--instance-type', default='t2.medium',
-        help="specify 'c4.2xlarge' for faster indexing (you should switch to a smaller "
-             "instance afterwards.)")
-    parser.add_argument('--profile-name', default=None, help="AWS creds profile")
-    parser.add_argument('--dbrestore', default='test_data', 
-        help="Load test data by default, use 'gene_and_disease_data' to include hgnc/orphanet")
+        help="specify 'c4.2xlarge' for faster indexing "
+             "(you should switch to a smaller instance afterwards.)")
+    parser.add_argument(
+        '--profile-name', default=None, help="AWS creds profile")
+    parser.add_argument(
+        '--dbrestore', default='test_data',
+        help="Load local test data by default, "
+             "'test_gene_and_disease_data' to include local hgnc/orphanet, "
+             "'s3_data' to restore backup from AWS S3")
+
     args = parser.parse_args()
 
     return run(**vars(args))
