@@ -18,7 +18,7 @@ var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
-var Assessment = Assessments.Assessment;
+var AssessmentTracker = Assessments.AssessmentTracker;
 var AssessmentPanel = Assessments.AssessmentPanel;
 var AssessmentMixin = Assessments.AssessmentMixin;
 var Form = form.Form;
@@ -142,6 +142,9 @@ var FamilyCuration = React.createClass({
         this.getRestDatas(
             uris
         ).then(datas => {
+            var user = this.props.session && this.props.session.user_properties;
+            var userAssessment;
+
             // See what we got back so we can build an object to copy in this React object's state to rerender the page.
             var stateObj = {};
             datas.forEach(function(data) {
@@ -210,13 +213,18 @@ var FamilyCuration = React.createClass({
                     // No variants in this family, but it does have a proband individual. Open one empty variant panel
                     stateObj.variantCount = 1;
                 }
+
+                // Find the current user's pathogenicity's assessment from the pathogenicity's assessment list
+                if (stateObj.family.segregation && stateObj.family.segregation.assessments && stateObj.family.segregation.assessments.length) {
+                    userAssessment = Assessments.userAssessment(stateObj.family.segregation.assessments, user && user.uuid);
+                }
+
             }
 
             // Make a new tracking object for the current assessment. Either or both of the original assessment or user can be blank
             // and assigned later. Then set the component state's assessment value to the assessment's value -- default if there was no
             // assessment.
-            var user = this.props.session && this.props.session.user_properties;
-            var assessmentTracker = this.cv.assessmentTracker = new Assessment(null, user, 'segregation');
+            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'segregation');
             this.setAssessmentValue(assessmentTracker);
 
             // Set all the state variables we've collected
@@ -1151,7 +1159,7 @@ var FamilySegregation = function() {
             </Input>
             <Input type="textarea" ref="addedsegregationinfo" label="Additional Segregation Information:" rows="5" value={segregation.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue.bind(null, this.cv.assessmentTracker)} />
+            <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue.bind(null, this.cv.assessmentTracker)} />
         </div>
     );
 };

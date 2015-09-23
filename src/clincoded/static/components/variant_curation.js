@@ -15,7 +15,7 @@ var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
 var VariantAssociationsHeader = curator.VariantAssociationsHeader;
-var Assessment = Assessments.Assessment;
+var AssessmentTracker = Assessments.AssessmentTracker;
 var AssessmentPanel = Assessments.AssessmentPanel;
 var AssessmentMixin = Assessments.AssessmentMixin;
 var PmidSummary = curator.PmidSummary;
@@ -119,7 +119,7 @@ var VariantCuration = React.createClass({
             // Make a new tracking object for the current assessment. Either or both of the original assessment or user can be blank
             // and assigned later. Then set the component state's assessment value to the assessment's value -- default if there was no
             // assessment.
-            var assessmentObj = this.cv.assessmentTracker = new Assessment(userAssessment, user, 'pathogenicity');
+            var assessmentObj = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'pathogenicity');
             this.setAssessmentValue(assessmentObj);
 
             // Set all the state variables we've collected

@@ -43,7 +43,7 @@ class AssessmentTracker {
     }
 }
 
-module.exports.Assessment = AssessmentTracker;
+module.exports.AssessmentTracker = AssessmentTracker;
 
 
 // Mixin to handle React states for assessments
