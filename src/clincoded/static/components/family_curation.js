@@ -40,6 +40,25 @@ var VAR_SPEC = 1; // A specific variant (dbSNP, ClinVar, HGVS) entered in a pane
 var VAR_OTHER = 2; // Other description entered in a panel
 
 
+// Maps segregation field refs to schema properties
+var formMapSegregation = {
+    'SEGpedigreedesc': 'pedigreeDescription',
+    'SEGpedigreesize': 'pedigreeSize',
+    'SEGnogenerationsinpedigree': 'numberOfGenerationInPedigree',
+    'SEGconsanguineous': 'consanguineousFamily',
+    'SEGnocases': 'numberOfCases',
+    'SEGdenovo': 'deNovoType',
+    'SEGunaffectedcarriers': 'numberOfParentsUnaffectedCarriers',
+    'SEGnoaffected': 'numberOfAffectedAlleles',
+    'SEGnoaffected1': 'numberOfAffectedWithOneVariant',
+    'SEGnoaffected2': 'numberOfAffectedWithTwoVariants',
+    'SEGnounaffectedcarriers': 'numberOfUnaffectedCarriers',
+    'SEGnounaffectedindividuals': 'numberOfUnaffectedIndividuals',
+    'SEGbothvariants': 'probandAssociatedWithBoth',
+    'SEGaddedsegregationinfo': 'additionalInformation'
+};
+
+
 var FamilyCuration = React.createClass({
     mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
 
@@ -215,32 +234,45 @@ var FamilyCuration = React.createClass({
 
                 // See if we need to disable the Add Variant button based on the number of variants configured
                 var segregation = stateObj.family.segregation;
-                if (segregation && segregation.variants && segregation.variants.length) {
-                    // We have variants
-                    stateObj.variantCount = segregation.variants.length;
-                    stateObj.addVariantDisabled = false;
+                if (segregation) {
+                    // Adjust the form for incoming variants
+                    if (segregation.variants && segregation.variants.length) {
+                        // We have variants
+                        stateObj.variantCount = segregation.variants.length;
+                        stateObj.addVariantDisabled = false;
 
-                    var currVariantOption = [];
-                    for (var i = 0; i < segregation.variants.length; i++) {
-                        if (segregation.variants[i].clinvarVariantId) {
-                            currVariantOption[i] = VAR_SPEC;
-                        } else if (segregation.variants[i].otherDescription) {
-                            currVariantOption[i] = VAR_OTHER;
-                        } else {
-                            currVariantOption[i] = VAR_NONE;
+                        // For each incoming variant, set the form value
+                        var currVariantOption = [];
+                        for (var i = 0; i < segregation.variants.length; i++) {
+                            if (segregation.variants[i].clinvarVariantId) {
+                                currVariantOption[i] = VAR_SPEC;
+                            } else if (segregation.variants[i].otherDescription) {
+                                currVariantOption[i] = VAR_OTHER;
+                            } else {
+                                currVariantOption[i] = VAR_NONE;
+                            }
                         }
+                        stateObj.variantOption = currVariantOption;
+                    } else if (stateObj.probandIndividual) {
+                        // No variants in this family, but it does have a proband individual. Open one empty variant panel
+                        stateObj.variantCount = 1;
                     }
-                    stateObj.variantOption = currVariantOption;
-                } else if (stateObj.probandIndividual) {
-                    // No variants in this family, but it does have a proband individual. Open one empty variant panel
-                    stateObj.variantCount = 1;
-                }
 
-                // Find the current user's pathogenicity's assessment from the pathogenicity's assessment list
-                if (stateObj.family.segregation && stateObj.family.segregation.assessments && stateObj.family.segregation.assessments.length) {
-                    userAssessment = Assessments.userAssessment(stateObj.family.segregation.assessments, user && user.uuid);
-                }
+                    // Find the current user's segregation assessment from the segregation's assessment list
+                    if (segregation.assessments && segregation.assessments.length) {
+                        userAssessment = Assessments.userAssessment(segregation.assessments, user && user.uuid);
+                    }
 
+                    // Fill in the segregation filled object so we know whether to enable or disable the assessment dropdown
+                    Object.keys(formMapSegregation).forEach(formRef => {
+                        if (segregation.hasOwnProperty(formMapSegregation[formRef])) {
+                            this.cv.filledSegregations[formRef] = segregation[formMapSegregation[formRef]];
+                        }
+                    });
+
+                    // Note whether any segregation fields were set so the assessment dropdown is set properly on load
+                    stateObj.segregationFilled = Object.keys(this.cv.filledSegregations).length > 0;
+                }
             }
 
             // Make a new tracking object for the current assessment. Either or both of the original assessment or user can be blank
@@ -668,59 +700,59 @@ var FamilyCuration = React.createClass({
 
         value1 = this.getFormValue('SEGpedigreedesc');
         if (value1) {
-            newSegregation.pedigreeDescription = value1;
+            newSegregation[formMapSegregation['SEGpedigreedesc']] = value1;
         }
         value1 = this.getFormValue('SEGpedigreesize');
         if (value1) {
-            newSegregation.pedigreeSize = parseInt(value1, 10);
+            newSegregation[formMapSegregation['SEGpedigreesize']] = parseInt(value1, 10);
         }
         value1 = this.getFormValue('SEGnogenerationsinpedigree');
         if (value1) {
-            newSegregation.numberOfGenerationInPedigree = parseInt(value1, 10);
+            newSegregation[formMapSegregation['SEGnogenerationsinpedigree']] = parseInt(value1, 10);
         }
         value1 = this.getFormValue('SEGconsanguineous');
         if (value1 !== 'none') {
-            newSegregation.consanguineousFamily = value1 === 'Yes';
+            newSegregation[formMapSegregation['SEGconsanguineous']] = value1 === 'Yes';
         }
         value1 = this.getFormValue('SEGnocases');
         if (value1) {
-            newSegregation.numberOfCases = parseInt(value1, 10);
+            newSegregation[formMapSegregation['SEGnocases']] = parseInt(value1, 10);
         }
         value1 = this.getFormValue('SEGdenovo');
         if (value1 !== 'none') {
-            newSegregation.deNovoType = value1;
+            newSegregation[formMapSegregation['SEGdenovo']] = value1;
         }
         value1 = this.getFormValue('SEGunaffectedcarriers');
         if (value1 !== 'none') {
-            newSegregation.numberOfParentsUnaffectedCarriers = parseInt(value1, 10);
+            newSegregation[formMapSegregation['SEGunaffectedcarriers']] = parseInt(value1, 10);
         }
         value1 = this.getFormValue('SEGnoaffected');
         if (value1) {
-            newSegregation.numberOfAffectedAlleles = parseInt(value1, 10);
+            newSegregation[formMapSegregation['SEGunaffectedcarriers']] = parseInt(value1, 10);
         }
         value1 = this.getFormValue('SEGnoaffected1');
         if (value1) {
-            newSegregation.numberOfAffectedWithOneVariant = parseInt(value1, 10);
+            newSegregation[formMapSegregation['SEGnoaffected1']] = parseInt(value1, 10);
         }
         value1 = this.getFormValue('SEGnoaffected2');
         if (value1) {
-            newSegregation.numberOfAffectedWithTwoVariants = parseInt(value1, 10);
+            newSegregation[formMapSegregation['SEGnoaffected2']] = parseInt(value1, 10);
         }
         value1 = this.getFormValue('SEGnounaffectedcarriers');
         if (value1) {
-            newSegregation.numberOfUnaffectedCarriers = parseInt(value1, 10);
+            newSegregation[formMapSegregation['SEGnounaffectedcarriers']] = parseInt(value1, 10);
         }
         value1 = this.getFormValue('SEGnounaffectedindividuals');
         if (value1) {
-            newSegregation.numberOfUnaffectedIndividuals = parseInt(value1, 10);
+            newSegregation[formMapSegregation['SEGnounaffectedindividuals']] = parseInt(value1, 10);
         }
         value1 = this.getFormValue('SEGbothvariants');
         if (value1 !== 'none') {
-            newSegregation.probandAssociatedWithBoth = value1 === 'Yes';
+            newSegregation[formMapSegregation['SEGbothvariants']] = value1 === 'Yes';
         }
         value1 = this.getFormValue('SEGaddedsegregationinfo');
         if (value1) {
-            newSegregation.additionalInformation = value1;
+            newSegregation[formMapSegregation['SEGaddedsegregationinfo']] = value1;
         }
         if (variants) {
             newSegregation.variants = variants;
