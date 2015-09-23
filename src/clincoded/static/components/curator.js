@@ -1070,7 +1070,9 @@ function cloneSimpleProps(obj, props) {
     var dup = {};
 
     props.forEach(function(prop) {
-        dup[prop] = obj[prop];
+        if (obj.hasOwnProperty(prop)) {
+            dup[prop] = obj[prop];
+        }
     });
     return dup;
 }

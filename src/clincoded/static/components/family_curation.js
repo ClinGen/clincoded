@@ -728,7 +728,7 @@ var FamilyCuration = React.createClass({
         }
         value1 = this.getFormValue('SEGnoaffected');
         if (value1) {
-            newSegregation[formMapSegregation['SEGunaffectedcarriers']] = parseInt(value1, 10);
+            newSegregation[formMapSegregation['SEGnoaffected']] = parseInt(value1, 10);
         }
         value1 = this.getFormValue('SEGnoaffected1');
         if (value1) {
@@ -1478,80 +1478,7 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    <Panel title="Family — Segregation" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Pedigree description</dt>
-                                <dd>{segregation && segregation.pedigreeDescription}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Pedigree size</dt>
-                                <dd>{segregation && segregation.pedigreeSize}</dd>
-                            </div>
-
-                            <div>
-                                <dt># generations in pedigree</dt>
-                                <dd>{segregation && segregation.numberOfGenerationInPedigree}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Consanguineous family</dt>
-                                <dd>{segregation && segregation.consanguineousFamily === true ? 'Yes' : (segregation.consanguineousFamily === false ? 'No' : '')}</dd>
-                            </div>
-
-                            <div>
-                                <dt># cases (phenotype positive)</dt>
-                                <dd>{segregation && segregation.numberOfCases}</dd>
-                            </div>
-
-                            <div>
-                                <dt>de novo type</dt>
-                                <dd>{segregation && segregation.deNovoType}</dd>
-                            </div>
-
-                            <div>
-                                <dt># parents who are unaffected carriers</dt>
-                                <dd>{segregation && segregation.numberOfParentsUnaffectedCarriers}</dd>
-                            </div>
-
-                            <div>
-                                <dt># affected individuals</dt>
-                                <dd>{segregation && segregation.numberOfAffectedAlleles}</dd>
-                            </div>
-
-                            <div>
-                                <dt># affected with 1 variant</dt>
-                                <dd>{segregation && segregation.numberOfAffectedWithOneVariant}</dd>
-                            </div>
-
-                            <div>
-                                <dt># affected with 2 different variants or homozygous for 1</dt>
-                                <dd>{segregation && segregation.numberOfAffectedWithTwoVariants}</dd>
-                            </div>
-
-                            <div>
-                                <dt># unaffected carriers</dt>
-                                <dd>{segregation && segregation.numberOfUnaffectedCarriers}</dd>
-                            </div>
-
-                            <div>
-                                <dt># unaffected individuals</dt>
-                                <dd>{segregation && segregation.numberOfUnaffectedIndividuals}</dd>
-                            </div>
-
-                            <div>
-                                <dt>If more than 1 variant, is proband associated with both</dt>
-                                <dd>{segregation && segregation.probandAssociatedWithBoth === true ? 'Yes' : (segregation.probandAssociatedWithBoth === false ? 'No' : '')}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Additional Segregation information</dt>
-                                <dd>{segregation && segregation.additionalInformation}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
+                    {FamilySegregationViewer(segregation)}
                     <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                         {variants.map(function(variant, i) {
                             return (
@@ -1600,3 +1527,82 @@ var FamilyViewer = React.createClass({
 });
 
 globals.content_views.register(FamilyViewer, 'family');
+
+
+var FamilySegregationViewer = function(segregation) {
+    return (
+        <Panel title="Family — Segregation" panelClassName="panel-data">
+            <dl className="dl-horizontal">
+                <div>
+                    <dt>Pedigree description</dt>
+                    <dd>{segregation && segregation.pedigreeDescription}</dd>
+                </div>
+
+                <div>
+                    <dt>Pedigree size</dt>
+                    <dd>{segregation && segregation.pedigreeSize}</dd>
+                </div>
+
+                <div>
+                    <dt># generations in pedigree</dt>
+                    <dd>{segregation && segregation.numberOfGenerationInPedigree}</dd>
+                </div>
+
+                <div>
+                    <dt>Consanguineous family</dt>
+                    <dd>{segregation && segregation.consanguineousFamily === true ? 'Yes' : (segregation.consanguineousFamily === false ? 'No' : '')}</dd>
+                </div>
+
+                <div>
+                    <dt># cases (phenotype positive)</dt>
+                    <dd>{segregation && segregation.numberOfCases}</dd>
+                </div>
+
+                <div>
+                    <dt>de novo type</dt>
+                    <dd>{segregation && segregation.deNovoType}</dd>
+                </div>
+
+                <div>
+                    <dt># parents who are unaffected carriers</dt>
+                    <dd>{segregation && segregation.numberOfParentsUnaffectedCarriers}</dd>
+                </div>
+
+                <div>
+                    <dt># affected individuals</dt>
+                    <dd>{segregation && segregation.numberOfAffectedAlleles}</dd>
+                </div>
+
+                <div>
+                    <dt># affected with 1 variant</dt>
+                    <dd>{segregation && segregation.numberOfAffectedWithOneVariant}</dd>
+                </div>
+
+                <div>
+                    <dt># affected with 2 different variants or homozygous for 1</dt>
+                    <dd>{segregation && segregation.numberOfAffectedWithTwoVariants}</dd>
+                </div>
+
+                <div>
+                    <dt># unaffected carriers</dt>
+                    <dd>{segregation && segregation.numberOfUnaffectedCarriers}</dd>
+                </div>
+
+                <div>
+                    <dt># unaffected individuals</dt>
+                    <dd>{segregation && segregation.numberOfUnaffectedIndividuals}</dd>
+                </div>
+
+                <div>
+                    <dt>If more than 1 variant, is proband associated with both</dt>
+                    <dd>{segregation && segregation.probandAssociatedWithBoth === true ? 'Yes' : (segregation.probandAssociatedWithBoth === false ? 'No' : '')}</dd>
+                </div>
+
+                <div>
+                    <dt>Additional Segregation information</dt>
+                    <dd>{segregation && segregation.additionalInformation}</dd>
+                </div>
+            </dl>
+        </Panel>
+    );
+};
