@@ -138,10 +138,12 @@ var FamilyCuration = React.createClass({
             if (this.refs[ref].props.type === 'select') {
                 value = value === 'none' ? '' : value;
             }
-            if (value) {
+            if (value !== '') {
+                console.log('non-empty');
                 // A segregation field has a value; remember this field
-                this.cv.filledSegregations[ref] = value;
+                this.cv.filledSegregations[ref] = true;
             } else {
+                console.log('empty');
                 // A segregation field lost its value; if we had remembered it, forget it
                 if (this.cv.filledSegregations[ref]) {
                     delete this.cv.filledSegregations[ref];
@@ -266,7 +268,7 @@ var FamilyCuration = React.createClass({
                     // Fill in the segregation filled object so we know whether to enable or disable the assessment dropdown
                     Object.keys(formMapSegregation).forEach(formRef => {
                         if (segregation.hasOwnProperty(formMapSegregation[formRef])) {
-                            this.cv.filledSegregations[formRef] = segregation[formMapSegregation[formRef]];
+                            this.cv.filledSegregations[formRef] = true;
                         }
                     });
 
@@ -1479,6 +1481,7 @@ var FamilyViewer = React.createClass({
                     </Panel>
 
                     {FamilySegregationViewer(segregation)}
+
                     <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                         {variants.map(function(variant, i) {
                             return (
