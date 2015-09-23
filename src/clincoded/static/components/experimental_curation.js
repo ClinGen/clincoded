@@ -1159,7 +1159,7 @@ var TypeBiochemicalFunctionB = function() {
 // HTML labels for Biochemical Functions panel B
 var LabelHPOIDs = React.createClass({
     render: function() {
-        return <span>Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO lookup at PhenExplorer</a>)</span>:</span>
+        return <span>Phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID)</span>:</span>
     }
 });
 var LabelPhenotypesFT = React.createClass({
