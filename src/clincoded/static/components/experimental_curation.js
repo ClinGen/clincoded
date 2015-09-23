@@ -336,6 +336,57 @@ var ExperimentalCuration = React.createClass({
         this.loadData();
     },
 
+    validateFormTerms: function(formError, type, terms, formField, limit) {
+        limit = typeof limit !== 'undefined' ? limit : 0;
+        var errorMsgs = {
+            'efoIDs': {
+                'invalid1': "Use EFO ID (e.g. 0000001)",
+                'invalid': "Use EFO IDs (e.g. 0000001) separated by commas",
+                'limit1': "Enter only one EFO ID",
+                'limit': "Enter only " + limit + " EFO IDs"
+            },
+            'geneSymbols': {
+                'invalid1': "Use gene symbol (e.g. SMAD3)",
+                'invalid': "Use gene symbols (e.g. SMAD3) separated by commas",
+                'limit1': "Enter only one gene symbol",
+                'limit': "Enter only " + limit + " gene symbols"
+            },
+            'goSlimIds': {
+                'invalid1': "Use GO_Slim ID (e.g. GO:0012345)",
+                'invalid': "Use GO_Slim IDs (e.g. GO:0012345) separated by commas",
+                'limit1': "Enter only one GO_Slim ID",
+                'limit': "Enter only " + limit + " GO_Slim IDs"
+            },
+            'hpoIDs': {
+                'invalid1': "Use HPO ID (e.g. HP:0000001)",
+                'invalid': "Use HPO IDs (e.g. HP:0000001) separated by commas",
+                'limit1': "Enter only one HPO ID",
+                'limit': "Enter only " + limit + " HPO IDs"
+            },
+            'uberonIDs': {
+                'invalid1': "Use Uberon ID (e.g. UBERON_0000948)",
+                'invalid': "Use Uberon IDs (e.g. UBERON_0000948) separated by commas",
+                'limit1': "Enter only one Uberon ID",
+                'limit': "Enter only " + limit + " Uberon IDs"
+            }
+        };
+        if (terms && terms.length && _(terms).any(function(id) { return id === null; })) {
+            // term is bad
+            formError = true;
+            this.setFormErrors(formField, errorMsgs[type]['invalid']);
+        }
+        if (limit !== 0 && terms.length > limit) {
+            // number of terms more than specified limit
+            formError = true;
+            if (limit == 1) {
+                this.setFormErrors(formField, errorMsgs[type]['limit']);
+            } else {
+                this.setFormErrors(formField, errorMsgs[type]['limit']);
+            }
+        }
+        return formError;
+    },
+
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
@@ -350,156 +401,80 @@ var ExperimentalCuration = React.createClass({
 
             if (this.state.experimentalType == 'Biochemical function') {
                 // Check form for Biochemical Function panel
-                goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
-                geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
-                hpoIDs = curator.capture.hpoids(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
                 if (this.state.biochemicalFunctionsAOn === false && this.state.biochemicalFunctionsBOn === false){
                     formError = true;
                     this.setFormErrors('geneWithSameFunctionSameDisease.genes', 'One of these fields must be filled in');
                     this.setFormErrors('geneFunctionConsistentWithPhenotype.phenotypeHPO', 'One of these fields must be filled in');
                     this.setFormErrors('geneFunctionConsistentWithPhenotype.phenotypeFreeText', 'One of these fields must be filled in');
                 }
-                if (goSlimIDs && goSlimIDs.length && _(goSlimIDs).any(function(id) { return id === null; })) {
-                    // GO_Slim ID is bad
-                    formError = true;
-                    this.setFormErrors('identifiedFunction', 'Use GO_Slim ID (e.g. GO:0012345)');
-                }
-                if (goSlimIDs.length > 1) {
-                    // More than one GO_Slim ID specified
-                    this.setFormErrors('identifiedFunction', 'Enter only one GO_Slim ID');
-                }
-                if (geneSymbols && geneSymbols.length && _(geneSymbols).any(function(id) { return id === null; })) {
-                    // Gene symbol list is bad
-                    formError = true;
-                    this.setFormErrors('geneWithSameFunctionSameDisease.genes', 'Use gene symbols (e.g. SMAD3) separated by commas');
-                }
-                if (hpoIDs && hpoIDs.length && _(hpoIDs).any(function(id) { return id === null; })) {
-                    // Gene symbol list is bad
-                    formError = true;
-                    this.setFormErrors('geneFunctionConsistentWithPhenotype.phenotypeHPO', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-                }
+                // check goSlims
+                goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
+                formError = this.validateFormTerms(formError, 'goSlimIds', goSlimIDs, 'identifiedFunction', 1);
+                // check geneSymbols
+                geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
+                formError = this.validateFormTerms(formError, 'geneSymbols', geneSymbols, 'geneWithSameFunctionSameDisease.genes');
+                // check hpoIDs
+                hpoIDs = curator.capture.hpoids(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
+                formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'geneFunctionConsistentWithPhenotype.phenotypeHPO');
             }
             else if (this.state.experimentalType == 'Protein interactions') {
                 // Check form for Protein Interactions panel
+                // check geneSymbols
                 geneSymbols = curator.capture.genes(this.getFormValue('interactingGenes'));
-                if (geneSymbols && geneSymbols.length && _(geneSymbols).any(function(id) { return id === null; })) {
-                    // Gene symbol list is bad
-                    formError = true;
-                    this.setFormErrors('interactingGenes', 'Use gene symbols (e.g. SMAD3) separated by commas');
-                }
+                formError = this.validateFormTerms(formError, 'geneSymbols', geneSymbols, 'interactingGenes');
             }
             else if (this.state.experimentalType == 'Expression') {
                 // Check form for Expression panel
-                uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
                 if (this.state.expressedInTissue === false && this.state.expressedInPatients === false) {
                     formError = true;
                     this.setFormErrors('normalExpression.expressedInTissue', 'One of these evidences must be submitted');
                     this.setFormErrors('alteredExpression.expressedInPatients', 'One of these evidences must be submitted');
                 }
-                if (uberonIDs && uberonIDs.length && _(uberonIDs).any(function(id) { return id === null; })) {
-                    // Uberon ID is bad
-                    formError = true;
-                    this.setFormErrors('organOfTissue', 'Use Uberon ID (e.g. UBERON_0000948)');
-                }
-                if (uberonIDs.length > 1) {
-                    // More than one Uberon ID specified
-                    this.setFormErrors('organOfTissue', 'Enter only one Uberon ID');
-                }
+                // check uberonIDs
+                uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
+                formError = this.validateFormTerms(formError, 'uberonIDs', uberonIDs, 'organOfTissue', 1);
             }
             else if (this.state.experimentalType == 'Functional alteration of gene/gene product') {
                 // Check form for Functional Alterations panel
-                goSlimIDs = curator.capture.goslims(this.getFormValue('normalFunctionOfGene'));
+                // check efoIDs depending on form selection
                 if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Patient cells') {
                     efoIDs = curator.capture.efoids(this.getFormValue('funcalt.patientCellType'));
-                    if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
-                        // EFO ID is bad
-                        formError = true;
-                        this.setFormErrors('funcalt.patientCellType', 'Use EFO ID (e.g. 0000001)');
-                    }
-                    if (efoIDs.length > 1) {
-                        // More than one EFO ID specified
-                        this.setFormErrors('funcalt.patientCellType', 'Enter only one EFO ID');
-                    }
+                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.patientCellType', 1);
                 } else if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Engineered equivalent') {
                     efoIDs = curator.capture.efoids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
-                    if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
-                        // EFO ID is bad
-                        formError = true;
-                        this.setFormErrors('funcalt.engineeredEquivalentCellType', 'Use EFO ID (e.g. 0000001)');
-                    }
-                    if (efoIDs.length > 1) {
-                        // More than one EFO ID specified
-                        this.setFormErrors('funcalt.engineeredEquivalentCellType', 'Enter only one EFO ID');
-                    }
+                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.engineeredEquivalentCellType', 1);
                 }
-                if (goSlimIDs && goSlimIDs.length && _(goSlimIDs).any(function(id) { return id === null; })) {
-                    // GO_Slim ID is bad
-                    formError = true;
-                    this.setFormErrors('normalFunctionOfGene', 'Use GO_Slim ID (e.g. GO:0012345)');
-                }
-                if (goSlimIDs.length > 1) {
-                    // More than one GO_Slim ID specified
-                    this.setFormErrors('normalFunctionOfGene', 'Enter only one GO_Slim ID');
-                }
+                // check goSlimIDs
+                goSlimIDs = curator.capture.goslims(this.getFormValue('normalFunctionOfGene'));
+                formError = this.validateFormTerms(formError, 'goSlimIds', goSlimIDs, 'normalFunctionOfGene', 1);
             }
             else if (this.state.experimentalType == 'Model systems') {
                 // Check form for Model Systems panel
+                // check efoIDs depending on form selection
+                if (this.getFormValue('animalOrCellCulture') === 'Engineered equivalent') {
+                    efoIDs = curator.capture.efoids(this.getFormValue('cellCulture'));
+                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.cellCulture', 1);
+                }
+                // check hpoIDs
                 hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPO'));
-                if (hpoIDs && hpoIDs.length && _(hpoIDs).any(function(id) { return id === null; })) {
-                    // HPO ID is bad
-                    formError = true;
-                    this.setFormErrors('model.phenotypeHPO', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-                }
-                if (hpoIDs.length > 1) {
-                    // More than one HPO ID specified
-                    this.setFormErrors('model.phenotypeHPO', 'Enter only one HPO ID');
-                }
+                formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPO', 1);
+                // check hpoIDs part 2
                 hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPOObserved'));
-                if (hpoIDs && hpoIDs.length && _(hpoIDs).any(function(id) { return id === null; })) {
-                    // HPO ID is bad
-                    formError = true;
-                    this.setFormErrors('model.phenotypeHPOObserved', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-                }
-                if (hpoIDs.length > 1) {
-                    // More than one HPO ID specified
-                    this.setFormErrors('model.phenotypeHPOObserved', 'Enter only one HPO ID');
-                }
+                formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPOObserved', 1);
             }
             else if (this.state.experimentalType == 'Rescue') {
                 // Check form for Rescue panel
-                hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
+                // check efoIDs depending on form selection
                 if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Patient cells') {
                     efoIDs = curator.capture.efoids(this.getFormValue('rescue.patientCellType'));
-                    if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
-                        // EFO ID is bad
-                        formError = true;
-                        this.setFormErrors('rescue.patientCellType', 'Use EFO ID (e.g. 0000001)');
-                    }
-                    if (efoIDs.length > 1) {
-                        // More than one EFO ID specified
-                        this.setFormErrors('rescue.patientCellType', 'Enter only one EFO ID');
-                    }
+                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'rescue.patientCellType', 1);
                 } else if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Engineered equivalent') {
-                efoIDs = curator.capture.efoids(this.getFormValue('rescue.engineeredEquivalentCellType'));
-                    if (efoIDs && efoIDs.length && _(efoIDs).any(function(id) { return id === null; })) {
-                        // EFO ID is bad
-                        formError = true;
-                        this.setFormErrors('rescue.engineeredEquivalentCellType', 'Use EFO ID (e.g. 0000001)');
-                    }
-                    if (efoIDs.length > 1) {
-                        // More than one EFO ID specified
-                        this.setFormErrors('rescue.engineeredEquivalentCellType', 'Enter only one EFO ID');
-                    }
+                    efoIDs = curator.capture.efoids(this.getFormValue('rescue.engineeredEquivalentCellType'));
+                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'rescue.engineeredEquivalentCellType', 1);
                 }
-                if (hpoIDs && hpoIDs.length && _(hpoIDs).any(function(id) { return id === null; })) {
-                    // HPO ID is bad
-                    formError = true;
-                    this.setFormErrors('rescue.phenotypeHPO', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-                }
-                if (hpoIDs.length > 1) {
-                    // More than one HPO ID specified
-                    this.setFormErrors('rescue.phenotypeHPO', 'Enter only one HPO ID');
-                }
+                // check hpoIDs
+                hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
+                formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'rescue.phenotypeHPO', 1);
             }
 
             if (!formError) {
@@ -650,13 +625,16 @@ var ExperimentalCuration = React.createClass({
                     if (MSanimalOrCellCulture) {
                         newExperimental.modelSystems.animalOrCellCulture = MSanimalOrCellCulture;
                     }
-                    var MSanimalModel = this.getFormValue('animalModel');
-                    if (MSanimalModel) {
-                        newExperimental.modelSystems.animalModel = MSanimalModel;
-                    }
-                    var MScellCulture = this.getFormValue('cellCulture');
-                    if (MScellCulture) {
-                        newExperimental.modelSystems.cellCulture = MScellCulture;
+                    if (MSanimalOrCellCulture == 'Animal model') {
+                        var MSanimalModel = this.getFormValue('animalModel');
+                        if (MSanimalModel) {
+                            newExperimental.modelSystems.animalModel = MSanimalModel;
+                        }
+                    } else if (MSanimalOrCellCulture == 'Engineered equivalent') {
+                        var MScellCulture = this.getFormValue('cellCulture');
+                        if (MScellCulture) {
+                            newExperimental.modelSystems.cellCulture = MScellCulture;
+                        }
                     }
                     var MSdescriptionOfGeneAlteration = this.getFormValue('descriptionOfGeneAlteration');
                     if (MSdescriptionOfGeneAlteration) {
