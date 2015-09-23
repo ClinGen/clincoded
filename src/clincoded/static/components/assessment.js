@@ -136,6 +136,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
 
     propTypes: {
         assessmentTracker: React.PropTypes.object, // Current value of assessment
+        disabled: React.PropTypes.bool, // TRUE to make assessment dropdown disabled; FALSE to enable it (default)
         panelTitle: React.PropTypes.string, // Title of Assessment panel; 'Assessment' default
         label: React.PropTypes.string, // Label for dropdown; 'Assessment' default
         note: React.PropTypes.string, // Note to display below the dropdown
@@ -152,6 +153,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         var panelTitle = this.props.panelTitle ? this.props.panelTitle : 'Assessment';
         var label = this.props.label ? this.props.label : 'Assessment';
         var value = this.props.assessmentTracker && this.props.assessmentTracker.currentVal;
+        var disabled = (this.props.disabled === true || this.props.disabled === false) ? this.props.disabled : false;
 
         return (
             <div>
@@ -159,7 +161,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                     <Panel title={panelTitle}>
                         <div className="row">
                             <Input type="select" ref="assessment" label={label + ':'} defaultValue="Not Assessed" value={value} handleChange={this.handleChange}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={disabled}>
                                 <option>Not Assessed</option>
                                 <option disabled="disabled"></option>
                                 <option>Supports</option>

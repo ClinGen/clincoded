@@ -48,9 +48,9 @@ var FamilyCuration = React.createClass({
     },
 
     cv: {
-        assessmentTracker: null // Tracking object for a single assessment
+        assessmentTracker: null, // Tracking object for a single assessment
+        filledSegregations: {} // Tracks segregation fields with values filled in
     },
-
 
     // Keeps track of values from the query string
     queryValues: {},
@@ -68,7 +68,8 @@ var FamilyCuration = React.createClass({
             probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
             addVariantDisabled: false, // True if Add Another Variant button enabled
-            genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
+            genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
+            segregationFilled: false // True if at least one segregation field has a value
         };
     },
 
@@ -112,6 +113,27 @@ var FamilyCuration = React.createClass({
                 currVariantOption[refSuffix] = VAR_NONE;
             }
             this.setState({variantOption: currVariantOption});
+        } else if (ref.substring(0,3) === 'SEG') {
+            // Handle segregation fields to see if we should enable or disable the assessment dropdown
+            var value = this.refs[ref].getValue();
+            if (this.refs[ref].props.type === 'select') {
+                value = value === 'none' ? '' : value;
+            }
+            if (value) {
+                // A segregation field has a value; remember this field
+                this.cv.filledSegregations[ref] = value;
+            } else {
+                // A segregation field lost its value; if we had remembered it, forget it
+                if (this.cv.filledSegregations[ref]) {
+                    delete this.cv.filledSegregations[ref];
+                }
+            }
+
+            // Now change the state of the assessment dropdown if needed
+            var filled = Object.keys(this.cv.filledSegregations).length > 0;
+            if (this.state.segregationFilled !== filled) {
+                this.setState({segregationFilled: filled});
+            }
         }
     },
 
@@ -644,59 +666,59 @@ var FamilyCuration = React.createClass({
         var newSegregation = {};
         var value1;
 
-        value1 = this.getFormValue('pedigreedesc');
+        value1 = this.getFormValue('SEGpedigreedesc');
         if (value1) {
             newSegregation.pedigreeDescription = value1;
         }
-        value1 = this.getFormValue('pedigreesize');
+        value1 = this.getFormValue('SEGpedigreesize');
         if (value1) {
             newSegregation.pedigreeSize = parseInt(value1, 10);
         }
-        value1 = this.getFormValue('nogenerationsinpedigree');
+        value1 = this.getFormValue('SEGnogenerationsinpedigree');
         if (value1) {
             newSegregation.numberOfGenerationInPedigree = parseInt(value1, 10);
         }
-        value1 = this.getFormValue('consanguineous');
+        value1 = this.getFormValue('SEGconsanguineous');
         if (value1 !== 'none') {
             newSegregation.consanguineousFamily = value1 === 'Yes';
         }
-        value1 = this.getFormValue('nocases');
+        value1 = this.getFormValue('SEGnocases');
         if (value1) {
             newSegregation.numberOfCases = parseInt(value1, 10);
         }
-        value1 = this.getFormValue('denovo');
+        value1 = this.getFormValue('SEGdenovo');
         if (value1 !== 'none') {
             newSegregation.deNovoType = value1;
         }
-        value1 = this.getFormValue('unaffectedcarriers');
+        value1 = this.getFormValue('SEGunaffectedcarriers');
         if (value1 !== 'none') {
             newSegregation.numberOfParentsUnaffectedCarriers = parseInt(value1, 10);
         }
-        value1 = this.getFormValue('noaffected');
+        value1 = this.getFormValue('SEGnoaffected');
         if (value1) {
             newSegregation.numberOfAffectedAlleles = parseInt(value1, 10);
         }
-        value1 = this.getFormValue('noaffected1');
+        value1 = this.getFormValue('SEGnoaffected1');
         if (value1) {
             newSegregation.numberOfAffectedWithOneVariant = parseInt(value1, 10);
         }
-        value1 = this.getFormValue('noaffected2');
+        value1 = this.getFormValue('SEGnoaffected2');
         if (value1) {
             newSegregation.numberOfAffectedWithTwoVariants = parseInt(value1, 10);
         }
-        value1 = this.getFormValue('nounaffectedcarriers');
+        value1 = this.getFormValue('SEGnounaffectedcarriers');
         if (value1) {
             newSegregation.numberOfUnaffectedCarriers = parseInt(value1, 10);
         }
-        value1 = this.getFormValue('nounaffectedindividuals');
+        value1 = this.getFormValue('SEGnounaffectedindividuals');
         if (value1) {
             newSegregation.numberOfUnaffectedIndividuals = parseInt(value1, 10);
         }
-        value1 = this.getFormValue('bothvariants');
+        value1 = this.getFormValue('SEGbothvariants');
         if (value1 !== 'none') {
             newSegregation.probandAssociatedWithBoth = value1 === 'Yes';
         }
-        value1 = this.getFormValue('addedsegregationinfo');
+        value1 = this.getFormValue('SEGaddedsegregationinfo');
         if (value1) {
             newSegregation.additionalInformation = value1;
         }
@@ -1102,32 +1124,32 @@ var FamilySegregation = function() {
 
     return (
         <div className="row">
-            <Input type="textarea" ref="pedigreedesc" label="Pedigree description:" rows="5" value={segregation.pedigreeDescription}
+            <Input type="textarea" ref="SEGpedigreedesc" label="Pedigree description:" rows="5" value={segregation.pedigreeDescription} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="pedigreesize" label="Pedigree size:" value={segregation.pedigreeSize} minVal={2}
-                error={this.getFormError('pedigreesize')} clearError={this.clrFormErrors.bind(null, 'pedigreesize')}
+            <Input type="number" ref="SEGpedigreesize" label="Pedigree size:" value={segregation.pedigreeSize} minVal={2} handleChange={this.handleChange}
+                error={this.getFormError('SEGpedigreesize')} clearError={this.clrFormErrors.bind(null, 'SEGpedigreesize')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="nogenerationsinpedigree" label="# generations in pedigree:" value={segregation.numberOfGenerationInPedigree}
-                error={this.getFormError('nogenerationsinpedigree')} clearError={this.clrFormErrors.bind(null, 'nogenerationsinpedigree')}
+            <Input type="number" ref="SEGnogenerationsinpedigree" label="# generations in pedigree:" value={segregation.numberOfGenerationInPedigree} handleChange={this.handleChange}
+                error={this.getFormError('SEGnogenerationsinpedigree')} clearError={this.clrFormErrors.bind(null, 'SEGnogenerationsinpedigree')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="consanguineous" label="Consanguineous family?:" defaultValue="none" value={curator.booleanToDropdown(segregation.consanguineousFamily)}
+            <Input type="select" ref="SEGconsanguineous" label="Consanguineous family?:" defaultValue="none" value={curator.booleanToDropdown(segregation.consanguineousFamily)} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="number" ref="nocases" label="# cases (phenotype positive):" value={segregation.numberOfCases} minVal={1}
-                error={this.getFormError('nocases')} clearError={this.clrFormErrors.bind(null, 'nocases')}
+            <Input type="number" ref="SEGnocases" label="# cases (phenotype positive):" value={segregation.numberOfCases} minVal={1} handleChange={this.handleChange}
+                error={this.getFormError('SEGnocases')} clearError={this.clrFormErrors.bind(null, 'SEGnocases')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="denovo" label="de novo type:" defaultValue="none" value={segregation.deNovoType}
+            <Input type="select" ref="SEGdenovo" label="de novo type:" defaultValue="none" value={segregation.deNovoType} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Inferred</option>
                 <option>Confirmed</option>
             </Input>
-            <Input type="select" ref="unaffectedcarriers" label="# parents who are unaffected carriers" defaultValue="none" value={segregation.numberOfParentsUnaffectedCarriers}
+            <Input type="select" ref="SEGunaffectedcarriers" label="# parents who are unaffected carriers" defaultValue="none" value={segregation.numberOfParentsUnaffectedCarriers} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1135,31 +1157,32 @@ var FamilySegregation = function() {
                 <option>1</option>
                 <option>2</option>
             </Input>
-            <Input type="number" ref="noaffected" label="# affected individuals:" value={segregation.numberOfAffectedAlleles}
-                error={this.getFormError('noaffected')} clearError={this.clrFormErrors.bind(null, 'noaffected')}
+            <Input type="number" ref="SEGnoaffected" label="# affected individuals:" value={segregation.numberOfAffectedAlleles} handleChange={this.handleChange}
+                error={this.getFormError('SEGnoaffected')} clearError={this.clrFormErrors.bind(null, 'SEGnoaffected')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="noaffected1" label="# affected with 1 variant:" value={segregation.numberOfAffectedWithOneVariant}
-                error={this.getFormError('noaffected1')} clearError={this.clrFormErrors.bind(null, 'noaffected1')}
+            <Input type="number" ref="SEGnoaffected1" label="# affected with 1 variant:" value={segregation.numberOfAffectedWithOneVariant} handleChange={this.handleChange}
+                error={this.getFormError('SEGnoaffected1')} clearError={this.clrFormErrors.bind(null, 'SEGnoaffected1')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="noaffected2" label="# affected with 2 different variants or homozygous for 1:" value={segregation.numberOfAffectedWithTwoVariants}
-                error={this.getFormError('noaffected2')} clearError={this.clrFormErrors.bind(null, 'noaffected2')}
+            <Input type="number" ref="SEGnoaffected2" label="# affected with 2 different variants or homozygous for 1:" value={segregation.numberOfAffectedWithTwoVariants} handleChange={this.handleChange}
+                error={this.getFormError('SEGnoaffected2')} clearError={this.clrFormErrors.bind(null, 'SEGnoaffected2')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="nounaffectedcarriers" label="# unaffected carriers:" value={segregation.numberOfUnaffectedCarriers}
-                error={this.getFormError('nounaffectedcarriers')} clearError={this.clrFormErrors.bind(null, 'nounaffectedcarriers')}
+            <Input type="number" ref="SEGnounaffectedcarriers" label="# unaffected carriers:" value={segregation.numberOfUnaffectedCarriers} handleChange={this.handleChange}
+                error={this.getFormError('SEGnounaffectedcarriers')} clearError={this.clrFormErrors.bind(null, 'SEGnounaffectedcarriers')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="nounaffectedindividuals" label="# unaffected individuals:" value={segregation.numberOfUnaffectedIndividuals}
-                error={this.getFormError('nounaffectedindividuals')} clearError={this.clrFormErrors.bind(null, 'nounaffectedindividuals')}
+            <Input type="number" ref="SEGnounaffectedindividuals" label="# unaffected individuals:" value={segregation.numberOfUnaffectedIndividuals} handleChange={this.handleChange}
+                error={this.getFormError('SEGnounaffectedindividuals')} clearError={this.clrFormErrors.bind(null, 'SEGnounaffectedindividuals')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="bothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={curator.booleanToDropdown(segregation.probandAssociatedWithBoth)}
+            <Input type="select" ref="SEGbothvariants" label="If more than 1 variant, is proband associated with both?" defaultValue="none" value={curator.booleanToDropdown(segregation.probandAssociatedWithBoth)} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Yes</option>
                 <option>No</option>
             </Input>
-            <Input type="textarea" ref="addedsegregationinfo" label="Additional Segregation Information:" rows="5" value={segregation.additionalInformation}
+            <Input type="textarea" ref="SEGaddedsegregationinfo" label="Additional Segregation Information:" rows="5" value={segregation.additionalInformation} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue.bind(null, this.cv.assessmentTracker)} />
+            <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled}
+                updateValue={this.updateAssessmentValue.bind(null, this.cv.assessmentTracker)} />
         </div>
     );
 };
