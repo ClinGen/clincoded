@@ -730,7 +730,7 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.rescue.evidenceInPaper = RevidenceInPaper;
                     }
                 }
-
+                console.log(newExperimental);
                 var searchStr = '';
                 // Begin with empty promise
                 new Promise(function(resolve, reject) {
