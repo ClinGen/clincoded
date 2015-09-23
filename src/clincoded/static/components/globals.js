@@ -139,6 +139,7 @@ module.exports.external_url_map = {
     'PubMedSearch': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&id=',
     'PubMed': 'https://www.ncbi.nlm.nih.gov/pubmed/',
     'OrphaNet': 'http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=',
+    'OrphanetHome': 'http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=',
     'HGNC': 'http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=',
     'HGNCHome': 'http://www.genenames.org/',
     'Entrez': 'http://www.ncbi.nlm.nih.gov/gene/',

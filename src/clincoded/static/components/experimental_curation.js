@@ -1067,6 +1067,13 @@ var TypeBiochemicalFunction = function() {
     );
 }
 
+// HTML labels for Biochemical Functions panel
+var LabelIdentifiedFunction = React.createClass({
+    render: function() {
+        return <span>Identified Function <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> ID)</span>:</span>;
+    }
+});
+
 var TypeBiochemicalFunctionA = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
@@ -1088,7 +1095,7 @@ var TypeBiochemicalFunctionA = function() {
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that above gene(s) share same function:" rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.biochemicalFunctionsAOn} />
-            <Input type="text" ref="geneWithSameFunctionSameDisease.sharedDisease" label="Shared disease (Orphanet):" value={"ORPHA" + this.state.gdm.disease.orphaNumber}
+            <Input type="text" ref="geneWithSameFunctionSameDisease.sharedDisease" label={<LabelSharedDisease />} value={"ORPHA" + this.state.gdm.disease.orphaNumber}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={true} />
             <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene or genes been implicated in the above disease?:"
                 checked={this.state.geneImplicatedWithDisease} defaultChecked="false" handleChange={this.handleChange}
@@ -1105,6 +1112,18 @@ var TypeBiochemicalFunctionA = function() {
         </div>
     );
 }
+
+// HTML labels for Biochemical Functions panel A
+var LabelGenesWithSameFunction = React.createClass({
+    render: function() {
+        return <span>Gene(s) with same function <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>;
+    }
+});
+var LabelSharedDisease = React.createClass({
+    render: function() {
+        return <span>Shared disease <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet in a new tab">Orphanet</a> ID)</span>:</span>;
+    }
+});
 
 var TypeBiochemicalFunctionB = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
@@ -1124,10 +1143,10 @@ var TypeBiochemicalFunctionB = function() {
             <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />} value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" handleChange={this.handleChange} />
-            <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeFreeText" label="Phenotypes (free text):" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}
+            <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeFreeText" label={<LabelPhenotypesFT />} rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
-            <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.explanation" label="Explanation of how phenotype is consistent with disease (free text):" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}
+            <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.explanation" label="Explanation of how phenotype is consistent with disease:" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.explanation')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={!this.state.biochemicalFunctionsBOn} required={this.state.biochemicalFunctionsBOn} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.evidenceInPaper" label="Notes on where evidence found in paper:" rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}
@@ -1137,20 +1156,15 @@ var TypeBiochemicalFunctionB = function() {
     );
 }
 
-// HTML labels for Biochemical Functions panel
-var LabelGenesWithSameFunction = React.createClass({
-    render: function() {
-        return <span>Gene(s) with same function (<span style={{fontWeight: 'normal'}}><a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol</span>):</span>;
-    }
-});
-var LabelIdentifiedFunction = React.createClass({
-    render: function() {
-        return <span>Identified Function (<span style={{fontWeight: 'normal'}}><a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a></span>):</span>;
-    }
-});
+// HTML labels for Biochemical Functions panel B
 var LabelHPOIDs = React.createClass({
     render: function() {
-        return <span>Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href={external_url_map['PhenoExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO lookup at Bioportal</a>)</span>:</span>
+        return <span>Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO lookup at PhenExplorer</a>)</span>:</span>
+    }
+});
+var LabelPhenotypesFT = React.createClass({
+    render: function() {
+        return <span>Phenotype(s) <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>
     }
 });
 
@@ -1169,7 +1183,7 @@ var TypeProteinInteractions = function() {
     }
     return (
         <div className="row experimental-data-form">
-            <Input type="text" ref="interactingGenes" label="Interacting gene(s) (HGNC):" value={proteinInteractions.interactingGenes} placeholder="e.g. DICER1"
+            <Input type="text" ref="interactingGenes" label={<LabelInteractingGenes />} value={proteinInteractions.interactingGenes} placeholder="e.g. DICER1"
                 error={this.getFormError('interactingGenes')} clearError={this.clrFormErrors.bind(null, 'interactingGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <Input type="select" ref="interactionType" label="Interaction Type:" defaultValue="none" value={proteinInteractions.interactionType} handleChange={this.handleChange}
@@ -1209,6 +1223,13 @@ var TypeProteinInteractions = function() {
         </div>
     );
 }
+
+// HTML labels for Protein Interactions panel
+var LabelInteractingGenes = React.createClass({
+    render: function() {
+        return <span>Interacting gene(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>;
+    }
+});
 
 // Expression type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
@@ -1286,7 +1307,7 @@ var TypeExpressionB = function() {
 // HTML labels for Expression panel.
 var LabelUberonId = React.createClass({
     render: function() {
-        return <span>Organ of tissue relevant to disease, in which gene expression is examined (<span style={{fontWeight: 'normal'}}><a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID</span>):</span>;
+        return <span>Organ of tissue relevant to disease, in which gene expression is examined <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID)</span>:</span>;
     }
 });
 
@@ -1315,10 +1336,10 @@ var TypeFunctionalAlteration = function() {
                 <option>Patient cells</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <Input type="textarea" ref="funcalt.patientCellType" label={<LabelPatientCellType />} value={functionalAlteration.patientCellType} placeholder="e.g. 0000001"
+            <Input type="textarea" ref="funcalt.patientCellType" label={<LabelFAPatientCellType />} value={functionalAlteration.patientCellType} placeholder="e.g. 0000001"
                 error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')} rows="1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize" inputDisabled={this.state.functionalAlterationPCEE != 'Patient cells'} required={this.state.functionalAlterationPCEE == 'Patient cells'} />
-            <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. 0000001"
+            <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<LabelFAEngineeredEquivalent />} value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. 0000001"
                 error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')} rows="1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize" inputDisabled={this.state.functionalAlterationPCEE != 'Engineered equivalent'} required={this.state.functionalAlterationPCEE == 'Engineered equivalent'} />
             <Input type="text" ref="normalFunctionOfGene" label={<LabelNormalFunctionOfGene />} value={functionalAlteration.normalFunctionOfGene} placeholder=""
@@ -1338,19 +1359,19 @@ var TypeFunctionalAlteration = function() {
 }
 
 // HTML labels for Functional Alterations panel.
-var LabelPatientCellType = React.createClass({
+var LabelFAPatientCellType = React.createClass({
     render: function() {
-        return <span>Patient cell type (<span style={{fontWeight: 'normal'}}><a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a></span>)</span>;
+        return <span>Patient cell type <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a> ID)</span>:</span>;
     }
 });
-var LabelEngineeredEquivalent = React.createClass({
+var LabelFAEngineeredEquivalent = React.createClass({
     render: function() {
-        return <span>Engineered equivalent cell type/line (<span style={{fontWeight: 'normal'}}><a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a></span>)</span>;
+        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a> ID)</span>:</span>;
     }
 });
 var LabelNormalFunctionOfGene = React.createClass({
     render: function() {
-        return <span>Normal function of gene/gene product (<span style={{fontWeight: 'normal'}}><a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a></span>):</span>;
+        return <span>Normal function of gene/gene product <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> ID)</span>:</span>;
     }
 });
 
@@ -1406,7 +1427,7 @@ var TypeModelSystems = function() {
                 <option>Sheep (Ovis aries) 9940</option>
                 <option>Zebrafish (Daanio rerio) 7955</option>
             </Input>
-            <Input type="textarea" ref="cellCulture" label="Cell-culture type/line (EFO ID):" value={modelSystems.cellCulture} placeholder=""
+            <Input type="textarea" ref="cellCulture" label={<LabelCellCulture />} value={modelSystems.cellCulture} placeholder=""
                 error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')} rows="1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize" inputDisabled={this.state.modelSystemsNHACCM != 'Engineered equivalent'} required={this.state.modelSystemsNHACCM == 'Engineered equivalent'} />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={modelSystems.descriptionOfGeneAlteration}
@@ -1415,13 +1436,13 @@ var TypeModelSystems = function() {
             <Input type="text" ref="model.phenotypeHPOObserved" label={<LabelPhenotypeObserved />} value={modelSystems.phenotypeHPOObserved} placeholder="e.g. HP:0010704"
                 error={this.getFormError('model.phenotypeHPOObserved')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPOObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenotypeFreetextObserved" label="Phenotype observed in model system:" rows="5" value={modelSystems.phenotypeFreetextObserved}
+            <Input type="textarea" ref="phenotypeFreetextObserved" label={<LabelPhenotypeObservedFT />} rows="5" value={modelSystems.phenotypeFreetextObserved}
                 error={this.getFormError('phenotypeFreetextObserved')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreetextObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="text" ref="model.phenotypeHPO" label={<LabelPatientPhenotype />} value={modelSystems.phenotypeHPO} placeholder="e.g. HP:0010704"
                 error={this.getFormError('model.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenotypeFreeText" label="Patient phenotype:" rows="5" value={modelSystems.phenotypeFreeText}
+            <Input type="textarea" ref="phenotypeFreeText" label={<LabelPatientPhenotypeFT />} rows="5" value={modelSystems.phenotypeFreeText}
                 error={this.getFormError('phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="textarea" ref="explanation" label="Explanation of how model system phenotype is similar to phenotype observed in patient:" rows="5" value={modelSystems.explanation}
@@ -1435,14 +1456,29 @@ var TypeModelSystems = function() {
 }
 
 // HTML labels for Model Systems panel.
-var LabelPatientPhenotype = React.createClass({
+var LabelCellCulture = React.createClass({
     render: function() {
-        return <span>Patient phenotype (<span style={{fontWeight: 'normal'}}><a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID</span>):</span>;
+        return <span>Cell-culture type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a> ID)</span>:</span>;
     }
 });
 var LabelPhenotypeObserved = React.createClass({
     render: function() {
-        return <span>Phenotype observed in model system (<span style={{fontWeight: 'normal'}}><a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID</span>):</span>;
+        return <span>Phenotype observed in model system <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID)</span>:</span>;
+    }
+});
+var LabelPhenotypeObservedFT = React.createClass({
+    render: function() {
+        return <span>Phenotype observed in model system <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>;
+    }
+});
+var LabelPatientPhenotype = React.createClass({
+    render: function() {
+        return <span>Patient phenotype <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID)</span>:</span>;
+    }
+});
+var LabelPatientPhenotypeFT = React.createClass({
+    render: function() {
+        return <span>Patient phenotype <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>;
     }
 });
 
@@ -1473,19 +1509,19 @@ var TypeRescue = function() {
                 <option>Patient cells</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <Input type="textarea" ref="rescue.patientCellType" label={<LabelPatientCellType />} value={rescue.patientCellType} placeholder=""
+            <Input type="textarea" ref="rescue.patientCellType" label={<LabelRPatientCellType />} value={rescue.patientCellType} placeholder=""
                 error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')} rows="1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize" inputDisabled={this.state.rescuePCEE != 'Patient cells'} required={this.state.rescuePCEE == 'Patient cells'} />
-            <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<LabelEngineeredEquivalent />} value={rescue.engineeredEquivalentCellType} placeholder=""
+            <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<LabelREngineeredEquivalent />} value={rescue.engineeredEquivalentCellType} placeholder=""
                 error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')} rows="1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize" inputDisabled={this.state.rescuePCEE != 'Engineered equivalent'} required={this.state.rescuePCEE == 'Engineered equivalent'} />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={rescue.descriptionOfGeneAlteration}
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <Input type="text" ref="rescue.phenotypeHPO" label="Phenotype to rescue (HPO)" value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704"
+            <Input type="text" ref="rescue.phenotypeHPO" label={<LabelPhenotypeRescue />} value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704"
                 error={this.getFormError('rescue.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-            <Input type="textarea" ref="phenotypeFreeText" label="Phenotype to rescue:" rows="5" value={rescue.phenotypeFreeText}
+            <Input type="textarea" ref="phenotypeFreeText" label={<LabelPhenotypeRescueFT />} rows="5" value={rescue.phenotypeFreeText}
                 error={this.getFormError('phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="textarea" ref="rescueMethod" label="Description of method used to rescue:" rows="5" value={rescue.rescueMethod}
@@ -1509,6 +1545,28 @@ var TypeRescue = function() {
         </div>
     );
 }
+
+// HTML labels for Rescue panel
+var LabelRPatientCellType = React.createClass({
+    render: function() {
+        return <span>Patient cell type <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a> ID)</span>:</span>;
+    }
+});
+var LabelREngineeredEquivalent = React.createClass({
+    render: function() {
+        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a> ID)</span>:</span>;
+    }
+});
+var LabelPhenotypeRescue = React.createClass({
+    render: function() {
+        return <span>Phenotype to rescue <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID)</span>:</span>;
+    }
+});
+var LabelPhenotypeRescueFT = React.createClass({
+    render: function() {
+        return <span>Phenotype to rescue <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>;
+    }
+});
 
 // Display the Family variant panel. The number of copies depends on the variantCount state variable.
 var ExperimentalDataVariant = function() {
