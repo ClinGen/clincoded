@@ -23,6 +23,7 @@ var InputMixin = form.InputMixin;
 var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
+var external_url_map = globals.external_url_map;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 5;
@@ -373,13 +374,17 @@ var ExperimentalCuration = React.createClass({
         if (terms && terms.length && _(terms).any(function(id) { return id === null; })) {
             // term is bad
             formError = true;
-            this.setFormErrors(formField, errorMsgs[type]['invalid']);
+            if (limit == 1) {
+                this.setFormErrors(formField, errorMsgs[type]['invalid1']);
+            } else {
+                this.setFormErrors(formField, errorMsgs[type]['invalid']);
+            }
         }
         if (limit !== 0 && terms.length > limit) {
             // number of terms more than specified limit
             formError = true;
             if (limit == 1) {
-                this.setFormErrors(formField, errorMsgs[type]['limit']);
+                this.setFormErrors(formField, errorMsgs[type]['limit1']);
             } else {
                 this.setFormErrors(formField, errorMsgs[type]['limit']);
             }
@@ -1135,17 +1140,17 @@ var TypeBiochemicalFunctionB = function() {
 // HTML labels for Biochemical Functions panel
 var LabelGenesWithSameFunction = React.createClass({
     render: function() {
-        return <span>Gene(s) with same function (<span style={{fontWeight: 'normal'}}><a href="http://www.genenames.org/" target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol</span>):</span>;
+        return <span>Gene(s) with same function (<span style={{fontWeight: 'normal'}}><a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol</span>):</span>;
     }
 });
 var LabelIdentifiedFunction = React.createClass({
     render: function() {
-        return <span>Identified Function (<span style={{fontWeight: 'normal'}}><a href="http://bit.ly/1fxDvhV" target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a></span>):</span>;
+        return <span>Identified Function (<span style={{fontWeight: 'normal'}}><a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a></span>):</span>;
     }
 });
 var LabelHPOIDs = React.createClass({
     render: function() {
-        return <span>Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://bioportal.bioontology.org/ontologies/HP?p=classes&conceptid=root" target="_blank" title="Bioportal Human Phenotype Ontology in a new tab">HPO lookup at Bioportal</a>)</span>:</span>
+        return <span>Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href={external_url_map['PhenoExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO lookup at Bioportal</a>)</span>:</span>
     }
 });
 
@@ -1281,7 +1286,7 @@ var TypeExpressionB = function() {
 // HTML labels for Expression panel.
 var LabelUberonId = React.createClass({
     render: function() {
-        return <span>Organ of tissue relevant to disease, in which gene expression is examined (<span style={{fontWeight: 'normal'}}><a href="http://uberon.github.io/" target="_blank" title="Open Uberon in a new tab">Uberon</a> ID</span>):</span>;
+        return <span>Organ of tissue relevant to disease, in which gene expression is examined (<span style={{fontWeight: 'normal'}}><a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID</span>):</span>;
     }
 });
 
@@ -1335,17 +1340,17 @@ var TypeFunctionalAlteration = function() {
 // HTML labels for Functional Alterations panel.
 var LabelPatientCellType = React.createClass({
     render: function() {
-        return <span>Patient cell type (<span style={{fontWeight: 'normal'}}><a href="http://uberon.github.io/" target="_blank" title="Open Uberon in a new tab">EFO</a></span>)</span>;
+        return <span>Patient cell type (<span style={{fontWeight: 'normal'}}><a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a></span>)</span>;
     }
 });
 var LabelEngineeredEquivalent = React.createClass({
     render: function() {
-        return <span>Engineered equivalent cell type/line (<span style={{fontWeight: 'normal'}}><a href="http://uberon.github.io/" target="_blank" title="Open Uberon in a new tab">EFO</a></span>)</span>;
+        return <span>Engineered equivalent cell type/line (<span style={{fontWeight: 'normal'}}><a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a></span>)</span>;
     }
 });
 var LabelNormalFunctionOfGene = React.createClass({
     render: function() {
-        return <span>Normal function of gene/gene product (<span style={{fontWeight: 'normal'}}><a href="http://bit.ly/1fxDvhV" target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a></span>):</span>;
+        return <span>Normal function of gene/gene product (<span style={{fontWeight: 'normal'}}><a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a></span>):</span>;
     }
 });
 
@@ -1401,7 +1406,7 @@ var TypeModelSystems = function() {
                 <option>Sheep (Ovis aries) 9940</option>
                 <option>Zebrafish (Daanio rerio) 7955</option>
             </Input>
-            <Input type="textarea" ref="cellCulture" label="Cell-culture type/line:" value={modelSystems.cellCulture} placeholder=""
+            <Input type="textarea" ref="cellCulture" label="Cell-culture type/line (EFO ID):" value={modelSystems.cellCulture} placeholder=""
                 error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')} rows="1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize" inputDisabled={this.state.modelSystemsNHACCM != 'Engineered equivalent'} required={this.state.modelSystemsNHACCM == 'Engineered equivalent'} />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={modelSystems.descriptionOfGeneAlteration}
@@ -1432,12 +1437,12 @@ var TypeModelSystems = function() {
 // HTML labels for Model Systems panel.
 var LabelPatientPhenotype = React.createClass({
     render: function() {
-        return <span>Patient phenotype (<span style={{fontWeight: 'normal'}}><a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID</span>):</span>;
+        return <span>Patient phenotype (<span style={{fontWeight: 'normal'}}><a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID</span>):</span>;
     }
 });
 var LabelPhenotypeObserved = React.createClass({
     render: function() {
-        return <span>Phenotype observed in model system (<span style={{fontWeight: 'normal'}}><a href="http://compbio.charite.de/phenexplorer/" target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID</span>):</span>;
+        return <span>Phenotype observed in model system (<span style={{fontWeight: 'normal'}}><a href={external_url_map['PhenExplorer']} target="_blank" title="Open PhenExplorer in a new tab">HPO</a> ID</span>):</span>;
     }
 });
 
@@ -1557,7 +1562,7 @@ var ExperimentalDataVariant = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+        return <span><a href={external_url_map['PubMed']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
     }
 });
 
