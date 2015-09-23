@@ -527,6 +527,7 @@ var FamilyCuration = React.createClass({
                     // Family doesn't have any variants
                     return Promise.resolve(null);
                 }).then(individual => {
+                    // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the family.
                     return this.saveAssessment(this.cv.assessmentTracker, this.state.gdm, this.state.family).then(assessmentInfo => {
                         return Promise.resolve({individual: individual, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
                     });
@@ -590,7 +591,10 @@ var FamilyCuration = React.createClass({
                             group.familyIncluded.push(newFamily['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/groups/' + this.state.group.uuid, group);
+                            promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(data => {
+                                // The next step needs the family, not the group it was written to
+                                return newFamily;
+                            });
                         } else {
                             // Not part of a group, so add the family to the annotation instead.
                             var annotation = curator.flatten(this.state.annotation);
@@ -602,20 +606,23 @@ var FamilyCuration = React.createClass({
                             annotation.families.push(newFamily['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
+                            promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                                // The next step needs the family, not the group it was written to
+                                return newFamily;
+                            });
                         }
                     } else {
                         promise = Promise.resolve(null);
                     }
                     return promise;
-                }).then(data => {
+                }).then(newFamily => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut && !initvar) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                     } else {
-                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + savedFamilies[0].uuid + '&annotation=' + this.state.annotation.uuid + (initvar ? '&initvar' : '') + (hadvar ? '&hadvar' : ''));
+                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + newFamily.uuid + '&annotation=' + this.state.annotation.uuid + (initvar ? '&initvar' : '') + (hadvar ? '&hadvar' : ''));
                     }
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);

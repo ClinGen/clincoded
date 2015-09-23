@@ -107,9 +107,11 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
         return new Promise(function(resolve, reject) {
             var assessmentPromise;
 
-            if (assessmentTracker.original && (newAssessment.value !== assessmentTracker.original.value)) {
+            if (assessment || (assessmentTracker.original && (newAssessment.value !== assessmentTracker.original.value))) {
+                var assessmentUuid = assessment ? assessment.uuid : assessmentTracker.original.uuid;
+
                 // Updating an existing assessment, and the value of the assessment has changed
-                assessmentPromise = this.putRestData('/assessments/' + assessmentTracker.original.uuid, newAssessment).then(data => {
+                assessmentPromise = this.putRestData('/assessments/' + assessmentUuid, newAssessment).then(data => {
                     return Promise.resolve({assessment: data['@graph'][0], update: true});
                 });
             } else if (!assessmentTracker.original && newAssessment.value !== DEFAULT_VALUE) {
