@@ -596,6 +596,7 @@ var ExperimentalCuration = React.createClass({
                 // prepare experimental object for post/putting to db
                 if (newExperimental.evidenceType == 'Biochemical function') {
                     // newExperimental object for type Rescue
+                    newExperimental.biochemicalFunction = {};
                     var BFidentifiedFunction = this.getFormValue('identifiedFunction');
                     if (BFidentifiedFunction) {
                         newExperimental.biochemicalFunction.identifiedFunction = BFidentifiedFunction;
@@ -609,7 +610,7 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.biochemicalFunction.evidenceForFunctionInPaper = BFevidenceForFunctionInPaper;
                     }
                     if (this.state.experimentalSubtype.charAt(0) == 'A') {
-                        newExperimental.biochemicalFunction = {geneWithSameFunctionSameDisease: {}};
+                        newExperimental.biochemicalFunction['geneWithSameFunctionSameDisease'] = {};
                         var BFgenes = geneSymbols;
                         if (BFgenes) {
                             newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes = BFgenes;
@@ -629,7 +630,7 @@ var ExperimentalCuration = React.createClass({
                             newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = BFGWSFSDevidenceInPaper;
                         }
                     } else if (this.state.experimentalSubtype.charAt(0) == 'B') {
-                        newExperimental.biochemicalFunction = {geneFunctionConsistentWithPhenotype: {}};
+                        newExperimental.biochemicalFunction['geneFunctionConsistentWithPhenotype'] = {};
                         var BFphenotypeHPO = hpoIDs;
                         if (BFphenotypeHPO) {
                             newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO = BFphenotypeHPO;
@@ -674,12 +675,13 @@ var ExperimentalCuration = React.createClass({
                     }
                 } else if (newExperimental.evidenceType == 'Expression') {
                     // newExperimental object for type Rescue
+                    newExperimental.expression = {};
                     var EorganOfTissue = this.getFormValue('organOfTissue');
                     if (EorganOfTissue) {
                         newExperimental.expression.organOfTissue = EorganOfTissue;
                     }
                     if (this.state.experimentalSubtype.charAt(0) == 'A') {
-                        newExperimental.expression = {normalExpression: {}};
+                        newExperimental.expression['normalExpression'] = {};
                         var EexpressedInTissue = this.getFormValue('normalExpression.expressedInTissue');
                         newExperimental.expression.normalExpression.expressedInTissue = EexpressedInTissue;
                         var ENEevidence = this.getFormValue('normalExpression.evidence');
@@ -691,7 +693,7 @@ var ExperimentalCuration = React.createClass({
                             newExperimental.expression.normalExpression.evidenceInPaper = ENEevidenceInPaper;
                         }
                     } else if (this.state.experimentalSubtype.charAt(0) == 'B') {
-                        newExperimental.expression = {alteredExpression: {}};
+                        newExperimental.expression['alteredExpression'] = {};
                         var EexpressedInPatients = this.getFormValue('alteredExpression.expressedInPatients');
                         newExperimental.expression.alteredExpression.expressedInPatients = EexpressedInPatients;
                         var EAEevidence = this.getFormValue('alteredExpression.evidence');
