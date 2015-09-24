@@ -68,7 +68,8 @@ var FamilyCuration = React.createClass({
 
     cv: {
         assessmentTracker: null, // Tracking object for a single assessment
-        filledSegregations: {} // Tracks segregation fields with values filled in
+        filledSegregations: {}, // Tracks segregation fields with values filled in
+        segregationAssessed: false // TRUE if segregation has been assessed by self or others
     },
 
     // Keeps track of values from the query string
@@ -260,7 +261,13 @@ var FamilyCuration = React.createClass({
 
                     // Find the current user's segregation assessment from the segregation's assessment list
                     if (segregation.assessments && segregation.assessments.length) {
+                        // Find the assessment belonging to the logged-in curator, if any.
                         userAssessment = Assessments.userAssessment(segregation.assessments, user && user.uuid);
+
+                        // See if any assessments are non-default
+                        this.cv.segregationAssessed = _(segregation.assessments).find(function(assessment) {
+                            return assessment.value !== Assessments.DEFAULT_VALUE;
+                        });
                     }
 
                     // Fill in the segregation filled object so we know whether to enable or disable the assessment dropdown
@@ -832,8 +839,10 @@ var FamilyCuration = React.createClass({
         value = this.getFormValue('additionalinfofamily');
         if (value) { newFamily.additionalInformation = value; }
 
-        // Fill in the segregation fields to the family.
-        this.createSegregation(newFamily, familyVariants);
+        // Fill in the segregation fields to the family, if there was a form (no form if assessed)
+        if (!this.cv.segregationAssessed) {
+            this.createSegregation(newFamily, familyVariants);
+        }
 
         return newFamily;
     },
@@ -911,9 +920,17 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title="Family — Segregation" open>
-                                                {FamilySegregation.call(this)}
-                                            </Panel>
+                                            {!this.cv.segregationAssessed ?
+                                                <Panel title="Family — Segregation" open>
+                                                    {FamilySegregation.call(this)}
+                                                </Panel>
+                                            :
+                                                <div>{family.segregation ? <div>{FamilySegregationViewer(family.segregation)}</div> : null}</div>
+                                            }
+                                        </PanelGroup>
+                                        <PanelGroup accordion>
+                                            <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled}
+                                                updateValue={this.updateAssessmentValue.bind(null, this.cv.assessmentTracker)} />
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Family — Variant(s) Segregating with Proband" open>
@@ -1213,8 +1230,6 @@ var FamilySegregation = function() {
             </Input>
             <Input type="textarea" ref="SEGaddedsegregationinfo" label="Additional Segregation Information:" rows="5" value={segregation.additionalInformation} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled}
-                updateValue={this.updateAssessmentValue.bind(null, this.cv.assessmentTracker)} />
         </div>
     );
 };
