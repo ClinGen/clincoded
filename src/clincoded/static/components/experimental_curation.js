@@ -418,6 +418,12 @@ var ExperimentalCuration = React.createClass({
     validateFormTerms: function(formError, type, terms, formField, limit) {
         limit = typeof limit !== 'undefined' ? limit : 0;
         var errorMsgs = {
+            'clIDs': {
+                'invalid1': "Use CL Ontology ID (e.g. CL_0000057)",
+                'invalid': "Use CL Ontologys (e.g. CL_0000057) separated by commas",
+                'limit1': "Enter only one CL Ontology ID",
+                'limit': "Enter only " + limit + " CL Ontology IDs"
+            },
             'efoIDs': {
                 'invalid1': "Use EFO ID (e.g. 0000001)",
                 'invalid': "Use EFO IDs (e.g. 0000001) separated by commas",
@@ -479,7 +485,7 @@ var ExperimentalCuration = React.createClass({
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault() && this.validateVariants()) {
             var groupGenes;
-            var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, efoIDs;
+            var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, clIDs;
             var formError = false;
 
             if (this.state.experimentalType == 'Biochemical function') {
@@ -519,13 +525,13 @@ var ExperimentalCuration = React.createClass({
             }
             else if (this.state.experimentalType == 'Functional alteration of gene/gene product') {
                 // Check form for Functional Alterations panel
-                // check efoIDs depending on form selection
+                // check clIDs depending on form selection
                 if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Patient cells') {
-                    efoIDs = curator.capture.efoids(this.getFormValue('funcalt.patientCellType'));
-                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.patientCellType', 1);
+                    clIDs = curator.capture.clids(this.getFormValue('funcalt.patientCellType'));
+                    formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'funcalt.patientCellType', 1);
                 } else if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Engineered equivalent') {
-                    efoIDs = curator.capture.efoids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
-                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.engineeredEquivalentCellType', 1);
+                    clIDs = curator.capture.clids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
+                    formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'funcalt.engineeredEquivalentCellType', 1);
                 }
                 // check goSlimIDs
                 goSlimIDs = curator.capture.goslims(this.getFormValue('normalFunctionOfGene'));
@@ -533,10 +539,10 @@ var ExperimentalCuration = React.createClass({
             }
             else if (this.state.experimentalType == 'Model systems') {
                 // Check form for Model Systems panel
-                // check efoIDs depending on form selection
+                // check clIDs depending on form selection
                 if (this.getFormValue('animalOrCellCulture') === 'Engineered equivalent') {
-                    efoIDs = curator.capture.efoids(this.getFormValue('cellCulture'));
-                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.cellCulture', 1);
+                    clIDs = curator.capture.clids(this.getFormValue('cellCulture'));
+                    formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'funcalt.cellCulture', 1);
                 }
                 // check hpoIDs
                 hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPO'));
@@ -547,13 +553,13 @@ var ExperimentalCuration = React.createClass({
             }
             else if (this.state.experimentalType == 'Rescue') {
                 // Check form for Rescue panel
-                // check efoIDs depending on form selection
+                // check clIDs depending on form selection
                 if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Patient cells') {
-                    efoIDs = curator.capture.efoids(this.getFormValue('rescue.patientCellType'));
-                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'rescue.patientCellType', 1);
+                    clIDs = curator.capture.clids(this.getFormValue('rescue.patientCellType'));
+                    formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'rescue.patientCellType', 1);
                 } else if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Engineered equivalent') {
-                    efoIDs = curator.capture.efoids(this.getFormValue('rescue.engineeredEquivalentCellType'));
-                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'rescue.engineeredEquivalentCellType', 1);
+                    clIDs = curator.capture.clids(this.getFormValue('rescue.engineeredEquivalentCellType'));
+                    formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'rescue.engineeredEquivalentCellType', 1);
                 }
                 // check hpoIDs
                 hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
@@ -1426,13 +1432,13 @@ var TypeFunctionalAlteration = function() {
                 <option>Patient cells</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <Input type="textarea" ref="funcalt.patientCellType" label={<LabelFAPatientCellType />} value={functionalAlteration.patientCellType} placeholder="e.g. 0000001"
+            <Input type="textarea" ref="funcalt.patientCellType" label={<LabelFAPatientCellType />} value={functionalAlteration.patientCellType} placeholder="e.g. CL_0000057"
                 error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')} rows="1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize" inputDisabled={this.state.functionalAlterationPCEE != 'Patient cells'} required={this.state.functionalAlterationPCEE == 'Patient cells'} />
-            <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<LabelFAEngineeredEquivalent />} value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. 0000001"
+            <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<LabelFAEngineeredEquivalent />} value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. CL_0000057"
                 error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')} rows="1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize" inputDisabled={this.state.functionalAlterationPCEE != 'Engineered equivalent'} required={this.state.functionalAlterationPCEE == 'Engineered equivalent'} />
-            <Input type="text" ref="normalFunctionOfGene" label={<LabelNormalFunctionOfGene />} value={functionalAlteration.normalFunctionOfGene} placeholder=""
+            <Input type="text" ref="normalFunctionOfGene" label={<LabelNormalFunctionOfGene />} value={functionalAlteration.normalFunctionOfGene} placeholder="e.g. GO:0008150"
                 error={this.getFormError('normalFunctionOfGene')} clearError={this.clrFormErrors.bind(null, 'normalFunctionOfGene')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={functionalAlteration.descriptionOfGeneAlteration}
@@ -1451,12 +1457,12 @@ var TypeFunctionalAlteration = function() {
 // HTML labels for Functional Alterations panel.
 var LabelFAPatientCellType = React.createClass({
     render: function() {
-        return <span>Patient cell type <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a> ID)</span>:</span>;
+        return <span>Patient cell type <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
     }
 });
 var LabelFAEngineeredEquivalent = React.createClass({
     render: function() {
-        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a> ID)</span>:</span>;
+        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
     }
 });
 var LabelNormalFunctionOfGene = React.createClass({
@@ -1517,7 +1523,7 @@ var TypeModelSystems = function() {
                 <option>Sheep (Ovis aries) 9940</option>
                 <option>Zebrafish (Daanio rerio) 7955</option>
             </Input>
-            <Input type="textarea" ref="cellCulture" label={<LabelCellCulture />} value={modelSystems.cellCulture} placeholder=""
+            <Input type="textarea" ref="cellCulture" label={<LabelCellCulture />} value={modelSystems.cellCulture} placeholder="e.g. CL_0000057"
                 error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')} rows="1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize" inputDisabled={this.state.modelSystemsNHACCM != 'Engineered equivalent'} required={this.state.modelSystemsNHACCM == 'Engineered equivalent'} />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={modelSystems.descriptionOfGeneAlteration}
@@ -1548,7 +1554,7 @@ var TypeModelSystems = function() {
 // HTML labels for Model Systems panel.
 var LabelCellCulture = React.createClass({
     render: function() {
-        return <span>Cell-culture type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a> ID)</span>:</span>;
+        return <span>Cell-culture type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
     }
 });
 var LabelPhenotypeObserved = React.createClass({
@@ -1599,10 +1605,10 @@ var TypeRescue = function() {
                 <option>Patient cells</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <Input type="textarea" ref="rescue.patientCellType" label={<LabelRPatientCellType />} value={rescue.patientCellType} placeholder=""
+            <Input type="textarea" ref="rescue.patientCellType" label={<LabelRPatientCellType />} value={rescue.patientCellType} placeholder="e.g. CL_0000057"
                 error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')} rows="1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize" inputDisabled={this.state.rescuePCEE != 'Patient cells'} required={this.state.rescuePCEE == 'Patient cells'} />
-            <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<LabelREngineeredEquivalent />} value={rescue.engineeredEquivalentCellType} placeholder=""
+            <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<LabelREngineeredEquivalent />} value={rescue.engineeredEquivalentCellType} placeholder="e.g. CL_0000057"
                 error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')} rows="1"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize" inputDisabled={this.state.rescuePCEE != 'Engineered equivalent'} required={this.state.rescuePCEE == 'Engineered equivalent'} />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:" rows="5" value={rescue.descriptionOfGeneAlteration}
@@ -1639,12 +1645,12 @@ var TypeRescue = function() {
 // HTML labels for Rescue panel
 var LabelRPatientCellType = React.createClass({
     render: function() {
-        return <span>Patient cell type <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a> ID)</span>:</span>;
+        return <span>Patient cell type <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
     }
 });
 var LabelREngineeredEquivalent = React.createClass({
     render: function() {
-        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">EFO</a> ID)</span>:</span>;
+        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
     }
 });
 var LabelPhenotypeRescue = React.createClass({

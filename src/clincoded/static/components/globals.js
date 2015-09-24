@@ -147,7 +147,8 @@ module.exports.external_url_map = {
     'ClinVar': 'http://www.ncbi.nlm.nih.gov/clinvar/',
     'HPOBrowser': 'http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000118',
     'Uberon': 'http://uberon.github.io/',
-    'GO_Slim': 'http://bit.ly/1fxDvhV'
+    'GO_Slim': 'http://bit.ly/1fxDvhV',
+    'CL': 'http://www.ontobee.org/browser/index.php?o=CL'
 };
 
 
