@@ -139,11 +139,9 @@ var FamilyCuration = React.createClass({
                 value = value === 'none' ? '' : value;
             }
             if (value !== '') {
-                console.log('non-empty');
                 // A segregation field has a value; remember this field
                 this.cv.filledSegregations[ref] = true;
             } else {
-                console.log('empty');
                 // A segregation field lost its value; if we had remembered it, forget it
                 if (this.cv.filledSegregations[ref]) {
                     delete this.cv.filledSegregations[ref];
