@@ -1039,7 +1039,7 @@ module.exports.capture = {
 
     // Find all the comma-separated EFO ID occurrences. Return all valid EFO IDs in an array.
     efoids: function(s) {
-        return captureBase(s, /^\s*(\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*(EFO_\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.

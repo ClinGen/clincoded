@@ -51,7 +51,7 @@ var ExperimentalCuration = React.createClass({
             experimentalNameVisible: false,  // Is the Experimental Data Name field visible?
             experimentalName: '', // Currently entered name of the Experimental Data entry
             experimentalType: '',  // Currently entered type of the Experimental Data entry
-            experimentalTypeDescription: '', // Description of the selected Experimental Data type
+            experimentalTypeDescription: [], // Description of the selected Experimental Data type
             experimentalSubtype: '', // Currently entered subtype of the Experimental Data entry (if applicable)
             geneImplicatedWithDisease: false, // checkbox state values
             geneImplicatedInDisease: false,
@@ -76,16 +76,29 @@ var ExperimentalCuration = React.createClass({
         };
     },
 
-    getExperimentalTypeDescription: function(item) {
+    getExperimentalTypeDescription: function(item, subitem) {
+        subitem = typeof subitem !== 'undefined' ? subitem : '';
         var experimentalTypeDescriptionList = {
-            'Biochemical function': 'The gene product performs a biochemical function shared with other known genes in the disease of interest, or consistent with the phenotype',
-            'Protein interactions': 'The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest',
-            'Expression': 'The gene is expressed in tissues relevant to the disease of interest and/or is altered in expression in patients who have the disease',
-            'Functional alteration of gene/gene product': 'The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents',
-            'Model systems': 'Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state',
-            'Rescue': 'The cellular phenotype in patient-derived cells or engineered equivalents can be rescued by addition of the wild-type gene product'
+            'Biochemical function': [
+                'A. The gene product performs a biochemical function shared with other known genes in the disease of interest',
+                'B. The gene product is consistent with the observed phenotype(s)'
+            ],
+            'Protein interactions': ['The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest'],
+            'Expression': [
+                'The gene is expressed in tissues relevant to the disease of interest',
+                'The gene is altered in expression in patients who have the disease'
+            ],
+            'Functional alteration of gene/gene product': ['The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents'],
+            'Model systems': ['Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state'],
+            'Rescue': ['The cellular phenotype in patient-derived cells or engineered equivalents can be rescued by addition of the wild-type gene product']
         };
-        return experimentalTypeDescriptionList[item];
+        if (subitem == 'A') {
+            return [experimentalTypeDescriptionList[item][0]];
+        } else if (subitem == 'B') {
+            return [experimentalTypeDescriptionList[item][1]];
+        } else {
+            return experimentalTypeDescriptionList[item];
+        }
     },
 
     // Handle value changes in genotyping method 1
@@ -103,6 +116,7 @@ var ExperimentalCuration = React.createClass({
             if (tempExperimentalType == 'Biochemical function' || tempExperimentalType == 'Expression') {
                 this.setState({
                     experimentalSubtype: '',
+                    experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType),
                     experimentalNameVisible: false
                 });
             } else {
@@ -112,9 +126,15 @@ var ExperimentalCuration = React.createClass({
             var tempExperimentalSubtype = this.refs[ref].getValue();
             this.setState({experimentalSubtype: tempExperimentalSubtype});
             if (tempExperimentalSubtype == 'none' || tempExperimentalSubtype === '') {
-                this.setState({experimentalNameVisible: false});
+                this.setState({
+                    experimentalTypeDescription: this.getExperimentalTypeDescription(this.state.experimentalType),
+                    experimentalNameVisible: false
+                });
             } else {
-                this.setState({experimentalNameVisible: true});
+                this.setState({
+                    experimentalTypeDescription: this.getExperimentalTypeDescription(this.state.experimentalType, tempExperimentalSubtype.charAt(0)),
+                    experimentalNameVisible: true
+                });
             }
         } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
             this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()});
@@ -485,7 +505,7 @@ var ExperimentalCuration = React.createClass({
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault() && this.validateVariants()) {
             var groupGenes;
-            var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, clIDs;
+            var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, clIDs, efoIDs;
             var formError = false;
 
             if (this.state.experimentalType == 'Biochemical function') {
@@ -530,8 +550,8 @@ var ExperimentalCuration = React.createClass({
                     clIDs = curator.capture.clids(this.getFormValue('funcalt.patientCellType'));
                     formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'funcalt.patientCellType', 1);
                 } else if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Engineered equivalent') {
-                    clIDs = curator.capture.clids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
-                    formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'funcalt.engineeredEquivalentCellType', 1);
+                    efoIDs = curator.capture.clids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
+                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.engineeredEquivalentCellType', 1);
                 }
                 // check goSlimIDs
                 goSlimIDs = curator.capture.goslims(this.getFormValue('normalFunctionOfGene'));
@@ -558,8 +578,8 @@ var ExperimentalCuration = React.createClass({
                     clIDs = curator.capture.clids(this.getFormValue('rescue.patientCellType'));
                     formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'rescue.patientCellType', 1);
                 } else if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Engineered equivalent') {
-                    clIDs = curator.capture.clids(this.getFormValue('rescue.engineeredEquivalentCellType'));
-                    formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'rescue.engineeredEquivalentCellType', 1);
+                    efoIDs = curator.capture.clids(this.getFormValue('rescue.engineeredEquivalentCellType'));
+                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'rescue.engineeredEquivalentCellType', 1);
                 }
                 // check hpoIDs
                 hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
@@ -573,11 +593,9 @@ var ExperimentalCuration = React.createClass({
                 var savedExperimental;
                 newExperimental.label = this.getFormValue('experimentalName');
                 newExperimental.evidenceType = this.getFormValue('experimentalType');
-
                 // prepare experimental object for post/putting to db
                 if (newExperimental.evidenceType == 'Biochemical function') {
                     // newExperimental object for type Rescue
-                    newExperimental.biochemicalFunction = {geneWithSameFunctionSameDisease: {}, geneFunctionConsistentWithPhenotype: {}};
                     var BFidentifiedFunction = this.getFormValue('identifiedFunction');
                     if (BFidentifiedFunction) {
                         newExperimental.biochemicalFunction.identifiedFunction = BFidentifiedFunction;
@@ -590,39 +608,44 @@ var ExperimentalCuration = React.createClass({
                     if (BFevidenceForFunctionInPaper) {
                         newExperimental.biochemicalFunction.evidenceForFunctionInPaper = BFevidenceForFunctionInPaper;
                     }
-                    var BFgenes = geneSymbols;
-                    if (BFgenes) {
-                        newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes = BFgenes;
-                    }
-                    var BFevidenceForOtherGenesWithSameFunction = this.getFormValue('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction');
-                    if (BFevidenceForOtherGenesWithSameFunction) {
-                        newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = BFevidenceForOtherGenesWithSameFunction;
-                    }
-                    var BFgeneImplicatedWithDisease = this.getFormValue('geneWithSameFunctionSameDisease.geneImplicatedWithDisease');
-                    newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease = BFgeneImplicatedWithDisease;
-                    var BFexplanationOfOtherGenes = this.getFormValue('geneWithSameFunctionSameDisease.explanationOfOtherGenes');
-                    if (BFexplanationOfOtherGenes) {
-                        newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = BFexplanationOfOtherGenes;
-                    }
-                    var BFGWSFSDevidenceInPaper = this.getFormValue('geneWithSameFunctionSameDisease.evidenceInPaper');
-                    if (BFGWSFSDevidenceInPaper) {
-                        newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = BFGWSFSDevidenceInPaper;
-                    }
-                    var BFphenotypeHPO = hpoIDs;
-                    if (BFphenotypeHPO) {
-                        newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO = BFphenotypeHPO;
-                    }
-                    var BFphenotypeFreeText = this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeFreeText');
-                    if (BFphenotypeFreeText) {
-                        newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText = BFphenotypeFreeText;
-                    }
-                    var BFexplanation = this.getFormValue('geneFunctionConsistentWithPhenotype.explanation');
-                    if (BFexplanation) {
-                        newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation = BFexplanation;
-                    }
-                    var BFGFCWPevidenceInPaper = this.getFormValue('geneFunctionConsistentWithPhenotype.evidenceInPaper');
-                    if (BFGFCWPevidenceInPaper) {
-                        newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = BFGFCWPevidenceInPaper;
+                    if (this.state.experimentalSubtype.charAt(0) == 'A') {
+                        newExperimental.biochemicalFunction = {geneWithSameFunctionSameDisease: {}};
+                        var BFgenes = geneSymbols;
+                        if (BFgenes) {
+                            newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes = BFgenes;
+                        }
+                        var BFevidenceForOtherGenesWithSameFunction = this.getFormValue('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction');
+                        if (BFevidenceForOtherGenesWithSameFunction) {
+                            newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = BFevidenceForOtherGenesWithSameFunction;
+                        }
+                        var BFgeneImplicatedWithDisease = this.getFormValue('geneWithSameFunctionSameDisease.geneImplicatedWithDisease');
+                        newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease = BFgeneImplicatedWithDisease;
+                        var BFexplanationOfOtherGenes = this.getFormValue('geneWithSameFunctionSameDisease.explanationOfOtherGenes');
+                        if (BFexplanationOfOtherGenes) {
+                            newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = BFexplanationOfOtherGenes;
+                        }
+                        var BFGWSFSDevidenceInPaper = this.getFormValue('geneWithSameFunctionSameDisease.evidenceInPaper');
+                        if (BFGWSFSDevidenceInPaper) {
+                            newExperimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = BFGWSFSDevidenceInPaper;
+                        }
+                    } else if (this.state.experimentalSubtype.charAt(0) == 'B') {
+                        newExperimental.biochemicalFunction = {geneFunctionConsistentWithPhenotype: {}};
+                        var BFphenotypeHPO = hpoIDs;
+                        if (BFphenotypeHPO) {
+                            newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO = BFphenotypeHPO;
+                        }
+                        var BFphenotypeFreeText = this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeFreeText');
+                        if (BFphenotypeFreeText) {
+                            newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText = BFphenotypeFreeText;
+                        }
+                        var BFexplanation = this.getFormValue('geneFunctionConsistentWithPhenotype.explanation');
+                        if (BFexplanation) {
+                            newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation = BFexplanation;
+                        }
+                        var BFGFCWPevidenceInPaper = this.getFormValue('geneFunctionConsistentWithPhenotype.evidenceInPaper');
+                        if (BFGFCWPevidenceInPaper) {
+                            newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = BFGFCWPevidenceInPaper;
+                        }
                     }
                 } else if (newExperimental.evidenceType == 'Protein interactions') {
                     // newExperimental object for type Rescue
@@ -651,30 +674,34 @@ var ExperimentalCuration = React.createClass({
                     }
                 } else if (newExperimental.evidenceType == 'Expression') {
                     // newExperimental object for type Rescue
-                    newExperimental.expression = {normalExpression: {}, alteredExpression: {}};
                     var EorganOfTissue = this.getFormValue('organOfTissue');
                     if (EorganOfTissue) {
                         newExperimental.expression.organOfTissue = EorganOfTissue;
                     }
-                    var EexpressedInTissue = this.getFormValue('normalExpression.expressedInTissue');
-                    newExperimental.expression.normalExpression.expressedInTissue = EexpressedInTissue;
-                    var ENEevidence = this.getFormValue('normalExpression.evidence');
-                    if (ENEevidence) {
-                        newExperimental.expression.normalExpression.evidence = ENEevidence;
-                    }
-                    var ENEevidenceInPaper = this.getFormValue('normalExpression.evidenceInPaper');
-                    if (ENEevidenceInPaper) {
-                        newExperimental.expression.normalExpression.evidenceInPaper = ENEevidenceInPaper;
-                    }
-                    var EexpressedInPatients = this.getFormValue('alteredExpression.expressedInPatients');
-                    newExperimental.expression.alteredExpression.expressedInPatients = EexpressedInPatients;
-                    var EAEevidence = this.getFormValue('alteredExpression.evidence');
-                    if (EAEevidence) {
-                        newExperimental.expression.alteredExpression.evidence = EAEevidence;
-                    }
-                    var EAEevidenceInPaper = this.getFormValue('alteredExpression.evidenceInPaper');
-                    if (EAEevidenceInPaper) {
-                        newExperimental.expression.alteredExpression.evidenceInPaper = EAEevidenceInPaper;
+                    if (this.state.experimentalSubtype.charAt(0) == 'A') {
+                        newExperimental.expression = {normalExpression: {}};
+                        var EexpressedInTissue = this.getFormValue('normalExpression.expressedInTissue');
+                        newExperimental.expression.normalExpression.expressedInTissue = EexpressedInTissue;
+                        var ENEevidence = this.getFormValue('normalExpression.evidence');
+                        if (ENEevidence) {
+                            newExperimental.expression.normalExpression.evidence = ENEevidence;
+                        }
+                        var ENEevidenceInPaper = this.getFormValue('normalExpression.evidenceInPaper');
+                        if (ENEevidenceInPaper) {
+                            newExperimental.expression.normalExpression.evidenceInPaper = ENEevidenceInPaper;
+                        }
+                    } else if (this.state.experimentalSubtype.charAt(0) == 'B') {
+                        newExperimental.expression = {alteredExpression: {}};
+                        var EexpressedInPatients = this.getFormValue('alteredExpression.expressedInPatients');
+                        newExperimental.expression.alteredExpression.expressedInPatients = EexpressedInPatients;
+                        var EAEevidence = this.getFormValue('alteredExpression.evidence');
+                        if (EAEevidence) {
+                            newExperimental.expression.alteredExpression.evidence = EAEevidence;
+                        }
+                        var EAEevidenceInPaper = this.getFormValue('alteredExpression.evidenceInPaper');
+                        if (EAEevidenceInPaper) {
+                            newExperimental.expression.alteredExpression.evidenceInPaper = EAEevidenceInPaper;
+                        }
                     }
                 } else if (newExperimental.evidenceType == 'Functional alteration of gene/gene product') {
                     // newExperimental object for type Rescue
@@ -1085,7 +1112,7 @@ var ExperimentalNameType = function() {
             <Input type="select" ref="experimentalType" label="Experiment type:"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
-                inputDisabled={experimental==null} required>
+                inputDisabled={this.state.experimental!=null} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Biochemical function</option>
@@ -1104,7 +1131,7 @@ var ExperimentalNameType = function() {
                 <Input type="select" ref="experimentalSubtype" label="Please select which one (A or B) you would like to curate"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                     defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
-                    inputDisabled={experimental==null} required>
+                    inputDisabled={this.state.experimental!=null} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>A. Gene(s) with same function implicated in same disease</option>
@@ -1115,7 +1142,7 @@ var ExperimentalNameType = function() {
                 <Input type="select" ref="experimentalSubtype" label="Please select which one (A or B) you would like to curate"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                     defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
-                    inputDisabled={experimental==null} required>
+                    inputDisabled={this.state.experimental!=null} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>A. Gene normally expressed in tissue relevant to the disease</option>
@@ -1470,7 +1497,7 @@ var TypeFunctionalAlteration = function() {
             <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<LabelFAEngineeredEquivalent />}
                 error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                rows="1" value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. CL_0000057"
+                rows="1" value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. EFO_0002009"
                 inputDisabled={this.state.functionalAlterationPCEE != 'Engineered equivalent'} required={this.state.functionalAlterationPCEE == 'Engineered equivalent'} />
             <Input type="text" ref="normalFunctionOfGene" label={<LabelNormalFunctionOfGene />}
                 error={this.getFormError('normalFunctionOfGene')} clearError={this.clrFormErrors.bind(null, 'normalFunctionOfGene')}
@@ -1500,7 +1527,7 @@ var LabelFAPatientCellType = React.createClass({
 });
 var LabelFAEngineeredEquivalent = React.createClass({
     render: function() {
-        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
+        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> ID)</span>:</span>;
     }
 });
 var LabelNormalFunctionOfGene = React.createClass({
@@ -1664,7 +1691,7 @@ var TypeRescue = function() {
             <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<LabelREngineeredEquivalent />}
                 error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                rows="1" value={rescue.engineeredEquivalentCellType} placeholder="e.g. CL_0000057"
+                rows="1" value={rescue.engineeredEquivalentCellType} placeholder="e.g. EFO_0002009"
                 inputDisabled={this.state.rescuePCEE != 'Engineered equivalent'} required={this.state.rescuePCEE == 'Engineered equivalent'} />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
@@ -1711,7 +1738,7 @@ var LabelRPatientCellType = React.createClass({
 });
 var LabelREngineeredEquivalent = React.createClass({
     render: function() {
-        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
+        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> ID)</span>:</span>;
     }
 });
 var LabelPhenotypeRescue = React.createClass({
