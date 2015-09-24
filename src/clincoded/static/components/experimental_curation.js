@@ -374,11 +374,10 @@ var ExperimentalCuration = React.createClass({
                             experimentalSubtype: "A. Gene normally expressed in tissue relevant to the disease",
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'A')
                         });
-                        if (!_.isEmpty(stateObj.experimental.expression.normalExpression.expressedInTissue)) {
-                            console.log(stateObj.experimental.expression.normalExpression.expressedInTissue);
+                        if (stateObj.experimental.expression.normalExpression.expressedInTissue) {
                             this.setState({expressedInTissue: stateObj.experimental.expression.normalExpression.expressedInTissue});
                         }
-                    } else if (stateObj.experimental.expression.alteredExpression) {
+                    } else if (!_.isEmpty(stateObj.experimental.expression.alteredExpression)) {
                         this.setState({
                             experimentalSubtype: "B. Altered expression in Patients",
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B')
@@ -469,8 +468,8 @@ var ExperimentalCuration = React.createClass({
                 'limit': "Enter only " + limit + " CL Ontology IDs"
             },
             'efoIDs': {
-                'invalid1': "Use EFO ID (e.g. 0000001)",
-                'invalid': "Use EFO IDs (e.g. 0000001) separated by commas",
+                'invalid1': "Use EFO ID (e.g. EFO_0002009)",
+                'invalid': "Use EFO IDs (e.g. EFO_0002009) separated by commas",
                 'limit1': "Enter only one EFO ID",
                 'limit': "Enter only " + limit + " EFO IDs"
             },
@@ -569,12 +568,12 @@ var ExperimentalCuration = React.createClass({
             }
             else if (this.state.experimentalType == 'Functional alteration of gene/gene product') {
                 // Check form for Functional Alterations panel
-                // check clIDs depending on form selection
+                // check clIDs/efoIDs depending on form selection
                 if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Patient cells') {
                     clIDs = curator.capture.clids(this.getFormValue('funcalt.patientCellType'));
                     formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'funcalt.patientCellType', 1);
                 } else if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Engineered equivalent') {
-                    efoIDs = curator.capture.clids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
+                    efoIDs = curator.capture.efoids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
                     formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.engineeredEquivalentCellType', 1);
                 }
                 // check goSlimIDs
@@ -583,31 +582,37 @@ var ExperimentalCuration = React.createClass({
             }
             else if (this.state.experimentalType == 'Model systems') {
                 // Check form for Model Systems panel
-                // check clIDs depending on form selection
+                // check efoIDs depending on form selection
                 if (this.getFormValue('animalOrCellCulture') === 'Engineered equivalent') {
-                    clIDs = curator.capture.clids(this.getFormValue('cellCulture'));
-                    formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'funcalt.cellCulture', 1);
+                    efoIDs = curator.capture.efoids(this.getFormValue('cellCulture'));
+                    formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.cellCulture', 1);
                 }
                 // check hpoIDs
-                hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPO'));
-                formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPO', 1);
+                if (this.getFormValue('model.phenotypeHPO') !== '') {
+                    hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPO'));
+                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPO', 1);
+                }
                 // check hpoIDs part 2
-                hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPOObserved'));
-                formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPOObserved', 1);
+                if (this.getFormValue('model.phenotypeHPOObserved') !== '') {
+                    hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPOObserved'));
+                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPOObserved', 1);
+                }
             }
             else if (this.state.experimentalType == 'Rescue') {
                 // Check form for Rescue panel
-                // check clIDs depending on form selection
+                // check clIDs/efoIDs depending on form selection
                 if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Patient cells') {
                     clIDs = curator.capture.clids(this.getFormValue('rescue.patientCellType'));
                     formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'rescue.patientCellType', 1);
                 } else if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Engineered equivalent') {
-                    efoIDs = curator.capture.clids(this.getFormValue('rescue.engineeredEquivalentCellType'));
+                    efoIDs = curator.capture.efoids(this.getFormValue('rescue.engineeredEquivalentCellType'));
                     formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'rescue.engineeredEquivalentCellType', 1);
                 }
                 // check hpoIDs
-                hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
-                formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'rescue.phenotypeHPO', 1);
+                if (this.getFormValue('rescue.phenotypeHPO') !== '') {
+                    hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
+                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'rescue.phenotypeHPO', 1);
+                }
             }
 
             if (!formError) {
@@ -1622,7 +1627,7 @@ var TypeModelSystems = function() {
             <Input type="textarea" ref="cellCulture" label={<LabelCellCulture />}
                 error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                rows="1" value={modelSystems.cellCulture} placeholder="e.g. CL_0000057"
+                rows="1" value={modelSystems.cellCulture} placeholder="e.g. EFO_0002009"
                 inputDisabled={this.state.modelSystemsNHACCM != 'Engineered equivalent'} required={this.state.modelSystemsNHACCM == 'Engineered equivalent'} />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
@@ -1659,7 +1664,7 @@ var TypeModelSystems = function() {
 // HTML labels for Model Systems panel.
 var LabelCellCulture = React.createClass({
     render: function() {
-        return <span>Cell-culture type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
+        return <span>Cell-culture type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> ID)</span>:</span>;
     }
 });
 var LabelPhenotypeObserved = React.createClass({
