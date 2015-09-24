@@ -85,8 +85,8 @@ var ExperimentalCuration = React.createClass({
             ],
             'Protein interactions': ['The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest'],
             'Expression': [
-                'The gene is expressed in tissues relevant to the disease of interest',
-                'The gene is altered in expression in patients who have the disease'
+                'A. The gene is expressed in tissues relevant to the disease of interest',
+                'B. The gene is altered in expression in patients who have the disease'
             ],
             'Functional alteration of gene/gene product': ['The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents'],
             'Model systems': ['Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state'],
@@ -1122,11 +1122,13 @@ var ExperimentalNameType = function() {
                 <option>Model systems</option>
                 <option>Rescue</option>
             </Input>
-            {this.state.experimentalType && this.state.experimentalType != 'none' ?
-                <div className="col-sm-7 col-sm-offset-5">
-                    <p className="alert alert-info">{this.state.experimentalTypeDescription}</p>
-                </div>
-            : null}
+            {this.state.experimentalTypeDescription.map(function(description, i) {
+                return (
+                    <div key={i} className="col-sm-7 col-sm-offset-5">
+                        <p className="alert alert-info">{description}</p>
+                    </div>
+                );
+            })}
             {this.state.experimentalType && this.state.experimentalType == 'Biochemical function' ?
                 <Input type="select" ref="experimentalSubtype" label="Please select which one (A or B) you would like to curate"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
