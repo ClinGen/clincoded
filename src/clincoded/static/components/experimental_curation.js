@@ -48,9 +48,11 @@ var ExperimentalCuration = React.createClass({
             gdm: null, // GDM object given in UUID
             annotation: null, // Annotation object given in UUID
             experimental: null, // If we're editing a group, this gets the fleshed-out group object we're editing
+            experimentalNameVisible: false,
             experimentalName: '', // Currently entered name of the group
             experimentalType: '',
             experimentalTypeDescription: '',
+            experimentalSubtype: '',
             geneImplicatedWithDisease: false, // checkbox state values
             geneImplicatedInDisease: false,
             expressedInTissue: false,
@@ -98,6 +100,22 @@ var ExperimentalCuration = React.createClass({
                 experimentalType: tempExperimentalType,
                 experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType)
             });
+            if (tempExperimentalType == 'Biochemical function' || tempExperimentalType == 'Expression') {
+                this.setState({
+                    experimentalSubtype: '',
+                    experimentalNameVisible: false
+                });
+            } else {
+                this.setState({experimentalNameVisible: true});
+            }
+        } else if (ref === 'experimentalSubtype') {
+            var tempExperimentalSubtype = this.refs[ref].getValue();
+            this.setState({experimentalSubtype: tempExperimentalSubtype});
+            if (tempExperimentalSubtype == 'none' || tempExperimentalSubtype === '') {
+                this.setState({experimentalNameVisible: false});
+            } else {
+                this.setState({experimentalNameVisible: true});
+            }
         } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
             this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()});
             if (this.refs['geneWithSameFunctionSameDisease.geneImplicatedWithDisease'].getValue() === false) {
@@ -996,40 +1014,20 @@ var ExperimentalCuration = React.createClass({
                                         <Panel>
                                             {ExperimentalNameType.call(this)}
                                         </Panel>
-                                        {this.state.experimentalType == 'Biochemical function' ?
-                                            <Panel title="Biochemical function" open>
+                                        {this.state.experimentalType == 'Biochemical function' && this.state.experimentalNameVisible ?
+                                            <PanelGroup accordion><Panel title="Biochemical function" open>
                                                 {TypeBiochemicalFunction.call(this)}
-                                            </Panel>
-                                        : null}
-                                        {this.state.experimentalType == 'Biochemical function' ?
-                                            <PanelGroup accordion>
-                                                <Panel title="A. Gene(s) with same function implicated in same disease" open>
-                                                    {TypeBiochemicalFunctionA.call(this)}
-                                                </Panel>
-                                                <Panel title="B. Gene function consistent with phenotype" open>
-                                                    {TypeBiochemicalFunctionB.call(this)}
-                                                </Panel>
-                                            </PanelGroup>
+                                            </Panel></PanelGroup>
                                         : null}
                                         {this.state.experimentalType == 'Protein interactions' ?
                                             <PanelGroup accordion><Panel title="Protein interactions" open>
                                                 {TypeProteinInteractions.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
-                                        {this.state.experimentalType == 'Expression' ?
-                                            <Panel title="Expression" open>
+                                        {this.state.experimentalType == 'Expression' && this.state.experimentalNameVisible ?
+                                            <PanelGroup accordion><Panel title="Expression" open>
                                                 {TypeExpression.call(this)}
-                                            </Panel>
-                                        : null}
-                                        {this.state.experimentalType == 'Expression' ?
-                                            <PanelGroup accordion>
-                                                <Panel title="A. Gene normally expressed in tissue relevant to the disease" open>
-                                                    {TypeExpressionA.call(this)}
-                                                </Panel>
-                                                <Panel title="B. Altered expression in Patients" open>
-                                                    {TypeExpressionB.call(this)}
-                                                </Panel>
-                                            </PanelGroup>
+                                            </Panel></PanelGroup>
                                         : null}
                                         {this.state.experimentalType == 'Functional alteration of gene/gene product' ?
                                             <PanelGroup accordion><Panel title="Functional alteration of gene/gene product" open>
@@ -1046,12 +1044,12 @@ var ExperimentalCuration = React.createClass({
                                                 {TypeRescue.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
-                                        {this.state.experimentalType != '' && this.state.experimentalType != 'none' ?
+                                        {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
                                             <PanelGroup accordion><Panel title="Experimental Data - Associated Variant(s)" open>
                                                 {ExperimentalDataVariant.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
-                                        {this.state.experimentalType != '' && this.state.experimentalType != 'none' ?
+                                        {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
                                             <div className="curation-submit clearfix">
                                                 <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                                 <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
@@ -1094,11 +1092,29 @@ var ExperimentalNameType = function() {
                     <p className="alert alert-info">{this.state.experimentalTypeDescription}</p>
                 </div>
             : null}
-            {this.state.experimentalType !== '' ?
+            {this.state.experimentalType && this.state.experimentalType == 'Biochemical function' ?
+                <Input type="select" ref="experimentalSubtype" label="Please select which one (A or B) you would like to curate" defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                    <option value="none">No Selection</option>
+                    <option disabled="disabled"></option>
+                    <option>A. Gene(s) with same function implicated in same disease</option>
+                    <option>B. Gene function consistent with phenotype(s)</option>
+                </Input>
+            : null}
+            {this.state.experimentalType && this.state.experimentalType == 'Expression' ?
+                <Input type="select" ref="experimentalSubtype" label="Please select which one (A or B) you would like to curate" defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                    <option value="none">No Selection</option>
+                    <option disabled="disabled"></option>
+                    <option>A. Gene normally expressed in tissue relevant to the disease</option>
+                    <option>B. Altered expression in Patients</option>
+                </Input>
+            : null}
+            {this.state.experimentalNameVisible ?
                 <Input type="text" ref="experimentalName" label="Experiment name:" value={experimental && experimental.label} handleChange={this.handleChange}
                     error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            : null }
+            : null}
         </div>
     );
 };
@@ -1125,6 +1141,12 @@ var TypeBiochemicalFunction = function() {
             <Input type="textarea" ref="evidenceForFunctionInPaper" label="Notes on where evidence found in paper:" rows="5" value={biochemicalFunction.evidenceForFunctionInPaper}
                 error={this.getFormError('evidenceForFunctionInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceForFunctionInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            {this.state.experimentalSubtype == 'A. Gene(s) with same function implicated in same disease' ?
+                TypeBiochemicalFunctionA.call(this)
+            : null}
+            {this.state.experimentalSubtype == 'B. Gene function consistent with phenotype(s)' ?
+                TypeBiochemicalFunctionB.call(this)
+            : null}
         </div>
     );
 }
@@ -1150,7 +1172,7 @@ var TypeBiochemicalFunctionA = function() {
         }
     }
     return (
-        <div className="row experimental-data-form">
+        <div>
             <Input type="text" ref="geneWithSameFunctionSameDisease.genes" label={<LabelGenesWithSameFunction />} value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1"
                 error={this.getFormError('geneWithSameFunctionSameDisease.genes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.genes')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1201,7 +1223,7 @@ var TypeBiochemicalFunctionB = function() {
         }
     }
     return (
-        <div className="row experimental-data-form">
+        <div>
             <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />} value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" handleChange={this.handleChange} />
@@ -1307,6 +1329,12 @@ var TypeExpression = function() {
             <Input type="text" ref="organOfTissue" label={<LabelUberonId />} value={expression.organOfTissue} placeholder="e.g. UBERON_0000948"
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+            {this.state.experimentalSubtype == 'A. Gene normally expressed in tissue relevant to the disease' ?
+                TypeExpressionA.call(this)
+            : null}
+            {this.state.experimentalSubtype == 'B. Altered expression in Patients' ?
+                TypeExpressionB.call(this)
+            : null}
         </div>
     );
 }
@@ -1323,7 +1351,7 @@ var TypeExpressionA = function() {
         }
     }
     return (
-        <div className="row experimental-data-form">
+        <div>
             <Input type="checkbox" ref="normalExpression.expressedInTissue" label="Is the gene normally expressed in the above tissue?:"
                 checked={this.state.expressedInTissue} defaultChecked="false" handleChange={this.handleChange}
                 error={this.getFormError('normalExpression.expressedInTissue')} clearError={this.clrFormErrors.bind(null, 'normalExpression.expressedInTissue')}
@@ -1351,7 +1379,7 @@ var TypeExpressionB = function() {
         }
     }
     return (
-        <div className="row experimental-data-form">
+        <div>
             <Input type="checkbox" ref="alteredExpression.expressedInPatients" label="Is expression altered in patients who have the disease?:"
                 checked={this.state.expressedInPatients} defaultChecked="false" handleChange={this.handleChange}
                 error={this.getFormError('alteredExpression.expressedInPatients')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.expressedInPatients')}
