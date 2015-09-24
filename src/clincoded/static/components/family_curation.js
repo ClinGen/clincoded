@@ -596,8 +596,11 @@ var FamilyCuration = React.createClass({
                     // Family doesn't have any variants
                     return Promise.resolve(null);
                 }).then(individual => {
+                    var gdmUuid = this.state.gdm && this.state.gdm.uuid;
+                    var familyUuid = this.state.family && this.state.family.uuid;
+
                     // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the family.
-                    return this.saveAssessment(this.cv.assessmentTracker, this.state.gdm, this.state.family).then(assessmentInfo => {
+                    return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid).then(assessmentInfo => {
                         return Promise.resolve({individual: individual, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
                     });
                 }).then(data => {
@@ -635,10 +638,13 @@ var FamilyCuration = React.createClass({
                     // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
                     var newFamily = data.family;
                     var newAssessment = data.assessment;
+                    var gdmUuid = this.state.gdm && this.state.gdm.uuid;
+                    var familyUuid = newFamily && newFamily.uuid;
+
                     if (newFamily && newAssessment && !newAssessment.evidence_id) {
                         // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
                         // Nothing relies on this operation completing, so don't wait for a promise from it.
-                        this.saveAssessment(this.cv.assessmentTracker, this.state.gdm, newFamily, newAssessment);
+                        this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid, newAssessment);
                     }
 
                     // Next step relies on the pathogenicity, not the updated assessment
@@ -929,8 +935,8 @@ var FamilyCuration = React.createClass({
                                             }
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled}
-                                                updateValue={this.updateAssessmentValue.bind(null, this.cv.assessmentTracker)} />
+                                            <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled}
+                                                updateValue={this.updateAssessmentValue} />
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Family — Variant(s) Segregating with Proband" open>
@@ -1341,12 +1347,47 @@ var FamilyAdditional = function() {
 
 
 var FamilyViewer = React.createClass({
+    mixins: [RestMixin, AssessmentMixin],
+
+    cv: {
+        assessmentTracker: null, // Tracking object for a single assessment
+        gdmUuid: '', // UUID of the GDM; passed in the query string
+        familyUuid: '' // UUID of the family; passed in the query string
+    },
+
+    // Handle the assessment submit button
+    assessmentSubmit: function(e) {
+        // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the family.
+        this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.cv.familyUuid);
+    },
+
+    componentWillMount: function() {
+        // Get the GDM and Family UUIDs from the query string
+        this.cv.gdmUuid = queryKeyValue('gdm', this.props.href);
+        this.cv.familyUuid = queryKeyValue('family', this.props.href);
+    },
+
     render: function() {
         var context = this.props.context;
         var method = context.method;
         var groups = context.associatedGroups;
         var segregation = context.segregation;
         var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
+        var user = this.props.session && this.props.session.user_properties;
+
+        if (!this.cv.assessmentTracker && user && segregation) {
+            var userAssessment;
+
+            // Find if any assessments for the segregation are owned by the currently logged-in user
+            if (segregation.assessments && segregation.assessments.length) {
+                // Find the assessment belonging to the logged-in curator, if any.
+                userAssessment = Assessments.userAssessment(segregation.assessments, user && user.uuid);
+
+                if (userAssessment) {
+                    this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'segregation');
+                }
+            }
+        }
 
         return (
             <div className="container">
@@ -1495,10 +1536,15 @@ var FamilyViewer = React.createClass({
 
                     {FamilySegregationViewer(segregation)}
 
+                    {this.cv.assessmentTracker && this.cv.gdmUuid && this.cv.familyUuid ?
+                        <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
+                            assessmentSubmit={this.assessmentSubmit} />
+                    : null}
+
                     <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                         {variants.map(function(variant, i) {
                             return (
-                                <div className="variant-view-panel">
+                                <div className="variant-view-panel" key={variant.uuid}>
                                     <h5>Variant {i + 1}</h5>
                                     <dl className="dl-horizontal">
                                         <div>

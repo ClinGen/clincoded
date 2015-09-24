@@ -88,16 +88,15 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
     // an existing assessment, pass that in the 'assessment' parameter. This is useful for when you've written the
     // assessment without an evidence_id, but now have it. In that case, pass the assessment tracker, null for the
     // GDM (use the existing one), the evidence object, and the assessment object to write with the new evidence ID.
-    saveAssessment: function(assessmentTracker, gdm, evidence, assessment) {
+    saveAssessment: function(assessmentTracker, gdmUuid, evidenceUuid, assessment) {
         // Flatten the original assessment if any; will modify with updated values
         var newAssessment = assessment ? curator.flatten(assessment) : (assessmentTracker.original ? curator.flatten(assessmentTracker.original, 'assessment') : {});
         newAssessment.value = assessmentTracker.currentVal;
-        if (evidence) {
-            newAssessment.evidence_id = evidence.uuid;
-            newAssessment.evidence_type = evidence['@type'][0];
+        if (evidenceUuid) {
+            newAssessment.evidence_id = evidenceUuid;
         }
-        if (gdm) {
-            newAssessment.evidence_gdm = gdm.uuid;
+        if (gdmUuid) {
+            newAssessment.evidence_gdm = gdmUuid;
         }
         newAssessment.active = true;
 
@@ -140,13 +139,21 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         panelTitle: React.PropTypes.string, // Title of Assessment panel; 'Assessment' default
         label: React.PropTypes.string, // Label for dropdown; 'Assessment' default
         note: React.PropTypes.string, // Note to display below the dropdown
-        updateValue: React.PropTypes.func.isRequired // Parent function to call when dropdown changes
+        updateValue: React.PropTypes.func.isRequired, // Parent function to call when dropdown changes
+        assessmentSubmit: React.PropTypes.func, // Function to call if assessment selfSubmit button is clicked
     },
 
     // Called when the dropdown value changes
-    handleChange: function(ref, e) {
+    handleChange: function(assessmentTracker, e) {
         var value = this.refs['assessment'].getValue();
-        this.props.updateValue(value);
+        this.props.updateValue(assessmentTracker, value);
+    },
+
+    // Handle a click in the selfSubmit button
+    handleClick: function(e) {
+        if (this.props.assessmentSubmit) {
+            this.props.assessmentSubmit(e);
+        }
     },
 
     render: function() {
@@ -160,7 +167,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                 {this.props.assessmentTracker ?
                     <Panel title={panelTitle}>
                         <div className="row">
-                            <Input type="select" ref="assessment" label={label + ':'} defaultValue="Not Assessed" value={value} handleChange={this.handleChange}
+                            <Input type="select" ref="assessment" label={label + ':'} value={value} handleChange={this.handleChange.bind(null, this.props.assessmentTracker)}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={disabled}>
                                 <option>Not Assessed</option>
                                 <option disabled="disabled"></option>
@@ -172,6 +179,11 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                                 <p className="col-sm-7 col-sm-offset-5">{this.props.note}</p>
                             : null}
                         </div>
+                        {this.props.assessmentSubmit ?
+                            <div className="curation-submit clearfix">
+                                <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.handleClick} title="Save" />
+                            </div>
+                        : null}
                     </Panel>
                 : null}
             </div>
