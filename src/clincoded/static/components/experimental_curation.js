@@ -47,12 +47,12 @@ var ExperimentalCuration = React.createClass({
         return {
             gdm: null, // GDM object given in UUID
             annotation: null, // Annotation object given in UUID
-            experimental: null, // If we're editing a group, this gets the fleshed-out group object we're editing
-            experimentalNameVisible: false,
-            experimentalName: '', // Currently entered name of the group
-            experimentalType: '',
-            experimentalTypeDescription: '',
-            experimentalSubtype: '',
+            experimental: null, // If we're editing an Experimental Data entry, this gets the fleshed-out group Experimental Data entry we're editing
+            experimentalNameVisible: false,  // Is the Experimental Data Name field visible?
+            experimentalName: '', // Currently entered name of the Experimental Data entry
+            experimentalType: '',  // Currently entered type of the Experimental Data entry
+            experimentalTypeDescription: '', // Description of the selected Experimental Data type
+            experimentalSubtype: '', // Currently entered subtype of the Experimental Data entry (if applicable)
             geneImplicatedWithDisease: false, // checkbox state values
             geneImplicatedInDisease: false,
             expressedInTissue: false,
@@ -1083,7 +1083,7 @@ var ExperimentalNameType = function() {
     return (
         <div className="row experimental-data-form">
             <Input type="select" ref="experimentalType" label="Experiment type:" defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={experimental==null} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Biochemical function</option>
@@ -1100,7 +1100,7 @@ var ExperimentalNameType = function() {
             : null}
             {this.state.experimentalType && this.state.experimentalType == 'Biochemical function' ?
                 <Input type="select" ref="experimentalSubtype" label="Please select which one (A or B) you would like to curate" defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={experimental==null} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>A. Gene(s) with same function implicated in same disease</option>
