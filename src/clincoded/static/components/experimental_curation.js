@@ -337,31 +337,54 @@ var ExperimentalCuration = React.createClass({
                 this.setState({
                     experimentalName: stateObj.experimental.label,
                     experimentalType: stateObj.experimental.evidenceType,
-                    experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType)
+                    experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType),
+                    experimentalNameVisible: true
                 });
                 if (stateObj.experimental.evidenceType === 'Biochemical function') {
-                    if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease) {
-                        this.setState({geneImplicatedWithDisease: stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease});
-                    }
-                    if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes && stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.length > 0) {
-                        this.setState({'biochemicalFunctionsAOn': true});
-                    }
-                    if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.length > 0) {
-                        this.setState({'biochemicalFunctionsBOn': true});
-                    }
-                    if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '') {
-                        this.setState({'biochemicalFunctionsBOn': true});
+                    if (!_.isEmpty(stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease)) {
+                        this.setState({
+                            experimentalSubtype: "A. Gene(s) with same function implicated in same disease",
+                            experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'A')
+                        });
+                        if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease) {
+                            this.setState({geneImplicatedWithDisease: stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease});
+                        }
+                        if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes && stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.length > 0) {
+                            this.setState({'biochemicalFunctionsAOn': true});
+                        }
+                    } else if (!_.isEmpty(stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype)) {
+                        this.setState({
+                            experimentalSubtype: "B. Gene function consistent with phenotype(s)",
+                            experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B')
+                        });
+                        if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.length > 0) {
+                            this.setState({'biochemicalFunctionsBOn': true});
+                        }
+                        if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '') {
+                            this.setState({'biochemicalFunctionsBOn': true});
+                        }
                     }
                 } else if (stateObj.experimental.evidenceType === 'Protein interactions') {
                     if (stateObj.experimental.proteinInteractions.geneImplicatedInDisease) {
                         this.setState({geneImplicatedInDisease: stateObj.experimental.proteinInteractions.geneImplicatedInDisease});
                     }
                 } else if (stateObj.experimental.evidenceType === 'Expression') {
-                    if (stateObj.experimental.expression.normalExpression.expressedInTissue) {
-                        this.setState({expressedInTissue: stateObj.experimental.expression.normalExpression.expressedInTissue});
-                    }
-                    if (stateObj.experimental.expression.alteredExpression.expressedInPatients) {
-                        this.setState({expressedInPatients: stateObj.experimental.expression.alteredExpression.expressedInPatients});
+                    if (!_.isEmpty(stateObj.experimental.expression.normalExpression)) {
+                        this.setState({
+                            experimentalSubtype: "A. Gene normally expressed in tissue relevant to the disease",
+                            experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'A')
+                        });
+                        if (!_.isEmpty(stateObj.experimental.expression.normalExpression.expressedInTissue)) {
+                            this.setState({expressedInTissue: stateObj.experimental.expression.normalExpression.expressedInTissue});
+                        }
+                    } else if (stateObj.experimental.expression.alteredExpression) {
+                        this.setState({
+                            experimentalSubtype: "B. Altered expression in Patients",
+                            experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B')
+                        });
+                        if (stateObj.experimental.expression.alteredExpression.expressedInPatients) {
+                            this.setState({expressedInPatients: stateObj.experimental.expression.alteredExpression.expressedInPatients});
+                        }
                     }
                 } else if (stateObj.experimental.evidenceType === 'Functional alteration of gene/gene product') {
                     this.setState({functionalAlterationPCEE: stateObj.experimental.functionalAlteration.cellMutationOrEngineeredEquivalent});
@@ -1134,7 +1157,7 @@ var ExperimentalNameType = function() {
             {this.state.experimentalType && this.state.experimentalType == 'Biochemical function' ?
                 <Input type="select" ref="experimentalSubtype" label="Please select which one (A or B) you would like to curate"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                    defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
+                    defaultValue="none" value={this.state.experimentalSubtype} handleChange={this.handleChange}
                     inputDisabled={this.state.experimental!=null} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -1145,7 +1168,7 @@ var ExperimentalNameType = function() {
             {this.state.experimentalType && this.state.experimentalType == 'Expression' ?
                 <Input type="select" ref="experimentalSubtype" label="Please select which one (A or B) you would like to curate"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                    defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
+                    defaultValue="none" value={this.state.experimentalSubtype} handleChange={this.handleChange}
                     inputDisabled={this.state.experimental!=null} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
