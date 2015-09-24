@@ -1351,27 +1351,44 @@ var FamilyViewer = React.createClass({
 
     cv: {
         assessmentTracker: null, // Tracking object for a single assessment
-        gdmUuid: '', // UUID of the GDM; passed in the query string
-        familyUuid: '' // UUID of the family; passed in the query string
+        gdmUuid: '' // UUID of the GDM; passed in the query string
     },
 
     // Handle the assessment submit button
     assessmentSubmit: function(e) {
         // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the family.
-        this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.cv.familyUuid);
+        this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
+            var family = this.props.context;
+
+            // If we made a new assessment, add it to the family's assessments
+            if (assessmentInfo.assessment && !assessmentInfo.update) {
+                var updatedFamily = curator.flatten(family);
+                if (!updatedFamily.segregation.assessments) {
+                    updatedFamily.segregation.assessments = [];
+                }
+                updatedFamily.segregation.assessments.push(assessmentInfo.assessment['@id']);
+
+                // Write the updated family object to the DB
+                return this.putRestData('/families/' + family.uuid, updatedFamily);
+            }
+
+            // Not updating the family
+            Promise.resolve(null);
+        }).catch(function(e) {
+            console.log('FAMILY VIEW UPDATE ERROR=: %o', e);
+        });
     },
 
     componentWillMount: function() {
         // Get the GDM and Family UUIDs from the query string
         this.cv.gdmUuid = queryKeyValue('gdm', this.props.href);
-        this.cv.familyUuid = queryKeyValue('family', this.props.href);
     },
 
     render: function() {
-        var context = this.props.context;
-        var method = context.method;
-        var groups = context.associatedGroups;
-        var segregation = context.segregation;
+        var family = this.props.context;
+        var method = family.method;
+        var groups = family.associatedGroups;
+        var segregation = family.segregation;
         var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
         var user = this.props.session && this.props.session.user_properties;
 
@@ -1383,9 +1400,9 @@ var FamilyViewer = React.createClass({
                 // Find the assessment belonging to the logged-in curator, if any.
                 userAssessment = Assessments.userAssessment(segregation.assessments, user && user.uuid);
 
-                if (userAssessment) {
-                    this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'segregation');
-                }
+                // Make an assessment tracker for this user; if no existing assessment found for the logged-in user,
+                // make a new one
+                this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'segregation');
             }
         }
 
@@ -1393,7 +1410,7 @@ var FamilyViewer = React.createClass({
             <div className="container">
                 <div className="row group-curation-content">
                     <div className="viewer-titles">
-                        <h1>View Family: {context.label}</h1>
+                        <h1>View Family: {family.label}</h1>
                         {groups && groups.length ?
                             <h2>
                                 Group association:&nbsp;
@@ -1408,7 +1425,7 @@ var FamilyViewer = React.createClass({
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
                                 <dd>
-                                    {context.commonDiagnosis.map(function(disease, i) {
+                                    {family.commonDiagnosis.map(function(disease, i) {
                                         return (
                                             <span key={disease.orphaNumber}>
                                                 {i > 0 ? ', ' : ''}
@@ -1421,22 +1438,22 @@ var FamilyViewer = React.createClass({
 
                             <div>
                                 <dt>HPO IDs</dt>
-                                <dd>{context.hpoIdInDiagnosis.join(', ')}</dd>
+                                <dd>{family.hpoIdInDiagnosis.join(', ')}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype Terms</dt>
-                                <dd>{context.termsInDiagnosis}</dd>
+                                <dd>{family.termsInDiagnosis}</dd>
                             </div>
 
                             <div>
                                 <dt>NOT HPO IDs</dt>
-                                <dd>{context.hpoIdInElimination.join(', ')}</dd>
+                                <dd>{family.hpoIdInElimination.join(', ')}</dd>
                             </div>
 
                             <div>
                                 <dt>NOT phenotype terms</dt>
-                                <dd>{context.termsInElimination}</dd>
+                                <dd>{family.termsInElimination}</dd>
                             </div>
                         </dl>
                     </Panel>
@@ -1445,42 +1462,42 @@ var FamilyViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt># Males</dt>
-                                <dd>{context.numberOfMale}</dd>
+                                <dd>{family.numberOfMale}</dd>
                             </div>
 
                             <div>
                                 <dt># Females</dt>
-                                <dd>{context.numberOfFemale}</dd>
+                                <dd>{family.numberOfFemale}</dd>
                             </div>
 
                             <div>
                                 <dt>Country of Origin</dt>
-                                <dd>{context.countryOfOrigin}</dd>
+                                <dd>{family.countryOfOrigin}</dd>
                             </div>
 
                             <div>
                                 <dt>Ethnicity</dt>
-                                <dd>{context.ethnicity}</dd>
+                                <dd>{family.ethnicity}</dd>
                             </div>
 
                             <div>
                                 <dt>Race</dt>
-                                <dd>{context.race}</dd>
+                                <dd>{family.race}</dd>
                             </div>
 
                             <div>
                                 <dt>Age Range Type</dt>
-                                <dd>{context.ageRangeType}</dd>
+                                <dd>{family.ageRangeType}</dd>
                             </div>
 
                             <div>
                                 <dt>Age Range</dt>
-                                <dd>{context.ageRangeFrom || context.ageRangeTo ? <span>{context.ageRangeFrom + ' – ' + context.ageRangeTo}</span> : null}</dd>
+                                <dd>{family.ageRangeFrom || family.ageRangeTo ? <span>{family.ageRangeFrom + ' – ' + family.ageRangeTo}</span> : null}</dd>
                             </div>
 
                             <div>
                                 <dt>Age Range Unit</dt>
-                                <dd>{context.ageRangeUnit}</dd>
+                                <dd>{family.ageRangeUnit}</dd>
                             </div>
                         </dl>
                     </Panel>
@@ -1536,7 +1553,7 @@ var FamilyViewer = React.createClass({
 
                     {FamilySegregationViewer(segregation)}
 
-                    {this.cv.assessmentTracker && this.cv.gdmUuid && this.cv.familyUuid ?
+                    {this.cv.gdmUuid ?
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
                             assessmentSubmit={this.assessmentSubmit} />
                     : null}
@@ -1566,12 +1583,12 @@ var FamilyViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Additional Information about Family</dt>
-                                <dd>{context.additionalInformation}</dd>
+                                <dd>{family.additionalInformation}</dd>
                             </div>
 
                             <dt>Other PMID(s) that report evidence about this same Family</dt>
                             <dd>
-                                {context.otherPMIDs && context.otherPMIDs.map(function(article, i) {
+                                {family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
                                     return (
                                         <span key={i}>
                                             {i > 0 ? ', ' : ''}

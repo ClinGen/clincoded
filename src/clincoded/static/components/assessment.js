@@ -149,13 +149,6 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         this.props.updateValue(assessmentTracker, value);
     },
 
-    // Handle a click in the selfSubmit button
-    handleClick: function(e) {
-        if (this.props.assessmentSubmit) {
-            this.props.assessmentSubmit(e);
-        }
-    },
-
     render: function() {
         var panelTitle = this.props.panelTitle ? this.props.panelTitle : 'Assessment';
         var label = this.props.label ? this.props.label : 'Assessment';
@@ -181,7 +174,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                         </div>
                         {this.props.assessmentSubmit ?
                             <div className="curation-submit clearfix">
-                                <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.handleClick} title="Save" />
+                                <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.assessmentSubmit} title="Save" />
                             </div>
                         : null}
                     </Panel>
