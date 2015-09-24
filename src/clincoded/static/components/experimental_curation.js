@@ -375,6 +375,7 @@ var ExperimentalCuration = React.createClass({
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'A')
                         });
                         if (!_.isEmpty(stateObj.experimental.expression.normalExpression.expressedInTissue)) {
+                            console.log(stateObj.experimental.expression.normalExpression.expressedInTissue);
                             this.setState({expressedInTissue: stateObj.experimental.expression.normalExpression.expressedInTissue});
                         }
                     } else if (stateObj.experimental.expression.alteredExpression) {
