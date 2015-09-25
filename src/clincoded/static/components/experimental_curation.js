@@ -183,18 +183,8 @@ var ExperimentalCuration = React.createClass({
             }
         } else if (ref === 'cellMutationOrEngineeredEquivalent') {
             this.setState({functionalAlterationPCEE: this.refs['cellMutationOrEngineeredEquivalent'].getValue()});
-            if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() == 'Patient cells') {
-                this.refs['funcalt.engineeredEquivalentCellType'].resetValue();
-            } else if (this.refs['cellMutationOrEngineeredEquivalent'].getValue() == 'Engineered equivalent') {
-                this.refs['funcalt.patientCellType'].resetValue();
-            }
         } else if (ref === 'animalOrCellCulture') {
             this.setState({modelSystemsNHACCM: this.refs['animalOrCellCulture'].getValue()});
-            if (this.refs['animalOrCellCulture'].getValue() === 'Animal model') {
-                this.refs['cellCulture'].resetValue();
-            } else if (this.refs['animalOrCellCulture'].getValue() === 'Engineered equivalent') {
-                this.refs['animalModel'].resetValue();
-            }
         } else if (ref === 'model.phenotypeHPOObserved') {
             if (this.refs['model.phenotypeHPOObserved'].getValue() === '') {
                 this.setState({modelSystemsPOMSHPO: false});
@@ -233,11 +223,6 @@ var ExperimentalCuration = React.createClass({
             }
         } else if (ref === 'patientCellOrEngineeredEquivalent') {
             this.setState({rescuePCEE: this.refs['patientCellOrEngineeredEquivalent'].getValue()});
-            if (this.refs['patientCellOrEngineeredEquivalent'].getValue() === 'Patient cells') {
-                this.refs['rescue.engineeredEquivalentCellType'].resetValue();
-            } else if (this.refs['patientCellOrEngineeredEquivalent'].getValue() === 'Engineered equivalent') {
-                this.refs['rescue.patientCellType'].resetValue();
-            }
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -1534,18 +1519,24 @@ var TypeFunctionalAlteration = function() {
                 <option>Patient cells</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> for a cell type (e.g. fibroblast = CL_0000057)</p>
-            <Input type="textarea" ref="funcalt.patientCellType" label={<LabelFAPatientCellType />}
-                error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                rows="1" value={functionalAlteration.patientCellType} placeholder="e.g. CL_0000057"
-                inputDisabled={this.state.functionalAlterationPCEE != 'Patient cells'} required={this.state.functionalAlterationPCEE == 'Patient cells'} />
-            <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187)</p>
-            <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<LabelFAEngineeredEquivalent />}
-                error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                rows="1" value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. EFO_0001187"
-                inputDisabled={this.state.functionalAlterationPCEE != 'Engineered equivalent'} required={this.state.functionalAlterationPCEE == 'Engineered equivalent'} />
+            {this.state.functionalAlterationPCEE == 'Patient cells' ?
+            <div>
+                <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> for a cell type (e.g. fibroblast = CL_0000057)</p>
+                <Input type="textarea" ref="funcalt.patientCellType" label={<LabelFAPatientCellType />}
+                    error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
+                    rows="1" value={functionalAlteration.patientCellType} placeholder="e.g. CL_0000057" required />
+            </div>
+            : null}
+            {this.state.functionalAlterationPCEE == 'Engineered equivalent' ?
+            <div>
+                 <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187)</p>
+                <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<LabelFAEngineeredEquivalent />}
+                    error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
+                    rows="1" value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. EFO_0001187" required />
+            </div>
+            : null}
             <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> for gene function (e.g. DNA metabolic process = GO:0006259)</p>
             <Input type="text" ref="normalFunctionOfGene" label={<LabelNormalFunctionOfGene />}
                 error={this.getFormError('normalFunctionOfGene')} clearError={this.clrFormErrors.bind(null, 'normalFunctionOfGene')}
@@ -1613,38 +1604,44 @@ var TypeModelSystems = function() {
                 <option>Animal model</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <Input type="select" ref="animalModel" label="Animal model:"
-                error={this.getFormError('animalModel')} clearError={this.clrFormErrors.bind(null, 'animalModel')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                defaultValue="none" value={modelSystems.animalModel} handleChange={this.handleChange}
-                inputDisabled={this.state.modelSystemsNHACCM != 'Animal model'} required={this.state.modelSystemsNHACCM == 'Animal model'}>
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option>Cat (Felis catus) 9685</option>
-                <option>Chicken (Gallus gallus) 9031</option>
-                <option>Chimpanzee (Pan troglodytes) 9598</option>
-                <option>Cow (Bos taurus) 9913</option>
-                <option>Dog (Canis lupus familaris) 9615</option>
-                <option>Frog (Xenopus) 262014</option>
-                <option>Fruit fly (Drosophila) 7215</option>
-                <option>Gerbil (Gerbilinae) 10045</option>
-                <option>Guinea pig (Cavia porcellus) 10141</option>
-                <option>Hamster (Cricetinae) 10026</option>
-                <option>Macaque (Macaca) 9539</option>
-                <option>Mouse (Mus musculus) 10090</option>
-                <option>Pig (Sus scrofa) 9823</option>
-                <option>Rabbit (Oryctolagus crunicu) 9986</option>
-                <option>Rat (Rattus norvegicus) 10116</option>
-                <option>Round worm (Carnorhabditis elegans) 6239</option>
-                <option>Sheep (Ovis aries) 9940</option>
-                <option>Zebrafish (Daanio rerio) 7955</option>
-            </Input>
-            <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187)</p>
-            <Input type="textarea" ref="cellCulture" label={<LabelCellCulture />}
-                error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                rows="1" value={modelSystems.cellCulture} placeholder="e.g. EFO_0001187"
-                inputDisabled={this.state.modelSystemsNHACCM != 'Engineered equivalent'} required={this.state.modelSystemsNHACCM == 'Engineered equivalent'} />
+            {this.state.modelSystemsNHACCM == 'Animal model' ?
+            <div>
+                <Input type="select" ref="animalModel" label="Animal model:"
+                    error={this.getFormError('animalModel')} clearError={this.clrFormErrors.bind(null, 'animalModel')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                    defaultValue="none" value={modelSystems.animalModel} handleChange={this.handleChange} required>
+                    <option value="none">No Selection</option>
+                    <option disabled="disabled"></option>
+                    <option>Cat (Felis catus) 9685</option>
+                    <option>Chicken (Gallus gallus) 9031</option>
+                    <option>Chimpanzee (Pan troglodytes) 9598</option>
+                    <option>Cow (Bos taurus) 9913</option>
+                    <option>Dog (Canis lupus familaris) 9615</option>
+                    <option>Frog (Xenopus) 262014</option>
+                    <option>Fruit fly (Drosophila) 7215</option>
+                    <option>Gerbil (Gerbilinae) 10045</option>
+                    <option>Guinea pig (Cavia porcellus) 10141</option>
+                    <option>Hamster (Cricetinae) 10026</option>
+                    <option>Macaque (Macaca) 9539</option>
+                    <option>Mouse (Mus musculus) 10090</option>
+                    <option>Pig (Sus scrofa) 9823</option>
+                    <option>Rabbit (Oryctolagus crunicu) 9986</option>
+                    <option>Rat (Rattus norvegicus) 10116</option>
+                    <option>Round worm (Carnorhabditis elegans) 6239</option>
+                    <option>Sheep (Ovis aries) 9940</option>
+                    <option>Zebrafish (Daanio rerio) 7955</option>
+                </Input>
+            </div>
+            : null}
+            {this.state.modelSystemsNHACCM == 'Engineered equivalent' ?
+            <div>
+                <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187)</p>
+                <Input type="textarea" ref="cellCulture" label={<LabelCellCulture />}
+                    error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
+                    rows="1" value={modelSystems.cellCulture} placeholder="e.g. EFO_0001187" required />
+            </div>
+            : null}
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1732,18 +1729,24 @@ var TypeRescue = function() {
                 <option>Patient cells</option>
                 <option>Engineered equivalent</option>
             </Input>
-            <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> for a cell type (e.g. fibroblast = CL_0000057)</p>
-            <Input type="textarea" ref="rescue.patientCellType" label={<LabelRPatientCellType />}
-                error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                rows="1" value={rescue.patientCellType} placeholder="e.g. CL_0000057"
-                inputDisabled={this.state.rescuePCEE != 'Patient cells'} required={this.state.rescuePCEE == 'Patient cells'} />
-            <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187)</p>
-            <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<LabelREngineeredEquivalent />}
-                error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                rows="1" value={rescue.engineeredEquivalentCellType} placeholder="e.g. EFO_0001187"
-                inputDisabled={this.state.rescuePCEE != 'Engineered equivalent'} required={this.state.rescuePCEE == 'Engineered equivalent'} />
+            {this.state.rescuePCEE == 'Patient cells' ?
+            <div>
+                <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> for a cell type (e.g. fibroblast = CL_0000057)</p>
+                <Input type="textarea" ref="rescue.patientCellType" label={<LabelRPatientCellType />}
+                    error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
+                    rows="1" value={rescue.patientCellType} placeholder="e.g. CL_0000057" required />
+            </div>
+            : null}
+            {this.state.rescuePCEE == 'Engineered equivalent' ?
+            <div>
+                 <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187)</p>
+                <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<LabelREngineeredEquivalent />}
+                    error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
+                    rows="1" value={rescue.engineeredEquivalentCellType} placeholder="e.g. EFO_0001187" required />
+            </div>
+            : null}
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
