@@ -130,13 +130,21 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             var variantName = variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 20);
                             var userPathogenicity = null;
 
+                            // See if the variant has a pathogenicity curated in the current GDM
+                            var inCurrentGdm = _(variant.associatedPathogenicities).find(function(pathogenicity) {
+                                var matchingGdm = _(pathogenicity.associatedGdm).find(function(associatedGdm) {
+                                    return associatedGdm.uuid === gdm.uuid;
+                                });
+                                return !!matchingGdm;
+                            });
+
                             if (session) {
                                 userPathogenicity = getPathogenicityFromVariant(variant, session.user_properties.uuid);
                             }
                             return (
                                 <div className="col-sm-6 col-md-3 col-lg-2" key={variant.uuid}>
                                     <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}>
-                                        {variant.associatedPathogenicities.length ? <i className="icon icon-sticky-note"></i> : null}
+                                        {inCurrentGdm ? <i className="icon icon-sticky-note"></i> : null}
                                         {variantName}
                                     </a>
                                 </div>
