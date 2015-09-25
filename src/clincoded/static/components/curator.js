@@ -872,6 +872,20 @@ var collectVariantAssociations = function(annotation, targetVariant) {
         }
     }
 
+    // Find any variants matching the target variant in the given experimental data.
+    // Any matching variant pushes its experimental data onto the associations array as a side effect
+    function surveyExperimental(experimental, targetVariant, associations) {
+        // Search for variant in experimental matching variant we're looking for
+        var matchingVariant = _(experimental.variants).find(function(variant) {
+            return variant.uuid === targetVariant.uuid;
+        });
+
+        // Found a matching variant; push its parent individual
+        if (matchingVariant) {
+            associations.push(experimental);
+        }
+    }
+
     if (annotation && Object.keys(annotation).length) {
         // Search unassociated individuals
         annotation.individuals.forEach(function(individual) {
@@ -906,6 +920,11 @@ var collectVariantAssociations = function(annotation, targetVariant) {
                     surveyIndividual(individual, targetVariant, allAssociations);
                 });
             });
+        });
+
+        // Search experimental data
+        annotation.experimentalData.forEach(function(experimental) {
+            surveyExperimental(experimental, targetVariant, allAssociations);
         });
     }
 
@@ -1001,8 +1020,6 @@ var collectAnnotationVariants = function(annotation) {
                 });
             }
         });
-
-        console.log('finish');
     }
     return allVariants;
 };
