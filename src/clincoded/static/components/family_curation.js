@@ -1418,6 +1418,7 @@ var FamilyViewer = React.createClass({
         var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
         var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
         var user = this.props.session && this.props.session.user_properties;
+        var userFamily = user && family && family.submitted_by ? user.uuid === family.submitted_by.uuid : false;
         var familyUserAssessed = false; // TRUE if logged-in user doesn't own the family, but the family's owner assessed its segregation
 
         // Make an assessment tracker object once we get the logged in user info
@@ -1434,7 +1435,7 @@ var FamilyViewer = React.createClass({
 
         // Note if we don't own the family, but the owner has assessed the segregation
         if (user && family && family.submitted_by) {
-            if (user.uuid !== family.submitted_by.uuid) {
+            if (userFamily) {
                 var familyUserAssessment = Assessments.userAssessment(assessments, family.submitted_by.uuid);
                 if (familyUserAssessment && familyUserAssessment.value !== Assessments.DEFAULT_VALUE) {
                     familyUserAssessed = true;
@@ -1589,7 +1590,7 @@ var FamilyViewer = React.createClass({
 
                     {FamilySegregationViewer(segregation, assessments)}
 
-                    {this.cv.gdmUuid && familyUserAssessed ?
+                    {this.cv.gdmUuid && (familyUserAssessed || userFamily) ?
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
                             assessmentSubmit={this.assessmentSubmit} />
                     : null}
