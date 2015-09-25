@@ -991,6 +991,18 @@ var collectAnnotationVariants = function(annotation) {
                 });
             });
         });
+
+        // Search experimental data
+        annotation.experimentalData.forEach(function(experimental) {
+            // Collect variants in experimental data, if available
+            if (experimental.variants) {
+                experimental.variants.forEach(function(variant) {
+                    allVariants[variant['@id']] = variant;
+                });
+            }
+        });
+
+        console.log('finish');
     }
     return allVariants;
 };

@@ -497,8 +497,8 @@ var ExperimentalCuration = React.createClass({
                 'limit': "Enter only " + limit + " HPO IDs"
             },
             'uberonIDs': {
-                'invalid1': "Use Uberon ID (e.g. UBERON_0000948)",
-                'invalid': "Use Uberon IDs (e.g. UBERON_0000948) separated by commas",
+                'invalid1': "Use Uberon ID (e.g. UBERON_0015228)",
+                'invalid': "Use Uberon IDs (e.g. UBERON_0015228) separated by commas",
                 'limit1': "Enter only one Uberon ID",
                 'limit': "Enter only " + limit + " Uberon IDs"
             }
@@ -1113,12 +1113,12 @@ var ExperimentalCuration = React.createClass({
                                                 {TypeRescue.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
-                                        {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
+                                        {this.state.experimentalType != 'Biochemical function' && this.state.experimentalType != 'Protein interactions' && (this.state.experimentalType == 'Expression' && this.state.experimentalSubtype.charAt(0) != 'A') && this.state.experimentalNameVisible ?
                                             <PanelGroup accordion><Panel title="Experimental Data - Associated Variant(s)" open>
                                                 {ExperimentalDataVariant.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
-                                        {this.state.experimentalType != 'Biochemical function' && this.state.experimentalNameVisible ?
+                                        {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
                                             <div className="curation-submit clearfix">
                                                 <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                                 <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
@@ -1437,10 +1437,11 @@ var TypeExpression = function() {
     }
     return (
         <div className="row experimental-data-form">
+            <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> for an organ type (e.g. heart = UBERON_0015228)</p>
             <Input type="text" ref="organOfTissue" label={<LabelUberonId />}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={expression.organOfTissue} placeholder="e.g. UBERON_0000948" required />
+                value={expression.organOfTissue} placeholder="e.g. UBERON_0015228" required />
             {this.state.experimentalSubtype == 'A. Gene normally expressed in tissue relevant to the disease' ?
                 TypeExpressionA.call(this)
             : null}
@@ -1450,6 +1451,13 @@ var TypeExpression = function() {
         </div>
     );
 }
+
+// HTML labels for Expression panel.
+var LabelUberonId = React.createClass({
+    render: function() {
+        return <span>Organ of tissue relevant to disease, in which gene expression is examined <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID)</span>:</span>;
+    }
+});
 
 var TypeExpressionA = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
@@ -1473,7 +1481,7 @@ var TypeExpressionA = function() {
                 error={this.getFormError('normalExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidence')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={expression.normalExpression.evidence} inputDisabled={!this.state.expressedInTissue} required={this.state.expressedInTissue} />
-            <Input type="textarea" ref="normalExpression.evidenceInPaper" label="Notes on where evidence found in paper:"
+            <Input type="textarea" ref="normalExpression.evidenceInPaper" label="Notes on where evidence found:"
                 error={this.getFormError('normalExpression.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={expression.normalExpression.evidenceInPaper} inputDisabled={!this.state.expressedInTissue} />
@@ -1498,6 +1506,7 @@ var TypeExpressionB = function() {
                 error={this.getFormError('alteredExpression.expressedInPatients')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.expressedInPatients')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.expressedInPatients} defaultChecked="false" handleChange={this.handleChange} />
+            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the expression is not altered in patients who have the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
             <Input type="textarea" ref="alteredExpression.evidence" label="Evidence for altered expression in patients:"
                 error={this.getFormError('alteredExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.evidence')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1509,13 +1518,6 @@ var TypeExpressionB = function() {
         </div>
     );
 }
-
-// HTML labels for Expression panel.
-var LabelUberonId = React.createClass({
-    render: function() {
-        return <span>Organ of tissue relevant to disease, in which gene expression is examined <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID)</span>:</span>;
-    }
-});
 
 // Functional Alteration type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
@@ -2047,7 +2049,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Notes on where evidence found in paper</dt>
+                                <dt>Notes on where evidence found</dt>
                                 <dd>{context.expression.alteredExpression.evidenceInPaper}</dd>
                             </div>
                         </dl>
