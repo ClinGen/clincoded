@@ -1377,7 +1377,9 @@ var FamilyViewer = React.createClass({
                 updatedFamily.segregation.assessments.push(assessmentInfo.assessment['@id']);
 
                 // Write the updated family object to the DB
-                return this.putRestData('/families/' + family.uuid, updatedFamily);
+                return this.putRestData('/families/' + family.uuid, updatedFamily).then(data => {
+                    return this.getRestData('/families/' + data['@graph'][0].uuid);
+                });
             }
 
             // Didn't update the family; if updated the assessment, reload the family
@@ -1413,20 +1415,30 @@ var FamilyViewer = React.createClass({
         var method = family.method;
         var groups = family.associatedGroups;
         var segregation = family.segregation;
+        var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
         var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
         var user = this.props.session && this.props.session.user_properties;
+        var familyUserAssessed = false; // TRUE if logged-in user doesn't own the family, but the family's owner assessed its segregation
 
+        // Make an assessment tracker object once we get the logged in user info
         if (!this.cv.assessmentTracker && user && segregation) {
             var userAssessment;
 
             // Find if any assessments for the segregation are owned by the currently logged-in user
-            if (segregation.assessments && segregation.assessments.length) {
+            if (assessments && assessments.length) {
                 // Find the assessment belonging to the logged-in curator, if any.
-                userAssessment = Assessments.userAssessment(segregation.assessments, user && user.uuid);
+                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+            }
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'segregation');
+        }
 
-                // Make an assessment tracker for this user; if no existing assessment found for the logged-in user,
-                // make a new one
-                this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'segregation');
+        // Note if we don't own the family, but the owner has assessed the segregation
+        if (user && family && family.submitted_by) {
+            if (user.uuid !== family.submitted_by.uuid) {
+                var familyUserAssessment = Assessments.userAssessment(assessments, family.submitted_by.uuid);
+                if (familyUserAssessment && familyUserAssessment.value !== Assessments.DEFAULT_VALUE) {
+                    familyUserAssessed = true;
+                }
             }
         }
 
@@ -1575,9 +1587,9 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    {FamilySegregationViewer(segregation, this.state.assessments)}
+                    {FamilySegregationViewer(segregation, assessments)}
 
-                    {this.cv.gdmUuid ?
+                    {this.cv.gdmUuid && familyUserAssessed ?
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
                             assessmentSubmit={this.assessmentSubmit} />
                     : null}
