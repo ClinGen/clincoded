@@ -113,7 +113,12 @@ var ExperimentalCuration = React.createClass({
                 experimentalType: tempExperimentalType,
                 experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType)
             });
-            if (tempExperimentalType == 'Biochemical function' || tempExperimentalType == 'Expression') {
+            if (tempExperimentalType == 'none') {
+                this.setState({
+                    experimentalNameVisible: false,
+                    experimentalTypeDescription: []
+                });
+            } else if (tempExperimentalType == 'Biochemical function' || tempExperimentalType == 'Expression') {
                 this.setState({
                     experimentalSubtype: '',
                     experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType),
@@ -1079,7 +1084,7 @@ var ExperimentalCuration = React.createClass({
                                             {ExperimentalNameType.call(this)}
                                         </Panel>
                                         {this.state.experimentalType == 'Biochemical function' && this.state.experimentalNameVisible ?
-                                            <PanelGroup accordion><Panel title="Biochemical function" open>
+                                            <PanelGroup accordion><Panel title={this.state.experimentalSubtype.charAt(0) + ". Biochemical function"} open>
                                                 {TypeBiochemicalFunction.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
@@ -1089,7 +1094,7 @@ var ExperimentalCuration = React.createClass({
                                             </Panel></PanelGroup>
                                         : null}
                                         {this.state.experimentalType == 'Expression' && this.state.experimentalNameVisible ?
-                                            <PanelGroup accordion><Panel title="Expression" open>
+                                            <PanelGroup accordion><Panel title={this.state.experimentalSubtype.charAt(0) + ". Expression"} open>
                                                 {TypeExpression.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
@@ -1113,7 +1118,7 @@ var ExperimentalCuration = React.createClass({
                                                 {ExperimentalDataVariant.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
-                                        {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
+                                        {this.state.experimentalType != 'Biochemical function' && this.state.experimentalNameVisible ?
                                             <div className="curation-submit clearfix">
                                                 <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
                                                 <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
@@ -1140,6 +1145,11 @@ var ExperimentalNameType = function() {
 
     return (
         <div className="row experimental-data-form">
+            {!this.state.experimentalType || this.state.experimentalType == 'none' ?
+                <div className="col-sm-7 col-sm-offset-5">
+                    <p>Select which experiment type you would like to curate:</p>
+                </div>
+            : null}
             <Input type="select" ref="experimentalType" label="Experiment type:"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
@@ -1153,6 +1163,18 @@ var ExperimentalNameType = function() {
                 <option>Model systems</option>
                 <option>Rescue</option>
             </Input>
+            {!this.state.experimentalType || this.state.experimentalType == 'none' ?
+                <div className="col-sm-7 col-sm-offset-5">
+                    <p className="alert alert-info">
+                        <strong>Biochemical function</strong>: The gene product performs a biochemical function shared with other known genes in the disease of interest, or the gene product is consistent with the observed phenotype(s)<br /><br />
+                        <strong>Protein interactions</strong>: The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest<br /><br />
+                        <strong>Expression</strong>: The gene is expressed in tissues relevant to the disease of interest, or the gene is altered in expression in patients who have the disease<br /><br />
+                        <strong>Functional alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents<br /><br />
+                        <strong>Model systems</strong>: Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state<br /><br />
+                        <strong>Rescue</strong>: The cellular phenotype in patient-derived cells or engineered equivalents can be rescued by addition of the wild-type gene product
+                    </p>
+                </div>
+            : null}
             {this.state.experimentalTypeDescription.map(function(description, i) {
                 return (
                     <div key={i} className="col-sm-7 col-sm-offset-5">
@@ -1204,12 +1226,12 @@ var TypeBiochemicalFunction = function() {
     }
     return (
         <div className="row experimental-data-form">
-            <p className="col-sm-7 col-sm-offset-5">There are 2 kinds of evidence that support Biochemical Function (see A. and B.). You can collect either or both - each kind counts as one piece of Biochemical Function evidence. Fill out this section and then curate on A. and/or B.</p>
+            <p className="col-sm-7 col-sm-offset-5">To select a GO_Slim ID click on the GO_Slim link and copy/paste the desired GO ID into the box below.</p>
             <Input type="text" ref="identifiedFunction" label={<LabelIdentifiedFunction />}
                 error={this.getFormError('identifiedFunction')} clearError={this.clrFormErrors.bind(null, 'identifiedFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
                 value={biochemicalFunction.identifiedFunction} placeholder="e.g. GO:0008150" required />
-            <Input type="textarea" ref="evidenceForFunction" label="Evidence for function:"
+            <Input type="textarea" ref="evidenceForFunction" label="Evidence for above function:"
                 error={this.getFormError('evidenceForFunction')} clearError={this.clrFormErrors.bind(null, 'evidenceForFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={biochemicalFunction.evidenceForFunction} required />
@@ -1230,7 +1252,7 @@ var TypeBiochemicalFunction = function() {
 // HTML labels for Biochemical Functions panel
 var LabelIdentifiedFunction = React.createClass({
     render: function() {
-        return <span>Identified Function <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> ID)</span>:</span>;
+        return <span>Identified function of gene in this record <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> ID)</span>:</span>;
     }
 });
 
@@ -1253,7 +1275,7 @@ var TypeBiochemicalFunctionA = function() {
                 error={this.getFormError('geneWithSameFunctionSameDisease.genes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.genes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1" handleChange={this.handleChange} />
-            <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that above gene(s) share same function:"
+            <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that above gene(s) share same function with gene in record:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction} required={this.state.biochemicalFunctionsAOn} />
@@ -1264,8 +1286,8 @@ var TypeBiochemicalFunctionA = function() {
                 error={this.getFormError('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.geneImplicatedWithDisease} defaultChecked="false" handleChange={this.handleChange} />
-            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the gene(s) entered above in this section have not been implicated in the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Proceed to section B below or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
-            <Input type="textarea" ref="geneWithSameFunctionSameDisease.explanationOfOtherGenes" label="How has this gene(s) been implicated in the above disease?:"
+            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the gene(s) entered above in this section have not been implicated in the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
+            <Input type="textarea" ref="geneWithSameFunctionSameDisease.explanationOfOtherGenes" label="How has this other gene(s) been implicated in the above disease?:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.explanationOfOtherGenes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.explanationOfOtherGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes} inputDisabled={!this.state.geneImplicatedWithDisease} required={this.state.geneImplicatedWithDisease} />
@@ -1273,7 +1295,6 @@ var TypeBiochemicalFunctionA = function() {
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                  rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper} inputDisabled={!this.state.geneImplicatedWithDisease} />
-            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> You may submit now by scrolling to bottom of page OR enter a new piece of Biochemical Function evidence in B, below.</p>
         </div>
     );
 }
@@ -1281,7 +1302,7 @@ var TypeBiochemicalFunctionA = function() {
 // HTML labels for Biochemical Functions panel A
 var LabelGenesWithSameFunction = React.createClass({
     render: function() {
-        return <span>Gene(s) with same function <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>;
+        return <span>Other gene(s) with same function as gene in record <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>;
     }
 });
 var LabelSharedDisease = React.createClass({
@@ -1305,6 +1326,7 @@ var TypeBiochemicalFunctionB = function() {
     }
     return (
         <div>
+            <p className="col-sm-7 col-sm-offset-5 hug-top">Either an HPO or free text Phenotype is required.</p>
             <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
@@ -1328,12 +1350,12 @@ var TypeBiochemicalFunctionB = function() {
 // HTML labels for Biochemical Functions panel B
 var LabelHPOIDs = React.createClass({
     render: function() {
-        return <span>Phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
+        return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
     }
 });
 var LabelPhenotypesFT = React.createClass({
     render: function() {
-        return <span>Phenotype(s) <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>
+        return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>
     }
 });
 
@@ -1385,7 +1407,7 @@ var TypeProteinInteractions = function() {
                 error={this.getFormError('geneImplicatedInDisease')} clearError={this.clrFormErrors.bind(null, 'geneImplicatedInDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.geneImplicatedInDisease} defaultChecked="false" handleChange={this.handleChange} />
-            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the interacting gene(s) have not been associated with the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
+            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the interacting gene(s) have not been associated with the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
             <Input type="textarea" ref="relationshipOfOtherGenesToDisese" label="Explanation of relationship of interacting gene(s):"
                 error={this.getFormError('relationshipOfOtherGenesToDisese')} clearError={this.clrFormErrors.bind(null, 'relationshipOfOtherGenesToDisese')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1415,7 +1437,6 @@ var TypeExpression = function() {
     }
     return (
         <div className="row experimental-data-form">
-            <p className="col-sm-7 col-sm-offset-5">There are 2 kinds of evidence that support Expression (see A. and B.). You can collect either or both - each kind counts as one piece of Expression evidence. Fill out this section and then curate on A. and/or B.</p>
             <Input type="text" ref="organOfTissue" label={<LabelUberonId />}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
@@ -1746,7 +1767,7 @@ var TypeRescue = function() {
                 error={this.getFormError('wildTypeRescuePhenotype')} clearError={this.clrFormErrors.bind(null, 'wildTypeRescuePhenotype')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.wildTypeRescuePhenotype} defaultChecked="false" handleChange={this.handleChange} />
-            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the wild-type version of the gene does not rescue the phenotype, the criteria of counting this experimental evidence has not been met and cannot be submitted. Return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
+            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the wild-type version of the gene does not rescue the phenotype, the criteria of counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
             <Input type="checkbox" ref="patientVariantRescue" label="Does patient variant rescue?:"
                 error={this.getFormError('patientVariantRescue')} clearError={this.clrFormErrors.bind(null, 'patientVariantRescue')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1856,18 +1877,20 @@ var ExperimentalViewer = React.createClass({
         return (
             <div className="container">
                 <div className="row curation-content-viewer">
-                    <h1>View Experimental Data: {context.label}<br />{context.evidenceType}</h1>
+                    <h1>View Experimental Data</h1>
+                    <h3>{context.evidenceType}</h3>
+                    <h4>{context.label}</h4>
 
                     {context.evidenceType == 'Biochemical function' ?
                     <Panel title="Biochemical function" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
-                                <dt>Identified Function</dt>
+                                <dt>Identified function of gene in this record</dt>
                                 <dd>{context.biochemicalFunction.identifiedFunction}</dd>
                             </div>
 
                             <div>
-                                <dt>Evidence for function</dt>
+                                <dt>Evidence for above function</dt>
                                 <dd>{context.biochemicalFunction.evidenceForFunction}</dd>
                             </div>
 
@@ -1882,14 +1905,14 @@ var ExperimentalViewer = React.createClass({
                     <Panel title="A. Gene(s) with same function implicated in same disease" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
-                                <dt>Genes</dt>
+                                <dt>Other gene(s) with same function as gene in record</dt>
                                 <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(function(gene, i) {
                                         return (<span>{gene.symbol} </span>);
                                     })}</dd>
                             </div>
 
                             <div>
-                                <dt>Evidence that above gene(s) share same function</dt>
+                                <dt>Evidence that above gene(s) share same function with gene in record</dt>
                                 <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}</dd>
                             </div>
 
@@ -1901,7 +1924,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>How has this gene(s) been implicated in the above disease?</dt>
+                                <dt>How has this other gene(s) been implicated in the above disease?</dt>
                                 <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}</dd>
                             </div>
 

@@ -514,7 +514,8 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
 
     return (
         <div className="panel-evidence-group" key={experimental.uuid}>
-            <h5>{experimental.label} – {experimental.evidenceType}{subtype}</h5>
+            <h5>{experimental.label}</h5>
+            {experimental.evidenceType}{subtype}
             <div className="evidence-curation-info">
                 {experimental.submitted_by ?
                     <p className="evidence-curation-info">{experimental.submitted_by.title}</p>
