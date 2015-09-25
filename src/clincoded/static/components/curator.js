@@ -497,6 +497,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
 var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
     var i = 0;
     var subtype = '';
+    // determine if the evidence type has a subtype, and determine the subtype
     if (experimental.evidenceType == 'Biochemical function') {
         if (!_.isEmpty(experimental.biochemicalFunction.geneWithSameFunctionSameDisease)) {
             subtype = ' (A)';
