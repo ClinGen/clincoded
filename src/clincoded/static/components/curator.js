@@ -496,10 +496,24 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
 // Render an experimental data in the curator palette.
 var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
     var i = 0;
+    var subtype = '';
+    if (experimental.evidenceType == 'Biochemical function') {
+        if (!_.isEmpty(experimental.biochemicalFunction.geneWithSameFunctionSameDisease)) {
+            subtype = ' (A)';
+        } else if (!_.isEmpty(experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype)) {
+            subtype = ' (B)';
+        }
+    } else if (experimental.evidenceType == 'Expression') {
+        if (!_.isEmpty(experimental.expression.normalExpression)) {
+            subtype = ' (A)';
+        } else if (!_.isEmpty(experimental.expression.alteredExpression)) {
+            subtype = ' (B)';
+        }
+    }
 
     return (
         <div className="panel-evidence-group" key={experimental.uuid}>
-            <h5>{experimental.label} – {experimental.evidenceType}</h5>
+            <h5>{experimental.label} – {experimental.evidenceType}{subtype}</h5>
             <div className="evidence-curation-info">
                 {experimental.submitted_by ?
                     <p className="evidence-curation-info">{experimental.submitted_by.title}</p>
