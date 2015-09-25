@@ -59,8 +59,8 @@ var ExperimentalCuration = React.createClass({
             expressedInPatients: false,
             patientVariantRescue: false,
             wildTypeRescuePhenotype: false,
-            biochemicalFunctionsAOn: false, // form enabled/disabled checks
-            biochemicalFunctionsBOn: false,
+            biochemicalFunctionHPO: false, // form enabled/disabled checks
+            biochemicalFunctionFT: false,
             functionalAlterationPCEE: '',
             modelSystemsNHACCM: '',
             modelSystemsPOMSHPO: false,
@@ -169,30 +169,17 @@ var ExperimentalCuration = React.createClass({
             this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()});
         } else if (ref === 'patientVariantRescue') {
             this.setState({patientVariantRescue: this.refs[ref].toggleValue()});
-        } else if (ref === 'geneWithSameFunctionSameDisease.genes') {
-            if (this.refs[ref].getValue() !== '' ) {
-                this.setState({biochemicalFunctionsAOn: true});
-            }
-            else {
-                this.setState({biochemicalFunctionsAOn: false});
-            }
         } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeHPO') {
-            if (this.refs[ref].getValue() !== '' || this.refs['geneFunctionConsistentWithPhenotype.phenotypeFreeText'].getValue()) {
-                this.setState({biochemicalFunctionsBOn: true});
-            }
-            else {
-                this.setState({biochemicalFunctionsBOn: false});
-                this.refs['geneFunctionConsistentWithPhenotype.explanation'].resetValue();
-                this.refs['geneFunctionConsistentWithPhenotype.evidenceInPaper'].resetValue();
+            if (this.refs['geneFunctionConsistentWithPhenotype.phenotypeHPO'].getValue() === '') {
+                this.setState({biochemicalFunctionHPO: false});
+            } else {
+                this.setState({biochemicalFunctionHPO: true});
             }
         } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeFreeText') {
-            if (this.refs[ref].getValue() !== '' || this.refs['geneFunctionConsistentWithPhenotype.phenotypeHPO'].getValue()) {
-                this.setState({biochemicalFunctionsBOn: true});
-            }
-            else {
-                this.setState({biochemicalFunctionsBOn: false});
-                this.refs['geneFunctionConsistentWithPhenotype.explanation'].resetValue();
-                this.refs['geneFunctionConsistentWithPhenotype.evidenceInPaper'].resetValue();
+            if (this.refs['geneFunctionConsistentWithPhenotype.phenotypeFreeText'].getValue() === '') {
+                this.setState({biochemicalFunctionFT: false});
+            } else {
+                this.setState({biochemicalFunctionFT: true});
             }
         } else if (ref === 'cellMutationOrEngineeredEquivalent') {
             this.setState({functionalAlterationPCEE: this.refs['cellMutationOrEngineeredEquivalent'].getValue()});
@@ -354,19 +341,16 @@ var ExperimentalCuration = React.createClass({
                         if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease) {
                             this.setState({geneImplicatedWithDisease: stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease});
                         }
-                        if (stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes && stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.length > 0) {
-                            this.setState({'biochemicalFunctionsAOn': true});
-                        }
                     } else if (!_.isEmpty(stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype)) {
                         this.setState({
                             experimentalSubtype: "B. Gene function consistent with phenotype(s)",
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B')
                         });
                         if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.length > 0) {
-                            this.setState({'biochemicalFunctionsBOn': true});
+                            this.setState({'biochemicalFunctionHPO': true});
                         }
                         if (stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && stateObj.experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '') {
-                            this.setState({'biochemicalFunctionsBOn': true});
+                            this.setState({'biochemicalFunctionFT': true});
                         }
                     }
                 } else if (stateObj.experimental.evidenceType === 'Protein interactions') {
@@ -538,11 +522,9 @@ var ExperimentalCuration = React.createClass({
 
             if (this.state.experimentalType == 'Biochemical function') {
                 // Check form for Biochemical Function panel
-                if (this.state.biochemicalFunctionsAOn === false && this.state.biochemicalFunctionsBOn === false){
+                if (this.state.experimentalSubtype.charAt(0) == 'A' && !this.getFormValue('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')) {
                     formError = true;
-                    this.setFormErrors('geneWithSameFunctionSameDisease.genes', 'One of these fields must be filled in');
-                    this.setFormErrors('geneFunctionConsistentWithPhenotype.phenotypeHPO', 'One of these fields must be filled in');
-                    this.setFormErrors('geneFunctionConsistentWithPhenotype.phenotypeFreeText', 'One of these fields must be filled in');
+                    this.setFormErrors('geneWithSameFunctionSameDisease.geneImplicatedWithDisease', "Please see note below.");
                 }
                 // check goSlims
                 goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
@@ -557,15 +539,18 @@ var ExperimentalCuration = React.createClass({
             else if (this.state.experimentalType == 'Protein interactions') {
                 // Check form for Protein Interactions panel
                 // check geneSymbols
+                if (!this.getFormValue('geneImplicatedInDisease')) {
+                    formError = true;
+                    this.setFormErrors('geneImplicatedInDisease', "Please see note below.");
+                }
                 geneSymbols = curator.capture.genes(this.getFormValue('interactingGenes'));
                 formError = this.validateFormTerms(formError, 'geneSymbols', geneSymbols, 'interactingGenes');
             }
             else if (this.state.experimentalType == 'Expression') {
                 // Check form for Expression panel
-                if (this.state.expressedInTissue === false && this.state.expressedInPatients === false) {
+                if (this.state.experimentalSubtype.charAt(0) == 'B' && !this.getFormValue('alteredExpression.expressedInPatients')) {
                     formError = true;
-                    this.setFormErrors('normalExpression.expressedInTissue', 'One of these evidences must be submitted');
-                    this.setFormErrors('alteredExpression.expressedInPatients', 'One of these evidences must be submitted');
+                    this.setFormErrors('alteredExpression.expressedInPatients', "Please see note below.");
                 }
                 // check uberonIDs
                 uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
@@ -606,6 +591,10 @@ var ExperimentalCuration = React.createClass({
             else if (this.state.experimentalType == 'Rescue') {
                 // Check form for Rescue panel
                 // check clIDs/efoIDs depending on form selection
+                if (!this.getFormValue('wildTypeRescuePhenotype')) {
+                    formError = true;
+                    this.setFormErrors('wildTypeRescuePhenotype', "Please read note below.");
+                }
                 if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Patient cells') {
                     clIDs = curator.capture.clids(this.getFormValue('rescue.patientCellType'));
                     formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'rescue.patientCellType', 1);
@@ -1274,11 +1263,11 @@ var TypeBiochemicalFunctionA = function() {
             <Input type="text" ref="geneWithSameFunctionSameDisease.genes" label={<LabelGenesWithSameFunction />}
                 error={this.getFormError('geneWithSameFunctionSameDisease.genes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.genes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1" handleChange={this.handleChange} />
+                value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1" handleChange={this.handleChange} required />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that above gene(s) share same function with gene in record:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction} required={this.state.biochemicalFunctionsAOn} />
+                rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction} required />
             <Input type="text" ref="geneWithSameFunctionSameDisease.sharedDisease" label={<LabelSharedDisease />}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 value={"ORPHA" + this.state.gdm.disease.orphaNumber} inputDisabled={true} />
@@ -1330,19 +1319,19 @@ var TypeBiochemicalFunctionB = function() {
             <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange} />
+                value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange} required={!this.state.biochemicalFunctionFT} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeFreeText" label={<LabelPhenotypesFT />}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText} handleChange={this.handleChange} />
+                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText} handleChange={this.handleChange} required={!this.state.biochemicalFunctionHPO} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.explanation" label="Explanation of how phenotype is consistent with disease:"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.explanation')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation} inputDisabled={!this.state.biochemicalFunctionsBOn} required={this.state.biochemicalFunctionsBOn} />
+                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation} inputDisabled={!(this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT)} required={this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.evidenceInPaper" label="Notes on where evidence found in paper:"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper} inputDisabled={!this.state.biochemicalFunctionsBOn} />
+                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper} inputDisabled={!(this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT)} />
         </div>
     );
 }
