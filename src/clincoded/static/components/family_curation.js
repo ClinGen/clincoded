@@ -1435,11 +1435,9 @@ var FamilyViewer = React.createClass({
 
         // Note if we don't own the family, but the owner has assessed the segregation
         if (user && family && family.submitted_by) {
-            if (userFamily) {
-                var familyUserAssessment = Assessments.userAssessment(assessments, family.submitted_by.uuid);
-                if (familyUserAssessment && familyUserAssessment.value !== Assessments.DEFAULT_VALUE) {
-                    familyUserAssessed = true;
-                }
+            var familyUserAssessment = Assessments.userAssessment(assessments, family.submitted_by.uuid);
+            if (familyUserAssessment && familyUserAssessment.value !== Assessments.DEFAULT_VALUE) {
+                familyUserAssessed = true;
             }
         }
 
