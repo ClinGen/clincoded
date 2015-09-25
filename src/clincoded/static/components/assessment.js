@@ -140,7 +140,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         label: React.PropTypes.string, // Label for dropdown; 'Assessment' default
         note: React.PropTypes.string, // Note to display below the dropdown
         updateValue: React.PropTypes.func.isRequired, // Parent function to call when dropdown changes
-        assessmentSubmit: React.PropTypes.func, // Function to call if assessment selfSubmit button is clicked
+        assessmentSubmit: React.PropTypes.func // Function to call when Save button is clicked; This prop's existence makes the Save button exist
     },
 
     // Called when the dropdown value changes

@@ -1354,15 +1354,23 @@ var FamilyViewer = React.createClass({
         gdmUuid: '' // UUID of the GDM; passed in the query string
     },
 
+    getInitialState: function() {
+        return {
+            assessments: null // Array of assessments for the family's segregation
+        };
+    },
+
     // Handle the assessment submit button
     assessmentSubmit: function(e) {
-        // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the family.
+        var updatedFamily;
+
+        // Write the assessment to the DB, if there was one.
         this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
             var family = this.props.context;
 
             // If we made a new assessment, add it to the family's assessments
             if (assessmentInfo.assessment && !assessmentInfo.update) {
-                var updatedFamily = curator.flatten(family);
+                 updatedFamily = curator.flatten(family);
                 if (!updatedFamily.segregation.assessments) {
                     updatedFamily.segregation.assessments = [];
                 }
@@ -1372,19 +1380,37 @@ var FamilyViewer = React.createClass({
                 return this.putRestData('/families/' + family.uuid, updatedFamily);
             }
 
+            // Didn't update the family; if updated the assessment, reload the family
+            if (assessmentInfo.update) {
+                return this.getRestData('/families/' + family.uuid);
+            }
+
             // Not updating the family
-            Promise.resolve(null);
+            return Promise.resolve(family);
+        }).then(updatedFamily => {
+            console.log('UPDATE FAMILY %o', updatedFamily);
+            // Wrote the family, so update the assessments state to the new assessment list
+            if (updatedFamily && updatedFamily.segregation && updatedFamily.segregation.assessments && updatedFamily.segregation.assessments.length) {
+                this.setState({assessments: updatedFamily.segregation.assessments});
+            }
+            return Promise.resolve(null);
         }).catch(function(e) {
             console.log('FAMILY VIEW UPDATE ERROR=: %o', e);
         });
     },
 
     componentWillMount: function() {
+        var family = this.props.context;
+
         // Get the GDM and Family UUIDs from the query string
         this.cv.gdmUuid = queryKeyValue('gdm', this.props.href);
+        if (family && family.segregation && family.segregation.assessments && family.segregation.assessments.length) {
+            this.setState({assessments: family.segregation.assessments});
+        }
     },
 
     render: function() {
+        console.log('RENDER ASSESSMENTS %o', this.state.assessments);
         var family = this.props.context;
         var method = family.method;
         var groups = family.associatedGroups;
@@ -1551,7 +1577,7 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    {FamilySegregationViewer(segregation)}
+                    {FamilySegregationViewer(segregation, this.state.assessments)}
 
                     {this.cv.gdmUuid ?
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
@@ -1608,7 +1634,15 @@ var FamilyViewer = React.createClass({
 globals.content_views.register(FamilyViewer, 'family');
 
 
-var FamilySegregationViewer = function(segregation) {
+// Display a segregation in a read-only panel. If the assessments can change while the page
+// gets dispalyed, pass the dynamic assessments in 'assessments'. If the assessments won't
+// change, don't pass anything in assessments -- the assessments in the segregation get
+// displayed.
+var FamilySegregationViewer = function(segregation, assessments) {
+    if (!assessments) {
+        assessments = segregation.assessments;
+    }
+
     return (
         <Panel title="Family — Segregation" panelClassName="panel-data">
             <dl className="dl-horizontal">
@@ -1681,6 +1715,22 @@ var FamilySegregationViewer = function(segregation) {
                     <dt>Additional Segregation information</dt>
                     <dd>{segregation && segregation.additionalInformation}</dd>
                 </div>
+
+                {assessments && assessments.length ?
+                    <div>
+                        <dt>Assessments</dt>
+                        <dd>
+                            {assessments.map(function(assessment, i) {
+                                return (
+                                    <span key={assessment.uuid}>
+                                        {i > 0 ? <br /> : null}
+                                        {assessment.value} ({assessment.submitted_by.title})
+                                    </span>
+                                );
+                            })}
+                        </dd>
+                    </div>
+                : null}
             </dl>
         </Panel>
     );
