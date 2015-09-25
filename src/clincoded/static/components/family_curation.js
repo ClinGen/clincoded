@@ -1388,7 +1388,6 @@ var FamilyViewer = React.createClass({
             // Not updating the family
             return Promise.resolve(family);
         }).then(updatedFamily => {
-            console.log('UPDATE FAMILY %o', updatedFamily);
             // Wrote the family, so update the assessments state to the new assessment list
             if (updatedFamily && updatedFamily.segregation && updatedFamily.segregation.assessments && updatedFamily.segregation.assessments.length) {
                 this.setState({assessments: updatedFamily.segregation.assessments});
@@ -1410,7 +1409,6 @@ var FamilyViewer = React.createClass({
     },
 
     render: function() {
-        console.log('RENDER ASSESSMENTS %o', this.state.assessments);
         var family = this.props.context;
         var method = family.method;
         var groups = family.associatedGroups;
