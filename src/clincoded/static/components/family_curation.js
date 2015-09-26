@@ -1725,21 +1725,25 @@ var FamilySegregationViewer = function(segregation, assessments) {
                     <dd>{segregation && segregation.additionalInformation}</dd>
                 </div>
 
-                {assessments && assessments.length ?
-                    <div>
-                        <dt>Assessments</dt>
-                        <dd>
-                            {assessments.map(function(assessment, i) {
-                                return (
-                                    <span key={assessment.uuid}>
-                                        {i > 0 ? <br /> : null}
-                                        {assessment.value} ({assessment.submitted_by.title})
-                                    </span>
-                                );
-                            })}
-                        </dd>
-                    </div>
-                : null}
+                <div>
+                    <dt>Assessments</dt>
+                    <dd>
+                        {assessments && assessments.length ?
+                            <div>
+                                {assessments.map(function(assessment, i) {
+                                    return (
+                                        <span key={assessment.uuid}>
+                                            {i > 0 ? <br /> : null}
+                                            {assessment.value} ({assessment.submitted_by.title})
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                        :
+                            <span>None</span>
+                        }
+                    </dd>
+                </div>
             </dl>
         </Panel>
     );
