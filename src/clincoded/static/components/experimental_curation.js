@@ -110,9 +110,13 @@ var ExperimentalCuration = React.createClass({
         } else if (ref === 'experimentalType') {
             var tempExperimentalType = this.refs[ref].getValue();
             this.setState({
+                experimentalName: '',
                 experimentalType: tempExperimentalType,
                 experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType)
             });
+            if (this.state.experimentalNameVisible) {
+                this.refs['experimentalName'].resetValue();
+            }
             if (tempExperimentalType == 'none') {
                 this.setState({
                     experimentalNameVisible: false,
@@ -1179,10 +1183,10 @@ var ExperimentalNameType = function() {
                 </Input>
             : null}
             {this.state.experimentalNameVisible ?
-                <Input type="text" ref="experimentalName" label="Experiment name:"
+                <Input type="textarea" ref="experimentalName" label="Experiment name:"
                     error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                    value={experimental && experimental.label} handleChange={this.handleChange} required />
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="no-resize"
+                    rows='1' value={experimental && experimental.label} handleChange={this.handleChange} required />
             : null}
         </div>
     );
@@ -1662,7 +1666,7 @@ var TypeModelSystems = function() {
                 error={this.getFormError('model.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={modelSystems.phenotypeFreeText} handleChange={this.handleChange} required={!this.state.modelSystemsPPHPO} />
-            <Input type="textarea" ref="explanation" label="Explanation of how model system phenotype is similar to phenotype observed in patient:"
+            <Input type="textarea" ref="explanation" label="Explanation of how model system phenotype is similar to phenotype observed in humans:"
                 error={this.getFormError('explanation')} clearError={this.clrFormErrors.bind(null, 'explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={modelSystems.explanation} required />
@@ -1682,22 +1686,22 @@ var LabelCellCulture = React.createClass({
 });
 var LabelPhenotypeObserved = React.createClass({
     render: function() {
-        return <span>Phenotype observed in model system <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
+        return <span>Phenotype(s) observed in model system <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
 });
 var LabelPhenotypeObservedFT = React.createClass({
     render: function() {
-        return <span>Phenotype observed in model system <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>;
+        return <span>Phenotype(s) observed in model system <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>;
     }
 });
 var LabelPatientPhenotype = React.createClass({
     render: function() {
-        return <span>Patient phenotype <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
+        return <span>Human phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
 });
 var LabelPatientPhenotypeFT = React.createClass({
     render: function() {
-        return <span>Patient phenotype <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>;
+        return <span>Human phenotype(s) <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>;
     }
 });
 
@@ -2117,27 +2121,27 @@ var ExperimentalViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Patient phenotype HPO</dt>
-                                <dd>{context.modelSystems.phenotypeHPO}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Patient phenotype</dt>
-                                <dd>{context.modelSystems.phenotypeFreeText}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Phenotype HPO observed</dt>
+                                <dt>Phenotype(s) observed in model system (HPO)</dt>
                                 <dd>{context.modelSystems.phenotypeHPOObserved}</dd>
                             </div>
 
                             <div>
-                                <dt>Phenotype observed in model system</dt>
+                                <dt>Phenotype(s) observed in model system (free text)</dt>
                                 <dd>{context.modelSystems.phenotypeFreetextObserved}</dd>
                             </div>
 
                             <div>
-                                <dt>Explanation of how model system phenotype is similar to phenotype observed in patient</dt>
+                                <dt>Human phenotype(s) (HPO)</dt>
+                                <dd>{context.modelSystems.phenotypeHPO}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Human phenotype(s) (free text)</dt>
+                                <dd>{context.modelSystems.phenotypeFreeText}</dd>
+                            </div>
+
+                            <div>
+                                <dt>Explanation of how model system phenotype is similar to phenotype observed in humans</dt>
                                 <dd>{context.modelSystems.explanation}</dd>
                             </div>
 
