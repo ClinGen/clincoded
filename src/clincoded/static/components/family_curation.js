@@ -58,6 +58,12 @@ var formMapSegregation = {
     'SEGaddedsegregationinfo': 'additionalInformation'
 };
 
+var initialCv = {
+    assessmentTracker: null, // Tracking object for a single assessment
+    filledSegregations: {}, // Tracks segregation fields with values filled in
+    segregationAssessed: false // TRUE if segregation has been assessed by self or others
+};
+
 
 var FamilyCuration = React.createClass({
     mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
@@ -66,16 +72,14 @@ var FamilyCuration = React.createClass({
         navigate: React.PropTypes.func
     },
 
-    cv: {
-        assessmentTracker: null, // Tracking object for a single assessment
-        filledSegregations: {}, // Tracks segregation fields with values filled in
-        segregationAssessed: false // TRUE if segregation has been assessed by self or others
-    },
+    cv: initialCv,
 
     // Keeps track of values from the query string
     queryValues: {},
 
     getInitialState: function() {
+        this.cv.assessmentTracker = initialCv;
+
         return {
             gdm: null, // GDM object given in query string
             group: null, // Group object given in query string
