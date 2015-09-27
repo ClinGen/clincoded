@@ -691,7 +691,7 @@ var FamilyCuration = React.createClass({
                             });
                         }
                     } else {
-                        promise = Promise.resolve(null);
+                        promise = Promise.resolve(newFamily);
                     }
                     return promise;
                 }).then(newFamily => {
