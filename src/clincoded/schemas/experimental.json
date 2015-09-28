@@ -32,7 +32,7 @@
             "description": "One of six evidence types",
             "type": "string",
             "enum": [
-                "Biochemical function",
+                "Biochemical Function",
                 "Protein Interactions",
                 "Expression",
                 "Functional Alteration",
