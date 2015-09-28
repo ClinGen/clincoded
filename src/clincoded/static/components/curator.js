@@ -453,7 +453,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                                 })}
                                 <span key={family.uuid}>
                                     {i++ > 0 ? ', ' : ''}
-                                    <a href={family['@id']} target="_blank" title="View family in a new tab">{family.label}</a>
+                                    <a href={family['@id'] + '?gdm=' + gdm.uuid} target="_blank" title="View family in a new tab">{family.label}</a>
                                 </span>
                             </span>
                         );
