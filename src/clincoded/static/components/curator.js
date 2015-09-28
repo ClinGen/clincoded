@@ -7,6 +7,7 @@ var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
 var parseAndLogError = require('./mixins').parseAndLogError;
+var RestMixin = require('./rest').RestMixin;
 
 var Panel = panel.Panel;
 var Modal = modal.Modal;
@@ -70,16 +71,51 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
     propTypes: {
         gdm: React.PropTypes.object, // GDM data to display
         omimId: React.PropTypes.string, // OMIM ID to display
-        updateOmimId: React.PropTypes.func // Function to call when OMIM ID changes
+        updateOmimId: React.PropTypes.func, // Function to call when OMIM ID changes
+        session: React.PropTypes.object // Logged-in session
     },
+
+    mixins: [RestMixin],
 
     render: function() {
         var gdm = this.props.gdm;
+        var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
 
+        var provisional;
+        var summaryInfo = 'none';
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+
+            if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
+                for (var i in gdm.provisionalClassifications) {
+                    if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
+                        summaryInfo = 'provisional';
+                        provisional = gdm.provisionalClassifications[i];
+                        break;
+                    }
+                }
+            }
+            if (summaryInfo === 'none' && gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
+                for (var i in gdm.variantPathogenicity) {
+                    if (gdm.variantPathogenicity[i].assessments &&
+                        gdm.variantPathogenicity[i].assessments[0].value === 'Supports' &&
+                        userMatch(gdm.variantPathogenicity[i].assessments[0].submitted_by, session)) {
+                        summaryInfo = 'assessed';
+                        break;
+                    }
+                }
+            }
+            if (summaryInfo === 'none' && gdm.annotations && gdm.annotations.length > 0) {
+                var allAssessments = [];
+                for (var i in gdm.annotations) {
+                    if (checkAssessment(annotations[i], session)) {
+                        summaryInfo = 'assessed';
+                        break;
+                    }
+                }
+            }
 
             return (
                 <div>
@@ -87,6 +123,45 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                         <div className="container">
                             <h1>{gene.symbol} – {disease.term}</h1>
                             <h2>{mode}</h2>
+                            { (summaryInfo !== 'none') ?
+                                <div className="provisional-border">
+                                    <div className="provisional-button">
+                                        <a className="btn btn-primary btn-xs" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                            { summaryInfo === 'provisional' ? 'Generate New Summary' : 'Generate Summary' }
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <div className="provisional-data">
+                                            <strong>Current Summary & Provisional Classification</strong>
+                                        </div>
+                                        {   summaryInfo === 'provisional' ?
+                                            <div>
+                                                <div className="provisional-data-left">
+                                                    <span>
+                                                        Current Summary<br />
+                                                        Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                    </span>
+                                                </div>
+                                                <div className="provisional-data-center">
+                                                    <span>
+                                                        Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                        Provisional Classification: {provisional.alteredClassification}&nbsp;&nbsp;
+                                                        [<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            :
+                                            <div>
+                                                <div className="provisional-data provisional-data-left">
+                                                   <span>None</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                :
+                                null
+                            }
                         </div>
                     </div>
                     <div className="container curation-data">
@@ -104,6 +179,87 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
     }
 });
 
+// Function to pick all assessment list in each annotation.
+function checkAssessment(obj, session) {
+    var allAssociations = assessmentList;
+    if (obj['@type'][0] === 'annotation' && obj.groups.length > 0) {
+        for (var i in obj.groups) {
+            checkAssessment(obj.groups[i], session);
+        }
+    }
+    else if (obj['@type'][0] === 'annotation' && obj.families.length > 0) {
+        for (var i in obj.families) {
+            checkAssessment(obj.families[i], session);
+        }
+    }
+    else if (obj['@type'][0] === 'annotation' && obj.experimentalData.length > 0) {
+        for (var i in obj.experimentalData) {
+            checkAssessment(obj.experimentalData[i], session);
+        }
+    }
+    else if (obj['@type'][0] === 'group' && obj.familyIncluded.length > 0) {
+        for (var i in obj.familyIncluded[i]) {
+            checkAssessment(obj.familyIncluded[i], session);
+        }
+    }
+    else if (obj['@type'][0] === 'family' && obj.segregation.assessments &&
+        obj.segregation.assessments.length > 0 &&
+        getAssessment(obj.segregation.assessments, session)) {
+        return true;
+    }
+    else if (obj['@type'][0] === 'experimental') {
+        var keys = [
+            'functionalAleration',
+            'modelSystems',
+            'proteinIneractions',
+            'expression',
+            'biochemicalFunction',
+            'rescue'
+        ];
+        for (var i in keys) {
+            if (keys[i] === 'expression') {
+                var subKeys = [
+                    'normalExpression',
+                    'alteredExpression'
+                ];
+                for (var j in subKeys) {
+                    if (obj.keys[i].subKeys[j].assessments &&
+                        obj.keys[i].subKeys[j].assessments.length > 0 &&
+                        getAssessment(obj.keys[i].subKeys[j].assessments, session)) {
+                            return true;
+                    }
+                }
+            }
+            else if (keys[i] === 'biochemicalFunction') {
+                var subKeys = [
+                    'geneWithSameFunctionSameDisease',
+                    'geneFunctionConsistentWithPhenotype'
+                ];
+                for (var j in subKeys) {
+                    if (obj.keys[i].subKeys[j].assessments &&
+                        obj.keys[i].subKeys[j].assessments.length > 0 &&
+                        getAssessment(obj.keys[i].subKeys[j].assessments, session)) {
+                            return true;
+                    }
+                }
+            }
+            else if (obj.keys[i].assessments && obj.keys[i].assessments.length > 0 &&
+                getAssessment(obj.keys[i].assessments, session)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+// Function to check if exist assessment created by login user and value === Supports
+function getAssessment(assessmentList, session) {
+    for (var i in assessmentList) {
+        if (userMatch(assessmentList[i].submitted_by, session) && assessmentList[i].value === 'Supports') {
+            return true;
+        }
+    }
+    return false;
+}
 
 // Display the header of all variants involved with the current GDM.
 var VariantHeader = module.exports.VariantHeader = React.createClass({
@@ -337,7 +493,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                 : null}
                                 {variantRenders}
                             </Panel>
-                        : 
+                        :
                             <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence"></Panel>
                         }
                     </Panel>
@@ -638,7 +794,7 @@ var AddOmimIdModal = React.createClass({
         // Start with default validation
         var valid = this.validateDefault();
 
-        // Valid if the field has only 10 or fewer digits 
+        // Valid if the field has only 10 or fewer digits
         if (valid) {
             valid = this.getFormValue('omimid').match(/^[0-9]{1,10}$/i);
             if (!valid) {
@@ -664,9 +820,9 @@ var AddOmimIdModal = React.createClass({
     // nothing happened.
     cancelForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        
+
         //only a mouse click on cancel button closes modal
-        //(do not let the enter key [which evaluates to 0 mouse 
+        //(do not let the enter key [which evaluates to 0 mouse
         //clicks] be accepted to close modal)
         if (e.detail >= 1){
             this.props.closeModal();
@@ -1047,6 +1203,10 @@ var flatten = module.exports.flatten = function(obj, type) {
                 flat = flattenAssessment(obj);
                 break;
 
+            case 'provisionalClassification':
+                flat = flattenProvisional(obj);
+                break;
+
             default:
                 break;
         }
@@ -1307,6 +1467,17 @@ function flattenPathogenicity(pathogenicity) {
             return assessment['@id'];
         });
     }
+
+    return flat;
+}
+
+
+var provisionalSimpleProps = [
+    "date_created", "totalScore", "autoClassification", "alteredClassification", "reasons", "active"
+];
+
+function flattenProvisional(provisional) {
+    var flat = cloneSimpleProps(provisional, provisionalSimpleProps);
 
     return flat;
 }

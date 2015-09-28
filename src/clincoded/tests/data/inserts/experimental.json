@@ -10,11 +10,22 @@
             "organOfTissue" : "T-cells",
             "normalExpression": {
                 "evidence": "some evidence here",
-                "evidenceInPaper": "Paragraph 2-4, page 14"
+                "evidenceInPaper": "Paragraph 2-4, page 14",
+                "assessments": [
+                    "299dc3c4-7dd2-48fc-9213-03f94d1873e9",
+                    "74c8f168-2bfb-4b08-8f3a-6ba8ccf71259",
+                    "299dc3c4-7dd2-48fc-9213-03f94d1873e9"
+                ]
             },
             "alteredExpression": {
                 "evidence" : "The CD3E mRNA was abnormally small and present at a reduced level in the patient's T cells.",
-                "evidenceInPaper": "Paragraph14-16, page16"
+                "evidenceInPaper": "Paragraph14-16, page16",
+                "assessments": [
+                    "74c8f168-2bfb-4b08-8f3a-6ba8ccf71259",
+                    "1098783c-8a92-451f-b0d0-659ce4f2ce5a",
+                    "8c58c720-ede1-432b-86be-ae758abf28a5",
+                    "aee44081-92ac-4dc7-bcf6-e0a85519dfb6"
+                ]
             }
         }
     },
@@ -24,7 +35,7 @@
         "date_created": "2015-04-13T12:32:57.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
-        "evidenceType": "Protein Interactions",
+        "evidenceType": "Protein interactions",
         "proteinIneractions": {
             "interactingGenes" : [
                 "NGLY1"
@@ -34,7 +45,7 @@
             "geneImplicatedInDisease": true,
             "relationshipOfOtherGenesToDisese": "very strong relationship",
             "assessments": [
-                "4f94a226-2a4c-11e5-887c-60f81dc5b05a"
+                "bddf2659-4122-414a-8382-81f04b16a66d"
             ]
         }
     },
@@ -56,10 +67,7 @@
                 ],
                 "evidenceForOtherGenesWithSameFunction": "some evidence for genes here",
                 "explanationOfOtherGenes": "some explanation here",
-                "evidenceInPaper": "Paragraph 21-30, page 55",
-                "assessments": [
-                    "4aec0dae-2a4c-11e5-a66f-60f81dc5b05a"
-                ]
+                "evidenceInPaper": "Paragraph 21-30, page 55"
             },
             "geneFunctionConsistentWithPhenotype": {
                 "phenotypeHPO": [
@@ -68,12 +76,7 @@
                     "HP:0001419"
                 ],
                 "explanation": "some explanation here",
-                "evidenceInPaper": "Paragraph 2-12, page 12",
-                "assessments": [
-                    "3ecaaf6b-2a4c-11e5-ab2d-60f81dc5b05a",
-                    "4519985e-2a4c-11e5-96a0-60f81dc5b05a",
-                    "550d702b-2a4c-11e5-856d-60f81dc5b05a"
-                ]
+                "evidenceInPaper": "Paragraph 2-12, page 12"
             }
         },
         "variants": [
@@ -96,10 +99,7 @@
             "wildTypeRescuePhenotype": true,
             "patientVariantRescue": true,
             "explanation": "some explanation here",
-            "evidenceLocationInPaper": "Paragraph 31-32, page 2",
-            "assessments": [
-                "5a5cefba-2a4c-11e5-9f97-60f81dc5b05a"
-            ]
+            "evidenceLocationInPaper": "Paragraph 31-32, page 2"
         },
         "variants": [
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
@@ -111,7 +111,7 @@
         "date_created": "2015-04-13T16:43:12.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
-        "evidenceType": "Functional alteration of gene/gene product",
+        "evidenceType": "Functional alteration of gene or gene product",
         "functionalAleration": {
             "cellMutationOrEngineeredEquivalent": "Patient cells",
             "patientCellType": "EFO_13579",
@@ -119,10 +119,7 @@
             "descriptoinOfGeneAlteration": "some description here",
             "normalFunctionOfGene": "GO_Slim term for normal function",
             "evidenceForNormalFunction": "evidence 007",
-            "evidenceInPaper": "Paragraph 2-5, page 5",
-            "assessments": [
-                "b8eb988c-9844-44b0-ba04-c625809a692d"
-            ]
+            "evidenceInPaper": "Paragraph 2-5, page 5"
         },
         "variants": [
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
@@ -142,7 +139,10 @@
             "phenotypeFreeText": "phenotype A1B2C3D4",
             "phenotypeFreetextObserved": "phenotype X0Y9Z8",
             "explanation": "some explanation",
-            "evidenceInPaper": "Paragraph 7-12, page 25"
+            "evidenceInPaper": "Paragraph 7-12, page 25",
+            "assessments": [
+                "39738201-96b3-4bdd-94d8-99a57a8eea71"
+            ]
         },
         "variants": [
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"

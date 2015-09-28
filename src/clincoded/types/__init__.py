@@ -407,8 +407,23 @@ class Annotation(Item):
         'experimentalData.modelSystems.assessments',
         'experimentalData.modelSystems.assessments.submitted_by',
         'experimentalData.rescue.assessments',
-        'experimentalData.rescue.assessments.submitted_by'
+        'experimentalData.rescue.assessments.submitted_by',
+        'associatedGdm'
     ]
+    rev = {
+        'associatedGdm': ('gdm', 'annotations')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated gdm",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "gdm.annotations",
+        },
+    })
+    def associatedGdm(self, request, associatedGdm):
+        return paths_filtered_by_status(request, associatedGdm)
 
     @calculated_property(schema={
         "title": "Number of Group",
@@ -489,7 +504,8 @@ class Group(Item):
         'individualIncluded.variants',
         'individualIncluded.variants.submitted_by',
         'associatedAnnotations',
-        'associatedAnnotations.article'
+        'associatedAnnotations.article',
+        'associatedAnnotations.associatedGdm',
         #'control'
     ]
     rev = {
@@ -539,8 +555,10 @@ class Family(Item):
         'associatedGroups.commonDiagnosis',
         'associatedGroups.associatedAnnotations',
         'associatedGroups.associatedAnnotations.article',
+        'associatedGroups.associatedAnnotations.associatedGdm',
         'associatedAnnotations',
         'associatedAnnotations.article',
+        'associatedAnnotations.associatedGdm'
     ]
     rev = {
         'associatedGroups': ('group', 'familyIncluded'),
@@ -592,15 +610,18 @@ class Individual(Item):
         'associatedGroups.commonDiagnosis',
         'associatedGroups.associatedAnnotations',
         'associatedGroups.associatedAnnotations.article',
+        'associatedGroups.associatedAnnotations.associatedGdm',
         'associatedFamilies',
         'associatedFamilies.associatedGroups',
         'associatedFamilies.associatedGroups.associatedAnnotations',
         'associatedFamilies.associatedGroups.associatedAnnotations.article',
         'associatedFamilies.associatedAnnotations',
         'associatedFamilies.associatedAnnotations.article',
+        'associatedFamilies.associatedAnnotations.associatedGdm',
         'associatedFamilies.commonDiagnosis',
         'associatedAnnotations',
-        'associatedAnnotations.article'
+        'associatedAnnotations.article',
+        'associatedAnnotations.associatedGdm',
     ]
     rev = {
         'associatedGroups': ('group', 'individualIncluded'),
@@ -673,8 +694,25 @@ class Experimental(Item):
         'modelSystems.assessments',
         'modelSystems.assessments.submitted_by',
         'rescue.assessments',
-        'rescue.assessments.submitted_by'
+        'rescue.assessments.submitted_by',
+        'associatedAnnotations',
+        'associatedAnnotations.article',
+        'associatedAnnotations.associatedGdm',
     ]
+    rev = {
+        'associatedAnnotations': ('annotation', 'experimentalData')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated annotations",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.experimentalData",
+        },
+    })
+    def associatedAnnotations(self, request, associatedAnnotations):
+        return paths_filtered_by_status(request, associatedAnnotations)
 
 
 @collection(

@@ -158,5 +158,21 @@
         ],
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-04-14T22:47:10.000000+00:00"
+    },
+    {
+        "uuid": "95d62ca5-d344-4c0f-8509-488b2e043969",
+        "dbSNPId": "386833478",
+        "clinvarVariantId": "55996",
+        "clinVarRCV": "RCV000049405",
+        "hgvsNames": [
+            "NM_000111.2:c.344delT",
+            "NG_008046.1:g.16366delT",
+            "NC_000007.14:g.107791868delA",
+            "NC_000007.13:g.107432313delA",
+            "NP_000102.1:p.Ile115Thrfs"
+        ],
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-09-21T22:47:10.000000+00:00",
+        "last_modified": "2015-09-22T22:59:10.000000+00:00"
     }
 ]

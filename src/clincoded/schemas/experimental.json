@@ -27,9 +27,9 @@
             "type": "string",
             "enum": [
                 "Biochemical function",
-                "Protein Interactions",
+                "Protein interactions",
                 "Expression",
-                "Functional alteration of gene/gene product",
+                "Functional alteration of gene or gene product",
                 "Model systems",
                 "Rescue"
             ]

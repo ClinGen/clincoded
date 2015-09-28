@@ -120,7 +120,7 @@ var CurationCentral = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                 <div className="container">
                     <VariantHeader gdm={gdm} pmid={this.state.currPmid} session={session} />
                     <div className="row curation-content">
@@ -205,7 +205,7 @@ var PmidSelectionList = React.createClass({
                     </Modal>
                 </div>
                 {annotations ?
-                    <div className="pmid-selection-list">
+                    <div className="pmid-selection-list" style={{'height':'300px', 'overflow':'auto'}}>
                         {annotations.map(annotation => {
                             var classList = 'pmid-selection-list-item' + (annotation.article.pmid === this.props.currPmid ? ' curr-pmid' : '');
 
@@ -314,9 +314,9 @@ var AddPmidModal = React.createClass({
     // nothing happened.
     cancelForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        
+
         //only a mouse click on cancel button closes modal
-        //(do not let the enter key [which evaluates to 0 mouse 
+        //(do not let the enter key [which evaluates to 0 mouse
         //clicks] be accepted to close modal)
         if (e.detail >= 1){
             this.props.closeModal();

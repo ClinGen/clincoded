@@ -24,6 +24,9 @@
         "annotations": [
             "5cd72a73-189e-11e5-9db5-60f81dc5b05a"
         ],
+        "variantPathogenicity": [
+            "912cf582-4e46-425c-839d-f6b21fa621ae"
+        ],
         "active": true
     },
     {
@@ -38,12 +41,16 @@
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "annotations": [
             "bb3432ca-1788-11e5-aefb-60f81dc5b05a",
-            "5cd72a73-189e-11e5-9db5-60f81dc5b05a"
+            "4172f4ab-189e-11e5-a10f-60f81dc5b05a"
         ],
         "variantPathogenicity": [
             "23a34abf-cd82-44de-a228-a604709315f9",
             "94184c52-38ab-4fdf-acc0-c1170d4d2427",
-            "82dcd58a-4493-4196-a234-93bda7aeee9f"
+            "82dcd58a-4493-4196-a234-93bda7aeee9f",
+            "5f5f6896-59cb-435e-8407-1d3996b6e502",
+            "d831ef32-e4e7-42e2-af11-e6de0664cb28",
+            "ca83ac65-5f87-4e3c-a7e3-60ab2e48d33b",
+            "89d48c23-764a-47d4-bd6e-366502224e12"
         ],
         "provisionalClassifications": [
             "157f6817-3175-11e5-8d11-60f81dc5b05a",
@@ -61,9 +68,6 @@
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-03-13T17:23:22.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "annotations": [
-            "4172f4ab-189e-11e5-a10f-60f81dc5b05a"
-        ],
         "active": true
     },
     {

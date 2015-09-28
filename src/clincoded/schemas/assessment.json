@@ -32,7 +32,7 @@
             "type": "string"
         },
         "evidence_id": {
-            "description": "uuidof assessed evidence",
+            "description": "uuid of assessed evidence",
             "type": "string"
         },
         "evidence_gdm": {
@@ -47,12 +47,16 @@
         }
     },
     "columns": {
-        "submitted_by.title": {
+        "submitted_by.uuid": {
             "title": "Owner",
             "type": "string"
         },
         "evidence_type": {
             "title": "Evidence",
+            "type": "string"
+        },
+        "evidence_id": {
+            "title": "Evidence ID",
             "type": "string"
         },
         "evidence_gdm": {

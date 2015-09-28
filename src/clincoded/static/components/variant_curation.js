@@ -123,7 +123,7 @@ var VariantCuration = React.createClass({
             } else {
                 // No assessment foound for user; make an initial one and save it in the component state
                 stateObj.assessment = {
-                    evidence_type: 'pathogenicity',
+                    evidence_type: 'Pathogenicity',
                     evidence_id: stateObj.pathogenicity ? stateObj.pathogenicity.uuid : '',
                     evidence_gdm: stateObj.gdm ? stateObj.gdm.uuid : '',
                     value: assessmentMod.DEFAULT_VALUE,
