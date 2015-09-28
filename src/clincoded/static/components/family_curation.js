@@ -929,18 +929,24 @@ var FamilyCuration = React.createClass({
                                                 {methods.render.call(this, method, true)}
                                             </Panel>
                                         </PanelGroup>
-                                        <PanelGroup accordion>
-                                            {!this.cv.segregationAssessed ?
+                                        {!this.cv.segregationAssessed ?
+                                            <PanelGroup accordion>
                                                 <Panel title="Family — Segregation" open>
                                                     {FamilySegregation.call(this)}
                                                 </Panel>
-                                            :
-                                                <div>{family.segregation ? <div>{FamilySegregationViewer(family.segregation)}</div> : null}</div>
-                                            }
-                                        </PanelGroup>
+                                            </PanelGroup>
+                                        :
+                                            <div>
+                                                {family.segregation ?
+                                                    <PanelGroup accordion>
+                                                        {FamilySegregationViewer(family.segregation, null, true)}
+                                                    </PanelGroup>
+                                                : null}
+                                            </div>
+                                        }
                                         <PanelGroup accordion>
-                                            <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled}
-                                                updateValue={this.updateAssessmentValue} />
+                                            <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled}
+                                                updateValue={this.updateAssessmentValue} accordion open />
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Family — Variant(s) Segregating with Proband" open>
@@ -1590,7 +1596,7 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
 
-                    {FamilySegregationViewer(segregation, assessments)}
+                    {FamilySegregationViewer(segregation, assessments, true)}
 
                     {this.cv.gdmUuid && (familyUserAssessed || userFamily) ?
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
@@ -1651,13 +1657,13 @@ globals.content_views.register(FamilyViewer, 'family');
 // gets dispalyed, pass the dynamic assessments in 'assessments'. If the assessments won't
 // change, don't pass anything in assessments -- the assessments in the segregation get
 // displayed.
-var FamilySegregationViewer = function(segregation, assessments) {
+var FamilySegregationViewer = function(segregation, assessments, open) {
     if (!assessments) {
         assessments = segregation.assessments;
     }
 
     return (
-        <Panel title="Family — Segregation" panelClassName="panel-data">
+        <Panel title="Family — Segregation" panelClassName="panel-data" open={open}>
             <dl className="dl-horizontal">
                 <div>
                     <dt>Pedigree description</dt>

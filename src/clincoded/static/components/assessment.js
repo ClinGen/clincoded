@@ -140,7 +140,9 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         label: React.PropTypes.string, // Label for dropdown; 'Assessment' default
         note: React.PropTypes.string, // Note to display below the dropdown
         updateValue: React.PropTypes.func.isRequired, // Parent function to call when dropdown changes
-        assessmentSubmit: React.PropTypes.func // Function to call when Save button is clicked; This prop's existence makes the Save button exist
+        assessmentSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
+        accordion: React.PropTypes.bool, // True if the panel should part of an openable accordion
+        open: React.PropTypes.bool // True if the panel should be an openable panel
     },
 
     // Called when the dropdown value changes
@@ -158,7 +160,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         return (
             <div>
                 {this.props.assessmentTracker ?
-                    <Panel title={panelTitle}>
+                    <Panel title={panelTitle} accordion={this.props.accordion} open={this.props.open}>
                         <div className="row">
                             <Input type="select" ref="assessment" label={label + ':'} value={value} handleChange={this.handleChange.bind(null, this.props.assessmentTracker)}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={disabled}>
