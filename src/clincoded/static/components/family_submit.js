@@ -101,6 +101,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
         var group = (family && family.associatedGroups.length) ? family.associatedGroups[0] : null;
         var annotation = this.state.annotation;
         var hasVariants = !!(family && family.segregation && family.segregation.variants && family.segregation.variants.length);
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get the given family's proband individual if it has one; null if it doesn't.
         var probandIndividual = family && _(family.individualIncluded).find(function(individual) {
@@ -124,7 +125,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} />
+                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
                 <div className="container">
                     {family ?
                         <div className="viewer-titles">

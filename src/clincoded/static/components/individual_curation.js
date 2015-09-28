@@ -654,6 +654,7 @@ var IndividualCuration = React.createClass({
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
         var variantTitle = (individual && individual.proband) ? <h4>Individual<i className="icon icon-proband-white"></i>  – Variant(s) segregating with Proband</h4> : <h4>Individual — Associated Variant(s)</h4>;
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get a list of associated groups if editing an individual, or the group in the query string if there was one, or null.
         var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
@@ -708,7 +709,7 @@ var IndividualCuration = React.createClass({
             <div>
                 {(!this.queryValues.individualUuid || individual) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -1098,7 +1099,7 @@ var IndividualVariantInfo = function() {
                         );
                     })}
                 </div>
-            }            
+            }
         </div>
     );
 };

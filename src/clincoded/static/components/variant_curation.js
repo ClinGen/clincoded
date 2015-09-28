@@ -346,6 +346,7 @@ var VariantCuration = React.createClass({
         var variant = this.state.variant;
         var pathogenicity = this.state.pathogenicity;
         var otherPathogenicityList;
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         var curatorName = this.props.session && this.props.session.user_properties ? this.props.session.user_properties.title : '';
 
@@ -373,7 +374,7 @@ var VariantCuration = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                 <div className="container">
                     {!this.queryValues.all && annotation && annotation.article ?
                         <div className="curation-pmid-summary">
