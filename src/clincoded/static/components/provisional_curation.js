@@ -47,7 +47,6 @@ var ProvisionalCuration = React.createClass({
 
     loadData: function() {
         var gdmUuid = this.queryValues.gdmUuid;
-        //var rerun = this.queryValues.rerun; //queryKeyValue('rerun', this.props.href);
 
         // get gdm and all assessments from db.
         var uris = _.compact([
@@ -59,9 +58,6 @@ var ProvisionalCuration = React.createClass({
         ).then(datas => {
             var stateObj = {};
             stateObj.user = this.props.session.user_properties.uuid; //'e49d01a5-51f7-4a32-ba0e-b2a71684e4aa'
-            //stateObj.user = 'e49d01a5-51f7-4a32-ba0e-b2a71684e4aa';
-
-            var assessments_all = [];
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
                     case 'gdm':
@@ -69,7 +65,6 @@ var ProvisionalCuration = React.createClass({
                         break;
                     case 'assessment_collection':
                         stateObj.assessments = data['@graph'];
-                        assessments_all = data['@graph'];
                         break;
                     default:
                         break;
@@ -276,6 +271,7 @@ var NewCalculation = function() {
     var assessments = this.state.assessments;
 
     var pathoList = [];
+    var expList = [];
     var exp_scores = [0, 0, 0];
     var expType = {
         "Expression": 0,
@@ -300,35 +296,51 @@ var NewCalculation = function() {
         var evid_type = assessments[i]['evidence_type'];
         var evid_id = assessments[i]['evidence_id'];
 
-        if (gdmAssessed == gdm.uuid && owner == this.state.user && value == 'Supports') {
-            if (evid_type == 'Pathogenicity' || evid_type == 'pathogenicity') {
+        if (gdmAssessed === gdm.uuid && owner === this.state.user && value === 'Supports') {
+        //if (gdmAssessed == gdm.uuid && owner === this.state.user) {
+            if (evid_type === 'Pathogenicity' || evid_type === 'pathogenicity') {
                 pathoList.push({"patho":evid_id, "owner":owner, "value":value});
             }
             // collect experimental data assessed as Supports (variant association is not necessary)
-            else if (evid_type == 'Expression') {
+            else if (evid_type === 'Expression') {
                 expType["Expression"] += 1;
                 exp_scores[0] += 0.5;
             }
-            else if (evid_type == 'Protein interactions') {
+            else if (evid_type === 'Protein interactions') {
                 expType["Protein interactions"] += 1;
                 exp_scores[0] += 0.5;
+                if (!in_array(evid_id, expList)) {
+                    expList.push(evid_id);
+                }
 
             }
-            else if (evid_type == 'Biochemical function') {
+            else if (evid_type === 'Biochemical function') {
                 expType["Biochemical function"] += 1;
                 exp_scores[0] += 0.5;
+                if (!in_array(evid_id, expList)) {
+                    expList.push(evid_id);
+                }
             }
-            else if (evid_type == 'Functional alteration of gene or gene product') {
+            else if (evid_type === 'Functional alteration of gene or gene product') {
                 expType["Functional alteration of gene or gene product"] += 1;
                 exp_scores[1] += 1;
+                if (!in_array(evid_id, expList)) {
+                    expList.push(evid_id);
+                }
             }
-            else if (evid_type == 'Rescue') {
+            else if (evid_type === 'Rescue') {
                 expType["Rescue"] += 1;
                 exp_scores[2] += 2;
+                if (!in_array(evid_id, expList)) {
+                    expList.push(evid_id);
+                }
             }
-            else if (evid_type == 'Model systems') {
+            else if (evid_type === 'Model systems') {
                 expType["Model systems"] += 1;
                 exp_scores[2] += 2;
+                if (!in_array(evid_id, expList)) {
+                    expList.push(evid_id);
+                }
             }
         }
     }
@@ -343,7 +355,7 @@ var NewCalculation = function() {
         var varUuid = variant.uuid;
 
         for (var j in pathoList) {
-            if (pathoUuid == pathoList[j].patho) {
+            if (pathoUuid === pathoList[j].patho) {
                 //variantsList.push({ "patho": pathoUuid, "variant": varUuid, "assessedBy": pathoList[j].owner, "value": pathoList[j].value });
                 variantIdList.push(varUuid);
                 break;
@@ -374,9 +386,9 @@ var NewCalculation = function() {
         if (annotations[i].individuals) {
             filter(individualsCollected, annotations[i].individuals, annotations[i].article, variantIdList);
         }
-        //if (annotations[i].experimentalData) {
-        //    filter(experimentalCollected, annotations[i].experimentalData, annotations[i].article, variantIdList, expList);
-        //}
+        if (annotations[i].experimentalData) {
+            filter(experimentalCollected, annotations[i].experimentalData, annotations[i].article, expList);
+        }
     }
 
     // Scoring Experimental
@@ -403,6 +415,12 @@ var NewCalculation = function() {
         if (!in_array(individualsCollected[i].pmid, articleCollected) && individualsCollected[i].pmid != '') {
             articleCollected.push(individualsCollected[i].pmid);
             earliest = get_earliest_year(earliest, individualsCollected[i].date);
+        }
+    }
+    for (var i in experimentalCollected) {
+        if (!in_array(experimentalCollected[i].pmid, articleCollected) && experimentalCollected[i].pmid != '') {
+            articleCollected.push(experimentalCollected[i].pmid);
+            earliest = get_earliest_year(earliest, experimentalCollected[i].date);
         }
     }
 
@@ -600,7 +618,7 @@ var get_earliest_year = function(earliest, dateStr) {
     return earliest;
 };
 
-var filter = function(target, branch, article, variantList) {
+var filter = function(target, branch, article, idList) {
     for (var i in branch) {
         var obj = branch[i];
         var variantIds = [];
@@ -612,7 +630,7 @@ var filter = function(target, branch, article, variantList) {
                 if (seg.variants) {
                     var variants = seg.variants;
                     for (var j in variants) {
-                        if (!in_array(variants[j].uuid, variantList)) {
+                        if (!in_array(variants[j].uuid, idList)) {
                             allAssessed = false;
                             break;
                         }
@@ -628,12 +646,16 @@ var filter = function(target, branch, article, variantList) {
             if (obj.variants) {
                 var variants = obj.variants;
                 for (var j in variants) {
-                    if (in_array(variants[j].uuid, variantList)) {
+                    if (in_array(variants[j].uuid, idList)) {
                         variantIds.push(variants[j].uuid);
                         allAssessed = true;
                     }
                 }
             }
+        }
+        else if (obj['@type'][0] === 'experimental' && in_array(obj.uuid, idList)) {
+            target.push({"evidence":branch[i].uuid, "variant":'', "pmid":article.pmid, "date": article.date});
+            allAssessed = false;
         }
 
         if (allAssessed) {
