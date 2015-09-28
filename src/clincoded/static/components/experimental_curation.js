@@ -79,17 +79,17 @@ var ExperimentalCuration = React.createClass({
     getExperimentalTypeDescription: function(item, subitem) {
         subitem = typeof subitem !== 'undefined' ? subitem : '';
         var experimentalTypeDescriptionList = {
-            'Biochemical function': [
+            'Biochemical Function': [
                 'A. The gene product performs a biochemical function shared with other known genes in the disease of interest',
                 'B. The gene product is consistent with the observed phenotype(s)'
             ],
-            'Protein interactions': ['The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest'],
+            'Protein Interactions': ['The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest'],
             'Expression': [
                 'A. The gene is expressed in tissues relevant to the disease of interest',
                 'B. The gene is altered in expression in patients who have the disease'
             ],
-            'Functional alteration of gene/gene product': ['The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents'],
-            'Model systems': ['Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state'],
+            'Functional Alteration': ['The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents'],
+            'Model Systems': ['Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state'],
             'Rescue': ['The cellular phenotype in patient-derived cells or engineered equivalents can be rescued by addition of the wild-type gene product']
         };
         if (subitem == 'A') {
@@ -122,7 +122,7 @@ var ExperimentalCuration = React.createClass({
                     experimentalNameVisible: false,
                     experimentalTypeDescription: []
                 });
-            } else if (tempExperimentalType == 'Biochemical function' || tempExperimentalType == 'Expression') {
+            } else if (tempExperimentalType == 'Biochemical Function' || tempExperimentalType == 'Expression') {
                 this.setState({
                     experimentalSubtype: '',
                     experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType),
@@ -321,7 +321,7 @@ var ExperimentalCuration = React.createClass({
                     experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType),
                     experimentalNameVisible: true
                 });
-                if (stateObj.experimental.evidenceType === 'Biochemical function') {
+                if (stateObj.experimental.evidenceType === 'Biochemical Function') {
                     if (!_.isEmpty(stateObj.experimental.biochemicalFunction.geneWithSameFunctionSameDisease)) {
                         this.setState({
                             experimentalSubtype: "A. Gene(s) with same function implicated in same disease",
@@ -342,7 +342,7 @@ var ExperimentalCuration = React.createClass({
                             this.setState({'biochemicalFunctionFT': true});
                         }
                     }
-                } else if (stateObj.experimental.evidenceType === 'Protein interactions') {
+                } else if (stateObj.experimental.evidenceType === 'Protein Interactions') {
                     if (stateObj.experimental.proteinInteractions.geneImplicatedInDisease) {
                         this.setState({geneImplicatedInDisease: stateObj.experimental.proteinInteractions.geneImplicatedInDisease});
                     }
@@ -364,9 +364,9 @@ var ExperimentalCuration = React.createClass({
                             this.setState({expressedInPatients: stateObj.experimental.expression.alteredExpression.expressedInPatients});
                         }
                     }
-                } else if (stateObj.experimental.evidenceType === 'Functional alteration of gene/gene product') {
+                } else if (stateObj.experimental.evidenceType === 'Functional Alteration') {
                     this.setState({functionalAlterationPCEE: stateObj.experimental.functionalAlteration.cellMutationOrEngineeredEquivalent});
-                } else if (stateObj.experimental.evidenceType === 'Model systems') {
+                } else if (stateObj.experimental.evidenceType === 'Model Systems') {
                     this.setState({modelSystemsNHACCM: stateObj.experimental.modelSystems.animalOrCellCulture});
                     if (stateObj.experimental.modelSystems.phenotypeHPOObserved !== '') {
                         this.setState({modelSystemsPOMSHPO: true});
@@ -509,7 +509,7 @@ var ExperimentalCuration = React.createClass({
             var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, clIDs, efoIDs;
             var formError = false;
 
-            if (this.state.experimentalType == 'Biochemical function') {
+            if (this.state.experimentalType == 'Biochemical Function') {
                 // Check form for Biochemical Function panel
                 if (this.state.experimentalSubtype.charAt(0) == 'A' && !this.getFormValue('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')) {
                     formError = true;
@@ -525,7 +525,7 @@ var ExperimentalCuration = React.createClass({
                 hpoIDs = curator.capture.hpoids(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
                 formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'geneFunctionConsistentWithPhenotype.phenotypeHPO');
             }
-            else if (this.state.experimentalType == 'Protein interactions') {
+            else if (this.state.experimentalType == 'Protein Interactions') {
                 // Check form for Protein Interactions panel
                 // check geneSymbols
                 if (!this.getFormValue('geneImplicatedInDisease')) {
@@ -545,7 +545,7 @@ var ExperimentalCuration = React.createClass({
                 uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
                 formError = this.validateFormTerms(formError, 'uberonIDs', uberonIDs, 'organOfTissue', 1);
             }
-            else if (this.state.experimentalType == 'Functional alteration of gene/gene product') {
+            else if (this.state.experimentalType == 'Functional Alteration') {
                 // Check form for Functional Alterations panel
                 // check clIDs/efoIDs depending on form selection
                 if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Patient cells') {
@@ -559,7 +559,7 @@ var ExperimentalCuration = React.createClass({
                 goSlimIDs = curator.capture.goslims(this.getFormValue('normalFunctionOfGene'));
                 formError = this.validateFormTerms(formError, 'goSlimIds', goSlimIDs, 'normalFunctionOfGene', 1);
             }
-            else if (this.state.experimentalType == 'Model systems') {
+            else if (this.state.experimentalType == 'Model Systems') {
                 // Check form for Model Systems panel
                 // check efoIDs depending on form selection
                 if (this.getFormValue('animalOrCellCulture') === 'Engineered equivalent') {
@@ -606,7 +606,7 @@ var ExperimentalCuration = React.createClass({
                 newExperimental.label = this.getFormValue('experimentalName');
                 newExperimental.evidenceType = this.getFormValue('experimentalType');
                 // prepare experimental object for post/putting to db
-                if (newExperimental.evidenceType == 'Biochemical function') {
+                if (newExperimental.evidenceType == 'Biochemical Function') {
                     // newExperimental object for type Rescue
                     newExperimental.biochemicalFunction = {};
                     var BFidentifiedFunction = this.getFormValue('identifiedFunction');
@@ -660,7 +660,7 @@ var ExperimentalCuration = React.createClass({
                             newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = BFGFCWPevidenceInPaper;
                         }
                     }
-                } else if (newExperimental.evidenceType == 'Protein interactions') {
+                } else if (newExperimental.evidenceType == 'Protein Interactions') {
                     // newExperimental object for type Rescue
                     newExperimental.proteinInteractions = {};
                     var PIinteractingGenes = geneSymbols;
@@ -717,7 +717,7 @@ var ExperimentalCuration = React.createClass({
                             newExperimental.expression.alteredExpression.evidenceInPaper = EAEevidenceInPaper;
                         }
                     }
-                } else if (newExperimental.evidenceType == 'Functional alteration of gene/gene product') {
+                } else if (newExperimental.evidenceType == 'Functional Alteration') {
                     // newExperimental object for type Rescue
                     newExperimental.functionalAlteration = {};
                     var FAcellMutationOrEngineeredEquivalent = this.getFormValue('cellMutationOrEngineeredEquivalent');
@@ -748,7 +748,7 @@ var ExperimentalCuration = React.createClass({
                     if (FAevidenceInPaper) {
                         newExperimental.functionalAlteration.evidenceInPaper = FAevidenceInPaper;
                     }
-                } else if (newExperimental.evidenceType == 'Model systems') {
+                } else if (newExperimental.evidenceType == 'Model Systems') {
                     // newExperimental object for type Rescue
                     newExperimental.modelSystems = {};
                     var MSanimalOrCellCulture = this.getFormValue('animalOrCellCulture');
@@ -853,9 +853,9 @@ var ExperimentalCuration = React.createClass({
                                 return Promise.resolve(genes);
                             } else {
                                 var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
-                                if (newExperimental.evidenceType == 'Biochemical function') {
+                                if (newExperimental.evidenceType == 'Biochemical Function') {
                                     this.setFormErrors('geneWithSameFunctionSameDisease.genes', missingGenes.join(', ') + ' not found');
-                                } else if (newExperimental.evidenceType == 'Protein interactions') {
+                                } else if (newExperimental.evidenceType == 'Protein Interactions') {
                                     this.setFormErrors('interactingGenes', missingGenes.join(', ') + ' not found');
                                 }
 
@@ -1061,13 +1061,13 @@ var ExperimentalCuration = React.createClass({
                                         <Panel>
                                             {ExperimentalNameType.call(this)}
                                         </Panel>
-                                        {this.state.experimentalType == 'Biochemical function' && this.state.experimentalNameVisible ?
-                                            <PanelGroup accordion><Panel title={this.state.experimentalSubtype.charAt(0) + ". Biochemical function"} open>
+                                        {this.state.experimentalType == 'Biochemical Function' && this.state.experimentalNameVisible ?
+                                            <PanelGroup accordion><Panel title={this.state.experimentalSubtype.charAt(0) + ". Biochemical Function"} open>
                                                 {TypeBiochemicalFunction.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
-                                        {this.state.experimentalType == 'Protein interactions' ?
-                                            <PanelGroup accordion><Panel title="Protein interactions" open>
+                                        {this.state.experimentalType == 'Protein Interactions' ?
+                                            <PanelGroup accordion><Panel title="Protein Interactions" open>
                                                 {TypeProteinInteractions.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
@@ -1076,13 +1076,13 @@ var ExperimentalCuration = React.createClass({
                                                 {TypeExpression.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
-                                        {this.state.experimentalType == 'Functional alteration of gene/gene product' ?
-                                            <PanelGroup accordion><Panel title="Functional alteration of gene/gene product" open>
+                                        {this.state.experimentalType == 'Functional Alteration' ?
+                                            <PanelGroup accordion><Panel title="Functional Alteration" open>
                                                 {TypeFunctionalAlteration.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
-                                        {this.state.experimentalType == 'Model systems' ?
-                                            <PanelGroup accordion><Panel title="Model systems" open>
+                                        {this.state.experimentalType == 'Model Systems' ?
+                                            <PanelGroup accordion><Panel title="Model Systems" open>
                                                 {TypeModelSystems.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
@@ -1091,7 +1091,7 @@ var ExperimentalCuration = React.createClass({
                                                 {TypeRescue.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
-                                        {this.state.experimentalType != 'Biochemical function' && this.state.experimentalType != 'Protein interactions' && (this.state.experimentalType == 'Expression' && this.state.experimentalSubtype.charAt(0) != 'A') && this.state.experimentalNameVisible ?
+                                        {this.state.experimentalType != 'Biochemical Function' && this.state.experimentalType != 'Protein Interactions' && (this.state.experimentalType == 'Expression' && this.state.experimentalSubtype.charAt(0) != 'A') && this.state.experimentalNameVisible ?
                                             <PanelGroup accordion><Panel title="Experimental Data - Associated Variant(s)" open>
                                                 {ExperimentalDataVariant.call(this)}
                                             </Panel></PanelGroup>
@@ -1134,21 +1134,21 @@ var ExperimentalNameType = function() {
                 inputDisabled={this.state.experimental!=null} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Biochemical function</option>
-                <option>Protein interactions</option>
+                <option>Biochemical Function</option>
+                <option>Protein Interactions</option>
                 <option>Expression</option>
-                <option>Functional alteration of gene/gene product</option>
-                <option>Model systems</option>
+                <option>Functional Alteration</option>
+                <option>Model Systems</option>
                 <option>Rescue</option>
             </Input>
             {!this.state.experimentalType || this.state.experimentalType == 'none' ?
                 <div className="col-sm-7 col-sm-offset-5">
                     <p className="alert alert-info">
-                        <strong>Biochemical function</strong>: The gene product performs a biochemical function shared with other known genes in the disease of interest, or the gene product is consistent with the observed phenotype(s)<br /><br />
-                        <strong>Protein interactions</strong>: The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest<br /><br />
+                        <strong>Biochemical Function</strong>: The gene product performs a biochemical function shared with other known genes in the disease of interest, or the gene product is consistent with the observed phenotype(s)<br /><br />
+                        <strong>Protein Interactions</strong>: The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest<br /><br />
                         <strong>Expression</strong>: The gene is expressed in tissues relevant to the disease of interest, or the gene is altered in expression in patients who have the disease<br /><br />
-                        <strong>Functional alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents<br /><br />
-                        <strong>Model systems</strong>: Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state<br /><br />
+                        <strong>Functional Alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents<br /><br />
+                        <strong>Model Systems</strong>: Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state<br /><br />
                         <strong>Rescue</strong>: The cellular phenotype in patient-derived cells or engineered equivalents can be rescued by addition of the wild-type gene product
                     </p>
                 </div>
@@ -1160,7 +1160,7 @@ var ExperimentalNameType = function() {
                     </div>
                 );
             })}
-            {this.state.experimentalType && this.state.experimentalType == 'Biochemical function' ?
+            {this.state.experimentalType && this.state.experimentalType == 'Biochemical Function' ?
                 <Input type="select" ref="experimentalSubtype" label="Please select which one (A or B) you would like to curate"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                     defaultValue="none" value={this.state.experimentalSubtype} handleChange={this.handleChange}
@@ -1779,11 +1779,11 @@ var TypeRescue = function() {
             <Input type="textarea" ref="explanation" label="Explanation of rescue of phenotype:"
                 error={this.getFormError('explanation')} clearError={this.clrFormErrors.bind(null, 'explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={rescue.explanation} required />
+                rows="5" value={rescue.explanation} inputDisabled={!this.state.wildTypeRescuePhenotype} required />
             <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper"
                 error={this.getFormError('evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={rescue.evidenceInPaper} />
+                rows="5" inputDisabled={!this.state.wildTypeRescuePhenotype} value={rescue.evidenceInPaper} />
         </div>
     );
 }
@@ -1885,8 +1885,8 @@ var ExperimentalViewer = React.createClass({
                     <h3>{context.evidenceType}</h3>
                     <h4>{context.label}</h4>
 
-                    {context.evidenceType == 'Biochemical function' ?
-                    <Panel title="Biochemical function" panelClassName="panel-data">
+                    {context.evidenceType == 'Biochemical Function' ?
+                    <Panel title="Biochemical Function" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Identified function of gene in this record</dt>
@@ -1905,7 +1905,7 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Biochemical function' && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction !== '' ?
+                    {context.evidenceType == 'Biochemical Function' && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction !== '' ?
                     <Panel title="A. Gene(s) with same function implicated in same disease" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
@@ -1939,7 +1939,7 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Biochemical function' && ((context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ') !== '') || (context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) ?
+                    {context.evidenceType == 'Biochemical Function' && ((context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ') !== '') || (context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) ?
                     <Panel title="B. Gene function consistent with phenotype" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
@@ -1964,8 +1964,8 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Protein interactions' ?
-                    <Panel title="Protein interactions" panelClassName="panel-data">
+                    {context.evidenceType == 'Protein Interactions' ?
+                    <Panel title="Protein Interactions" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Interacting Gene(s)</dt>
@@ -2057,8 +2057,8 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Functional alteration of gene/gene product' ?
-                    <Panel title="Functional alteration of gene/gene product" panelClassName="panel-data">
+                    {context.evidenceType == 'Functional Alteration' ?
+                    <Panel title="Functional Alteration" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Patient cells with candidate mutation or engineered equivalent</dt>
@@ -2097,8 +2097,8 @@ var ExperimentalViewer = React.createClass({
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Model systems' ?
-                    <Panel title="Model systems" panelClassName="panel-data">
+                    {context.evidenceType == 'Model Systems' ?
+                    <Panel title="Model Systems" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Non-human animal or cell-culture model?</dt>

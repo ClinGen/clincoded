@@ -26,7 +26,7 @@
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
         "label": "Experiment 2",
-        "evidenceType": "Protein interactions",
+        "evidenceType": "Protein Interactions",
         "proteinInteractions": {
             "interactingGenes" : [
                 "NGLY1"
@@ -47,7 +47,7 @@
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
         "label": "Experiment 3",
-        "evidenceType": "Biochemical function",
+        "evidenceType": "Biochemical Function",
         "biochemicalFunction": {
             "identifiedFunction": "GO_Slim term here",
             "evidenceForFunction": "some evidence",
@@ -116,7 +116,7 @@
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
         "label": "Experiment 5",
-        "evidenceType": "Functional alteration of gene/gene product",
+        "evidenceType": "Functional Alteration",
         "functionalAlteration": {
             "cellMutationOrEngineeredEquivalent": "Patient cells",
             "patientCellType": "EFO_13579",
@@ -140,7 +140,7 @@
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
         "label": "Experiment 6",
-        "evidenceType": "Model systems",
+        "evidenceType": "Model Systems",
         "modelSystems": {
             "animalOrCellCulture": "Engineered equivalent",
             "cellCulture": "EFO_76543210",
