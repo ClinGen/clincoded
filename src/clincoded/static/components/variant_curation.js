@@ -311,7 +311,7 @@ var VariantCuration = React.createClass({
                 }
 
                 // Not updating the assessment
-                Promise.resolve(newPathogenicity);
+                return Promise.resolve(newPathogenicity);
             }).then(pathogenicity => {
                 // Given pathogenicity has been saved (created or updated).
                 // Now update the GDM to include the pathogenicity if it's new
