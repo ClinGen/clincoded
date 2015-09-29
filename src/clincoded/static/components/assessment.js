@@ -141,8 +141,9 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         note: React.PropTypes.string, // Note to display below the dropdown
         updateValue: React.PropTypes.func.isRequired, // Parent function to call when dropdown changes
         assessmentSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
+        disableDefault: React.PropTypes.bool, // TRUE to disable the Default (Not Assessed) item
         accordion: React.PropTypes.bool, // True if the panel should part of an openable accordion
-        open: React.PropTypes.bool // True if the panel should be an openable panel
+        open: React.PropTypes.bool, // True if the panel should be an openable panel
     },
 
     // Called when the dropdown value changes
@@ -164,7 +165,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                         <div className="row">
                             <Input type="select" ref="assessment" label={label + ':'} value={value} handleChange={this.handleChange.bind(null, this.props.assessmentTracker)}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={disabled}>
-                                <option>Not Assessed</option>
+                                <option disabled={this.props.disableDefault}>Not Assessed</option>
                                 <option disabled="disabled"></option>
                                 <option>Supports</option>
                                 <option>Review</option>
@@ -176,7 +177,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                         </div>
                         {this.props.assessmentSubmit ?
                             <div className="curation-submit clearfix">
-                                <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.assessmentSubmit} title="Save" />
+                                <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.assessmentSubmit} title="Update" />
                             </div>
                         : null}
                     </Panel>
@@ -197,4 +198,12 @@ module.exports.userAssessment = function(assessments, curatorUuid) {
         }).clone().value();
     }
     return null;
+};
+
+
+module.exports.othersAssessed = function(assessments, curatorUuid) {
+    // See if others have assessed
+    return !!_(assessments).find(function(assessment) {
+        return (assessment.submitted_by.uuid !== curatorUuid) && assessment.value !== DEFAULT_VALUE;
+    });
 };

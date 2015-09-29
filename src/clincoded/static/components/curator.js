@@ -1183,9 +1183,6 @@ function flattenGroup(group) {
 var familySimpleProps = ["label", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "numberOfMale", "numberOfFemale", "countryOfOrigin",
     "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "method", "additionalInformation", "date_created"
 ];
-var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGenerationInPedigree", "consanguineousFamily", "numberOfCases", "deNovoType",
-    "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
-    "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation"];
 
 function flattenFamily(family) {
     // First copy everything before fixing the special properties
@@ -1198,17 +1195,7 @@ function flattenFamily(family) {
 
     // Flatten segregation variants
     if (family.segregation) {
-        flat.segregation = cloneSimpleProps(family.segregation, segregationSimpleProps);
-        if (family.segregation.variants && family.segregation.variants.length) {
-            flat.segregation.variants = family.segregation.variants.map(function(variant) {
-                return variant['@id'];
-            });
-        }
-        if (family.segregation.assessments && family.segregation.assessments.length) {
-            flat.segregation.assessments = family.segregation.assessments.map(function(assessment) {
-                return assessment['@id'];
-            });
-        }
+        flat.segregation = flattenSegregation(family.segregation);
     }
 
     // Flatten other PMIDs
@@ -1227,6 +1214,28 @@ function flattenFamily(family) {
 
     return flat;
 }
+
+
+var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGenerationInPedigree", "consanguineousFamily", "numberOfCases", "deNovoType",
+    "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
+    "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation"];
+
+var flattenSegregation = module.exports.flattenSegregation = function(segregation) {
+    var flat = cloneSimpleProps(segregation, segregationSimpleProps);
+
+    if (segregation.variants && segregation.variants.length) {
+        flat.variants = segregation.variants.map(function(variant) {
+            return variant['@id'];
+        });
+    }
+    if (segregation.assessments && segregation.assessments.length) {
+        flat.assessments = segregation.assessments.map(function(assessment) {
+            return assessment['@id'];
+        });
+    }
+
+    return flat;
+};
 
 
 var individualSimpleProps = ["label", "sex", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "countryOfOrigin", "ethnicity",

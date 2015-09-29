@@ -61,7 +61,8 @@ var formMapSegregation = {
 var initialCv = {
     assessmentTracker: null, // Tracking object for a single assessment
     filledSegregations: {}, // Tracks segregation fields with values filled in
-    segregationAssessed: false // TRUE if segregation has been assessed by self or others
+    segregationAssessed: false, // TRUE if segregation has been assessed by self or others
+    othersAssessed: false // TRUE if other curators have assessed the family's segregation
 };
 
 
@@ -272,6 +273,11 @@ var FamilyCuration = React.createClass({
                         this.cv.segregationAssessed = _(segregation.assessments).find(function(assessment) {
                             return assessment.value !== Assessments.DEFAULT_VALUE;
                         });
+
+                        // See if others have assessed
+                        if (user && user.uuid) {
+                            this.cv.othersAssessed = Assessments.othersAssessed(segregation.assessments, user.uuid);
+                        }
                     }
 
                     // Fill in the segregation filled object so we know whether to enable or disable the assessment dropdown
@@ -850,7 +856,7 @@ var FamilyCuration = React.createClass({
         if (value) { newFamily.additionalInformation = value; }
 
         // Fill in the segregation fields to the family, if there was a form (no form if assessed)
-        if (!this.cv.segregationAssessed) {
+        if (!newFamily.segregation || !newFamily.segregation.assessments || newFamily.segregation.assessments.length === 0) {
             this.createSegregation(newFamily, familyVariants);
         }
 
@@ -946,7 +952,7 @@ var FamilyCuration = React.createClass({
                                         }
                                         <PanelGroup accordion>
                                             <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled}
-                                                updateValue={this.updateAssessmentValue} accordion open />
+                                                updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Family — Variant(s) Segregating with Proband" open>
@@ -1430,6 +1436,7 @@ var FamilyViewer = React.createClass({
         var user = this.props.session && this.props.session.user_properties;
         var userFamily = user && family && family.submitted_by ? user.uuid === family.submitted_by.uuid : false;
         var familyUserAssessed = false; // TRUE if logged-in user doesn't own the family, but the family's owner assessed its segregation
+        var othersAssessed = false; // TRUE if we own this segregation, and others have assessed it
 
         // Make an assessment tracker object once we get the logged in user info
         if (!this.cv.assessmentTracker && user && segregation) {
@@ -1441,6 +1448,11 @@ var FamilyViewer = React.createClass({
                 userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
             }
             this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'segregation');
+        }
+
+        // See if others have assessed
+        if (userFamily) {
+            othersAssessed = Assessments.othersAssessed(assessments, user.uuid);
         }
 
         // Note if we don't own the family, but the owner has assessed the segregation
@@ -1600,7 +1612,7 @@ var FamilyViewer = React.createClass({
 
                     {this.cv.gdmUuid && (familyUserAssessed || userFamily) ?
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} />
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} />
                     : null}
 
                     <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
