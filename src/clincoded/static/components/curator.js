@@ -522,6 +522,19 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                 : null}
                 <p>{moment(experimental.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
+            {(experimental.variants && experimental.variants.length) ?
+                <div>
+                    <span>Variants: </span>
+                    {experimental.variants.map(function(variant, j) {
+                        return (
+                            <span key={j}>
+                                {j > 0 ? ', ' : ''}
+                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
+                            </span>
+                        );
+                    })}
+                </div>
+            : null}
             <a href={'/experimental/' + experimental.uuid} target="_blank" title="View experimental data in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
         </div>
