@@ -223,6 +223,22 @@ var Input = module.exports.Input = React.createClass({
             return React.findDOMNode(this.refs.input).value.trim();
         } else if (this.props.type === 'select') {
             return this.getSelectedOption().trim();
+        } else if (this.props.type === 'checkbox') {
+            return this.props.checked;
+        }
+    },
+
+    // Toggles value for checkboxes
+    toggleValue: function() {
+        if (this.props.type === 'checkbox') {
+            if (this.props.checked === true) {
+                this.props.checked = false;
+                return false;
+            }
+            else {
+                this.props.checked = true;
+                return true;
+            }
         }
     },
 
@@ -230,6 +246,8 @@ var Input = module.exports.Input = React.createClass({
     setValue: function(val) {
         if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
             React.findDOMNode(this.refs.input).value = val;
+        } else if (this.props.type === 'checkbox') {
+            React.findDOMNode(this.refs.input).checked = val;
         }
     },
 
@@ -238,6 +256,8 @@ var Input = module.exports.Input = React.createClass({
             React.findDOMNode(this.refs.input).value = '';
         } else if (this.props.type === 'select') {
             this.resetSelectedOption();
+        } else if (this.props.type === 'checkbox') {
+            this.props.checked = false;
         }
     },
 
@@ -350,6 +370,22 @@ var Input = module.exports.Input = React.createClass({
                     <span className={this.props.wrapperClassName}>
                         <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} disabled={this.props.inputDisabled} />
                     </span>
+                );
+                break;
+
+            case 'checkbox':
+                var checkboxInput = (this.props.checked ?
+                    <input className={inputClasses} type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} checked />
+                    : <input className={inputClasses} type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} />
+                );
+                input = (
+                    <div className={this.props.groupClassName}>
+                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
+                        <div className={this.props.wrapperClassName}>
+                            {checkboxInput}
+                            <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
+                        </div>
+                    </div>
                 );
                 break;
 

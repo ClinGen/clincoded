@@ -227,10 +227,12 @@ var VariantCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
+            var pathogenicityUuid = this.state.pathogenicity ? this.state.pathogenicity.uuid : '';
+
             // If pathogenicity object has no assessment object found with currently logged-in user
             // and form assessment has non-default value. The assessment might be a new one without a type,
             // so pass in the type.
-            var promise = this.saveAssessment(this.cv.assessmentTracker, this.state.gdm, this.state.pathogenicity);
+            var promise = this.saveAssessment(this.cv.assessmentTracker, this.state.gdm.uuid, pathogenicityUuid);
 
             // Wait for the assessment to finish writing if needed, then handle the pathenogicity object
             promise.then(newAssessmentInfo => {
@@ -427,7 +429,7 @@ var VariantCuration = React.createClass({
                                                 </Panel>
                                             </PanelGroup>
                                         : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} note="Note: To Edit the pathogenicity evaluation, first change your assessment to “Not assessed” and click Save, then Edit the Variant again."/> : null) }
-                                        <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue.bind(null, this.cv.assessmentTracker)} accordion open />
+                                        <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue} accordion open />
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" />
                                             {gdm ?

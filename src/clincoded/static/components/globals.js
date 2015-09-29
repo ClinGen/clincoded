@@ -139,9 +139,17 @@ module.exports.external_url_map = {
     'PubMedSearch': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&id=',
     'PubMed': 'https://www.ncbi.nlm.nih.gov/pubmed/',
     'OrphaNet': 'http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=',
+    'OrphanetHome': 'http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=',
     'HGNC': 'http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=',
+    'HGNCHome': 'http://www.genenames.org/',
     'Entrez': 'http://www.ncbi.nlm.nih.gov/gene/',
-    'OMIM': 'http://omim.org/'
+    'OMIM': 'http://omim.org/',
+    'ClinVar': 'http://www.ncbi.nlm.nih.gov/clinvar/',
+    'HPOBrowser': 'http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000118',
+    'Uberon': 'http://uberon.github.io/',
+    'GO_Slim': 'http://bit.ly/1fxDvhV',
+    'CL': 'http://www.ontobee.org/browser/index.php?o=CL',
+    'EFO': 'http://www.ebi.ac.uk/efo/'
 };
 
 
