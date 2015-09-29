@@ -205,7 +205,7 @@ var PmidSelectionList = React.createClass({
                     </Modal>
                 </div>
                 {annotations ?
-                    <div className="pmid-selection-list" style={{'height':'300px', 'overflow':'auto'}}>
+                    <div className="pmid-selection-list" style={{'height':'500px', 'overflow':'auto'}}>
                         {annotations.map(annotation => {
                             var classList = 'pmid-selection-list-item' + (annotation.article.pmid === this.props.currPmid ? ' curr-pmid' : '');
 

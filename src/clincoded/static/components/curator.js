@@ -72,10 +72,10 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         gdm: React.PropTypes.object, // GDM data to display
         omimId: React.PropTypes.string, // OMIM ID to display
         updateOmimId: React.PropTypes.func, // Function to call when OMIM ID changes
-        session: React.PropTypes.object // Logged-in session
+        //session: React.PropTypes.object // Logged-in session
     },
 
-    mixins: [RestMixin],
+    //mixins: [RestMixin],
 
     render: function() {
         var gdm = this.props.gdm;
@@ -110,7 +110,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             if (summaryInfo === 'none' && gdm.annotations && gdm.annotations.length > 0) {
                 var allAssessments = [];
                 for (var i in gdm.annotations) {
-                    if (checkAssessment(annotations[i], session)) {
+                    if (checkAssessment(gdm.annotations[i], session)) {
                         summaryInfo = 'assessed';
                         break;
                     }
@@ -124,14 +124,14 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <h1>{gene.symbol} – {disease.term}</h1>
                             <h2>{mode}</h2>
                             { (summaryInfo !== 'none') ?
-                                <div className="provisional-border">
+                                <div className="provisional-info-panel">
                                     <div className="provisional-button">
                                         <a className="btn btn-primary btn-xs" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
                                             { summaryInfo === 'provisional' ? 'Generate New Summary' : 'Generate Summary' }
                                         </a>
                                     </div>
                                     <div>
-                                        <div className="provisional-data">
+                                        <div className="provisional-title">
                                             <strong>Current Summary & Provisional Classification</strong>
                                         </div>
                                         {   summaryInfo === 'provisional' ?
@@ -181,7 +181,6 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
 // Function to pick all assessment list in each annotation.
 function checkAssessment(obj, session) {
-    var allAssociations = assessmentList;
     if (obj['@type'][0] === 'annotation' && obj.groups.length > 0) {
         for (var i in obj.groups) {
             checkAssessment(obj.groups[i], session);

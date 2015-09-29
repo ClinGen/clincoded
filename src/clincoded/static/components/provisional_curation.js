@@ -521,13 +521,13 @@ var NewCalculation = function() {
                                 <strong className="pull-right">&nbsp;</strong>
                             </div>
                             <div className="col-sm-7">
-                                <table style={{'border-top':'solid 1px #ddd', 'border-bottom':'solid 1px #ddd'}}>
+                                <table className="summary-scoring">
                                     <tr><td><strong>Total Experimental Score:</strong></td><td><strong>{expScore}</strong></td></tr>
                                     {Object.keys(expType).map(function(key) {
                                         return (
                                             expType[key] > 0 ?
-                                                <tr><td style={{width:'300px'}}>{key} x {expType[key]} ({expUnit[key]} each)</td>
-                                                    <td style={{width:'300px'}}>{expType[key]*expUnit[key]}</td>
+                                                <tr><td className="td-title">{key} x {expType[key]} ({expUnit[key]} each)</td>
+                                                    <td className="td-score">{expType[key]*expUnit[key]}</td>
                                                 </tr>
                                             :
                                             null
