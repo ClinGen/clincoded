@@ -419,7 +419,8 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var groupRenders = [], familyRenders = [], individualRenders = [];
+        var experimentalUrl = curatorMatch ? ('/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var groupRenders = [], familyRenders = [], individualRenders = [], experimentalRenders = [];
 
         // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
         if (annotation && annotation.groups) {
@@ -473,6 +474,14 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             individualRenders = individualRenders.concat(individualAnnotationRenders);
         }
 
+        // Add to the array of experiment renders.
+        if (annotation && annotation.experimentalData) {
+            var experimentalAnnotationRenders = annotation.experimentalData.map(experimental => {
+                return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch)}</div>;
+            });
+            experimentalRenders = experimentalRenders.concat(experimentalAnnotationRenders);
+        }
+
         // Render variants
         var variantRenders;
         var allVariants = collectAnnotationVariants(annotation);
@@ -494,6 +503,9 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                         </Panel>
                         <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
                             {individualRenders}
+                        </Panel>
+                        <Panel title={<CurationPaletteTitles title="Experimental Data" url={experimentalUrl} />} panelClassName="panel-evidence">
+                            {experimentalRenders}
                         </Panel>
                         {variantRenders && variantRenders.length ?
                             <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence">
@@ -644,6 +656,54 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             : null}
             <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
+        </div>
+    );
+};
+
+// Render an experimental data in the curator palette.
+var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
+    var i = 0;
+    var subtype = '';
+    // determine if the evidence type has a subtype, and determine the subtype
+    if (experimental.evidenceType == 'Biochemical function') {
+        if (!_.isEmpty(experimental.biochemicalFunction.geneWithSameFunctionSameDisease)) {
+            subtype = ' (A)';
+        } else if (!_.isEmpty(experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype)) {
+            subtype = ' (B)';
+        }
+    } else if (experimental.evidenceType == 'Expression') {
+        if (!_.isEmpty(experimental.expression.normalExpression)) {
+            subtype = ' (A)';
+        } else if (!_.isEmpty(experimental.expression.alteredExpression)) {
+            subtype = ' (B)';
+        }
+    }
+
+    return (
+        <div className="panel-evidence-group" key={experimental.uuid}>
+            <h5>{experimental.label}</h5>
+            {experimental.evidenceType}{subtype}
+            <div className="evidence-curation-info">
+                {experimental.submitted_by ?
+                    <p className="evidence-curation-info">{experimental.submitted_by.title}</p>
+                : null}
+                <p>{moment(experimental.date_created).format('YYYY MMM DD, h:mm a')}</p>
+            </div>
+            {(experimental.variants && experimental.variants.length) ?
+                <div>
+                    <span>Variants: </span>
+                    {experimental.variants.map(function(variant, j) {
+                        return (
+                            <span key={j}>
+                                {j > 0 ? ', ' : ''}
+                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
+                            </span>
+                        );
+                    })}
+                </div>
+            : null}
+            <a href={'/experimental/' + experimental.uuid} target="_blank" title="View experimental data in a new tab">View</a>
+            {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
         </div>
     );
 };
@@ -992,6 +1052,20 @@ var collectVariantAssociations = function(annotation, targetVariant) {
         }
     }
 
+    // Find any variants matching the target variant in the given experimental data.
+    // Any matching variant pushes its experimental data onto the associations array as a side effect
+    function surveyExperimental(experimental, targetVariant, associations) {
+        // Search for variant in experimental matching variant we're looking for
+        var matchingVariant = _(experimental.variants).find(function(variant) {
+            return variant.uuid === targetVariant.uuid;
+        });
+
+        // Found a matching variant; push its parent individual
+        if (matchingVariant) {
+            associations.push(experimental);
+        }
+    }
+
     if (annotation && Object.keys(annotation).length) {
         // Search unassociated individuals
         annotation.individuals.forEach(function(individual) {
@@ -1026,6 +1100,11 @@ var collectVariantAssociations = function(annotation, targetVariant) {
                     surveyIndividual(individual, targetVariant, allAssociations);
                 });
             });
+        });
+
+        // Search experimental data
+        annotation.experimentalData.forEach(function(experimental) {
+            surveyExperimental(experimental, targetVariant, allAssociations);
         });
     }
 
@@ -1111,6 +1190,16 @@ var collectAnnotationVariants = function(annotation) {
                 });
             });
         });
+
+        // Search experimental data
+        annotation.experimentalData.forEach(function(experimental) {
+            // Collect variants in experimental data, if available
+            if (experimental.variants) {
+                experimental.variants.forEach(function(variant) {
+                    allVariants[variant['@id']] = variant;
+                });
+            }
+        });
     }
     return allVariants;
 };
@@ -1161,7 +1250,27 @@ module.exports.capture = {
     // Find all the comma-separated HPO ID occurrences. Return all valid HPO ID in an array.
     hpoids: function(s) {
         return captureBase(s, /^\s*(HP:\d{7})\s*$/i, true);
-    }
+    },
+
+    // Find all the comma-separated GO_Slim ID occurrences. Return all valid GO_Slim ID in an array.
+    goslims: function(s) {
+        return captureBase(s, /^\s*(GO:\d{7})\s*$/i, true);
+    },
+
+    // Find all the comma-separated Uberon ID occurrences. Return all valid Uberon ID in an array.
+    uberonids: function(s) {
+        return captureBase(s, /^\s*(UBERON_\d{7})\s*$/i, true);
+    },
+
+    // Find all the comma-separated EFO ID occurrences. Return all valid EFO IDs in an array.
+    efoids: function(s) {
+        return captureBase(s, /^\s*(EFO_\d{7})\s*$/i, true);
+    },
+
+    // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.
+    clids: function(s) {
+        return captureBase(s, /^\s*(CL_\d{7})\s*$/i, true);
+    },
 };
 
 

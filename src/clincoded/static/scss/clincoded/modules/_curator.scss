@@ -359,6 +359,22 @@
     }
 }
 
+.experimental-data-form {
+    input[type=checkbox] {
+        margin-top: 11px;
+    }
+
+    .hug-top {
+        margin-top: -20px;
+        padding-bottom: 20px;
+    }
+
+    .no-resize {
+        resize: none;
+        overflow-x: hidden;
+    }
+}
+
 .palette-not-curated {
     color: #909090;
 }

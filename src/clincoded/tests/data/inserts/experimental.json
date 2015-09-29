@@ -5,6 +5,7 @@
         "date_created": "2015-04-13T10:10:37.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
+        "label": "Experiment 1",
         "evidenceType": "Expression",
         "expression": {
             "organOfTissue" : "T-cells",
@@ -35,8 +36,14 @@
         "date_created": "2015-04-13T12:32:57.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
+<<<<<<< HEAD
         "evidenceType": "Protein interactions",
         "proteinIneractions": {
+=======
+        "label": "Experiment 2",
+        "evidenceType": "Protein Interactions",
+        "proteinInteractions": {
+>>>>>>> dev
             "interactingGenes" : [
                 "NGLY1"
             ],
@@ -55,11 +62,12 @@
         "date_created": "2015-04-13T16:43:12.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
-        "evidenceType": "Biochemical function",
+        "label": "Experiment 3",
+        "evidenceType": "Biochemical Function",
         "biochemicalFunction": {
             "identifiedFunction": "GO_Slim term here",
             "evidenceForFunction": "some evidence",
-            "evidenceForFunctionInPapaer": "Paragraph 3-5, Page 3",
+            "evidenceForFunctionInPaper": "Paragraph 3-5, Page 3",
             "geneWithSameFunctionSameDisease": {
                 "genes": [
                     "NGLY1",
@@ -89,6 +97,7 @@
         "date_created": "2015-04-13T16:43:12.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
+        "label": "Experiment 4",
         "evidenceType": "Rescue",
         "rescue": {
             "patientCellOrEngineeredEquivalent": "Patient cells",
@@ -111,12 +120,18 @@
         "date_created": "2015-04-13T16:43:12.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
+<<<<<<< HEAD
         "evidenceType": "Functional alteration of gene or gene product",
         "functionalAleration": {
+=======
+        "label": "Experiment 5",
+        "evidenceType": "Functional Alteration",
+        "functionalAlteration": {
+>>>>>>> dev
             "cellMutationOrEngineeredEquivalent": "Patient cells",
             "patientCellType": "EFO_13579",
             "normalFunctionOfGene": "GO_Slim term here",
-            "descriptoinOfGeneAlteration": "some description here",
+            "descriptionOfGeneAlteration": "some description here",
             "normalFunctionOfGene": "GO_Slim term for normal function",
             "evidenceForNormalFunction": "evidence 007",
             "evidenceInPaper": "Paragraph 2-5, page 5"
@@ -131,7 +146,8 @@
         "date_created": "2015-04-13T16:43:12.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "active": true,
-        "evidenceType": "Model systems",
+        "label": "Experiment 6",
+        "evidenceType": "Model Systems",
         "modelSystems": {
             "animalOrCellCulture": "Engineered equivalent",
             "cellCulture": "EFO_76543210",

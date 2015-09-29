@@ -15,6 +15,12 @@
         "schema_version": {
             "default": "1"
         },
+        "label": {
+            "title": "Label",
+            "description": "A user entered label for the experiment",
+            "type": "string",
+            "default": ""
+        },
         "active": {
             "title": "Active",
             "description": "Switch to set if the experimental data is avaliable for curation",
@@ -26,11 +32,19 @@
             "description": "One of six evidence types",
             "type": "string",
             "enum": [
+<<<<<<< HEAD
                 "Biochemical function",
                 "Protein interactions",
                 "Expression",
                 "Functional alteration of gene or gene product",
                 "Model systems",
+=======
+                "Biochemical Function",
+                "Protein Interactions",
+                "Expression",
+                "Functional Alteration",
+                "Model Systems",
+>>>>>>> dev
                 "Rescue"
             ]
         },
@@ -50,7 +64,7 @@
                     "description": "Evidence for function (required)",
                     "type": "string"
                 },
-                "evidenceForFunctionInPapaer": {
+                "evidenceForFunctionInPaper": {
                     "title": "Evidence Location in Article",
                     "description": "Where in article to find evidence",
                     "type": "string",
@@ -76,6 +90,11 @@
                             "title": "Evidence for Other Genes with Same Function",
                             "description": "Evidence for other genes (required)",
                             "type": "string"
+                        },
+                        "geneImplicatedWithDisease": {
+                            "title": "Gene implicated in the disease",
+                            "description": "Has this gene or genes been implicated in the above disease",
+                            "type": "boolean"
                         },
                         "explanationOfOtherGenes": {
                             "title": "Explanation of Other Genes",
@@ -151,7 +170,7 @@
                 }
             }
         },
-        "proteinIneractions": {
+        "proteinInteractions": {
             "title": "Interactions",
             "description": "Items in interactions type",
             "type": "object",
@@ -238,6 +257,11 @@
                     "type": "object",
                     "default": {},
                     "properties": {
+                        "expressedInTissue": {
+                            "title": "Is gene normally expressed in tissue",
+                            "description": "Is the gene normally expressed in the tissue",
+                            "type": "boolean"
+                        },
                         "evidence": {
                             "title": "Evidence for Normal Expression",
                             "description": "Evidence for normal expression in tissue",
@@ -266,6 +290,11 @@
                     "type": "object",
                     "default": {},
                     "properties": {
+                        "expressedInPatients": {
+                            "title": "Is expression altered in patients with disease",
+                            "description": "Is expression altered in patients who have the disease",
+                            "type": "boolean"
+                        },
                         "evidence": {
                             "title": "Evidence for Altered Expression",
                             "description": "Evidence for altered expression in patients",
@@ -291,7 +320,7 @@
                 }
             }
         },
-        "functionalAleration": {
+        "functionalAlteration": {
             "title": "Functional Alteration",
             "description": "Items in Functional Alteration type",
             "type": "object",
@@ -316,7 +345,7 @@
                     "description": "EFO terms",
                     "type": "string"
                 },
-                "descriptoinOfGeneAlteration": {
+                "descriptionOfGeneAlteration": {
                     "title": "Gene Alteration",
                     "description": "Description of gene alteration in engineered equivalent",
                     "type": "string"
@@ -433,7 +462,7 @@
                     "type": "string"
                 },
                 "evidenceInPaper": {
-                    "title": "Evidence in Papaer",
+                    "title": "Evidence in Paper",
                     "description": "Where evidence can be found in paper",
                     "type": "string",
                     "default": ""
@@ -512,7 +541,7 @@
                     "description": "Explanation",
                     "type": "string"
                 },
-                "evidenceLocationInPaper": {
+                "evidenceInPaper": {
                     "title": "Evidence Location in Paper",
                     "description": "Where can evidence be found in paper",
                     "type": "string",
@@ -545,6 +574,10 @@
         }
     },
     "columns": {
+        "label": {
+            "title": "Label",
+            "type": "string"
+        },
         "uuid": {
             "title": "ExperimentalData",
             "type": "string"

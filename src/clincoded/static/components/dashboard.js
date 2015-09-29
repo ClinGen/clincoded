@@ -56,6 +56,8 @@ var Dashboard = React.createClass({
                     gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
                 if (gdmSubItem[i].groups) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].groups,
                     gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
+                if (gdmSubItem[i].experimentalData) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].experimentalData,
+                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
                 if (gdmSubItem[i].familyIncluded) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].familyIncluded,
                     gdmUuid, geneSymbol, diseaseTerm, modeInheritance, _.extend({}, extraInfo, {parent: gdmSubItem[i].label, parentUrl: gdmSubItem[i]['@id'], parentType: gdmSubItem[i]['@type'][0]}));
                 if (gdmSubItem[i].individualIncluded) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].individualIncluded,
@@ -76,7 +78,7 @@ var Dashboard = React.createClass({
 
     getData: function(session) {
         // Retrieve all GDMs and other objects related to user via search
-        this.getRestDatas(['/gdm/', '/search/?type=gdm&type=annotation&type=group&type=family&type=individual&limit=10&submitted_by.uuid=' +
+        this.getRestDatas(['/gdm/', '/search/?type=gdm&type=annotation&type=group&type=family&type=individual&type=experimental&limit=10&submitted_by.uuid=' +
             session.user_properties.uuid], [function() {}, function() {}]).then(data => {
             // Search objects successfully retrieved; process results
             // GDM results; finds GDMs created by user, and also creates PMID-GDM mapping table
@@ -113,6 +115,14 @@ var Dashboard = React.createClass({
                         if (result.uuid in gdmMapping) {
                             tempUrl = "/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + result.article.pmid;
                             tempDisplayText = <span><a href={tempUrl}>PMID:{result.article.pmid}</a> added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i></span>;
+                            tempTimestamp = "added " + tempDateTime;
+                            display = true;
+                        }
+                        break;
+                    case 'experimental':
+                        if (result.uuid in gdmMapping) {
+                            tempUrl = "/experimental/" + result.uuid + "/";
+                            tempDisplayText = <span><a href={tempUrl}>{result.label}</a> ({result.evidenceType}) added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
                             tempTimestamp = "added " + tempDateTime;
                             display = true;
                         }
