@@ -1091,7 +1091,7 @@ var ExperimentalCuration = React.createClass({
                                                 {TypeRescue.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
-                                        {this.state.experimentalType != 'Biochemical Function' && this.state.experimentalType != 'Protein Interactions' && (this.state.experimentalType == 'Expression' && this.state.experimentalSubtype.charAt(0) != 'A') && this.state.experimentalNameVisible ?
+                                        {((this.state.experimentalType == 'Expression' && this.state.experimentalSubtype.charAt(0) != 'A') || this.state.experimentalType == 'Functional Alteration' || this.state.experimentalType == 'Model Systems' || this.state.experimentalType == 'Rescue') && this.state.experimentalNameVisible ?
                                             <PanelGroup accordion><Panel title="Experimental Data - Associated Variant(s)" open>
                                                 {ExperimentalDataVariant.call(this)}
                                             </Panel></PanelGroup>
