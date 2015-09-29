@@ -140,6 +140,13 @@ var VariantCuration = React.createClass({
         this.loadData();
     },
 
+    // When the user changes the assessment value, this gets called
+    updateAssessment: function(value) {
+        var assessment = this.state.assessment;
+        assessment.value = value;
+        this.setState({assessment: assessment});
+    },
+
     // Convert filled-out form values to pathonegicity object, which is returned. Any existing pathogenicity object
     // (editing a variant) gets passed in currPathogenicity and gets modified with the new values.
     formToPathogenicity: function(currPathogenicity) {
