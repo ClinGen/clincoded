@@ -179,22 +179,20 @@ var ProvisionalCuration = React.createClass({
                     <div>
                         <RecordHeader gdm={this.state.gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={this.props.session} />
                         <div className="container">
-                            { (this.state.provisional && edit === 'yes') ?
+                            {   (this.state.provisional && edit === 'yes') ?
                                 EditCurrent.call(this)
                                 :
                                 (
                                     calculate === 'yes' ?
                                     NewCalculation.call(this)
                                     :
-                                    null
+                                    Demo.call(this)
                                 )
                             }
                         </div>
                     </div>
                     :
-                    <div>
-                        <strong style={{'color':'red'}}>Error: failed to get gdm data.</strong>
-                    </div>
+                    null
                 }
             </div>
         );
@@ -202,6 +200,96 @@ var ProvisionalCuration = React.createClass({
 });
 
 globals.curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
+
+var Demo = function() {
+    return (
+        <div>
+            <h1>Curation Summary and Provisional Classification</h1>
+            <div>
+                <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                    <PanelGroup accordion>
+                        <Panel title="New calculation and Classification" open>
+                            <div className="form-group">
+                                <div className="row">
+                                    <div className="col-sm-5"><strong className="pull-right">Total Score:</strong></div>
+                                    <div className="col-sm-7"><strong>1000</strong></div>
+                                </div>
+                                <br />
+                                <div className="row">
+                                    <div className="col-sm-5">
+                                        <strong className="pull-right">Scoring Details:</strong>
+                                    </div>
+                                    <div className="col-sm-7"><span>&nbsp;</span></div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-sm-5">
+                                        <strong className="pull-right">&nbsp;</strong>
+                                    </div>
+                                    <div className="col-sm-7">
+                                        <table className="summary-scoring">
+                                            <tr><td className="td-title"><strong>Final Experimental Score:</strong></td>
+                                                <td className="td-score"><strong>400</strong></td>
+                                            </tr>
+                                            <tr><td className="td-title">Expression: 100 (0.5 each)</td><td className="td-score">50</td></tr>
+                                            <tr><td className="td-title">Protein interactions: 100 (0.5 each)</td><td className="td-score">50</td></tr>
+                                            <tr><td className="td-title">Biochemical function: 100 (0.5 each)</td><td className="td-score">50</td></tr>
+                                            <tr><td className="td-title">Functional alteration of gene or gene product: 100 (1 each)</td><td className="td-score">100</td></tr>
+                                            <tr><td className="td-title">Model systems: 100 (2 each)</td><td className="td-score">200</td></tr>
+                                            <tr><td className="td-title">Rescue: 100 (2 each)</td><td className="td-score">200</td></tr>
+                                            <tr><td cols="2"><strong>&nbsp;</strong></td></tr>
+                                            <tr><td className="td-title"><strong>Proband Score:</strong></td><td className="td-score"><strong>300</strong></td></tr>
+                                            <tr><td className="td-title"># Variant assessed</td><td className="td-score">100</td></tr>
+                                            <tr><td className="td-title"># Family counted</td><td className="td-score">100</td></tr>
+                                            <tr><td className="td-title"># Individual counted</td><td className="td-score">100</td></tr>
+                                            <tr><td cols="2"><span>&nbsp;</span></td></tr>
+                                            <tr><td className="td-title"><strong>Publication Score:</strong></td><td className="td-score"><strong>200</strong></td></tr>
+                                            <tr><td className="td-title"># Article</td><td className="td-score">100</td></tr>
+                                            <tr><td cols="2"><span>&nbsp;</span></td></tr>
+                                            <tr><td className="td-title"><strong>Time Score:</strong></td><td className="td-score"><strong>100</strong></td></tr>
+                                            <tr><td className="td-title">Earliest Year</td><td className="td-score">{'0001'}</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <br />
+                                <div className="row">
+                                    <div className="col-sm-5">
+                                        <strong className="pull-right">Calculated Clinical Validity Classification:</strong>
+                                    </div>
+                                    <div className="col-sm-7"><span>{this.state.autoClassification}</span></div>
+                                </div>
+                                <br />
+                                <Input type="select" ref="alteredClassification" label="Change Provisional Clinical Validity Classification:" defaultValue="none"
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                    <option value="none">No Selection</option>
+                                    <option disabled="disabled"></option>
+                                    <option value="Definitive">Definitive</option>
+                                    <option value="Strong">Strong</option>
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="Limited">Limited</option>
+                                    <option value="No Evidence">No Evidence</option>
+                                    <option value="Disputed">Disputed</option>
+                                    <option value="Refuted">Refuted</option>
+                                </Input>
+                                <Input type="textarea" ref="reasons" label="Explain Reason(s) for Change:" rows="5" labelClassName="col-sm-5 control-label"
+                                    wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                <div className="col-sm-5"><span className="pull-right">&nbsp;</span></div>
+                                <div className="col-sm-7">
+                                    <span>
+                                    **Note: If your selected Clinical Validity Classification is different from the Calculated value, provide a reason to expain why you changed it.
+                                    </span>
+                                </div>
+                            </div>
+                        </Panel>
+                    </PanelGroup>
+                    <div className='modal-footer'>
+                        <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
+                    </div>
+                </Form>
+            </div>
+        </div>
+    );
+};
 
 var EditCurrent = function() {
     var alteredClassification = this.state.provisional.alteredClassification ? this.state.provisional.alteredClassification : 'none';
@@ -213,7 +301,7 @@ var EditCurrent = function() {
             <h1>Edit Summary and Provisional Classification</h1>
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <PanelGroup accordion>
-                    <Panel width="100%" title="Currently Saved Calculation and Classification" open>
+                    <Panel title="Currently Saved Calculation and Classification" open>
                         <div className="row">
                             <div className="col-sm-5"><strong>Total Score:</strong></div>
                             <div className="col-sm-7"><span>{this.state.totalScore}</span></div>
@@ -234,6 +322,9 @@ var EditCurrent = function() {
                                 <option value="Strong">Strong</option>
                                 <option value="Moderate">Moderate</option>
                                 <option value="Limited">Limited</option>
+                                <option value="No Evidence">No Evidence</option>
+                                <option value="Disputed">Disputed</option>
+                                <option value="Refuted">Refuted</option>
                             </Input>
                         </div>
                         <div className="row">
@@ -270,8 +361,12 @@ var NewCalculation = function() {
     var gdm = this.state.gdm;
     var assessments = this.state.assessments;
 
+
+// Gegerate pathogenicity id list and collect experimental id list from all assessments
+// condition: assessed by login user, value as Supports, current gdm
+// count piece number at each experimental type and add score at 3 different categories
     var pathoList = [];
-    var expList = [];
+    //var expList = [];
     var exp_scores = [0, 0, 0];
     var expType = {
         "Expression": 0,
@@ -297,55 +392,54 @@ var NewCalculation = function() {
         var evid_id = assessments[i]['evidence_id'];
 
         if (gdmAssessed === gdm.uuid && owner === this.state.user && value === 'Supports') {
-        //if (gdmAssessed == gdm.uuid && owner === this.state.user) {
+            // Generate pathoList
             if (evid_type === 'Pathogenicity' || evid_type === 'pathogenicity') {
                 pathoList.push({"patho":evid_id, "owner":owner, "value":value});
             }
-            // collect experimental data assessed as Supports (variant association is not necessary)
+            // Select experimental, count number of each type and calculate as 3 score categories
             else if (evid_type === 'Expression') {
                 expType["Expression"] += 1;
                 exp_scores[0] += 0.5;
+                //if (!in_array(evid_id, expList)) {
+                //    expList.push(evid_id);
+                //}
             }
             else if (evid_type === 'Protein interactions') {
                 expType["Protein interactions"] += 1;
                 exp_scores[0] += 0.5;
-                if (!in_array(evid_id, expList)) {
-                    expList.push(evid_id);
-                }
 
             }
             else if (evid_type === 'Biochemical function') {
                 expType["Biochemical function"] += 1;
                 exp_scores[0] += 0.5;
-                if (!in_array(evid_id, expList)) {
-                    expList.push(evid_id);
-                }
             }
             else if (evid_type === 'Functional alteration of gene or gene product') {
                 expType["Functional alteration of gene or gene product"] += 1;
                 exp_scores[1] += 1;
-                if (!in_array(evid_id, expList)) {
-                    expList.push(evid_id);
-                }
             }
             else if (evid_type === 'Rescue') {
                 expType["Rescue"] += 1;
                 exp_scores[2] += 2;
-                if (!in_array(evid_id, expList)) {
-                    expList.push(evid_id);
-                }
             }
             else if (evid_type === 'Model systems') {
                 expType["Model systems"] += 1;
                 exp_scores[2] += 2;
-                if (!in_array(evid_id, expList)) {
-                    expList.push(evid_id);
-                }
             }
         }
     }
 
-    // get all variants from gdm pathogenicity list.
+// Compare designed max value at each score category and get the total experimental score
+    var finalExperimentalScore = 0;
+    for (var i in exp_scores) {
+        var max = 2; // set max value for each type
+        if (i == 2) {
+            max = 4;
+        }
+        finalExperimentalScore += (exp_scores[i] <= max) ? exp_scores[i] : max; // not more than the max
+    }
+
+// Generate variantIdList
+// condition: id must in pathoList generated from assessments (above)
     var gdmPathoList = gdm.variantPathogenicity;
     var variantIdList = [];
     for (var i in gdmPathoList) {
@@ -356,27 +450,26 @@ var NewCalculation = function() {
 
         for (var j in pathoList) {
             if (pathoUuid === pathoList[j].patho) {
-                //variantsList.push({ "patho": pathoUuid, "variant": varUuid, "assessedBy": pathoList[j].owner, "value": pathoList[j].value });
                 variantIdList.push(varUuid);
                 break;
             }
         }
     }
 
-    // collect all families, independent individuals, and experimental in the gdm
+// Collect all families and independent individuals with article info (experimental data is not necessary)
     var annotations = gdm.annotations;
     var familiesCollected = [];
     var individualsCollected = [];
-    var experimentalCollected = [];
+    //var experimentalCollected = [];
     for (var i in annotations) {
         if (annotations[i].groups) {
             var groups = annotations[i].groups;
             for (var j in groups) {
                 if (groups[j].familyIncluded) {
-                    filter(familiesCollected, groups[j].familyIncluded, annotations[i].article, variantIdList);
+                    filter(familiesCollected, groups[j].familyIncluded, annotations[i].article, variantIdList); // take those associated with variant in pathogenicity list and assessed as Supports
                 }
                 if (groups[j].individualIncluded) {
-                    filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, variantIdList);
+                    filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, variantIdList); // same as above
                 }
             }
         }
@@ -386,22 +479,13 @@ var NewCalculation = function() {
         if (annotations[i].individuals) {
             filter(individualsCollected, annotations[i].individuals, annotations[i].article, variantIdList);
         }
-        if (annotations[i].experimentalData) {
-            filter(experimentalCollected, annotations[i].experimentalData, annotations[i].article, expList);
-        }
+        // experimental data is not necessary to
+        //if (annotations[i].experimentalData) {
+        //    filter(experimentalCollected, annotations[i].experimentalData, annotations[i].article, expList);
+        //}
     }
 
-    // Scoring Experimental
-    var finalExperimentalScore = 0;
-    for (var i in exp_scores) {
-        var max = 2; // set max value for each type
-        if (i == 2) {
-            max = 4;
-        }
-        finalExperimentalScore += (exp_scores[i] <= max) ? exp_scores[i] : max; // not more than the max
-    }
-
-    // Collect articles and find the earliest publication year
+// Collect articles and find the earliest publication year
     var articleCollected = [];
     var year = new Date();
     var earliest = year.getFullYear();
@@ -417,13 +501,14 @@ var NewCalculation = function() {
             earliest = get_earliest_year(earliest, individualsCollected[i].date);
         }
     }
-    for (var i in experimentalCollected) {
-        if (!in_array(experimentalCollected[i].pmid, articleCollected) && experimentalCollected[i].pmid != '') {
-            articleCollected.push(experimentalCollected[i].pmid);
-            earliest = get_earliest_year(earliest, experimentalCollected[i].date);
-        }
-    }
+    //for (var i in experimentalCollected) {
+    //    if (!in_array(experimentalCollected[i].pmid, articleCollected) && experimentalCollected[i].pmid != '') {
+    //        articleCollected.push(experimentalCollected[i].pmid);
+    //        earliest = get_earliest_year(earliest, experimentalCollected[i].date);
+    //    }
+    //}
 
+// get final scores
     var currentYear = year.getFullYear();
     //var years = (currentYear.valueOf() - earliest.valueOf()) + ' = ' + currentYear + ' - ' + earliest;
     var time = currentYear.valueOf() - earliest.valueOf();
@@ -442,7 +527,7 @@ var NewCalculation = function() {
     if (proband > 18) {
         probandScore = 7;
     }
-    else if (proband >=16) {
+    else if (proband >15) {
         probandScore = 6;
     }
     else if (proband > 12) {
@@ -479,6 +564,9 @@ var NewCalculation = function() {
     else {
         pubScore = articleCollected.length;
     }
+    if (articleCollected.length === 0) {
+        earliest = 'N/A'; // if no article collect,
+    }
 
     var totalScore = probandScore + pubScore + timeScore + expScore;
     var autoClassification;
@@ -491,7 +579,7 @@ var NewCalculation = function() {
     else if (totalScore > 9) {
         autoClassification = 'Moderate';
     }
-    else {
+    else if (totalScore > 1) {
         autoClassification = 'Limited';
     }
 
@@ -522,7 +610,9 @@ var NewCalculation = function() {
                             </div>
                             <div className="col-sm-7">
                                 <table className="summary-scoring">
-                                    <tr><td><strong>Total Experimental Score:</strong></td><td><strong>{expScore}</strong></td></tr>
+                                    <tr><td className="td-title"><strong>Total Experimental Score:</strong></td>
+                                        <td className="td-score"><strong>{expScore}</strong></td>
+                                    </tr>
                                     {Object.keys(expType).map(function(key) {
                                         return (
                                             expType[key] > 0 ?
@@ -533,17 +623,17 @@ var NewCalculation = function() {
                                             null
                                         );
                                     })}
-                                    <tr><td cols="2"><strong>&nbsp;</strong></td></tr>
-                                    <tr><td><strong>Proband Score:</strong></td><td><strong>{probandScore}</strong></td></tr>
-                                    <tr><td># Variant assessed</td><td>{variantIdList.length}</td></tr>
-                                    <tr><td># Family counted</td><td>{count_proband(familiesCollected)}</td></tr>
-                                    <tr><td># Individual counted</td><td>{count_proband(individualsCollected)}</td></tr>
-                                    <tr><td cols="2"><strong>&nbsp;</strong></td></tr>
-                                    <tr><td><strong>Publication Score:</strong></td><td><strong>{pubScore}</strong></td></tr>
-                                    <tr><td># Article</td><td>{articleCollected.length}</td></tr>
-                                    <tr><td cols="2"><strong>&nbsp;</strong></td></tr>
-                                    <tr><td><strong>Time Score:</strong></td><td><strong>{timeScore}</strong></td></tr>
-                                    <tr><td>Earliest Year</td><td>{earliest}</td></tr>
+                                    <tr><td cols="2"><span>&nbsp;</span></td></tr>
+                                    <tr><td className="td-title"><strong>Proband Score:</strong></td><td className="td-score"><strong>{probandScore}</strong></td></tr>
+                                    <tr><td className="td-title"># Variant assessed</td><td className="td-score">{variantIdList.length}</td></tr>
+                                    <tr><td className="td-title"># Family counted</td><td className="td-score">{count_proband(familiesCollected)}</td></tr>
+                                    <tr><td className="td-title"># Individual counted</td><td className="td-score">{count_proband(individualsCollected)}</td></tr>
+                                    <tr><td cols="2"><span>&nbsp;</span></td></tr>
+                                    <tr><td className="td-title"><strong>Publication Score:</strong></td><td className="td-score"><strong>{pubScore}</strong></td></tr>
+                                    <tr><td className="td-title"># Article</td><td className="td-score">{articleCollected.length}</td></tr>
+                                    <tr><td cols="2"><span>&nbsp;</span></td></tr>
+                                    <tr><td className="td-title"><strong>Time Score:</strong></td><td className="td-score"><strong>{timeScore}</strong></td></tr>
+                                    <tr><td className="td-title">Earliest Year</td><td className="td-score">{earliest}</td></tr>
                                 </table>
                             </div>
                         </div>
@@ -563,6 +653,9 @@ var NewCalculation = function() {
                             <option value="Strong">Strong</option>
                             <option value="Moderate">Moderate</option>
                             <option value="Limited">Limited</option>
+                            <option value="No Evidence">No Evidence</option>
+                            <option value="Disputed">Disputed</option>
+                            <option value="Refuted">Refuted</option>
                         </Input>
                         <Input type="textarea" ref="reasons" label="Explain Reason(s) for Change:" rows="5" labelClassName="col-sm-5 control-label"
                             wrapperClassName="col-sm-7" groupClassName="form-group" />
