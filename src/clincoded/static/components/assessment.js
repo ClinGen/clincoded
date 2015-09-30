@@ -144,6 +144,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         disableDefault: React.PropTypes.bool, // TRUE to disable the Default (Not Assessed) item
         accordion: React.PropTypes.bool, // True if the panel should part of an openable accordion
         open: React.PropTypes.bool, // True if the panel should be an openable panel
+        updateMsg: React.PropTypes.string // String to display by the Update button if desired
     },
 
     // Called when the dropdown value changes
@@ -157,6 +158,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         var label = this.props.label ? this.props.label : 'Assessment';
         var value = this.props.assessmentTracker && this.props.assessmentTracker.currentVal;
         var disabled = (this.props.disabled === true || this.props.disabled === false) ? this.props.disabled : false;
+        var submitErrClass = 'submit-info pull-right';
 
         return (
             <div>
@@ -178,6 +180,9 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                         {this.props.assessmentSubmit ?
                             <div className="curation-submit clearfix">
                                 <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.assessmentSubmit} title="Update" />
+                                {this.props.updateMsg ?
+                                    <div className="submit-info pull-right">{this.props.updateMsg}</div>
+                                : null}
                             </div>
                         : null}
                     </Panel>
@@ -186,7 +191,6 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         );
     }
 });
-
 
 // Return the assessment from the given array of assessments that's owned by the curator with the
 // given UUID. The returned assessment is a clone of the original object, so it can be modified
