@@ -1021,11 +1021,29 @@ var ExperimentalCuration = React.createClass({
                     // No variant search strings. Go to next THEN indicating no new named variants
                     return Promise.resolve(null);
                 }).then(data => {
+                    // NEW
+                    var gdmUuid = this.state.gdm && this.state.gdm.uuid;
+                    var experimentalUuid = this.state.experimental && this.state.experimental.uuid;
+
+                    // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the family.
+                    return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid).then(assessmentInfo => {
+                        return Promise.resolve({assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
+                    });
+                }).then(data => {
                     var promise;
 
                     // Add variants if they've been found
                     if (experimentalDataVariants.length > 0) {
                         newExperimental.variants = experimentalDataVariants;
+                    }
+
+                    // NEW
+                    // If we made a new assessment, add it to the pathogenicity's assessments
+                    if (data.assessment && !data.updatedAssessment) {
+                        if (!newExperimental.assessments) {
+                            newExperimental.assessments = [];
+                        }
+                        newExperimental.assessments.push(data.assessment['@id']);
                     }
 
                     if (this.state.experimental) {
@@ -1058,6 +1076,21 @@ var ExperimentalCuration = React.createClass({
                     }
 
                     return promise;
+                }).then(data => {
+                    // NEW
+                    // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
+                    var newAssessment = data.assessment;
+                    var gdmUuid = this.state.gdm && this.state.gdm.uuid;
+                    var experimentalUuid = savedExperimental ? savedExperimental.uuid : this.state.experimental.uuid;
+
+                    if (newAssessment && !newAssessment.evidence_id) {
+                        // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
+                        // Nothing relies on this operation completing, so don't wait for a promise from it.
+                        this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid, newAssessment);
+                    }
+
+                    // Next step relies on the pathogenicity, not the updated assessment
+                    return Promise.resolve(savedExperimental);
                 }).then(data => {
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
