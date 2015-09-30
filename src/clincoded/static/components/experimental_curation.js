@@ -131,6 +131,7 @@ var ExperimentalCuration = React.createClass({
                 experimentalType: tempExperimentalType,
                 experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType)
             });
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, tempExperimentalType);
             if (this.state.experimentalNameVisible) {
                 this.refs['experimentalName'].resetValue();
             }
@@ -479,7 +480,7 @@ var ExperimentalCuration = React.createClass({
             // Make a new tracking object for the current assessment. Either or both of the original assessment or user can be blank
             // and assigned later. Then set the component state's assessment value to the assessment's value -- default if there was no
             // assessment.
-            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'experimentalData');
+            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, stateObj.experimental.evidenceType);
             this.setAssessmentValue(assessmentTracker);
 
             // Set all the state variables we've collected
@@ -677,6 +678,15 @@ var ExperimentalCuration = React.createClass({
                 newExperimental.label = this.getFormValue('experimentalName');
                 newExperimental.evidenceType = this.getFormValue('experimentalType');
                 // prepare experimental object for post/putting to db
+                // copy assessments over
+                if (this.state.experimental) {
+                    if (this.state.experimental.assessments && this.state.experimental.assessments.length) {
+                        newExperimental.assessments = [];
+                        for (var i = 0; i < this.state.experimental.assessments.length; i++) {
+                            newExperimental.assessments.push(this.state.experimental.assessments[i]['@id']);
+                        }
+                    }
+                }
                 if (newExperimental.evidenceType == 'Biochemical Function') {
                     // newExperimental object for type Rescue
                     newExperimental.biochemicalFunction = {};
@@ -1040,12 +1050,16 @@ var ExperimentalCuration = React.createClass({
 
                     // NEW
                     // If we made a new assessment, add it to the pathogenicity's assessments
+                    console.log(newExperimental.assessments);
                     if (data.assessment && !data.updatedAssessment) {
+                        console.log('DEEP1');
                         if (!newExperimental.assessments) {
+                            console.log('DEEP2');
                             newExperimental.assessments = [];
                         }
                         newExperimental.assessments.push(data.assessment['@id']);
                     }
+                    console.log(newExperimental.assessments);
 
                     if (this.state.experimental) {
                         // We're editing a experimental. PUT the new group object to the DB to update the existing one.
