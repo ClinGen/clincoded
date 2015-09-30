@@ -723,7 +723,7 @@ var FamilyCuration = React.createClass({
 
         // Unless others have assessed (in which case there's no segregation form), get the segregation
         // values from the form
-        if (!this.cv.othersAssessed) {
+        if (!this.cv.segregationAssessed) {
             value1 = this.getFormValue('SEGpedigreedesc');
             if (value1) {
                 newSegregation[formMapSegregation['SEGpedigreedesc']] = value1;
