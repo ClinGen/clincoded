@@ -780,7 +780,7 @@ var FamilyCuration = React.createClass({
             if (value1) {
                 newSegregation[formMapSegregation['SEGaddedsegregationinfo']] = value1;
             }
-        } else if (newFamily.segregation && Object.keys(newSegregation).length) {
+        } else if (newFamily.segregation && Object.keys(newFamily.segregation).length) {
             newSegregation = _.clone(newFamily.segregation);
         }
 
