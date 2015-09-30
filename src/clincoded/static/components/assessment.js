@@ -98,6 +98,7 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
         if (gdmUuid) {
             newAssessment.evidence_gdm = gdmUuid;
         }
+        newAssessment.evidence_type = assessmentTracker.type;
         newAssessment.active = true;
 
         // Start a write of the record to the DB, returning a promise object with:

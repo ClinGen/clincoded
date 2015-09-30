@@ -295,7 +295,7 @@ var FamilyCuration = React.createClass({
             // Make a new tracking object for the current assessment. Either or both of the original assessment or user can be blank
             // and assigned later. Then set the component state's assessment value to the assessment's value -- default if there was no
             // assessment.
-            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'segregation');
+            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
             this.setAssessmentValue(assessmentTracker);
 
             // Set all the state variables we've collected
@@ -1460,7 +1460,7 @@ var FamilyViewer = React.createClass({
                 // Find the assessment belonging to the logged-in curator, if any.
                 userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
             }
-            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'segregation');
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
         }
 
         // See if others have assessed
