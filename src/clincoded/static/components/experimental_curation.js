@@ -1027,6 +1027,7 @@ var ExperimentalCuration = React.createClass({
 
                     // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the family.
                     return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid).then(assessmentInfo => {
+                        console.log("FIRST");
                         return Promise.resolve({assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
                     });
                 }).then(data => {
@@ -1084,6 +1085,7 @@ var ExperimentalCuration = React.createClass({
                     var experimentalUuid = savedExperimental ? savedExperimental.uuid : this.state.experimental.uuid;
 
                     if (newAssessment && !newAssessment.evidence_id) {
+                        console.log("SECOND");
                         // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
                         // Nothing relies on this operation completing, so don't wait for a promise from it.
                         this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid, newAssessment);
