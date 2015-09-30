@@ -68,7 +68,6 @@ var ExperimentalCuration = React.createClass({
             experimentalType: '',  // Currently entered type of the Experimental Data entry
             experimentalTypeDescription: [], // Description of the selected Experimental Data type
             experimentalSubtype: 'none', // Currently entered subtype of the Experimental Data entry (if applicable)
-            assessmentTracker: null, // Tracking object for a single assessment
             othersAssessed: false, // TRUE if other curators have assessed the experimental data entry
             geneImplicatedWithDisease: false, // checkbox state values
             geneImplicatedInDisease: false,
@@ -126,6 +125,11 @@ var ExperimentalCuration = React.createClass({
             this.setState({experimentalName: this.refs[ref].getValue()});
         } else if (ref === 'experimentalType') {
             var tempExperimentalType = this.refs[ref].getValue();
+            var user = this.props.session && this.props.session.user_properties;
+            var userAssessment;
+            if (this.state.experimental && this.state.experimental.assessments) {
+                userAssessment = Assessments.userAssessment(this.state.experimental.assessments, user && user.uuid);
+            }
             this.setState({
                 experimentalName: '',
                 experimentalType: tempExperimentalType,
@@ -480,7 +484,11 @@ var ExperimentalCuration = React.createClass({
             // Make a new tracking object for the current assessment. Either or both of the original assessment or user can be blank
             // and assigned later. Then set the component state's assessment value to the assessment's value -- default if there was no
             // assessment.
-            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, stateObj.experimental.evidenceType);
+            var tempEvidenceType = '';
+            if (stateObj.experimental) {
+                tempEvidenceType = stateObj.experimental.evidenceType;
+            }
+            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, tempEvidenceType);
             this.setAssessmentValue(assessmentTracker);
 
             // Set all the state variables we've collected
@@ -1040,7 +1048,7 @@ var ExperimentalCuration = React.createClass({
                         console.log("FIRST");
                         return Promise.resolve({assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
                     });
-                }).then(data => {
+                }).then(assessment => {
                     var promise;
 
                     // Add variants if they've been found
@@ -1051,35 +1059,35 @@ var ExperimentalCuration = React.createClass({
                     // NEW
                     // If we made a new assessment, add it to the pathogenicity's assessments
                     console.log(newExperimental.assessments);
-                    if (data.assessment && !data.updatedAssessment) {
+                    if (assessment.assessment && !assessment.updatedAssessment) {
                         console.log('DEEP1');
                         if (!newExperimental.assessments) {
                             console.log('DEEP2');
                             newExperimental.assessments = [];
                         }
-                        newExperimental.assessments.push(data.assessment['@id']);
+                        newExperimental.assessments.push(assessment.assessment['@id']);
                     }
                     console.log(newExperimental.assessments);
 
                     if (this.state.experimental) {
                         // We're editing a experimental. PUT the new group object to the DB to update the existing one.
                         promise = this.putRestData('/experimental/' + this.state.experimental.uuid, newExperimental).then(data => {
-                            return Promise.resolve(data['@graph'][0]);
+                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
                         });
                     } else {
                         // We created an experimental data item; post it to the DB
                         promise = this.postRestData('/experimental/', newExperimental).then(data => {
-                            return Promise.resolve(data['@graph'][0]);
+                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
                         }).then(newExperimental => {
-                            savedExperimental = newExperimental;
+                            savedExperimental = newExperimental.data;
                             if (!this.state.experimental) {
                                 // Get a flattened copy of the annotation and put our new group into it,
                                 // ready for writing.
                                 var annotation = curator.flatten(this.state.annotation);
                                 if (annotation.experimentalData) {
-                                    annotation.experimentalData.push(newExperimental['@id']);
+                                    annotation.experimentalData.push(newExperimental.data['@id']);
                                 } else {
-                                    annotation.experimentalData = [newExperimental['@id']];
+                                    annotation.experimentalData = [newExperimental.data['@id']];
                                 }
 
                                 // Post the modified annotation to the DB, then go back to Curation Central

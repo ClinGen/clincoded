@@ -252,6 +252,7 @@ class Gdm(Item):
         'annotations.experimentalData.variants',
         'annotations.experimentalData.variants.submitted_by',
         'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
+        'annotations.experimentalData.proteinInteractions.interactingGenes',
         'annotations.experimentalData.assessments',
         'annotations.experimentalData.assessments.submitted_by'
     ]
@@ -384,6 +385,7 @@ class Annotation(Item):
         'experimentalData.variants',
         'experimentalData.variants.submitted_by',
         'experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
+        'experimentalData.proteinInteractions.interactingGenes',
         'experimentalData.assessments',
         'experimentalData.assessments.submitted_by'
     ]
@@ -636,6 +638,7 @@ class Experimental(Item):
         'variants',
         'variants.submitted_by',
         'biochemicalFunction.geneWithSameFunctionSameDisease.genes',
+        'proteinInteractions.interactingGenes',
         'assessments',
         'assessments.submitted_by'
     ]
