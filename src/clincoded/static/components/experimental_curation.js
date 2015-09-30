@@ -9,10 +9,14 @@ var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
+var Assessments = require('./assessment');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
+var AssessmentTracker = Assessments.AssessmentTracker;
+var AssessmentPanel = Assessments.AssessmentPanel;
+var AssessmentMixin = Assessments.AssessmentMixin;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -33,17 +37,28 @@ var VAR_NONE = 0; // No variants entered in a panel
 var VAR_SPEC = 1; // A specific variant (dbSNP, ClinVar, HGVS) entered in a panel
 var VAR_OTHER = 2; // Other description entered in a panel
 
+var initialCv = {
+    assessmentTracker: null, // Tracking object for a single assessment
+    filledExperimentalData: {}, // Tracks segregation fields with values filled in
+    experimentalDataAssessed: false, // TRUE if segregation has been assessed by self or others
+    othersAssessed: false // TRUE if other curators have assessed the family's segregation
+};
+
 var ExperimentalCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
 
     contextTypes: {
         navigate: React.PropTypes.func
     },
 
+    cv: initialCv,
+
     // Keeps track of values from the query string
     queryValues: {},
 
     getInitialState: function() {
+        this.cv.assessmentTracker = initialCv;
+
         return {
             gdm: null, // GDM object given in UUID
             annotation: null, // Annotation object given in UUID
@@ -52,7 +67,9 @@ var ExperimentalCuration = React.createClass({
             experimentalName: '', // Currently entered name of the Experimental Data entry
             experimentalType: '',  // Currently entered type of the Experimental Data entry
             experimentalTypeDescription: [], // Description of the selected Experimental Data type
-            experimentalSubtype: '', // Currently entered subtype of the Experimental Data entry (if applicable)
+            experimentalSubtype: 'none', // Currently entered subtype of the Experimental Data entry (if applicable)
+            assessmentTracker: null, // Tracking object for a single assessment
+            othersAssessed: false, // TRUE if other curators have assessed the experimental data entry
             geneImplicatedWithDisease: false, // checkbox state values
             geneImplicatedInDisease: false,
             expressedInTissue: false,
@@ -124,7 +141,7 @@ var ExperimentalCuration = React.createClass({
                 });
             } else if (tempExperimentalType == 'Biochemical Function' || tempExperimentalType == 'Expression') {
                 this.setState({
-                    experimentalSubtype: '',
+                    experimentalSubtype: 'none',
                     experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType),
                     experimentalNameVisible: false
                 });
@@ -227,6 +244,27 @@ var ExperimentalCuration = React.createClass({
             }
         } else if (ref === 'patientCellOrEngineeredEquivalent') {
             this.setState({rescuePCEE: this.refs['patientCellOrEngineeredEquivalent'].getValue()});
+        } else if (ref === 'assessment') {
+            // Handle segregation fields to see if we should enable or disable the assessment dropdown
+            var value = this.refs[ref].getValue();
+            if (this.refs[ref].props.type === 'select') {
+                value = value === 'none' ? '' : value;
+            }
+            if (value !== '') {
+                // A segregation field has a value; remember this field
+                this.cv.filledExperimentalData[ref] = true;
+            } else {
+                // A segregation field lost its value; if we had remembered it, forget it
+                if (this.cv.filledExperimentalData[ref]) {
+                    delete this.cv.filledExperimentalData[ref];
+                }
+            }
+
+            // Now change the state of the assessment dropdown if needed
+            var filled = Object.keys(this.cv.filledExperimentalData).length > 0;
+            if (this.state.experimentalDataAssessed !== filled) {
+                this.setState({experimentalDataAssessed: filled});
+            }
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -287,6 +325,9 @@ var ExperimentalCuration = React.createClass({
         this.getRestDatas(
             uris
         ).then(datas => {
+            var user = this.props.session && this.props.session.user_properties;
+            var userAssessment;
+
             // See what we got back so we can build an object to copy in this React object's state to rerender the page.
             var stateObj = {};
             datas.forEach(function(data) {
@@ -395,6 +436,7 @@ var ExperimentalCuration = React.createClass({
                         this.setState({rescuePRFT: true});
                     }
                 }
+
                 // See if we need to disable the Add Variant button based on the number of variants configured
                 if (stateObj.experimental.variants) {
                     var variants = stateObj.experimental.variants;
@@ -416,7 +458,29 @@ var ExperimentalCuration = React.createClass({
                         stateObj.variantOption = currVariantOption;
                     }
                 }
+
+                // Find the current user's segregation assessment from the segregation's assessment list
+                if (stateObj.experimental.assessments && stateObj.experimental.assessments.length) {
+                    // Find the assessment belonging to the logged-in curator, if any.
+                    userAssessment = Assessments.userAssessment(stateObj.experimental.assessments, user && user.uuid);
+
+                    // See if any assessments are non-default
+                    this.cv.experimentalDataAssessed = _(stateObj.experimental.assessments).find(function(assessment) {
+                        return assessment.value !== Assessments.DEFAULT_VALUE;
+                    });
+
+                    // See if others have assessed
+                    if (user && user.uuid) {
+                        this.cv.othersAssessed = Assessments.othersAssessed(stateObj.experimental.assessments, user.uuid);
+                    }
+                }
             }
+
+            // Make a new tracking object for the current assessment. Either or both of the original assessment or user can be blank
+            // and assigned later. Then set the component state's assessment value to the assessment's value -- default if there was no
+            // assessment.
+            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'experimentalData');
+            this.setAssessmentValue(assessmentTracker);
 
             // Set all the state variables we've collected
             this.setState(stateObj);
@@ -434,6 +498,13 @@ var ExperimentalCuration = React.createClass({
     // done from unmounted components.
     componentDidMount: function() {
         this.loadData();
+    },
+
+    // When the user changes the assessment value, this gets called
+    updateAssessment: function(value) {
+        var assessment = this.state.assessment;
+        assessment.value = value;
+        this.setState({assessment: assessment});
     },
 
     validateFormTerms: function(formError, type, terms, formField, limit) {
@@ -1096,6 +1167,12 @@ var ExperimentalCuration = React.createClass({
                                                 {ExperimentalDataVariant.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
+                                        {this.state.experimentalNameVisible ?
+                                            <PanelGroup accordion>
+                                                <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker}
+                                                    updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
+                                            </PanelGroup>
+                                        : null}
                                         {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
                                             <div className="curation-submit clearfix">
                                                 <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
@@ -1244,7 +1321,6 @@ var TypeBiochemicalFunctionA = function() {
             biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction : null;
             biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes ? biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes : null;
             biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper : null;
-            biochemicalFunction.geneWithSameFunctionSameDisease.assessments = biochemicalFunction.geneWithSameFunctionSameDisease.assessments ? biochemicalFunction.geneWithSameFunctionSameDisease.assessments : null;
         }
     }
     return (
@@ -1299,7 +1375,6 @@ var TypeBiochemicalFunctionB = function() {
             biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText : null;
             biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation = biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation ? biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation : null;
             biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper ? biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper : null;
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments = biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments ? biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments : null;
         }
     }
     return (
@@ -1348,7 +1423,6 @@ var TypeProteinInteractions = function() {
         proteinInteractions.experimentalInteractionDetection = proteinInteractions.experimentalInteractionDetection ? proteinInteractions.experimentalInteractionDetection : null;
         proteinInteractions.relationshipOfOtherGenesToDisese = proteinInteractions.relationshipOfOtherGenesToDisese ? proteinInteractions.relationshipOfOtherGenesToDisese : null;
         proteinInteractions.evidenceInPaper = proteinInteractions.evidenceInPaper ? proteinInteractions.evidenceInPaper : null;
-        proteinInteractions.assessments = proteinInteractions.assessments ? proteinInteractions.assessments : null;
     }
     return (
         <div className="row experimental-data-form">
@@ -1445,7 +1519,6 @@ var TypeExpressionA = function() {
         if (expression.normalExpression) {
             expression.normalExpression.evidence = expression.normalExpression.evidence ? expression.normalExpression.evidence : null;
             expression.normalExpression.evidenceInPaper = expression.normalExpression.evidenceInPaper ? expression.normalExpression.evidenceInPaper : null;
-            expression.normalExpression.assessments = expression.normalExpression.assessments ? expression.normalExpression.assessments : null;
         }
     }
     return (
@@ -1475,7 +1548,6 @@ var TypeExpressionB = function() {
         if (expression.alteredExpression) {
             expression.alteredExpression.evidence = expression.alteredExpression.evidence ? expression.alteredExpression.evidence : null;
             expression.alteredExpression.evidenceInPaper = expression.alteredExpression.evidenceInPaper ? expression.alteredExpression.evidenceInPaper : null;
-            expression.alteredExpression.assessments = expression.alteredExpression.assessments ? expression.alteredExpression.assessments : null;
         }
     }
     return (
@@ -1510,7 +1582,6 @@ var TypeFunctionalAlteration = function() {
         functionalAlteration.normalFunctionOfGene = functionalAlteration.normalFunctionOfGene ? functionalAlteration.normalFunctionOfGene : null;
         functionalAlteration.evidenceForNormalFunction = functionalAlteration.evidenceForNormalFunction ? functionalAlteration.evidenceForNormalFunction : null;
         functionalAlteration.evidenceInPaper = functionalAlteration.evidenceInPaper ? functionalAlteration.evidenceInPaper : null;
-        functionalAlteration.assessments = functionalAlteration.assessments ? functionalAlteration.assessments : null;
     }
     return (
         <div className="row experimental-data-form">
@@ -1595,7 +1666,6 @@ var TypeModelSystems = function() {
         modelSystems.phenotypeFreetextObserved = modelSystems.phenotypeFreetextObserved ? modelSystems.phenotypeFreetextObserved : null;
         modelSystems.explanation = modelSystems.explanation ? modelSystems.explanation : null;
         modelSystems.evidenceInPaper = modelSystems.evidenceInPaper ? modelSystems.evidenceInPaper : null;
-        modelSystems.assessments = modelSystems.assessments ? modelSystems.assessments : null;
     }
     return (
         <div className="row experimental-data-form">
@@ -1720,7 +1790,6 @@ var TypeRescue = function() {
         rescue.rescueMethod = rescue.rescueMethod ? rescue.rescueMethod : null;
         rescue.explanation = rescue.explanation ? rescue.explanation : null;
         rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper : null;
-        rescue.assessments = rescue.assessments ? rescue.assessments : null;
     }
     return (
         <div className="row experimental-data-form">

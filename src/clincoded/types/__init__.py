@@ -252,22 +252,8 @@ class Gdm(Item):
         'annotations.experimentalData.variants',
         'annotations.experimentalData.variants.submitted_by',
         'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
-        'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.assessments',
-        'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.assessments.submitted_by',
-        'annotations.experimentalData.biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments',
-        'annotations.experimentalData.biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments.submitted_by',
-        'annotations.experimentalData.proteinInteractions.assessments',
-        'annotations.experimentalData.proteinInteractions.assessments.submitted_by',
-        'annotations.experimentalData.expression.normalExpression.assessments',
-        'annotations.experimentalData.expression.normalExpression.assessments.submitted_by',
-        'annotations.experimentalData.expression.alteredExpression.assessments',
-        'annotations.experimentalData.expression.alteredExpression.assessments.submitted_by',
-        'annotations.experimentalData.functionalAlteration.assessments',
-        'annotations.experimentalData.functionalAlteration.assessments.submitted_by',
-        'annotations.experimentalData.modelSystems.assessments',
-        'annotations.experimentalData.modelSystems.assessments.submitted_by',
-        'annotations.experimentalData.rescue.assessments',
-        'annotations.experimentalData.rescue.assessments.submitted_by'
+        'annotations.experimentalData.assessments',
+        'annotations.experimentalData.assessments.submitted_by'
     ]
 
     @calculated_property(schema={
@@ -398,22 +384,8 @@ class Annotation(Item):
         'experimentalData.variants',
         'experimentalData.variants.submitted_by',
         'experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
-        'experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.assessments',
-        'experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.assessments.submitted_by',
-        'experimentalData.biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments',
-        'experimentalData.biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments.submitted_by',
-        'experimentalData.proteinInteractions.assessments',
-        'experimentalData.proteinInteractions.assessments.submitted_by',
-        'experimentalData.expression.normalExpression.assessments',
-        'experimentalData.expression.normalExpression.assessments.submitted_by',
-        'experimentalData.expression.alteredExpression.assessments',
-        'experimentalData.expression.alteredExpression.assessments.submitted_by',
-        'experimentalData.functionalAlteration.assessments',
-        'experimentalData.functionalAlteration.assessments.submitted_by',
-        'experimentalData.modelSystems.assessments',
-        'experimentalData.modelSystems.assessments.submitted_by',
-        'experimentalData.rescue.assessments',
-        'experimentalData.rescue.assessments.submitted_by'
+        'experimentalData.assessments',
+        'experimentalData.assessments.submitted_by'
     ]
 
     @calculated_property(schema={
@@ -664,23 +636,8 @@ class Experimental(Item):
         'variants',
         'variants.submitted_by',
         'biochemicalFunction.geneWithSameFunctionSameDisease.genes',
-        'biochemicalFunction.geneWithSameFunctionSameDisease.assessments',
-        'biochemicalFunction.geneWithSameFunctionSameDisease.assessments.submitted_by',
-        'biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments',
-        'biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments.submitted_by',
-        'proteinInteractions.interactingGenes',
-        'proteinInteractions.assessments',
-        'proteinInteractions.assessments.submitted_by',
-        'expression.normalExpression.assessments',
-        'expression.normalExpression.assessments.submitted_by',
-        'expression.alteredExpression.assessments',
-        'expression.alteredExpression.assessments.submitted_by',
-        'functionalAlteration.assessments',
-        'functionalAlteration.assessments.submitted_by',
-        'modelSystems.assessments',
-        'modelSystems.assessments.submitted_by',
-        'rescue.assessments',
-        'rescue.assessments.submitted_by'
+        'assessments',
+        'assessments.submitted_by'
     ]
 
 
