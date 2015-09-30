@@ -89,8 +89,8 @@ var ExperimentalCuration = React.createClass({
                 'B. The gene is altered in expression in patients who have the disease'
             ],
             'Functional Alteration': ['The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents'],
-            'Model Systems': ['Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state'],
-            'Rescue': ['The cellular phenotype in patient-derived cells or engineered equivalents can be rescued by addition of the wild-type gene product']
+            'Model Systems': ['Non-human animal OR cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state'],
+            'Rescue': ['The cellular phenotype in patient-derived cells OR engineered equivalents can be rescued by addition of the wild-type gene product']
         };
         if (subitem == 'A') {
             return [experimentalTypeDescriptionList[item][0]];
@@ -582,7 +582,7 @@ var ExperimentalCuration = React.createClass({
                 // check clIDs/efoIDs depending on form selection
                 if (!this.getFormValue('wildTypeRescuePhenotype')) {
                     formError = true;
-                    this.setFormErrors('wildTypeRescuePhenotype', "Please read note below.");
+                    this.setFormErrors('wildTypeRescuePhenotype', "Please see note below.");
                 }
                 if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Patient cells') {
                     clIDs = curator.capture.clids(this.getFormValue('rescue.patientCellType'));
@@ -1144,12 +1144,12 @@ var ExperimentalNameType = function() {
             {!this.state.experimentalType || this.state.experimentalType == 'none' ?
                 <div className="col-sm-7 col-sm-offset-5">
                     <p className="alert alert-info">
-                        <strong>Biochemical Function</strong>: The gene product performs a biochemical function shared with other known genes in the disease of interest, or the gene product is consistent with the observed phenotype(s)<br /><br />
+                        <strong>Biochemical Function</strong>: The gene product performs a biochemical function shared with other known genes in the disease of interest, OR the gene product is consistent with the observed phenotype(s)<br /><br />
                         <strong>Protein Interactions</strong>: The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest<br /><br />
-                        <strong>Expression</strong>: The gene is expressed in tissues relevant to the disease of interest, or the gene is altered in expression in patients who have the disease<br /><br />
+                        <strong>Expression</strong>: The gene is expressed in tissues relevant to the disease of interest, OR the gene is altered in expression in patients who have the disease<br /><br />
                         <strong>Functional Alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents<br /><br />
-                        <strong>Model Systems</strong>: Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state<br /><br />
-                        <strong>Rescue</strong>: The cellular phenotype in patient-derived cells or engineered equivalents can be rescued by addition of the wild-type gene product
+                        <strong>Model Systems</strong>: Non-human animal OR cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state<br /><br />
+                        <strong>Rescue</strong>: The cellular phenotype in patient-derived cells OR engineered equivalents can be rescued by addition of the wild-type gene product
                     </p>
                 </div>
             : null}
@@ -1204,7 +1204,7 @@ var TypeBiochemicalFunction = function() {
     }
     return (
         <div className="row experimental-data-form">
-            <p className="col-sm-7 col-sm-offset-5">To select a GO_Slim ID click on the GO_Slim link and copy/paste the desired GO ID into the box below.</p>
+            <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> for a GO ID (e.g. biological_process = GO:0008150)</p>
             <Input type="text" ref="identifiedFunction" label={<LabelIdentifiedFunction />}
                 error={this.getFormError('identifiedFunction')} clearError={this.clrFormErrors.bind(null, 'identifiedFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
@@ -1269,7 +1269,7 @@ var TypeBiochemicalFunctionA = function() {
                 error={this.getFormError('geneWithSameFunctionSameDisease.explanationOfOtherGenes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.explanationOfOtherGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes} inputDisabled={!this.state.geneImplicatedWithDisease} required={this.state.geneImplicatedWithDisease} />
-            <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Notes on where evidence found in paper:"
+            <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Additional comments:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                  rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper} inputDisabled={!this.state.geneImplicatedWithDisease} />
@@ -1433,7 +1433,7 @@ var TypeExpression = function() {
 // HTML labels for Expression panel.
 var LabelUberonId = React.createClass({
     render: function() {
-        return <span>Organ of tissue relevant to disease, in which gene expression is examined <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID)</span>:</span>;
+        return <span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID)</span>:</span>;
     }
 });
 
@@ -1455,7 +1455,7 @@ var TypeExpressionA = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.expressedInTissue} defaultChecked="false" handleChange={this.handleChange} />
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the gene is not normally expressed in the above tissue, the criteria for counting this experimental evidence has not been met and cannot be submitted. Proceed to section B below or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Curation Central</a>.</p>
-            <Input type="textarea" ref="normalExpression.evidence" label="Evidence for normal expression in tissue:"
+            <Input type="textarea" ref="normalExpression.evidence" label="Change Evidence for normal expression in disease tissue:"
                 error={this.getFormError('normalExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidence')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={expression.normalExpression.evidence} inputDisabled={!this.state.expressedInTissue} required={this.state.expressedInTissue} />
@@ -1686,7 +1686,7 @@ var LabelCellCulture = React.createClass({
 });
 var LabelPhenotypeObserved = React.createClass({
     render: function() {
-        return <span>Phenotype(s) observed in model system <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
+        return <span>Phenotype(s) observed in human disease state <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
 });
 var LabelPhenotypeObservedFT = React.createClass({
@@ -1921,7 +1921,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Has this gene or genes been implicated in the above disease?</dt>
+                                <dt>This gene or genes have been implicated in the above disease</dt>
                                 <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease ?
                                     context.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease.toString()
                                 : null}</dd>
@@ -1933,7 +1933,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Notes on where evidence found in paper</dt>
+                                <dt>Additional comments</dt>
                                 <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}</dd>
                             </div>
                         </dl>
@@ -1985,7 +1985,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Has this gene or genes been implicated in the above disease</dt>
+                                <dt>This gene or genes have been implicated in the above disease</dt>
                                 <dd>{context.proteinInteractions.geneImplicatedInDisease ?
                                     context.proteinInteractions.geneImplicatedInDisease.toString()
                                 : null}</dd>
@@ -2007,7 +2007,7 @@ var ExperimentalViewer = React.createClass({
                     <Panel title="Expression" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
-                                <dt>Uberon ID of Tissue Organ</dt>
+                                <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient</dt>
                                 <dd>{context.expression.organOfTissue}</dd>
                             </div>
                         </dl>
@@ -2017,14 +2017,14 @@ var ExperimentalViewer = React.createClass({
                     <Panel title="A. Gene normally expressed in tissue relevant to the disease" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
-                                <dt>Is the gene normally expressed in the above tissue?</dt>
+                                <dt>The gene is normally expressed in the above tissue</dt>
                                 <dd>{context.expression.normalExpression.expressedInTissue ?
                                     context.expression.normalExpression.expressedInTissue.toString()
                                 : null}</dd>
                             </div>
 
                             <div>
-                                <dt>Evidence for normal expression in tissue</dt>
+                                <dt>Change Evidence for normal expression in disease tissue</dt>
                                 <dd>{context.expression.normalExpression.evidence}</dd>
                             </div>
 
@@ -2191,14 +2191,14 @@ var ExperimentalViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Does the wild-type rescue the above phenotype?</dt>
+                                <dt>The wild-type rescues the above phenotype</dt>
                                 <dd>{context.rescue.wildTypeRescuePhenotype ?
                                     context.rescue.wildTypeRescuePhenotype.toString()
                                 : null}</dd>
                             </div>
 
                             <div>
-                                <dt>Does patient variant rescue?</dt>
+                                <dt>The patient variant rescues</dt>
                                 <dd>{context.rescue.patientVariantRescue ?
                                     context.rescue.patientVariantRescue.toString()
                                 : null}</dd>
