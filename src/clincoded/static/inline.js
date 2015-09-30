@@ -10,8 +10,23 @@ cookie.set('X-Stats', '', {path: '/', expires: new Date(0)});
 
 // Use a separate tracker for dev / test
 var ga = require('google-analytics');
-var trackers = {'curation.clinicalgenome.org': 'UA-49947422-4'};
-var tracker = trackers[document.location.hostname] || 'UA-49947422-5';
+
+var analyticsTrackerHostname = document.location.hostname;
+var trackers = {
+    'curation.clinicalgenome.org': 'UA-49947422-4',
+    'curation-beta.clinicalgenome.org': 'UA-49947422-6',
+    'curation-demo.clinicalgenome.org': 'UA-49947422-5'
+};
+
+if (/^curation-beta(.*)/.test(analyticsTrackerHostname)){
+    analyticsTrackerHostname = 'curation-beta.clinicalgenome.org';
+} else if (/^.*.demo.clinicalgenome.org/.test(analyticsTrackerHostname) || /^localhost/.test(analyticsTrackerHostname){
+    analyticsTrackerHostname = 'curation-demo.clinicalgenome.org';
+}
+
+//var tracker = trackers[hostname];
+var tracker = trackers[analyticsTrackerHostname];
+
 ga('create', tracker, {'cookieDomain': 'none', 'siteSpeedSampleRate': 100});
 ga('send', 'pageview');
 
