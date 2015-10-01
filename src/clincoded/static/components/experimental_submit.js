@@ -91,6 +91,7 @@ var ExperimentalSubmit = React.createClass({
         var gdm = this.state.gdm;
         var experimental = this.state.experimental;
         var annotation = this.state.annotation;
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
@@ -104,7 +105,7 @@ var ExperimentalSubmit = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} />
+                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
                 <div className="container">
                     {experimental ?
                         <h1>{experimental.evidenceType}<br />Experimental Data Information: {experimental.label} <a href={experimental['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editExperimentalLink} className="btn btn-info">Edit</a></h1>

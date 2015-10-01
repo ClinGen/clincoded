@@ -12,8 +12,8 @@ var methods = require('./methods');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
-var PmidSummary = curator.PmidSummary;
-var PmidDoiButtons = curator.PmidDoiButtons;
+//var PmidSummary = curator.PmidSummary;
+//var PmidDoiButtons = curator.PmidDoiButtons;
 var CurationPalette = curator.CurationPalette;
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -107,45 +107,58 @@ var ProvisionalCuration = React.createClass({
         // Save all form values from the DOM.
         this.saveAllFormValues();
         if (this.validateDefault()) {
+            var calculate = queryKeyValue('calculate', this.props.href);
+            var edit = queryKeyValue('edit', this.props.href);
             var newProvisional = this.state.provisional ? curator.flatten(this.state.provisional) : {};
             newProvisional.totalScore = Number(this.state.totalScore);
             newProvisional.autoClassification = this.state.autoClassification;
-            newProvisional.alteredClassification = (this.getFormValue('alteredClassification') !== 'none') ? this.getFormValue('alteredClassification') : '';
+            newProvisional.alteredClassification = this.getFormValue('alteredClassification');
             newProvisional.reasons = this.getFormValue('reasons');
 
-            if (this.state.provisional) { // edit existing provisional
-                this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
-                    this.state.provisional = data['@graph'][0];
-                }).catch(function(e) {
-                    console.log('Provisional creation error = : %o', e);
-                });
+            // check required item (reasons)
+            var formErr = false;
+            if (!newProvisional.reasons && newProvisional.autoClassification !== newProvisional.alteredClassification) {
+                formErr = true;
+                this.setFormErrors('reasons', 'Required when changing classification.');
             }
-            else { // save a new calculation and provisional classification
-                this.postRestData('/provisional/', newProvisional).then(data => {
-                    return data['@graph'][0];
-                }).then(savedProvisional => {
-                    this.state.provisional = savedProvisional;
-
-                    var theGdm = curator.flatten(this.state.gdm);
-                    if (theGdm.provisionalClassifications) {
-                        theGdm.provisionalClassifications.push(savedProvisional['@id']);
-                    }
-                    else {
-                        theGdm.provisionalClassifications = [savedProvisional['@id']];
-                    }
-
-                    return this.putRestData('/gdm/' + this.state.gdm.uuid, theGdm).then(data => {
-                        return data['@graph'][0];
+            if (!formErr) {
+                if (this.state.provisional) { // edit existing provisional
+                    this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
+                        this.state.provisional = data['@graph'][0];
+                        this.resetAllFormValues();
+                        window.history.go(-1);
+                    }).catch(function(e) {
+                        console.log('PROVISIONAL GENERATION ERROR = : %o', e);
                     });
-                }).then(savedGdm => {
-                    this.state.gdm = savedGdm;
-                }).catch(function(e) {
-                    console.log('Provisional creation error = : %o', e);
-                });
+                }
+                else { // save a new calculation and provisional classification
+                    this.postRestData('/provisional/', newProvisional).then(data => {
+                        return data['@graph'][0];
+                    }).then(savedProvisional => {
+                        this.state.provisional = savedProvisional;
+                        //this.setState({provisional: savedProvisional});
+
+                        var theGdm = curator.flatten(this.state.gdm);
+                        if (theGdm.provisionalClassifications) {
+                            theGdm.provisionalClassifications.push(savedProvisional['@id']);
+                        }
+                        else {
+                            theGdm.provisionalClassifications = [savedProvisional['@id']];
+                        }
+
+                        return this.putRestData('/gdm/' + this.state.gdm.uuid, theGdm).then(data => {
+                            return data['@graph'][0];
+                        });
+                    }).then(savedGdm => {
+                        this.state.gdm = savedGdm;
+                        //this.setState({gdm: savedGdm});
+                        window.history.go(-1);
+                    }).catch(function(e) {
+                        console.log('PROVISIONAL GENERATION ERROR = : %o', e);
+                    });
+                }
             }
         }
-        this.resetAllFormValues();
-        window.history.go(-1);
         //this.context.navigate('/provisional-curation/?gdm=' + this.state.gdm.uuid + '&view=yes');
         //this.setState();
     },
@@ -166,20 +179,17 @@ var ProvisionalCuration = React.createClass({
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         var calculate = queryKeyValue('calculate', this.props.href);
         var edit = queryKeyValue('edit', this.props.href);
-        //this.queryValues.rerun = rerun;
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        var gdm = this.state.gdm ? this.state.gdm : null;
+        var provisional = this.state.provisional ? this.state.provisional : null;
 
-        var alteredClassification = (this.state.provisional && this.state.provisional.alteredClassification) ? this.state.provisional.alteredClassification : '';
-        var reasons = (this.state.provisional && this.state.provisional.reasons) ? this.state.provisional.reasons : '';
-
-        var families = count_proband(this.state.familiesCollected);
-        var individuals = count_proband(this.state.individualsCollected);
         return (
             <div>
-                {   this.state.gdm ?
+                {   gdm ?
                     <div>
-                        <RecordHeader gdm={this.state.gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={this.props.session} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                         <div className="container">
-                            {   (this.state.provisional && edit === 'yes') ?
+                            {   (provisional && edit === 'yes') ?
                                 EditCurrent.call(this)
                                 :
                                 (
@@ -209,44 +219,97 @@ var Demo = function() {
                 <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                     <PanelGroup accordion>
                         <Panel title="New calculation and Classification" open>
+                            <div>
+                                The calculated values below are based on the set of saved evidence that exists when the "Generate New Summary"
+                                is clicked. To save these values as the "Current Summary & Provisional Classification" calculated values and make
+                                any changes to the Provisional Classification, you must click the Save button below.
+                            </div>
+                            <div><span>&nbsp;</span></div>
                             <div className="form-group">
                                 <div className="row">
                                     <div className="col-sm-5"><strong className="pull-right">Total Score:</strong></div>
-                                    <div className="col-sm-7"><strong>1000</strong></div>
+                                    <div className="col-sm-7"><strong>18</strong></div>
                                 </div>
                                 <br />
                                 <div className="row">
                                     <div className="col-sm-5">
                                         <strong className="pull-right">Scoring Details:</strong>
                                     </div>
-                                    <div className="col-sm-7"><span>&nbsp;</span></div>
-                                </div>
-                                <div className="row">
-                                    <div className="col-sm-5">
-                                        <strong className="pull-right">&nbsp;</strong>
-                                    </div>
                                     <div className="col-sm-7">
                                         <table className="summary-scoring">
-                                            <tr><td className="td-title"><strong>Final Experimental Score:</strong></td>
-                                                <td className="td-score"><strong>400</strong></td>
+                                            <tr>
+                                                <td className="td-title"><strong>Evidence</strong></td>
+                                                <td className="td-score"><strong>Count</strong></td>
+                                                <td className="td-score"><strong>Score</strong></td>
                                             </tr>
-                                            <tr><td className="td-title">Expression: 100 (0.5 each)</td><td className="td-score">50</td></tr>
-                                            <tr><td className="td-title">Protein interactions: 100 (0.5 each)</td><td className="td-score">50</td></tr>
-                                            <tr><td className="td-title">Biochemical function: 100 (0.5 each)</td><td className="td-score">50</td></tr>
-                                            <tr><td className="td-title">Functional alteration of gene or gene product: 100 (1 each)</td><td className="td-score">100</td></tr>
-                                            <tr><td className="td-title">Model systems: 100 (2 each)</td><td className="td-score">200</td></tr>
-                                            <tr><td className="td-title">Rescue: 100 (2 each)</td><td className="td-score">200</td></tr>
-                                            <tr><td cols="2"><strong>&nbsp;</strong></td></tr>
-                                            <tr><td className="td-title"><strong>Proband Score:</strong></td><td className="td-score"><strong>300</strong></td></tr>
-                                            <tr><td className="td-title"># Variant assessed</td><td className="td-score">100</td></tr>
-                                            <tr><td className="td-title"># Family counted</td><td className="td-score">100</td></tr>
-                                            <tr><td className="td-title"># Individual counted</td><td className="td-score">100</td></tr>
-                                            <tr><td cols="2"><span>&nbsp;</span></td></tr>
-                                            <tr><td className="td-title"><strong>Publication Score:</strong></td><td className="td-score"><strong>200</strong></td></tr>
-                                            <tr><td className="td-title"># Article</td><td className="td-score">100</td></tr>
-                                            <tr><td cols="2"><span>&nbsp;</span></td></tr>
-                                            <tr><td className="td-title"><strong>Time Score:</strong></td><td className="td-score"><strong>100</strong></td></tr>
-                                            <tr><td className="td-title">Earliest Year</td><td className="td-score">{'0001'}</td></tr>
+                                            <tr><td cols="3">&nbsp;</td></tr>
+                                            <tr><td className="td-title"><strong>Final Experimental Score</strong></td>
+                                                <td className="td-score"><span>&nbsp;</span></td>
+                                                <td className="td-score"><strong>5</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td className="td-title">Expression</td>
+                                                <td className="td-score">1</td>
+                                                <td className="td-score">0.5</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="td-title">Protein Interactions</td>
+                                                <td className="td-score">1</td>
+                                                <td className="td-score">0.5</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="td-title">Biochemical Function</td>
+                                                <td className="td-score">0</td>
+                                                <td className="td-score">0</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="td-title">Functional Alteration</td>
+                                                <td className="td-score">0</td>
+                                                <td className="td-score">0</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="td-title">Model Systems</td>
+                                                <td className="td-score">2</td>
+                                                <td className="td-score">4</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="td-title">Rescue</td>
+                                                <td className="td-score">0</td>
+                                                <td className="td-score">0</td>
+                                            </tr>
+                                            <tr><td cols="3"><strong>&nbsp;</strong></td></tr>
+                                            <tr>
+                                                <td className="td-title"><strong>Proband Score</strong></td>
+                                                <td className="td-score"><span>&nbsp;</span></td>
+                                                <td className="td-score"><strong>6</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td className="td-title">Number of probands with variants assessed as "supports" pathogenicity</td>
+                                                <td className="td-score">16</td>
+                                                <td className="td-score"></td>
+                                            </tr>
+                                            <tr><td cols="3"><span>&nbsp;</span></td></tr>
+                                            <tr>
+                                                <td className="td-title"><strong>Publication Score</strong></td>
+                                                <td className="td-score">&nbsp;</td>
+                                                <td className="td-score"><strong>5</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td className="td-title">Clinical Publicatons</td>
+                                                <td className="td-score">6</td>
+                                                <td className="td-score"></td>
+                                            </tr>
+                                            <tr><td cols="3"><span>&nbsp;</span></td></tr>
+                                            <tr>
+                                                <td className="td-title"><strong>Time Score (First Clinical Report)</strong></td>
+                                                <td className="td-score">&nbsp;</td>
+                                                <td className="td-score"><strong>2</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td className="td-title">Number of years since first report</td>
+                                                <td className="td-score">4</td>
+                                                <td className="td-score"></td>
+                                            </tr>
                                         </table>
                                     </div>
                                 </div>
@@ -255,13 +318,11 @@ var Demo = function() {
                                     <div className="col-sm-5">
                                         <strong className="pull-right">Calculated Clinical Validity Classification:</strong>
                                     </div>
-                                    <div className="col-sm-7"><span>{this.state.autoClassification}</span></div>
+                                    <div className="col-sm-7"><span>Definitive</span></div>
                                 </div>
                                 <br />
-                                <Input type="select" ref="alteredClassification" label="Change Provisional Clinical Validity Classification:" defaultValue="none"
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                    <option value="none">No Selection</option>
-                                    <option disabled="disabled"></option>
+                                <Input type="select" ref="alteredClassification" label="Selecte Provisional Clinical Validity Classification:" defaultValue="Definitive"
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
                                     <option value="Definitive">Definitive</option>
                                     <option value="Strong">Strong</option>
                                     <option value="Moderate">Moderate</option>
@@ -313,11 +374,9 @@ var EditCurrent = function() {
                             <div className="col-sm-7"><span>{this.state.autoClassification}</span></div>
                         </div>
                         <div className="row">
-                            <Input type="select" ref="alteredClassification" label="Change Provisional Clinical Validity Classification:"
+                            <Input type="select" ref="alteredClassification" label="Selecte Provisional Clinical Validity Classification:"
                                 value={alteredClassification} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
-                                groupClassName="form-group">
-                                <option value="none">No Selection</option>
-                                <option disabled="disabled"></option>
+                                groupClassName="form-group" handleChange={this.handleChange}>
                                 <option value="Definitive">Definitive</option>
                                 <option value="Strong">Strong</option>
                                 <option value="Moderate">Moderate</option>
@@ -329,7 +388,8 @@ var EditCurrent = function() {
                         </div>
                         <div className="row">
                             <Input type="textarea" ref="reasons" label="Explain Reason(s) for Change:" rows="5" labelClassName="col-sm-5 control-label"
-                                value={this.state.provisional.reasons} wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                value={this.state.provisional && this.state.provisional.reasons} wrapperClassName="col-sm-7" groupClassName="form-group"
+                                error={this.getFormError('reasons')} clearError={this.clrFormErrors.bind(null, 'reasons')}/>
                         </div>
                         <div className="row">
                             <div className="col-sm-5"><strong>Date Created:</strong></div>
@@ -404,16 +464,16 @@ var NewCalculation = function() {
                 //    expList.push(evid_id);
                 //}
             }
-            else if (evid_type === 'Protein interactions') {
+            else if (evid_type === 'Protein Interactions') {
                 expType["Protein interactions"] += 1;
                 exp_scores[0] += 0.5;
 
             }
-            else if (evid_type === 'Biochemical function') {
+            else if (evid_type === 'Biochemical Function') {
                 expType["Biochemical function"] += 1;
                 exp_scores[0] += 0.5;
             }
-            else if (evid_type === 'Functional alteration of gene or gene product') {
+            else if (evid_type === 'Functional Alteration') {
                 expType["Functional alteration of gene or gene product"] += 1;
                 exp_scores[1] += 1;
             }
@@ -421,7 +481,7 @@ var NewCalculation = function() {
                 expType["Rescue"] += 1;
                 exp_scores[2] += 2;
             }
-            else if (evid_type === 'Model systems') {
+            else if (evid_type === 'Model Systems') {
                 expType["Model systems"] += 1;
                 exp_scores[2] += 2;
             }
@@ -565,7 +625,7 @@ var NewCalculation = function() {
         pubScore = articleCollected.length;
     }
     if (articleCollected.length === 0) {
-        earliest = 'N/A'; // if no article collect,
+        time = ''; // if no article collect,
     }
 
     var totalScore = probandScore + pubScore + timeScore + expScore;
@@ -582,6 +642,9 @@ var NewCalculation = function() {
     else if (totalScore > 1) {
         autoClassification = 'Limited';
     }
+    else {
+        autoClassification = 'Limited';
+    }
 
     this.state.totalScore = totalScore;
     this.state.autoClassification = autoClassification;
@@ -593,47 +656,78 @@ var NewCalculation = function() {
             <PanelGroup accordion>
                 <Panel title="New calculation and Classification" open>
                     <div className="form-group">
+                        <div>
+                            The calculated values below are based on the set of saved evidence that exists when the "Generate New Summary"
+                            is clicked. To save these values as the "Current Summary & Provisional Classification" calculated values and make
+                            any changes to the Provisional Classification, you must click the Save button below.
+                        </div>
+                        <div><span>&nbsp;</span></div>
                         <div className="row">
                             <div className="col-sm-5"><strong className="pull-right">Total Score:</strong></div>
-                            <div className="col-sm-7"><span>{this.state.totalScore}</span></div>
+                            <div className="col-sm-7"><strong>{this.state.totalScore}</strong></div>
                         </div>
                         <br />
                         <div className="row">
                             <div className="col-sm-5">
                                 <strong className="pull-right">Scoring Details:</strong>
                             </div>
-                            <div className="col-sm-7"><span>&nbsp;</span></div>
-                        </div>
-                        <div className="row">
-                            <div className="col-sm-5">
-                                <strong className="pull-right">&nbsp;</strong>
-                            </div>
                             <div className="col-sm-7">
                                 <table className="summary-scoring">
-                                    <tr><td className="td-title"><strong>Total Experimental Score:</strong></td>
+                                    <tr>
+                                        <td className="td-title"><strong>Evidence</strong></td>
+                                        <td className="td-score"><strong>Count</strong></td>
+                                        <td className="td-score"><strong>Score</strong></td>
+                                    </tr>
+                                    <tr><td cols="3">&nbsp;</td></tr>
+                                    <tr><td className="td-title"><strong>Final Experimental Score</strong></td>
+                                        <td className="td-score"><span>&nbsp;</span></td>
                                         <td className="td-score"><strong>{expScore}</strong></td>
                                     </tr>
                                     {Object.keys(expType).map(function(key) {
                                         return (
                                             expType[key] > 0 ?
-                                                <tr><td className="td-title">{key} x {expType[key]} ({expUnit[key]} each)</td>
+                                                <tr>
+                                                    <td className="td-title">{key}</td>
+                                                    <td className="td-score">{expType[key]}</td>
                                                     <td className="td-score">{expType[key]*expUnit[key]}</td>
                                                 </tr>
                                             :
                                             null
                                         );
                                     })}
-                                    <tr><td cols="2"><span>&nbsp;</span></td></tr>
-                                    <tr><td className="td-title"><strong>Proband Score:</strong></td><td className="td-score"><strong>{probandScore}</strong></td></tr>
-                                    <tr><td className="td-title"># Variant assessed</td><td className="td-score">{variantIdList.length}</td></tr>
-                                    <tr><td className="td-title"># Family counted</td><td className="td-score">{count_proband(familiesCollected)}</td></tr>
-                                    <tr><td className="td-title"># Individual counted</td><td className="td-score">{count_proband(individualsCollected)}</td></tr>
-                                    <tr><td cols="2"><span>&nbsp;</span></td></tr>
-                                    <tr><td className="td-title"><strong>Publication Score:</strong></td><td className="td-score"><strong>{pubScore}</strong></td></tr>
-                                    <tr><td className="td-title"># Article</td><td className="td-score">{articleCollected.length}</td></tr>
-                                    <tr><td cols="2"><span>&nbsp;</span></td></tr>
-                                    <tr><td className="td-title"><strong>Time Score:</strong></td><td className="td-score"><strong>{timeScore}</strong></td></tr>
-                                    <tr><td className="td-title">Earliest Year</td><td className="td-score">{earliest}</td></tr>
+                                    <tr><td cols="3"><strong>&nbsp;</strong></td></tr>
+                                    <tr>
+                                        <td className="td-title"><strong>Proband Score</strong></td>
+                                        <td className="td-score"><span>&nbsp;</span></td>
+                                        <td className="td-score"><strong>{probandScore}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td className="td-title">Number of probands with variants assessed as "supports" pathogenicity</td>
+                                        <td className="td-score">{proband}</td>
+                                        <td className="td-score">&nbsp;</td>
+                                    </tr>
+                                    <tr><td cols="3"><span>&nbsp;</span></td></tr>
+                                    <tr>
+                                        <td className="td-title"><strong>Publication Score</strong></td>
+                                        <td className="td-score">&nbsp;</td>
+                                        <td className="td-score"><strong>{pubScore}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td className="td-title">Clinical Publicatons</td>
+                                        <td className="td-score">{articleCollected.length}</td>
+                                        <td className="td-score">&nbsp;</td>
+                                    </tr>
+                                    <tr><td cols="3"><span>&nbsp;</span></td></tr>
+                                    <tr>
+                                        <td className="td-title"><strong>Time Score (First Clinical Report)</strong></td>
+                                        <td className="td-score">&nbsp;</td>
+                                        <td className="td-score"><strong>{timeScore}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td className="td-title">Number of years since first report</td>
+                                        <td className="td-score">{time}</td>
+                                        <td className="td-score">&nbsp;</td>
+                                    </tr>
                                 </table>
                             </div>
                         </div>
@@ -645,10 +739,9 @@ var NewCalculation = function() {
                             <div className="col-sm-7"><span>{this.state.autoClassification}</span></div>
                         </div>
                         <br />
-                        <Input type="select" ref="alteredClassification" label="Change Provisional Clinical Validity Classification:" defaultValue="none"
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                            <option value="none">No Selection</option>
-                            <option disabled="disabled"></option>
+                        <Input type="select" ref="alteredClassification" label="Selecte Provisional Clinical Validity Classification:"
+                            wrapperClassName="col-sm-7" defaultValue={this.state.autoClassification} labelClassName="col-sm-5 control-label"
+                            groupClassName="form-group">
                             <option value="Definitive">Definitive</option>
                             <option value="Strong">Strong</option>
                             <option value="Moderate">Moderate</option>
@@ -658,28 +751,14 @@ var NewCalculation = function() {
                             <option value="Refuted">Refuted</option>
                         </Input>
                         <Input type="textarea" ref="reasons" label="Explain Reason(s) for Change:" rows="5" labelClassName="col-sm-5 control-label"
-                            wrapperClassName="col-sm-7" groupClassName="form-group" />
+                            wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')}
+                            clearError={this.clrFormErrors.bind(null, 'reasons')} />
                         <div className="col-sm-5"><span className="pull-right">&nbsp;</span></div>
                         <div className="col-sm-7">
                             <span>
                             **Note: If your selected Clinical Validity Classification is different from the Calculated value, provide a reason to expain why you changed it.
                             </span>
                         </div>
-                        { this.state.provisional ?
-                            <div>
-                                <div className="row">
-                                    <div className="col-sm-5"><span className="pull-right">&nbsp;</span></div>
-                                    <div className="col-sm-7"><span>&nbsp;</span></div>
-                                </div>
-                                <div className="row">
-                                    <div className="col-sm-5"><span className="pull-right">&nbsp;</span></div>
-                                    <div className="col-sm-7">
-                                        <span>**Click Save below will permanenetly change your currently saved data.</span>
-                                    </div>
-                                </div>
-                            </div>
-                            : null
-                        }
                     </div>
                 </Panel>
             </PanelGroup>

@@ -68,9 +68,6 @@
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-03-13T17:23:22.000000+00:00",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "annotations": [
-            "4172f4ab-189e-11e5-a10f-60f81dc5b05a"
-        ],
         "active": true
     },
     {
@@ -82,7 +79,7 @@
         "omimId": "613795",
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "date_created": "2015-08-13T17:23:22.000000+00:00",
-        "last_modified": "2015-09-30T08:35:18.000000+00:00",
+        "last_modified": "2015-09-29T19:31:53.000000+00:00",
         "annotations": [
             "f5d63455-1278-444f-83bb-7b7d32821792"
         ],
