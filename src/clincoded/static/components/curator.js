@@ -433,7 +433,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                     })}
                 </div>
             : null}
-            <a href={'/family/' + family.uuid} target="_blank" title="View family in a new tab">View</a>
+            <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} target="_blank" title="View family in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
             {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
         </div>
@@ -477,7 +477,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                                 })}
                                 <span key={family.uuid}>
                                     {i++ > 0 ? ', ' : ''}
-                                    <a href={family['@id']} target="_blank" title="View family in a new tab">{family.label}</a>
+                                    <a href={family['@id'] + '?gdm=' + gdm.uuid} target="_blank" title="View family in a new tab">{family.label}</a>
                                 </span>
                             </span>
                         );
@@ -1171,11 +1171,11 @@ var flatten = module.exports.flatten = function(obj, type) {
             default:
                 break;
         }
-    }
 
-    // Flatten submitted_by
-    if (obj.submitted_by) {
-        flat.submitted_by = obj.submitted_by['@id'];
+        // Flatten submitted_by
+        if (obj.submitted_by) {
+            flat.submitted_by = obj.submitted_by['@id'];
+        }
     }
 
     return flat;
@@ -1191,7 +1191,9 @@ function cloneSimpleProps(obj, props) {
     var dup = {};
 
     props.forEach(function(prop) {
-        dup[prop] = obj[prop];
+        if (obj.hasOwnProperty(prop)) {
+            dup[prop] = obj[prop];
+        }
     });
     return dup;
 }
@@ -1290,9 +1292,6 @@ function flattenGroup(group) {
 var familySimpleProps = ["label", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "numberOfMale", "numberOfFemale", "countryOfOrigin",
     "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "method", "additionalInformation", "date_created"
 ];
-var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGenerationInPedigree", "consanguineousFamily", "numberOfCases", "deNovoType",
-    "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
-    "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation"];
 
 function flattenFamily(family) {
     // First copy everything before fixing the special properties
@@ -1305,17 +1304,7 @@ function flattenFamily(family) {
 
     // Flatten segregation variants
     if (family.segregation) {
-        flat.segregation = cloneSimpleProps(family.segregation, segregationSimpleProps);
-        if (family.segregation.variants && family.segregation.variants.length) {
-            flat.segregation.variants = family.segregation.variants.map(function(variant) {
-                return variant['@id'];
-            });
-        }
-        if (family.segregation.assessments && family.segregation.assessments.length) {
-            flat.segregation.assessments = family.segregation.assessments.map(function(assessment) {
-                return assessment['@id'];
-            });
-        }
+        flat.segregation = flattenSegregation(family.segregation);
     }
 
     // Flatten other PMIDs
@@ -1334,6 +1323,28 @@ function flattenFamily(family) {
 
     return flat;
 }
+
+
+var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGenerationInPedigree", "consanguineousFamily", "numberOfCases", "deNovoType",
+    "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
+    "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation"];
+
+var flattenSegregation = module.exports.flattenSegregation = function(segregation) {
+    var flat = cloneSimpleProps(segregation, segregationSimpleProps);
+
+    if (segregation.variants && segregation.variants.length) {
+        flat.variants = segregation.variants.map(function(variant) {
+            return variant['@id'];
+        });
+    }
+    if (segregation.assessments && segregation.assessments.length) {
+        flat.assessments = segregation.assessments.map(function(assessment) {
+            return assessment['@id'];
+        });
+    }
+
+    return flat;
+};
 
 
 var individualSimpleProps = ["label", "sex", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "countryOfOrigin", "ethnicity",

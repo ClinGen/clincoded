@@ -233,14 +233,12 @@
                 "dateTime": {
                     "title": "Date Time",
                     "description": "Time stamp for creation",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 },
                 "pedigreeDescription": {
                     "title": "Pedigree Description",
                     "description": "Pedigree Description",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 },
                 "pedigreeSize": {
                     "title": "Pedigree Size",
@@ -269,7 +267,6 @@
                     "title": "de novo type",
                     "description": "de novo type",
                     "type": "string",
-                    "default": "",
                     "enum": [
                         "",
                         "Inferred",
@@ -324,8 +321,7 @@
                 "additionalInformation": {
                     "title": "Additional Information",
                     "description": "Additional information of the segregation",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 },
                 "variants": {
                     "title": "Variants Associated with Proband",
