@@ -295,7 +295,7 @@ var FamilyCuration = React.createClass({
             // Make a new tracking object for the current assessment. Either or both of the original assessment or user can be blank
             // and assigned later. Then set the component state's assessment value to the assessment's value -- default if there was no
             // assessment.
-            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'segregation');
+            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
             this.setAssessmentValue(assessmentTracker);
 
             // Set all the state variables we've collected
@@ -377,7 +377,7 @@ var FamilyCuration = React.createClass({
         if (this.validateDefault() && this.validateVariants()) {
             var currFamily = this.state.family;
             var newFamily = {}; // Holds the new group object;
-            var familyDiseases = null, familyArticles, familyVariants = [];
+            var familyDiseases = null, familyArticles, familyVariants = [], familyAssessments = [];
             var individualDiseases = null;
             var savedFamilies; // Array of saved written to DB
             var formError = false;
@@ -614,8 +614,18 @@ var FamilyCuration = React.createClass({
                         return Promise.resolve({individual: individual, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
                     });
                 }).then(data => {
+                    // Make a list of assessments along with the new one if necessary
+                    if (currFamily && currFamily.segregation && currFamily.segregation.assessments && currFamily.segregation.assessments.length) {
+                        familyAssessments = currFamily.segregation.assessments.map(function(assessment) {
+                            return assessment['@id'];
+                        });
+                    }
+                    if (data.assessment && !data.updatedAssessment) {
+                        familyAssessments.push(data.assessment['@id']);
+                    }
+
                     // Make a new family object based on form fields.
-                    var newFamily = this.createFamily(familyDiseases, familyArticles, familyVariants);
+                    var newFamily = this.createFamily(familyDiseases, familyArticles, familyVariants, familyAssessments);
 
                     // Prep for multiple family writes, based on the family count dropdown (only appears when creating a new family,
                     // not when editing a family). This is a count of *extra* families, so add 1 to it to get the number of families
@@ -630,14 +640,6 @@ var FamilyCuration = React.createClass({
                             newFamily.individualIncluded = [];
                         }
                         newFamily.individualIncluded.push(data.individual['@id']);
-                    }
-
-                    // If we made a new assessment, add it to the pathogenicity's assessments
-                    if (data.assessment && !data.updatedAssessment) {
-                        if (!newFamily.segregation.assessments) {
-                            newFamily.segregation.assessments = [];
-                        }
-                        newFamily.segregation.assessments.push(data.assessment['@id']);
                     }
 
                     // Write the new family object to the DB
@@ -717,7 +719,7 @@ var FamilyCuration = React.createClass({
     },
 
     // Create segregation object based on the form values
-    createSegregation: function(newFamily, variants) {
+    createSegregation: function(newFamily, variants, assessments) {
         var newSegregation = {};
         var value1;
 
@@ -788,6 +790,10 @@ var FamilyCuration = React.createClass({
             newSegregation.variants = variants;
         }
 
+        if (assessments) {
+            newSegregation.assessments = assessments;
+        }
+
         if (Object.keys(newSegregation).length) {
             newFamily.segregation = newSegregation;
         }
@@ -795,7 +801,7 @@ var FamilyCuration = React.createClass({
 
     // Create a family object to be written to the database. Most values come from the values
     // in the form. The created object is returned from the function.
-    createFamily: function(familyDiseases, familyArticles, familyVariants) {
+    createFamily: function(familyDiseases, familyArticles, familyVariants, familyAssessments) {
         // Make a new family. If we're editing the form, first copy the old family
         // to make sure we have everything not from the form.
         var newFamily = this.state.family ? curator.flatten(this.state.family) : {};
@@ -863,7 +869,7 @@ var FamilyCuration = React.createClass({
         if (value) { newFamily.additionalInformation = value; }
 
         // Fill in the segregation fields to the family, if there was a form (no form if assessed)
-        this.createSegregation(newFamily, familyVariants);
+        this.createSegregation(newFamily, familyVariants, familyAssessments);
 
         return newFamily;
     },
@@ -1377,7 +1383,8 @@ var FamilyViewer = React.createClass({
 
     getInitialState: function() {
         return {
-            assessments: null // Array of assessments for the family's segregation
+            assessments: null, // Array of assessments for the family's segregation
+            updatedAssessment: '' // Updated assessment value
         };
     },
 
@@ -1413,7 +1420,7 @@ var FamilyViewer = React.createClass({
         }).then(updatedFamily => {
             // Wrote the family, so update the assessments state to the new assessment list
             if (updatedFamily && updatedFamily.segregation && updatedFamily.segregation.assessments && updatedFamily.segregation.assessments.length) {
-                this.setState({assessments: updatedFamily.segregation.assessments});
+                this.setState({assessments: updatedFamily.segregation.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
             return Promise.resolve(null);
         }).catch(function(e) {
@@ -1442,6 +1449,7 @@ var FamilyViewer = React.createClass({
         var userFamily = user && family && family.submitted_by ? user.uuid === family.submitted_by.uuid : false;
         var familyUserAssessed = false; // TRUE if logged-in user doesn't own the family, but the family's owner assessed its segregation
         var othersAssessed = false; // TRUE if we own this segregation, and others have assessed it
+        var updateMsg = this.state.updatedAssessment ? 'Assessment updated to ' + this.state.updatedAssessment : '';
 
         // Make an assessment tracker object once we get the logged in user info
         if (!this.cv.assessmentTracker && user && segregation) {
@@ -1452,7 +1460,7 @@ var FamilyViewer = React.createClass({
                 // Find the assessment belonging to the logged-in curator, if any.
                 userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
             }
-            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'segregation');
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
         }
 
         // See if others have assessed
@@ -1617,7 +1625,7 @@ var FamilyViewer = React.createClass({
 
                     {this.cv.gdmUuid && (familyUserAssessed || userFamily) ?
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} />
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} updateMsg={updateMsg} />
                     : null}
 
                     <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
