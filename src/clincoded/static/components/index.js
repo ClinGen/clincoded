@@ -25,6 +25,8 @@ require('./family_curation');
 require('./family_submit');
 require('./individual_curation');
 require('./individual_submit');
+require('./experimental_curation');
+require('./experimental_submit');
 require('./variant_curation');
 require('./testing');
 require('./edit');
