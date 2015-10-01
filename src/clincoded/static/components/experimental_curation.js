@@ -2001,7 +2001,8 @@ var ExperimentalViewer = React.createClass({
 
     getInitialState: function() {
         return {
-            assessments: null // Array of assessments for the family's segregation
+            assessments: null, // Array of assessments for the experimental data
+            updatedAssessment: '' // Updated assessment value
         };
     },
 
@@ -2013,7 +2014,7 @@ var ExperimentalViewer = React.createClass({
         this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
             var experimental = this.props.context;
 
-            // If we made a new assessment, add it to the family's assessments
+            // If we made a new assessment, add it to the experimental data's assessments
             if (assessmentInfo.assessment && !assessmentInfo.update) {
                 updatedExperimental = curator.flatten(experimental);
                 if (!updatedExperimental.assessments) {
@@ -2021,23 +2022,23 @@ var ExperimentalViewer = React.createClass({
                 }
                 updatedExperimental.assessments.push(assessmentInfo.assessment['@id']);
 
-                // Write the updated family object to the DB
+                // Write the updated experimental data object to the DB
                 return this.putRestData('/experimental/' + experimental.uuid, updatedExperimental).then(data => {
                     return this.getRestData('/experimental/' + data['@graph'][0].uuid);
                 });
             }
 
-            // Didn't update the family; if updated the assessment, reload the family
+            // Didn't update the experimental data object; if updated the assessment, reload the experimental data
             if (assessmentInfo.update) {
                 return this.getRestData('/experimental/' + experimental.uuid);
             }
 
-            // Not updating the family
+            // Not updating the experimental data
             return Promise.resolve(experimental);
         }).then(updatedExperimental => {
-            // Wrote the family, so update the assessments state to the new assessment list
+            // Wrote the experimental data, so update the assessments state to the new assessment list
             if (updatedExperimental && updatedExperimental.assessments && updatedExperimental.assessments.length) {
-                this.setState({assessments: updatedExperimental.assessments});
+                this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
             return Promise.resolve(null);
         }).catch(function(e) {
@@ -2060,8 +2061,9 @@ var ExperimentalViewer = React.createClass({
         var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
         var user = this.props.session && this.props.session.user_properties;
         var userExperimental = user && experimental && experimental.submitted_by ? user.uuid === experimental.submitted_by.uuid : false;
-        var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the family, but the family's owner assessed its segregation
-        var othersAssessed = false; // TRUE if we own this segregation, and others have assessed it
+        var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the experimental data, but the experimental data's owner assessed it
+        var othersAssessed = false; // TRUE if we own this experimental data, and others have assessed it
+        var updateMsg = this.state.updatedAssessment ? 'Assessment updated to ' + this.state.updatedAssessment : '';
 
         // Make an assessment tracker object once we get the logged in user info
         if (!this.cv.assessmentTracker && user) {
@@ -2471,7 +2473,7 @@ var ExperimentalViewer = React.createClass({
                     : null}
                     {this.cv.gdmUuid && (experimentalUserAssessed || userExperimental) ?
                         <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} />
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} updateMsg={updateMsg} />
                     : null}
                 </div>
             </div>
