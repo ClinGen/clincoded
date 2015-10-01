@@ -39,9 +39,8 @@ var VAR_OTHER = 2; // Other description entered in a panel
 
 var initialCv = {
     assessmentTracker: null, // Tracking object for a single assessment
-    filledExperimentalData: {}, // Tracks segregation fields with values filled in
-    experimentalDataAssessed: false, // TRUE if segregation has been assessed by self or others
-    othersAssessed: false // TRUE if other curators have assessed the family's segregation
+    experimentalDataAssessed: false, // TRUE if experimental data has been assessed by self or others
+    othersAssessed: false // TRUE if other curators have assessed the experimental data
 };
 
 var ExperimentalCuration = React.createClass({
@@ -92,6 +91,7 @@ var ExperimentalCuration = React.createClass({
         };
     },
 
+    // sets the description text below the experimental data type dropdown
     getExperimentalTypeDescription: function(item, subitem) {
         subitem = typeof subitem !== 'undefined' ? subitem : '';
         var experimentalTypeDescriptionList = {
@@ -117,10 +117,9 @@ var ExperimentalCuration = React.createClass({
         }
     },
 
-    // Handle value changes in genotyping method 1
+    // Handle value changes in forms
     handleChange: function(ref, e) {
         var clinvarid, othervariant;
-
         if (ref === 'experimentalName' && this.refs[ref].getValue()) {
             this.setState({experimentalName: this.refs[ref].getValue()});
         } else if (ref === 'experimentalType') {
@@ -249,27 +248,6 @@ var ExperimentalCuration = React.createClass({
             }
         } else if (ref === 'patientCellOrEngineeredEquivalent') {
             this.setState({rescuePCEE: this.refs['patientCellOrEngineeredEquivalent'].getValue()});
-        } else if (ref === 'assessment') {
-            // Handle segregation fields to see if we should enable or disable the assessment dropdown
-            var value = this.refs[ref].getValue();
-            if (this.refs[ref].props.type === 'select') {
-                value = value === 'none' ? '' : value;
-            }
-            if (value !== '') {
-                // A segregation field has a value; remember this field
-                this.cv.filledExperimentalData[ref] = true;
-            } else {
-                // A segregation field lost its value; if we had remembered it, forget it
-                if (this.cv.filledExperimentalData[ref]) {
-                    delete this.cv.filledExperimentalData[ref];
-                }
-            }
-
-            // Now change the state of the assessment dropdown if needed
-            var filled = Object.keys(this.cv.filledExperimentalData).length > 0;
-            if (this.state.experimentalDataAssessed !== filled) {
-                this.setState({experimentalDataAssessed: filled});
-            }
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -304,6 +282,7 @@ var ExperimentalCuration = React.createClass({
         }
     },
 
+    // for joining gene symbols w/ commas
     joinItems: function(input) {
         var outputArray = [];
         for (var i = 0; i < input.length; i++) {
@@ -2063,6 +2042,8 @@ var ExperimentalViewer = React.createClass({
                 this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
             return Promise.resolve(null);
+        }).catch(function(e) {
+            console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);
         });
     },
 
