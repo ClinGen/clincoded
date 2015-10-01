@@ -721,62 +721,69 @@ var FamilyCuration = React.createClass({
         var newSegregation = {};
         var value1;
 
-        value1 = this.getFormValue('SEGpedigreedesc');
-        if (value1) {
-            newSegregation[formMapSegregation['SEGpedigreedesc']] = value1;
+        // Unless others have assessed (in which case there's no segregation form), get the segregation
+        // values from the form
+        if (!this.cv.segregationAssessed) {
+            value1 = this.getFormValue('SEGpedigreedesc');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGpedigreedesc']] = value1;
+            }
+            value1 = this.getFormValue('SEGpedigreesize');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGpedigreesize']] = parseInt(value1, 10);
+            }
+            value1 = this.getFormValue('SEGnogenerationsinpedigree');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGnogenerationsinpedigree']] = parseInt(value1, 10);
+            }
+            value1 = this.getFormValue('SEGconsanguineous');
+            if (value1 !== 'none') {
+                newSegregation[formMapSegregation['SEGconsanguineous']] = value1 === 'Yes';
+            }
+            value1 = this.getFormValue('SEGnocases');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGnocases']] = parseInt(value1, 10);
+            }
+            value1 = this.getFormValue('SEGdenovo');
+            if (value1 !== 'none') {
+                newSegregation[formMapSegregation['SEGdenovo']] = value1;
+            }
+            value1 = this.getFormValue('SEGunaffectedcarriers');
+            if (value1 !== 'none') {
+                newSegregation[formMapSegregation['SEGunaffectedcarriers']] = parseInt(value1, 10);
+            }
+            value1 = this.getFormValue('SEGnoaffected');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGnoaffected']] = parseInt(value1, 10);
+            }
+            value1 = this.getFormValue('SEGnoaffected1');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGnoaffected1']] = parseInt(value1, 10);
+            }
+            value1 = this.getFormValue('SEGnoaffected2');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGnoaffected2']] = parseInt(value1, 10);
+            }
+            value1 = this.getFormValue('SEGnounaffectedcarriers');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGnounaffectedcarriers']] = parseInt(value1, 10);
+            }
+            value1 = this.getFormValue('SEGnounaffectedindividuals');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGnounaffectedindividuals']] = parseInt(value1, 10);
+            }
+            value1 = this.getFormValue('SEGbothvariants');
+            if (value1 !== 'none') {
+                newSegregation[formMapSegregation['SEGbothvariants']] = value1 === 'Yes';
+            }
+            value1 = this.getFormValue('SEGaddedsegregationinfo');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGaddedsegregationinfo']] = value1;
+            }
+        } else if (newFamily.segregation && Object.keys(newFamily.segregation).length) {
+            newSegregation = _.clone(newFamily.segregation);
         }
-        value1 = this.getFormValue('SEGpedigreesize');
-        if (value1) {
-            newSegregation[formMapSegregation['SEGpedigreesize']] = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('SEGnogenerationsinpedigree');
-        if (value1) {
-            newSegregation[formMapSegregation['SEGnogenerationsinpedigree']] = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('SEGconsanguineous');
-        if (value1 !== 'none') {
-            newSegregation[formMapSegregation['SEGconsanguineous']] = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('SEGnocases');
-        if (value1) {
-            newSegregation[formMapSegregation['SEGnocases']] = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('SEGdenovo');
-        if (value1 !== 'none') {
-            newSegregation[formMapSegregation['SEGdenovo']] = value1;
-        }
-        value1 = this.getFormValue('SEGunaffectedcarriers');
-        if (value1 !== 'none') {
-            newSegregation[formMapSegregation['SEGunaffectedcarriers']] = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('SEGnoaffected');
-        if (value1) {
-            newSegregation[formMapSegregation['SEGnoaffected']] = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('SEGnoaffected1');
-        if (value1) {
-            newSegregation[formMapSegregation['SEGnoaffected1']] = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('SEGnoaffected2');
-        if (value1) {
-            newSegregation[formMapSegregation['SEGnoaffected2']] = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('SEGnounaffectedcarriers');
-        if (value1) {
-            newSegregation[formMapSegregation['SEGnounaffectedcarriers']] = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('SEGnounaffectedindividuals');
-        if (value1) {
-            newSegregation[formMapSegregation['SEGnounaffectedindividuals']] = parseInt(value1, 10);
-        }
-        value1 = this.getFormValue('SEGbothvariants');
-        if (value1 !== 'none') {
-            newSegregation[formMapSegregation['SEGbothvariants']] = value1 === 'Yes';
-        }
-        value1 = this.getFormValue('SEGaddedsegregationinfo');
-        if (value1) {
-            newSegregation[formMapSegregation['SEGaddedsegregationinfo']] = value1;
-        }
+
         if (variants) {
             newSegregation.variants = variants;
         }
@@ -856,9 +863,7 @@ var FamilyCuration = React.createClass({
         if (value) { newFamily.additionalInformation = value; }
 
         // Fill in the segregation fields to the family, if there was a form (no form if assessed)
-        if (!newFamily.segregation || !newFamily.segregation.assessments || newFamily.segregation.assessments.length === 0) {
-            this.createSegregation(newFamily, familyVariants);
-        }
+        this.createSegregation(newFamily, familyVariants);
 
         return newFamily;
     },
