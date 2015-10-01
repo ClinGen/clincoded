@@ -8,10 +8,34 @@ var cookie = require('cookie-monster')(document);
 window.stats_cookie = cookie.get('X-Stats') || '';
 cookie.set('X-Stats', '', {path: '/', expires: new Date(0)});
 
-// Use a separate tracker for dev / test
+
 var ga = require('google-analytics');
-var trackers = {'curation.clinicalgenome.org': 'UA-49947422-4'};
-var tracker = trackers[document.location.hostname] || 'UA-49947422-5';
+
+//existing trackers for gene curation app
+var trackers = {
+    'curation.clinicalgenome.org': 'UA-49947422-4',
+    'curation-beta.clinicalgenome.org': 'UA-49947422-6',
+    'curation-demo.clinicalgenome.org': 'UA-49947422-5'
+};
+
+//determine current hostname
+var analyticsTrackerHostname = document.location.hostname;
+
+//match hostname to google analytics domain identified for tracker
+if (/^(www\.)?curation.clinicalgenome.org/.test(analyticsTrackerHostname)) {
+    //production app
+    analyticsTrackerHostname = 'curation.clinicalgenome.org';
+} else if (/^curation-beta.*.clinicalgenome.org/.test(analyticsTrackerHostname)){
+    //all curation-beta variants
+    analyticsTrackerHostname = 'curation-beta.clinicalgenome.org';
+} else {
+    //catch-all
+    analyticsTrackerHostname = 'curation-demo.clinicalgenome.org';
+}
+
+//use correct tracker based on hostname
+var tracker = trackers[analyticsTrackerHostname];
+
 ga('create', tracker, {'cookieDomain': 'none', 'siteSpeedSampleRate': 100});
 ga('send', 'pageview');
 
