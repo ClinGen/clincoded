@@ -2156,8 +2156,8 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>This gene or genes have been implicated in the above disease</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease ?
-                                    context.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease.toString()
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease ?
+                                    experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease.toString()
                                 : null}</dd>
                             </div>
 
@@ -2168,7 +2168,7 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>Additional comments</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}</dd>
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
@@ -2220,8 +2220,8 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>This gene or genes have been implicated in the above disease</dt>
-                                <dd>{context.proteinInteractions.geneImplicatedInDisease ?
-                                    context.proteinInteractions.geneImplicatedInDisease.toString()
+                                <dd>{experimental.proteinInteractions.geneImplicatedInDisease ?
+                                    experimental.proteinInteractions.geneImplicatedInDisease.toString()
                                 : null}</dd>
                             </div>
 
@@ -2242,7 +2242,7 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient</dt>
-                                <dd>{context.expression.organOfTissue}</dd>
+                                <dd>{experimental.expression.organOfTissue}</dd>
                             </div>
                         </dl>
                     </Panel>
@@ -2252,14 +2252,14 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>The gene is normally expressed in the above tissue</dt>
-                                <dd>{context.expression.normalExpression.expressedInTissue ?
-                                    context.expression.normalExpression.expressedInTissue.toString()
+                                <dd>{experimental.expression.normalExpression.expressedInTissue ?
+                                    experimental.expression.normalExpression.expressedInTissue.toString()
                                 : null}</dd>
                             </div>
 
                             <div>
                                 <dt>Change Evidence for normal expression in disease tissue</dt>
-                                <dd>{context.expression.normalExpression.evidence}</dd>
+                                <dd>{experimental.expression.normalExpression.evidence}</dd>
                             </div>
 
                             <div>
@@ -2426,15 +2426,15 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>The wild-type rescues the above phenotype</dt>
-                                <dd>{context.rescue.wildTypeRescuePhenotype ?
-                                    context.rescue.wildTypeRescuePhenotype.toString()
+                                <dd>{experimental.rescue.wildTypeRescuePhenotype ?
+                                    experimental.rescue.wildTypeRescuePhenotype.toString()
                                 : null}</dd>
                             </div>
 
                             <div>
                                 <dt>The patient variant rescues</dt>
-                                <dd>{context.rescue.patientVariantRescue ?
-                                    context.rescue.patientVariantRescue.toString()
+                                <dd>{experimental.rescue.patientVariantRescue ?
+                                    experimental.rescue.patientVariantRescue.toString()
                                 : null}</dd>
                             </div>
 

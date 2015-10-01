@@ -107,7 +107,7 @@ var ExperimentalSubmit = React.createClass({
                 <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} />
                 <div className="container">
                     {experimental ?
-                        <h1>{experimental.evidenceType}<br />Experimental Data Information: {experimental.label} <a href={experimental['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editExperimentalLink} className="btn btn-info">Edit</a></h1>
+                        <h1>{experimental.evidenceType}<br />Experimental Data Information: {experimental.label} <a href={experimental['@id'] + '?gdm=' + gdm.uuid} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editExperimentalLink} className="btn btn-info">Edit</a></h1>
                     : null}
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
@@ -115,7 +115,7 @@ var ExperimentalSubmit = React.createClass({
                         </div>
                     : null}
                     <div className="row">
-                        <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
+                        <div className="col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
                             <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
                                 <div className="submit-results-panel-info">
                                     <em>Your Experimental Data has been added!</em>
@@ -126,12 +126,12 @@ var ExperimentalSubmit = React.createClass({
                                     <div className="family-submit-results-choices">
                                         <div className="submit-results-panel-info"></div>
                                         <div className="submit-results-buttons">
-                                            <div className="col-md-7">
+                                            <div className="col-md-6">
                                                 <span className="family-submit-results-btn">
                                                     <a className="btn btn-default" href={'/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid}>Add another Experimental Data entry</a>
                                                 </span>
                                             </div>
-                                            <div className="col-md-7">
+                                            <div className="col-md-6">
                                                 <span className="family-submit-results-btn">
                                                     <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
                                                 </span>
