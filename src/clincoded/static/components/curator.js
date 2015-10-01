@@ -547,7 +547,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                     })}
                 </div>
             : null}
-            <a href={'/experimental/' + experimental.uuid} target="_blank" title="View experimental data in a new tab">View</a>
+            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} target="_blank" title="View experimental data in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
         </div>
     );

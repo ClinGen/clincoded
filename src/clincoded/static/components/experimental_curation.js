@@ -2000,351 +2000,448 @@ var LabelOtherVariant = React.createClass({
 
 
 var ExperimentalViewer = React.createClass({
+    mixins: [RestMixin, AssessmentMixin],
+
+    cv: {
+        assessmentTracker: null, // Tracking object for a single assessment
+        gdmUuid: '' // UUID of the GDM; passed in the query string
+    },
+
+    getInitialState: function() {
+        return {
+            assessments: null // Array of assessments for the family's segregation
+        };
+    },
+
+    // Handle the assessment submit button
+    assessmentSubmit: function(e) {
+        var updatedExperimental;
+
+        // Write the assessment to the DB, if there was one.
+        this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
+            var experimental = this.props.context;
+
+            // If we made a new assessment, add it to the family's assessments
+            if (assessmentInfo.assessment && !assessmentInfo.update) {
+                updatedExperimental = curator.flatten(experimental);
+                if (!updatedExperimental.assessments) {
+                    updatedExperimental.assessments = [];
+                }
+                updatedExperimental.assessments.push(assessmentInfo.assessment['@id']);
+
+                // Write the updated family object to the DB
+                return this.putRestData('/experimental/' + experimental.uuid, updatedExperimental).then(data => {
+                    return this.getRestData('/experimental/' + data['@graph'][0].uuid);
+                });
+            }
+
+            // Didn't update the family; if updated the assessment, reload the family
+            if (assessmentInfo.update) {
+                return this.getRestData('/experimental/' + experimental.uuid);
+            }
+
+            // Not updating the family
+            return Promise.resolve(experimental);
+        }).then(updatedExperimental => {
+            // Wrote the family, so update the assessments state to the new assessment list
+            if (updatedExperimental && updatedExperimental.assessments && updatedExperimental.assessments.length) {
+                this.setState({assessments: updatedExperimental.assessments});
+            }
+            return Promise.resolve(null);
+        }).catch(function(e) {
+            console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR=: %o', e);
+        });
+    },
+
+    componentWillMount: function() {
+        var experimental = this.props.context;
+
+        // Get the GDM and Family UUIDs from the query string
+        this.cv.gdmUuid = queryKeyValue('gdm', this.props.href);
+        if (experimental && experimental.assessments && experimental.assessments.length) {
+            this.setState({assessments: experimental.assessments});
+        }
+    },
+
     render: function() {
-        var context = this.props.context;
-        var method = context.method;
+        var experimental = this.props.context;
+        var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
+        var user = this.props.session && this.props.session.user_properties;
+        var userExperimental = user && experimental && experimental.submitted_by ? user.uuid === experimental.submitted_by.uuid : false;
+        var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the family, but the family's owner assessed its segregation
+        var othersAssessed = false; // TRUE if we own this segregation, and others have assessed it
+
+        // Make an assessment tracker object once we get the logged in user info
+        if (!this.cv.assessmentTracker && user) {
+            var userAssessment;
+
+            // Find if any assessments for the segregation are owned by the currently logged-in user
+            if (assessments && assessments.length) {
+                // Find the assessment belonging to the logged-in curator, if any.
+                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+            }
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, experimental.evidenceType);
+        }
+
+        // See if others have assessed
+        if (userExperimental) {
+            othersAssessed = Assessments.othersAssessed(assessments, user.uuid);
+        }
+
+        // Note if we don't own the family, but the owner has assessed the segregation
+        if (user && experimental && experimental.submitted_by) {
+            var experimentalUserAssessment = Assessments.userAssessment(assessments, experimental.submitted_by.uuid);
+            if (experimentalUserAssessment && experimentalUserAssessment.value !== Assessments.DEFAULT_VALUE) {
+                experimentalUserAssessed = true;
+            }
+        }
+
+        console.log(assessments);
+        console.log(userExperimental);
+        console.log(experimentalUserAssessed);
+        console.log(this.cv.gdmUuid);
 
         return (
             <div className="container">
                 <div className="row curation-content-viewer">
                     <h1>View Experimental Data</h1>
-                    <h3>{context.evidenceType}</h3>
-                    <h4>{context.label}</h4>
+                    <h3>{experimental.evidenceType}</h3>
+                    <h4>{experimental.label}</h4>
 
-                    {context.evidenceType == 'Biochemical Function' ?
+                    {experimental.evidenceType == 'Biochemical Function' ?
                     <Panel title="Biochemical Function" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Identified function of gene in this record</dt>
-                                <dd>{context.biochemicalFunction.identifiedFunction}</dd>
+                                <dd>{experimental.biochemicalFunction.identifiedFunction}</dd>
                             </div>
 
                             <div>
                                 <dt>Evidence for above function</dt>
-                                <dd>{context.biochemicalFunction.evidenceForFunction}</dd>
+                                <dd>{experimental.biochemicalFunction.evidenceForFunction}</dd>
                             </div>
 
                             <div>
                                 <dt>Notes on where evidence found in paper</dt>
-                                <dd>{context.biochemicalFunction.evidenceForFunctionInPaper}</dd>
+                                <dd>{experimental.biochemicalFunction.evidenceForFunctionInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Biochemical Function' && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction !== '' ?
+                    {experimental.evidenceType == 'Biochemical Function' && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction !== '' ?
                     <Panel title="A. Gene(s) with same function implicated in same disease" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Other gene(s) with same function as gene in record</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(function(gene, i) {
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(function(gene, i) {
                                         return (<span>{gene.symbol} </span>);
                                     })}</dd>
                             </div>
 
                             <div>
                                 <dt>Evidence that above gene(s) share same function with gene in record</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}</dd>
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}</dd>
                             </div>
 
                             <div>
                                 <dt>Has this gene or genes been implicated in the above disease?</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease ?
-                                    context.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease.toString()
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease ?
+                                    experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease.toString()
                                 : null}</dd>
                             </div>
 
                             <div>
                                 <dt>How has this other gene(s) been implicated in the above disease?</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}</dd>
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}</dd>
                             </div>
 
                             <div>
                                 <dt>Notes on where evidence found in paper</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}</dd>
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Biochemical Function' && ((context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ') !== '') || (context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) ?
+                    {experimental.evidenceType == 'Biochemical Function' && ((experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ') !== '') || (experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) ?
                     <Panel title="B. Gene function consistent with phenotype" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>HPO ID(s)</dt>
-                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ')}</dd>
+                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ')}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype</dt>
-                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}</dd>
+                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}</dd>
                             </div>
 
                             <div>
                                 <dt>Explanation of how phenotype is consistent with disease</dt>
-                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}</dd>
+                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}</dd>
                             </div>
 
                             <div>
                                 <dt>Notes on where evidence found in paper</dt>
-                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}</dd>
+                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Protein Interactions' ?
+                    {experimental.evidenceType == 'Protein Interactions' ?
                     <Panel title="Protein Interactions" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Interacting Gene(s)</dt>
-                                <dd>{context.proteinInteractions.interactingGenes.map(function(gene, i) {
+                                <dd>{experimental.proteinInteractions.interactingGenes.map(function(gene, i) {
                                         return (<span>{gene.symbol} </span>);
                                     })}</dd>
                             </div>
 
                             <div>
                                 <dt>Interaction Type</dt>
-                                <dd>{context.proteinInteractions.interactionType}</dd>
+                                <dd>{experimental.proteinInteractions.interactionType}</dd>
                             </div>
 
                             <div>
                                 <dt>Method by which interaction detected</dt>
-                                <dd>{context.proteinInteractions.experimentalInteractionDetection}</dd>
+                                <dd>{experimental.proteinInteractions.experimentalInteractionDetection}</dd>
                             </div>
 
                             <div>
                                 <dt>Has this gene or genes been implicated in the above disease</dt>
-                                <dd>{context.proteinInteractions.geneImplicatedInDisease ?
-                                    context.proteinInteractions.geneImplicatedInDisease.toString()
+                                <dd>{experimental.proteinInteractions.geneImplicatedInDisease ?
+                                    experimental.proteinInteractions.geneImplicatedInDisease.toString()
                                 : null}</dd>
                             </div>
 
                             <div>
                                 <dt>Explanation of relationship of other gene(s) to the disease</dt>
-                                <dd>{context.proteinInteractions.relationshipOfOtherGenesToDisese}</dd>
+                                <dd>{experimental.proteinInteractions.relationshipOfOtherGenesToDisese}</dd>
                             </div>
 
                             <div>
                                 <dt>Information about where evidence can be found on paper</dt>
-                                <dd>{context.proteinInteractions.evidenceInPaper}</dd>
+                                <dd>{experimental.proteinInteractions.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Expression' ?
+                    {experimental.evidenceType == 'Expression' ?
                     <Panel title="Expression" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Uberon ID of Tissue Organ</dt>
-                                <dd>{context.expression.organOfTissue}</dd>
+                                <dd>{experimental.expression.organOfTissue}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Expression' && context.expression.normalExpression.expressedInTissue && context.expression.normalExpression.expressedInTissue == true ?
+                    {experimental.evidenceType == 'Expression' && experimental.expression.normalExpression.expressedInTissue && experimental.expression.normalExpression.expressedInTissue == true ?
                     <Panel title="A. Gene normally expressed in tissue relevant to the disease" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Is the gene normally expressed in the above tissue?</dt>
-                                <dd>{context.expression.normalExpression.expressedInTissue ?
-                                    context.expression.normalExpression.expressedInTissue.toString()
+                                <dd>{experimental.expression.normalExpression.expressedInTissue ?
+                                    experimental.expression.normalExpression.expressedInTissue.toString()
                                 : null}</dd>
                             </div>
 
                             <div>
                                 <dt>Evidence for normal expression in tissue</dt>
-                                <dd>{context.expression.normalExpression.evidence}</dd>
+                                <dd>{experimental.expression.normalExpression.evidence}</dd>
                             </div>
 
                             <div>
                                 <dt>Notes on where evidence found in paper</dt>
-                                <dd>{context.expression.normalExpression.evidenceInPaper}</dd>
+                                <dd>{experimental.expression.normalExpression.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Expression' && context.expression.alteredExpression.expressedInPatients && context.expression.alteredExpression.expressedInPatients == true ?
+                    {experimental.evidenceType == 'Expression' && experimental.expression.alteredExpression.expressedInPatients && experimental.expression.alteredExpression.expressedInPatients == true ?
                     <Panel title="B. Altered expression in patients" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Altered expression in Patients</dt>
-                                <dd>{context.expression.alteredExpression.expressedInPatients ?
-                                    context.expression.alteredExpression.expressedInPatients.toString()
+                                <dd>{experimental.expression.alteredExpression.expressedInPatients ?
+                                    experimental.expression.alteredExpression.expressedInPatients.toString()
                                 : null}</dd>
                             </div>
 
                             <div>
                                 <dt>Evidence for normal expression in tissue</dt>
-                                <dd>{context.expression.alteredExpression.evidence}</dd>
+                                <dd>{experimental.expression.alteredExpression.evidence}</dd>
                             </div>
 
                             <div>
                                 <dt>Notes on where evidence found</dt>
-                                <dd>{context.expression.alteredExpression.evidenceInPaper}</dd>
+                                <dd>{experimental.expression.alteredExpression.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Functional Alteration' ?
+                    {experimental.evidenceType == 'Functional Alteration' ?
                     <Panel title="Functional Alteration" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Patient cells with candidate mutation or engineered equivalent</dt>
-                                <dd>{context.functionalAlteration.cellMutationOrEngineeredEquivalent}</dd>
+                                <dd>{experimental.functionalAlteration.cellMutationOrEngineeredEquivalent}</dd>
                             </div>
 
                             <div>
                                 <dt>Patient cell type</dt>
-                                <dd>{context.functionalAlteration.patientCellType}</dd>
+                                <dd>{experimental.functionalAlteration.patientCellType}</dd>
                             </div>
 
                             <div>
                                 <dt>Engineered cell type</dt>
-                                <dd>{context.functionalAlteration.engineeredEquivalentCellType}</dd>
+                                <dd>{experimental.functionalAlteration.engineeredEquivalentCellType}</dd>
                             </div>
 
                             <div>
                                 <dt>Description of gene alteration</dt>
-                                <dd>{context.functionalAlteration.descriptionOfGeneAlteration}</dd>
+                                <dd>{experimental.functionalAlteration.descriptionOfGeneAlteration}</dd>
                             </div>
 
                             <div>
                                 <dt>Normal function of gene</dt>
-                                <dd>{context.functionalAlteration.normalFunctionOfGene}</dd>
+                                <dd>{experimental.functionalAlteration.normalFunctionOfGene}</dd>
                             </div>
 
                             <div>
                                 <dt>Evidence for altered function</dt>
-                                <dd>{context.functionalAlteration.evidenceForNormalFunction}</dd>
+                                <dd>{experimental.functionalAlteration.evidenceForNormalFunction}</dd>
                             </div>
 
                             <div>
                                 <dt>Notes on where evidence found in paper</dt>
-                                <dd>{context.functionalAlteration.evidenceInPaper}</dd>
+                                <dd>{experimental.functionalAlteration.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Model Systems' ?
+                    {experimental.evidenceType == 'Model Systems' ?
                     <Panel title="Model Systems" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Non-human animal or cell-culture model?</dt>
-                                <dd>{context.modelSystems.animalOrCellCulture}</dd>
+                                <dd>{experimental.modelSystems.animalOrCellCulture}</dd>
                             </div>
 
                             <div>
                                 <dt>Animal model</dt>
-                                <dd>{context.modelSystems.animalModel}</dd>
+                                <dd>{experimental.modelSystems.animalModel}</dd>
                             </div>
 
                             <div>
                                 <dt>Cell-culture type/line</dt>
-                                <dd>{context.modelSystems.cellCulture}</dd>
+                                <dd>{experimental.modelSystems.cellCulture}</dd>
                             </div>
 
                             <div>
                                 <dt>Description of gene alteration</dt>
-                                <dd>{context.modelSystems.descriptionOfGeneAlteration}</dd>
+                                <dd>{experimental.modelSystems.descriptionOfGeneAlteration}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype(s) observed in model system (HPO)</dt>
-                                <dd>{context.modelSystems.phenotypeHPOObserved}</dd>
+                                <dd>{experimental.modelSystems.phenotypeHPOObserved}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype(s) observed in model system (free text)</dt>
-                                <dd>{context.modelSystems.phenotypeFreetextObserved}</dd>
+                                <dd>{experimental.modelSystems.phenotypeFreetextObserved}</dd>
                             </div>
 
                             <div>
                                 <dt>Human phenotype(s) (HPO)</dt>
-                                <dd>{context.modelSystems.phenotypeHPO}</dd>
+                                <dd>{experimental.modelSystems.phenotypeHPO}</dd>
                             </div>
 
                             <div>
                                 <dt>Human phenotype(s) (free text)</dt>
-                                <dd>{context.modelSystems.phenotypeFreeText}</dd>
+                                <dd>{experimental.modelSystems.phenotypeFreeText}</dd>
                             </div>
 
                             <div>
                                 <dt>Explanation of how model system phenotype is similar to phenotype observed in humans</dt>
-                                <dd>{context.modelSystems.explanation}</dd>
+                                <dd>{experimental.modelSystems.explanation}</dd>
                             </div>
 
                             <div>
                                 <dt>Information about where evidence can be found on paper</dt>
-                                <dd>{context.modelSystems.evidenceInPaper}</dd>
+                                <dd>{experimental.modelSystems.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Rescue' ?
+                    {experimental.evidenceType == 'Rescue' ?
                     <Panel title="Rescue" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Patient cells with or engineered equivalent?</dt>
-                                <dd>{context.rescue.patientCellOrEngineeredEquivalent}</dd>
+                                <dd>{experimental.rescue.patientCellOrEngineeredEquivalent}</dd>
                             </div>
 
                             <div>
                                 <dt>Patient cell type</dt>
-                                <dd>{context.rescue.patientCellType}</dd>
+                                <dd>{experimental.rescue.patientCellType}</dd>
                             </div>
 
                             <div>
                                 <dt>Engineered equivalent cell type</dt>
-                                <dd>{context.rescue.engineeredEquivalentCellType}</dd>
+                                <dd>{experimental.rescue.engineeredEquivalentCellType}</dd>
                             </div>
 
                             <div>
                                 <dt>Description of gene alteration</dt>
-                                <dd>{context.rescue.descriptionOfGeneAlteration}</dd>
+                                <dd>{experimental.rescue.descriptionOfGeneAlteration}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype to rescue</dt>
-                                <dd>{context.rescue.phenotypeHPO}</dd>
+                                <dd>{experimental.rescue.phenotypeHPO}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype to rescue</dt>
-                                <dd>{context.rescue.phenotypeFreeText}</dd>
+                                <dd>{experimental.rescue.phenotypeFreeText}</dd>
                             </div>
 
                             <div>
                                 <dt>Method used to rescue</dt>
-                                <dd>{context.rescue.rescueMethod}</dd>
+                                <dd>{experimental.rescue.rescueMethod}</dd>
                             </div>
 
                             <div>
                                 <dt>Does the wild-type rescue the above phenotype?</dt>
-                                <dd>{context.rescue.wildTypeRescuePhenotype ?
-                                    context.rescue.wildTypeRescuePhenotype.toString()
+                                <dd>{experimental.rescue.wildTypeRescuePhenotype ?
+                                    experimental.rescue.wildTypeRescuePhenotype.toString()
                                 : null}</dd>
                             </div>
 
                             <div>
                                 <dt>Does patient variant rescue?</dt>
-                                <dd>{context.rescue.patientVariantRescue ?
-                                    context.rescue.patientVariantRescue.toString()
+                                <dd>{experimental.rescue.patientVariantRescue ?
+                                    experimental.rescue.patientVariantRescue.toString()
                                 : null}</dd>
                             </div>
 
                             <div>
                                 <dt>Explanation of rescue of phenotype</dt>
-                                <dd>{context.rescue.explanation}</dd>
+                                <dd>{experimental.rescue.explanation}</dd>
                             </div>
 
                             <div>
                                 <dt>Information about where evidence can be found on paper</dt>
-                                <dd>{context.rescue.evidenceInPaper}</dd>
+                                <dd>{experimental.rescue.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.variants && context.variants.length > 0 ?
+                    {experimental.variants && experimental.variants.length > 0 ?
                     <Panel title="Associated Variants" panelClassName="panel-data">
-                        {context.variants.map(function(variant, i) {
+                        {experimental.variants.map(function(variant, i) {
                             return (
                                 <div className="variant-view-panel">
                                     <h5>Variant {i + 1}</h5>
@@ -2363,6 +2460,11 @@ var ExperimentalViewer = React.createClass({
                             );
                         })}
                     </Panel>
+                    : null}
+
+                    {this.cv.gdmUuid && (experimentalUserAssessed || userExperimental) ?
+                        <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} />
                     : null}
                 </div>
             </div>
