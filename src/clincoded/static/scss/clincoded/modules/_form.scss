@@ -69,6 +69,11 @@ input[type=search] {
     }
 }
 
+.submit-info {
+    @extend .submit-err;
+    color: #2a2;
+}
+
 // Group and Family Submit Result page styles
 .submit-results-panel {
     margin: 40px 0;
