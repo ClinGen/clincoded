@@ -1168,6 +1168,21 @@
         "uuid": "3a70a47f-711a-473f-93cd-0996421eeaf2"
     },
     {
+        "email": "minyoung.choi@stanford.edu",
+        "first_name": "M",
+        "groups": [
+            "admin"
+        ],
+        "job_title": "Software Engineer",
+        "lab": "/labs/j-michael-cherry/",
+        "last_name": "C",
+        "submits_for": [
+            "/labs/j-michael-cherry/"
+        ],
+        "timezone": "US/Pacific",
+        "uuid": "f14beb93-5aad-434d-a717-64b8284f6539"
+    },
+    {
         "email": "hitz@stanford.edu",
         "first_name": "Ben",
         "groups": [
@@ -1309,7 +1324,7 @@
         ],
         "timezone": "US/Pacific"
     },
-    
+
     {
         "email": "selina.dwight@stanford.edu",
         "first_name": "Selina",

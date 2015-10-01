@@ -2063,8 +2063,6 @@ var ExperimentalViewer = React.createClass({
                 this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
             return Promise.resolve(null);
-        }).catch(function(e) {
-            console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR=: %o', e);
         });
     },
 
