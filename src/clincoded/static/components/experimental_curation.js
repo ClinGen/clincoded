@@ -488,7 +488,7 @@ var ExperimentalCuration = React.createClass({
             if (stateObj.experimental) {
                 tempEvidenceType = stateObj.experimental.evidenceType;
             }
-            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, tempEvidenceType);
+            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'experimental');
             this.setAssessmentValue(assessmentTracker);
 
             // Set all the state variables we've collected
@@ -1039,13 +1039,11 @@ var ExperimentalCuration = React.createClass({
                     // No variant search strings. Go to next THEN indicating no new named variants
                     return Promise.resolve(null);
                 }).then(data => {
-                    // NEW
                     var gdmUuid = this.state.gdm && this.state.gdm.uuid;
                     var experimentalUuid = this.state.experimental && this.state.experimental.uuid;
 
-                    // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the family.
+                    // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the experimental data object.
                     return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid).then(assessmentInfo => {
-                        console.log("FIRST");
                         return Promise.resolve({assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
                     });
                 }).then(assessment => {
@@ -1056,18 +1054,13 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.variants = experimentalDataVariants;
                     }
 
-                    // NEW
-                    // If we made a new assessment, add it to the pathogenicity's assessments
-                    console.log(newExperimental.assessments);
+                    // If we made a new assessment, add it to the experimental data's assessments
                     if (assessment.assessment && !assessment.updatedAssessment) {
-                        console.log('DEEP1');
                         if (!newExperimental.assessments) {
-                            console.log('DEEP2');
                             newExperimental.assessments = [];
                         }
                         newExperimental.assessments.push(assessment.assessment['@id']);
                     }
-                    console.log(newExperimental.assessments);
 
                     if (this.state.experimental) {
                         // We're editing a experimental. PUT the new group object to the DB to update the existing one.
@@ -1091,7 +1084,9 @@ var ExperimentalCuration = React.createClass({
                                 }
 
                                 // Post the modified annotation to the DB, then go back to Curation Central
-                                return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
+                                return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                                    return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
+                                });
                             } else {
                                 return Promise.resolve(null);
                             }
@@ -1100,14 +1095,11 @@ var ExperimentalCuration = React.createClass({
 
                     return promise;
                 }).then(data => {
-                    // NEW
                     // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
                     var newAssessment = data.assessment;
                     var gdmUuid = this.state.gdm && this.state.gdm.uuid;
                     var experimentalUuid = savedExperimental ? savedExperimental.uuid : this.state.experimental.uuid;
-
                     if (newAssessment && !newAssessment.evidence_id) {
-                        console.log("SECOND");
                         // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
                         // Nothing relies on this operation completing, so don't wait for a promise from it.
                         this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid, newAssessment);
@@ -2095,11 +2087,6 @@ var ExperimentalViewer = React.createClass({
                 experimentalUserAssessed = true;
             }
         }
-
-        console.log(assessments);
-        console.log(userExperimental);
-        console.log(experimentalUserAssessed);
-        console.log(this.cv.gdmUuid);
 
         return (
             <div className="container">
