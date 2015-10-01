@@ -115,7 +115,7 @@ var ExperimentalSubmit = React.createClass({
                         </div>
                     : null}
                     <div className="row">
-                        <div className="col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                        <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
                             <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
                                 <div className="submit-results-panel-info">
                                     <em>Your Experimental Data has been added!</em>
@@ -131,7 +131,7 @@ var ExperimentalSubmit = React.createClass({
                                                     <a className="btn btn-default" href={'/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid}>Add another Experimental Data entry</a>
                                                 </span>
                                             </div>
-                                            <div className="col-md-5">
+                                            <div className="col-md-7">
                                                 <span className="family-submit-results-btn">
                                                     <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
                                                 </span>
