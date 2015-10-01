@@ -1363,7 +1363,7 @@ var FamilyViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Description of Method(s)</dt>
+                                <dt>Description of genotyping method</dt>
                                 <dd>{method && method.specificMutationsGenotypedMethod}</dd>
                             </div>
 
