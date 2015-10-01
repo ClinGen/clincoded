@@ -942,7 +942,7 @@ var ExperimentalCuration = React.createClass({
                 }).then(data => {
                     // See what variants from the form already exist in the DB (we don't search for "Other description"; each one
                     // of those kinds of variants generates a new variant object). For any that already exist, push them onto
-                    // the array of the family's variants. For any that don't, pass them to the next THEN to write them to the DB.
+                    // the array of the experimental data's variants. For any that don't, pass them to the next THEN to write them to the DB.
                     var newVariants = [];
 
                     // Build an array of search strings for each of the ClinVar IDs entered in the form.
@@ -968,7 +968,7 @@ var ExperimentalCuration = React.createClass({
                             // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
                             results.forEach(function(result, i) {
                                 if (result.total) {
-                                    // Search got a result. Add a string for family.variants for this existing variant
+                                    // Search got a result. Add a string for experimentalData.variants for this existing variant
                                     experimentalDataVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                 } else {
                                     // Search got no result; make a new variant and save it in an array so we can write them.
@@ -1005,13 +1005,13 @@ var ExperimentalCuration = React.createClass({
                         }
                     }
 
-                    // Now write the new variants to the DB, and push their @ids to the family variant
+                    // Now write the new variants to the DB, and push their @ids to the experimental data variant
                     if (newVariants && newVariants.length) {
                         return this.postRestDatas(
                             '/variants/', newVariants
                         ).then(results => {
                             if (results && results.length) {
-                                // Add the newly written variants to the family
+                                // Add the newly written variants to the experimental data
                                 results.forEach(result => {
                                     experimentalDataVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                 });
@@ -1934,7 +1934,7 @@ var LabelPhenotypeRescueFT = React.createClass({
     }
 });
 
-// Display the Family variant panel. The number of copies depends on the variantCount state variable.
+// Display the Experimental Data variant panel. The number of copies depends on the variantCount state variable.
 var ExperimentalDataVariant = function() {
     var experimental = this.state.experimental;
     var variants = experimental && experimental.variants;
@@ -2088,7 +2088,7 @@ var ExperimentalViewer = React.createClass({
             othersAssessed = Assessments.othersAssessed(assessments, user.uuid);
         }
 
-        // Note if we don't own the family, but the owner has assessed the segregation
+        // Note if we don't own the experimental data, but the owner has assessed it
         if (user && experimental && experimental.submitted_by) {
             var experimentalUserAssessment = Assessments.userAssessment(assessments, experimental.submitted_by.uuid);
             if (experimentalUserAssessment && experimentalUserAssessment.value !== Assessments.DEFAULT_VALUE) {
