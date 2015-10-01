@@ -250,6 +250,7 @@ class Gdm(Item):
         'annotations.experimentalData',
         'annotations.experimentalData.submitted_by',
         'annotations.experimentalData.variants',
+        'annotations.experimentalData.variants.associatedPathogenicities',
         'annotations.experimentalData.variants.submitted_by',
         'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'annotations.experimentalData.proteinInteractions.interactingGenes',
