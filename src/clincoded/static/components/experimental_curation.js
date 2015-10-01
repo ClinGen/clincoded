@@ -43,6 +43,15 @@ var initialCv = {
     othersAssessed: false // TRUE if other curators have assessed the experimental data
 };
 
+// for joining gene symbols w/ commas
+function joinGenes(input) {
+    var outputArray = [];
+    for (var i = 0; i < input.length; i++) {
+        outputArray.push(input[i].symbol);
+    }
+    return outputArray.join(', ');
+}
+
 var ExperimentalCuration = React.createClass({
     mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
 
@@ -124,26 +133,30 @@ var ExperimentalCuration = React.createClass({
             this.setState({experimentalName: this.refs[ref].getValue()});
         } else if (ref === 'experimentalType') {
             var tempExperimentalType = this.refs[ref].getValue();
+            // set values for assessmentTracker
             var user = this.props.session && this.props.session.user_properties;
             var userAssessment;
             if (this.state.experimental && this.state.experimental.assessments) {
                 userAssessment = Assessments.userAssessment(this.state.experimental.assessments, user && user.uuid);
             }
+            // set assessmentTracker
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, tempExperimentalType);
             this.setState({
                 experimentalName: '',
                 experimentalType: tempExperimentalType,
                 experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType)
             });
-            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, tempExperimentalType);
             if (this.state.experimentalNameVisible) {
                 this.refs['experimentalName'].resetValue();
             }
             if (tempExperimentalType == 'none') {
+                // reset form
                 this.setState({
                     experimentalNameVisible: false,
                     experimentalTypeDescription: []
                 });
             } else if (tempExperimentalType == 'Biochemical Function' || tempExperimentalType == 'Expression') {
+                // display only subtype field if type is Biochemical Function or Expression
                 this.setState({
                     experimentalSubtype: 'none',
                     experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType),
@@ -282,15 +295,6 @@ var ExperimentalCuration = React.createClass({
         }
     },
 
-    // for joining gene symbols w/ commas
-    joinItems: function(input) {
-        var outputArray = [];
-        for (var i = 0; i < input.length; i++) {
-            outputArray.push(input[i].symbol);
-        }
-        return outputArray.join(', ');
-    },
-
     // Load objects from query string into the state variables. Must have already parsed the query string
     // and set the queryValues property of this React class.
     loadData: function() {
@@ -338,7 +342,7 @@ var ExperimentalCuration = React.createClass({
                 this.setOmimIdState(stateObj.gdm.omimId);
             }
 
-            // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
+            // Load data and set states as needed
             if (stateObj.experimental) {
                 this.setState({
                     experimentalName: stateObj.experimental.label,
@@ -443,7 +447,7 @@ var ExperimentalCuration = React.createClass({
                     }
                 }
 
-                // Find the current user's segregation assessment from the segregation's assessment list
+                // Find the current user's assessment from the assessment list
                 if (stateObj.experimental.assessments && stateObj.experimental.assessments.length) {
                     // Find the assessment belonging to the logged-in curator, if any.
                     userAssessment = Assessments.userAssessment(stateObj.experimental.assessments, user && user.uuid);
@@ -495,6 +499,7 @@ var ExperimentalCuration = React.createClass({
         this.setState({assessment: assessment});
     },
 
+    // validate values and return error messages as needed
     validateFormTerms: function(formError, type, terms, formField, limit) {
         limit = typeof limit !== 'undefined' ? limit : 0;
         var errorMsgs = {
@@ -675,7 +680,7 @@ var ExperimentalCuration = React.createClass({
                     }
                 }
                 if (newExperimental.evidenceType == 'Biochemical Function') {
-                    // newExperimental object for type Rescue
+                    // newExperimental object for type Biochemical Function
                     newExperimental.biochemicalFunction = {};
                     var BFidentifiedFunction = this.getFormValue('identifiedFunction');
                     if (BFidentifiedFunction) {
@@ -729,7 +734,7 @@ var ExperimentalCuration = React.createClass({
                         }
                     }
                 } else if (newExperimental.evidenceType == 'Protein Interactions') {
-                    // newExperimental object for type Rescue
+                    // newExperimental object for type Protein Interactions
                     newExperimental.proteinInteractions = {};
                     var PIinteractingGenes = geneSymbols;
                     if (PIinteractingGenes) {
@@ -754,7 +759,7 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.proteinInteractions.evidenceInPaper = PIevidenceInPaper;
                     }
                 } else if (newExperimental.evidenceType == 'Expression') {
-                    // newExperimental object for type Rescue
+                    // newExperimental object for type Expression
                     newExperimental.expression = {};
                     var EorganOfTissue = this.getFormValue('organOfTissue');
                     if (EorganOfTissue) {
@@ -786,7 +791,7 @@ var ExperimentalCuration = React.createClass({
                         }
                     }
                 } else if (newExperimental.evidenceType == 'Functional Alteration') {
-                    // newExperimental object for type Rescue
+                    // newExperimental object for type Functional Alteration
                     newExperimental.functionalAlteration = {};
                     var FAcellMutationOrEngineeredEquivalent = this.getFormValue('cellMutationOrEngineeredEquivalent');
                     if (FAcellMutationOrEngineeredEquivalent) {
@@ -817,7 +822,7 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.functionalAlteration.evidenceInPaper = FAevidenceInPaper;
                     }
                 } else if (newExperimental.evidenceType == 'Model Systems') {
-                    // newExperimental object for type Rescue
+                    // newExperimental object for type Model Systems
                     newExperimental.modelSystems = {};
                     var MSanimalOrCellCulture = this.getFormValue('animalOrCellCulture');
                     if (MSanimalOrCellCulture) {
@@ -1345,7 +1350,7 @@ var TypeBiochemicalFunctionA = function() {
     if (biochemicalFunction) {
         biochemicalFunction.geneWithSameFunctionSameDisease = biochemicalFunction.geneWithSameFunctionSameDisease ? biochemicalFunction.geneWithSameFunctionSameDisease : {};
         if (biochemicalFunction.geneWithSameFunctionSameDisease) {
-            biochemicalFunction.geneWithSameFunctionSameDisease.genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? this.joinItems(biochemicalFunction.geneWithSameFunctionSameDisease.genes) : null;
+            biochemicalFunction.geneWithSameFunctionSameDisease.genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? joinGenes(biochemicalFunction.geneWithSameFunctionSameDisease.genes) : null;
             biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction : null;
             biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes ? biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes : null;
             biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper : null;
@@ -1454,7 +1459,7 @@ var TypeProteinInteractions = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var proteinInteractions = experimental.proteinInteractions ? experimental.proteinInteractions : {};
     if (proteinInteractions) {
-        proteinInteractions.interactingGenes = proteinInteractions.interactingGenes ? this.joinItems(proteinInteractions.interactingGenes) : null;
+        proteinInteractions.interactingGenes = proteinInteractions.interactingGenes ? joinGenes(proteinInteractions.interactingGenes) : null;
         proteinInteractions.interactionType = proteinInteractions.interactionType ? proteinInteractions.interactionType : null;
         proteinInteractions.experimentalInteractionDetection = proteinInteractions.experimentalInteractionDetection ? proteinInteractions.experimentalInteractionDetection : null;
         proteinInteractions.relationshipOfOtherGenesToDisese = proteinInteractions.relationshipOfOtherGenesToDisese ? proteinInteractions.relationshipOfOtherGenesToDisese : null;
@@ -2123,9 +2128,7 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Other gene(s) with same function as gene in record</dt>
-                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(function(gene, i) {
-                                        return (<span>{gene.symbol} </span>);
-                                    })}</dd>
+                                <dd>{joinGenes(experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes)}</dd>
                             </div>
 
                             <div>
@@ -2135,9 +2138,7 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>This gene or genes have been implicated in the above disease</dt>
-                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease ?
-                                    experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease.toString()
-                                : null}</dd>
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
@@ -2182,9 +2183,7 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Interacting Gene(s)</dt>
-                                <dd>{experimental.proteinInteractions.interactingGenes.map(function(gene, i) {
-                                        return (<span>{gene.symbol} </span>);
-                                    })}</dd>
+                                <dd>{joinGenes(experimental.proteinInteractions.interactingGenes)}</dd>
                             </div>
 
                             <div>
@@ -2199,9 +2198,7 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>This gene or genes have been implicated in the above disease</dt>
-                                <dd>{experimental.proteinInteractions.geneImplicatedInDisease ?
-                                    experimental.proteinInteractions.geneImplicatedInDisease.toString()
-                                : null}</dd>
+                                <dd>{experimental.proteinInteractions.geneImplicatedInDisease ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
@@ -2231,9 +2228,7 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>The gene is normally expressed in the above tissue</dt>
-                                <dd>{experimental.expression.normalExpression.expressedInTissue ?
-                                    experimental.expression.normalExpression.expressedInTissue.toString()
-                                : null}</dd>
+                                <dd>{experimental.expression.normalExpression.expressedInTissue ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
@@ -2252,19 +2247,17 @@ var ExperimentalViewer = React.createClass({
                     <Panel title="B. Altered expression in patients" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
-                                <dt>Altered expression in Patients</dt>
-                                <dd>{experimental.expression.alteredExpression.expressedInPatients ?
-                                    experimental.expression.alteredExpression.expressedInPatients.toString()
-                                : null}</dd>
+                                <dt>Expression is altered in patients who have the disease</dt>
+                                <dd>{experimental.expression.alteredExpression.expressedInPatients ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
-                                <dt>Evidence for normal expression in tissue</dt>
+                                <dt>Evidence for altered expression in patients</dt>
                                 <dd>{experimental.expression.alteredExpression.evidence}</dd>
                             </div>
 
                             <div>
-                                <dt>Notes on where evidence found</dt>
+                                <dt>Notes on where evidence found in paper</dt>
                                 <dd>{experimental.expression.alteredExpression.evidenceInPaper}</dd>
                             </div>
                         </dl>
@@ -2405,16 +2398,12 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>The wild-type rescues the above phenotype</dt>
-                                <dd>{experimental.rescue.wildTypeRescuePhenotype ?
-                                    experimental.rescue.wildTypeRescuePhenotype.toString()
-                                : null}</dd>
+                                <dd>{experimental.rescue.wildTypeRescuePhenotype ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
                                 <dt>The patient variant rescues</dt>
-                                <dd>{experimental.rescue.patientVariantRescue ?
-                                    experimental.rescue.patientVariantRescue.toString()
-                                : null}</dd>
+                                <dd>{experimental.rescue.patientVariantRescue ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
