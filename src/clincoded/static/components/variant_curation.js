@@ -341,6 +341,9 @@ var VariantCuration = React.createClass({
             });
         }
 
+        // Set up the deNovo type for the dropdown
+        var denovoType = pathogenicity ? (pathogenicity.denovoType === "" ? "none" : pathogenicity.denovoType) : "none";
+
         return (
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
@@ -395,7 +398,7 @@ var VariantCuration = React.createClass({
                                                             <option>Yes</option>
                                                             <option>No</option>
                                                         </Input>
-                                                        <Input type="select" ref="denovo" label="de novo Type (inferred or confirmed):" defaultValue="none" value={pathogenicity && pathogenicity.denovoType}
+                                                        <Input type="select" ref="denovo" label="de novo Type (inferred or confirmed):" defaultValue="none" value={denovoType}
                                                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                                             <option value="none">No Selection</option>
                                                             <option disabled="disabled"></option>
