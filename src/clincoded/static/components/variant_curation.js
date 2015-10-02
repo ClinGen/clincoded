@@ -277,7 +277,7 @@ var VariantCuration = React.createClass({
                 if (newPathogenicity && newAssessment && !newAssessment.evidence_id) {
                     // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
                     // Nothing relies on this operation completing, so don't wait for a promise from it.
-                    this.saveAssessment(this.cv.assessmentTracker, this.state.pathogenicity, newAssessment);
+                    this.saveAssessment(this.cv.assessmentTracker, this.state.gdm.uuid, newPathogenicity.uuid, newAssessment);
                 }
 
                 // Next step relies on the pathogenicity, not the updated assessment
