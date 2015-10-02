@@ -40,7 +40,8 @@ var App = module.exports = React.createClass({
     getInitialState: function() {
         return {
             errors: [],
-            portal: portal
+            portal: portal,
+            demoWarning: !/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)
         };
     },
 
@@ -76,7 +77,7 @@ var App = module.exports = React.createClass({
 
         var appClass = 'done';
         if (this.props.slow) {
-            appClass = 'communicating'; 
+            appClass = 'communicating';
         }
 
         var title = context.title || context.name || context.accession || context['@id'];
@@ -114,7 +115,9 @@ var App = module.exports = React.createClass({
                     }}></script>
                     <div>
                         <Header session={this.state.session} />
+                        {this.state.demoWarning ?
                         <Notice noticeType='danger' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
+                        : null}
                         {content}
                     </div>
                 </body>
