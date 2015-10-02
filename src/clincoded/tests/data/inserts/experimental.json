@@ -34,11 +34,11 @@
             "interactionType" : "positive genetic interaction (MI:0935)",
             "experimentalInteractionDetection" : "x-ray crystallography (MI:0114)",
             "geneImplicatedInDisease": true,
-            "relationshipOfOtherGenesToDisese": "very strong relationship",
-            "assessments": [
-                "4f94a226-2a4c-11e5-887c-60f81dc5b05a"
-            ]
-        }
+            "relationshipOfOtherGenesToDisese": "very strong relationship"
+        },
+        "assessments": [
+            "4f94a226-2a4c-11e5-887c-60f81dc5b05a"
+        ]
     },
     {
         "uuid": "6be668d4-2a6e-11e5-804a-60f81dc5b05a",
@@ -52,18 +52,6 @@
             "identifiedFunction": "GO_Slim term here",
             "evidenceForFunction": "some evidence",
             "evidenceForFunctionInPaper": "Paragraph 3-5, Page 3",
-            "geneWithSameFunctionSameDisease": {
-                "genes": [
-                    "NGLY1",
-                    "FGFR3"
-                ],
-                "evidenceForOtherGenesWithSameFunction": "some evidence for genes here",
-                "explanationOfOtherGenes": "some explanation here",
-                "evidenceInPaper": "Paragraph 21-30, page 55",
-                "assessments": [
-                    "4aec0dae-2a4c-11e5-a66f-60f81dc5b05a"
-                ]
-            },
             "geneFunctionConsistentWithPhenotype": {
                 "phenotypeHPO": [
                     "HP:0001470",
@@ -71,16 +59,16 @@
                     "HP:0001419"
                 ],
                 "explanation": "some explanation here",
-                "evidenceInPaper": "Paragraph 2-12, page 12",
-                "assessments": [
-                    "3ecaaf6b-2a4c-11e5-ab2d-60f81dc5b05a",
-                    "4519985e-2a4c-11e5-96a0-60f81dc5b05a",
-                    "550d702b-2a4c-11e5-856d-60f81dc5b05a"
-                ]
+                "evidenceInPaper": "Paragraph 2-12, page 12"
             }
         },
         "variants": [
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
+        ],
+        "assessments": [
+            "3ecaaf6b-2a4c-11e5-ab2d-60f81dc5b05a",
+            "4519985e-2a4c-11e5-96a0-60f81dc5b05a",
+            "550d702b-2a4c-11e5-856d-60f81dc5b05a"
         ]
     },
     {
@@ -100,13 +88,13 @@
             "wildTypeRescuePhenotype": true,
             "patientVariantRescue": true,
             "explanation": "some explanation here",
-            "evidenceLocationInPaper": "Paragraph 31-32, page 2",
-            "assessments": [
-                "5a5cefba-2a4c-11e5-9f97-60f81dc5b05a"
-            ]
+            "evidenceLocationInPaper": "Paragraph 31-32, page 2"
         },
         "variants": [
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
+        ],
+        "assessments": [
+            "5a5cefba-2a4c-11e5-9f97-60f81dc5b05a"
         ]
     },
     {
@@ -124,13 +112,13 @@
             "descriptionOfGeneAlteration": "some description here",
             "normalFunctionOfGene": "GO_Slim term for normal function",
             "evidenceForNormalFunction": "evidence 007",
-            "evidenceInPaper": "Paragraph 2-5, page 5",
-            "assessments": [
-                "b8eb988c-9844-44b0-ba04-c625809a692d"
-            ]
+            "evidenceInPaper": "Paragraph 2-5, page 5"
         },
         "variants": [
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
+        ],
+        "assessments": [
+            "b8eb988c-9844-44b0-ba04-c625809a692d"
         ]
     },
     {

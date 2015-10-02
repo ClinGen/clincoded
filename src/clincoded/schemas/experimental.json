@@ -99,17 +99,6 @@
                             "description": "Where explanation can be found in paper (optional)",
                             "type": "string",
                             "default": ""
-                        },
-                        "assessments": {
-                            "title": "Assessments",
-                            "description": "List of assessments added from different curators",
-                            "type": "array",
-                            "default": [],
-                            "items": {
-                                "description": "Assessment from one curator",
-                                "type": "string",
-                                "linkTo": "assessment"
-                            }
                         }
                     }
                 },
@@ -146,17 +135,6 @@
                             "description": "Where to find the explantion in paper",
                             "type": "string",
                             "default": ""
-                        },
-                        "assessments": {
-                            "title": "Assessments",
-                            "description": "List of assessments added from different curators",
-                            "type": "array",
-                            "default": [],
-                            "items": {
-                                "description": "Assessment from one curator",
-                                "type": "string",
-                                "linkTo": "assessment"
-                            }
                         }
                     }
                 }
@@ -218,17 +196,6 @@
                     "title": "Evidence in Paper",
                     "description": "Where evidence can be found in paper",
                     "type": "string"
-                },
-                "assessments": {
-                    "title": "Assessments",
-                    "description": "List of assessments added from different curators",
-                    "type": "array",
-                    "default": [],
-                    "items": {
-                        "description": "Assessment from one curator",
-                        "type": "string",
-                        "linkTo": "assessment"
-                    }
                 }
             }
         },
@@ -263,16 +230,6 @@
                             "title": "Evidence in Paper",
                             "description": "Where evidence can be found in paper",
                             "type": "string"
-                        },
-                        "assessments": {
-                            "title": "Assessments",
-                            "description": "List of assessments added from different curators",
-                            "type": "array",
-                            "items": {
-                                "description": "Assessment from one curator",
-                                "type": "string",
-                                "linkTo": "assessment"
-                            }
                         }
                     }
                 },
@@ -296,17 +253,6 @@
                             "title": "Evidence Location in Paper",
                             "description": "Information about where evidence can be found in paper",
                             "type": "string"
-                        },
-                        "assessments": {
-                            "title": "Assessments",
-                            "description": "List of assessments added from different curators",
-                            "type": "array",
-                            "default": [],
-                            "items": {
-                                "description": "Assessment from one curator",
-                                "type": "string",
-                                "linkTo": "assessment"
-                            }
                         }
                     }
                 }
@@ -357,17 +303,6 @@
                     "description": "Where evidence can be found in paper",
                     "type": "string",
                     "default": ""
-                },
-                "assessments": {
-                    "title": "Assessments",
-                    "description": "List of assessments added from different curators",
-                    "type": "array",
-                    "default": [],
-                    "items": {
-                        "description": "Assessment from one curator",
-                        "type": "string",
-                        "linkTo": "assessment"
-                    }
                 }
             }
         },
@@ -458,18 +393,6 @@
                     "description": "Where evidence can be found in paper",
                     "type": "string",
                     "default": ""
-                },
-                "assessments": {
-                    "title": "Assessments",
-                    "description": "List of assessments added from different curators",
-                    "type": "array",
-                    "default": [],
-                    "items": {
-                        "description": "Assessment from one curator",
-                        "type": "object",
-                        "type": "string",
-                        "linkTo": "assessment"
-                    }
                 }
             }
         },
@@ -538,18 +461,6 @@
                     "description": "Where can evidence be found in paper",
                     "type": "string",
                     "default": ""
-                },
-                "assessments": {
-                    "title": "Assessments",
-                    "description": "List of assessments added from different curators",
-                    "type": "array",
-                    "default": [],
-                    "items": {
-                        "description": "Assessment from one curator",
-                        "type": "object",
-                        "type": "string",
-                        "linkTo": "assessment"
-                    }
                 }
             }
         },
@@ -562,6 +473,17 @@
                 "description": "Variant id",
                 "type": "string",
                 "linkTo": "variant"
+            }
+        },
+        "assessments": {
+            "title": "Assessments",
+            "description": "List of assessments added from different curators",
+            "type": "array",
+            "default": [],
+            "items": {
+                "description": "Assessment from one curator",
+                "type": "string",
+                "linkTo": "assessment"
             }
         }
     },
