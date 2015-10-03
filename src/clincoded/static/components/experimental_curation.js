@@ -9,10 +9,14 @@ var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
+var Assessments = require('./assessment');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
+var AssessmentTracker = Assessments.AssessmentTracker;
+var AssessmentPanel = Assessments.AssessmentPanel;
+var AssessmentMixin = Assessments.AssessmentMixin;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -33,17 +37,36 @@ var VAR_NONE = 0; // No variants entered in a panel
 var VAR_SPEC = 1; // A specific variant (dbSNP, ClinVar, HGVS) entered in a panel
 var VAR_OTHER = 2; // Other description entered in a panel
 
+var initialCv = {
+    assessmentTracker: null, // Tracking object for a single assessment
+    experimentalDataAssessed: false, // TRUE if experimental data has been assessed by self or others
+    othersAssessed: false // TRUE if other curators have assessed the experimental data
+};
+
+// for joining gene symbols w/ commas
+function joinGenes(input) {
+    var outputArray = [];
+    for (var i = 0; i < input.length; i++) {
+        outputArray.push(input[i].symbol);
+    }
+    return outputArray.join(', ');
+}
+
 var ExperimentalCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
 
     contextTypes: {
         navigate: React.PropTypes.func
     },
 
+    cv: initialCv,
+
     // Keeps track of values from the query string
     queryValues: {},
 
     getInitialState: function() {
+        this.cv.assessmentTracker = initialCv;
+
         return {
             gdm: null, // GDM object given in UUID
             annotation: null, // Annotation object given in UUID
@@ -52,7 +75,8 @@ var ExperimentalCuration = React.createClass({
             experimentalName: '', // Currently entered name of the Experimental Data entry
             experimentalType: '',  // Currently entered type of the Experimental Data entry
             experimentalTypeDescription: [], // Description of the selected Experimental Data type
-            experimentalSubtype: '', // Currently entered subtype of the Experimental Data entry (if applicable)
+            experimentalSubtype: 'none', // Currently entered subtype of the Experimental Data entry (if applicable)
+            othersAssessed: false, // TRUE if other curators have assessed the experimental data entry
             geneImplicatedWithDisease: false, // checkbox state values
             geneImplicatedInDisease: false,
             expressedInTissue: false,
@@ -76,6 +100,7 @@ var ExperimentalCuration = React.createClass({
         };
     },
 
+    // sets the description text below the experimental data type dropdown
     getExperimentalTypeDescription: function(item, subitem) {
         subitem = typeof subitem !== 'undefined' ? subitem : '';
         var experimentalTypeDescriptionList = {
@@ -89,8 +114,8 @@ var ExperimentalCuration = React.createClass({
                 'B. The gene is altered in expression in patients who have the disease'
             ],
             'Functional Alteration': ['The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents'],
-            'Model Systems': ['Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state'],
-            'Rescue': ['The cellular phenotype in patient-derived cells or engineered equivalents can be rescued by addition of the wild-type gene product']
+            'Model Systems': ['Non-human animal OR cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state'],
+            'Rescue': ['The cellular phenotype in patient-derived cells OR engineered equivalents can be rescued by addition of the wild-type gene product']
         };
         if (subitem == 'A') {
             return [experimentalTypeDescriptionList[item][0]];
@@ -101,14 +126,21 @@ var ExperimentalCuration = React.createClass({
         }
     },
 
-    // Handle value changes in genotyping method 1
+    // Handle value changes in forms
     handleChange: function(ref, e) {
         var clinvarid, othervariant;
-
         if (ref === 'experimentalName' && this.refs[ref].getValue()) {
             this.setState({experimentalName: this.refs[ref].getValue()});
         } else if (ref === 'experimentalType') {
             var tempExperimentalType = this.refs[ref].getValue();
+            // set values for assessmentTracker
+            var user = this.props.session && this.props.session.user_properties;
+            var userAssessment;
+            if (this.state.experimental && this.state.experimental.assessments) {
+                userAssessment = Assessments.userAssessment(this.state.experimental.assessments, user && user.uuid);
+            }
+            // set assessmentTracker
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, tempExperimentalType);
             this.setState({
                 experimentalName: '',
                 experimentalType: tempExperimentalType,
@@ -118,13 +150,15 @@ var ExperimentalCuration = React.createClass({
                 this.refs['experimentalName'].resetValue();
             }
             if (tempExperimentalType == 'none') {
+                // reset form
                 this.setState({
                     experimentalNameVisible: false,
                     experimentalTypeDescription: []
                 });
             } else if (tempExperimentalType == 'Biochemical Function' || tempExperimentalType == 'Expression') {
+                // display only subtype field if type is Biochemical Function or Expression
                 this.setState({
-                    experimentalSubtype: '',
+                    experimentalSubtype: 'none',
                     experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType),
                     experimentalNameVisible: false
                 });
@@ -261,14 +295,6 @@ var ExperimentalCuration = React.createClass({
         }
     },
 
-    joinItems: function(input) {
-        var outputArray = [];
-        for (var i = 0; i < input.length; i++) {
-            outputArray.push(input[i].symbol);
-        }
-        return outputArray.join(', ');
-    },
-
     // Load objects from query string into the state variables. Must have already parsed the query string
     // and set the queryValues property of this React class.
     loadData: function() {
@@ -287,6 +313,9 @@ var ExperimentalCuration = React.createClass({
         this.getRestDatas(
             uris
         ).then(datas => {
+            var user = this.props.session && this.props.session.user_properties;
+            var userAssessment;
+
             // See what we got back so we can build an object to copy in this React object's state to rerender the page.
             var stateObj = {};
             datas.forEach(function(data) {
@@ -313,7 +342,7 @@ var ExperimentalCuration = React.createClass({
                 this.setOmimIdState(stateObj.gdm.omimId);
             }
 
-            // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
+            // Load data and set states as needed
             if (stateObj.experimental) {
                 this.setState({
                     experimentalName: stateObj.experimental.label,
@@ -395,6 +424,7 @@ var ExperimentalCuration = React.createClass({
                         this.setState({rescuePRFT: true});
                     }
                 }
+
                 // See if we need to disable the Add Variant button based on the number of variants configured
                 if (stateObj.experimental.variants) {
                     var variants = stateObj.experimental.variants;
@@ -416,7 +446,33 @@ var ExperimentalCuration = React.createClass({
                         stateObj.variantOption = currVariantOption;
                     }
                 }
+
+                // Find the current user's assessment from the assessment list
+                if (stateObj.experimental.assessments && stateObj.experimental.assessments.length) {
+                    // Find the assessment belonging to the logged-in curator, if any.
+                    userAssessment = Assessments.userAssessment(stateObj.experimental.assessments, user && user.uuid);
+
+                    // See if any assessments are non-default
+                    this.cv.experimentalDataAssessed = _(stateObj.experimental.assessments).find(function(assessment) {
+                        return assessment.value !== Assessments.DEFAULT_VALUE;
+                    });
+
+                    // See if others have assessed
+                    if (user && user.uuid) {
+                        this.cv.othersAssessed = Assessments.othersAssessed(stateObj.experimental.assessments, user.uuid);
+                    }
+                }
             }
+
+            // Make a new tracking object for the current assessment. Either or both of the original assessment or user can be blank
+            // and assigned later. Then set the component state's assessment value to the assessment's value -- default if there was no
+            // assessment.
+            var tempEvidenceType = '';
+            if (stateObj.experimental) {
+                tempEvidenceType = stateObj.experimental.evidenceType;
+            }
+            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'experimental');
+            this.setAssessmentValue(assessmentTracker);
 
             // Set all the state variables we've collected
             this.setState(stateObj);
@@ -436,6 +492,14 @@ var ExperimentalCuration = React.createClass({
         this.loadData();
     },
 
+    // When the user changes the assessment value, this gets called
+    updateAssessment: function(value) {
+        var assessment = this.state.assessment;
+        assessment.value = value;
+        this.setState({assessment: assessment});
+    },
+
+    // validate values and return error messages as needed
     validateFormTerms: function(formError, type, terms, formField, limit) {
         limit = typeof limit !== 'undefined' ? limit : 0;
         var errorMsgs = {
@@ -582,7 +646,7 @@ var ExperimentalCuration = React.createClass({
                 // check clIDs/efoIDs depending on form selection
                 if (!this.getFormValue('wildTypeRescuePhenotype')) {
                     formError = true;
-                    this.setFormErrors('wildTypeRescuePhenotype', "Please read note below.");
+                    this.setFormErrors('wildTypeRescuePhenotype', "Please see note below.");
                 }
                 if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Patient cells') {
                     clIDs = curator.capture.clids(this.getFormValue('rescue.patientCellType'));
@@ -606,8 +670,17 @@ var ExperimentalCuration = React.createClass({
                 newExperimental.label = this.getFormValue('experimentalName');
                 newExperimental.evidenceType = this.getFormValue('experimentalType');
                 // prepare experimental object for post/putting to db
+                // copy assessments over
+                if (this.state.experimental) {
+                    if (this.state.experimental.assessments && this.state.experimental.assessments.length) {
+                        newExperimental.assessments = [];
+                        for (var i = 0; i < this.state.experimental.assessments.length; i++) {
+                            newExperimental.assessments.push(this.state.experimental.assessments[i]['@id']);
+                        }
+                    }
+                }
                 if (newExperimental.evidenceType == 'Biochemical Function') {
-                    // newExperimental object for type Rescue
+                    // newExperimental object for type Biochemical Function
                     newExperimental.biochemicalFunction = {};
                     var BFidentifiedFunction = this.getFormValue('identifiedFunction');
                     if (BFidentifiedFunction) {
@@ -661,7 +734,7 @@ var ExperimentalCuration = React.createClass({
                         }
                     }
                 } else if (newExperimental.evidenceType == 'Protein Interactions') {
-                    // newExperimental object for type Rescue
+                    // newExperimental object for type Protein Interactions
                     newExperimental.proteinInteractions = {};
                     var PIinteractingGenes = geneSymbols;
                     if (PIinteractingGenes) {
@@ -686,7 +759,7 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.proteinInteractions.evidenceInPaper = PIevidenceInPaper;
                     }
                 } else if (newExperimental.evidenceType == 'Expression') {
-                    // newExperimental object for type Rescue
+                    // newExperimental object for type Expression
                     newExperimental.expression = {};
                     var EorganOfTissue = this.getFormValue('organOfTissue');
                     if (EorganOfTissue) {
@@ -718,7 +791,7 @@ var ExperimentalCuration = React.createClass({
                         }
                     }
                 } else if (newExperimental.evidenceType == 'Functional Alteration') {
-                    // newExperimental object for type Rescue
+                    // newExperimental object for type Functional Alteration
                     newExperimental.functionalAlteration = {};
                     var FAcellMutationOrEngineeredEquivalent = this.getFormValue('cellMutationOrEngineeredEquivalent');
                     if (FAcellMutationOrEngineeredEquivalent) {
@@ -749,7 +822,7 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.functionalAlteration.evidenceInPaper = FAevidenceInPaper;
                     }
                 } else if (newExperimental.evidenceType == 'Model Systems') {
-                    // newExperimental object for type Rescue
+                    // newExperimental object for type Model Systems
                     newExperimental.modelSystems = {};
                     var MSanimalOrCellCulture = this.getFormValue('animalOrCellCulture');
                     if (MSanimalOrCellCulture) {
@@ -869,7 +942,7 @@ var ExperimentalCuration = React.createClass({
                 }).then(data => {
                     // See what variants from the form already exist in the DB (we don't search for "Other description"; each one
                     // of those kinds of variants generates a new variant object). For any that already exist, push them onto
-                    // the array of the family's variants. For any that don't, pass them to the next THEN to write them to the DB.
+                    // the array of the experimental data's variants. For any that don't, pass them to the next THEN to write them to the DB.
                     var newVariants = [];
 
                     // Build an array of search strings for each of the ClinVar IDs entered in the form.
@@ -895,7 +968,7 @@ var ExperimentalCuration = React.createClass({
                             // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
                             results.forEach(function(result, i) {
                                 if (result.total) {
-                                    // Search got a result. Add a string for family.variants for this existing variant
+                                    // Search got a result. Add a string for experimentalData.variants for this existing variant
                                     experimentalDataVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                 } else {
                                     // Search got no result; make a new variant and save it in an array so we can write them.
@@ -932,13 +1005,13 @@ var ExperimentalCuration = React.createClass({
                         }
                     }
 
-                    // Now write the new variants to the DB, and push their @ids to the family variant
+                    // Now write the new variants to the DB, and push their @ids to the experimental data variant
                     if (newVariants && newVariants.length) {
                         return this.postRestDatas(
                             '/variants/', newVariants
                         ).then(results => {
                             if (results && results.length) {
-                                // Add the newly written variants to the family
+                                // Add the newly written variants to the experimental data
                                 results.forEach(result => {
                                     experimentalDataVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                 });
@@ -950,6 +1023,14 @@ var ExperimentalCuration = React.createClass({
                     // No variant search strings. Go to next THEN indicating no new named variants
                     return Promise.resolve(null);
                 }).then(data => {
+                    var gdmUuid = this.state.gdm && this.state.gdm.uuid;
+                    var experimentalUuid = this.state.experimental && this.state.experimental.uuid;
+
+                    // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the experimental data object.
+                    return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid).then(assessmentInfo => {
+                        return Promise.resolve({assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
+                    });
+                }).then(assessment => {
                     var promise;
 
                     // Add variants if they've been found
@@ -957,29 +1038,39 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.variants = experimentalDataVariants;
                     }
 
+                    // If we made a new assessment, add it to the experimental data's assessments
+                    if (assessment.assessment && !assessment.updatedAssessment) {
+                        if (!newExperimental.assessments) {
+                            newExperimental.assessments = [];
+                        }
+                        newExperimental.assessments.push(assessment.assessment['@id']);
+                    }
+
                     if (this.state.experimental) {
                         // We're editing a experimental. PUT the new group object to the DB to update the existing one.
                         promise = this.putRestData('/experimental/' + this.state.experimental.uuid, newExperimental).then(data => {
-                            return Promise.resolve(data['@graph'][0]);
+                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
                         });
                     } else {
                         // We created an experimental data item; post it to the DB
                         promise = this.postRestData('/experimental/', newExperimental).then(data => {
-                            return Promise.resolve(data['@graph'][0]);
+                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
                         }).then(newExperimental => {
-                            savedExperimental = newExperimental;
+                            savedExperimental = newExperimental.data;
                             if (!this.state.experimental) {
                                 // Get a flattened copy of the annotation and put our new group into it,
                                 // ready for writing.
                                 var annotation = curator.flatten(this.state.annotation);
                                 if (annotation.experimentalData) {
-                                    annotation.experimentalData.push(newExperimental['@id']);
+                                    annotation.experimentalData.push(newExperimental.data['@id']);
                                 } else {
-                                    annotation.experimentalData = [newExperimental['@id']];
+                                    annotation.experimentalData = [newExperimental.data['@id']];
                                 }
 
                                 // Post the modified annotation to the DB, then go back to Curation Central
-                                return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
+                                return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                                    return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
+                                });
                             } else {
                                 return Promise.resolve(null);
                             }
@@ -987,6 +1078,19 @@ var ExperimentalCuration = React.createClass({
                     }
 
                     return promise;
+                }).then(data => {
+                    // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
+                    var newAssessment = data.assessment;
+                    var gdmUuid = this.state.gdm && this.state.gdm.uuid;
+                    var experimentalUuid = savedExperimental ? savedExperimental.uuid : this.state.experimental.uuid;
+                    if (newAssessment && !newAssessment.evidence_id) {
+                        // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
+                        // Nothing relies on this operation completing, so don't wait for a promise from it.
+                        this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid, newAssessment);
+                    }
+
+                    // Next step relies on the pathogenicity, not the updated assessment
+                    return Promise.resolve(savedExperimental);
                 }).then(data => {
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
@@ -1097,6 +1201,12 @@ var ExperimentalCuration = React.createClass({
                                                 {ExperimentalDataVariant.call(this)}
                                             </Panel></PanelGroup>
                                         : null}
+                                        {this.state.experimentalNameVisible ?
+                                            <PanelGroup accordion>
+                                                <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker}
+                                                    updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
+                                            </PanelGroup>
+                                        : null}
                                         {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
                                             <div className="curation-submit clearfix">
                                                 <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
@@ -1132,7 +1242,7 @@ var ExperimentalNameType = function() {
             <Input type="select" ref="experimentalType" label="Experiment type:"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
-                inputDisabled={this.state.experimental!=null} required>
+                inputDisabled={this.state.experimental!=null || this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Biochemical Function</option>
@@ -1145,12 +1255,12 @@ var ExperimentalNameType = function() {
             {!this.state.experimentalType || this.state.experimentalType == 'none' ?
                 <div className="col-sm-7 col-sm-offset-5">
                     <p className="alert alert-info">
-                        <strong>Biochemical Function</strong>: The gene product performs a biochemical function shared with other known genes in the disease of interest, or the gene product is consistent with the observed phenotype(s)<br /><br />
+                        <strong>Biochemical Function</strong>: The gene product performs a biochemical function shared with other known genes in the disease of interest, OR the gene product is consistent with the observed phenotype(s)<br /><br />
                         <strong>Protein Interactions</strong>: The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest<br /><br />
-                        <strong>Expression</strong>: The gene is expressed in tissues relevant to the disease of interest, or the gene is altered in expression in patients who have the disease<br /><br />
+                        <strong>Expression</strong>: The gene is expressed in tissues relevant to the disease of interest, OR the gene is altered in expression in patients who have the disease<br /><br />
                         <strong>Functional Alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents<br /><br />
-                        <strong>Model Systems</strong>: Non-human animal or cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state<br /><br />
-                        <strong>Rescue</strong>: The cellular phenotype in patient-derived cells or engineered equivalents can be rescued by addition of the wild-type gene product
+                        <strong>Model Systems</strong>: Non-human animal OR cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state<br /><br />
+                        <strong>Rescue</strong>: The cellular phenotype in patient-derived cells OR engineered equivalents can be rescued by addition of the wild-type gene product
                     </p>
                 </div>
             : null}
@@ -1165,7 +1275,7 @@ var ExperimentalNameType = function() {
                 <Input type="select" ref="experimentalSubtype" label="Please select which one (A or B) you would like to curate"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                     defaultValue="none" value={this.state.experimentalSubtype} handleChange={this.handleChange}
-                    inputDisabled={this.state.experimental!=null} required>
+                    inputDisabled={this.state.experimental!=null || this.cv.othersAssessed} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>A. Gene(s) with same function implicated in same disease</option>
@@ -1176,7 +1286,7 @@ var ExperimentalNameType = function() {
                 <Input type="select" ref="experimentalSubtype" label="Please select which one (A or B) you would like to curate"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                     defaultValue="none" value={this.state.experimentalSubtype} handleChange={this.handleChange}
-                    inputDisabled={this.state.experimental!=null} required>
+                    inputDisabled={this.state.experimental!=null || this.cv.othersAssessed} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>A. Gene normally expressed in tissue relevant to the disease</option>
@@ -1187,7 +1297,7 @@ var ExperimentalNameType = function() {
                 <Input type="textarea" ref="experimentalName" label="Experiment name:"
                     error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="no-resize"
-                    rows='1' value={experimental && experimental.label} handleChange={this.handleChange} required />
+                    rows='1' value={experimental && experimental.label} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required />
             : null}
         </div>
     );
@@ -1205,19 +1315,19 @@ var TypeBiochemicalFunction = function() {
     }
     return (
         <div className="row experimental-data-form">
-            <p className="col-sm-7 col-sm-offset-5">To select a GO_Slim ID click on the GO_Slim link and copy/paste the desired GO ID into the box below.</p>
+            <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> for a GO ID (e.g. biological_process = GO:0008150)</p>
             <Input type="text" ref="identifiedFunction" label={<LabelIdentifiedFunction />}
                 error={this.getFormError('identifiedFunction')} clearError={this.clrFormErrors.bind(null, 'identifiedFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={biochemicalFunction.identifiedFunction} placeholder="e.g. GO:0008150" required />
+                value={biochemicalFunction.identifiedFunction} placeholder="e.g. GO:0008150" inputDisabled={this.cv.othersAssessed} required />
             <Input type="textarea" ref="evidenceForFunction" label="Evidence for above function:"
                 error={this.getFormError('evidenceForFunction')} clearError={this.clrFormErrors.bind(null, 'evidenceForFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.evidenceForFunction} required />
+                rows="5" value={biochemicalFunction.evidenceForFunction} inputDisabled={this.cv.othersAssessed} required />
             <Input type="textarea" ref="evidenceForFunctionInPaper" label="Notes on where evidence found in paper:"
                 error={this.getFormError('evidenceForFunctionInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceForFunctionInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.evidenceForFunctionInPaper} />
+                rows="5" value={biochemicalFunction.evidenceForFunctionInPaper} inputDisabled={this.cv.othersAssessed} />
             {this.state.experimentalSubtype == 'A. Gene(s) with same function implicated in same disease' ?
                 TypeBiochemicalFunctionA.call(this)
             : null}
@@ -1241,11 +1351,10 @@ var TypeBiochemicalFunctionA = function() {
     if (biochemicalFunction) {
         biochemicalFunction.geneWithSameFunctionSameDisease = biochemicalFunction.geneWithSameFunctionSameDisease ? biochemicalFunction.geneWithSameFunctionSameDisease : {};
         if (biochemicalFunction.geneWithSameFunctionSameDisease) {
-            biochemicalFunction.geneWithSameFunctionSameDisease.genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? this.joinItems(biochemicalFunction.geneWithSameFunctionSameDisease.genes) : null;
+            biochemicalFunction.geneWithSameFunctionSameDisease.genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? joinGenes(biochemicalFunction.geneWithSameFunctionSameDisease.genes) : null;
             biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction : null;
             biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes ? biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes : null;
             biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper : null;
-            biochemicalFunction.geneWithSameFunctionSameDisease.assessments = biochemicalFunction.geneWithSameFunctionSameDisease.assessments ? biochemicalFunction.geneWithSameFunctionSameDisease.assessments : null;
         }
     }
     return (
@@ -1253,27 +1362,31 @@ var TypeBiochemicalFunctionA = function() {
             <Input type="text" ref="geneWithSameFunctionSameDisease.genes" label={<LabelGenesWithSameFunction />}
                 error={this.getFormError('geneWithSameFunctionSameDisease.genes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.genes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1" handleChange={this.handleChange} required />
+                value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1" handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that above gene(s) share same function with gene in record:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction} required />
+                rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}
+                inputDisabled={this.cv.othersAssessed} required />
             <Input type="text" ref="geneWithSameFunctionSameDisease.sharedDisease" label={<LabelSharedDisease />}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 value={"ORPHA" + this.state.gdm.disease.orphaNumber} inputDisabled={true} />
-            <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene or genes been implicated in the above disease?:"
+            <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene(s) been implicated in the above disease?:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                checked={this.state.geneImplicatedWithDisease} defaultChecked="false" handleChange={this.handleChange} />
+                checked={this.state.geneImplicatedWithDisease} defaultChecked="false" handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} />
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the gene(s) entered above in this section have not been implicated in the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.explanationOfOtherGenes" label="How has this other gene(s) been implicated in the above disease?:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.explanationOfOtherGenes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.explanationOfOtherGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes} inputDisabled={!this.state.geneImplicatedWithDisease} required={this.state.geneImplicatedWithDisease} />
-            <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Notes on where evidence found in paper:"
+                rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}
+                inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} required={this.state.geneImplicatedWithDisease} />
+            <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Additional comments:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                 rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper} inputDisabled={!this.state.geneImplicatedWithDisease} />
+                rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}
+                inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1300,7 +1413,6 @@ var TypeBiochemicalFunctionB = function() {
             biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText : null;
             biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation = biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation ? biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation : null;
             biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper ? biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper : null;
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments = biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments ? biochemicalFunction.geneFunctionConsistentWithPhenotype.assessments : null;
         }
     }
     return (
@@ -1309,19 +1421,23 @@ var TypeBiochemicalFunctionB = function() {
             <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange} required={!this.state.biochemicalFunctionFT} />
+                value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required={!this.state.biochemicalFunctionFT} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeFreeText" label={<LabelPhenotypesFT />}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText} handleChange={this.handleChange} required={!this.state.biochemicalFunctionHPO} />
+                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText} handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required={!this.state.biochemicalFunctionHPO} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.explanation" label="Explanation of how phenotype is consistent with disease:"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.explanation')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation} inputDisabled={!(this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT)} required={this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT} />
+                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}
+                inputDisabled={!(this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT) || this.cv.othersAssessed} required={this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.evidenceInPaper" label="Notes on where evidence found in paper:"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper} inputDisabled={!(this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT)} />
+                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}
+                inputDisabled={!(this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT) || this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1344,23 +1460,22 @@ var TypeProteinInteractions = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var proteinInteractions = experimental.proteinInteractions ? experimental.proteinInteractions : {};
     if (proteinInteractions) {
-        proteinInteractions.interactingGenes = proteinInteractions.interactingGenes ? this.joinItems(proteinInteractions.interactingGenes) : null;
+        proteinInteractions.interactingGenes = proteinInteractions.interactingGenes ? joinGenes(proteinInteractions.interactingGenes) : null;
         proteinInteractions.interactionType = proteinInteractions.interactionType ? proteinInteractions.interactionType : null;
         proteinInteractions.experimentalInteractionDetection = proteinInteractions.experimentalInteractionDetection ? proteinInteractions.experimentalInteractionDetection : null;
         proteinInteractions.relationshipOfOtherGenesToDisese = proteinInteractions.relationshipOfOtherGenesToDisese ? proteinInteractions.relationshipOfOtherGenesToDisese : null;
         proteinInteractions.evidenceInPaper = proteinInteractions.evidenceInPaper ? proteinInteractions.evidenceInPaper : null;
-        proteinInteractions.assessments = proteinInteractions.assessments ? proteinInteractions.assessments : null;
     }
     return (
         <div className="row experimental-data-form">
             <Input type="text" ref="interactingGenes" label={<LabelInteractingGenes />}
                 error={this.getFormError('interactingGenes')} clearError={this.clrFormErrors.bind(null, 'interactingGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={proteinInteractions.interactingGenes} placeholder="e.g. DICER1" required />
+                value={proteinInteractions.interactingGenes} placeholder="e.g. DICER1" inputDisabled={this.cv.othersAssessed} required />
             <Input type="select" ref="interactionType" label="Interaction Type:" defaultValue="none"
                 error={this.getFormError('interactionType')} clearError={this.clrFormErrors.bind(null, 'interactionType')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                value={proteinInteractions.interactionType} handleChange={this.handleChange} required>
+                value={proteinInteractions.interactionType} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>physical association (MI:0915)</option>
@@ -1371,7 +1486,8 @@ var TypeProteinInteractions = function() {
             <Input type="select" ref="experimentalInteractionDetection" label="Method by which interaction detected:"
                 error={this.getFormError('experimentalInteractionDetection')} clearError={this.clrFormErrors.bind(null, 'experimentalInteractionDetection')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                defaultValue="none" value={proteinInteractions.experimentalInteractionDetection} handleChange={this.handleChange} required>
+                defaultValue="none" value={proteinInteractions.experimentalInteractionDetection} handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>coimmunoprecipitation (M:0019)</option>
@@ -1385,16 +1501,17 @@ var TypeProteinInteractions = function() {
             <Input type="checkbox" ref="geneImplicatedInDisease" label="Has this gene or genes been implicated in the above disease?:"
                 error={this.getFormError('geneImplicatedInDisease')} clearError={this.clrFormErrors.bind(null, 'geneImplicatedInDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                checked={this.state.geneImplicatedInDisease} defaultChecked="false" handleChange={this.handleChange} />
+                checked={this.state.geneImplicatedInDisease} defaultChecked="false" inputDisabled={this.cv.othersAssessed} handleChange={this.handleChange} />
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the interacting gene(s) have not been associated with the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
             <Input type="textarea" ref="relationshipOfOtherGenesToDisese" label="Explanation of relationship of interacting gene(s):"
                 error={this.getFormError('relationshipOfOtherGenesToDisese')} clearError={this.clrFormErrors.bind(null, 'relationshipOfOtherGenesToDisese')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={proteinInteractions.relationshipOfOtherGenesToDisese} inputDisabled={!this.state.geneImplicatedInDisease} required={this.state.geneImplicatedInDisease} />
+                rows="5" value={proteinInteractions.relationshipOfOtherGenesToDisese}
+                inputDisabled={!this.state.geneImplicatedInDisease || this.cv.othersAssessed} required={this.state.geneImplicatedInDisease} />
             <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper"
                 error={this.getFormError('evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={proteinInteractions.evidenceInPaper} inputDisabled={!this.state.geneImplicatedInDisease} />
+                rows="5" value={proteinInteractions.evidenceInPaper}inputDisabled={!this.state.geneImplicatedInDisease || this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1420,7 +1537,7 @@ var TypeExpression = function() {
             <Input type="text" ref="organOfTissue" label={<LabelUberonId />}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={expression.organOfTissue} placeholder="e.g. UBERON_0015228" required />
+                value={expression.organOfTissue} placeholder="e.g. UBERON_0015228" inputDisabled={this.cv.othersAssessed} required />
             {this.state.experimentalSubtype == 'A. Gene normally expressed in tissue relevant to the disease' ?
                 TypeExpressionA.call(this)
             : null}
@@ -1434,7 +1551,7 @@ var TypeExpression = function() {
 // HTML labels for Expression panel.
 var LabelUberonId = React.createClass({
     render: function() {
-        return <span>Organ of tissue relevant to disease, in which gene expression is examined <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID)</span>:</span>;
+        return <span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID)</span>:</span>;
     }
 });
 
@@ -1446,7 +1563,6 @@ var TypeExpressionA = function() {
         if (expression.normalExpression) {
             expression.normalExpression.evidence = expression.normalExpression.evidence ? expression.normalExpression.evidence : null;
             expression.normalExpression.evidenceInPaper = expression.normalExpression.evidenceInPaper ? expression.normalExpression.evidenceInPaper : null;
-            expression.normalExpression.assessments = expression.normalExpression.assessments ? expression.normalExpression.assessments : null;
         }
     }
     return (
@@ -1454,16 +1570,16 @@ var TypeExpressionA = function() {
             <Input type="checkbox" ref="normalExpression.expressedInTissue" label="Is the gene normally expressed in the above tissue?:"
                 error={this.getFormError('normalExpression.expressedInTissue')} clearError={this.clrFormErrors.bind(null, 'normalExpression.expressedInTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                checked={this.state.expressedInTissue} defaultChecked="false" handleChange={this.handleChange} />
+                checked={this.state.expressedInTissue} defaultChecked="false" handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} />
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the gene is not normally expressed in the above tissue, the criteria for counting this experimental evidence has not been met and cannot be submitted. Proceed to section B below or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Curation Central</a>.</p>
-            <Input type="textarea" ref="normalExpression.evidence" label="Evidence for normal expression in tissue:"
+            <Input type="textarea" ref="normalExpression.evidence" label="Change Evidence for normal expression in disease tissue:"
                 error={this.getFormError('normalExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidence')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={expression.normalExpression.evidence} inputDisabled={!this.state.expressedInTissue} required={this.state.expressedInTissue} />
+                rows="5" value={expression.normalExpression.evidence} inputDisabled={!this.state.expressedInTissue || this.cv.othersAssessed} required={this.state.expressedInTissue} />
             <Input type="textarea" ref="normalExpression.evidenceInPaper" label="Notes on where evidence found:"
                 error={this.getFormError('normalExpression.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={expression.normalExpression.evidenceInPaper} inputDisabled={!this.state.expressedInTissue} />
+                rows="5" value={expression.normalExpression.evidenceInPaper} inputDisabled={!this.state.expressedInTissue || this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1476,7 +1592,6 @@ var TypeExpressionB = function() {
         if (expression.alteredExpression) {
             expression.alteredExpression.evidence = expression.alteredExpression.evidence ? expression.alteredExpression.evidence : null;
             expression.alteredExpression.evidenceInPaper = expression.alteredExpression.evidenceInPaper ? expression.alteredExpression.evidenceInPaper : null;
-            expression.alteredExpression.assessments = expression.alteredExpression.assessments ? expression.alteredExpression.assessments : null;
         }
     }
     return (
@@ -1484,16 +1599,16 @@ var TypeExpressionB = function() {
             <Input type="checkbox" ref="alteredExpression.expressedInPatients" label="Is expression altered in patients who have the disease?:"
                 error={this.getFormError('alteredExpression.expressedInPatients')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.expressedInPatients')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                checked={this.state.expressedInPatients} defaultChecked="false" handleChange={this.handleChange} />
+                checked={this.state.expressedInPatients} defaultChecked="false" handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} />
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the expression is not altered in patients who have the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
             <Input type="textarea" ref="alteredExpression.evidence" label="Evidence for altered expression in patients:"
                 error={this.getFormError('alteredExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.evidence')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={expression.alteredExpression.evidence} inputDisabled={!this.state.expressedInPatients} required={this.state.expressedInPatients} />
+                rows="5" value={expression.alteredExpression.evidence} inputDisabled={!this.state.expressedInPatients || this.cv.othersAssessed} required={this.state.expressedInPatients} />
             <Input type="textarea" ref="alteredExpression.evidenceInPaper" label="Notes on where evidence found in paper:"
                 error={this.getFormError('alteredExpression.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={expression.alteredExpression.evidenceInPaper} inputDisabled={!this.state.expressedInPatients} />
+                rows="5" value={expression.alteredExpression.evidenceInPaper} inputDisabled={!this.state.expressedInPatients || this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1511,14 +1626,14 @@ var TypeFunctionalAlteration = function() {
         functionalAlteration.normalFunctionOfGene = functionalAlteration.normalFunctionOfGene ? functionalAlteration.normalFunctionOfGene : null;
         functionalAlteration.evidenceForNormalFunction = functionalAlteration.evidenceForNormalFunction ? functionalAlteration.evidenceForNormalFunction : null;
         functionalAlteration.evidenceInPaper = functionalAlteration.evidenceInPaper ? functionalAlteration.evidenceInPaper : null;
-        functionalAlteration.assessments = functionalAlteration.assessments ? functionalAlteration.assessments : null;
     }
     return (
         <div className="row experimental-data-form">
             <Input type="select" ref="cellMutationOrEngineeredEquivalent" label="Patient cells with candidate mutation or engineered equivalent?:"
                 error={this.getFormError('cellMutationOrEngineeredEquivalent')} clearError={this.clrFormErrors.bind(null, 'cellMutationOrEngineeredEquivalent')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                defaultValue="none" value={functionalAlteration.cellMutationOrEngineeredEquivalent} handleChange={this.handleChange} required>
+                defaultValue="none" value={functionalAlteration.cellMutationOrEngineeredEquivalent} handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Patient cells</option>
@@ -1530,7 +1645,8 @@ var TypeFunctionalAlteration = function() {
                 <Input type="textarea" ref="funcalt.patientCellType" label={<LabelFAPatientCellType />}
                     error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                    rows="1" value={functionalAlteration.patientCellType} placeholder="e.g. CL_0000057" required />
+                    rows="1" value={functionalAlteration.patientCellType} placeholder="e.g. CL_0000057"
+                    inputDisabled={this.cv.othersAssessed} required />
             </div>
             : null}
             {this.state.functionalAlterationPCEE == 'Engineered equivalent' ?
@@ -1539,26 +1655,27 @@ var TypeFunctionalAlteration = function() {
                 <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<LabelFAEngineeredEquivalent />}
                     error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                    rows="1" value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. EFO_0001187" required />
+                    rows="1" value={functionalAlteration.engineeredEquivalentCellType} placeholder="e.g. EFO_0001187"
+                    inputDisabled={this.cv.othersAssessed} required />
             </div>
             : null}
             <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> for gene function (e.g. DNA metabolic process = GO:0006259)</p>
             <Input type="text" ref="normalFunctionOfGene" label={<LabelNormalFunctionOfGene />}
                 error={this.getFormError('normalFunctionOfGene')} clearError={this.clrFormErrors.bind(null, 'normalFunctionOfGene')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={functionalAlteration.normalFunctionOfGene} placeholder="e.g. GO:0006259" required />
+                value={functionalAlteration.normalFunctionOfGene} placeholder="e.g. GO:0006259" inputDisabled={this.cv.othersAssessed} required />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={functionalAlteration.descriptionOfGeneAlteration} required />
+                rows="5" value={functionalAlteration.descriptionOfGeneAlteration} inputDisabled={this.cv.othersAssessed} required />
             <Input type="textarea" ref="evidenceForNormalFunction" label="Evidence for altered function:"
                 error={this.getFormError('evidenceForNormalFunction')} clearError={this.clrFormErrors.bind(null, 'evidenceForNormalFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={functionalAlteration.evidenceForNormalFunction} required />
+                rows="5" value={functionalAlteration.evidenceForNormalFunction} inputDisabled={this.cv.othersAssessed} required />
             <Input type="textarea" ref="evidenceInPaper" label="Notes on where evidence found in paper:"
                 error={this.getFormError('evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={functionalAlteration.evidenceInPaper} />
+                rows="5" value={functionalAlteration.evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1596,14 +1713,14 @@ var TypeModelSystems = function() {
         modelSystems.phenotypeFreetextObserved = modelSystems.phenotypeFreetextObserved ? modelSystems.phenotypeFreetextObserved : null;
         modelSystems.explanation = modelSystems.explanation ? modelSystems.explanation : null;
         modelSystems.evidenceInPaper = modelSystems.evidenceInPaper ? modelSystems.evidenceInPaper : null;
-        modelSystems.assessments = modelSystems.assessments ? modelSystems.assessments : null;
     }
     return (
         <div className="row experimental-data-form">
             <Input type="select" ref="animalOrCellCulture" label="Non-human animal or cell-culture model?:"
                 error={this.getFormError('animalOrCellCulture')} clearError={this.clrFormErrors.bind(null, 'animalOrCellCulture')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                defaultValue="none" value={modelSystems.animalOrCellCulture} handleChange={this.handleChange} required>
+                defaultValue="none" value={modelSystems.animalOrCellCulture} handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Animal model</option>
@@ -1614,7 +1731,8 @@ var TypeModelSystems = function() {
                 <Input type="select" ref="animalModel" label="Animal model:"
                     error={this.getFormError('animalModel')} clearError={this.clrFormErrors.bind(null, 'animalModel')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                    defaultValue="none" value={modelSystems.animalModel} handleChange={this.handleChange} required>
+                    defaultValue="none" value={modelSystems.animalModel} handleChange={this.handleChange}
+                    inputDisabled={this.cv.othersAssessed} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>Cat (Felis catus) 9685</option>
@@ -1644,37 +1762,41 @@ var TypeModelSystems = function() {
                 <Input type="textarea" ref="cellCulture" label={<LabelCellCulture />}
                     error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                    rows="1" value={modelSystems.cellCulture} placeholder="e.g. EFO_0001187" required />
+                    rows="1" value={modelSystems.cellCulture} placeholder="e.g. EFO_0001187" inputDisabled={this.cv.othersAssessed} required />
             </div>
             : null}
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={modelSystems.descriptionOfGeneAlteration} required />
+                rows="5" value={modelSystems.descriptionOfGeneAlteration} inputDisabled={this.cv.othersAssessed} required />
             <Input type="text" ref="model.phenotypeHPOObserved" label={<LabelPhenotypeObserved />}
                 error={this.getFormError('model.phenotypeHPOObserved')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPOObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={modelSystems.phenotypeHPOObserved} placeholder="e.g. HP:0010704" handleChange={this.handleChange} required={!this.state.modelSystemsPOMSFT} />
+                value={modelSystems.phenotypeHPOObserved} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required={!this.state.modelSystemsPOMSFT} />
             <Input type="textarea" ref="phenotypeFreetextObserved" label={<LabelPhenotypeObservedFT />}
                 error={this.getFormError('phenotypeFreetextObserved')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreetextObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={modelSystems.phenotypeFreetextObserved} handleChange={this.handleChange} required={!this.state.modelSystemsPOMSHPO} />
+                rows="5" value={modelSystems.phenotypeFreetextObserved} handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required={!this.state.modelSystemsPOMSHPO} />
             <Input type="text" ref="model.phenotypeHPO" label={<LabelPatientPhenotype />}
                 error={this.getFormError('model.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={modelSystems.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange} required={!this.state.modelSystemsPPFT} />
+                value={modelSystems.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required={!this.state.modelSystemsPPFT} />
             <Input type="textarea" ref="model.phenotypeFreeText" label={<LabelPatientPhenotypeFT />}
                 error={this.getFormError('model.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={modelSystems.phenotypeFreeText} handleChange={this.handleChange} required={!this.state.modelSystemsPPHPO} />
+                rows="5" value={modelSystems.phenotypeFreeText} handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required={!this.state.modelSystemsPPHPO} />
             <Input type="textarea" ref="explanation" label="Explanation of how model system phenotype is similar to phenotype observed in humans:"
                 error={this.getFormError('explanation')} clearError={this.clrFormErrors.bind(null, 'explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={modelSystems.explanation} required />
+                rows="5" value={modelSystems.explanation} inputDisabled={this.cv.othersAssessed} required />
             <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper"
                 error={this.getFormError('evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={modelSystems.evidenceInPaper} />
+                rows="5" value={modelSystems.evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1721,14 +1843,14 @@ var TypeRescue = function() {
         rescue.rescueMethod = rescue.rescueMethod ? rescue.rescueMethod : null;
         rescue.explanation = rescue.explanation ? rescue.explanation : null;
         rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper : null;
-        rescue.assessments = rescue.assessments ? rescue.assessments : null;
     }
     return (
         <div className="row experimental-data-form">
             <Input type="select" ref="patientCellOrEngineeredEquivalent" label="Patient cells with or engineered equivalent?:"
                 error={this.getFormError('patientCellOrEngineeredEquivalent')} clearError={this.clrFormErrors.bind(null, 'patientCellOrEngineeredEquivalent')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                defaultValue="none" value={rescue.patientCellOrEngineeredEquivalent} handleChange={this.handleChange} required>
+                defaultValue="none" value={rescue.patientCellOrEngineeredEquivalent} handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option>Patient cells</option>
@@ -1740,51 +1862,53 @@ var TypeRescue = function() {
                 <Input type="textarea" ref="rescue.patientCellType" label={<LabelRPatientCellType />}
                     error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                    rows="1" value={rescue.patientCellType} placeholder="e.g. CL_0000057" required />
+                    rows="1" value={rescue.patientCellType} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed} required />
             </div>
             : null}
             {this.state.rescuePCEE == 'Engineered equivalent' ?
             <div>
-                 <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187)</p>
+                <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187)</p>
                 <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<LabelREngineeredEquivalent />}
                     error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                    rows="1" value={rescue.engineeredEquivalentCellType} placeholder="e.g. EFO_0001187" required />
+                    rows="1" value={rescue.engineeredEquivalentCellType} placeholder="e.g. EFO_0001187" inputDisabled={this.cv.othersAssessed} required />
             </div>
             : null}
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={rescue.descriptionOfGeneAlteration} required />
+                rows="5" value={rescue.descriptionOfGeneAlteration} inputDisabled={this.cv.othersAssessed} required />
             <Input type="text" ref="rescue.phenotypeHPO" label={<LabelPhenotypeRescue />}
                 error={this.getFormError('rescue.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange} required={!this.state.rescuePRFT} />
+                value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required={!this.state.rescuePRFT} />
             <Input type="textarea" ref="rescue.phenotypeFreeText" label={<LabelPhenotypeRescueFT />}
                 error={this.getFormError('rescue.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={rescue.phenotypeFreeText} handleChange={this.handleChange} required={!this.state.rescuePRHPO} />
+                rows="5" value={rescue.phenotypeFreeText} handleChange={this.handleChange}
+                inputDisabled={this.cv.othersAssessed} required={!this.state.rescuePRHPO} />
             <Input type="textarea" ref="rescueMethod" label="Description of method used to rescue:"
                 error={this.getFormError('rescueMethod')} clearError={this.clrFormErrors.bind(null, 'rescueMethod')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={rescue.rescueMethod} required />
+                rows="5" value={rescue.rescueMethod} inputDisabled={this.cv.othersAssessed} required />
             <Input type="checkbox" ref="wildTypeRescuePhenotype" label="Does the wild-type rescue the above phenotype?:"
                 error={this.getFormError('wildTypeRescuePhenotype')} clearError={this.clrFormErrors.bind(null, 'wildTypeRescuePhenotype')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                checked={this.state.wildTypeRescuePhenotype} defaultChecked="false" handleChange={this.handleChange} />
+                checked={this.state.wildTypeRescuePhenotype} defaultChecked="false" handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} />
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the wild-type version of the gene does not rescue the phenotype, the criteria of counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
             <Input type="checkbox" ref="patientVariantRescue" label="Does patient variant rescue?:"
                 error={this.getFormError('patientVariantRescue')} clearError={this.clrFormErrors.bind(null, 'patientVariantRescue')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                checked={this.state.patientVariantRescue} defaultChecked="false" />
+                checked={this.state.patientVariantRescue} defaultChecked="false" inputDisabled={this.cv.othersAssessed} />
             <Input type="textarea" ref="explanation" label="Explanation of rescue of phenotype:"
                 error={this.getFormError('explanation')} clearError={this.clrFormErrors.bind(null, 'explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={rescue.explanation} inputDisabled={!this.state.wildTypeRescuePhenotype} required />
+                rows="5" value={rescue.explanation} inputDisabled={!this.state.wildTypeRescuePhenotype || this.cv.othersAssessed} required={this.state.wildTypeRescuePhenotype} />
             <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper"
                 error={this.getFormError('evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" inputDisabled={!this.state.wildTypeRescuePhenotype} value={rescue.evidenceInPaper} />
+                rows="5" inputDisabled={!this.state.wildTypeRescuePhenotype || this.cv.othersAssessed} value={rescue.evidenceInPaper} />
         </div>
     );
 }
@@ -1811,7 +1935,7 @@ var LabelPhenotypeRescueFT = React.createClass({
     }
 });
 
-// Display the Family variant panel. The number of copies depends on the variantCount state variable.
+// Display the Experimental Data variant panel. The number of copies depends on the variantCount state variable.
 var ExperimentalDataVariant = function() {
     var experimental = this.state.experimental;
     var variants = experimental && experimental.variants;
@@ -1840,13 +1964,13 @@ var ExperimentalDataVariant = function() {
                                 </p>
                             </div>
                         </div>
-                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
+                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER || this.cv.othersAssessed}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"/>
                         <p className="col-sm-7 col-sm-offset-5 input-note-below">
                             The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href="http://www.ncbi.nlm.nih.gov/clinvar/variation/139214/" target="_blank">example</a>: 139214).
                         </p>
-                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
+                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                     </div>
                 );
@@ -1854,7 +1978,7 @@ var ExperimentalDataVariant = function() {
             {this.state.variantCount < MAX_VARIANTS ?
                 <div>
                     <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Experimental data" : "Add variant associated with Experimental data"}
-                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled || this.cv.othersAssessed} />
                 </div>
             : null}
         </div>
@@ -1875,351 +1999,429 @@ var LabelOtherVariant = React.createClass({
 
 
 var ExperimentalViewer = React.createClass({
+    mixins: [RestMixin, AssessmentMixin],
+
+    cv: {
+        assessmentTracker: null, // Tracking object for a single assessment
+        gdmUuid: '' // UUID of the GDM; passed in the query string
+    },
+
+    getInitialState: function() {
+        return {
+            assessments: null, // Array of assessments for the experimental data
+            updatedAssessment: '' // Updated assessment value
+        };
+    },
+
+    // Handle the assessment submit button
+    assessmentSubmit: function(e) {
+        var updatedExperimental;
+
+        // Write the assessment to the DB, if there was one.
+        this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
+            var experimental = this.props.context;
+
+            // If we made a new assessment, add it to the experimental data's assessments
+            if (assessmentInfo.assessment && !assessmentInfo.update) {
+                updatedExperimental = curator.flatten(experimental);
+                if (!updatedExperimental.assessments) {
+                    updatedExperimental.assessments = [];
+                }
+                updatedExperimental.assessments.push(assessmentInfo.assessment['@id']);
+
+                // Write the updated experimental data object to the DB
+                return this.putRestData('/experimental/' + experimental.uuid, updatedExperimental).then(data => {
+                    return this.getRestData('/experimental/' + data['@graph'][0].uuid);
+                });
+            }
+
+            // Didn't update the experimental data object; if updated the assessment, reload the experimental data
+            if (assessmentInfo.update) {
+                return this.getRestData('/experimental/' + experimental.uuid);
+            }
+
+            // Not updating the experimental data
+            return Promise.resolve(experimental);
+        }).then(updatedExperimental => {
+            // Wrote the experimental data, so update the assessments state to the new assessment list
+            if (updatedExperimental && updatedExperimental.assessments && updatedExperimental.assessments.length) {
+                this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
+            }
+            return Promise.resolve(null);
+        }).catch(function(e) {
+            console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);
+        });
+    },
+
+    componentWillMount: function() {
+        var experimental = this.props.context;
+
+        // Get the GDM and Family UUIDs from the query string
+        this.cv.gdmUuid = queryKeyValue('gdm', this.props.href);
+        if (experimental && experimental.assessments && experimental.assessments.length) {
+            this.setState({assessments: experimental.assessments});
+        }
+    },
+
     render: function() {
-        var context = this.props.context;
-        var method = context.method;
+        var experimental = this.props.context;
+        var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
+        var user = this.props.session && this.props.session.user_properties;
+        var userExperimental = user && experimental && experimental.submitted_by ? user.uuid === experimental.submitted_by.uuid : false;
+        var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the experimental data, but the experimental data's owner assessed it
+        var othersAssessed = false; // TRUE if we own this experimental data, and others have assessed it
+        var updateMsg = this.state.updatedAssessment ? 'Assessment updated to ' + this.state.updatedAssessment : '';
+
+        // Make an assessment tracker object once we get the logged in user info
+        if (!this.cv.assessmentTracker && user) {
+            var userAssessment;
+
+            // Find if any assessments for the segregation are owned by the currently logged-in user
+            if (assessments && assessments.length) {
+                // Find the assessment belonging to the logged-in curator, if any.
+                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+            }
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, experimental.evidenceType);
+        }
+
+        // See if others have assessed
+        if (userExperimental) {
+            othersAssessed = Assessments.othersAssessed(assessments, user.uuid);
+        }
+
+        // Note if we don't own the experimental data, but the owner has assessed it
+        if (user && experimental && experimental.submitted_by) {
+            var experimentalUserAssessment = Assessments.userAssessment(assessments, experimental.submitted_by.uuid);
+            if (experimentalUserAssessment && experimentalUserAssessment.value !== Assessments.DEFAULT_VALUE) {
+                experimentalUserAssessed = true;
+            }
+        }
 
         return (
             <div className="container">
                 <div className="row curation-content-viewer">
                     <h1>View Experimental Data</h1>
-                    <h3>{context.evidenceType}</h3>
-                    <h4>{context.label}</h4>
+                    <h3>{experimental.evidenceType}</h3>
+                    <h4>{experimental.label}</h4>
 
-                    {context.evidenceType == 'Biochemical Function' ?
+                    {experimental.evidenceType == 'Biochemical Function' ?
                     <Panel title="Biochemical Function" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Identified function of gene in this record</dt>
-                                <dd>{context.biochemicalFunction.identifiedFunction}</dd>
+                                <dd>{experimental.biochemicalFunction.identifiedFunction}</dd>
                             </div>
 
                             <div>
                                 <dt>Evidence for above function</dt>
-                                <dd>{context.biochemicalFunction.evidenceForFunction}</dd>
+                                <dd>{experimental.biochemicalFunction.evidenceForFunction}</dd>
                             </div>
 
                             <div>
                                 <dt>Notes on where evidence found in paper</dt>
-                                <dd>{context.biochemicalFunction.evidenceForFunctionInPaper}</dd>
+                                <dd>{experimental.biochemicalFunction.evidenceForFunctionInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Biochemical Function' && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction && context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction !== '' ?
+                    {experimental.evidenceType == 'Biochemical Function' && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction !== '' ?
                     <Panel title="A. Gene(s) with same function implicated in same disease" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Other gene(s) with same function as gene in record</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(function(gene, i) {
-                                        return (<span>{gene.symbol} </span>);
-                                    })}</dd>
+                                <dd>{joinGenes(experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes)}</dd>
                             </div>
 
                             <div>
                                 <dt>Evidence that above gene(s) share same function with gene in record</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}</dd>
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}</dd>
                             </div>
 
                             <div>
-                                <dt>Has this gene or genes been implicated in the above disease?</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease ?
-                                    context.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease.toString()
-                                : null}</dd>
+                                <dt>This gene or genes have been implicated in the above disease</dt>
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
                                 <dt>How has this other gene(s) been implicated in the above disease?</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}</dd>
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}</dd>
                             </div>
 
                             <div>
-                                <dt>Notes on where evidence found in paper</dt>
-                                <dd>{context.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}</dd>
+                                <dt>Additional comments</dt>
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Biochemical Function' && ((context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ') !== '') || (context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) ?
+                    {experimental.evidenceType == 'Biochemical Function' && ((experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ') !== '') || (experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) ?
                     <Panel title="B. Gene function consistent with phenotype" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>HPO ID(s)</dt>
-                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ')}</dd>
+                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ')}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype</dt>
-                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}</dd>
+                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}</dd>
                             </div>
 
                             <div>
                                 <dt>Explanation of how phenotype is consistent with disease</dt>
-                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}</dd>
+                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}</dd>
                             </div>
 
                             <div>
                                 <dt>Notes on where evidence found in paper</dt>
-                                <dd>{context.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}</dd>
+                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Protein Interactions' ?
+                    {experimental.evidenceType == 'Protein Interactions' ?
                     <Panel title="Protein Interactions" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Interacting Gene(s)</dt>
-                                <dd>{context.proteinInteractions.interactingGenes.map(function(gene, i) {
-                                        return (<span>{gene.symbol} </span>);
-                                    })}</dd>
+                                <dd>{joinGenes(experimental.proteinInteractions.interactingGenes)}</dd>
                             </div>
 
                             <div>
                                 <dt>Interaction Type</dt>
-                                <dd>{context.proteinInteractions.interactionType}</dd>
+                                <dd>{experimental.proteinInteractions.interactionType}</dd>
                             </div>
 
                             <div>
                                 <dt>Method by which interaction detected</dt>
-                                <dd>{context.proteinInteractions.experimentalInteractionDetection}</dd>
+                                <dd>{experimental.proteinInteractions.experimentalInteractionDetection}</dd>
                             </div>
 
                             <div>
-                                <dt>Has this gene or genes been implicated in the above disease</dt>
-                                <dd>{context.proteinInteractions.geneImplicatedInDisease ?
-                                    context.proteinInteractions.geneImplicatedInDisease.toString()
-                                : null}</dd>
+                                <dt>This gene or genes have been implicated in the above disease</dt>
+                                <dd>{experimental.proteinInteractions.geneImplicatedInDisease ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
                                 <dt>Explanation of relationship of other gene(s) to the disease</dt>
-                                <dd>{context.proteinInteractions.relationshipOfOtherGenesToDisese}</dd>
+                                <dd>{experimental.proteinInteractions.relationshipOfOtherGenesToDisese}</dd>
                             </div>
 
                             <div>
                                 <dt>Information about where evidence can be found on paper</dt>
-                                <dd>{context.proteinInteractions.evidenceInPaper}</dd>
+                                <dd>{experimental.proteinInteractions.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Expression' ?
+                    {experimental.evidenceType == 'Expression' ?
                     <Panel title="Expression" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
-                                <dt>Uberon ID of Tissue Organ</dt>
-                                <dd>{context.expression.organOfTissue}</dd>
+                                <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient</dt>
+                                <dd>{experimental.expression.organOfTissue}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Expression' && context.expression.normalExpression.expressedInTissue && context.expression.normalExpression.expressedInTissue == true ?
+                    {experimental.evidenceType == 'Expression' && experimental.expression.normalExpression.expressedInTissue && experimental.expression.normalExpression.expressedInTissue == true ?
                     <Panel title="A. Gene normally expressed in tissue relevant to the disease" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
-                                <dt>Is the gene normally expressed in the above tissue?</dt>
-                                <dd>{context.expression.normalExpression.expressedInTissue ?
-                                    context.expression.normalExpression.expressedInTissue.toString()
-                                : null}</dd>
+                                <dt>The gene is normally expressed in the above tissue</dt>
+                                <dd>{experimental.expression.normalExpression.expressedInTissue ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
-                                <dt>Evidence for normal expression in tissue</dt>
-                                <dd>{context.expression.normalExpression.evidence}</dd>
+                                <dt>Change Evidence for normal expression in disease tissue</dt>
+                                <dd>{experimental.expression.normalExpression.evidence}</dd>
                             </div>
 
                             <div>
                                 <dt>Notes on where evidence found in paper</dt>
-                                <dd>{context.expression.normalExpression.evidenceInPaper}</dd>
+                                <dd>{experimental.expression.normalExpression.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Expression' && context.expression.alteredExpression.expressedInPatients && context.expression.alteredExpression.expressedInPatients == true ?
+                    {experimental.evidenceType == 'Expression' && experimental.expression.alteredExpression.expressedInPatients && experimental.expression.alteredExpression.expressedInPatients == true ?
                     <Panel title="B. Altered expression in patients" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
-                                <dt>Altered expression in Patients</dt>
-                                <dd>{context.expression.alteredExpression.expressedInPatients ?
-                                    context.expression.alteredExpression.expressedInPatients.toString()
-                                : null}</dd>
+                                <dt>Expression is altered in patients who have the disease</dt>
+                                <dd>{experimental.expression.alteredExpression.expressedInPatients ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
-                                <dt>Evidence for normal expression in tissue</dt>
-                                <dd>{context.expression.alteredExpression.evidence}</dd>
+                                <dt>Evidence for altered expression in patients</dt>
+                                <dd>{experimental.expression.alteredExpression.evidence}</dd>
                             </div>
 
                             <div>
-                                <dt>Notes on where evidence found</dt>
-                                <dd>{context.expression.alteredExpression.evidenceInPaper}</dd>
+                                <dt>Notes on where evidence found in paper</dt>
+                                <dd>{experimental.expression.alteredExpression.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Functional Alteration' ?
+                    {experimental.evidenceType == 'Functional Alteration' ?
                     <Panel title="Functional Alteration" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Patient cells with candidate mutation or engineered equivalent</dt>
-                                <dd>{context.functionalAlteration.cellMutationOrEngineeredEquivalent}</dd>
+                                <dd>{experimental.functionalAlteration.cellMutationOrEngineeredEquivalent}</dd>
                             </div>
 
                             <div>
                                 <dt>Patient cell type</dt>
-                                <dd>{context.functionalAlteration.patientCellType}</dd>
+                                <dd>{experimental.functionalAlteration.patientCellType}</dd>
                             </div>
 
                             <div>
                                 <dt>Engineered cell type</dt>
-                                <dd>{context.functionalAlteration.engineeredEquivalentCellType}</dd>
+                                <dd>{experimental.functionalAlteration.engineeredEquivalentCellType}</dd>
                             </div>
 
                             <div>
                                 <dt>Description of gene alteration</dt>
-                                <dd>{context.functionalAlteration.descriptionOfGeneAlteration}</dd>
+                                <dd>{experimental.functionalAlteration.descriptionOfGeneAlteration}</dd>
                             </div>
 
                             <div>
                                 <dt>Normal function of gene</dt>
-                                <dd>{context.functionalAlteration.normalFunctionOfGene}</dd>
+                                <dd>{experimental.functionalAlteration.normalFunctionOfGene}</dd>
                             </div>
 
                             <div>
                                 <dt>Evidence for altered function</dt>
-                                <dd>{context.functionalAlteration.evidenceForNormalFunction}</dd>
+                                <dd>{experimental.functionalAlteration.evidenceForNormalFunction}</dd>
                             </div>
 
                             <div>
                                 <dt>Notes on where evidence found in paper</dt>
-                                <dd>{context.functionalAlteration.evidenceInPaper}</dd>
+                                <dd>{experimental.functionalAlteration.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Model Systems' ?
+                    {experimental.evidenceType == 'Model Systems' ?
                     <Panel title="Model Systems" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Non-human animal or cell-culture model?</dt>
-                                <dd>{context.modelSystems.animalOrCellCulture}</dd>
+                                <dd>{experimental.modelSystems.animalOrCellCulture}</dd>
                             </div>
 
                             <div>
                                 <dt>Animal model</dt>
-                                <dd>{context.modelSystems.animalModel}</dd>
+                                <dd>{experimental.modelSystems.animalModel}</dd>
                             </div>
 
                             <div>
                                 <dt>Cell-culture type/line</dt>
-                                <dd>{context.modelSystems.cellCulture}</dd>
+                                <dd>{experimental.modelSystems.cellCulture}</dd>
                             </div>
 
                             <div>
                                 <dt>Description of gene alteration</dt>
-                                <dd>{context.modelSystems.descriptionOfGeneAlteration}</dd>
+                                <dd>{experimental.modelSystems.descriptionOfGeneAlteration}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype(s) observed in model system (HPO)</dt>
-                                <dd>{context.modelSystems.phenotypeHPOObserved}</dd>
+                                <dd>{experimental.modelSystems.phenotypeHPOObserved}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype(s) observed in model system (free text)</dt>
-                                <dd>{context.modelSystems.phenotypeFreetextObserved}</dd>
+                                <dd>{experimental.modelSystems.phenotypeFreetextObserved}</dd>
                             </div>
 
                             <div>
                                 <dt>Human phenotype(s) (HPO)</dt>
-                                <dd>{context.modelSystems.phenotypeHPO}</dd>
+                                <dd>{experimental.modelSystems.phenotypeHPO}</dd>
                             </div>
 
                             <div>
                                 <dt>Human phenotype(s) (free text)</dt>
-                                <dd>{context.modelSystems.phenotypeFreeText}</dd>
+                                <dd>{experimental.modelSystems.phenotypeFreeText}</dd>
                             </div>
 
                             <div>
                                 <dt>Explanation of how model system phenotype is similar to phenotype observed in humans</dt>
-                                <dd>{context.modelSystems.explanation}</dd>
+                                <dd>{experimental.modelSystems.explanation}</dd>
                             </div>
 
                             <div>
                                 <dt>Information about where evidence can be found on paper</dt>
-                                <dd>{context.modelSystems.evidenceInPaper}</dd>
+                                <dd>{experimental.modelSystems.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.evidenceType == 'Rescue' ?
+                    {experimental.evidenceType == 'Rescue' ?
                     <Panel title="Rescue" panelClassName="panel-data">
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Patient cells with or engineered equivalent?</dt>
-                                <dd>{context.rescue.patientCellOrEngineeredEquivalent}</dd>
+                                <dd>{experimental.rescue.patientCellOrEngineeredEquivalent}</dd>
                             </div>
 
                             <div>
                                 <dt>Patient cell type</dt>
-                                <dd>{context.rescue.patientCellType}</dd>
+                                <dd>{experimental.rescue.patientCellType}</dd>
                             </div>
 
                             <div>
                                 <dt>Engineered equivalent cell type</dt>
-                                <dd>{context.rescue.engineeredEquivalentCellType}</dd>
+                                <dd>{experimental.rescue.engineeredEquivalentCellType}</dd>
                             </div>
 
                             <div>
                                 <dt>Description of gene alteration</dt>
-                                <dd>{context.rescue.descriptionOfGeneAlteration}</dd>
+                                <dd>{experimental.rescue.descriptionOfGeneAlteration}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype to rescue</dt>
-                                <dd>{context.rescue.phenotypeHPO}</dd>
+                                <dd>{experimental.rescue.phenotypeHPO}</dd>
                             </div>
 
                             <div>
                                 <dt>Phenotype to rescue</dt>
-                                <dd>{context.rescue.phenotypeFreeText}</dd>
+                                <dd>{experimental.rescue.phenotypeFreeText}</dd>
                             </div>
 
                             <div>
                                 <dt>Method used to rescue</dt>
-                                <dd>{context.rescue.rescueMethod}</dd>
+                                <dd>{experimental.rescue.rescueMethod}</dd>
                             </div>
 
                             <div>
-                                <dt>Does the wild-type rescue the above phenotype?</dt>
-                                <dd>{context.rescue.wildTypeRescuePhenotype ?
-                                    context.rescue.wildTypeRescuePhenotype.toString()
-                                : null}</dd>
+                                <dt>The wild-type rescues the above phenotype</dt>
+                                <dd>{experimental.rescue.wildTypeRescuePhenotype ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
-                                <dt>Does patient variant rescue?</dt>
-                                <dd>{context.rescue.patientVariantRescue ?
-                                    context.rescue.patientVariantRescue.toString()
-                                : null}</dd>
+                                <dt>The patient variant rescues</dt>
+                                <dd>{experimental.rescue.patientVariantRescue ? 'Yes' : 'No'}</dd>
                             </div>
 
                             <div>
                                 <dt>Explanation of rescue of phenotype</dt>
-                                <dd>{context.rescue.explanation}</dd>
+                                <dd>{experimental.rescue.explanation}</dd>
                             </div>
 
                             <div>
                                 <dt>Information about where evidence can be found on paper</dt>
-                                <dd>{context.rescue.evidenceInPaper}</dd>
+                                <dd>{experimental.rescue.evidenceInPaper}</dd>
                             </div>
                         </dl>
                     </Panel>
                     : null}
-                    {context.variants && context.variants.length > 0 ?
+                    {experimental.variants && experimental.variants.length > 0 ?
                     <Panel title="Associated Variants" panelClassName="panel-data">
-                        {context.variants.map(function(variant, i) {
+                        {experimental.variants.map(function(variant, i) {
                             return (
                                 <div className="variant-view-panel">
                                     <h5>Variant {i + 1}</h5>
@@ -2238,6 +2440,31 @@ var ExperimentalViewer = React.createClass({
                             );
                         })}
                     </Panel>
+                    : null}
+                    {assessments && assessments.length ?
+                    <Panel panelClassName="panel-data">
+                        <dl className="dl-horizontal">
+                            <div>
+                                <dt>Assessments</dt>
+                                <dd>
+                                    <div>
+                                        {assessments.map(function(assessment, i) {
+                                            return (
+                                                <span key={assessment.uuid}>
+                                                    {i > 0 ? <br /> : null}
+                                                    {assessment.value} ({assessment.submitted_by.title})
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
+                                </dd>
+                            </div>
+                        </dl>
+                    </Panel>
+                    : null}
+                    {this.cv.gdmUuid && (experimentalUserAssessed || userExperimental) ?
+                        <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} updateMsg={updateMsg} />
                     : null}
                 </div>
             </div>

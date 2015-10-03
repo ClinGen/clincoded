@@ -86,7 +86,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
 
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
-            // else if any evidence assessed as Supports, show Generate Summary button
+            // else if pathogenicity or experimental assessed as Supports, show Generate Summary button
             if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
                 for (var i in gdm.provisionalClassifications) {
                     if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
@@ -107,10 +107,20 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 }
             }
             if (summaryInfo === 'none' && gdm.annotations && gdm.annotations.length > 0) {
-                for (var i in gdm.annotations) {
-                    if (checkAssessment(gdm.annotations[i], session)) {
-                        summaryInfo = 'assessed';
-                        break;
+                for (var i=0; i<gdm.annotations.length; i++) {
+                    var annotation = gdm.annotations[i];
+                    if (annotation.experimentalData.length > 0) {
+                        for (var j in annotation.experimentalData) {
+                            var experimental = annotation.experimentalData[j];
+                            if (experimental.assessments && experimental.assessments.length > 0) {
+                                for (var k in experimental.assessments) {
+                                    if (userMatch(experimental.assessments[k].submitted_by, session) && experimental.assessments[k].value === 'Supports') {
+                                        summaryInfo = 'assessed';
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -639,7 +649,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
     var associatedPathogenicity = getPathogenicityFromVariant(gdm, annotation.submitted_by.uuid);
     //var associatedPathogenicity = getPathogenicityFromVariant(variant, annotation.submitted_by.uuid);
 
-    // Get all families and individuals that reference this variant into variantAssocations array of families and individuals
+    // Get all families and individuals that reference this variant into variantAssociations array of families and individuals
     var variantAssociations = collectVariantAssociations(annotation, variant).sort(function(associationA, associationB) {
         var labelA = associationA.label.toLowerCase();
         var labelB = associationB.label.toLowerCase();
@@ -657,7 +667,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
             </div>
             {variantAssociations ?
                 <div>
-                    <span>Assocations: </span>
+                    <span>Associations: </span>
                     {variantAssociations.map(function(association, i) {
                         var associationType = association['@type'][0];
                         var probandIndividual = associationType === 'individual' && association.proband;
@@ -1557,42 +1567,24 @@ function flattenProvisional(provisional) {
 
 
 // Function to pick all assessment list in each annotation.
-function checkAssessment(obj, session) {
-    if (obj['@type'][0] === 'annotation' && obj.groups.length > 0) {
-        for (var i in obj.groups) {
-            checkAssessment(obj.groups[i], session);
+function checkAssessment(list, session) {
+    for (var i in list) {
+        if (list[i].assessments && list[i].assessments.length > 0) {
+            for (var j in list[i].assessments) {
+                if (userMatch(list[i].assessments[j].submitted_by, session) && list[i].assessments[j].value === 'Supports') {
+                    return true;
+                }
+            }
         }
-    }
-    else if (obj['@type'][0] === 'annotation' && obj.families.length > 0) {
-        for (var i in obj.families) {
-            checkAssessment(obj.families[i], session);
-        }
-    }
-    else if (obj['@type'][0] === 'annotation' && obj.experimentalData.length > 0) {
-        for (var i in obj.experimentalData) {
-            checkAssessment(obj.experimentalData[i], session);
-        }
-    }
-    else if (obj['@type'][0] === 'group' && obj.familyIncluded.length > 0) {
-        for (var i in obj.familyIncluded[i]) {
-            checkAssessment(obj.familyIncluded[i], session);
-        }
-    }
-    else if (obj['@type'][0] === 'family' && obj.segregation.assessments &&
-        obj.segregation.assessments.length > 0 &&
-        getAssessment(obj.segregation.assessments, session)) {
-        return true;
-    }
-    else if (obj['@type'][0] === 'experimental' && obj.assessments &
-        obj.assessments.length > 0 && getAssessment(obj.segregation.assessments, session)) {
-        return true;
     }
     return false;
 }
+
 // Function to check if exist assessment created by login user and value === Supports
 function getAssessment(assessmentList, session) {
-    for (var i in assessmentList) {
-        if (userMatch(assessmentList[i].submitted_by, session) && assessmentList[i].value === 'Supports') {
+    var userUuid = session.user_properties.uuid;
+    for (var i=0; i<assessmentList.length; i++) {
+        if (assessmentList[i].submitted_by.uuid === userUuid && assessmentList[i].value === 'Supports') {
             return true;
         }
     }
