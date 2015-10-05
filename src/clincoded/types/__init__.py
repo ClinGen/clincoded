@@ -388,11 +388,11 @@ class Annotation(Item):
         'experimentalData.submitted_by',
         'experimentalData.variants',
         'experimentalData.variants.submitted_by',
-        'experimentalData.assessments',
-        'experimentalData.assessments.submitted_by',
         'experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'experimentalData.proteinInteractions.interactingGenes',
         'associatedGdm'
+        'experimentalData.assessments',
+        'experimentalData.assessments.submitted_by'
     ]
     rev = {
         'associatedGdm': ('gdm', 'annotations')
@@ -661,14 +661,14 @@ class Experimental(Item):
     embedded = [
         'submitted_by',
         'variants',
-        'assessments',
-        'assessments.submitted_by',
         'variants.submitted_by',
         'biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'proteinInteractions.interactingGenes',
         'associatedAnnotations',
         'associatedAnnotations.article',
         'associatedAnnotations.associatedGdm',
+        'assessments',
+        'assessments.submitted_by'
     ]
     rev = {
         'associatedAnnotations': ('annotation', 'experimentalData')

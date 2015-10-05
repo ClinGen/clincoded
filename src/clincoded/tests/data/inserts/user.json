@@ -1548,5 +1548,37 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "tam.sneddon@stanford.edu",
+        "first_name": "Tam",
+        "last_name": "Sneddon",
+        "uuid": "75bf9943-e1db-4327-bd00-bcf37c00cc56",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "kg.liu@stanford.edu",
+        "first_name": "Kang",
+        "last_name": "Liu",
+        "uuid": "b99c5c3e-ff1e-408a-9806-8941cbfd21ae",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
