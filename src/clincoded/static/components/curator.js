@@ -631,7 +631,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                     })}
                 </div>
             : null}
-            <a href={'/experimental/' + experimental.uuid} target="_blank" title="View experimental data in a new tab">View</a>
+            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} target="_blank" title="View experimental data in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
         </div>
     );
@@ -1260,6 +1260,10 @@ var flatten = module.exports.flatten = function(obj, type) {
                 flat = flattenPathogenicity(obj);
                 break;
 
+            case 'experimental':
+                flat = flattenExperimental(obj);
+                break;
+
             case 'assessment':
                 flat = flattenAssessment(obj);
                 break;
@@ -1470,6 +1474,45 @@ function flattenIndividual(individual) {
     // Flatten variants
     if (individual.variants && individual.variants.length) {
         flat.variants = individual.variants.map(function(variant) {
+            return variant['@id'];
+        });
+    }
+
+    return flat;
+}
+
+
+var experimentalSimpleProps = ["label", "evidenceType", "biochemicalFunction", "proteinInteractions", "expression",
+    "functionalAlteration", "modelSystems", "rescue"
+];
+
+function flattenExperimental(experimental) {
+    // First copy everything before fixing the special properties
+    var flat = cloneSimpleProps(experimental, experimentalSimpleProps);
+
+    // Flatten genes
+    if (experimental.biochemicalFunction && experimental.biochemicalFunction.geneWithSameFunctionSameDisease
+        && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes
+        && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.length) {
+        flat.biochemicalFunction.geneWithSameFunctionSameDisease.genes = experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(function(gene) {
+            return gene['@id'];
+        });
+    }
+    if (experimental.proteinInteractions && experimental.proteinInteractions.interactingGenes
+        && experimental.proteinInteractions.interactingGenes.length) {
+        flat.proteinInteractions.interactingGenes = experimental.proteinInteractions.interactingGenes.map(function(gene) {
+            return gene['@id'];
+        });
+    }
+    // Flatten assessments
+    if (experimental.assessments && experimental.assessments.length) {
+        flat.assessments = experimental.assessments.map(function(assessment) {
+            return assessment['@id'];
+        });
+    }
+    // Flatten variants
+    if (experimental.variants && experimental.variants.length) {
+        flat.variants = experimental.variants.map(function(variant) {
             return variant['@id'];
         });
     }

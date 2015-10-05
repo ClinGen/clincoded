@@ -42,12 +42,15 @@ var ProvisionalCuration = React.createClass({
             provisional: null, // login user's existing provisional object, must be null initially.
             assessments: null,  // list of all assessments, must be nul initially.
             totalScore: null,
-            autoClassification: null
+            autoClassification: null,
+            urlFrom: null // page link from. will go back to after save or cancel
         };
     },
 
     loadData: function() {
+        //var lastPageUrl = document.referrer;
         var gdmUuid = this.queryValues.gdmUuid;
+        var lastPageUrl = this.queryValues.lastPageUrl;
 
         // get gdm and all assessments from db.
         var uris = _.compact([
@@ -58,7 +61,11 @@ var ProvisionalCuration = React.createClass({
             uris
         ).then(datas => {
             var stateObj = {};
-            stateObj.user = this.props.session.user_properties.uuid; //'e49d01a5-51f7-4a32-ba0e-b2a71684e4aa'
+            if (!stateObj.urlFrom) {
+                stateObj.urlFrom = lastPageUrl;
+            }
+            stateObj.user = this.props.session.user_properties.uuid;
+
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
                     case 'gdm':
@@ -97,6 +104,7 @@ var ProvisionalCuration = React.createClass({
     },
 
     componentDidMount: function() {
+        //this.clrFormErrors.bind(null, 'reasons');
         this.loadData();
     },
 
@@ -125,9 +133,11 @@ var ProvisionalCuration = React.createClass({
             if (!formErr) {
                 if (this.state.provisional) { // edit existing provisional
                     this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
-                        this.state.provisional = data['@graph'][0];
+                        //this.state.provisional = data['@graph'][0];
+                        //return Promise.resolve(null);
                         this.resetAllFormValues();
-                        window.history.go(-1);
+                        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
+                        //window.history.go(-1);
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = : %o', e);
                     });
@@ -136,8 +146,7 @@ var ProvisionalCuration = React.createClass({
                     this.postRestData('/provisional/', newProvisional).then(data => {
                         return data['@graph'][0];
                     }).then(savedProvisional => {
-                        this.state.provisional = savedProvisional;
-                        //this.setState({provisional: savedProvisional});
+                        //this.state.provisional = savedProvisional;
 
                         var theGdm = curator.flatten(this.state.gdm);
                         if (theGdm.provisionalClassifications) {
@@ -151,11 +160,12 @@ var ProvisionalCuration = React.createClass({
                             return data['@graph'][0];
                         });
                     }).then(savedGdm => {
-                        this.state.gdm = savedGdm;
-                        //this.setState({gdm: savedGdm});
-                        window.history.go(-1);
+                        //this.state.gdm = savedGdm;
+                        this.resetAllFormValues();
+                        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
+                        //window.history.go(-1);
                     }).catch(function(e) {
-                        console.log('PROVISIONAL GENERATION ERROR = : %o', e);
+                        console.log('PROVISIONAL GENERATION ERROR = %o', e);
                     });
                 }
             }
@@ -171,20 +181,20 @@ var ProvisionalCuration = React.createClass({
 
         // click Cancel button will go back to view - current
         if (e.detail >= 1){
-            window.history.go(-1);
-            //this.context.navigate('/provisional-curation/?gdm=' + this.state.gdm.uuid);
+            //window.history.go(-1);
+            this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
         }
     },
 
     render: function() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
+        this.queryValues.lastPageUrl = document.referrer;
         var calculate = queryKeyValue('calculate', this.props.href);
         var edit = queryKeyValue('edit', this.props.href);
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
         var gdm = this.state.gdm ? this.state.gdm : null;
         var provisional = this.state.provisional ? this.state.provisional : null;
 
-        var htmlstr = '';
         return (
             <div>
                 { gdm ?
@@ -226,7 +236,7 @@ var ProvisionalCuration = React.createClass({
                                                             <div className="col-sm-5">
                                                                 <strong>Reason(s):</strong>
                                                             </div>
-                                                            <div className="col-sm-7"><span>{provisional.reasons}</span></div>
+                                                            <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
                                                         </div>
                                                     </Panel>
                                                 </PanelGroup>
@@ -569,11 +579,11 @@ var NewCalculation = function() {
         var pathoUuid = gdmPathoList[i].uuid;
         var owner = gdmPathoList[i].submitted_by;
         var variant = gdmPathoList[i].variant;
-        var varUuid = variant.uuid;
+        //var varUuid = variant.uuid;
 
         for (var j in pathoList) {
             if (pathoUuid === pathoList[j].patho) {
-                variantIdList.push(varUuid);
+                variantIdList.push(variant.uuid);
                 break;
             }
         }
@@ -585,22 +595,22 @@ var NewCalculation = function() {
     var individualsCollected = [];
     //var experimentalCollected = [];
     for (var i in annotations) {
-        if (annotations[i].groups) {
+        if (annotations[i].groups && annotations[i].groups.length > 0) {
             var groups = annotations[i].groups;
             for (var j in groups) {
-                if (groups[j].familyIncluded) {
-                    filter(familiesCollected, groups[j].familyIncluded, annotations[i].article, variantIdList); // take those associated with variant in pathogenicity list and assessed as Supports
+                if (groups[j].familyIncluded && groups[j].familyIncluded.length > 0) {
+                    familiesCollected = filter(familiesCollected, groups[j].familyIncluded, annotations[i].article, variantIdList); // take those associated with variant in pathogenicity list and assessed as Supports
                 }
-                if (groups[j].individualIncluded) {
-                    filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, variantIdList); // same as above
+                if (groups[j].individualIncluded && groups[j].individualIncluded.length > 0) {
+                    individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, variantIdList); // same as above
                 }
             }
         }
-        if (annotations[i].families) {
-            filter(familiesCollected, annotations[i].families, annotations[i].article, variantIdList);
+        if (annotations[i].families && annotations[i].families.length > 0) {
+            familiesCollected = filter(familiesCollected, annotations[i].families, annotations[i].article, variantIdList);
         }
-        if (annotations[i].individuals) {
-            filter(individualsCollected, annotations[i].individuals, annotations[i].article, variantIdList);
+        if (annotations[i].individuals && annotations[i].individuals.length > 0) {
+            individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, variantIdList);
         }
         // experimental data is not necessary to
         //if (annotations[i].experimentalData) {
@@ -842,52 +852,47 @@ var get_earliest_year = function(earliest, dateStr) {
 };
 
 var filter = function(target, branch, article, idList) {
-    for (var i in branch) {
-        var obj = branch[i];
+    //var theTarget = target;
+
+    branch.forEach(function(obj) {
         var variantIds = [];
         var allAssessed = false;
 
-        if (obj['@type'][0] === 'family') {
-            if (obj.segregation) {
-                var seg = obj.segregation;
-                if (seg.variants) {
-                    var variants = seg.variants;
-                    for (var j in variants) {
-                        if (!in_array(variants[j].uuid, idList)) {
-                            allAssessed = false;
-                            break;
-                        }
-                        else {
-                            allAssessed = true;
-                            variantIds.push(variants[j].uuid);
-                        }
-                    }
+        if (obj['@type'][0] === 'family' && obj.segregation && obj.segregation.variants && obj.segregation.variants.length > 0) {
+            // pick family only if all associated variants assessed as Supports
+            for (var j in obj.segregation.variants) {
+                if (!in_array(obj.segregation.variants[j].uuid, idList)) {
+                    allAssessed = false;
+                    break;
+                }
+                else {
+                    allAssessed = true;
+                    variantIds.push(obj.segregation.variants[j].uuid);
                 }
             }
         }
-        else if (obj['@type'][0] === 'individual') {
-            if (obj.variants) {
-                var variants = obj.variants;
-                for (var j in variants) {
-                    if (in_array(variants[j].uuid, idList)) {
-                        variantIds.push(variants[j].uuid);
-                        allAssessed = true;
-                    }
+        else if (obj['@type'][0] === 'individual' && obj.variants && obj.variants.length > 0) {
+            // pick individual if one variant assessed as Supports
+            for (var j in obj.variants) {
+                if (in_array(obj.variants[j].uuid, idList)) {
+                    variantIds.push(obj.variants[j].uuid);
+                    allAssessed = true;
                 }
             }
-        }
-        else if (obj['@type'][0] === 'experimental' && in_array(obj.uuid, idList)) {
-            target.push({"evidence":branch[i].uuid, "variant":'', "pmid":article.pmid, "date": article.date});
-            allAssessed = false;
         }
 
         if (allAssessed) {
-            target.push({"evidence":branch[i].uuid, "variant":variantIds[0], "pmid":article.pmid, "date": article.date});
-            if (variantIds.length > 0) {
-                target.push({"evidence":'', "variant":variantIds[1], "pmid":'', "date": ''});
-            }
+            target.push(
+                {
+                    "evidence":obj.uuid,
+                    "variants":variantIds,
+                    "pmid":article.pmid,
+                    "date": article.date
+                }
+            );
         }
-    }
+    });
+
     return target;
 };
 
