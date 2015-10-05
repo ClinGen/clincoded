@@ -1580,5 +1580,21 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "saronson@partners.org",
+        "first_name": "Sandy",
+        "last_name": "Aronson",
+        "uuid": "6f8e543b-a2fe-4d03-b71b-5255428bd04c",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
