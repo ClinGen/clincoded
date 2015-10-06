@@ -251,8 +251,8 @@ var AddPmidModal = React.createClass({
         var valid = this.validateDefault();
         var formInput = this.getFormValue('pmid');
 
-        // valid if input isn't zero-filled or is not longer than 8 characters
-        if (valid && (formInput.match(/^0+$/) || formInput.length > 8)) {
+        // valid if input isn't zero-filled
+        if (valid && formInput.match(/^0+$/)) {
             valid = false;
             this.setFormErrors('pmid', 'This PMID does not exist');
         }
@@ -296,7 +296,7 @@ var AddPmidModal = React.createClass({
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
                     var newArticle = parsePubmed(xml, enteredPmid);
                     // if the PubMed article for this PMID doesn't exist, display an error
-                    if (newArticle.length === undefined) this.setFormErrors('pmid', 'This PMID does not exist');
+                    if (!('pmid' in newArticle)) this.setFormErrors('pmid', 'This PMID does not exist');
                     return this.postRestData('/articles/', newArticle).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });
@@ -314,9 +314,9 @@ var AddPmidModal = React.createClass({
     // nothing happened.
     cancelForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        
+
         //only a mouse click on cancel button closes modal
-        //(do not let the enter key [which evaluates to 0 mouse 
+        //(do not let the enter key [which evaluates to 0 mouse
         //clicks] be accepted to close modal)
         if (e.detail >= 1){
             this.props.closeModal();
