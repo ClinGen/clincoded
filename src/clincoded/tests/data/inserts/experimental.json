@@ -10,6 +10,7 @@
         "expression": {
             "organOfTissue" : "UBERON_0012345",
             "normalExpression": {
+                "expressedInTissue": true,
                 "evidence": "some evidence here",
                 "evidenceInPaper": "Paragraph 2-4, page 14"
             }
@@ -29,6 +30,7 @@
         "evidenceType": "Expression",
         "expression": {
             "alteredExpression": {
+                "expressedInPatients": true,
                 "evidence" : "The CD3E mRNA was abnormally small and present at a reduced level in the patient's T cells.",
                 "evidenceInPaper": "Paragraph14-16, page16"
             }
@@ -79,6 +81,7 @@
                 ],
                 "evidenceForOtherGenesWithSameFunction": "some evidence for genes here",
                 "explanationOfOtherGenes": "some explanation here",
+                "geneImplicatedWithDisease": true,
                 "evidenceInPaper": "Paragraph 21-30, page 55"
             }
         },

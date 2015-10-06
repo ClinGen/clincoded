@@ -12,24 +12,6 @@
         "active": true
     },
     {
-        "uuid": "7f9988fa-16d9-11e5-ba73-60f81dc5b05a",
-        "gene": "DICER1",
-        "disease": "64742",
-        "modeInheritance": "Autosomal dominant inheritance with maternal imprinting (HP:0012275)",
-        "modeCode": "2",
-        "omimId": "601200",
-        "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
-        "date_created": "2015-03-19T16:52:38.000000+00:00",
-        "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "annotations": [
-            "5cd72a73-189e-11e5-9db5-60f81dc5b05a"
-        ],
-        "variantPathogenicity": [
-            "912cf582-4e46-425c-839d-f6b21fa621ae"
-        ],
-        "active": true
-    },
-    {
         "uuid": "9ffd7c1e-16d9-11e5-b283-60f81dc5b05a",
         "gene": "FGFR3",
         "disease": "15",
@@ -55,6 +37,24 @@
         "provisionalClassifications": [
             "157f6817-3175-11e5-8d11-60f81dc5b05a",
             "3efff00a-3177-11e5-b11e-60f81dc5b05a"
+        ],
+        "active": true
+    },
+    {
+        "uuid": "7f9988fa-16d9-11e5-ba73-60f81dc5b05a",
+        "gene": "DICER1",
+        "disease": "64742",
+        "modeInheritance": "Autosomal dominant inheritance with maternal imprinting (HP:0012275)",
+        "modeCode": "2",
+        "omimId": "601200",
+        "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
+        "date_created": "2015-03-19T16:52:38.000000+00:00",
+        "last_modified": "2015-08-19T08:35:18.000000+00:00",
+        "annotations": [
+            "5cd72a73-189e-11e5-9db5-60f81dc5b05a"
+        ],
+        "variantPathogenicity": [
+            "912cf582-4e46-425c-839d-f6b21fa621ae"
         ],
         "active": true
     },

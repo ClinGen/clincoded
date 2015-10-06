@@ -934,7 +934,7 @@ var LabelPhenoTerms = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
+                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : ''}
                 Phenotype(s) (<span style={{fontWeight: 'normal'}}>free text</span>):
             </span>
         );
