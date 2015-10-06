@@ -471,7 +471,7 @@ var ExperimentalCuration = React.createClass({
             if (stateObj.experimental) {
                 tempEvidenceType = stateObj.experimental.evidenceType;
             }
-            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'experimental');
+            var assessmentTracker = this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, tempEvidenceType);
             this.setAssessmentValue(assessmentTracker);
 
             // Set all the state variables we've collected
