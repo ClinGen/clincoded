@@ -42,15 +42,13 @@ var ProvisionalCuration = React.createClass({
             provisional: null, // login user's existing provisional object, must be null initially.
             assessments: null,  // list of all assessments, must be nul initially.
             totalScore: null,
-            autoClassification: null,
-            urlFrom: null // page link from. will go back to after save or cancel
+            autoClassification: null
         };
     },
 
     loadData: function() {
         //var lastPageUrl = document.referrer;
         var gdmUuid = this.queryValues.gdmUuid;
-        var lastPageUrl = this.queryValues.lastPageUrl;
 
         // get gdm and all assessments from db.
         var uris = _.compact([
@@ -61,9 +59,6 @@ var ProvisionalCuration = React.createClass({
             uris
         ).then(datas => {
             var stateObj = {};
-            if (!stateObj.urlFrom) {
-                stateObj.urlFrom = lastPageUrl;
-            }
             stateObj.user = this.props.session.user_properties.uuid;
 
             datas.forEach(function(data) {
@@ -131,12 +126,14 @@ var ProvisionalCuration = React.createClass({
                 this.setFormErrors('reasons', 'Required when changing classification.');
             }
             if (!formErr) {
+                var backUrl = '/curation-central/?gdm=' + this.state.gdm.uuid;
+                backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
                 if (this.state.provisional) { // edit existing provisional
                     this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
                         //this.state.provisional = data['@graph'][0];
                         //return Promise.resolve(null);
                         this.resetAllFormValues();
-                        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
+                        this.context.navigate(backUrl);
                         //window.history.go(-1);
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = : %o', e);
@@ -162,7 +159,7 @@ var ProvisionalCuration = React.createClass({
                     }).then(savedGdm => {
                         //this.state.gdm = savedGdm;
                         this.resetAllFormValues();
-                        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
+                        this.context.navigate(backUrl);
                         //window.history.go(-1);
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = %o', e);
@@ -181,14 +178,17 @@ var ProvisionalCuration = React.createClass({
 
         // click Cancel button will go back to view - current
         if (e.detail >= 1){
+            var backUrl = '/curation-central/?gdm=' + this.state.gdm.uuid;
+            backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
             //window.history.go(-1);
-            this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
+            this.context.navigate(backUrl);
         }
     },
 
     render: function() {
+        //var lastUrl = document.referrer;
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        this.queryValues.lastPageUrl = document.referrer;
+        this.queryValues.pmid = queryKeyValue('pmid', this.props.href) ? queryKeyValue('pmid', this.props.href) : '';
         var calculate = queryKeyValue('calculate', this.props.href);
         var edit = queryKeyValue('edit', this.props.href);
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
@@ -576,17 +576,28 @@ var NewCalculation = function() {
     var gdmPathoList = gdm.variantPathogenicity;
     var variantIdList = [];
     for (var i in gdmPathoList) {
-        var pathoUuid = gdmPathoList[i].uuid;
-        var owner = gdmPathoList[i].submitted_by;
-        var variant = gdmPathoList[i].variant;
+        //var pathoUuid = gdmPathoList[i].uuid;
+        //var owner = gdmPathoList[i].submitted_by;
+        //var variant = gdmPathoList[i].variant;
         //var varUuid = variant.uuid;
 
-        for (var j in pathoList) {
-            if (pathoUuid === pathoList[j].patho) {
-                variantIdList.push(variant.uuid);
-                break;
+        if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
+            for (var j in gdmPathoList[i].assessments) {
+                if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
+                    var variantUuid = gdmPathoList[i].variant['@id'].substr(10).replace('/', '');
+                    variantIdList.push(variantUuid);
+                    break;
+                }
             }
         }
+
+
+        //for (var j in pathoList) {
+        //    if (pathoUuid === pathoList[j].patho) {
+        //        variantIdList.push(variant.uuid);
+        //        break;
+        //    }
+        //}
     }
 
 // Collect all families and independent individuals with article info (experimental data is not necessary)

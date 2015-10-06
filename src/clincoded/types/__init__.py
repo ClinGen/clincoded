@@ -390,7 +390,7 @@ class Annotation(Item):
         'experimentalData.variants.submitted_by',
         'experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'experimentalData.proteinInteractions.interactingGenes',
-        'associatedGdm'
+        'associatedGdm',
         'experimentalData.assessments',
         'experimentalData.assessments.submitted_by'
     ]

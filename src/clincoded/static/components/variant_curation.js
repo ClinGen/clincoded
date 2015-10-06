@@ -53,6 +53,7 @@ var VariantCuration = React.createClass({
         };
 
         return {
+            user: null, // login user uuid
             gdm: null, // GDM object given in UUID
             variant: null, // Variant object given in UUID
             pathogenicity: null, // If editing curation, pathogenicity we're editing
@@ -67,6 +68,7 @@ var VariantCuration = React.createClass({
         var gdmUuid = this.queryValues.gdmUuid;
         var variantUuid = this.queryValues.variantUuid;
         var pathogenicityUuid = this.queryValues.pathogenicityUuid;
+        var user = this.queryValues.session_user;
 
         // Make an array of URIs to query the database. Don't include any that didn't include a query string.
         var uris = _.compact([
@@ -81,6 +83,7 @@ var VariantCuration = React.createClass({
         ).then(datas => {
             // See what we got back so we can build an object to copy in this React object's state to rerender the page.
             var stateObj = {};
+            stateObj.user = user;
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
                     case 'gdm':
@@ -228,6 +231,7 @@ var VariantCuration = React.createClass({
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
             var pathogenicityUuid = this.state.pathogenicity ? this.state.pathogenicity.uuid : '';
+            //var pathogenicityUuid = (this.state.pathogenicity && this.state.pathogenicity.submitted_by.uuid === this.state.user) ? this.state.pathogenicity.uuid : '';
 
             // If pathogenicity object has no assessment object found with currently logged-in user
             // and form assessment has non-default value. The assessment might be a new one without a type,
@@ -243,10 +247,11 @@ var VariantCuration = React.createClass({
 
                     // If we made a new assessment, add it to the pathogenicity's assessments
                     if (newAssessmentInfo.assessment && !newAssessmentInfo.update) {
-                        if (!newPathogenicity.assessments) {
-                            newPathogenicity.assessments = [];
-                        }
-                        newPathogenicity.assessments.push(newAssessmentInfo.assessment['@id']);
+                        //if (!newPathogenicity.assessments) {
+                        //    newPathogenicity.assessments = [];
+                        //}
+                        //newPathogenicity.assessments.push(newAssessmentInfo.assessment['@id']);
+                        newPathogenicity.assessments = [newAssessmentInfo.assessment['@id']]; // only login user's assessment is allowed.
                     }
 
                     // Assign a link to the pathogenicity's variant if new
@@ -273,12 +278,12 @@ var VariantCuration = React.createClass({
             }).then(pa => {
                 // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
                 var newPathogenicity = pa.pathogenicity;
-                var newAssessment = pa.assessment;
-                if (newPathogenicity && newAssessment && !newAssessment.evidence_id) {
+                //var newAssessment = pa.assessment;
+                //if (newPathogenicity && newAssessment && !newAssessment.evidence_id) {
                     // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
                     // Nothing relies on this operation completing, so don't wait for a promise from it.
-                    this.saveAssessment(this.cv.assessmentTracker, this.state.gdm.uuid, newPathogenicity.uuid, newAssessment);
-                }
+                //    this.saveAssessment(this.cv.assessmentTracker, this.state.gdm.uuid, newPathogenicity.uuid, newAssessment);
+                //}
 
                 // Next step relies on the pathogenicity, not the updated assessment
                 return Promise.resolve(newPathogenicity);
