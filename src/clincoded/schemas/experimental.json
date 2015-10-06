@@ -15,6 +15,12 @@
         "schema_version": {
             "default": "1"
         },
+        "label": {
+            "title": "Label",
+            "description": "A user entered label for the experiment",
+            "type": "string",
+            "default": ""
+        },
         "active": {
             "title": "Active",
             "description": "Switch to set if the experimental data is avaliable for curation",
@@ -26,11 +32,11 @@
             "description": "One of six evidence types",
             "type": "string",
             "enum": [
-                "Biochemical function",
+                "Biochemical Function",
                 "Protein Interactions",
                 "Expression",
-                "Functional alteration of gene/gene product",
-                "Model systems",
+                "Functional Alteration",
+                "Model Systems",
                 "Rescue"
             ]
         },
@@ -50,7 +56,7 @@
                     "description": "Evidence for function (required)",
                     "type": "string"
                 },
-                "evidenceForFunctionInPapaer": {
+                "evidenceForFunctionInPaper": {
                     "title": "Evidence Location in Article",
                     "description": "Where in article to find evidence",
                     "type": "string",
@@ -77,6 +83,11 @@
                             "description": "Evidence for other genes (required)",
                             "type": "string"
                         },
+                        "geneImplicatedWithDisease": {
+                            "title": "Gene implicated in the disease",
+                            "description": "Has this gene or genes been implicated in the above disease",
+                            "type": "boolean"
+                        },
                         "explanationOfOtherGenes": {
                             "title": "Explanation of Other Genes",
                             "description": "Explanation of relationship of other genes to the diasease  (optional)",
@@ -88,17 +99,6 @@
                             "description": "Where explanation can be found in paper (optional)",
                             "type": "string",
                             "default": ""
-                        },
-                        "assessments": {
-                            "title": "Assessments",
-                            "description": "List of assessments added from different curators",
-                            "type": "array",
-                            "default": [],
-                            "items": {
-                                "description": "Assessment from one curator",
-                                "type": "string",
-                                "linkTo": "assessment"
-                            }
                         }
                     }
                 },
@@ -135,23 +135,12 @@
                             "description": "Where to find the explantion in paper",
                             "type": "string",
                             "default": ""
-                        },
-                        "assessments": {
-                            "title": "Assessments",
-                            "description": "List of assessments added from different curators",
-                            "type": "array",
-                            "default": [],
-                            "items": {
-                                "description": "Assessment from one curator",
-                                "type": "string",
-                                "linkTo": "assessment"
-                            }
                         }
                     }
                 }
             }
         },
-        "proteinIneractions": {
+        "proteinInteractions": {
             "title": "Interactions",
             "description": "Items in interactions type",
             "type": "object",
@@ -207,17 +196,6 @@
                     "title": "Evidence in Paper",
                     "description": "Where evidence can be found in paper",
                     "type": "string"
-                },
-                "assessments": {
-                    "title": "Assessments",
-                    "description": "List of assessments added from different curators",
-                    "type": "array",
-                    "default": [],
-                    "items": {
-                        "description": "Assessment from one curator",
-                        "type": "string",
-                        "linkTo": "assessment"
-                    }
                 }
             }
         },
@@ -238,6 +216,11 @@
                     "type": "object",
                     "default": {},
                     "properties": {
+                        "expressedInTissue": {
+                            "title": "Is gene normally expressed in tissue",
+                            "description": "Is the gene normally expressed in the tissue",
+                            "type": "boolean"
+                        },
                         "evidence": {
                             "title": "Evidence for Normal Expression",
                             "description": "Evidence for normal expression in tissue",
@@ -247,16 +230,6 @@
                             "title": "Evidence in Paper",
                             "description": "Where evidence can be found in paper",
                             "type": "string"
-                        },
-                        "assessments": {
-                            "title": "Assessments",
-                            "description": "List of assessments added from different curators",
-                            "type": "array",
-                            "items": {
-                                "description": "Assessment from one curator",
-                                "type": "string",
-                                "linkTo": "assessment"
-                            }
                         }
                     }
                 },
@@ -266,6 +239,11 @@
                     "type": "object",
                     "default": {},
                     "properties": {
+                        "expressedInPatients": {
+                            "title": "Is expression altered in patients with disease",
+                            "description": "Is expression altered in patients who have the disease",
+                            "type": "boolean"
+                        },
                         "evidence": {
                             "title": "Evidence for Altered Expression",
                             "description": "Evidence for altered expression in patients",
@@ -275,23 +253,12 @@
                             "title": "Evidence Location in Paper",
                             "description": "Information about where evidence can be found in paper",
                             "type": "string"
-                        },
-                        "assessments": {
-                            "title": "Assessments",
-                            "description": "List of assessments added from different curators",
-                            "type": "array",
-                            "default": [],
-                            "items": {
-                                "description": "Assessment from one curator",
-                                "type": "string",
-                                "linkTo": "assessment"
-                            }
                         }
                     }
                 }
             }
         },
-        "functionalAleration": {
+        "functionalAlteration": {
             "title": "Functional Alteration",
             "description": "Items in Functional Alteration type",
             "type": "object",
@@ -316,7 +283,7 @@
                     "description": "EFO terms",
                     "type": "string"
                 },
-                "descriptoinOfGeneAlteration": {
+                "descriptionOfGeneAlteration": {
                     "title": "Gene Alteration",
                     "description": "Description of gene alteration in engineered equivalent",
                     "type": "string"
@@ -336,17 +303,6 @@
                     "description": "Where evidence can be found in paper",
                     "type": "string",
                     "default": ""
-                },
-                "assessments": {
-                    "title": "Assessments",
-                    "description": "List of assessments added from different curators",
-                    "type": "array",
-                    "default": [],
-                    "items": {
-                        "description": "Assessment from one curator",
-                        "type": "string",
-                        "linkTo": "assessment"
-                    }
                 }
             }
         },
@@ -433,22 +389,10 @@
                     "type": "string"
                 },
                 "evidenceInPaper": {
-                    "title": "Evidence in Papaer",
+                    "title": "Evidence in Paper",
                     "description": "Where evidence can be found in paper",
                     "type": "string",
                     "default": ""
-                },
-                "assessments": {
-                    "title": "Assessments",
-                    "description": "List of assessments added from different curators",
-                    "type": "array",
-                    "default": [],
-                    "items": {
-                        "description": "Assessment from one curator",
-                        "type": "object",
-                        "type": "string",
-                        "linkTo": "assessment"
-                    }
                 }
             }
         },
@@ -512,23 +456,11 @@
                     "description": "Explanation",
                     "type": "string"
                 },
-                "evidenceLocationInPaper": {
+                "evidenceInPaper": {
                     "title": "Evidence Location in Paper",
                     "description": "Where can evidence be found in paper",
                     "type": "string",
                     "default": ""
-                },
-                "assessments": {
-                    "title": "Assessments",
-                    "description": "List of assessments added from different curators",
-                    "type": "array",
-                    "default": [],
-                    "items": {
-                        "description": "Assessment from one curator",
-                        "type": "object",
-                        "type": "string",
-                        "linkTo": "assessment"
-                    }
                 }
             }
         },
@@ -542,9 +474,24 @@
                 "type": "string",
                 "linkTo": "variant"
             }
+        },
+        "assessments": {
+            "title": "Assessments",
+            "description": "List of assessments added from different curators",
+            "type": "array",
+            "default": [],
+            "items": {
+                "description": "Assessment from one curator",
+                "type": "string",
+                "linkTo": "assessment"
+            }
         }
     },
     "columns": {
+        "label": {
+            "title": "Label",
+            "type": "string"
+        },
         "uuid": {
             "title": "ExperimentalData",
             "type": "string"

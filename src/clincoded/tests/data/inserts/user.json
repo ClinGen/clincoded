@@ -1168,6 +1168,21 @@
         "uuid": "3a70a47f-711a-473f-93cd-0996421eeaf2"
     },
     {
+        "email": "minyoung.choi@stanford.edu",
+        "first_name": "민영",
+        "groups": [
+            "admin"
+        ],
+        "job_title": "Software Engineer",
+        "lab": "/labs/j-michael-cherry/",
+        "last_name": "최",
+        "submits_for": [
+            "/labs/j-michael-cherry/"
+        ],
+        "timezone": "US/Pacific",
+        "uuid": "f14beb93-5aad-434d-a717-64b8284f6539"
+    },
+    {
         "email": "hitz@stanford.edu",
         "first_name": "Ben",
         "groups": [
@@ -1309,7 +1324,7 @@
         ],
         "timezone": "US/Pacific"
     },
-    
+
     {
         "email": "selina.dwight@stanford.edu",
         "first_name": "Selina",
@@ -1523,6 +1538,54 @@
         "first_name": "Jillian",
         "last_name": "Buchan",
         "uuid": "6a6fde1a-a1b5-4d3d-a7b8-2aa95196c1af",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "tam.sneddon@stanford.edu",
+        "first_name": "Tam",
+        "last_name": "Sneddon",
+        "uuid": "75bf9943-e1db-4327-bd00-bcf37c00cc56",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "kg.liu@stanford.edu",
+        "first_name": "Kang",
+        "last_name": "Liu",
+        "uuid": "b99c5c3e-ff1e-408a-9806-8941cbfd21ae",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "saronson@partners.org",
+        "first_name": "Sandy",
+        "last_name": "Aronson",
+        "uuid": "6f8e543b-a2fe-4d03-b71b-5255428bd04c",
         "groups": [
             "ClinGen Curator",
             "admin"
