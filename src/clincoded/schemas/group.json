@@ -7,11 +7,7 @@
     "required": [
         "label",
         "commonDiagnosis",
-        "totalNumberIndividuals",
-        "numberOfIndividualsWithFamilyInformation",
-        "numberOfIndividualsWithoutFamilyInformation",
-        "numberOfIndividualsWithVariantInCuratedGene",
-        "numberOfIndividualsWithoutVariantInCuratedGene"
+        "totalNumberIndividuals"
     ],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
