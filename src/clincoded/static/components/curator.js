@@ -1611,32 +1611,6 @@ function flattenProvisional(provisional) {
 }
 
 
-// Function to pick all assessment list in each annotation.
-function checkAssessment(list, session) {
-    for (var i in list) {
-        if (list[i].assessments && list[i].assessments.length > 0) {
-            for (var j in list[i].assessments) {
-                if (userMatch(list[i].assessments[j].submitted_by, session) && list[i].assessments[j].value === 'Supports') {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-// Function to check if exist assessment created by login user and value === Supports
-function getAssessment(assessmentList, session) {
-    var userUuid = session.user_properties.uuid;
-    for (var i=0; i<assessmentList.length; i++) {
-        if (assessmentList[i].submitted_by.uuid === userUuid && assessmentList[i].value === 'Supports') {
-            return true;
-        }
-    }
-    return false;
-}
-
-
 // Given an array of group or families in 'objList', render a list of Orphanet IDs for all diseases in those
 // groups or families.
 var renderOrphanets = module.exports.renderOrphanets = function(objList, title) {

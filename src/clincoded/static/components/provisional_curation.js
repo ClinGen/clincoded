@@ -251,7 +251,7 @@ var ProvisionalCuration = React.createClass({
                                         </Form>
                                     </div>
                                     :
-                                    Demo.call(this)
+                                    null
                                 )
                             }
                         </div>
@@ -264,175 +264,6 @@ var ProvisionalCuration = React.createClass({
 });
 
 globals.curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
-
-var Demo = function() {
-    return (
-        <div>
-            <h1>Curation Summary and Provisional Classification</h1>
-            <div>
-                <Form formClassName="form-horizontal form-std">
-                    <PanelGroup accordion>
-                        <Panel title="Currently Saved Calculation and Classification" open>
-                            <div className="row">
-                                <div className="col-sm-5"><strong>Generated:</strong></div>
-                                <div className="col-sm-7"><span>2015 Aug 21, 2:35 pm</span></div>
-                            </div>
-                            <div className="row">
-                                <div className="col-sm-5"><strong>Total Score:</strong></div>
-                                <div className="col-sm-7"><span>17</span></div>
-                            </div>
-                            <div className="row">
-                                <div className="col-sm-5">
-                                    <strong>Calculated Clinical Validity Classification:</strong>
-                                </div>
-                                <div className="col-sm-7"><span>Definitive</span></div>
-                            </div>
-                            <div className="row">
-                                <div className="col-sm-5">
-                                    <strong>Selected Clinical Validity Classification:</strong>
-                                </div>
-                                <div className="col-sm-7"><span>Definitive</span></div>
-                            </div>
-                            <div className="row">
-                                <div className="col-sm-5">
-                                    <strong>Reason(s):</strong>
-                                </div>
-                                <div className="col-sm-7"><span></span></div>
-                            </div>
-                        </Panel>
-                        <Panel title="New calculation and Classification" open>
-                            <div>
-                                The calculated values below are based on the set of saved evidence that exists when the "Generate New Summary"
-                                is clicked. To save these values as the "Current Summary & Provisional Classification" calculated values and make
-                                any changes to the Provisional Classification, you must click the Save button below.
-                            </div>
-                            <div><span>&nbsp;</span></div>
-                            <div className="form-group">
-                                <div className="row">
-                                    <div className="col-sm-5"><strong className="pull-right">Total Score:</strong></div>
-                                    <div className="col-sm-7"><strong>18</strong></div>
-                                </div>
-                                <br />
-                                <div className="row">
-                                    <div className="col-sm-5">
-                                        <strong className="pull-right">Scoring Details:</strong>
-                                    </div>
-                                    <div className="col-sm-7">
-                                        <table className="summary-scoring">
-                                            <tr>
-                                                <td className="td-title"><strong>Evidence</strong></td>
-                                                <td className="td-score"><strong>Count</strong></td>
-                                                <td className="td-score"><strong>Score</strong></td>
-                                            </tr>
-                                            <tr><td cols="3">&nbsp;</td></tr>
-                                            <tr>
-                                                <td className="td-title">Expression</td>
-                                                <td className="td-score">1</td>
-                                                <td className="td-score">0.5</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="td-title">Protein Interactions</td>
-                                                <td className="td-score">1</td>
-                                                <td className="td-score">0.5</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="td-title">Biochemical Function</td>
-                                                <td className="td-score">0</td>
-                                                <td className="td-score">0</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="td-title">Functional Alteration</td>
-                                                <td className="td-score">0</td>
-                                                <td className="td-score">0</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="td-title">Model Systems</td>
-                                                <td className="td-score">2</td>
-                                                <td className="td-score">4</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="td-title">Rescue</td>
-                                                <td className="td-score">0</td>
-                                                <td className="td-score">0</td>
-                                            </tr>
-                                            <tr><td className="td-title"><strong>Final Experimental Score</strong></td>
-                                                <td className="td-score"><span>&nbsp;</span></td>
-                                                <td className="td-score"><strong>5</strong></td>
-                                            </tr>
-                                            <tr><td cols="3"><strong>&nbsp;</strong></td></tr>
-                                            <tr>
-                                                <td className="td-title">Number of probands with variants assessed as "Supports" pathogenicity</td>
-                                                <td className="td-score">16</td>
-                                                <td className="td-score"></td>
-                                            </tr>
-                                            <tr>
-                                                <td className="td-title"><strong>Proband Score</strong></td>
-                                                <td className="td-score"><span>&nbsp;</span></td>
-                                                <td className="td-score"><strong>6</strong></td>
-                                            </tr>
-                                            <tr><td cols="3"><span>&nbsp;</span></td></tr>
-                                            <tr>
-                                                <td className="td-title">Clinical Publicatons</td>
-                                                <td className="td-score">6</td>
-                                                <td className="td-score"></td>
-                                            </tr>
-                                            <tr>
-                                                <td className="td-title"><strong>Publication Score</strong></td>
-                                                <td className="td-score">&nbsp;</td>
-                                                <td className="td-score"><strong>5</strong></td>
-                                            </tr>
-                                            <tr><td cols="3"><span>&nbsp;</span></td></tr>
-                                            <tr>
-                                                <td className="td-title">Number of years since first report</td>
-                                                <td className="td-score">4</td>
-                                                <td className="td-score"></td>
-                                            </tr>
-                                            <tr>
-                                                <td className="td-title"><strong>Time Score (First Clinical Report)</strong></td>
-                                                <td className="td-score">&nbsp;</td>
-                                                <td className="td-score"><strong>2</strong></td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </div>
-                                <br />
-                                <div className="row">
-                                    <div className="col-sm-5">
-                                        <strong className="pull-right">Calculated Clinical Validity Classification:</strong>
-                                    </div>
-                                    <div className="col-sm-7"><span>Definitive</span></div>
-                                </div>
-                                <br />
-                                <Input type="select" ref="alteredClassification" label="Selecte Provisional Clinical Validity Classification:" defaultValue="Definitive"
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                    <option value="Definitive">Definitive</option>
-                                    <option value="Strong">Strong</option>
-                                    <option value="Moderate">Moderate</option>
-                                    <option value="Limited">Limited</option>
-                                    <option value="No Evidence">No Evidence</option>
-                                    <option value="Disputed">Disputed</option>
-                                    <option value="Refuted">Refuted</option>
-                                </Input>
-                                <Input type="textarea" ref="reasons" label="Explain Reason(s) for Change:" rows="5" labelClassName="col-sm-5 control-label"
-                                    wrapperClassName="col-sm-7" groupClassName="form-group" />
-                                <div className="col-sm-5"><span className="pull-right">&nbsp;</span></div>
-                                <div className="col-sm-7">
-                                    <span>
-                                    **Note: If your selected Clinical Validity Classification is different from the Calculated value, provide a reason to expain why you changed it.
-                                    </span>
-                                </div>
-                            </div>
-                        </Panel>
-                    </PanelGroup>
-                    <div className='modal-footer'>
-                        <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
-                    </div>
-                </Form>
-            </div>
-        </div>
-    );
-};
 
 var EditCurrent = function() {
     var alteredClassification = this.state.provisional.alteredClassification ? this.state.provisional.alteredClassification : 'none';
@@ -572,7 +403,6 @@ var NewCalculation = function() {
     }
 
 // Generate variantIdList
-// condition: id must in pathoList generated from assessments (above)
     var gdmPathoList = gdm.variantPathogenicity;
     var variantIdList = [];
     for (var i in gdmPathoList) {
@@ -581,6 +411,7 @@ var NewCalculation = function() {
         //var variant = gdmPathoList[i].variant;
         //var varUuid = variant.uuid;
 
+        // pick up variants from login user's pathogenicity assessed as Supports.
         if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
             for (var j in gdmPathoList[i].assessments) {
                 if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
