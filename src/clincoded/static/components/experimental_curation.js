@@ -1571,7 +1571,7 @@ var TypeExpressionA = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.expressedInTissue} defaultChecked="false" handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} />
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the gene is not normally expressed in the above tissue, the criteria for counting this experimental evidence has not been met and cannot be submitted. Proceed to section B below or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Curation Central</a>.</p>
-            <Input type="textarea" ref="normalExpression.evidence" label="Change Evidence for normal expression in disease tissue:"
+            <Input type="textarea" ref="normalExpression.evidence" label="Evidence for normal expression in disease tissue:"
                 error={this.getFormError('normalExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidence')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={expression.normalExpression.evidence} inputDisabled={!this.state.expressedInTissue || this.cv.othersAssessed} required={this.state.expressedInTissue} />
@@ -2255,7 +2255,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Change Evidence for normal expression in disease tissue</dt>
+                                <dt>Evidence for normal expression in disease tissue</dt>
                                 <dd>{experimental.expression.normalExpression.evidence}</dd>
                             </div>
 
