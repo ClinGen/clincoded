@@ -2016,36 +2016,54 @@ var ExperimentalViewer = React.createClass({
     assessmentSubmit: function(e) {
         var updatedExperimental;
 
-        // Write the assessment to the DB, if there was one.
-        this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
-            var experimental = this.props.context;
+        // GET the experimental object to have the most up-to-date version
+        this.getRestData('/experimental/' + this.props.context.uuid).then(data => {
+            var experimental = data;
 
-            // If we made a new assessment, add it to the experimental data's assessments
-            if (assessmentInfo.assessment && !assessmentInfo.update) {
-                updatedExperimental = curator.flatten(experimental);
-                if (!updatedExperimental.assessments) {
-                    updatedExperimental.assessments = [];
+            return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
+                // If we made a new assessment, add it to the experimental data's assessments
+                if (assessmentInfo.assessment && !assessmentInfo.update) {
+                    updatedExperimental = curator.flatten(experimental);
+                    if (!updatedExperimental.assessments) {
+                        updatedExperimental.assessments = [];
+                    }
+                    updatedExperimental.assessments.push(assessmentInfo.assessment['@id']);
+
+                    // Write the updated experimental data object to the DB
+                    return this.putRestData('/experimental/' + experimental.uuid, updatedExperimental).then(data => {
+                        return this.getRestData('/experimental/' + data['@graph'][0].uuid);
+                    });
                 }
-                updatedExperimental.assessments.push(assessmentInfo.assessment['@id']);
 
-                // Write the updated experimental data object to the DB
-                return this.putRestData('/experimental/' + experimental.uuid, updatedExperimental).then(data => {
-                    return this.getRestData('/experimental/' + data['@graph'][0].uuid);
-                });
-            }
+                // Didn't update the experimental data object; if updated the assessment, reload the experimental data
+                if (assessmentInfo.update) {
+                    return this.getRestData('/experimental/' + experimental.uuid);
+                }
 
-            // Didn't update the experimental data object; if updated the assessment, reload the experimental data
-            if (assessmentInfo.update) {
-                return this.getRestData('/experimental/' + experimental.uuid);
-            }
+                // Not updating the experimental data
+                return Promise.resolve(experimental);
+            });
+        // Write the assessment to the DB, if there was one.
 
-            // Not updating the experimental data
-            return Promise.resolve(experimental);
         }).then(updatedExperimental => {
+            // update the assessmentTracker object so it accounts for any new assessments
+            var userAssessment;
+            var assessments = updatedExperimental.assessments;
+            var user = this.props.session && this.props.session.user_properties;
+
+            // Find if any assessments for the segregation are owned by the currently logged-in user
+            if (assessments && assessments.length) {
+                // Find the assessment belonging to the logged-in curator, if any.
+                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+            }
+
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, updatedExperimental.evidenceType);
+
             // Wrote the experimental data, so update the assessments state to the new assessment list
             if (updatedExperimental && updatedExperimental.assessments && updatedExperimental.assessments.length) {
                 this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
+
             return Promise.resolve(null);
         }).catch(function(e) {
             console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);
@@ -2062,6 +2080,25 @@ var ExperimentalViewer = React.createClass({
         }
     },
 
+    componentWillReceiveProps: function(nextProps) {
+        if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
+            var experimental = this.props.context;
+            var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
+            var user = nextProps.session && nextProps.session.user_properties;
+                    // Make an assessment tracker object once we get the logged in user info
+            if (!this.cv.assessmentTracker && user) {
+                var userAssessment;
+
+                // Find if any assessments for the segregation are owned by the currently logged-in user
+                if (assessments && assessments.length) {
+                    // Find the assessment belonging to the logged-in curator, if any.
+                    userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+                }
+                this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, experimental.evidenceType);
+            }
+        }
+    },
+
     render: function() {
         var experimental = this.props.context;
         var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
@@ -2070,18 +2107,6 @@ var ExperimentalViewer = React.createClass({
         var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the experimental data, but the experimental data's owner assessed it
         var othersAssessed = false; // TRUE if we own this experimental data, and others have assessed it
         var updateMsg = this.state.updatedAssessment ? 'Assessment updated to ' + this.state.updatedAssessment : '';
-
-        // Make an assessment tracker object once we get the logged in user info
-        if (!this.cv.assessmentTracker && user) {
-            var userAssessment;
-
-            // Find if any assessments for the segregation are owned by the currently logged-in user
-            if (assessments && assessments.length) {
-                // Find the assessment belonging to the logged-in curator, if any.
-                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
-            }
-            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, experimental.evidenceType);
-        }
 
         // See if others have assessed
         if (userExperimental) {
