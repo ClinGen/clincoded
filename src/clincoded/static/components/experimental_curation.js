@@ -2020,6 +2020,7 @@ var ExperimentalViewer = React.createClass({
         this.getRestData('/experimental/' + this.props.context.uuid).then(data => {
             var experimental = data;
 
+            // Write the assessment to the DB, if there was one.
             return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
                 // If we made a new assessment, add it to the experimental data's assessments
                 if (assessmentInfo.assessment && !assessmentInfo.update) {
@@ -2043,8 +2044,6 @@ var ExperimentalViewer = React.createClass({
                 // Not updating the experimental data
                 return Promise.resolve(experimental);
             });
-        // Write the assessment to the DB, if there was one.
-
         }).then(updatedExperimental => {
             // update the assessmentTracker object so it accounts for any new assessments
             var userAssessment;
