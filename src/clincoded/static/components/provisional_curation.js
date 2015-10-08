@@ -13,8 +13,6 @@ var parseAndLogError = require('./mixins').parseAndLogError;
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
-//var PmidSummary = curator.PmidSummary;
-//var PmidDoiButtons = curator.PmidDoiButtons;
 var CurationPalette = curator.CurationPalette;
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -47,7 +45,6 @@ var ProvisionalCuration = React.createClass({
     },
 
     loadData: function() {
-        //var lastPageUrl = document.referrer;
         var gdmUuid = this.queryValues.gdmUuid;
 
         // get gdm and all assessments from db.
@@ -130,8 +127,6 @@ var ProvisionalCuration = React.createClass({
                 backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
                 if (this.state.provisional) { // edit existing provisional
                     this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
-                        //this.state.provisional = data['@graph'][0];
-                        //return Promise.resolve(null);
                         this.resetAllFormValues();
                         this.context.navigate(backUrl);
                         //window.history.go(-1);
@@ -143,8 +138,6 @@ var ProvisionalCuration = React.createClass({
                     this.postRestData('/provisional/', newProvisional).then(data => {
                         return data['@graph'][0];
                     }).then(savedProvisional => {
-                        //this.state.provisional = savedProvisional;
-
                         var theGdm = curator.flatten(this.state.gdm);
                         if (theGdm.provisionalClassifications) {
                             theGdm.provisionalClassifications.push(savedProvisional['@id']);
@@ -157,7 +150,6 @@ var ProvisionalCuration = React.createClass({
                             return data['@graph'][0];
                         });
                     }).then(savedGdm => {
-                        //this.state.gdm = savedGdm;
                         this.resetAllFormValues();
                         this.context.navigate(backUrl);
                         //window.history.go(-1);
@@ -167,8 +159,6 @@ var ProvisionalCuration = React.createClass({
                 }
             }
         }
-        //this.context.navigate('/provisional-curation/?gdm=' + this.state.gdm.uuid + '&view=yes');
-        //this.setState();
     },
 
     cancelForm: function(e) {
@@ -186,7 +176,6 @@ var ProvisionalCuration = React.createClass({
     },
 
     render: function() {
-        //var lastUrl = document.referrer;
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.pmid = queryKeyValue('pmid', this.props.href) ? queryKeyValue('pmid', this.props.href) : '';
         var calculate = queryKeyValue('calculate', this.props.href);
@@ -406,11 +395,6 @@ var NewCalculation = function() {
     var gdmPathoList = gdm.variantPathogenicity;
     var variantIdList = [];
     for (var i in gdmPathoList) {
-        //var pathoUuid = gdmPathoList[i].uuid;
-        //var owner = gdmPathoList[i].submitted_by;
-        //var variant = gdmPathoList[i].variant;
-        //var varUuid = variant.uuid;
-
         // pick up variants from login user's pathogenicity assessed as Supports.
         if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
             for (var j in gdmPathoList[i].assessments) {
@@ -421,21 +405,12 @@ var NewCalculation = function() {
                 }
             }
         }
-
-
-        //for (var j in pathoList) {
-        //    if (pathoUuid === pathoList[j].patho) {
-        //        variantIdList.push(variant.uuid);
-        //        break;
-        //    }
-        //}
     }
 
 // Collect all families and independent individuals with article info (experimental data is not necessary)
     var annotations = gdm.annotations;
     var familiesCollected = [];
     var individualsCollected = [];
-    //var experimentalCollected = [];
     for (var i in annotations) {
         if (annotations[i].groups && annotations[i].groups.length > 0) {
             var groups = annotations[i].groups;
@@ -454,10 +429,6 @@ var NewCalculation = function() {
         if (annotations[i].individuals && annotations[i].individuals.length > 0) {
             individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, variantIdList);
         }
-        // experimental data is not necessary to
-        //if (annotations[i].experimentalData) {
-        //    filter(experimentalCollected, annotations[i].experimentalData, annotations[i].article, expList);
-        //}
     }
 
 // Collect articles and find the earliest publication year
@@ -476,12 +447,6 @@ var NewCalculation = function() {
             earliest = get_earliest_year(earliest, individualsCollected[i].date);
         }
     }
-    //for (var i in experimentalCollected) {
-    //    if (!in_array(experimentalCollected[i].pmid, articleCollected) && experimentalCollected[i].pmid != '') {
-    //        articleCollected.push(experimentalCollected[i].pmid);
-    //        earliest = get_earliest_year(earliest, experimentalCollected[i].date);
-    //    }
-    //}
 
 // get final scores
     var currentYear = year.getFullYear();
@@ -694,8 +659,6 @@ var get_earliest_year = function(earliest, dateStr) {
 };
 
 var filter = function(target, branch, article, idList) {
-    //var theTarget = target;
-
     branch.forEach(function(obj) {
         var variantIds = [];
         var allAssessed = false;

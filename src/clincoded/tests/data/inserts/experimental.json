@@ -154,10 +154,9 @@
         "evidenceType": "Functional Alteration",
         "functionalAlteration": {
             "cellMutationOrEngineeredEquivalent": "Patient cells",
-            "patientCellType": "EFO_13579",
-            "normalFunctionOfGene": "GO_Slim term here",
+            "patientCellType": "CL_0000009",
+            "normalFunctionOfGene": "GO:0000012",
             "descriptionOfGeneAlteration": "some description here",
-            "normalFunctionOfGene": "GO:0012345",
             "evidenceForNormalFunction": "evidence 007",
             "evidenceInPaper": "Paragraph 2-5, page 5"
         },
@@ -183,7 +182,7 @@
             "animalOrCellCulture": "Animal model",
             "phenotypeFreeText": "human phenotype free text here",
             "evidenceInPaper": "location here",
-            "phenotypeHPO": "hp:0012345"
+            "phenotypeHPO": "HP:0012345"
         },
         "variants": [
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
