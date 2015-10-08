@@ -2055,14 +2055,12 @@ var ExperimentalViewer = React.createClass({
                 // Find the assessment belonging to the logged-in curator, if any.
                 userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
             }
-
             this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, updatedExperimental.evidenceType);
 
             // Wrote the experimental data, so update the assessments state to the new assessment list
             if (updatedExperimental && updatedExperimental.assessments && updatedExperimental.assessments.length) {
                 this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
-
             return Promise.resolve(null);
         }).catch(function(e) {
             console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);
@@ -2084,7 +2082,8 @@ var ExperimentalViewer = React.createClass({
             var experimental = this.props.context;
             var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
             var user = nextProps.session && nextProps.session.user_properties;
-                    // Make an assessment tracker object once we get the logged in user info
+
+            // Make an assessment tracker object once we get the logged in user info
             if (!this.cv.assessmentTracker && user) {
                 var userAssessment;
 
