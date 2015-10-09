@@ -981,7 +981,7 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
-                                            <Input type="submit" inputClassName="btn-primary pull-right" submitBusy={this.state.submitBusy} id="submit" title="Save" />
+                                            <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>
@@ -1444,6 +1444,7 @@ var FamilyViewer = React.createClass({
             if (updatedFamily && updatedFamily.segregation && updatedFamily.segregation.assessments && updatedFamily.segregation.assessments.length) {
                 this.setState({assessments: updatedFamily.segregation.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
+
             this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
         }).catch(function(e) {
@@ -1657,7 +1658,7 @@ var FamilyViewer = React.createClass({
 
                     {this.cv.gdmUuid && (familyUserAssessed || userFamily) ?
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitDisable={this.state.submitBusy} updateMsg={updateMsg} />
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
                     : null}
 
                     <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">

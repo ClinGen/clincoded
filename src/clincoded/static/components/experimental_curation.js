@@ -1213,7 +1213,7 @@ var ExperimentalCuration = React.createClass({
                                         : null}
                                         {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
                                             <div className="curation-submit clearfix">
-                                                <Input type="submit" inputClassName="btn-primary pull-right" submitBusy={this.state.submitBusy} id="submit" title="Save" />
+                                                <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                                 <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                             </div>
                                         : null}
@@ -2068,6 +2068,8 @@ var ExperimentalViewer = React.createClass({
             if (updatedExperimental && updatedExperimental.assessments && updatedExperimental.assessments.length) {
                 this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
+
+            this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
         }).catch(function(e) {
             console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);

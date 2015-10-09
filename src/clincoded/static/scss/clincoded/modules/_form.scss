@@ -225,11 +225,12 @@ input[type=search] {
     transition: opacity 0.2s, width 0.2s;
 }
 
-.submit-spinner i {
-    font-size: 15px;
-}
-
 .btn.submit-busy .submit-spinner {
     opacity: 1;
     width: auto;
+    padding-right: 5px;
+}
+
+.submit-spinner i {
+    font-size: 15px;
 }

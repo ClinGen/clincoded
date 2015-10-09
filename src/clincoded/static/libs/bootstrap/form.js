@@ -396,7 +396,7 @@ var Input = module.exports.Input = React.createClass({
                 input = (
                     <span className={this.props.wrapperClassName}>
                         <button className={inputClasses} onClick={this.props.submitHandler} disabled={this.props.inputDisabled || this.props.submitBusy}>
-                        <span className="submit-spinner"><i className="icon icon-spin icon-cog"></i></span> {title}</button>
+                        {this.props.submitBusy ? <span className="submit-spinner"><i className="icon icon-spin icon-cog"></i></span> : null}{title}</button>
                     </span>
                 );
                 break;
