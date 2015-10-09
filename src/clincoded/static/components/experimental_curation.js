@@ -929,10 +929,10 @@ var ExperimentalCuration = React.createClass({
                             } else {
                                 var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
                                 if (newExperimental.evidenceType == 'Biochemical Function') {
-                                    this.setState({submitBusy: false});
+                                    this.setState({submitBusy: false}); // submit error; re-enable submit button
                                     this.setFormErrors('geneWithSameFunctionSameDisease.genes', missingGenes.join(', ') + ' not found');
                                 } else if (newExperimental.evidenceType == 'Protein Interactions') {
-                                    this.setState({submitBusy: false});
+                                    this.setState({submitBusy: false}); // submit error; re-enable submit button
                                     this.setFormErrors('interactingGenes', missingGenes.join(', ') + ' not found');
                                 }
 
@@ -1096,6 +1096,7 @@ var ExperimentalCuration = React.createClass({
                     // Next step relies on the pathogenicity, not the updated assessment
                     return Promise.resolve(savedExperimental);
                 }).then(data => {
+                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -2067,7 +2068,6 @@ var ExperimentalViewer = React.createClass({
             if (updatedExperimental && updatedExperimental.assessments && updatedExperimental.assessments.length) {
                 this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
-            this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
         }).catch(function(e) {
             console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);

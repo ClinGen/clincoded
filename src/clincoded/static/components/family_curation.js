@@ -94,7 +94,8 @@ var FamilyCuration = React.createClass({
             familyName: '', // Currently entered family name
             addVariantDisabled: false, // True if Add Another Variant button enabled
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
-            segregationFilled: false // True if at least one segregation field has a value
+            segregationFilled: false, // True if at least one segregation field has a value
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -431,6 +432,7 @@ var FamilyCuration = React.createClass({
             if (!formError) {
                 // Build search string from given ORPHA IDs
                 var searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                this.setState({submitBusy: true});
 
                 // Verify given Orpha ID exists in DB
                 this.getRestData(searchStr).then(diseases => {
@@ -461,12 +463,14 @@ var FamilyCuration = React.createClass({
                                 return Promise.resolve(diseases);
                             } else {
                                 // Get array of missing Orphanet IDs
+                                this.setState({submitBusy: false}); // submit error; re-enable submit button
                                 var missingOrphas = _.difference(indOrphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
                                 this.setFormErrors('individualorphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
                                 throw diseases;
                             }
                         }, e => {
                             // The given orpha IDs couldn't be retrieved for some reason.
+                            this.setState({submitBusy: false}); // submit error; re-enable submit button
                             this.setFormErrors('individualorphanetid', 'The given diseases not found');
                             throw e;
                         });
@@ -483,6 +487,7 @@ var FamilyCuration = React.createClass({
                                 familyArticles = articles;
                                 return Promise.resolve(articles);
                             } else {
+                                this.setState({submitBusy: false}); // submit error; re-enable submit button
                                 var missingPmids = _.difference(pmids, articles['@graph'].map(function(article) { return article.pmid; }));
                                 this.setFormErrors('otherpmids', missingPmids.join(', ') + ' not found');
                                 throw articles;
@@ -976,7 +981,7 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
-                                            <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                            <Input type="submit" inputClassName="btn-primary pull-right" submitBusy={this.state.submitBusy} id="submit" title="Save" />
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>

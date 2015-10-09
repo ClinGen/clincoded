@@ -41,7 +41,8 @@ var GroupCuration = React.createClass({
             annotation: null, // Annotation object given in UUID
             group: null, // If we're editing a group, this gets the fleshed-out group object we're editing
             groupName: '', // Currently entered name of the group
-            genotyping2Disabled: true // True if genotyping method 2 dropdown disabled
+            genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -179,6 +180,7 @@ var GroupCuration = React.createClass({
             if (!formError) {
                 // Build search string from given ORPHA IDs
                 var searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                this.setState({submitBusy: true});
 
                 // Verify given Orpha ID exists in DB
                 this.getRestData(searchStr).then(diseases => {
@@ -188,12 +190,14 @@ var GroupCuration = React.createClass({
                         return Promise.resolve(diseases);
                     } else {
                         // Get array of missing Orphanet IDs
+                        this.setState({submitBusy: false}); // submit error; re-enable submit button
                         var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
                         this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
                         throw diseases;
                     }
                 }, e => {
                     // The given orpha IDs couldn't be retrieved for some reason.
+                    this.setState({submitBusy: false}); // submit error; re-enable submit button
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
@@ -206,6 +210,7 @@ var GroupCuration = React.createClass({
                                 groupGenes = genes;
                                 return Promise.resolve(genes);
                             } else {
+                                this.setState({submitBusy: false}); // submit error; re-enable submit button
                                 var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
                                 this.setFormErrors('othergenevariants', missingGenes.join(', ') + ' not found');
                                 throw genes;
@@ -226,6 +231,7 @@ var GroupCuration = React.createClass({
                                 groupArticles = articles;
                                 return Promise.resolve(articles);
                             } else {
+                                this.setState({submitBusy: false}); // submit error; re-enable submit button
                                 var missingPmids = _.difference(pmids, articles['@graph'].map(function(article) { return article.pmid; }));
                                 this.setFormErrors('otherpmids', missingPmids.join(', ') + ' not found');
                                 throw articles;
@@ -359,6 +365,7 @@ var GroupCuration = React.createClass({
                 }).then(data => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Group Submit page.
+                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
