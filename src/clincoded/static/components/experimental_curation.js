@@ -1096,7 +1096,7 @@ var ExperimentalCuration = React.createClass({
                     // Next step relies on the pathogenicity, not the updated assessment
                     return Promise.resolve(savedExperimental);
                 }).then(data => {
-                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
+                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);

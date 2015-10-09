@@ -710,6 +710,7 @@ var FamilyCuration = React.createClass({
                 }).then(newFamily => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
+                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut && !initvar) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
