@@ -133,41 +133,39 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <h2>{mode}</h2>
                             { (summaryInfo !== 'none') ?
                                 <div className="provisional-info-panel">
-                                    <div className="provisional-button">
-                                        <div className="btn">
+                                    <table style={{'width':'100%'}}>
+                                        <tr>
+                                            <td style={{'text-align':'left'}}>
+                                                <div className="provisional-title">
+                                                    <strong>Current Summary & Provisional Classification</strong>
+                                                </div>
+                                                {   summaryInfo === 'provisional' ?
+                                                        <div>
+                                                            <div className="provisional-data-left">
+                                                                <span>
+                                                                    Current Summary<br />
+                                                                    Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                                </span>
+                                                            </div>
+                                                            <div className="provisional-data-center">
+                                                                <span>
+                                                                    Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                    Provisional Classification: {provisional.alteredClassification}&nbsp;&nbsp;
+                                                                    [<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    :
+                                                        <div className="provisional-data-left"><span>None</span></div>
+                                                }
+                                            </td>
+                                            <td style={{'width':'200px', 'vertical-align':'middle'}}>
                                                 <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
                                                     { summaryInfo === 'provisional' ? 'Generate New Summary' : 'Generate Summary' }
                                                 </a>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="provisional-title">
-                                            <strong>Current Summary & Provisional Classification</strong>
-                                        </div>
-                                        {   summaryInfo === 'provisional' ?
-                                            <div>
-                                                <div className="provisional-data-left">
-                                                    <span>
-                                                        Current Summary<br />
-                                                        Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                    </span>
-                                                </div>
-                                                <div className="provisional-data-center">
-                                                    <span>
-                                                        Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                        Provisional Classification: {provisional.alteredClassification}&nbsp;&nbsp;
-                                                        [<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            :
-                                            <div>
-                                                <div className="provisional-data provisional-data-left">
-                                                   <span>None</span>
-                                                </div>
-                                            </div>
-                                        }
-                                    </div>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </div>
                                 :
                                 null

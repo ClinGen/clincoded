@@ -430,7 +430,6 @@
 .provisional-info-panel {
     width: 100%;
     border-top: 2px solid #aaa;
-    display: inline-block;
 
     .provisional-title {
         text-align: left;
@@ -440,7 +439,6 @@
     .provisional-data-left {
         float: left;
         text-align: left;
-        padding-bottom: 5px;
         padding-left: 10px;
         padding-right: 100px;
     }
@@ -448,22 +446,15 @@
     .provisional-data-center {
         float: left;
         text-align: left;
-        padding-bottom: 5px;
         padding-left: 10px;
     }
 
     .provisional-button {
-        height: 100%;
-        position: relative;
-        border: solid 2px #000;
-        float: right;
         padding: 0;
         margin: auto;
-        display: inline-block;
 
         .btn {
-            margin: auto;
-            display: inline-block;
+            margin: 10px 0 10px 0;
         }
     }
 }
