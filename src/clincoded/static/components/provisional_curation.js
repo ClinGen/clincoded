@@ -538,7 +538,7 @@ var NewCalculation = function() {
 
     return (
                 <PanelGroup accordion>
-                    <Panel title="New calculation and Classification" open>
+                    <Panel title="New Calculation and Classification" open>
                         <div className="form-group">
                             <div>
                                 The calculated values below are based on the set of saved evidence that exists when the "Generate New Summary"
