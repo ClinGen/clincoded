@@ -1596,5 +1596,22 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "ronak.patel@bcm.edu",
+        "first_name": "Ronak",
+        "last_name": "Patel",
+        "uuid": "0c37cfba-8063-4d1a-83a8-bb008d9780ca",
+        "groups": [
+            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
+
 ]
