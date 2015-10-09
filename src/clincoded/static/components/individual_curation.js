@@ -792,6 +792,7 @@ var LabelPanelTitle = React.createClass({
 // as the calling component.
 var IndividualName = function(displayNote) {
     var individual = this.state.individual;
+    var family = this.state.family;
     var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     return (
@@ -801,6 +802,21 @@ var IndividualName = function(displayNote) {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one individual with IDENTICAL information, you can indicate this at the bottom of this form.</p>
+            : null}
+            {!family ?
+                <div className="clearfix">
+                    <Input type="select" ref="proband" label="Is this Individual a proband:" value={individual && individual.proband ? "Yes" : (individual ? "No" : "none")}
+                        error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                        <option value="none">No Selection</option>
+                        <option disabled="disabled"></option>
+                        <option>Yes</option>
+                        <option>No</option>
+                    </Input>
+                    <p className="col-sm-7 col-sm-offset-5 input-note-below">
+                        Note: Probands are indicated by the following icon: <i className="icon icon-proband"></i>
+                    </p>
+                </div>
             : null}
         </div>
     );
@@ -1049,22 +1065,6 @@ var IndividualVariantInfo = function() {
                 </div>
             :
                 <div>
-                    {!family ?
-                        <div className="clearfix">
-                            <Input type="select" ref="proband" label="Is this Individual a proband:" value={individual && individual.proband ? "Yes" : (individual ? "No" : "none")}
-                                error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                                <option value="none">No Selection</option>
-                                <option disabled="disabled"></option>
-                                <option>Yes</option>
-                                <option>No</option>
-                            </Input>
-                            <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                                Note: Probands are indicated by the following icon: <i className="icon icon-proband"></i>
-                            </p>
-                        </div>
-                    : null}
-
                     {_.range(this.state.variantCount).map(i => {
                         var variant;
 
@@ -1098,7 +1098,7 @@ var IndividualVariantInfo = function() {
                         );
                     })}
                 </div>
-            }            
+            }
         </div>
     );
 };

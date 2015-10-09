@@ -1392,32 +1392,47 @@ var FamilyViewer = React.createClass({
     assessmentSubmit: function(e) {
         var updatedFamily;
 
-        // Write the assessment to the DB, if there was one.
-        this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
-            var family = this.props.context;
+        // GET the family object to have the most up-to-date version
+        this.getRestData('/families/' + this.props.context.uuid).then(data => {
+            var family = data;
 
-            // If we made a new assessment, add it to the family's assessments
-            if (assessmentInfo.assessment && !assessmentInfo.update) {
-                 updatedFamily = curator.flatten(family);
-                if (!updatedFamily.segregation.assessments) {
-                    updatedFamily.segregation.assessments = [];
+            // Write the assessment to the DB, if there was one.
+            return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
+                // If we made a new assessment, add it to the family's assessments
+                if (assessmentInfo.assessment && !assessmentInfo.update) {
+                     updatedFamily = curator.flatten(family);
+                    if (!updatedFamily.segregation.assessments) {
+                        updatedFamily.segregation.assessments = [];
+                    }
+                    updatedFamily.segregation.assessments.push(assessmentInfo.assessment['@id']);
+
+                    // Write the updated family object to the DB
+                    return this.putRestData('/families/' + family.uuid, updatedFamily).then(data => {
+                        return this.getRestData('/families/' + data['@graph'][0].uuid);
+                    });
                 }
-                updatedFamily.segregation.assessments.push(assessmentInfo.assessment['@id']);
 
-                // Write the updated family object to the DB
-                return this.putRestData('/families/' + family.uuid, updatedFamily).then(data => {
-                    return this.getRestData('/families/' + data['@graph'][0].uuid);
-                });
-            }
+                // Didn't update the family; if updated the assessment, reload the family
+                if (assessmentInfo.update) {
+                    return this.getRestData('/families/' + family.uuid);
+                }
 
-            // Didn't update the family; if updated the assessment, reload the family
-            if (assessmentInfo.update) {
-                return this.getRestData('/families/' + family.uuid);
-            }
-
-            // Not updating the family
-            return Promise.resolve(family);
+                // Not updating the family
+                return Promise.resolve(family);
+            });
         }).then(updatedFamily => {
+            // update the assessmentTracker object so it accounts for any new assessments
+            var userAssessment;
+            var assessments = updatedFamily.segregation.assessments;
+            var user = this.props.session && this.props.session.user_properties;
+
+            // Find if any assessments for the segregation are owned by the currently logged-in user
+            if (assessments && assessments.length) {
+                // Find the assessment belonging to the logged-in curator, if any.
+                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+            }
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
+
             // Wrote the family, so update the assessments state to the new assessment list
             if (updatedFamily && updatedFamily.segregation && updatedFamily.segregation.assessments && updatedFamily.segregation.assessments.length) {
                 this.setState({assessments: updatedFamily.segregation.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
@@ -1438,6 +1453,27 @@ var FamilyViewer = React.createClass({
         }
     },
 
+    componentWillReceiveProps: function(nextProps) {
+        if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
+            var family = this.props.context;
+            var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
+            var user = nextProps.session && nextProps.session.user_properties;
+            var segregation = family.segregation;
+
+            // Make an assessment tracker object once we get the logged in user info
+            if (!this.cv.assessmentTracker && user && segregation) {
+                var userAssessment;
+
+                // Find if any assessments for the segregation are owned by the currently logged-in user
+                if (assessments && assessments.length) {
+                    // Find the assessment belonging to the logged-in curator, if any.
+                    userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+                }
+                this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
+            }
+        }
+    },
+
     render: function() {
         var family = this.props.context;
         var method = family.method;
@@ -1450,18 +1486,6 @@ var FamilyViewer = React.createClass({
         var familyUserAssessed = false; // TRUE if logged-in user doesn't own the family, but the family's owner assessed its segregation
         var othersAssessed = false; // TRUE if we own this segregation, and others have assessed it
         var updateMsg = this.state.updatedAssessment ? 'Assessment updated to ' + this.state.updatedAssessment : '';
-
-        // Make an assessment tracker object once we get the logged in user info
-        if (!this.cv.assessmentTracker && user && segregation) {
-            var userAssessment;
-
-            // Find if any assessments for the segregation are owned by the currently logged-in user
-            if (assessments && assessments.length) {
-                // Find the assessment belonging to the logged-in curator, if any.
-                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
-            }
-            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
-        }
 
         // See if others have assessed
         if (userFamily) {
