@@ -208,6 +208,7 @@ var Input = module.exports.Input = React.createClass({
         clickHandler: React.PropTypes.func, // Called to handle button click
         submitHandler: React.PropTypes.func, // Called to handle submit button click
         cancelHandler: React.PropTypes.func, // Called to handle cancel button click
+        submitBusy: React.PropTypes.bool, //
         minVal: React.PropTypes.number, // Minimum value for a number formatted input
         maxVal: React.PropTypes.number // Maximum value for a number formatted input
     },
@@ -365,10 +366,10 @@ var Input = module.exports.Input = React.createClass({
                 // Requires properties:
                 //   title: Label to put into button
                 //   clickHandler: Method to call when button is clicked
-                inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
+                inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '') + (this.props.submitBusy ? ' submit-busy' : '');
                 input = (
                     <span className={this.props.wrapperClassName}>
-                        <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} disabled={this.props.inputDisabled} />
+                        <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} disabled={this.props.inputDisabled || this.props.submitBusy} />
                     </span>
                 );
                 break;
@@ -391,10 +392,11 @@ var Input = module.exports.Input = React.createClass({
 
             case 'submit':
                 title = this.props.title ? this.props.title : 'Submit';
-                inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
+                inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '') + (this.props.submitBusy ? ' submit-busy' : '');
                 input = (
                     <span className={this.props.wrapperClassName}>
-                        <button className={inputClasses} onClick={this.props.submitHandler} disabled={this.props.inputDisabled}>{title}</button>
+                        <button className={inputClasses} onClick={this.props.submitHandler} disabled={this.props.inputDisabled || this.props.submitBusy}>
+                        {this.props.submitBusy ? <span className="submit-spinner"><i className="icon icon-spin icon-cog"></i></span> : null}{title}</button>
                     </span>
                 );
                 break;

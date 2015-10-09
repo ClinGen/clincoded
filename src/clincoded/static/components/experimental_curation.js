@@ -97,6 +97,7 @@ var ExperimentalCuration = React.createClass({
             variantCount: 0, // Number of variants to display
             variantOption: [], // One variant panel, and nothing entered
             addVariantDisabled: false, // True if Add Another Variant button enabled
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -913,6 +914,7 @@ var ExperimentalCuration = React.createClass({
                 }
 
                 var searchStr = '';
+                this.setState({submitBusy: true});
                 // Begin with empty promise
                 new Promise(function(resolve, reject) {
                     resolve(1);
@@ -927,8 +929,10 @@ var ExperimentalCuration = React.createClass({
                             } else {
                                 var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
                                 if (newExperimental.evidenceType == 'Biochemical Function') {
+                                    this.setState({submitBusy: false}); // submit error; re-enable submit button
                                     this.setFormErrors('geneWithSameFunctionSameDisease.genes', missingGenes.join(', ') + ' not found');
                                 } else if (newExperimental.evidenceType == 'Protein Interactions') {
+                                    this.setState({submitBusy: false}); // submit error; re-enable submit button
                                     this.setFormErrors('interactingGenes', missingGenes.join(', ') + ' not found');
                                 }
 
@@ -1092,6 +1096,7 @@ var ExperimentalCuration = React.createClass({
                     // Next step relies on the pathogenicity, not the updated assessment
                     return Promise.resolve(savedExperimental);
                 }).then(data => {
+                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -1208,7 +1213,7 @@ var ExperimentalCuration = React.createClass({
                                         : null}
                                         {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
                                             <div className="curation-submit clearfix">
-                                                <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                                <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                                 <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                             </div>
                                         : null}
@@ -2008,7 +2013,8 @@ var ExperimentalViewer = React.createClass({
     getInitialState: function() {
         return {
             assessments: null, // Array of assessments for the experimental data
-            updatedAssessment: '' // Updated assessment value
+            updatedAssessment: '', // Updated assessment value
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -2018,6 +2024,7 @@ var ExperimentalViewer = React.createClass({
 
         // GET the experimental object to have the most up-to-date version
         this.getRestData('/experimental/' + this.props.context.uuid).then(data => {
+            this.setState({submitBusy: true});
             var experimental = data;
 
             // Write the assessment to the DB, if there was one.
@@ -2061,6 +2068,8 @@ var ExperimentalViewer = React.createClass({
             if (updatedExperimental && updatedExperimental.assessments && updatedExperimental.assessments.length) {
                 this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
+
+            this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
         }).catch(function(e) {
             console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);
@@ -2486,7 +2495,7 @@ var ExperimentalViewer = React.createClass({
                     : null}
                     {this.cv.gdmUuid && (experimentalUserAssessed || userExperimental) ?
                         <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} updateMsg={updateMsg} />
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
                     : null}
                 </div>
             </div>

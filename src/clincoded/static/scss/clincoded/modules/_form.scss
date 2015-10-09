@@ -213,3 +213,19 @@ input[type=search] {
         margin: 20px 0;
     }
 }
+
+.submit-spinner {
+    display: inline-block;
+    opacity: 0;
+    width: 0;
+}
+
+.btn.submit-busy .submit-spinner {
+    opacity: 1;
+    width: auto;
+    padding-right: 5px;
+}
+
+.submit-spinner i {
+    font-size: 15px;
+}
