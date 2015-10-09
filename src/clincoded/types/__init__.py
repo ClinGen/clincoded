@@ -726,7 +726,9 @@ class Pathogenicity(Item):
         "type": "integer"
     })
     def numberOfAssessment(self, assessments):
-        return len(assessments)
+        if len(assessments) > 0:
+            return len(assessments)
+        return ''
 
 
 @collection(

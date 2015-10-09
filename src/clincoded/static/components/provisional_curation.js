@@ -266,17 +266,17 @@ var EditCurrent = function() {
                 <PanelGroup accordion>
                     <Panel title="Currently Saved Calculation and Classification" open>
                         <div className="row">
-                            <div className="col-sm-5"><strong>Total Score:</strong></div>
+                            <div className="col-sm-5"><strong className="pull-right">otal Score:</strong></div>
                             <div className="col-sm-7"><span>{this.state.totalScore}</span></div>
                         </div>
                         <div className="row">
                             <div className="col-sm-5">
-                                <strong>Calculated Clinical Validity Classification:</strong
+                                <strong className="pull-right">Calculated Clinical Validity Classification:</strong
                             ></div>
                             <div className="col-sm-7"><span>{this.state.autoClassification}</span></div>
                         </div>
                         <div className="row">
-                            <Input type="select" ref="alteredClassification" label="Selecte Provisional Clinical Validity Classification:"
+                            <Input type="select" ref="alteredClassification" label="Select Provisional Clinical Validity Classification:"
                                 value={alteredClassification} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
                                 groupClassName="form-group" handleChange={this.handleChange}>
                                 <option value="Definitive">Definitive</option>
@@ -407,7 +407,7 @@ var NewCalculation = function() {
         }
     }
 
-// Collect all families and independent individuals with article info (experimental data is not necessary)
+// Collect all individuals in all annotations, pass to function filter with article info (experimental data is not necessary)
     var annotations = gdm.annotations;
     var familiesCollected = [];
     var individualsCollected = [];
@@ -416,15 +416,25 @@ var NewCalculation = function() {
             var groups = annotations[i].groups;
             for (var j in groups) {
                 if (groups[j].familyIncluded && groups[j].familyIncluded.length > 0) {
-                    familiesCollected = filter(familiesCollected, groups[j].familyIncluded, annotations[i].article, variantIdList); // take those associated with variant in pathogenicity list and assessed as Supports
+                    for (var k in groups[j].familyIncluded) {
+                        if (groups[j].familyIncluded[k].individualIncluded && groups[j].familyIncluded[k].individualIncluded.length > 0) {
+                            individualsCollected = filter(individualsCollected, groups[j].familyIncluded[k].individualIncluded, annotations[i].article, variantIdList); // same as above
+                        }
+                    }
                 }
+                    //familiesCollected = filter(familiesCollected, groups[j].familyIncluded, annotations[i].article, variantIdList);
                 if (groups[j].individualIncluded && groups[j].individualIncluded.length > 0) {
-                    individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, variantIdList); // same as above
+                    individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, variantIdList);
                 }
             }
         }
         if (annotations[i].families && annotations[i].families.length > 0) {
-            familiesCollected = filter(familiesCollected, annotations[i].families, annotations[i].article, variantIdList);
+            for (var j in annotations[i].families) {
+                if (annotations[i].families[j].individualIncluded && annotations[i].families[j].individualIncluded.length > 0) {
+                    individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, variantIdList);
+                }
+            }
+            //familiesCollected = filter(familiesCollected, annotations[i].families, annotations[i].article, variantIdList);
         }
         if (annotations[i].individuals && annotations[i].individuals.length > 0) {
             individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, variantIdList);
@@ -613,7 +623,7 @@ var NewCalculation = function() {
                                 <div className="col-sm-7"><span>{this.state.autoClassification}</span></div>
                             </div>
                             <br />
-                            <Input type="select" ref="alteredClassification" label="Selecte Provisional Clinical Validity Classification:"
+                            <Input type="select" ref="alteredClassification" label="Select Provisional Clinical Validity Classification:"
                                 wrapperClassName="col-sm-7" defaultValue={this.state.autoClassification} labelClassName="col-sm-5 control-label"
                                 groupClassName="form-group">
                                 <option value="Definitive">Definitive</option>
@@ -663,38 +673,29 @@ var filter = function(target, branch, article, idList) {
         var variantIds = [];
         var allAssessed = false;
 
-        if (obj['@type'][0] === 'family' && obj.segregation && obj.segregation.variants && obj.segregation.variants.length > 0) {
-            // pick family only if all associated variants assessed as Supports
-            for (var j in obj.segregation.variants) {
-                if (!in_array(obj.segregation.variants[j].uuid, idList)) {
+        if (obj.proband && obj.variants && obj.variants.length > 0) {
+            // pick up proband individuals if all associated variant assessed Support
+            for (var j in obj.variants) {
+                if (!in_array(obj.variants[j].uuid, idList)) {
                     allAssessed = false;
                     break;
                 }
                 else {
                     allAssessed = true;
-                    variantIds.push(obj.segregation.variants[j].uuid);
-                }
-            }
-        }
-        else if (obj['@type'][0] === 'individual' && obj.variants && obj.variants.length > 0) {
-            // pick individual if one variant assessed as Supports
-            for (var j in obj.variants) {
-                if (in_array(obj.variants[j].uuid, idList)) {
                     variantIds.push(obj.variants[j].uuid);
-                    allAssessed = true;
                 }
             }
-        }
 
-        if (allAssessed) {
-            target.push(
-                {
-                    "evidence":obj.uuid,
-                    "variants":variantIds,
-                    "pmid":article.pmid,
-                    "date": article.date
-                }
-            );
+            if (allAssessed) {
+                target.push(
+                    {
+                        "evidence":obj.uuid,
+                        "variants":variantIds,
+                        "pmid":article.pmid,
+                        "date": article.date
+                    }
+                );
+            }
         }
     });
 

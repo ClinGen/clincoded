@@ -134,9 +134,11 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             { (summaryInfo !== 'none') ?
                                 <div className="provisional-info-panel">
                                     <div className="provisional-button">
-                                        <a className="btn btn-primary btn-xs" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                            { summaryInfo === 'provisional' ? 'Generate New Summary' : 'Generate Summary' }
-                                        </a>
+                                        <div className="btn">
+                                                <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                    { summaryInfo === 'provisional' ? 'Generate New Summary' : 'Generate Summary' }
+                                                </a>
+                                        </div>
                                     </div>
                                     <div>
                                         <div className="provisional-title">
