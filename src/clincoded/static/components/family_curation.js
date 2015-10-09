@@ -1384,7 +1384,8 @@ var FamilyViewer = React.createClass({
     getInitialState: function() {
         return {
             assessments: null, // Array of assessments for the family's segregation
-            updatedAssessment: '' // Updated assessment value
+            updatedAssessment: '', // Updated assessment value
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -1394,6 +1395,7 @@ var FamilyViewer = React.createClass({
 
         // GET the family object to have the most up-to-date version
         this.getRestData('/families/' + this.props.context.uuid).then(data => {
+            this.setState({submitBusy: true});
             var family = data;
 
             // Write the assessment to the DB, if there was one.
@@ -1437,6 +1439,7 @@ var FamilyViewer = React.createClass({
             if (updatedFamily && updatedFamily.segregation && updatedFamily.segregation.assessments && updatedFamily.segregation.assessments.length) {
                 this.setState({assessments: updatedFamily.segregation.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
+            this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
         }).catch(function(e) {
             console.log('FAMILY VIEW UPDATE ERROR=: %o', e);
@@ -1649,7 +1652,7 @@ var FamilyViewer = React.createClass({
 
                     {this.cv.gdmUuid && (familyUserAssessed || userFamily) ?
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} updateMsg={updateMsg} />
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitDisable={this.state.submitBusy} updateMsg={updateMsg} />
                     : null}
 
                     <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">

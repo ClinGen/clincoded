@@ -143,6 +143,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         updateValue: React.PropTypes.func.isRequired, // Parent function to call when dropdown changes
         assessmentSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
         disableDefault: React.PropTypes.bool, // TRUE to disable the Default (Not Assessed) item
+        submitBusy: React.PropTypes.bool, // TRUE while the form submit is running
         accordion: React.PropTypes.bool, // True if the panel should part of an openable accordion
         open: React.PropTypes.bool, // True if the panel should be an openable panel
         updateMsg: React.PropTypes.string // String to display by the Update button if desired
@@ -180,7 +181,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                         </div>
                         {this.props.assessmentSubmit ?
                             <div className="curation-submit clearfix">
-                                <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.assessmentSubmit} title="Update" />
+                                <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.assessmentSubmit} title="Update" submitBusy={this.props.submitBusy} />
                                 {this.props.updateMsg ?
                                     <div className="submit-info pull-right">{this.props.updateMsg}</div>
                                 : null}
