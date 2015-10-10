@@ -57,7 +57,8 @@ var VariantCuration = React.createClass({
             gdm: null, // GDM object given in UUID
             variant: null, // Variant object given in UUID
             pathogenicity: null, // If editing curation, pathogenicity we're editing
-            assessment: null // Assessment of pathogenicity
+            assessment: null, // Assessment of pathogenicity
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -230,6 +231,8 @@ var VariantCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
+            this.setState({submitBusy: true});
+
             var pathogenicityUuid = this.state.pathogenicity ? this.state.pathogenicity.uuid : '';
             //var pathogenicityUuid = (this.state.pathogenicity && this.state.pathogenicity.submitted_by.uuid === this.state.user) ? this.state.pathogenicity.uuid : '';
 
@@ -307,6 +310,7 @@ var VariantCuration = React.createClass({
                 return Promise.resolve(null);
             }).then(data => {
                 // Now go back to Record Curation
+                this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                 var gdmQs = this.state.gdm ? '?gdm=' + this.state.gdm.uuid : '';
                 var pmidQs = this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
                 this.context.navigate('/curation-central/' + gdmQs + pmidQs);
@@ -440,7 +444,7 @@ var VariantCuration = React.createClass({
                                         : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} note="Note: To Edit the pathogenicity evaluation, first change your assessment to “Not assessed” and click Save, then Edit the Variant again."/> : null) }
                                         <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue} accordion open />
                                         <div className="curation-submit clearfix">
-                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" />
+                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ?
                                                 <a href={'/curation-central/?gdm=' + gdm.uuid + (this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '')} className="btn btn-default btn-inline-spacer pull-right">Cancel</a>
                                             : null}
