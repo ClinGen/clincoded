@@ -32,7 +32,7 @@ var makeStarterIndividual = individual_curation.makeStarterIndividual;
 var updateProbandVariants = individual_curation.updateProbandVariants;
 
 // Will be great to convert to 'const' when available
-var MAX_VARIANTS = 5;
+var MAX_VARIANTS = 2;
 
 // Settings for this.state.varOption
 var VAR_NONE = 0; // No variants entered in a panel
