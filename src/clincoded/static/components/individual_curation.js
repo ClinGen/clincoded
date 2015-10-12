@@ -1097,7 +1097,7 @@ var IndividualVariantInfo = function() {
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                 {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
-                                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
+                                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with Individual"
                                         clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                                 : null}
                             </div>
