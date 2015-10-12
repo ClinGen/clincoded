@@ -337,7 +337,8 @@ var NewCalculation = function() {
         "Functional Alteration (Engineered equivalent)": 0,
         "Model Systems (Animal model)": 0,
         "Model Systems (Engineered equivalent)": 0,
-        "Rescue": 0
+        "Rescue (Patient cells)": 0,
+        "Rescue (Engineered equivalent)": 0
     }
     for (var i in assessments) {
         var value = assessments[i]['value'];
@@ -408,45 +409,59 @@ var NewCalculation = function() {
             for (var j in annotations[i].experimentalData) {
                 var exp = annotations[i].experimentalData[j];
                 var subTypeKey = exp.evidenceType;
-                if (exp.evidenceType === 'Expression') {
-                    expType[subTypeKey] += 1;
-                    exp_scores[0] += 0.5;
-                    //if (!in_array(evid_id, expList)) {
-                    //    expList.push(evid_id);
-                    //}
-                }
-                else if (exp.evidenceType === 'Protein Interactions') {
-                    expType[subTypeKey] += 1;
-                    exp_scores[0] += 0.5;
 
-                }
-                else if (exp.evidenceType === 'Biochemical Function') {
-                    expType[subTypeKey] += 1;
-                    exp_scores[0] += 0.5;
-                }
-                else if (exp.evidenceType === 'Functional Alteration' && exp.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Engineered equivalent') {
-                    subTypeKey = subTypeKey + ' (Engineered equivalent)';
-                    expType[subTypeKey] += 1;
-                    exp_scores[1] += 0.5;
-                }
-                else if (exp.evidenceType === 'Functional Alteration' && exp.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells') {
-                    subTypeKey = subTypeKey + ' (Patient cells)';
-                    expType[subTypeKey] += 1;
-                    exp_scores[1] += 1;
-                }
-                else if (exp.evidenceType === 'Model Systems' && exp.modelSystems.animalOrCellCulture === 'Engineered equivalent') {
-                    subTypeKey = subTypeKey + ' (Engineered equivalent)';
-                    expType[subTypeKey] += 1;
-                    exp_scores[2] += 1;
-                }
-                else if (exp.evidenceType === 'Model Systems' && exp.modelSystems.animalOrCellCulture === 'Animal model') {
-                    subTypeKey = subTypeKey + ' (Animal model)';
-                    expType[subTypeKey] += 1;
-                    exp_scores[2] += 2;
-                }
-                else if (exp.evidenceType === 'Rescue') {
-                    expType[subTypeKey] += 1;
-                    exp_scores[2] += 2;
+                if (exp.assessments && exp.assessments.length > 0) {
+                    for (var j in exp.assessments) {
+                        if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Supports') {
+                            if (exp.evidenceType === 'Expression') {
+                                expType[subTypeKey] += 1;
+                                exp_scores[0] += 0.5;
+                                //if (!in_array(evid_id, expList)) {
+                                //    expList.push(evid_id);
+                                //}
+                            }
+                            else if (exp.evidenceType === 'Protein Interactions') {
+                                expType[subTypeKey] += 1;
+                                exp_scores[0] += 0.5;
+
+                            }
+                            else if (exp.evidenceType === 'Biochemical Function') {
+                                expType[subTypeKey] += 1;
+                                exp_scores[0] += 0.5;
+                            }
+                            else if (exp.evidenceType === 'Functional Alteration' && exp.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Engineered equivalent') {
+                                subTypeKey = subTypeKey + ' (Engineered equivalent)';
+                                expType[subTypeKey] += 1;
+                                exp_scores[1] += 0.5;
+                            }
+                            else if (exp.evidenceType === 'Functional Alteration' && exp.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells') {
+                                subTypeKey = subTypeKey + ' (Patient cells)';
+                                expType[subTypeKey] += 1;
+                                exp_scores[1] += 1;
+                            }
+                            else if (exp.evidenceType === 'Model Systems' && exp.modelSystems.animalOrCellCulture === 'Engineered equivalent') {
+                                subTypeKey = subTypeKey + ' (Engineered equivalent)';
+                                expType[subTypeKey] += 1;
+                                exp_scores[2] += 1;
+                            }
+                            else if (exp.evidenceType === 'Model Systems' && exp.modelSystems.animalOrCellCulture === 'Animal model') {
+                                subTypeKey = subTypeKey + ' (Animal model)';
+                                expType[subTypeKey] += 1;
+                                exp_scores[2] += 2;
+                            }
+                            else if (exp.evidenceType === 'Rescue' && exp.rescue.patientCellOrEngineeredEquivalent === 'Patient cells') {
+                                subTypeKey = subTypeKey + ' (Patient cells)';
+                                expType[subTypeKey] += 1;
+                                exp_scores[2] += 2;
+                            }
+                            else if (exp.evidenceType === 'Rescue' && exp.rescue.patientCellOrEngineeredEquivalent === 'Engineered equivalent') {
+                                subTypeKey = subTypeKey + ' (Engineered equivalent)';
+                                expType[subTypeKey] += 1;
+                                exp_scores[2] += 1;
+                            }
+                            break;
+                        }
+                    }
                 }
             }
         }
