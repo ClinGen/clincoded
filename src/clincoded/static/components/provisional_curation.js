@@ -333,8 +333,10 @@ var NewCalculation = function() {
         "Expression": 0,
         "Protein Interactions": 0,
         "Biochemical Function": 0,
-        "Functional Alteration": 0,
-        "Model Systems": 0,
+        "Functional Alteration (Patient cells)": 0,
+        "Functional Alteration (Engineered equivalent)": 0,
+        "Model Systems (Animal model)": 0,
+        "Model Systems (Engineered equivalent)": 0,
         "Rescue": 0
     }
     for (var i in assessments) {
@@ -349,46 +351,7 @@ var NewCalculation = function() {
             if (evid_type === 'Pathogenicity' || evid_type === 'pathogenicity') {
                 pathoList.push({"patho":evid_id, "owner":owner, "value":value});
             }
-            // Select experimental, count number of each type and calculate as 3 score categories
-            else if (evid_type === 'Expression') {
-                expType[evid_type] += 1;
-                exp_scores[0] += 0.5;
-                //if (!in_array(evid_id, expList)) {
-                //    expList.push(evid_id);
-                //}
-            }
-            else if (evid_type === 'Protein Interactions') {
-                expType[evid_type] += 1;
-                exp_scores[0] += 0.5;
-
-            }
-            else if (evid_type === 'Biochemical Function') {
-                expType[evid_type] += 1;
-                exp_scores[0] += 0.5;
-            }
-            else if (evid_type === 'Functional Alteration') {
-                expType[evid_type] += 1;
-                exp_scores[1] += 1;
-            }
-            else if (evid_type === 'Rescue') {
-                expType[evid_type] += 1;
-                exp_scores[2] += 2;
-            }
-            else if (evid_type === 'Model Systems') {
-                expType[evid_type] += 1;
-                exp_scores[2] += 2;
-            }
         }
-    }
-
-// Compare designed max value at each score category and get the total experimental score
-    var finalExperimentalScore = 0;
-    for (var i in exp_scores) {
-        var max = 2; // set max value for each type
-        if (i == 2) {
-            max = 4;
-        }
-        finalExperimentalScore += (exp_scores[i] <= max) ? exp_scores[i] : max; // not more than the max
     }
 
 // Generate variantIdList
@@ -439,6 +402,64 @@ var NewCalculation = function() {
         if (annotations[i].individuals && annotations[i].individuals.length > 0) {
             individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, variantIdList);
         }
+
+        // collect experimental assessed support
+        if (annotations[i].experimentalData && annotations[i].experimentalData.length > 0) {
+            for (var j in annotations[i].experimentalData) {
+                var exp = annotations[i].experimentalData[j];
+                var subTypeKey = exp.evidenceType;
+                if (exp.evidenceType === 'Expression') {
+                    expType[subTypeKey] += 1;
+                    exp_scores[0] += 0.5;
+                    //if (!in_array(evid_id, expList)) {
+                    //    expList.push(evid_id);
+                    //}
+                }
+                else if (exp.evidenceType === 'Protein Interactions') {
+                    expType[subTypeKey] += 1;
+                    exp_scores[0] += 0.5;
+
+                }
+                else if (exp.evidenceType === 'Biochemical Function') {
+                    expType[subTypeKey] += 1;
+                    exp_scores[0] += 0.5;
+                }
+                else if (exp.evidenceType === 'Functional Alteration' && exp.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Engineered equivalent') {
+                    subTypeKey = subTypeKey + ' (Engineered equivalent)';
+                    expType[subTypeKey] += 1;
+                    exp_scores[1] += 0.5;
+                }
+                else if (exp.evidenceType === 'Functional Alteration' && exp.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells') {
+                    subTypeKey = subTypeKey + ' (Patient cells)';
+                    expType[subTypeKey] += 1;
+                    exp_scores[1] += 1;
+                }
+                else if (exp.evidenceType === 'Model Systems' && exp.modelSystems.animalOrCellCulture === 'Engineered equivalent') {
+                    subTypeKey = subTypeKey + ' (Engineered equivalent)';
+                    expType[subTypeKey] += 1;
+                    exp_scores[2] += 1;
+                }
+                else if (exp.evidenceType === 'Model Systems' && exp.modelSystems.animalOrCellCulture === 'Animal model') {
+                    subTypeKey = subTypeKey + ' (Animal model)';
+                    expType[subTypeKey] += 1;
+                    exp_scores[2] += 2;
+                }
+                else if (exp.evidenceType === 'Rescue') {
+                    expType[subTypeKey] += 1;
+                    exp_scores[2] += 2;
+                }
+            }
+        }
+    }
+
+// Compare designed max value at each score category and get the total experimental score
+    var finalExperimentalScore = 0;
+    for (var i in exp_scores) {
+        var max = 2; // set max value for each type
+        if (i == 2) {
+            max = 4;
+        }
+        finalExperimentalScore += (exp_scores[i] <= max) ? exp_scores[i] : max; // not more than the max
     }
 
 // Collect articles and find the earliest publication year
@@ -649,7 +670,6 @@ var NewCalculation = function() {
     );
 };
 
-//Independent functions
 var in_array = function(item, list) {
     for(var i in list){
         if (list[i] == item) {
