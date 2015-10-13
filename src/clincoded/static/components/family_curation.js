@@ -1337,7 +1337,7 @@ var FamilyVariant = function() {
             : null}
             {this.state.variantCount < MAX_VARIANTS ?
                 <div>
-                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with proband" : "Add variant associated with proband"}
+                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Individual" : "Add variant associated with Individual"}
                         clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                 </div>
             : null}
