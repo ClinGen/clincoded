@@ -1336,7 +1336,14 @@ var FamilyVariant = function() {
                 </div>
             : null}
             {this.state.variantCount < MAX_VARIANTS ?
-                <div>
+                <div className="col-sm-7 col-sm-offset-5">
+                    {this.state.variantCount ?
+                        <p className="alert alert-warning">
+                            For a recessive condition, you must enter both variants believed to be causative for the disease in order that
+                            each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
+                            variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
+                        </p>
+                    : null}
                     <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Individual" : "Add variant associated with Individual"}
                         clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                 </div>
