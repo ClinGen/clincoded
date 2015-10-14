@@ -799,10 +799,23 @@ var LabelPanelTitle = React.createClass({
 var IndividualName = function(displayNote) {
     var individual = this.state.individual;
     var family = this.state.family;
+    var familyProbandExists = false;
     var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
+    if (family && family.individualIncluded && family.individualIncluded.length && family.individualIncluded.length > 0) {
+        for (var i = 0; i < family.individualIncluded.length; i++) {
+            if (family.individualIncluded[i].proband == true) familyProbandExists = true;
+        }
+    }
 
     return (
         <div className="row">
+            {family && !familyProbandExists ?
+            <div className="col-sm-7 col-sm-offset-5">
+                <p className="alert alert-warning">
+                    The proband for a Family must be created through the <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + this.queryValues.familyUuid}>Edit Family page</a>. This page is only for adding non-probands to the Family.
+                </p>
+            </div>
+            : null}
             <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
                 error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
