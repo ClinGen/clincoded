@@ -551,8 +551,8 @@ var NewCalculation = function() {
     else {
         pubScore = articleCollected.length;
     }
-    if (articleCollected.length === 0) {
-        time = ''; // if no article collect,
+    if (articleCollected.length <= 2 && timeScore > 1) {
+        timeScore = 1;
     }
 
     var totalScore = probandScore + pubScore + timeScore + expScore;
