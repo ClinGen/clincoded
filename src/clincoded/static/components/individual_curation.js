@@ -26,7 +26,7 @@ var country_codes = globals.country_codes;
 
 
 // Will be great to convert to 'const' when available
-var MAX_VARIANTS = 5;
+var MAX_VARIANTS = 2;
 
 // Settings for this.state.varOption
 var VAR_NONE = 0; // No variants entered in a panel
@@ -799,10 +799,23 @@ var LabelPanelTitle = React.createClass({
 var IndividualName = function(displayNote) {
     var individual = this.state.individual;
     var family = this.state.family;
+    var familyProbandExists = false;
     var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
+    if (family && family.individualIncluded && family.individualIncluded.length && family.individualIncluded.length > 0) {
+        for (var i = 0; i < family.individualIncluded.length; i++) {
+            if (family.individualIncluded[i].proband == true) familyProbandExists = true;
+        }
+    }
 
     return (
         <div className="row">
+            {family && !familyProbandExists ?
+            <div className="col-sm-7 col-sm-offset-5">
+                <p className="alert alert-warning">
+                    The proband for a Family must be created through the <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + this.queryValues.familyUuid}>Edit Family page</a>. This page is only for adding non-probands to the Family.
+                </p>
+            </div>
+            : null}
             <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
                 error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
@@ -1097,8 +1110,15 @@ var IndividualVariantInfo = function() {
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                 {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
-                                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
-                                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                                    <div className="col-sm-7 col-sm-offset-5">
+                                        <p className="alert alert-warning">
+                                            For a recessive condition, you must enter both variants believed to be causative for the disease in order that
+                                            each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
+                                            variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
+                                        </p>
+                                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with Individual"
+                                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                                    </div>
                                 : null}
                             </div>
                         );

@@ -31,7 +31,6 @@ var hpoValues = [
     {text: 'Mitochondrial inheritance (HP:0001427)'},
     {text: 'Sex-limited autosomal dominant (HP:0001470)'},
     {text: 'Somatic mutation (HP:0001428)'},
-    {text: 'Sporadic (HP:0003745)'},
     {text: 'X-linked dominant inheritance (HP:0001423)'},
     {text: 'X-linked inheritance (HP:0001417)'},
     {text: 'X-linked recessive inheritance (HP:0001419)'},
