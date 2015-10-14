@@ -1098,8 +1098,15 @@ var IndividualVariantInfo = function() {
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                 {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
-                                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with Individual"
-                                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                                    <div className="col-sm-7 col-sm-offset-5">
+                                        <p className="alert alert-warning">
+                                            For a recessive condition, you must enter both variants believed to be causative for the disease in order that
+                                            each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
+                                            variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
+                                        </p>
+                                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with Individual"
+                                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                                    </div>
                                 : null}
                             </div>
                         );

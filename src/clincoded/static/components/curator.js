@@ -79,6 +79,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
         var provisional;
         var summaryInfo = 'none';
+        var provisionalExist = false;
+        var summaryButton = false;
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
@@ -89,7 +91,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
                 for (var i in gdm.provisionalClassifications) {
                     if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
-                        summaryInfo = 'provisional';
+                        provisionalExist = true;
+                        //summaryInfo = 'provisional';
                         provisional = gdm.provisionalClassifications[i];
                         break;
                     }
@@ -97,24 +100,24 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             }
 
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
-            if (summaryInfo === 'none' && gdm.annotations && gdm.annotations.length > 0 && getUserPathogenicity(gdm, session).length > 0) {
+            if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && getUserPathogenicity(gdm, session).length > 0) {
                 var supportedVariants = getUserPathogenicity(gdm, session);
                 for (var i in gdm.annotations) {
                     var annotation = gdm.annotations[i];
                     if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
-                        summaryInfo = 'assessed';
+                        summaryButton = true;
                         break;
                     }
-                    if (summaryInfo === 'none' && annotation.families && annotation.families.length > 0) {
+                    if (!summaryButton && annotation.families && annotation.families.length > 0) {
                         for (var j in annotation.families) {
                             if (annotation.families[j].individualIncluded && annotation.families[j].individualIncluded.length > 0 &&
                                 searchProbandIndividual(annotation.families[j].individualIncluded, supportedVariants)) {
-                                summaryInfo = 'assessed';
+                                summaryButton = true;
                                 break;
                             }
                         }
                     }
-                    if (summaryInfo === 'assessed') {
+                    if (summaryButton) {
                         break;
                     }
                     else if (annotation.groups && annotation.groups.length > 0) {
@@ -123,22 +126,22 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                 for (var k in annotation.groups[j].familyIncluded) {
                                     if (annotation.groups[j].familyIncluded[k].individualIncluded && annotation.groups[j].familyIncluded[k].individualIncluded.length > 0 &&
                                         searchProbandIndividual(annotation.groups[j].familyIncluded[k].individualIncluded, supportedVariants)) {
-                                        summaryInfo = 'assessed';
+                                        summaryButton = true;
                                         break;
                                     }
                                 }
                             }
-                            if (summaryInfo === 'assessed') {
+                            if (summaryButton) {
                                 break;
                             }
                             else if (annotation.groups[j].individualIncluded && annotation.groups[j].individualIncluded.length > 0 &&
                                 searchProbandIndividual(annotation.groups[j].individualIncluded, supportedVariants)) {
-                                summaryInfo = 'assessed';
+                                summaryButton = true;
                                 break;
                             }
                         }
                     }
-                    if (summaryInfo === 'assessed') {
+                    if (summaryButton) {
                         break;
                     }
                 }
@@ -150,45 +153,46 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                         <div className="container">
                             <h1>{gene.symbol} – {disease.term}</h1>
                             <h2>{mode}</h2>
-                            { (summaryInfo !== 'none') ?
-                                <div className="provisional-info-panel">
-                                    <table style={{'width':'100%'}}>
-                                        <tr>
-                                            <td style={{'text-align':'left'}}>
-                                                <div className="provisional-title">
-                                                    <strong>Current Summary & Provisional Classification</strong>
-                                                </div>
-                                                {   summaryInfo === 'provisional' ?
-                                                        <div>
-                                                            <div className="provisional-data-left">
-                                                                <span>
-                                                                    Current Summary<br />
-                                                                    Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                                </span>
-                                                            </div>
-                                                            <div className="provisional-data-center">
-                                                                <span>
-                                                                    Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                    Provisional Classification: {provisional.alteredClassification}&nbsp;&nbsp;
-                                                                    [<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]
-                                                                </span>
-                                                            </div>
+                            <div className="provisional-info-panel">
+                                <table style={{'width':'100%'}}>
+                                    <tr>
+                                        <td style={{'text-align':'left'}}>
+                                            <div className="provisional-title">
+                                                <strong>Current Summary & Provisional Classification</strong>
+                                            </div>
+                                            {   provisionalExist ?
+                                                    <div>
+                                                        <div className="provisional-data-left">
+                                                            <span>
+                                                                Current Summary<br />
+                                                                Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                            </span>
                                                         </div>
-                                                    :
-                                                        <div className="provisional-data-left"><span>No Reported Evidence</span></div>
-                                                }
-                                            </td>
+                                                        <div className="provisional-data-center">
+                                                            <span>
+                                                                Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                Provisional Classification: {provisional.alteredClassification}&nbsp;&nbsp;
+                                                                [<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                :
+                                                    <div className="provisional-data-left"><span>No Reported Evidence</span></div>
+                                            }
+                                        </td>
+                                        { summaryButton ?
                                             <td style={{'width':'200px', 'vertical-align':'middle'}}>
                                                 <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                                    { summaryInfo === 'provisional' ? 'Generate New Summary' : 'Generate Summary' }
+                                                    { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
                                                 </a>
                                             </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                :
-                                null
-                            }
+                                            :
+                                            <td style={{'width':'200px'}}>&nbsp;</td>
+                                        }
+
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div className="container curation-data">
