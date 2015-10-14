@@ -86,7 +86,6 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
 
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
-            // else if pathogenicity or experimental assessed as Supports, show Generate Summary button
             if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
                 for (var i in gdm.provisionalClassifications) {
                     if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
@@ -96,31 +95,51 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                     }
                 }
             }
-            if (summaryInfo === 'none' && gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
-                for (var i in gdm.variantPathogenicity) {
-                    if (gdm.variantPathogenicity[i].assessments.length > 0 &&
-                        gdm.variantPathogenicity[i].assessments[0].value === 'Supports' &&
-                        userMatch(gdm.variantPathogenicity[i].assessments[0].submitted_by, session)) {
+
+            // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
+            if (summaryInfo === 'none' && gdm.annotations && gdm.annotations.length > 0 && getUserPathogenicity(gdm, session).length > 0) {
+                var supportedVariants = getUserPathogenicity(gdm, session);
+                for (var i in gdm.annotations) {
+                    var annotation = gdm.annotations[i];
+                    if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
                         summaryInfo = 'assessed';
                         break;
                     }
-                }
-            }
-            if (summaryInfo === 'none' && gdm.annotations && gdm.annotations.length > 0) {
-                for (var i=0; i<gdm.annotations.length; i++) {
-                    var annotation = gdm.annotations[i];
-                    if (annotation.experimentalData.length > 0) {
-                        for (var j in annotation.experimentalData) {
-                            var experimental = annotation.experimentalData[j];
-                            if (experimental.assessments && experimental.assessments.length > 0) {
-                                for (var k in experimental.assessments) {
-                                    if (userMatch(experimental.assessments[k].submitted_by, session) && experimental.assessments[k].value === 'Supports') {
+                    if (summaryInfo === 'none' && annotation.families && annotation.families.length > 0) {
+                        for (var j in annotation.families) {
+                            if (annotation.families[j].individualIncluded && annotation.families[j].individualIncluded.length > 0 &&
+                                searchProbandIndividual(annotation.families[j].individualIncluded, supportedVariants)) {
+                                summaryInfo = 'assessed';
+                                break;
+                            }
+                        }
+                    }
+                    if (summaryInfo === 'assessed') {
+                        break;
+                    }
+                    else if (annotation.groups && annotation.groups.length > 0) {
+                        for (var j in annotation.groups) {
+                            if (annotation.groups[j].familyIncluded && annotation.groups[j].familyIncluded.length > 0) {
+                                for (var k in annotation.groups[j].familyIncluded) {
+                                    if (annotation.groups[j].familyIncluded[k].individualIncluded && annotation.groups[j].familyIncluded[k].individualIncluded.length > 0 &&
+                                        searchProbandIndividual(annotation.groups[j].familyIncluded[k].individualIncluded, supportedVariants)) {
                                         summaryInfo = 'assessed';
                                         break;
                                     }
                                 }
                             }
+                            if (summaryInfo === 'assessed') {
+                                break;
+                            }
+                            else if (annotation.groups[j].individualIncluded && annotation.groups[j].individualIncluded.length > 0 &&
+                                searchProbandIndividual(annotation.groups[j].individualIncluded, supportedVariants)) {
+                                summaryInfo = 'assessed';
+                                break;
+                            }
                         }
+                    }
+                    if (summaryInfo === 'assessed') {
+                        break;
                     }
                 }
             }
@@ -156,7 +175,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                             </div>
                                                         </div>
                                                     :
-                                                        <div className="provisional-data-left"><span>None</span></div>
+                                                        <div className="provisional-data-left"><span>No Reported Evidence</span></div>
                                                 }
                                             </td>
                                             <td style={{'width':'200px', 'vertical-align':'middle'}}>
@@ -186,6 +205,47 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         }
     }
 });
+
+
+// function to collect variants assessed support by login user
+var getUserPathogenicity = function(gdm, session) {
+    var supportedVariants = [];
+    if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
+        for (var i in gdm.variantPathogenicity) {
+            if (userMatch(gdm.variantPathogenicity[i].submitted_by, session) && gdm.variantPathogenicity[i].assessments && gdm.variantPathogenicity[i].assessments[0].value === 'Supports') {
+                supportedVariants.push(gdm.variantPathogenicity[i].variant.uuid);
+            }
+        }
+    }
+    return supportedVariants;
+};
+
+var all_in = function(individualVariantList, allSupportedlist) {
+    for(var i in individualVariantList) {
+        var this_in = false;
+        for (var j in allSupportedlist) {
+            if (individualVariantList[i].uuid === allSupportedlist[j]) {
+                this_in = true;
+                break;
+            }
+        }
+
+        if (!this_in) {
+            return false;
+        }
+    }
+    return true;
+};
+
+// function to find one proband individual with all variants assessed.
+var searchProbandIndividual = function(individualList, variantList) {
+    for (var i in individualList) {
+        if (individualList[i].proband && individualList[i].variants && individualList[i].variants.length > 0 && all_in(individualList[i].variants, variantList)) {
+            return true;
+        }
+    }
+    return false;
+};
 
 
 // Display the header of all variants involved with the current GDM.

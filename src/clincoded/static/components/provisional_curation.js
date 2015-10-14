@@ -35,6 +35,7 @@ var ProvisionalCuration = React.createClass({
 
     getInitialState: function() {
         return {
+            //urlFrom: document.referrer,
             user: null, // login user uuid
             gdm: null, // current gdm object, must be null initially.
             provisional: null, // login user's existing provisional object, must be null initially.
@@ -128,8 +129,8 @@ var ProvisionalCuration = React.createClass({
                 if (this.state.provisional) { // edit existing provisional
                     this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
                         this.resetAllFormValues();
-                        this.context.navigate(backUrl);
-                        //window.history.go(-1);
+                        //this.context.navigate(backUrl);
+                        window.history.go(-1);
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = : %o', e);
                     });
@@ -151,8 +152,8 @@ var ProvisionalCuration = React.createClass({
                         });
                     }).then(savedGdm => {
                         this.resetAllFormValues();
-                        this.context.navigate(backUrl);
-                        //window.history.go(-1);
+                        //this.context.navigate(backUrl);
+                        window.history.go(-1);
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = %o', e);
                     });
@@ -168,10 +169,10 @@ var ProvisionalCuration = React.createClass({
 
         // click Cancel button will go back to view - current
         if (e.detail >= 1){
-            var backUrl = '/curation-central/?gdm=' + this.state.gdm.uuid;
-            backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
-            //window.history.go(-1);
-            this.context.navigate(backUrl);
+            window.history.go(-1);
+            //var backUrl = '/curation-central/?gdm=' + this.state.gdm.uuid;
+            //backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
+            //this.context.navigate(backUrl);
         }
     },
 
@@ -283,7 +284,7 @@ var EditCurrent = function() {
                                 <option value="Strong">Strong</option>
                                 <option value="Moderate">Moderate</option>
                                 <option value="Limited">Limited</option>
-                                <option value="No Evidence">No Evidence</option>
+                                <option value="No Reported Evidence">No Evidence</option>
                                 <option value="Disputed">Disputed</option>
                                 <option value="Refuted">Refuted</option>
                             </Input>
@@ -555,7 +556,7 @@ var NewCalculation = function() {
     }
 
     var totalScore = probandScore + pubScore + timeScore + expScore;
-    var autoClassification = 'Limited';
+    var autoClassification = 'No Reported Evidence';
     if (totalScore > 16){
         autoClassification = 'Definitive';
     }
@@ -666,7 +667,7 @@ var NewCalculation = function() {
                                 <option value="Strong">Strong</option>
                                 <option value="Moderate">Moderate</option>
                                 <option value="Limited">Limited</option>
-                                <option value="No Evidence">No Evidence</option>
+                                <option value="No Evidence">No Reported Evidence</option>
                                 <option value="Disputed">Disputed</option>
                                 <option value="Refuted">Refuted</option>
                             </Input>
