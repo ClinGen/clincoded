@@ -70,5 +70,11 @@
         "title": "Dashboard",
         "status": "released",
         "uuid": "a6dbc91f-ed63-4ff9-a723-18f6cab05dae"
-    }
+    },
+    {
+        "name": "provisional-curation",
+        "title": "Summary & Provisional Classification",
+        "status": "released",
+        "uuid": "6e21a14f-2231-46ec-a7d1-5167b8662848"
+     }
 ]

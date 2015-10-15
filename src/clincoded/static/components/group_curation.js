@@ -385,6 +385,7 @@ var GroupCuration = React.createClass({
         var group = this.state.group;
         var method = (group && group.method && Object.keys(group.method).length) ? group.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
@@ -396,7 +397,7 @@ var GroupCuration = React.createClass({
             <div>
                 {(!this.queryValues.groupUuid || this.state.group) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">

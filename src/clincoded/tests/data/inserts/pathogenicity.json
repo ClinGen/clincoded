@@ -15,8 +15,7 @@
         "supportingStatistic": false,
         "supportingExperimental": true,
         "assessments": [
-            "430b4d6e-681d-4345-8936-02df2f65ebf8",
-            "0e953b83-c2b0-4468-abff-1af3077e3dee"
+            "51da1679-d731-42d2-ad2d-2ac45fc563be"
         ]
     },
     {
@@ -35,7 +34,6 @@
         "supportingStatistic": false,
         "supportingExperimental": true,
         "assessments": [
-            "5ff17117-8d6f-4723-8969-cfd0ad67a79c",
             "25285bb5-e0d0-47a6-8404-6ab63e6e71fb"
         ]
     },
@@ -55,8 +53,102 @@
         "supportingStatistic": false,
         "supportingExperimental": true,
         "assessments": [
-            "51da1679-d731-42d2-ad2d-2ac45fc563be",
-            "47f8be2f-f7e2-435c-9955-cccf2b6aba14"
+            "334e4629-a579-4e93-8274-2a52cbfabc2e"
+        ]
+    },
+    {
+        "uuid": "5f5f6896-59cb-435e-8407-1d3996b6e502",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-07-13T21:23:22.000000+00:00",
+        "last_modified": "2015-07-14T17:01:20.000000+00:00",
+        "variant": "df8135d4-2685-11e5-af19-60f81dc5b05a",
+        "consistentWithDiseaseMechanism": true,
+        "withinFunctionalDomain": true,
+        "frequencySupportPathogenicity": false,
+        "previouslyReported": false,
+        "denovoType": "Confirmed",
+        "intransWithAnotherVariant": false,
+        "supportingSegregation": true,
+        "supportingStatistic": false,
+        "supportingExperimental": true,
+        "assessments": [
+            "cb2541d7-1a21-4450-a5d1-ec0cd1a91b7e"
+        ]
+    },
+    {
+        "uuid": "d831ef32-e4e7-42e2-af11-e6de0664cb28",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-07-13T21:23:22.000000+00:00",
+        "last_modified": "2015-07-14T17:01:20.000000+00:00",
+        "variant": "c71fc085-2683-11e5-b9fe-60f81dc5b05a",
+        "consistentWithDiseaseMechanism": true,
+        "withinFunctionalDomain": true,
+        "frequencySupportPathogenicity": false,
+        "previouslyReported": false,
+        "denovoType": "Confirmed",
+        "intransWithAnotherVariant": false,
+        "supportingSegregation": true,
+        "supportingStatistic": false,
+        "supportingExperimental": true,
+        "assessments": [
+            "61ae58a8-db5e-4a43-80bf-9bb2e04fd794"
+        ]
+    },
+    {
+        "uuid": "ca83ac65-5f87-4e3c-a7e3-60ab2e48d33b",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-07-13T21:23:22.000000+00:00",
+        "last_modified": "2015-07-14T17:01:20.000000+00:00",
+        "variant": "d9717187-2685-11e5-9eac-60f81dc5b05a",
+        "consistentWithDiseaseMechanism": true,
+        "withinFunctionalDomain": true,
+        "frequencySupportPathogenicity": false,
+        "previouslyReported": false,
+        "denovoType": "Confirmed",
+        "intransWithAnotherVariant": false,
+        "supportingSegregation": true,
+        "supportingStatistic": false,
+        "supportingExperimental": true,
+        "assessments": [
+            "5090d816-60ff-4602-ab5c-431cb9bce5d6"
+        ]
+    },
+    {
+        "uuid": "89d48c23-764a-47d4-bd6e-366502224e12",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-07-13T21:23:22.000000+00:00",
+        "last_modified": "2015-07-14T17:01:20.000000+00:00",
+        "variant": "e496545c-2685-11e5-a4b3-60f81dc5b05a",
+        "consistentWithDiseaseMechanism": true,
+        "withinFunctionalDomain": true,
+        "frequencySupportPathogenicity": false,
+        "previouslyReported": false,
+        "denovoType": "Confirmed",
+        "intransWithAnotherVariant": false,
+        "supportingSegregation": true,
+        "supportingStatistic": false,
+        "supportingExperimental": true,
+        "assessments": [
+            "b2f1d0c8-37e3-4f9c-ac3b-f42cd1569a7f"
+        ]
+    },
+    {
+        "uuid": "912cf582-4e46-425c-839d-f6b21fa621ae",
+        "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
+        "date_created": "2015-09-13T21:23:22.000000+00:00",
+        "last_modified": "2015-09-14T17:01:20.000000+00:00",
+        "variant": "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a",
+        "consistentWithDiseaseMechanism": true,
+        "withinFunctionalDomain": true,
+        "frequencySupportPathogenicity": false,
+        "previouslyReported": false,
+        "denovoType": "Confirmed",
+        "intransWithAnotherVariant": false,
+        "supportingSegregation": true,
+        "supportingStatistic": false,
+        "supportingExperimental": true,
+        "assessments": [
+            "a4aeb035-0a9c-41e0-9963-1deeb4e1301d"
         ]
     }
 ]

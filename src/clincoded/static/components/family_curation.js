@@ -901,6 +901,7 @@ var FamilyCuration = React.createClass({
         var annotation = this.state.annotation;
         var method = (family && family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
@@ -915,7 +916,7 @@ var FamilyCuration = React.createClass({
             <div>
                 {(!this.queryValues.familyUuid || this.state.family) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">

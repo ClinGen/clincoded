@@ -138,7 +138,7 @@
 
 .pmid-selection-list {
     max-height: 250px;
-    overflow-y: scroll;
+    overflow-y: auto;
     border: 1px solid #e0e0e0;
 
     @media screen and (min-width: $screen-md-min) {
@@ -424,4 +424,52 @@
 .icon-proband-white {
     @extend .icon-proband;
     color: #fff;
+}
+
+// Summary and Provisional data in GDM title panel
+.provisional-info-panel {
+    width: 100%;
+    border-top: 2px solid #aaa;
+
+    .provisional-title {
+        text-align: left;
+        padding-left: 10px;
+    }
+
+    .provisional-data-left {
+        float: left;
+        text-align: left;
+        padding-left: 10px;
+        padding-right: 100px;
+    }
+
+    .provisional-data-center {
+        float: left;
+        text-align: left;
+        padding-left: 10px;
+    }
+
+    .provisional-button {
+        padding: 0;
+        margin: auto;
+
+        .btn {
+            margin: 10px 0 10px 0;
+        }
+    }
+}
+
+.summary-scoring {
+
+    .td-title {
+        width: 420px;
+        padding-left: 10px;
+    }
+
+    .td-score {
+        width: 80px;
+        text-align: right;
+        vertical-align: top;
+        padding-right: 10px;
+    }
 }

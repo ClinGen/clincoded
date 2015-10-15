@@ -103,6 +103,7 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
         var family = this.state.family;
         var individual = this.state.individual;
         var annotation = this.state.annotation;
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get the query strings to start the process of loading the objects
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
@@ -127,7 +128,7 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} />
+                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
                 <div className="container">
                     {individual ?
                         <h1>Individual Information: {individual.label} <a href={individual['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editIndividualLink} className="btn btn-info">Edit</a></h1>

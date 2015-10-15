@@ -120,7 +120,7 @@ var CurationCentral = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                 <div className="container">
                     <VariantHeader gdm={gdm} pmid={this.state.currPmid} session={session} />
                     <div className="row curation-content">

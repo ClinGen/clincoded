@@ -31,5 +31,6 @@ require('./variant_curation');
 require('./testing');
 require('./edit');
 require('./inputs');
+require('./provisional_curation');
 
 module.exports = require('./app');

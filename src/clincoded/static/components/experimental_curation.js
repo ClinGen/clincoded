@@ -1141,6 +1141,7 @@ var ExperimentalCuration = React.createClass({
         var annotation = this.state.annotation;
         var experimental = this.state.experimental;
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get the 'evidence', 'gdm', and 'experimental' UUIDs from the query string and save them locally.
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
@@ -1152,7 +1153,7 @@ var ExperimentalCuration = React.createClass({
             <div>
                 {(!this.queryValues.experimentalUuid || this.state.experimental) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">

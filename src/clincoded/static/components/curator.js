@@ -75,11 +75,77 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
     render: function() {
         var gdm = this.props.gdm;
+        var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
 
+        var provisional;
+        //var summaryInfo = 'none';
+        var provisionalExist = false;
+        var summaryButton = false;
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+
+
+            // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
+            if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
+                for (var i in gdm.provisionalClassifications) {
+                    if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
+                        provisionalExist = true;
+                        //summaryInfo = 'provisional';
+                        provisional = gdm.provisionalClassifications[i];
+                        break;
+                    }
+                }
+            }
+
+            // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
+            var supportedVariants = getUserPathogenicity(gdm, session);
+            if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && supportedVariants && supportedVariants.length > 0) {
+                for (var i in gdm.annotations) {
+                    var annotation = gdm.annotations[i];
+                    if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
+                        summaryButton = true;
+                        break;
+                    }
+                    if (!summaryButton && annotation.families && annotation.families.length > 0) {
+                        for (var j in annotation.families) {
+                            if (annotation.families[j].individualIncluded && annotation.families[j].individualIncluded.length > 0 &&
+                                searchProbandIndividual(annotation.families[j].individualIncluded, supportedVariants)) {
+                                summaryButton = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (summaryButton) {
+                        break;
+                    }
+                    else if (annotation.groups && annotation.groups.length > 0) {
+                        for (var j in annotation.groups) {
+                            if (annotation.groups[j].familyIncluded && annotation.groups[j].familyIncluded.length > 0) {
+                                for (var k in annotation.groups[j].familyIncluded) {
+                                    if (annotation.groups[j].familyIncluded[k].individualIncluded && annotation.groups[j].familyIncluded[k].individualIncluded.length > 0 &&
+                                        searchProbandIndividual(annotation.groups[j].familyIncluded[k].individualIncluded, supportedVariants)) {
+                                        summaryButton = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (summaryButton) {
+                                break;
+                            }
+                            else if (annotation.groups[j].individualIncluded && annotation.groups[j].individualIncluded.length > 0 &&
+                                searchProbandIndividual(annotation.groups[j].individualIncluded, supportedVariants)) {
+                                summaryButton = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (summaryButton) {
+                        break;
+                    }
+                }
+            }
 
             return (
                 <div>
@@ -87,6 +153,46 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                         <div className="container">
                             <h1>{gene.symbol} – {disease.term}</h1>
                             <h2>{mode}</h2>
+                            <div className="provisional-info-panel">
+                                <table style={{'width':'100%'}}>
+                                    <tr>
+                                        <td style={{'text-align':'left'}}>
+                                            <div className="provisional-title">
+                                                <strong>Current Summary & Provisional Classification</strong>
+                                            </div>
+                                            {   provisionalExist ?
+                                                    <div>
+                                                        <div className="provisional-data-left">
+                                                            <span>
+                                                                Current Summary<br />
+                                                                Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                            </span>
+                                                        </div>
+                                                        <div className="provisional-data-center">
+                                                            <span>
+                                                                Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                Provisional Classification: {provisional.alteredClassification}&nbsp;&nbsp;
+                                                                [<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                :
+                                                    <div className="provisional-data-left"><span>No Reported Evidence</span></div>
+                                            }
+                                        </td>
+                                        { summaryButton ?
+                                            <td style={{'width':'200px', 'vertical-align':'middle'}}>
+                                                <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                    { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
+                                                </a>
+                                            </td>
+                                            :
+                                            <td style={{'width':'200px'}}>&nbsp;</td>
+                                        }
+
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div className="container curation-data">
@@ -103,6 +209,48 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         }
     }
 });
+
+
+// function to collect variants assessed support by login user
+var getUserPathogenicity = function(gdm, session) {
+    var supportedVariants = [];
+    if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
+        for (var i in gdm.variantPathogenicity) {
+            var this_patho = gdm.variantPathogenicity[i];
+            if (userMatch(this_patho.submitted_by, session) && this_patho.assessments && this_patho.assessments[0].value === 'Supports') {
+                supportedVariants.push(this_patho.variant.uuid);
+            }
+        }
+    }
+    return supportedVariants;
+};
+
+var all_in = function(individualVariantList, allSupportedlist) {
+    for(var i in individualVariantList) {
+        var this_in = false;
+        for (var j in allSupportedlist) {
+            if (individualVariantList[i].uuid === allSupportedlist[j]) {
+                this_in = true;
+                break;
+            }
+        }
+
+        if (!this_in) {
+            return false;
+        }
+    }
+    return true;
+};
+
+// function to find one proband individual with all variants assessed.
+var searchProbandIndividual = function(individualList, variantList) {
+    for (var i in individualList) {
+        if (individualList[i].proband && individualList[i].variants && individualList[i].variants.length > 0 && all_in(individualList[i].variants, variantList)) {
+            return true;
+        }
+    }
+    return false;
+};
 
 
 // Display the header of all variants involved with the current GDM.
@@ -143,11 +291,14 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             });
 
                             if (session && inCurrentGdm) {
-                                userPathogenicity = getPathogenicityFromVariant(variant, session.user_properties.uuid);
+                                userPathogenicity = getPathogenicityFromVariant(gdm, session.user_properties.uuid, variant.uuid);
+                                //userPathogenicity = getPathogenicityFromVariant(variant, session.user_properties.uuid);
                             }
+                            inCurrentGdm = userPathogenicity ? true : false;
+
                             return (
                                 <div className="col-sm-6 col-md-3 col-lg-2" key={variant.uuid}>
-                                    <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (matchingPathogenicity ? '&pathogenicity=' + matchingPathogenicity.uuid : '')}>
+                                    <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}>
                                         {inCurrentGdm ? <i className="icon icon-sticky-note"></i> : null}
                                         {variantName}
                                     </a>
@@ -562,9 +713,10 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
     var variantCurated = variant.associatedPathogenicities.length > 0;
 
     // Get the pathogenicity record with an owner that matches the annotation's owner.
-    var associatedPathogenicity = getPathogenicityFromVariant(variant, annotation.submitted_by.uuid);
+    var associatedPathogenicity = getPathogenicityFromVariant(gdm, annotation.submitted_by.uuid, variant.uuid);
+    //var associatedPathogenicity = getPathogenicityFromVariant(variant, annotation.submitted_by.uuid);
 
-    // Get all families and individuals that reference this variant into variantAssocations array of families and individuals
+    // Get all families and individuals that reference this variant into variantAssociations array of families and individuals
     var variantAssociations = collectVariantAssociations(annotation, variant).sort(function(associationA, associationB) {
         var labelA = associationA.label.toLowerCase();
         var labelB = associationB.label.toLowerCase();
@@ -582,7 +734,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
             </div>
             {variantAssociations ?
                 <div>
-                    <span>Assocations: </span>
+                    <span>Associations: </span>
                     {variantAssociations.map(function(association, i) {
                         var associationType = association['@type'][0];
                         var probandIndividual = associationType === 'individual' && association.proband;
@@ -851,14 +1003,25 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
 
 
 // Get the pathogenicity made by the curator with the given user UUID from the given variant.
-var getPathogenicityFromVariant = function(variant, curatorUuid) {
-    var pathogenicity = null;
+//var getPathogenicityFromVariant = function(variant, curatorUuid) {
+//  var pathogenicity = null;
 
-    if (variant && variant.associatedPathogenicities.length > 0) {
-        // At this point, we know the variant has a curation (pathogenicity)
-        pathogenicity = _(variant.associatedPathogenicities).find(function(pathogenicity) {
-            return pathogenicity.submitted_by.uuid === curatorUuid;
-        });
+//    if (variant && variant.associatedPathogenicities.length > 0) {
+//        // At this point, we know the variant has a curation (pathogenicity)
+//        pathogenicity = _(variant.associatedPathogenicities).find(function(pathogenicity) {
+//            return pathogenicity.submitted_by.uuid === curatorUuid;
+//        });
+//    }
+//    return pathogenicity;
+//};
+var getPathogenicityFromVariant = function(gdm, curatorUuid, variantUuid) {
+    var pathogenicity = null;
+    if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
+        for (var i in gdm.variantPathogenicity) {
+            if (gdm.variantPathogenicity[i].submitted_by.uuid === curatorUuid && gdm.variantPathogenicity[i].variant.uuid == variantUuid) {
+                pathogenicity = gdm.variantPathogenicity[i];
+            }
+        }
     }
     return pathogenicity;
 };
@@ -1170,6 +1333,10 @@ var flatten = module.exports.flatten = function(obj, type) {
 
             case 'assessment':
                 flat = flattenAssessment(obj);
+                break;
+
+            case 'provisionalClassification':
+                flat = flattenProvisional(obj);
                 break;
 
             default:
@@ -1493,6 +1660,17 @@ var assessmentSimpleProps = [
 
 function flattenAssessment(assessment) {
     var flat = cloneSimpleProps(assessment, assessmentSimpleProps);
+
+    return flat;
+}
+
+
+var provisionalSimpleProps = [
+    "date_created", "totalScore", "autoClassification", "alteredClassification", "reasons", "active"
+];
+
+function flattenProvisional(provisional) {
+    var flat = cloneSimpleProps(provisional, provisionalSimpleProps);
 
     return flat;
 }
