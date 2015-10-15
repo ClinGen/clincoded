@@ -26,7 +26,7 @@ var country_codes = globals.country_codes;
 
 
 // Will be great to convert to 'const' when available
-var MAX_VARIANTS = 5;
+var MAX_VARIANTS = 2;
 
 // Settings for this.state.varOption
 var VAR_NONE = 0; // No variants entered in a panel
@@ -659,7 +659,7 @@ var IndividualCuration = React.createClass({
         var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
-        var variantTitle = (individual && individual.proband) ? <h4>Individual<i className="icon icon-proband-white"></i>  – Variant(s) segregating with Proband</h4> : <h4>Individual — Associated Variant(s)</h4>;
+        var variantTitle = (individual && individual.proband) ? <h4>Individual<i className="icon icon-proband-white"></i>  – Variant(s) segregating with Proband</h4> : <h4>Individual — Associated Variant(s)</h4>;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get a list of associated groups if editing an individual, or the group in the query string if there was one, or null.
@@ -800,10 +800,23 @@ var LabelPanelTitle = React.createClass({
 var IndividualName = function(displayNote) {
     var individual = this.state.individual;
     var family = this.state.family;
+    var familyProbandExists = false;
     var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
+    if (family && family.individualIncluded && family.individualIncluded.length && family.individualIncluded.length > 0) {
+        for (var i = 0; i < family.individualIncluded.length; i++) {
+            if (family.individualIncluded[i].proband == true) familyProbandExists = true;
+        }
+    }
 
     return (
         <div className="row">
+            {family && !familyProbandExists ?
+            <div className="col-sm-7 col-sm-offset-5">
+                <p className="alert alert-warning">
+                    The proband for a Family must be created through the <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + this.queryValues.familyUuid}>Edit Family page</a>. This page is only for adding non-probands to the Family.
+                </p>
+            </div>
+            : null}
             <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
                 error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
