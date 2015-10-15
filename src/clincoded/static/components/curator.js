@@ -100,8 +100,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             }
 
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
-            if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && getUserPathogenicity(gdm, session).length > 0) {
-                var supportedVariants = getUserPathogenicity(gdm, session);
+            var supportedVariants = getUserPathogenicity(gdm, session);
+            if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && supportedVariants && supportedVariants.length > 0) {
                 for (var i in gdm.annotations) {
                     var annotation = gdm.annotations[i];
                     if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
@@ -216,8 +216,9 @@ var getUserPathogenicity = function(gdm, session) {
     var supportedVariants = [];
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
         for (var i in gdm.variantPathogenicity) {
-            if (userMatch(gdm.variantPathogenicity[i].submitted_by, session) && gdm.variantPathogenicity[i].assessments && gdm.variantPathogenicity[i].assessments[0].value === 'Supports') {
-                supportedVariants.push(gdm.variantPathogenicity[i].variant.uuid);
+            var this_patho = gdm.variantPathogenicity[i];
+            if (userMatch(this_patho.submitted_by, session) && this_patho.assessments && this_patho.assessments[0].value === 'Supports') {
+                supportedVariants.push(this_patho.variant.uuid);
             }
         }
     }

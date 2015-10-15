@@ -629,7 +629,7 @@ var NewCalculation = function() {
                                         </tr>
                                         <tr><td cols="3"><span>&nbsp;</span></td></tr>
                                         <tr>
-                                            <td className="td-title">Clinical Publicatons</td>
+                                            <td className="td-title">Clinical Publications</td>
                                             <td className="td-score">{articleCollected.length}</td>
                                             <td className="td-score">&nbsp;</td>
                                         </tr>

@@ -345,11 +345,21 @@ var VariantCuration = React.createClass({
 
         // If we're editing a pathogenicity, get a list of all the variant's pathogenicities, except for the one
         // we're editing. This is to display the list of past curations.
-        if (this.queryValues.all && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length) {
-            otherPathogenicityList = _(variant.associatedPathogenicities).filter(function(fp) {
-                return fp.submitted_by.uuid !== user;
-            });
+        // Edited by Kang Liu, 10/14/2015
+        if (this.queryValues.all && variant && gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
+            for (var i in gdm.variantPathogenicity) {
+                var pathoVariant = gdm.variantPathogenicity[i].variant;
+                if (pathoVariant.uuid === variant.uuid && gdm.variantPathogenicity[i].submitted_by.uuid !== user) {
+                    otherPathogenicityList.push(gdm.variantPathogenicity[i]);
+                }
+            }
         }
+        //if (this.queryValues.all && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length) {
+        //    otherPathogenicityList = _(variant.associatedPathogenicities).filter(function(fp) {
+        //        return fp.submitted_by.uuid !== user;
+        //    });
+        //}
+
 
         // Set up the deNovo type for the dropdown
         var denovoType = pathogenicity ? (pathogenicity.denovoType === "" ? "none" : pathogenicity.denovoType) : "none";
