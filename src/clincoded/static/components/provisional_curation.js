@@ -341,20 +341,6 @@ var NewCalculation = function() {
         "Rescue (Patient cells)": 0,
         "Rescue (Engineered equivalent)": 0
     }
-    for (var i in assessments) {
-        var value = assessments[i]['value'];
-        var owner = assessments[i]['submitted_by']['uuid'];
-        var gdmAssessed = assessments[i]['evidence_gdm'];
-        var evid_type = assessments[i]['evidence_type'];
-        var evid_id = assessments[i]['evidence_id'];
-
-        if (gdmAssessed === gdm.uuid && owner === this.state.user && value === 'Supports') {
-            // Generate pathoList
-            if (evid_type === 'Pathogenicity' || evid_type === 'pathogenicity') {
-                pathoList.push({"patho":evid_id, "owner":owner, "value":value});
-            }
-        }
-    }
 
 // Generate variantIdList
     var gdmPathoList = gdm.variantPathogenicity;
@@ -364,7 +350,8 @@ var NewCalculation = function() {
         if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
             for (var j in gdmPathoList[i].assessments) {
                 if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
-                    var variantUuid = gdmPathoList[i].variant['@id'].substr(10).replace('/', '');
+                    var variantUuid = gdmPathoList[i].variant.uuid;
+                    //var variantUuid = gdmPathoList[i].variant['@id'].substr(10).replace('/', '');
                     variantIdList.push(variantUuid);
                     break;
                 }

@@ -78,7 +78,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
 
         var provisional;
-        var summaryInfo = 'none';
+        //var summaryInfo = 'none';
         var provisionalExist = false;
         var summaryButton = false;
         if (gdm && gdm['@type'][0] === 'gdm') {

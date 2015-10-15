@@ -324,7 +324,7 @@ var VariantCuration = React.createClass({
         var gdm = this.state.gdm;
         var variant = this.state.variant;
         var pathogenicity = this.state.pathogenicity;
-        var otherPathogenicityList;
+        var otherPathogenicityList = [];
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         var curatorName = this.props.session && this.props.session.user_properties ? this.props.session.user_properties.title : '';
@@ -460,7 +460,7 @@ var VariantCuration = React.createClass({
                                             : null}
                                         </div>
                                     </Form>
-                                    {otherPathogenicityList ?
+                                    {otherPathogenicityList.length > 0 ?
                                         <div>
                                             {otherPathogenicityList.map(function(pathogenicity) {
                                                 return <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} named />;
