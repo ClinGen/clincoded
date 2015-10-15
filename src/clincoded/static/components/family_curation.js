@@ -1387,6 +1387,30 @@ var FamilyAdditional = function() {
 };
 
 
+// Determine whether the given segregation contains any non-empty values.
+function segregationExists(segregation) {
+    var exists = false;
+
+    if (segregation) {
+        exists = (segregation.pedigreeDescription && segregation.pedigreeDescription.length > 0) ||
+                  segregation.pedigreeSize ||
+                  segregation.numberOfGenerationInPedigree ||
+                  segregation.consanguineousFamily ||
+                  segregation.numberOfCases ||
+                 (segregation.deNovoType && segregation.deNovoType.length > 0) ||
+                  segregation.numberOfParentsUnaffectedCarriers ||
+                  segregation.numberOfAffectedAlleles ||
+                  segregation.numberOfAffectedWithOneVariant ||
+                  segregation.numberOfAffectedWithTwoVariants ||
+                  segregation.numberOfUnaffectedCarriers ||
+                  segregation.numberOfUnaffectedIndividuals ||
+                  segregation.probandAssociatedWithBoth ||
+                 (segregation.additionalInformation && segregation.additionalInformation.length > 0);
+    }
+    return exists;
+};
+
+
 var FamilyViewer = React.createClass({
     mixins: [RestMixin, AssessmentMixin],
 
@@ -1517,6 +1541,9 @@ var FamilyViewer = React.createClass({
                 familyUserAssessed = true;
             }
         }
+
+        // See if the segregation contains anything.
+        var haveSegregation = segregationExists(segregation);
 
         return (
             <div className="container">
@@ -1665,7 +1692,7 @@ var FamilyViewer = React.createClass({
 
                     {FamilySegregationViewer(segregation, assessments, true)}
 
-                    {this.cv.gdmUuid && (familyUserAssessed || userFamily) ?
+                    {this.cv.gdmUuid && (familyUserAssessed || userFamily) && haveSegregation ?
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
                             assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
                     : null}
