@@ -88,6 +88,15 @@ var ProvisionalCuration = React.createClass({
                 }
             }
 
+            // filter assessments for specific user and gdm
+            var temp = [];
+            for (var i in stateObj.assessments) {
+                if (stateObj.assessments[i].submitted_by.uuid === stateObj.user && stateObj.assessments[i].evidence_gdm === stateObj.gdm.uuid) {
+                    temp.push(stateObj.assessments[i]);
+                }
+            }
+            stateObj.assessments = temp;
+
             this.setState(stateObj);
 
             return Promise.resolve();
@@ -232,6 +241,7 @@ var ProvisionalCuration = React.createClass({
                                                 </PanelGroup>
                                             : null
                                         }
+                                        {AssessmentSummary.call(this)}
                                         <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                             {NewCalculation.call(this)}
                                             <div className='modal-footer'>
@@ -320,15 +330,91 @@ var EditCurrent = function() {
 };
 
 
+var AssessmentSummary = function() {
+    var assessments = this.state.assessments;
+    var userAssessments = {
+        "variantSpt": 0,
+        "variantReview": 0,
+        "variantCntdct": 0,
+        "expSpt": 0,
+        "expReview": 0,
+        "expCntdct": 0,
+        "segSpt": 0,
+        "segReview": 0,
+        "segCntdct": 0
+    };
+    for (var i in assessments) {
+        if (assessments[i].value === 'Supports' && assessments[i].evidence_type === 'Pathogenicity') {
+            userAssessments.variantSpt += 1;
+        }
+        else if (assessments[i].value === 'Review' && assessments[i].evidence_type === 'Pathogenicity') {
+            userAssessments.variantReview += 1;
+        }
+        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Pathogenicity') {
+            userAssessments.variantCntdct += 1;
+        }
+        else if (assessments[i].value === 'Supports' && assessments[i].evidence_type === 'Segregation') {
+            userAssessments.segSpt += 1;
+        }
+        else if (assessments[i].value === 'Review' && assessments[i].evidence_type === 'Segregation') {
+            userAssessments.segReview += 1;
+        }
+        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Segregation') {
+            userAssessments.segCntdct += 1;
+        }
+        else if (assessments[i].value === 'Supports') {
+            userAssessments.expSpt += 1;
+        }
+        else if (assessments[i].value === 'Review') {
+            userAssessments.expReview += 1;
+        }
+        else if (assessments[i].value === 'Contradicts') {
+            userAssessments.expCntdct += 1;
+        }
+    }
+
+    return (
+        <PanelGroup accordion>
+            <Panel title="Your Current Assessments" open>
+                <table>
+                    <tr>
+                        <td style={{width:'150px', 'text-align':'center'}}>&nbsp;</td>
+                        <td style={{width:'150px', 'text-align':'center'}}><strong>Variant</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}><strong>Experimental</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}><strong>Segregation</strong></td>
+                    </tr>
+                    <tr>
+                        <td style={{width:'150px', 'text-align':'right'}}><strong>Supports</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantSpt}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expSpt}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segSpt}</td>
+                    </tr>
+                    <tr>
+                        <td style={{width:'150px', 'text-align':'right'}}><strong>Review</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantReview}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expReview}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segReview}</td>
+                    </tr>
+                    <tr>
+                        <td style={{width:'150px', 'text-align':'right'}}><strong>Contradicts</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantCntdct}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expCntdct}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segCntdct}</td>
+                    </tr>
+                </table>
+            </Panel>
+        </PanelGroup>
+    );
+};
+
+
 var NewCalculation = function() {
     var gdm = this.state.gdm;
-    var assessments = this.state.assessments;
 
 // Gegerate pathogenicity id list and collect experimental id list from all assessments
 // condition: assessed by login user, value as Supports, current gdm
 // count piece number at each experimental type and add score at 3 different categories
     var pathoList = [];
-    //var expList = [];
     var exp_scores = [0, 0, 0];
     var expType = {
         "Expression": 0,
@@ -346,12 +432,12 @@ var NewCalculation = function() {
     var gdmPathoList = gdm.variantPathogenicity;
     var variantIdList = [];
     for (var i in gdmPathoList) {
+
         // pick up variants from login user's pathogenicity assessed as Supports.
         if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
             for (var j in gdmPathoList[i].assessments) {
                 if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
                     var variantUuid = gdmPathoList[i].variant.uuid;
-                    //var variantUuid = gdmPathoList[i].variant['@id'].substr(10).replace('/', '');
                     variantIdList.push(variantUuid);
                     break;
                 }
@@ -361,9 +447,11 @@ var NewCalculation = function() {
 
 // Collect all individuals in all annotations, pass to function filter with article info (experimental data is not necessary)
     var annotations = gdm.annotations;
-    var familiesCollected = [];
     var individualsCollected = [];
+    var allProbandInd = [];
     for (var i in annotations) {
+          allProbandInd.push(getProbandIndividual(annotations[i], []));
+
         if (annotations[i].groups && annotations[i].groups.length > 0) {
             var groups = annotations[i].groups;
             for (var j in groups) {
@@ -374,7 +462,6 @@ var NewCalculation = function() {
                         }
                     }
                 }
-                    //familiesCollected = filter(familiesCollected, groups[j].familyIncluded, annotations[i].article, variantIdList);
                 if (groups[j].individualIncluded && groups[j].individualIncluded.length > 0) {
                     individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, variantIdList);
                 }
@@ -386,13 +473,12 @@ var NewCalculation = function() {
                     individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, variantIdList);
                 }
             }
-            //familiesCollected = filter(familiesCollected, annotations[i].families, annotations[i].article, variantIdList);
         }
         if (annotations[i].individuals && annotations[i].individuals.length > 0) {
             individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, variantIdList);
         }
 
-        // collect experimental assessed support
+        // collect experimental assessed support, check matrix
         if (annotations[i].experimentalData && annotations[i].experimentalData.length > 0) {
             for (var j in annotations[i].experimentalData) {
                 var exp = annotations[i].experimentalData[j];
@@ -404,9 +490,6 @@ var NewCalculation = function() {
                             if (exp.evidenceType === 'Expression') {
                                 expType[subTypeKey] += 1;
                                 exp_scores[0] += 0.5;
-                                //if (!in_array(evid_id, expList)) {
-                                //    expList.push(evid_id);
-                                //}
                             }
                             else if (exp.evidenceType === 'Protein Interactions') {
                                 expType[subTypeKey] += 1;
@@ -469,12 +552,6 @@ var NewCalculation = function() {
     var articleCollected = [];
     var year = new Date();
     var earliest = year.getFullYear();
-    for (var i in familiesCollected) {
-        if (!in_array(familiesCollected[i].pmid, articleCollected) && familiesCollected[i].pmid != '') {
-            articleCollected.push(familiesCollected[i].pmid);
-            earliest = get_earliest_year(earliest, familiesCollected[i].date);
-        }
-    }
     for (var i in individualsCollected) {
         if (!in_array(individualsCollected[i].pmid, articleCollected) && individualsCollected[i].pmid != '') {
             articleCollected.push(individualsCollected[i].pmid);
@@ -497,7 +574,8 @@ var NewCalculation = function() {
         timeScore = 0;
     }
 
-    var proband = count_proband(familiesCollected) + count_proband(individualsCollected);
+    var proband = individualsCollected.length;
+    //var proband = count_proband(familiesCollected) + count_proband(individualsCollected);
     if (proband > 18) {
         probandScore = 7;
     }
@@ -559,6 +637,25 @@ var NewCalculation = function() {
 
     this.state.totalScore = totalScore;
     this.state.autoClassification = autoClassification;
+
+    var contradicts = {
+        "Variant": 0,
+        "Experimental": 0,
+        "Segregation": 0
+    };
+    var assessments = this.state.assessments;
+    for (var i in assessments) {
+        if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Pathogenicity') {
+            contradicts.Variant += 1;
+        }
+        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Segregation') {
+            contradicts.Segregation += 1;
+        }
+        else if (assessments[i].value === 'Contradicts' ) {
+            contradicts.Experimental += 1;
+        }
+    }
+
 
     return (
                 <PanelGroup accordion>
@@ -691,6 +788,25 @@ var get_earliest_year = function(earliest, dateStr) {
     return earliest;
 };
 
+var getProbandIndividual = function(obj, probandIndividuals) {
+    if (obj['@type'][0] === 'individual' && obj.proband) {
+        probandIndividuals.push(obj.uuid);
+    }
+    else {
+        //var keys = Object.keys(obj);
+        for (var key in obj) {
+            if ((key === 'groups' || key === 'families' || key === 'individuals' || key === 'familyIncluded' || key === 'individualIncluded') && obj[key].length > 0) {
+                var subList = obj[key];
+                for (var i in subList) {
+                    probandIndividuals = getProbandIndividual(subList[i], probandIndividuals);
+                }
+                //return probandIndividuals;
+            }
+        }
+    }
+    return probandIndividuals;
+};
+
 var filter = function(target, branch, article, idList) {
     branch.forEach(function(obj) {
         var variantIds = [];
@@ -723,14 +839,4 @@ var filter = function(target, branch, article, idList) {
     });
 
     return target;
-};
-
-var count_proband = function(evidenceList) {
-    var proband = 0;
-    for (var i in evidenceList) {
-        if (i === 0 || evidenceList[i].evidence !== '') {
-            proband++;
-        }
-    }
-    return proband;
 };
