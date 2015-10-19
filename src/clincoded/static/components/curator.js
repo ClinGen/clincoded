@@ -156,7 +156,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <div className="provisional-info-panel">
                                 <table style={{'width':'100%'}}>
                                     <tr>
-                                        <td style={{'text-align':'left'}}>
+                                        <td style={{'textAlign':'left'}}>
                                             <div className="provisional-title">
                                                 <strong>Current Summary & Provisional Classification</strong>
                                             </div>
