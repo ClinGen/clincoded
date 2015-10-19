@@ -802,6 +802,7 @@ var IndividualName = function(displayNote) {
     var family = this.state.family;
     var familyProbandExists = false;
     var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
+    if (individual && individual.proband) familyProbandExists = individual.proband;
     if (family && family.individualIncluded && family.individualIncluded.length && family.individualIncluded.length > 0) {
         for (var i = 0; i < family.individualIncluded.length; i++) {
             if (family.individualIncluded[i].proband == true) familyProbandExists = true;
