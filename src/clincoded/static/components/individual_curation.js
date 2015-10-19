@@ -23,6 +23,7 @@ var InputMixin = form.InputMixin;
 var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
+var external_url_map = globals.external_url_map;
 
 
 // Will be great to convert to 'const' when available
@@ -951,7 +952,7 @@ var IndividualCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Disease for Individual{this.props.probandLabel}:</span>;
+        return <span><a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Disease for Individual{this.props.probandLabel}:</span>;
     }
 });
 
@@ -965,7 +966,7 @@ var LabelHpoId = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT </span> : ''}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://bioportal.bioontology.org/ontologies/HP?p=classes&conceptid=root" target="_blank" title="Bioportal Human Phenotype Ontology in a new tab">HPO lookup at Bioportal</a>)</span>:
+                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href={external_url_map['HPOBrowser']} target="_blank" title="Bioportal Human Phenotype Ontology in a new tab">HPO lookup at Bioportal</a>)</span>:
             </span>
         );
     }

@@ -23,6 +23,7 @@ var InputMixin = form.InputMixin;
 var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
+var external_url_map = globals.external_url_map;
 
 
 var GroupCuration = React.createClass({
@@ -518,7 +519,7 @@ var GroupCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span>Disease in Common (<span style={{fontWeight: 'normal'}}><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term</span>):</span>;
+        return <span>Disease in Common (<span style={{fontWeight: 'normal'}}><a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term</span>):</span>;
     }
 });
 
@@ -532,7 +533,7 @@ var LabelHpoId = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://bioportal.bioontology.org/ontologies/HP?p=classes&conceptid=root" target="_blank" title="Bioportal Human Phenotype Ontology in a new tab">HPO lookup at Bioportal</a>)</span>:
+                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href={external_url_map['HPOBrowser']} target="_blank" title="Bioportal Human Phenotype Ontology in a new tab">HPO lookup at Bioportal</a>)</span>:
             </span>
         );
     }
@@ -664,7 +665,7 @@ var GroupProbandInfo = function() {
 // HTML labels for inputs follow.
 var LabelOtherGenes = React.createClass({
     render: function() {
-        return <span>Other genes found to have variants in them (<a href="http://www.genenames.org/" title="HGNC home page in a new tab" target="_blank">HGNC</a> symbol):</span>;
+        return <span>Other genes found to have variants in them (<a href={external_url_map['HGNCHome']} title="HGNC home page in a new tab" target="_blank">HGNC</a> symbol):</span>;
     }
 });
 
