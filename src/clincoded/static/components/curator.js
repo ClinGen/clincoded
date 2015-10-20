@@ -78,7 +78,6 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
 
         var provisional;
-        //var summaryInfo = 'none';
         var provisionalExist = false;
         var summaryButton = false;
         if (gdm && gdm['@type'][0] === 'gdm') {
@@ -92,7 +91,6 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 for (var i in gdm.provisionalClassifications) {
                     if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
                         provisionalExist = true;
-                        //summaryInfo = 'provisional';
                         provisional = gdm.provisionalClassifications[i];
                         break;
                     }
@@ -217,7 +215,7 @@ var getUserPathogenicity = function(gdm, session) {
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
         for (var i in gdm.variantPathogenicity) {
             var this_patho = gdm.variantPathogenicity[i];
-            if (userMatch(this_patho.submitted_by, session) && this_patho.assessments && this_patho.assessments[0].value === 'Supports') {
+            if (userMatch(this_patho.submitted_by, session) && this_patho.assessments && this_patho.assessments.length > 0 && this_patho.assessments[0].value === 'Supports') {
                 supportedVariants.push(this_patho.variant.uuid);
             }
         }
@@ -1018,7 +1016,7 @@ var getPathogenicityFromVariant = function(gdm, curatorUuid, variantUuid) {
     var pathogenicity = null;
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
         for (var i in gdm.variantPathogenicity) {
-            if (gdm.variantPathogenicity[i].submitted_by.uuid === curatorUuid && gdm.variantPathogenicity[i].variant.uuid == variantUuid) {
+            if (gdm.variantPathogenicity[i].submitted_by.uuid === curatorUuid && gdm.variantPathogenicity[i].variant.uuid === variantUuid) {
                 pathogenicity = gdm.variantPathogenicity[i];
             }
         }
