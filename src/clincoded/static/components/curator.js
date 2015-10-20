@@ -546,6 +546,11 @@ var renderGroup = function(group, gdm, annotation, curatorMatch) {
 // Render a family in the curator palette.
 var renderFamily = function(family, gdm, annotation, curatorMatch) {
     var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+    var familyAssessable = (family && family.segregation && (family.segregation.pedigreeDescription || family.segregation.pedigreeSize
+        || family.segregation.numberOfGenerationInPedigree || family.segregation.consanguineousFamily || family.segregation.numberOfCases
+        || family.segregation.deNovoType || family.segregation.numberOfParentsUnaffectedCarriers || family.segregation.numberOfAffectedAlleles
+        || family.segregation.numberOfAffectedWithOneVariant || family.segregation.numberOfAffectedWithTwoVariants || family.segregation.numberOfUnaffectedCarriers
+        || family.segregation.numberOfUnaffectedIndividuals || family.segregation.probandAssociatedWithBoth || family.segregation.additionalInformation)) ? true : false;
 
     return (
         <div className="panel-evidence-group">
@@ -584,7 +589,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                     })}
                 </div>
             : null}
-            {(family && family.segregation && family.segregation.variants && family.segregation.variants.length) ?
+            {familyAssessable ?
                 <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} target="_blank" title="View/Assess family in a new tab">View/Assess</a>
                 : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} target="_blank" title="View family in a new tab">View</a>}
             {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
