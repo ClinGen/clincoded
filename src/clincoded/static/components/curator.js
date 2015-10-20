@@ -546,6 +546,7 @@ var renderGroup = function(group, gdm, annotation, curatorMatch) {
 // Render a family in the curator palette.
 var renderFamily = function(family, gdm, annotation, curatorMatch) {
     var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+    // if any of these segregation values exist, the family is assessable
     var familyAssessable = (family && family.segregation && (family.segregation.pedigreeDescription || family.segregation.pedigreeSize
         || family.segregation.numberOfGenerationInPedigree || family.segregation.consanguineousFamily || family.segregation.numberOfCases
         || family.segregation.deNovoType || family.segregation.numberOfParentsUnaffectedCarriers || family.segregation.numberOfAffectedAlleles
