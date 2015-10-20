@@ -375,31 +375,31 @@ var AssessmentSummary = function() {
 
     return (
         <PanelGroup accordion>
-            <Panel title="Your Current Assessments" open>
+            <Panel title="Your Assessments" open>
                 <table>
                     <tr>
                         <td style={{width:'150px', 'text-align':'center'}}>&nbsp;</td>
+                        <td style={{width:'150px', 'text-align':'center'}}><strong>Segregation</strong></td>
                         <td style={{width:'150px', 'text-align':'center'}}><strong>Variant</strong></td>
                         <td style={{width:'150px', 'text-align':'center'}}><strong>Experimental</strong></td>
-                        <td style={{width:'150px', 'text-align':'center'}}><strong>Segregation</strong></td>
                     </tr>
                     <tr>
                         <td style={{width:'150px', 'text-align':'right'}}><strong>Supports</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segSpt}</td>
                         <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantSpt}</td>
                         <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expSpt}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segSpt}</td>
                     </tr>
                     <tr>
                         <td style={{width:'150px', 'text-align':'right'}}><strong>Review</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segReview}</td>
                         <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantReview}</td>
                         <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expReview}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segReview}</td>
                     </tr>
                     <tr>
                         <td style={{width:'150px', 'text-align':'right'}}><strong>Contradicts</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segCntdct}</td>
                         <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantCntdct}</td>
                         <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expCntdct}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segCntdct}</td>
                     </tr>
                 </table>
             </Panel>

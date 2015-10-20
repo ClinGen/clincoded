@@ -128,9 +128,9 @@
         "evidenceType": "Rescue",
         "rescue": {
             "patientCellOrEngineeredEquivalent": "Patient cells",
-            "patientCellType": "EFO_12345678",
+            "patientCellType": "CL_0001234",
             "descriptionOfGeneAlteration": "some description about cell here",
-            "phenotypeHPO": "HP:xxxxxxx",
+            "phenotypeHPO": "HP:0000007",
             "rescueMethod": "rescue method here (not method object in clinical data)",
             "wildTypeRescuePhenotype": true,
             "patientVariantRescue": true,
