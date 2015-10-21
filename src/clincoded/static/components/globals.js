@@ -145,7 +145,7 @@ module.exports.external_url_map = {
     'Entrez': 'http://www.ncbi.nlm.nih.gov/gene/',
     'OMIM': 'http://omim.org/',
     'ClinVar': 'http://www.ncbi.nlm.nih.gov/clinvar/',
-    'HPOBrowser': 'http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000118',
+    'HPOBrowser': 'http://compbio.charite.de/hpoweb/showterm?id=HP:0000118',
     'Uberon': 'http://uberon.github.io/',
     'GO_Slim': 'http://bit.ly/1fxDvhV',
     'CL': 'http://www.ontobee.org/browser/index.php?o=CL',
