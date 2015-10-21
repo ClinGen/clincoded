@@ -35,7 +35,7 @@ Note: For Mac < 10.9, the system python doesn't work. You should install Python 
 Install Node 0.10 from homebrew/versions::
 
     $ brew tap homebrew/versions
-    $ brew install node010
+    $ brew install node
 
 If you need to update dependencies::
 
