@@ -1221,13 +1221,14 @@ var ExperimentalCuration = React.createClass({
                                                     updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
                                             </PanelGroup>
                                         : null}
-                                        {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
-                                            <div className="curation-submit clearfix">
+                                        <div className="curation-submit clearfix">
+                                            {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
                                                 <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
-                                                {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
-                                                <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
-                                            </div>
-                                        : null}
+
+                                            : null}
+                                            {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
+                                            <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                        </div>
                                     </Form>
                                 </div>
                             </div>
