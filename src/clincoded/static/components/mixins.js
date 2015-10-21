@@ -151,14 +151,9 @@ module.exports.Persona = {
         var cookie = require('cookie-monster');
         var session_cookie = cookie(document).get('session');
         if (this.props.session_cookie !== session_cookie) {
-            this.setProps({session_cookie: session_cookie});
-        }
-    },
-
-    componentWillReceiveProps: function (nextProps) {
-        if (this.props.session_cookie !== nextProps.session_cookie) {
+            this.setState({session_cookie: session_cookie});
             this.setState({
-                session: this.parseSessionCookie(nextProps.session_cookie)
+                session: this.parseSessionCookie(session_cookie)
             });
         }
     },
