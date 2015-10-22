@@ -60,7 +60,9 @@ function parsePubmed(xml){
             publicationData = publicationVolume + (publicationIssue ? '(' + publicationIssue + ')' : '')  + (publicationPgn ? ':' + publicationPgn : '');
         }
         if (publicationData) {
-            article.date += (publicationData ? ';' + publicationData : '');
+            article.date += ';' + publicationData + '.';
+        } else {
+            article.date += '.';
         }
     }
 
@@ -141,8 +143,10 @@ function pubmedDatePublished($PubmedArticle, $Journal){
                 } catch(e){}
             }
         }
-        if(pubdate){
+        if (pubdate){
             return pubdate;
+        } else {
+            return '';
         }
     }
 }
@@ -169,7 +173,11 @@ function parseDate(day, month, year) {
     } else if (year) {
         pubdate = year;
     }
-    return String(pubdate);
+    if (pubdate) {
+        return String(pubdate);
+    } else {
+        return null;
+    }
 }
 
 function pubmedPublicationIssue($Journal){
@@ -195,7 +203,7 @@ function pubmedPeriodical($Journal){
     var $Title = $Journal.getElementsByTagName('Title')[0];
     if($Title){
         var journalFormatted = $Title.textContent;
-        if ($Title.textContent.indexOf('.', $Title.textContent.length - 1) !== -1) {
+        if (journalFormatted.indexOf('.', journalFormatted.length - 1) !== -1) {
             journalFormatted = journalFormatted.substring(0, journalFormatted.length - 1);
         }
         return journalFormatted;
