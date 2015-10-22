@@ -197,7 +197,7 @@ var Dashboard = React.createClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
-        if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
+        if (nextProps.session.user_properties && this.props.session.user_properties && nextProps.session.user_properties.uuid !== this.props.session.user_properties.uuid) {
             this.setUserData(nextProps.session.user_properties);
             this.getData(nextProps.session);
         }
