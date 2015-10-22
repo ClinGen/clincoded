@@ -57,10 +57,10 @@ function parsePubmed(xml){
                     publicationPgn = $MedlinePgn.textContent;
                 }
             }
-            publicationData = publicationVolume + (publicationIssue ? '(' + publicationIssue + ')' : '')  + ':' + publicationPgn;
+            publicationData = publicationVolume + (publicationIssue ? '(' + publicationIssue + ')' : '')  + (publicationPgn ? ':' + publicationPgn : '');
         }
         if (publicationData) {
-            article.date += ';' + publicationData;
+            article.date += (publicationData ? ';' + publicationData : '');
         }
     }
 
@@ -194,7 +194,11 @@ function pubmedPeriodical($Journal){
 
     var $Title = $Journal.getElementsByTagName('Title')[0];
     if($Title){
-        return $Title.textContent;
+        var journalFormatted = $Title.textContent;
+        if ($Title.textContent.indexOf('.', $Title.textContent.length - 1) !== -1) {
+            journalFormatted = journalFormatted.substring(0, journalFormatted.length - 1);
+        }
+        return journalFormatted;
     }
     return '';
 
