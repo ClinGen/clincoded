@@ -40,6 +40,12 @@ var RestMixin = module.exports.RestMixin = {
         });
     },
 
+    getRestDatasXml: function(uris) {
+        return Promise.all(uris.map(function(uri, i) {
+            return this.getRestDataXml(uri, function() {});
+        }.bind(this)));
+    },
+
     // GET JSON data from the given URI. Returns data in the promise.
     // Non-OK error response calls the optional errorHandler function.
     getRestData: function(uri, errorHandler, dbSearch) {

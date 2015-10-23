@@ -294,7 +294,7 @@ var AddPmidModal = React.createClass({
                 var url = this.props.protocol + external_url_map['PubMedSearch'];
                 // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
-                    var newArticle = parsePubmed(xml, enteredPmid);
+                    var newArticle = parsePubmed(xml);
                     // if the PubMed article for this PMID doesn't exist, display an error
                     if (!('pmid' in newArticle)) this.setFormErrors('pmid', 'This PMID does not exist');
                     return this.postRestData('/articles/', newArticle).then(data => {

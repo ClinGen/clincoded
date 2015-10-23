@@ -87,7 +87,7 @@ function pubmedAuthors($PubmedArticle){
                 var $Initials = $Authors[i].getElementsByTagName('Initials')[0];
                 if ($Initials){
                     author += (author ? ' ' : '') + $Initials.textContent;
-                }                
+                }
             }
             authors.push(author);
         }
