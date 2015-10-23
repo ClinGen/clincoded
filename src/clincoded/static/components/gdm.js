@@ -1,17 +1,24 @@
 'use strict';
 var React = require('react');
 var moment = require('moment');
+var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
 var curator = require('./curator');
 
+var Form = form.Form;
+var FormMixin = form.FormMixin;
+var Input = form.Input;
 var truncateString = globals.truncateString;
 
 
 var GdmCollection = module.exports.GdmCollection = React.createClass({
+    mixins: [FormMixin],
+
     getInitialState: function() {
         return {
             sortCol: 'gdm',
-            reversed: false
+            reversed: false,
+            searchTerm: ''
         };
     },
 
@@ -51,14 +58,36 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         return this.state.reversed ? -diff : diff;
     },
 
+    searchChange: function(ref, e) {
+        var searchVal = this.refs[ref].getValue().toLowerCase();
+        this.setState({searchTerm: searchVal});
+    },
+
     render: function () {
         var context = this.props.context;
         var gdms = context['@graph'];
+        var searchTerm = this.state.searchTerm;
+        var filteredGdms;
         var sortIconClass = {gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
+        // Filter GDMs
+        if (searchTerm) {
+            filteredGdms = gdms.filter(function(gdm) {
+                return gdm.gene.symbol.toLowerCase().indexOf(searchTerm) !== -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm) !== -1;
+            });
+        } else {
+            filteredGdms = gdms;
+        }
+
         return (
             <div className="container">
+                <Form formClassName="form-std">
+                    <div className="modal-body">
+                        <Input type="text" ref="q" label="Search" handleChange={this.searchChange}
+                            labelClassName="control-label" groupClassName="form-group" />
+                    </div>
+                </Form>
                 <div className="table-responsive">
                     <div className="table-gdm">
                         <div className="table-header-gdm">
@@ -82,7 +111,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                 Created<span className={sortIconClass.created}></span>
                             </div>
                         </div>
-                        {gdms.sort(this.sortCol).map(function(gdm) {
+                        {filteredGdms.sort(this.sortCol).map(function(gdm) {
                             var annotationOwners = curator.getAnnotationOwners(gdm);
                             var latestAnnotation = curator.findLatestAnnotation(gdm);
                             var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
