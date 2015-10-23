@@ -40,6 +40,7 @@ var RestMixin = module.exports.RestMixin = {
         });
     },
 
+    // use getRestDataXml to get an array of XML responses from an array of URIs
     getRestDatasXml: function(uris) {
         return Promise.all(uris.map(function(uri, i) {
             return this.getRestDataXml(uri, function() {});
