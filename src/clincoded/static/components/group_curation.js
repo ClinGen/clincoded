@@ -528,9 +528,9 @@ var GroupCommonDiseases = function() {
     var orphanetidVal, hpoidVal, nothpoidVal;
 
     if (group) {
-        orphanetidVal = group.commonDiagnosis ? group.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
-        hpoidVal = group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis.join() : null;
-        nothpoidVal = group.hpoIdInElimination ? group.hpoIdInElimination.join() : null;
+        orphanetidVal = group.commonDiagnosis ? group.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : null;
+        hpoidVal = group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis.join(', ') : null;
+        nothpoidVal = group.hpoIdInElimination ? group.hpoIdInElimination.join(', ') : null;
     }
 
     return (
@@ -714,7 +714,7 @@ var GroupAdditional = function() {
     var otherpmidsVal;
     var group = this.state.group;
     if (group) {
-        otherpmidsVal = group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
+        otherpmidsVal = group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
     }
 
 
