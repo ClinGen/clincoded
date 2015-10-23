@@ -55,11 +55,132 @@
     }
 }
 
+
+//**************************************************************************************************
+// GDM table styles (might need to expand this to cover more types of tables, but just GDMs for now)
+
+// Entire GDM table
+.table-gdm {
+    display: table;
+    width: 100%;
+    border: 1px solid #e0e0e0;
+}
+
+// Table header
+.table-header-gdm {
+    display: table-row;
+    color: white;
+    background-color: $color-trim;
+}
+
+// Table row
+.table-row-gdm {
+    display: table-row;
+    color: #000;
+
+    &:nth-child(even) {
+        background-color: #f0f0f8;
+    }
+
+    &:nth-child(odd) {
+        background-color: #fcfcff;
+    }
+
+    &:hover {
+        background-color: #e0e0f0;
+        text-decoration: none;
+        color: #000;
+    }
+}
+
+// Table cell
+.table-cell-gdm {
+    display: table-cell;
+    padding: 10px 5px;
+    border-left: 1px solid #fff;
+
+    &:first-child {
+        border-left: none;
+    }
+
+    // Table cells in the header
+    .table-header-gdm & {
+        padding: 5px 5px 5px 12px;
+        vertical-align: bottom;
+    }
+}
+
+// "Main" column table cell
+.table-cell-gdm-main {
+    @extend .table-cell-gdm;
+
+    div:nth-child(1) {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+
+    div:nth-child(2) {
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+}
+
+// Status table column
+.table-cell-gdm-status {
+    @extend .table-cell-gdm;
+    vertical-align: middle;
+    text-align: center;
+
+    .table-header-gdm & {
+        vertical-align: middle;
+    }
+}
+
+
+// The following style the status icons
+
+// Non-specific status icon styles
+%status-icon {
+    display: inline-block;
+    line-height: 28px;
+    font-size: 1.3rem;
+    text-align: center;
+    border: none;
+    background-color: transparent;
+}
+
+// Connect status types to fontawesome icon suffixes and colors. GDM status need to be converted to these suffixes
+// by converting to lower case and converting any non-letters to dashes. Icon names are for font-awesome and are
+// suffixed to 'icon-'. One suffix, 'header', is just for the table header status icon.
+$status-types:
+//   GDM status                           FontAwesome suffix    Icon color
+    (header,                              circle,               #ffffff),
+    (final-classification,                check-circle,         #00c000),
+    (draft-classification,                check-circle-o,       #4060ff),
+    (summary-provisional-classifications, adjust,               #808080),
+    (in-progress,                         dot-circle-o,         #f09000),
+    (created,                             circle-o,             #e0e000);
+
+// Generate the audit icon classes for each of the audit types
+@each $status-type, $suffix, $color in $status-types {
+    // Status icons
+    .gdm-status-icon-#{$status-type} {
+        @extend .icon-#{$suffix}; // FontAwesome icon
+        @extend %status-icon;
+        color: $color;
+    }
+}
+
+
+// The following styles handle the sorting icons in the column headers.
+// tcell-sort for unsorted
+// tcell-asc for ascending sort
+// tcell-desc for descending sort
 %tcell-template {
     @extend .icon;
-    position: absolute;
-    right: 5px;
-    bottom: 7px;
+    display: inline-block;
+    margin-left: 5px;
+    font-size: 0.9rem;
 }
 
 .tcell-sort {
@@ -75,4 +196,12 @@
 .tcell-desc {
     @extend %tcell-template;
     @extend .icon-sort-desc;
+}
+
+.tcell-sortable {
+    cursor: pointer;
+
+    &:hover {
+        background-color: darken($color-trim, 10%);
+    }
 }

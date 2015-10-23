@@ -167,6 +167,18 @@
         "submitted_by.uuid": {
             "title": "Submitted by",
             "type": "string"
+        },
+        "submitted_by.title": {
+            "title": "Creator",
+            "type": "string"
+        },
+        "submitted_by.last_name": {
+            "title": "Creator",
+            "type": "string"
+        },
+        "submitted_by.email": {
+            "title": "Creator email",
+            "type": "string"
         }
     },
     "boost_values": {

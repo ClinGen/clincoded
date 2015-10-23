@@ -929,34 +929,10 @@ var CuratorRecordHeader = React.createClass({
         gdm: React.PropTypes.object // GDM with curator data to display
     },
 
-    // Return the latest annotation in the given GDM
-    findLatestAnnotation: function() {
-        var gdm = this.props.gdm;
-        var annotations = gdm && gdm.annotations;
-        var latestAnnotation = {};
-        var latestTime = 0;
-        if (annotations && annotations.length) {
-            annotations.forEach(function(annotation) {
-                // Get Unix timestamp version of annotation's time and compare against the saved version.
-                var time = moment(annotation.date_created).format('x');
-                if (latestTime < time) {
-                    latestAnnotation = annotation;
-                    latestTime = time;
-                }
-            });
-        }
-        return latestAnnotation;
-    },
-
     render: function() {
         var gdm = this.props.gdm;
-        var owners = gdm && gdm.annotations.map(function(annotation) {
-            return annotation.submitted_by;
-        });
-        var annotationOwners = _.chain(owners).uniq(function(owner) {
-            return owner.uuid;
-        }).sortBy('last_name').value();
-        var latestAnnotation = this.findLatestAnnotation();
+        var annotationOwners = getAnnotationOwners(gdm);
+        var latestAnnotation = findLatestAnnotation(gdm);
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
@@ -989,6 +965,30 @@ var CuratorRecordHeader = React.createClass({
         );
     }
 });
+
+
+// Return the latest annotation in the given GDM. This is the internal version; use the memoized version externally.
+var _findLatestAnnotation = function(gdm) {
+    var annotations = gdm && gdm.annotations;
+    var latestAnnotation = null;
+    var latestTime = 0;
+    if (annotations && annotations.length) {
+        annotations.forEach(function(annotation) {
+            // Get Unix timestamp version of annotation's time and compare against the saved version.
+            var time = moment(annotation.date_created).format('x');
+            if (latestTime < time) {
+                latestAnnotation = annotation;
+                latestTime = time;
+            }
+        });
+    }
+    return latestAnnotation;
+};
+
+var findLatestAnnotation = module.exports.findLatestAnnotation = _.memoize(_findLatestAnnotation, function(gdm) {
+    return gdm.uuid;
+});
+
 
 
 // Display buttons to bring up the PubMed and doi-specified web pages.
@@ -1145,6 +1145,18 @@ var collectGdmVariants = function(gdm) {
         });
     }
     return Object.keys(allVariants).length ? allVariants : null;
+};
+
+
+// Get a de-duped array of annotation submitted_by objects sorted by last name from the given GDM.
+var getAnnotationOwners = module.exports.getAnnotationOwners = function(gdm) {
+    var owners = gdm && gdm.annotations.map(function(annotation) {
+        return annotation.submitted_by;
+    });
+    var annotationOwners = _.chain(owners).uniq(function(owner) {
+        return owner.uuid;
+    }).sortBy('last_name').value();
+    return annotationOwners;
 };
 
 
