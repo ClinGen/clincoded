@@ -986,7 +986,7 @@ var _findLatestAnnotation = function(gdm) {
 };
 
 var findLatestAnnotation = module.exports.findLatestAnnotation = _.memoize(_findLatestAnnotation, function(gdm) {
-    return gdm.uuid;
+    return gdm ? gdm.uuid : null;
 });
 
 

@@ -59,6 +59,21 @@
 //**************************************************************************************************
 // GDM table styles (might need to expand this to cover more types of tables, but just GDMs for now)
 
+.gdm-header {
+    margin-top: 30px;
+    margin-bottom: 10px;
+
+    h1 {
+        margin: 0;
+    }
+}
+
+.gdm-filter-form {
+    .form-error {
+        display: none;
+    }
+}
+
 // Entire GDM table
 .table-gdm {
     display: table;
@@ -69,8 +84,8 @@
 // Table header
 .table-header-gdm {
     display: table-row;
-    color: white;
-    background-color: $color-trim;
+    color: $table-header-fg;
+    background-color: $table-header-bg;
 }
 
 // Table row
@@ -79,11 +94,11 @@
     color: #000;
 
     &:nth-child(even) {
-        background-color: #f0f0f8;
+        background-color: $table-row-even-bg;
     }
 
     &:nth-child(odd) {
-        background-color: #fcfcff;
+        background-color: $table-row-odd-bg;
     }
 
     &:hover {
@@ -153,13 +168,13 @@
 // by converting to lower case and converting any non-letters to dashes. Icon names are for font-awesome and are
 // suffixed to 'icon-'. One suffix, 'header', is just for the table header status icon.
 $status-types:
-//   GDM status                           FontAwesome suffix    Icon color
-    (header,                              circle,               #ffffff),
-    (final-classification,                check-circle,         #00c000),
-    (draft-classification,                check-circle-o,       #4060ff),
-    (summary-provisional-classifications, adjust,               #808080),
-    (in-progress,                         dot-circle-o,         #f09000),
-    (created,                             circle-o,             #e0e000);
+//   GDM status   FontAwesome suffix    Icon color
+    (header,      circle,               $table-header-fg),
+    (final,       check-circle,         #00c000),
+    (draft,       check-circle-o,       #4060ff),
+    (provisional, adjust,               #808080),
+    (in-progress, dot-circle-o,         #f09000),
+    (created,     circle-o,             #e0e000);
 
 // Generate the audit icon classes for each of the audit types
 @each $status-type, $suffix, $color in $status-types {
@@ -202,6 +217,18 @@ $status-types:
     cursor: pointer;
 
     &:hover {
-        background-color: darken($color-trim, 10%);
+        background-color: $table-header-highlight-bg;
     }
+}
+
+
+// Styles for the GDM status legend
+.gdm-status-legend {
+    margin-bottom: 10px;
+}
+
+.gdm-status-text {
+    display: inline-block;
+    margin-left: 5px;
+    font-size: 0.9rem;
 }

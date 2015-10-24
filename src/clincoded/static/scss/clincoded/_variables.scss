@@ -21,3 +21,9 @@ $font-size-h6: 0.85rem;
 $group-curation: #FFFF00;
 $group-curation-bg: desaturate(lighten($group-curation,45%),50%);
 $group-curation-trim: darken($group-curation,10%);
+
+$table-header-fg: #204080;
+$table-header-bg: #b8e8f8;
+$table-header-highlight-bg: darken($table-header-bg, 10%);
+$table-row-odd-bg: #f0f0f8;
+$table-row-even-bg: #fcfcff;

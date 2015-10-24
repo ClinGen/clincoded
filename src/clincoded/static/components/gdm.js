@@ -11,6 +11,16 @@ var Input = form.Input;
 var truncateString = globals.truncateString;
 
 
+// Map GDM statuses from 
+var statusMappings = {
+//  Status from GDM                         CSS class                Short name for screen display
+    'Created':                             {cssClass: 'created',     shortName: 'Created'},
+    'In Progress':                         {cssClass: 'in-progress', shortName: 'In Progress'},
+    'Summary/Provisional Classifications': {cssClass: 'provisional', shortName: 'Provisional'},
+    'Draft Classification':                {cssClass: 'draft',       shortName: 'Draft'},
+    'Final Classification':                {cssClass: 'final',       shortName: 'Final'}
+};
+
 var GdmCollection = module.exports.GdmCollection = React.createClass({
     mixins: [FormMixin],
 
@@ -82,12 +92,19 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
 
         return (
             <div className="container">
-                <Form formClassName="form-std">
-                    <div className="modal-body">
-                        <Input type="text" ref="q" label="Search" handleChange={this.searchChange}
-                            labelClassName="control-label" groupClassName="form-group" />
+                <div className="row gdm-header">
+                    <div className="col-sm-12 col-md-8">
+                        <h1>All Gene-Disease Records</h1>
                     </div>
-                </Form>
+                    <div className="col-md-1"></div>
+                    <div className="col-sm-12 col-md-3">
+                        <Form formClassName="form-std gdm-filter-form">
+                            <Input type="text" ref="q" placeholder="Filter" handleChange={this.searchChange}
+                                labelClassName="control-label" groupClassName="form-group" />
+                        </Form>
+                    </div>
+                </div>
+                <GdmStatusLegend />
                 <div className="table-responsive">
                     <div className="table-gdm">
                         <div className="table-header-gdm">
@@ -119,7 +136,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                             var createdTime = moment(gdm.date_created);
                             var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
                             var participants = annotationOwners.map(function(owner) { return owner.title; }).join(', ');
-                            var statusString = gdm.status.toLowerCase().replace(/\W/g, '-'); // Convert status string to have dashes for CSS
+                            var statusString = statusMappings[gdm.status].cssClass; // Convert status string to CSS class
                             var iconClass = 'icon gdm-status-icon-' + statusString;
 
                             return (
@@ -165,3 +182,26 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
 });
 
 globals.content_views.register(GdmCollection, 'gdm_collection');
+
+
+// Render the GDM status legend
+var GdmStatusLegend = React.createClass({
+    render: function() {
+        return (
+            <div className="row">
+                <div className="gdm-status-legend">
+                    {Object.keys(statusMappings).map(function(status, i) {
+                        var iconClass = 'icon gdm-status-icon-' + statusMappings[status].cssClass;
+                        
+                        return (
+                            <div className={"col-sm-2 gdm-status-item" + (i === 0 ? ' col-sm-offset-1' : '')} key={i}>
+                                <span className={iconClass}></span>
+                                <span className="gdm-status-text">{statusMappings[status].shortName}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
+});
