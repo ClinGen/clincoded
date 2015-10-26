@@ -327,6 +327,7 @@ module.exports.HistoryAndTriggers = {
 
     getInitialState: function () {
         return {
+            contextRequest: null,
             unsavedChanges: []
         };
     },
@@ -490,7 +491,7 @@ module.exports.HistoryAndTriggers = {
             window.location.reload();
             return;
         }
-        var request = this.props.contextRequest;
+        var request = this.state.contextRequest;
         var href = window.location.href;
         if (event.state) {
             // Abort inflight xhr before setProps
@@ -554,7 +555,7 @@ module.exports.HistoryAndTriggers = {
             return;
         }
 
-        var request = this.props.contextRequest;
+        var request = this.state.contextRequest;
 
         if (request) {
             request.abort();
@@ -615,7 +616,7 @@ module.exports.HistoryAndTriggers = {
             promise = promise.then(this.scrollTo);
         }
 
-        this.setProps({
+        this.setState({
             contextRequest: request
         });
         return request;
@@ -637,7 +638,7 @@ module.exports.HistoryAndTriggers = {
     },
 
     componentDidUpdate: function () {
-        var xhr = this.props.contextRequest;
+        var xhr = this.state.contextRequest;
         if (!xhr || !xhr.xhr_end || xhr.browser_stats) return;
         var browser_end = 1 * new Date();
 
