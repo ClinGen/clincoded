@@ -74,10 +74,18 @@
     }
 }
 
+@media screen and (max-width: $screen-xs-max) {
+    .table-responsive {
+        border: none;
+    }
+}
+
+
 // Entire GDM table
 .table-gdm {
     display: table;
     width: 100%;
+    margin-bottom: 50px;
     border: 1px solid #e0e0e0;
 }
 
