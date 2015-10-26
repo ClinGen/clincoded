@@ -71,7 +71,7 @@ var Dashboard = React.createClass({
         // sets the display name and curator status
         this.setState({
             userName: props.first_name,
-            userStatus: props.groups[0].charAt(0).toUpperCase() + props.groups[0].substring(1),
+            userStatus: props.job_title,
             lastLogin: ''
         });
     },
@@ -190,14 +190,14 @@ var Dashboard = React.createClass({
     },
 
     componentDidMount: function() {
-        if (this.props.session.user_properties !== undefined) {
+        if (this.props.session.user_properties) {
             this.setUserData(this.props.session.user_properties);
             this.getData(this.props.session);
         }
     },
 
     componentWillReceiveProps: function(nextProps) {
-        if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
+        if (nextProps.session.user_properties) {
             this.setUserData(nextProps.session.user_properties);
             this.getData(nextProps.session);
         }
