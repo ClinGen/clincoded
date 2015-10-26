@@ -182,7 +182,7 @@ $status-types:
     (draft,       check-circle-o,       #4060ff),
     (provisional, adjust,               #808080),
     (in-progress, dot-circle-o,         #f09000),
-    (created,     circle-o,             #e0e000);
+    (created,     circle-o,             #f040ff);
 
 // Generate the audit icon classes for each of the audit types
 @each $status-type, $suffix, $color in $status-types {

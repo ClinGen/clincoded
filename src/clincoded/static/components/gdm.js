@@ -45,6 +45,12 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         var diff;
 
         switch (this.state.sortCol) {
+            case 'status':
+                var statuses = Object.keys(statusMappings);
+                var statusIndexA = statuses.indexOf(a.status);
+                var statusIndexB = statuses.indexOf(b.status);
+                diff = statusIndexA - statusIndexB;
+                break;
             case 'gdm':
                 diff = a.gene.symbol > b.gene.symbol ? 1 : -1;
                 break;
@@ -78,7 +84,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         var gdms = context['@graph'];
         var searchTerm = this.state.searchTerm;
         var filteredGdms;
-        var sortIconClass = {gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
+        var sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
         // Filter GDMs
@@ -108,8 +114,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 <div className="table-responsive">
                     <div className="table-gdm">
                         <div className="table-header-gdm">
-                            <div className="table-cell-gdm-status">
-                                <span className="icon gdm-status-icon-header"></span>
+                            <div className="table-cell-gdm-status tcell-sortable" onClick={this.sortDir.bind(null, 'status')}>
+                                <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
                             </div>
                             <div className="table-cell-gdm-main tcell-sortable" onClick={this.sortDir.bind(null, 'gdm')}>
                                 <div>Gene — Disease<span className={sortIconClass.gdm}></span></div>
@@ -142,7 +148,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                             return (
                                 <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
                                     <div className="table-cell-gdm-status">
-                                        <span className={iconClass}></span>
+                                        <span className={iconClass} title={gdm.status}></span>
                                     </div>
 
                                     <div className="table-cell-gdm-main">
