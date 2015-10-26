@@ -155,42 +155,44 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <h2>{mode}</h2>
                             <div className="provisional-info-panel">
                                 <table style={{'width':'100%'}}>
-                                    <tr>
-                                        <td style={{'textAlign':'left'}}>
-                                            <div className="provisional-title">
-                                                <strong>Current Summary & Provisional Classification</strong>
-                                            </div>
-                                            {   provisionalExist ?
-                                                    <div>
-                                                        <div className="provisional-data-left">
-                                                            <span>
-                                                                Current Summary<br />
-                                                                Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                            </span>
+                                    <tbody>
+                                        <tr>
+                                            <td style={{'textAlign':'left'}}>
+                                                <div className="provisional-title">
+                                                    <strong>Current Summary & Provisional Classification</strong>
+                                                </div>
+                                                {   provisionalExist ?
+                                                        <div>
+                                                            <div className="provisional-data-left">
+                                                                <span>
+                                                                    Current Summary<br />
+                                                                    Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                                </span>
+                                                            </div>
+                                                            <div className="provisional-data-center">
+                                                                <span>
+                                                                    Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                    Provisional Classification: {provisional.alteredClassification}&nbsp;&nbsp;
+                                                                    [<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                        <div className="provisional-data-center">
-                                                            <span>
-                                                                Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                Provisional Classification: {provisional.alteredClassification}&nbsp;&nbsp;
-                                                                [<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                :
-                                                    <div className="provisional-data-left"><span>No Reported Evidence</span></div>
-                                            }
-                                        </td>
-                                        { summaryButton ?
-                                            <td style={{'width':'200px', 'vertical-align':'middle'}}>
-                                                <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                                    { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
-                                                </a>
+                                                    :
+                                                        <div className="provisional-data-left"><span>No Reported Evidence</span></div>
+                                                }
                                             </td>
-                                            :
-                                            <td style={{'width':'200px'}}>&nbsp;</td>
-                                        }
+                                            { summaryButton ?
+                                                <td style={{'width':'200px', 'vertical-align':'middle'}}>
+                                                    <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                        { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
+                                                    </a>
+                                                </td>
+                                                :
+                                                <td style={{'width':'200px'}}>&nbsp;</td>
+                                            }
 
-                                    </tr>
+                                        </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
