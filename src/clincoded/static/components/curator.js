@@ -376,18 +376,19 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
     },
 
     render: function() {
-        var authors;
+        var authors, authorsAll;
         var article = this.props.article;
         if (article && Object.keys(article).length) {
             var date = (/^([\d]{4})(.*?)$/).exec(article.date);
 
             if (article.authors && article.authors.length) {
                 authors = article.authors[0] + (article.authors.length > 1 ? ' et al. ' : '. ');
+                authorsAll = article.authors.join(', ') + '. ';
             }
 
             return (
                 <p>
-                    {authors}
+                    {this.props.displayJournal ? authorsAll : authors}
                     {article.title + ' '}
                     {this.props.displayJournal ? <i>{article.journal + '. '}</i> : null}
                     <strong>{date[1]}</strong>{date[2]}
