@@ -154,7 +154,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <div className="provisional-info-panel">
                                 <table style={{'width':'100%'}}>
                                     <tr>
-                                        <td style={{'text-align':'left'}}>
+                                        <td style={{'textAlign':'left'}}>
                                             <div className="provisional-title">
                                                 <strong>Current Summary & Provisional Classification</strong>
                                             </div>
@@ -374,18 +374,19 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
     },
 
     render: function() {
-        var authors;
+        var authors, authorsAll;
         var article = this.props.article;
         if (article && Object.keys(article).length) {
             var date = (/^([\d]{4})(.*?)$/).exec(article.date);
 
             if (article.authors && article.authors.length) {
                 authors = article.authors[0] + (article.authors.length > 1 ? ' et al. ' : '. ');
+                authorsAll = article.authors.join(', ') + '. ';
             }
 
             return (
                 <p>
-                    {authors}
+                    {this.props.displayJournal ? authorsAll : authors}
                     {article.title + ' '}
                     {this.props.displayJournal ? <i>{article.journal + '. '}</i> : null}
                     <strong>{date[1]}</strong>{date[2]}
@@ -544,6 +545,12 @@ var renderGroup = function(group, gdm, annotation, curatorMatch) {
 // Render a family in the curator palette.
 var renderFamily = function(family, gdm, annotation, curatorMatch) {
     var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+    // if any of these segregation values exist, the family is assessable
+    var familyAssessable = (family && family.segregation && (family.segregation.pedigreeDescription || family.segregation.pedigreeSize
+        || family.segregation.numberOfGenerationInPedigree || family.segregation.consanguineousFamily || family.segregation.numberOfCases
+        || family.segregation.deNovoType || family.segregation.numberOfParentsUnaffectedCarriers || family.segregation.numberOfAffectedAlleles
+        || family.segregation.numberOfAffectedWithOneVariant || family.segregation.numberOfAffectedWithTwoVariants || family.segregation.numberOfUnaffectedCarriers
+        || family.segregation.numberOfUnaffectedIndividuals || family.segregation.probandAssociatedWithBoth || family.segregation.additionalInformation)) ? true : false;
 
     return (
         <div className="panel-evidence-group">
@@ -582,7 +589,9 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                     })}
                 </div>
             : null}
-            <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} target="_blank" title="View family in a new tab">View</a>
+            {familyAssessable ?
+                <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} target="_blank" title="View/Assess family in a new tab">View/Assess</a>
+                : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} target="_blank" title="View family in a new tab">View</a>}
             {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
             {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
         </div>
@@ -696,7 +705,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                     })}
                 </div>
             : null}
-            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} target="_blank" title="View experimental data in a new tab">View</a>
+            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} target="_blank" title="View/Assess experimental data in a new tab">View/Assess</a>
             {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
         </div>
     );

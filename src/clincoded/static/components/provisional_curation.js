@@ -10,7 +10,8 @@ var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var parseAndLogError = require('./mixins').parseAndLogError;
-
+var modal = require('../libs/bootstrap/modal');
+var Modal = modal.Modal;
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
@@ -194,68 +195,75 @@ var ProvisionalCuration = React.createClass({
         var gdm = this.state.gdm ? this.state.gdm : null;
         var provisional = this.state.provisional ? this.state.provisional : null;
 
+        var show_clsfctn = queryKeyValue('classification', this.props.href);
         return (
             <div>
-                { gdm ?
-                    <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
-                        <div className="container">
-                            {
-                                (provisional && edit === 'yes') ?
-                                EditCurrent.call(this)
-                                :
-                                (   calculate === 'yes' ?
-                                    <div>
-                                        <h1>Curation Summary and Provisional Classification</h1>
-                                        {
-                                            provisional ?
-                                            <PanelGroup accordion>
-                                                <Panel title="Currently Saved Calculation and Classification" open>
-                                                    <div className="row">
-                                                            <div className="col-sm-5"><strong>Generated:</strong></div>
-                                                            <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
-                                                        </div>
-                                                        <div className="row">
-                                                            <div className="col-sm-5"><strong>Total Score:</strong></div>
-                                                            <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
-                                                        </div>
-                                                        <div className="row">
-                                                            <div className="col-sm-5">
-                                                                <strong>Calculated Clinical Validity Classification:</strong>
-                                                            </div>
-                                                            <div className="col-sm-7"><span>{provisional.autoClassification}</span></div>
-                                                        </div>
-                                                        <div className="row">
-                                                            <div className="col-sm-5">
-                                                                <strong>Selected Clinical Validity Classification:</strong>
-                                                            </div>
-                                                            <div className="col-sm-7"><span>{provisional.alteredClassification}</span></div>
-                                                        </div>
-                                                        <div className="row">
-                                                            <div className="col-sm-5">
-                                                                <strong>Reason(s):</strong>
-                                                            </div>
-                                                            <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
-                                                        </div>
-                                                    </Panel>
-                                                </PanelGroup>
-                                            : null
-                                        }
-                                        {AssessmentSummary.call(this)}
-                                        <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                            {NewCalculation.call(this)}
-                                            <div className='modal-footer'>
-                                                <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                                                <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
-                                            </div>
-                                        </Form>
-                                    </div>
-                                    :
-                                    null
-                                )
-                            }
-                        </div>
+                { show_clsfctn === 'display' ?
+                    <div className="container">
+                        <h1>Clinical Validity Classifications</h1>
+                        <img src={"../static/img/classification-values.png"} />
                     </div>
+                    :
+                    gdm ?
+                        <div>
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                            <div className="container">
+                                {
+                                    (provisional && edit === 'yes') ?
+                                    EditCurrent.call(this)
+                                    :
+                                    (   calculate === 'yes' ?
+                                        <div>
+                                            <h1>Curation Summary and Provisional Classification</h1>
+                                            {
+                                                provisional ?
+                                                <PanelGroup accordion>
+                                                    <Panel title="Currently Saved Calculation and Classification" open>
+                                                        <div className="row">
+                                                                <div className="col-sm-5"><strong>Generated:</strong></div>
+                                                                <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5"><strong>Total Score:</strong></div>
+                                                                <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5">
+                                                                    <strong>Calculated Clinical Validity Classification:</strong>
+                                                                </div>
+                                                                <div className="col-sm-7"><span>{provisional.autoClassification}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5">
+                                                                    <strong>Selected Clinical Validity Classification:</strong>
+                                                                </div>
+                                                                <div className="col-sm-7"><span>{provisional.alteredClassification}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5">
+                                                                    <strong>Reason(s):</strong>
+                                                                </div>
+                                                                <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
+                                                            </div>
+                                                        </Panel>
+                                                    </PanelGroup>
+                                                : null
+                                            }
+                                            {AssessmentSummary.call(this)}
+                                            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                                {NewCalculation.call(this)}
+                                                <div className='modal-footer'>
+                                                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                                                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
+                                                </div>
+                                            </Form>
+                                        </div>
+                                        :
+                                        null
+                                    )
+                                }
+                            </div>
+                        </div>
                     : null
                 }
             </div>
@@ -277,18 +285,23 @@ var EditCurrent = function() {
                 <PanelGroup accordion>
                     <Panel title="Currently Saved Calculation and Classification" open>
                         <div className="row">
-                            <div className="col-sm-5"><strong className="pull-right">otal Score:</strong></div>
+                            <div className="col-sm-5"><strong className="pull-right">Total Score:</strong></div>
                             <div className="col-sm-7"><span>{this.state.totalScore}</span></div>
                         </div>
+                        <br />
                         <div className="row">
                             <div className="col-sm-5">
-                                <strong className="pull-right">Calculated Clinical Validity Classification:</strong
-                            ></div>
+                                <strong className="pull-right">Calculated&nbsp;
+                                    <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>
+                                    :
+                                </strong>
+                            </div>
                             <div className="col-sm-7"><span>{this.state.autoClassification}</span></div>
                         </div>
+                        <br />
                         <div className="row">
-                            <Input type="select" ref="alteredClassification" label="Select Provisional Clinical Validity Classification:"
-                                value={alteredClassification} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
+                            <Input type="select" ref="alteredClassification" value={alteredClassification} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
+                                label={<strong>Select Provisional <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
                                 groupClassName="form-group" handleChange={this.handleChange}>
                                 <option value="Definitive">Definitive</option>
                                 <option value="Strong">Strong</option>
@@ -656,7 +669,6 @@ var NewCalculation = function() {
         }
     }
 
-
     return (
                 <PanelGroup accordion>
                     <Panel title="New Calculation and Classification" open>
@@ -739,13 +751,19 @@ var NewCalculation = function() {
                             <br />
                             <div className="row">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Calculated Clinical Validity Classification:</strong>
+                                    <strong className="pull-right">Calculated&nbsp;
+                                        <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:
+                                    </strong>
                                 </div>
-                                <div className="col-sm-7"><span>{this.state.autoClassification}</span></div>
+                                <div className="col-sm-7">
+                                    {this.state.autoClassification}
+                                </div>
                             </div>
                             <br />
-                            <Input type="select" ref="alteredClassification" label="Select Provisional Clinical Validity Classification:"
-                                wrapperClassName="col-sm-7" defaultValue={this.state.autoClassification} labelClassName="col-sm-5 control-label"
+                            <Input type="select" ref="alteredClassification"
+                                label={<strong>Select Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
+                                labelClassName="col-sm-5 control-label"
+                                wrapperClassName="col-sm-7" defaultValue={this.state.autoClassification}
                                 groupClassName="form-group">
                                 <option value="Definitive">Definitive</option>
                                 <option value="Strong">Strong</option>
@@ -769,6 +787,7 @@ var NewCalculation = function() {
                 </PanelGroup>
     );
 };
+
 
 var in_array = function(item, list) {
     for(var i in list){
