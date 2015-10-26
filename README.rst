@@ -32,9 +32,8 @@ Note: For Mac < 10.9, the system python doesn't work. You should install Python 
 
     $ brew install python3
 
-Install Node 0.10 from homebrew/versions::
+Install Node from homebrew/versions::
 
-    $ brew tap homebrew/versions
     $ brew install node
 
 If you need to update dependencies::
