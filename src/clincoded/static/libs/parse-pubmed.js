@@ -26,8 +26,7 @@ function parsePubmed(xml){
         // Get the journal name
         var $Journal = $PubmedArticle.getElementsByTagName('Journal')[0];
         if($Journal){
-            article.date = pubmedDatePublished($Journal).toISOString();
-            article.date = moment(article.date).format('YYYY-MMM');
+            article.date = pubmedDatePublished($PubmedArticle, $Journal);
             article.journal = pubmedPeriodical($Journal);
         }
 
@@ -58,10 +57,12 @@ function parsePubmed(xml){
                     publicationPgn = $MedlinePgn.textContent;
                 }
             }
-            publicationData = publicationVolume + (publicationIssue ? '(' + publicationIssue + ')' : '')  + ':' + publicationPgn;
+            publicationData = publicationVolume + (publicationIssue ? '(' + publicationIssue + ')' : '')  + (publicationPgn ? ':' + publicationPgn : '');
         }
         if (publicationData) {
-            article.date += ';' + publicationData;
+            article.date += ';' + publicationData + '.';
+        } else {
+            article.date += '.';
         }
     }
 
@@ -112,54 +113,70 @@ function pubmedDoi($PubmedArticle){
 }
 
 
-function pubmedDatePublished($Journal){
+function pubmedDatePublished($PubmedArticle, $Journal){
     var $PubDate = $Journal.getElementsByTagName('PubDate')[0];
     if($PubDate){
-        var $day = $PubDate.getElementsByTagName('Day')[0];
-        var $month = $PubDate.getElementsByTagName('Month')[0];
-        var $year = $PubDate.getElementsByTagName('Year')[0];
-        var month, jsDate;
+        var day = $PubDate.getElementsByTagName('Day')[0] ? $PubDate.getElementsByTagName('Day')[0].textContent.trim() : null;
+        var month = $PubDate.getElementsByTagName('Month')[0] ? $PubDate.getElementsByTagName('Month')[0].textContent.trim() : null;
+        var year = $PubDate.getElementsByTagName('Year')[0] ? $PubDate.getElementsByTagName('Year')[0].textContent.trim() : null;
+        var pubdate;
 
-        if($month){
-            var abrMonth2int = {
-                'jan': 0,
-                'feb': 1,
-                'mar': 2,
-                'apr': 3,
-                'may': 4,
-                'jun': 5,
-                'july': 6,
-                'aug': 7,
-                'sep': 8,
-                'oct': 9,
-                'nov': 10,
-                'dec': 11
-            };
+        pubdate = parseDate(day, month, year);
 
-            month = abrMonth2int[$month.textContent.trim().toLowerCase()];
+        if (!pubdate || pubdate.length < 5) {
+            // if PubDate tag is empty, or if only the year available, check to see if the
+            // ArticleDate tag exists, and use it for pubdate if it's longer
+            var $ArticleDate = $PubmedArticle.getElementsByTagName('ArticleDate')[0] ? $PubmedArticle.getElementsByTagName('ArticleDate')[0] : null;
+            if($ArticleDate) {
+                day = $ArticleDate.getElementsByTagName('Day')[0] ? $ArticleDate.getElementsByTagName('Day')[0].textContent.trim() : null;
+                month = $ArticleDate.getElementsByTagName('Month')[0] ? $ArticleDate.getElementsByTagName('Month')[0].textContent.trim() : null;
+                year = $ArticleDate.getElementsByTagName('Year')[0] ? $ArticleDate.getElementsByTagName('Year')[0].textContent.trim() : null;
+                pubdate = pubdate.length < parseDate(day, month, year).length ? parseDate(day, month, year) : pubdate;
+            }
         }
-
-        if($year && month && $day){
-            jsDate = Date.UTC($year.textContent, month, $day.textContent, 0, 0, 0, 0);
-        } else if($year && month){
-            jsDate = Date.UTC($year.textContent, month, 1, 0, 0, 0, 0);
-        } else if($year){
-            jsDate = Date.UTC($year.textContent, 0, 1, 0, 0, 0, 0);
-        }
-
-        if(jsDate){
-            jsDate = new Date(jsDate - 1000*5*60*60); //UTC to Eastern Time Zone (UTC-05:00)
-        } else {
+        if (!pubdate) {
+            // if we still don't have a valid pubdate, fall back to the MedlineDate info
             var $MedlineDate = $PubDate.getElementsByTagName('MedlineDate')[0];
             if($MedlineDate){
                 try {
-                    jsDate = new Date($MedlineDate.textContent);
+                    pubdate = $MedlineDate.textContent;
                 } catch(e){}
             }
         }
-        if(jsDate){
-            return jsDate;
+        if (pubdate){
+            return pubdate;
+        } else {
+            return '';
         }
+    }
+}
+
+function parseDate(day, month, year) {
+    // put together the date information for a valid Pubmed-style timestamp
+    var pubdate;
+    if (month && !isNaN(parseFloat(month)) && isFinite(month)) {
+        // if the month is in numeric format, switch it over to short alphabet
+        month = parseInt(month);
+        var monthToStr = {
+            1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr',
+            5: 'May', 6: 'Jun', 7: 'July', 8: 'Aug',
+            9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'
+        };
+        if (month in monthToStr) {
+            month = monthToStr[month];
+        }
+    }
+    if (year && month && day) {
+        pubdate = year + ' ' + month + ' ' + day;
+    } else if (year && month) {
+        pubdate = year + ' ' + month;
+    } else if (year) {
+        pubdate = year;
+    }
+    if (pubdate) {
+        return String(pubdate);
+    } else {
+        return null;
     }
 }
 
@@ -185,7 +202,11 @@ function pubmedPeriodical($Journal){
 
     var $Title = $Journal.getElementsByTagName('Title')[0];
     if($Title){
-        return $Title.textContent;
+        var journalFormatted = $Title.textContent;
+        if (journalFormatted.indexOf('.', journalFormatted.length - 1) !== -1) {
+            journalFormatted = journalFormatted.substring(0, journalFormatted.length - 1);
+        }
+        return journalFormatted;
     }
     return '';
 
