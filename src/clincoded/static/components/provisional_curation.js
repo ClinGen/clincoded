@@ -218,7 +218,7 @@ var ProvisionalCuration = React.createClass({
                                             {
                                                 provisional ?
                                                 <PanelGroup accordion>
-                                                    <Panel title="Last Saved Summary & Classification" open>
+                                                    <Panel title="Last Saved Summary & Provisional Classification" open>
                                                         <div className="row">
                                                                 <div className="col-sm-5"><strong>Date Generated:</strong></div>
                                                                 <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
@@ -675,7 +675,7 @@ var NewCalculation = function() {
 
     return (
                 <PanelGroup accordion>
-                    <Panel title="New Calculation & Classification" open>
+                    <Panel title="New Summary & Provisional Classification" open>
                         <div className="form-group">
                             <div>
                                 The calculated values below are based on the set of saved evidence that existed when the "Generate New Summary"
@@ -783,7 +783,7 @@ var NewCalculation = function() {
                             <div className="col-sm-5"><span className="pull-right">&nbsp;</span></div>
                             <div className="col-sm-7">
                                 <span>
-                                **Note: If your selected Clinical Validity Classification is different from the Calculated value, provide a reason to expain why you changed it.
+                                Note: If your selected Clinical Validity Classification is different from the Calculated value, provide a reason to expain why you changed it.
                                 </span>
                             </div>
                         </div>
