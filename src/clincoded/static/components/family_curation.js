@@ -11,6 +11,7 @@ var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var individual_curation = require('./individual_curation');
 var Assessments = require('./assessment');
+var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -479,19 +480,56 @@ var FamilyCuration = React.createClass({
                     return Promise.resolve(diseases);
                 }).then(diseases => {
                     // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
-                    if (pmids) {
+                    if (pmids && pmids.length) {
                         // User entered at least one PMID
                         searchStr = '/search/?type=article&' + pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
                         return this.getRestData(searchStr).then(articles => {
                             if (articles['@graph'].length === pmids.length) {
-                                // Successfully retrieved all genes
+                                // Successfully retrieved all PMIDs, so just set familyArticles and return
                                 familyArticles = articles;
                                 return Promise.resolve(articles);
                             } else {
-                                this.setState({submitBusy: false}); // submit error; re-enable submit button
+                                // some PMIDs were not in our db already
+                                // generate list of PMIDs and pubmed URLs for those PMIDs
                                 var missingPmids = _.difference(pmids, articles['@graph'].map(function(article) { return article.pmid; }));
-                                this.setFormErrors('otherpmids', missingPmids.join(', ') + ' not found');
-                                throw articles;
+                                var missingPmidsUrls = [];
+                                for (var missingPmidsIndex = 0; missingPmidsIndex < missingPmids.length; missingPmidsIndex++) {
+                                    missingPmidsUrls.push(external_url_map['PubMedSearch']  + missingPmids[missingPmidsIndex]);
+                                }
+                                // get the XML for the missing PMIDs
+                                return this.getRestDatasXml(missingPmidsUrls).then(xml => {
+                                    var newArticles = [];
+                                    var invalidPmids = [];
+                                    var tempArticle;
+                                    // loop through the resulting XMLs and parsePubmed them
+                                    for (var xmlIndex = 0; xmlIndex < xml.length; xmlIndex++) {
+                                        tempArticle = parsePubmed(xml[xmlIndex]);
+                                        // check to see if Pubmed actually had an entry for the PMID
+                                        if ('pmid' in tempArticle) {
+                                            newArticles.push(tempArticle);
+                                        } else {
+                                            // PMID was not found at Pubmed
+                                            invalidPmids.push(missingPmids[xmlIndex]);
+                                        }
+                                    }
+                                    // if there were invalid PMIDs, throw an error with a list of them
+                                    if (invalidPmids.length > 0) {
+                                        this.setState({submitBusy: false}); // submit error; re-enable submit button
+                                        this.setFormErrors('otherpmids', 'PMID(s) ' + invalidPmids.join(', ') + ' not found');
+                                        throw invalidPmids;
+                                    }
+                                    // otherwise, post the valid PMIDs
+                                    if (newArticles.length > 0) {
+                                        return this.postRestDatas('/articles', newArticles).then(data => {
+                                            for (var dataIndex = 0; dataIndex < data.length; dataIndex++) {
+                                                articles['@graph'].push(data[dataIndex]['@graph'][0]);
+                                            }
+                                            familyArticles = articles;
+                                            return Promise.resolve(data);
+                                        });
+                                    }
+                                    return Promise(articles);
+                                });
                             }
                         });
                     } else {
@@ -1066,9 +1104,9 @@ var FamilyCommonDiseases = function() {
 
     // If we're editing a family, make editable values of the complex properties
     if (family) {
-        orphanetidVal = family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
-        hpoidVal = family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join() : null;
-        nothpoidVal = family.hpoIdInElimination ? family.hpoIdInElimination.join() : null;
+        orphanetidVal = family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : null;
+        hpoidVal = family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join(', ') : null;
+        nothpoidVal = family.hpoIdInElimination ? family.hpoIdInElimination.join(', ') : null;
     }
 
     // Make a list of diseases from the group, either from the given group,
@@ -1383,7 +1421,7 @@ var FamilyAdditional = function() {
     var otherpmidsVal;
     var family = this.state.family;
     if (family) {
-        otherpmidsVal = family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
+        otherpmidsVal = family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
     }
 
     return (
