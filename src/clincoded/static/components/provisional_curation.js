@@ -214,13 +214,13 @@ var ProvisionalCuration = React.createClass({
                                     :
                                     (   calculate === 'yes' ?
                                         <div>
-                                            <h1>Curation Summary and Provisional Classification</h1>
+                                            <h1>Curation Summary & Provisional Classification</h1>
                                             {
                                                 provisional ?
                                                 <PanelGroup accordion>
-                                                    <Panel title="Currently Saved Calculation and Classification" open>
+                                                    <Panel title="Last Saved Summary & Classification" open>
                                                         <div className="row">
-                                                                <div className="col-sm-5"><strong>Generated:</strong></div>
+                                                                <div className="col-sm-5"><strong>Date Generated:</strong></div>
                                                                 <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
                                                             </div>
                                                             <div className="row">
@@ -245,6 +245,7 @@ var ProvisionalCuration = React.createClass({
                                                                 </div>
                                                                 <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
                                                             </div>
+                                                            <div className="row">&nbsp;</div>
                                                         </Panel>
                                                     </PanelGroup>
                                                 : null
@@ -388,7 +389,7 @@ var AssessmentSummary = function() {
 
     return (
         <PanelGroup accordion>
-            <Panel title="Your Assessments" open>
+            <Panel title="New Count of Assessments" open>
                 <table>
                     <tr>
                         <td style={{width:'150px', 'text-align':'center'}}>&nbsp;</td>
@@ -413,6 +414,9 @@ var AssessmentSummary = function() {
                         <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segCntdct}</td>
                         <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantCntdct}</td>
                         <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expCntdct}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">&nbsp;</td>
                     </tr>
                 </table>
             </Panel>
@@ -671,12 +675,12 @@ var NewCalculation = function() {
 
     return (
                 <PanelGroup accordion>
-                    <Panel title="New Calculation and Classification" open>
+                    <Panel title="New Calculation & Classification" open>
                         <div className="form-group">
                             <div>
-                                The calculated values below are based on the set of saved evidence that exists when the "Generate New Summary"
-                                is clicked. To save these values as the "Current Summary & Provisional Classification" calculated values and make
-                                any changes to the Provisional Classification, you must click the Save button below.
+                                The calculated values below are based on the set of saved evidence that existed when the "Generate New Summary"
+                                button was clicked. To save these values and the calculated or selected Classification, click "Save" below - they
+                                will then represent the new "Last Saved Summary & Provisional Classification".
                             </div>
                             <div><span>&nbsp;</span></div>
                             <div className="row">

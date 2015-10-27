@@ -156,14 +156,14 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                     <tr>
                                         <td style={{'textAlign':'left'}}>
                                             <div className="provisional-title">
-                                                <strong>Current Summary & Provisional Classification</strong>
+                                                <strong>Last Saved Summary & Provisional Classification</strong>
                                             </div>
                                             {   provisionalExist ?
                                                     <div>
                                                         <div className="provisional-data-left">
                                                             <span>
-                                                                Current Summary<br />
-                                                                Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                                Last Saved Summary<br />
+                                                                Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
                                                             </span>
                                                         </div>
                                                         <div className="provisional-data-center">
