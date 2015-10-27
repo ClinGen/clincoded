@@ -1261,7 +1261,7 @@ module.exports.capture = {
 
     // Find all the comma-separated PMID occurrences. Return all valid PMIDs in an array.
     pmids: function(s) {
-        return captureBase(s, /^\s*(\d{1,10})\s*$/);
+        return captureBase(s, /^\s*([1-9]{1}\d*)\s*$/);
     },
 
     // Find all the comma-separated HPO ID occurrences. Return all valid HPO ID in an array.
