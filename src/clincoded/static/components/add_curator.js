@@ -67,6 +67,8 @@ var AddCurator = React.createClass({
                         email: curatorEmail,
                         first_name: firstName,
                         last_name: lastName,
+                        groups: ["admin"],
+                        job_title: "ClinGen Curator",
                         lab: '/labs/curator/',
                         submits_for: ['/labs/curator/'],
                         timezone: 'US/Pacific'
