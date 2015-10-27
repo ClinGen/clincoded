@@ -328,6 +328,7 @@ module.exports.HistoryAndTriggers = {
     getInitialState: function () {
         return {
             contextRequest: null,
+            href: null,
             unsavedChanges: []
         };
     },
@@ -359,14 +360,14 @@ module.exports.HistoryAndTriggers = {
             window.onhashchange = this.onHashChange;
         }
         window.onbeforeunload = this.handleBeforeUnload;
-        if (this.props.href !== window.location.href) {
-            this.setProps({href: window.location.href});
+        if (this.state.href !== window.location.href) {
+            this.setState({href: window.location.href});
         }
     },
 
     onHashChange: function (event) {
         // IE8/9
-        this.setProps({href: window.location.href});
+        this.setState({href: window.location.href});
     },
 
     trigger: function (name) {
@@ -460,8 +461,8 @@ module.exports.HistoryAndTriggers = {
         if (!origin.same(target.action)) return;
 
         var options = {};
-        var action_url = url.parse(url.resolve(this.props.href, target.action));
-        options.replace = action_url.pathname == url.parse(this.props.href).pathname;
+        var action_url = url.parse(url.resolve(this.state.href, target.action));
+        options.replace = action_url.pathname == url.parse(this.state.href).pathname;
         var search = serialize(target);
         if (target.getAttribute('data-removeempty')) {
             search = search.split('&').filter(function (item) {
@@ -484,7 +485,7 @@ module.exports.HistoryAndTriggers = {
     handlePopState: function (event) {
         if (this.DISABLE_POPSTATE) return;
         if (!this.confirmNavigation()) {
-            window.history.pushState(window.state, '', this.props.href);
+            window.history.pushState(window.state, '', this.state.href);
             return;
         }
         if (!this.historyEnabled) {
@@ -497,9 +498,9 @@ module.exports.HistoryAndTriggers = {
             // Abort inflight xhr before setProps
             if (request) request.abort();
             this.setProps({
-                context: event.state,
-                href: href  // href should be consistent with context
+                context: event.state
             });
+            this.stateState({href: href});
         }
         // Always async update in case of server side changes.
         // Triggers standard analytics handling.
@@ -532,7 +533,7 @@ module.exports.HistoryAndTriggers = {
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
         options = options || {};
-        href = url.resolve(this.props.href, href);
+        href = url.resolve(this.state.href, href);
 
         // Strip url fragment.
         var fragment = '';
@@ -601,7 +602,7 @@ module.exports.HistoryAndTriggers = {
             } else {
                 window.history.pushState(null, '', response_url + fragment);
             }
-            this.setProps({
+            this.setState({
                 href: response_url + fragment
             });
             if (!response.ok) {
