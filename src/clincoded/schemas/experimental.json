@@ -18,8 +18,7 @@
         "label": {
             "title": "Label",
             "description": "A user entered label for the experiment",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "active": {
             "title": "Active",
@@ -59,8 +58,7 @@
                 "evidenceForFunctionInPaper": {
                     "title": "Evidence Location in Article",
                     "description": "Where in article to find evidence",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 },
                 "geneWithSameFunctionSameDisease": {
                     "title": "Option A",
@@ -91,14 +89,12 @@
                         "explanationOfOtherGenes": {
                             "title": "Explanation of Other Genes",
                             "description": "Explanation of relationship of other genes to the diasease  (optional)",
-                            "type": "string",
-                            "default": ""
+                            "type": "string"
                         },
                         "evidenceInPaper": {
                             "title": "Explanation in Paper",
                             "description": "Where explanation can be found in paper (optional)",
-                            "type": "string",
-                            "default": ""
+                            "type": "string"
                         }
                     }
                 },
@@ -122,8 +118,7 @@
                         "phenotypeFreeText": {
                             "title": "Phenotype (Free Text)",
                             "description": "Free text if HPO is not avaliable for the phenotype",
-                            "type": "string",
-                            "default": ""
+                            "type": "string"
                         },
                         "explanation": {
                             "title": "Consistent with Disease",
@@ -133,8 +128,7 @@
                         "evidenceInPaper": {
                             "title": "Consistent in Paper",
                             "description": "Where to find the explantion in paper",
-                            "type": "string",
-                            "default": ""
+                            "type": "string"
                         }
                     }
                 }
@@ -301,8 +295,7 @@
                 "evidenceInPaper": {
                     "title": "Evidence in Paper",
                     "description": "Where evidence can be found in paper",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 }
             }
         },
@@ -325,7 +318,6 @@
                     "title": "Animal Model",
                     "description": "NCBI Taxon id for animal model",
                     "type": "string",
-                    "default": "",
                     "enum": [
                         "",
                         "Cat (Felis catus) 9685",
@@ -351,8 +343,7 @@
                 "cellCulture": {
                     "title": "Cell Culture Type/Line",
                     "description": "EFO id for cell culture type/line",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 },
                 "descriptionOfGeneAlteration": {
                     "title": "Gene Alteration",
@@ -362,26 +353,22 @@
                 "phenotypeHPO": {
                     "title": "Phenotype (HPO)",
                     "description": "HPO id of patient phenotype",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 },
                 "phenotypeFreeText": {
                     "title": "Phenotype (Free text)",
                     "description": "Other terms of phenotype if HPO not avaliable",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 },
                 "phenotypeHPOObserved": {
                     "title": "Phenotype (HPO) Observed in Model System",
                     "description": "HPO term",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 },
                 "phenotypeFreetextObserved": {
                     "title": "Phenotype (Free text) Observed in Model System",
                     "description": "Free text",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 },
                 "explanation": {
                     "title": "Explanation",
@@ -391,8 +378,7 @@
                 "evidenceInPaper": {
                     "title": "Evidence in Paper",
                     "description": "Where evidence can be found in paper",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 }
             }
         },
@@ -459,8 +445,7 @@
                 "evidenceInPaper": {
                     "title": "Evidence Location in Paper",
                     "description": "Where can evidence be found in paper",
-                    "type": "string",
-                    "default": ""
+                    "type": "string"
                 }
             }
         },

@@ -11,6 +11,7 @@ var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var individual_curation = require('./individual_curation');
 var Assessments = require('./assessment');
+var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -30,9 +31,10 @@ var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var makeStarterIndividual = individual_curation.makeStarterIndividual;
 var updateProbandVariants = individual_curation.updateProbandVariants;
+var external_url_map = globals.external_url_map;
 
 // Will be great to convert to 'const' when available
-var MAX_VARIANTS = 5;
+var MAX_VARIANTS = 2;
 
 // Settings for this.state.varOption
 var VAR_NONE = 0; // No variants entered in a panel
@@ -94,7 +96,8 @@ var FamilyCuration = React.createClass({
             familyName: '', // Currently entered family name
             addVariantDisabled: false, // True if Add Another Variant button enabled
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
-            segregationFilled: false // True if at least one segregation field has a value
+            segregationFilled: false, // True if at least one segregation field has a value
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -431,6 +434,7 @@ var FamilyCuration = React.createClass({
             if (!formError) {
                 // Build search string from given ORPHA IDs
                 var searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                this.setState({submitBusy: true});
 
                 // Verify given Orpha ID exists in DB
                 this.getRestData(searchStr).then(diseases => {
@@ -461,12 +465,14 @@ var FamilyCuration = React.createClass({
                                 return Promise.resolve(diseases);
                             } else {
                                 // Get array of missing Orphanet IDs
+                                this.setState({submitBusy: false}); // submit error; re-enable submit button
                                 var missingOrphas = _.difference(indOrphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
                                 this.setFormErrors('individualorphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
                                 throw diseases;
                             }
                         }, e => {
                             // The given orpha IDs couldn't be retrieved for some reason.
+                            this.setState({submitBusy: false}); // submit error; re-enable submit button
                             this.setFormErrors('individualorphanetid', 'The given diseases not found');
                             throw e;
                         });
@@ -474,18 +480,56 @@ var FamilyCuration = React.createClass({
                     return Promise.resolve(diseases);
                 }).then(diseases => {
                     // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
-                    if (pmids) {
+                    if (pmids && pmids.length) {
                         // User entered at least one PMID
                         searchStr = '/search/?type=article&' + pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
                         return this.getRestData(searchStr).then(articles => {
                             if (articles['@graph'].length === pmids.length) {
-                                // Successfully retrieved all genes
+                                // Successfully retrieved all PMIDs, so just set familyArticles and return
                                 familyArticles = articles;
                                 return Promise.resolve(articles);
                             } else {
+                                // some PMIDs were not in our db already
+                                // generate list of PMIDs and pubmed URLs for those PMIDs
                                 var missingPmids = _.difference(pmids, articles['@graph'].map(function(article) { return article.pmid; }));
-                                this.setFormErrors('otherpmids', missingPmids.join(', ') + ' not found');
-                                throw articles;
+                                var missingPmidsUrls = [];
+                                for (var missingPmidsIndex = 0; missingPmidsIndex < missingPmids.length; missingPmidsIndex++) {
+                                    missingPmidsUrls.push(external_url_map['PubMedSearch']  + missingPmids[missingPmidsIndex]);
+                                }
+                                // get the XML for the missing PMIDs
+                                return this.getRestDatasXml(missingPmidsUrls).then(xml => {
+                                    var newArticles = [];
+                                    var invalidPmids = [];
+                                    var tempArticle;
+                                    // loop through the resulting XMLs and parsePubmed them
+                                    for (var xmlIndex = 0; xmlIndex < xml.length; xmlIndex++) {
+                                        tempArticle = parsePubmed(xml[xmlIndex]);
+                                        // check to see if Pubmed actually had an entry for the PMID
+                                        if ('pmid' in tempArticle) {
+                                            newArticles.push(tempArticle);
+                                        } else {
+                                            // PMID was not found at Pubmed
+                                            invalidPmids.push(missingPmids[xmlIndex]);
+                                        }
+                                    }
+                                    // if there were invalid PMIDs, throw an error with a list of them
+                                    if (invalidPmids.length > 0) {
+                                        this.setState({submitBusy: false}); // submit error; re-enable submit button
+                                        this.setFormErrors('otherpmids', 'PMID(s) ' + invalidPmids.join(', ') + ' not found');
+                                        throw invalidPmids;
+                                    }
+                                    // otherwise, post the valid PMIDs
+                                    if (newArticles.length > 0) {
+                                        return this.postRestDatas('/articles', newArticles).then(data => {
+                                            for (var dataIndex = 0; dataIndex < data.length; dataIndex++) {
+                                                articles['@graph'].push(data[dataIndex]['@graph'][0]);
+                                            }
+                                            familyArticles = articles;
+                                            return Promise.resolve(data);
+                                        });
+                                    }
+                                    return Promise(articles);
+                                });
                             }
                         });
                     } else {
@@ -705,11 +749,12 @@ var FamilyCuration = React.createClass({
                 }).then(newFamily => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
+                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut && !initvar) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                     } else {
-                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + newFamily.uuid + '&annotation=' + this.state.annotation.uuid + (initvar ? '&initvar' : '') + (hadvar ? '&hadvar' : ''));
+                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + newFamily.uuid + '&evidence=' + this.state.annotation.uuid + (initvar ? '&initvar' : '') + (hadvar ? '&hadvar' : ''));
                     }
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
@@ -893,8 +938,10 @@ var FamilyCuration = React.createClass({
         var groups = (family && family.associatedGroups) ? family.associatedGroups :
             (this.state.group ? [this.state.group] : null);
         var annotation = this.state.annotation;
+        var pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
         var method = (family && family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
@@ -905,11 +952,19 @@ var FamilyCuration = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
+        // define where pressing the Cancel button should take you to
+        var cancelUrl;
+        if (gdm) {
+            cancelUrl = (!this.queryValues.familyUuid || this.queryValues.editShortcut) ?
+                '/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')
+                : '/family-submit/?gdm=' + gdm.uuid + (family ? '&family=' + family.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
+        }
+
         return (
             <div>
                 {(!this.queryValues.familyUuid || this.state.family) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -976,7 +1031,8 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
-                                            <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
+                                            {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>
@@ -1048,9 +1104,9 @@ var FamilyCommonDiseases = function() {
 
     // If we're editing a family, make editable values of the complex properties
     if (family) {
-        orphanetidVal = family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
-        hpoidVal = family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join() : null;
-        nothpoidVal = family.hpoIdInElimination ? family.hpoIdInElimination.join() : null;
+        orphanetidVal = family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : null;
+        hpoidVal = family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join(', ') : null;
+        nothpoidVal = family.hpoIdInElimination ? family.hpoIdInElimination.join(', ') : null;
     }
 
     // Make a list of diseases from the group, either from the given group,
@@ -1088,7 +1144,7 @@ var FamilyCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Common Disease(s) in Family:</span>;
+        return <span><a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Common Disease(s) in Family:</span>;
     }
 });
 
@@ -1102,7 +1158,7 @@ var LabelHpoId = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://bioportal.bioontology.org/ontologies/HP?p=classes&conceptid=root" target="_blank" title="Bioportal Human Phenotype Ontology in a new tab">HPO lookup at Bioportal</a>)</span>:
+                Phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
             </span>
         );
     }
@@ -1309,7 +1365,7 @@ var FamilyVariant = function() {
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                         <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href="http://www.ncbi.nlm.nih.gov/clinvar/variation/139214/" target="_blank">example</a>: 139214).
+                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVar'] + 'variation/139214/'} target="_blank">example</a>: 139214).
                         </p>
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1330,8 +1386,15 @@ var FamilyVariant = function() {
                 </div>
             : null}
             {this.state.variantCount < MAX_VARIANTS ?
-                <div>
-                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with proband" : "Add variant associated with proband"}
+                <div className="col-sm-7 col-sm-offset-5">
+                    {this.state.variantCount ?
+                        <p className="alert alert-warning">
+                            For a recessive condition, you must enter both variants believed to be causative for the disease in order that
+                            each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
+                            variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
+                        </p>
+                    : null}
+                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Individual" : "Add variant associated with Individual"}
                         clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                 </div>
             : null}
@@ -1341,7 +1404,7 @@ var FamilyVariant = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
     }
 });
 
@@ -1358,7 +1421,7 @@ var FamilyAdditional = function() {
     var otherpmidsVal;
     var family = this.state.family;
     if (family) {
-        otherpmidsVal = family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
+        otherpmidsVal = family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
     }
 
     return (
@@ -1373,6 +1436,30 @@ var FamilyAdditional = function() {
 };
 
 
+// Determine whether the given segregation contains any non-empty values.
+function segregationExists(segregation) {
+    var exists = false;
+
+    if (segregation) {
+        exists = (segregation.pedigreeDescription && segregation.pedigreeDescription.length > 0) ||
+                  segregation.pedigreeSize ||
+                  segregation.numberOfGenerationInPedigree ||
+                  segregation.consanguineousFamily ||
+                  segregation.numberOfCases ||
+                 (segregation.deNovoType && segregation.deNovoType.length > 0) ||
+                  segregation.numberOfParentsUnaffectedCarriers ||
+                  segregation.numberOfAffectedAlleles ||
+                  segregation.numberOfAffectedWithOneVariant ||
+                  segregation.numberOfAffectedWithTwoVariants ||
+                  segregation.numberOfUnaffectedCarriers ||
+                  segregation.numberOfUnaffectedIndividuals ||
+                  segregation.probandAssociatedWithBoth ||
+                 (segregation.additionalInformation && segregation.additionalInformation.length > 0);
+    }
+    return exists;
+};
+
+
 var FamilyViewer = React.createClass({
     mixins: [RestMixin, AssessmentMixin],
 
@@ -1384,7 +1471,8 @@ var FamilyViewer = React.createClass({
     getInitialState: function() {
         return {
             assessments: null, // Array of assessments for the family's segregation
-            updatedAssessment: '' // Updated assessment value
+            updatedAssessment: '', // Updated assessment value
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -1392,36 +1480,54 @@ var FamilyViewer = React.createClass({
     assessmentSubmit: function(e) {
         var updatedFamily;
 
-        // Write the assessment to the DB, if there was one.
-        this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
-            var family = this.props.context;
+        // GET the family object to have the most up-to-date version
+        this.getRestData('/families/' + this.props.context.uuid).then(data => {
+            this.setState({submitBusy: true});
+            var family = data;
 
-            // If we made a new assessment, add it to the family's assessments
-            if (assessmentInfo.assessment && !assessmentInfo.update) {
-                 updatedFamily = curator.flatten(family);
-                if (!updatedFamily.segregation.assessments) {
-                    updatedFamily.segregation.assessments = [];
+            // Write the assessment to the DB, if there was one.
+            return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
+                // If we made a new assessment, add it to the family's assessments
+                if (assessmentInfo.assessment && !assessmentInfo.update) {
+                     updatedFamily = curator.flatten(family);
+                    if (!updatedFamily.segregation.assessments) {
+                        updatedFamily.segregation.assessments = [];
+                    }
+                    updatedFamily.segregation.assessments.push(assessmentInfo.assessment['@id']);
+
+                    // Write the updated family object to the DB
+                    return this.putRestData('/families/' + family.uuid, updatedFamily).then(data => {
+                        return this.getRestData('/families/' + data['@graph'][0].uuid);
+                    });
                 }
-                updatedFamily.segregation.assessments.push(assessmentInfo.assessment['@id']);
 
-                // Write the updated family object to the DB
-                return this.putRestData('/families/' + family.uuid, updatedFamily).then(data => {
-                    return this.getRestData('/families/' + data['@graph'][0].uuid);
-                });
-            }
+                // Didn't update the family; if updated the assessment, reload the family
+                if (assessmentInfo.update) {
+                    return this.getRestData('/families/' + family.uuid);
+                }
 
-            // Didn't update the family; if updated the assessment, reload the family
-            if (assessmentInfo.update) {
-                return this.getRestData('/families/' + family.uuid);
-            }
-
-            // Not updating the family
-            return Promise.resolve(family);
+                // Not updating the family
+                return Promise.resolve(family);
+            });
         }).then(updatedFamily => {
+            // update the assessmentTracker object so it accounts for any new assessments
+            var userAssessment;
+            var assessments = updatedFamily.segregation.assessments;
+            var user = this.props.session && this.props.session.user_properties;
+
+            // Find if any assessments for the segregation are owned by the currently logged-in user
+            if (assessments && assessments.length) {
+                // Find the assessment belonging to the logged-in curator, if any.
+                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+            }
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
+
             // Wrote the family, so update the assessments state to the new assessment list
             if (updatedFamily && updatedFamily.segregation && updatedFamily.segregation.assessments && updatedFamily.segregation.assessments.length) {
                 this.setState({assessments: updatedFamily.segregation.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
+
+            this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
         }).catch(function(e) {
             console.log('FAMILY VIEW UPDATE ERROR=: %o', e);
@@ -1438,6 +1544,27 @@ var FamilyViewer = React.createClass({
         }
     },
 
+    componentWillReceiveProps: function(nextProps) {
+        if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
+            var family = this.props.context;
+            var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
+            var user = nextProps.session && nextProps.session.user_properties;
+            var segregation = family.segregation;
+
+            // Make an assessment tracker object once we get the logged in user info
+            if (!this.cv.assessmentTracker && user && segregation) {
+                var userAssessment;
+
+                // Find if any assessments for the segregation are owned by the currently logged-in user
+                if (assessments && assessments.length) {
+                    // Find the assessment belonging to the logged-in curator, if any.
+                    userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+                }
+                this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
+            }
+        }
+    },
+
     render: function() {
         var family = this.props.context;
         var method = family.method;
@@ -1451,18 +1578,6 @@ var FamilyViewer = React.createClass({
         var othersAssessed = false; // TRUE if we own this segregation, and others have assessed it
         var updateMsg = this.state.updatedAssessment ? 'Assessment updated to ' + this.state.updatedAssessment : '';
 
-        // Make an assessment tracker object once we get the logged in user info
-        if (!this.cv.assessmentTracker && user && segregation) {
-            var userAssessment;
-
-            // Find if any assessments for the segregation are owned by the currently logged-in user
-            if (assessments && assessments.length) {
-                // Find the assessment belonging to the logged-in curator, if any.
-                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
-            }
-            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
-        }
-
         // See if others have assessed
         if (userFamily) {
             othersAssessed = Assessments.othersAssessed(assessments, user.uuid);
@@ -1475,6 +1590,9 @@ var FamilyViewer = React.createClass({
                 familyUserAssessed = true;
             }
         }
+
+        // See if the segregation contains anything.
+        var haveSegregation = segregationExists(segregation);
 
         return (
             <div className="container">
@@ -1623,9 +1741,9 @@ var FamilyViewer = React.createClass({
 
                     {FamilySegregationViewer(segregation, assessments, true)}
 
-                    {this.cv.gdmUuid && (familyUserAssessed || userFamily) ?
+                    {this.cv.gdmUuid && (familyUserAssessed || userFamily) && haveSegregation ?
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} updateMsg={updateMsg} />
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
                     : null}
 
                     <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">

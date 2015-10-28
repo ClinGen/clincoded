@@ -9,6 +9,7 @@ var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
+var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -23,10 +24,11 @@ var InputMixin = form.InputMixin;
 var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
+var external_url_map = globals.external_url_map;
 
 
 // Will be great to convert to 'const' when available
-var MAX_VARIANTS = 5;
+var MAX_VARIANTS = 2;
 
 // Settings for this.state.varOption
 var VAR_NONE = 0; // No variants entered in a panel
@@ -58,7 +60,8 @@ var IndividualCuration = React.createClass({
             individualName: '', // Currently entered individual name
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
-            proband: null // If we have an associated family that has a proband, this points at it
+            proband: null, // If we have an associated family that has a proband, this points at it
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -339,6 +342,7 @@ var IndividualCuration = React.createClass({
             if (!formError) {
                 // Build search string from given ORPHA IDs
                 var searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                this.setState({submitBusy: true});
 
                 // Verify given Orpha ID exists in DB
                 this.getRestData(searchStr).then(diseases => {
@@ -348,28 +352,68 @@ var IndividualCuration = React.createClass({
                         return Promise.resolve(diseases);
                     } else {
                         // Get array of missing Orphanet IDs
+                        this.setState({submitBusy: false}); // submit error; re-enable submit button
                         var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
                         this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
                         throw diseases;
                     }
                 }, e => {
                     // The given orpha IDs couldn't be retrieved for some reason.
+                    this.setState({submitBusy: false}); // submit error; re-enable submit button
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
-                    // Handle 'Add any other PMID(s) that have evidence about this same Individual' list of PMIDs
-                    if (pmids) {
+                    // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
+                    if (pmids && pmids.length) {
                         // User entered at least one PMID
                         searchStr = '/search/?type=article&' + pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
                         return this.getRestData(searchStr).then(articles => {
                             if (articles['@graph'].length === pmids.length) {
-                                // Successfully retrieved all genes
+                                // Successfully retrieved all PMIDs, so just set individualArticles and return
                                 individualArticles = articles;
                                 return Promise.resolve(articles);
                             } else {
+                                // some PMIDs were not in our db already
+                                // generate list of PMIDs and pubmed URLs for those PMIDs
                                 var missingPmids = _.difference(pmids, articles['@graph'].map(function(article) { return article.pmid; }));
-                                this.setFormErrors('otherpmids', missingPmids.join(', ') + ' not found');
-                                throw articles;
+                                var missingPmidsUrls = [];
+                                for (var missingPmidsIndex = 0; missingPmidsIndex < missingPmids.length; missingPmidsIndex++) {
+                                    missingPmidsUrls.push(external_url_map['PubMedSearch']  + missingPmids[missingPmidsIndex]);
+                                }
+                                // get the XML for the missing PMIDs
+                                return this.getRestDatasXml(missingPmidsUrls).then(xml => {
+                                    var newArticles = [];
+                                    var invalidPmids = [];
+                                    var tempArticle;
+                                    // loop through the resulting XMLs and parsePubmed them
+                                    for (var xmlIndex = 0; xmlIndex < xml.length; xmlIndex++) {
+                                        tempArticle = parsePubmed(xml[xmlIndex]);
+                                        // check to see if Pubmed actually had an entry for the PMID
+                                        if ('pmid' in tempArticle) {
+                                            newArticles.push(tempArticle);
+                                        } else {
+                                            // PMID was not found at Pubmed
+                                            invalidPmids.push(missingPmids[xmlIndex]);
+                                        }
+                                    }
+                                    // if there were invalid PMIDs, throw an error with a list of them
+                                    if (invalidPmids.length > 0) {
+                                        this.setState({submitBusy: false}); // submit error; re-enable submit button
+                                        this.setFormErrors('otherpmids', 'PMID(s) ' + invalidPmids.join(', ') + ' not found');
+                                        throw invalidPmids;
+                                    }
+                                    // otherwise, post the valid PMIDs
+                                    if (newArticles.length > 0) {
+                                        return this.postRestDatas('/articles', newArticles).then(data => {
+                                            for (var dataIndex = 0; dataIndex < data.length; dataIndex++) {
+                                                articles['@graph'].push(data[dataIndex]['@graph'][0]);
+                                            }
+                                            individualArticles = articles;
+                                            return Promise.resolve(data);
+                                        });
+                                    }
+                                    return Promise(articles);
+                                });
                             }
                         });
                     } else {
@@ -537,6 +581,7 @@ var IndividualCuration = React.createClass({
                 }).then(data => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
+                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -650,10 +695,12 @@ var IndividualCuration = React.createClass({
         var gdm = this.state.gdm;
         var individual = this.state.individual;
         var annotation = this.state.annotation;
+        var pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
         var method = (individual && individual.method && Object.keys(individual.method).length) ? individual.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
-        var variantTitle = (individual && individual.proband) ? <h4>Individual<i className="icon icon-proband-white"></i>  – Variant(s) segregating with Proband</h4> : <h4>Individual — Associated Variant(s)</h4>;
+        var variantTitle = (individual && individual.proband) ? <h4>Individual<i className="icon icon-proband-white"></i>  – Variant(s) segregating with Proband</h4> : <h4>Individual — Associated Variant(s)</h4>;
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get a list of associated groups if editing an individual, or the group in the query string if there was one, or null.
         var groups = (individual && individual.associatedGroups) ? individual.associatedGroups :
@@ -704,11 +751,19 @@ var IndividualCuration = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
+        // define where pressing the Cancel button should take you to
+        var cancelUrl;
+        if (gdm) {
+            cancelUrl = (!this.queryValues.individualUuid || this.queryValues.editShortcut) ?
+                '/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')
+                : '/individual-submit/?gdm=' + gdm.uuid + (individual ? '&individual=' + individual.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
+        }
+
         return (
             <div>
                 {(!this.queryValues.individualUuid || individual) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -761,7 +816,8 @@ var IndividualCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
-                                            <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
+                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
+                                            {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>
@@ -792,15 +848,45 @@ var LabelPanelTitle = React.createClass({
 // as the calling component.
 var IndividualName = function(displayNote) {
     var individual = this.state.individual;
+    var family = this.state.family;
+    var familyProbandExists = false;
     var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
+    if (individual && individual.proband) familyProbandExists = individual.proband;
+    if (family && family.individualIncluded && family.individualIncluded.length && family.individualIncluded.length > 0) {
+        for (var i = 0; i < family.individualIncluded.length; i++) {
+            if (family.individualIncluded[i].proband == true) familyProbandExists = true;
+        }
+    }
 
     return (
         <div className="row">
+            {family && !familyProbandExists ?
+            <div className="col-sm-7 col-sm-offset-5">
+                <p className="alert alert-warning">
+                    The proband for a Family must be created through the <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + this.queryValues.familyUuid}>Edit Family page</a>. This page is only for adding non-probands to the Family.
+                </p>
+            </div>
+            : null}
             <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
                 error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one individual with IDENTICAL information, you can indicate this at the bottom of this form.</p>
+            : null}
+            {!family ?
+                <div className="clearfix">
+                    <Input type="select" ref="proband" label="Is this Individual a proband:" value={individual && individual.proband ? "Yes" : (individual ? "No" : "none")}
+                        error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                        <option value="none">No Selection</option>
+                        <option disabled="disabled"></option>
+                        <option>Yes</option>
+                        <option>No</option>
+                    </Input>
+                    <p className="col-sm-7 col-sm-offset-5 input-note-below">
+                        Note: Probands are indicated by the following icon: <i className="icon icon-proband"></i>
+                    </p>
+                </div>
             : null}
         </div>
     );
@@ -853,9 +939,9 @@ var IndividualCommonDiseases = function() {
 
     // If we're editing an individual, make editable values of the complex properties
     if (individual) {
-        orphanetidVal = individual.diagnosis ? individual.diagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
-        hpoidVal = individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis.join() : null;
-        nothpoidVal = individual.hpoIdInElimination ? individual.hpoIdInElimination.join() : null;
+        orphanetidVal = individual.diagnosis ? individual.diagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : null;
+        hpoidVal = individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis.join(', ') : null;
+        nothpoidVal = individual.hpoIdInElimination ? individual.hpoIdInElimination.join(', ') : null;
     }
 
     // Make a list of diseases from the group, either from the given group,
@@ -904,7 +990,7 @@ var IndividualCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span><a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Disease for Individual{this.props.probandLabel}:</span>;
+        return <span><a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Disease for Individual{this.props.probandLabel}:</span>;
     }
 });
 
@@ -918,7 +1004,7 @@ var LabelHpoId = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT </span> : ''}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(HPO ID(s); <a href="http://bioportal.bioontology.org/ontologies/HP?p=classes&conceptid=root" target="_blank" title="Bioportal Human Phenotype Ontology in a new tab">HPO lookup at Bioportal</a>)</span>:
+                Phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
             </span>
         );
     }
@@ -933,7 +1019,7 @@ var LabelPhenoTerms = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
+                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : ''}
                 Phenotype(s) (<span style={{fontWeight: 'normal'}}>free text</span>):
             </span>
         );
@@ -1049,22 +1135,6 @@ var IndividualVariantInfo = function() {
                 </div>
             :
                 <div>
-                    {!family ?
-                        <div className="clearfix">
-                            <Input type="select" ref="proband" label="Is this Individual a proband:" value={individual && individual.proband ? "Yes" : (individual ? "No" : "none")}
-                                error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
-                                <option value="none">No Selection</option>
-                                <option disabled="disabled"></option>
-                                <option>Yes</option>
-                                <option>No</option>
-                            </Input>
-                            <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                                Note: Probands are indicated by the following icon: <i className="icon icon-proband"></i>
-                            </p>
-                        </div>
-                    : null}
-
                     {_.range(this.state.variantCount).map(i => {
                         var variant;
 
@@ -1086,19 +1156,26 @@ var IndividualVariantInfo = function() {
                                     error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                                 <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                                    The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href="http://www.ncbi.nlm.nih.gov/clinvar/variation/139214/" target="_blank">example</a>: 139214).
+                                    The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVar'] + 'variation/139214/'} target="_blank">example</a>: 139214).
                                 </p>
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                 {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
-                                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with proband"
-                                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                                    <div className="col-sm-7 col-sm-offset-5">
+                                        <p className="alert alert-warning">
+                                            For a recessive condition, you must enter both variants believed to be causative for the disease in order that
+                                            each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
+                                            variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
+                                        </p>
+                                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with Individual"
+                                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                                    </div>
                                 : null}
                             </div>
                         );
                     })}
                 </div>
-            }            
+            }
         </div>
     );
 };
@@ -1106,7 +1183,7 @@ var IndividualVariantInfo = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
     }
 });
 
@@ -1126,7 +1203,7 @@ var IndividualAdditional = function() {
 
     // If editing an individual, get its existing articles
     if (individual) {
-        otherpmidsVal = individual.otherPMIDs ? individual.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
+        otherpmidsVal = individual.otherPMIDs ? individual.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
     }
 
     return (

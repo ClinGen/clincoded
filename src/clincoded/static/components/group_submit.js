@@ -99,6 +99,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
         var gdm = this.state.gdm;
         var group = this.state.group;
         var annotation = this.state.annotation;
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
@@ -112,7 +113,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} />
+                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
                 <div className="container">
                     {group ?
                         <h1>Group Information: {group.label} <a href={group['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editGroupLink} className="btn btn-info">Edit</a></h1>

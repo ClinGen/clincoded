@@ -253,6 +253,8 @@ class Gdm(Item):
         'annotations.experimentalData.variants.associatedPathogenicities',
         'annotations.experimentalData.variants.associatedPathogenicities.associatedGdm',
         'annotations.experimentalData.variants.submitted_by',
+        'annotations.experimentalData.assessments',
+        'annotations.experimentalData.assessments.submitted_by',
         'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'annotations.experimentalData.proteinInteractions.interactingGenes',
         'annotations.experimentalData.assessments',
@@ -388,9 +390,24 @@ class Annotation(Item):
         'experimentalData.variants.submitted_by',
         'experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'experimentalData.proteinInteractions.interactingGenes',
+        'associatedGdm',
         'experimentalData.assessments',
         'experimentalData.assessments.submitted_by'
     ]
+    rev = {
+        'associatedGdm': ('gdm', 'annotations')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated gdm",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "gdm.annotations",
+        },
+    })
+    def associatedGdm(self, request, associatedGdm):
+        return paths_filtered_by_status(request, associatedGdm)
 
     @calculated_property(schema={
         "title": "Number of Group",
@@ -471,7 +488,8 @@ class Group(Item):
         'individualIncluded.variants',
         'individualIncluded.variants.submitted_by',
         'associatedAnnotations',
-        'associatedAnnotations.article'
+        'associatedAnnotations.article',
+        'associatedAnnotations.associatedGdm',
         #'control'
     ]
     rev = {
@@ -521,8 +539,10 @@ class Family(Item):
         'associatedGroups.commonDiagnosis',
         'associatedGroups.associatedAnnotations',
         'associatedGroups.associatedAnnotations.article',
+        'associatedGroups.associatedAnnotations.associatedGdm',
         'associatedAnnotations',
         'associatedAnnotations.article',
+        'associatedAnnotations.associatedGdm'
     ]
     rev = {
         'associatedGroups': ('group', 'familyIncluded'),
@@ -574,15 +594,18 @@ class Individual(Item):
         'associatedGroups.commonDiagnosis',
         'associatedGroups.associatedAnnotations',
         'associatedGroups.associatedAnnotations.article',
+        'associatedGroups.associatedAnnotations.associatedGdm',
         'associatedFamilies',
         'associatedFamilies.associatedGroups',
         'associatedFamilies.associatedGroups.associatedAnnotations',
         'associatedFamilies.associatedGroups.associatedAnnotations.article',
         'associatedFamilies.associatedAnnotations',
         'associatedFamilies.associatedAnnotations.article',
+        'associatedFamilies.associatedAnnotations.associatedGdm',
         'associatedFamilies.commonDiagnosis',
         'associatedAnnotations',
-        'associatedAnnotations.article'
+        'associatedAnnotations.article',
+        'associatedAnnotations.associatedGdm',
     ]
     rev = {
         'associatedGroups': ('group', 'individualIncluded'),
@@ -641,9 +664,26 @@ class Experimental(Item):
         'variants.submitted_by',
         'biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'proteinInteractions.interactingGenes',
+        'associatedAnnotations',
+        'associatedAnnotations.article',
+        'associatedAnnotations.associatedGdm',
         'assessments',
         'assessments.submitted_by'
     ]
+    rev = {
+        'associatedAnnotations': ('annotation', 'experimentalData')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated annotations",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.experimentalData",
+        },
+    })
+    def associatedAnnotations(self, request, associatedAnnotations):
+        return paths_filtered_by_status(request, associatedAnnotations)
 
 
 @collection(
@@ -660,6 +700,7 @@ class Pathogenicity(Item):
     embedded = [
         'submitted_by',
         'variant',
+        'variant.submitted_by',
         'variant.associatedPathogenicities',
         'variant.associatedPathogenicities.assessments',
         'variant.associatedPathogenicities.assessments.submitted_by',
@@ -686,7 +727,9 @@ class Pathogenicity(Item):
         "type": "integer"
     })
     def numberOfAssessment(self, assessments):
-        return len(assessments)
+        if len(assessments) > 0:
+            return len(assessments)
+        return ''
 
 
 @collection(
@@ -703,9 +746,11 @@ class Assessment(Item):
     embedded = [
         'submitted_by',
         'pathogenicity_assessed',
+        'experimental_assessed',
     ]
     rev = {
         'pathogenicity_assessed': ('pathogenicity', 'assessments'),
+        'experimental_assessed': ('experimental', 'assessments')
     }
 
     @calculated_property(schema={
@@ -715,6 +760,14 @@ class Assessment(Item):
     })
     def pathogenicity_assessed(self, request, pathogenicity_assessed):
         return paths_filtered_by_status(request, pathogenicity_assessed)
+
+    @calculated_property(schema={
+        "title": "Experimental Assessed",
+        "type": ["string", "object"],
+        "linkFrom": "experimental.assessments"
+    })
+    def experimental_assessed(self, request, experimental_assessed):
+        return paths_filtered_by_status(request, experimental_assessed)
 
 
 @collection(

@@ -97,6 +97,7 @@ var ExperimentalCuration = React.createClass({
             variantCount: 0, // Number of variants to display
             variantOption: [], // One variant panel, and nothing entered
             addVariantDisabled: false, // True if Add Another Variant button enabled
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -913,6 +914,7 @@ var ExperimentalCuration = React.createClass({
                 }
 
                 var searchStr = '';
+                this.setState({submitBusy: true});
                 // Begin with empty promise
                 new Promise(function(resolve, reject) {
                     resolve(1);
@@ -927,8 +929,10 @@ var ExperimentalCuration = React.createClass({
                             } else {
                                 var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
                                 if (newExperimental.evidenceType == 'Biochemical Function') {
+                                    this.setState({submitBusy: false}); // submit error; re-enable submit button
                                     this.setFormErrors('geneWithSameFunctionSameDisease.genes', missingGenes.join(', ') + ' not found');
                                 } else if (newExperimental.evidenceType == 'Protein Interactions') {
+                                    this.setState({submitBusy: false}); // submit error; re-enable submit button
                                     this.setFormErrors('interactingGenes', missingGenes.join(', ') + ' not found');
                                 }
 
@@ -1092,6 +1096,7 @@ var ExperimentalCuration = React.createClass({
                     // Next step relies on the pathogenicity, not the updated assessment
                     return Promise.resolve(savedExperimental);
                 }).then(data => {
+                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -1134,8 +1139,10 @@ var ExperimentalCuration = React.createClass({
     render: function() {
         var gdm = this.state.gdm;
         var annotation = this.state.annotation;
+        var pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
         var experimental = this.state.experimental;
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         // Get the 'evidence', 'gdm', and 'experimental' UUIDs from the query string and save them locally.
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
@@ -1143,11 +1150,19 @@ var ExperimentalCuration = React.createClass({
         this.queryValues.experimentalUuid = queryKeyValue('experimental', this.props.href);
         this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
+        // define where pressing the Cancel button should take you to
+        var cancelUrl;
+        if (gdm) {
+            cancelUrl = (!this.queryValues.experimentalUuid || this.queryValues.editShortcut) ?
+                '/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')
+                : '/experimental-submit/?gdm=' + gdm.uuid + (experimental ? '&experimental=' + experimental.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
+        }
+
         return (
             <div>
                 {(!this.queryValues.experimentalUuid || this.state.experimental) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -1206,12 +1221,14 @@ var ExperimentalCuration = React.createClass({
                                                     updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
                                             </PanelGroup>
                                         : null}
-                                        {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
-                                            <div className="curation-submit clearfix">
-                                                <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="Save" />
-                                                <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
-                                            </div>
-                                        : null}
+                                        <div className="curation-submit clearfix">
+                                            {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
+                                                <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
+
+                                            : null}
+                                            {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
+                                            <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
+                                        </div>
                                     </Form>
                                 </div>
                             </div>
@@ -1571,7 +1588,7 @@ var TypeExpressionA = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.expressedInTissue} defaultChecked="false" handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} />
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the gene is not normally expressed in the above tissue, the criteria for counting this experimental evidence has not been met and cannot be submitted. Proceed to section B below or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Curation Central</a>.</p>
-            <Input type="textarea" ref="normalExpression.evidence" label="Change Evidence for normal expression in disease tissue:"
+            <Input type="textarea" ref="normalExpression.evidence" label="Evidence for normal expression in disease tissue:"
                 error={this.getFormError('normalExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidence')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={expression.normalExpression.evidence} inputDisabled={!this.state.expressedInTissue || this.cv.othersAssessed} required={this.state.expressedInTissue} />
@@ -1967,7 +1984,7 @@ var ExperimentalDataVariant = function() {
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"/>
                         <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href="http://www.ncbi.nlm.nih.gov/clinvar/variation/139214/" target="_blank">example</a>: 139214).
+                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVar'] + 'variation/139214/'} target="_blank">example</a>: 139214).
                         </p>
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1986,7 +2003,7 @@ var ExperimentalDataVariant = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['PubMed']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
     }
 });
 
@@ -2008,7 +2025,8 @@ var ExperimentalViewer = React.createClass({
     getInitialState: function() {
         return {
             assessments: null, // Array of assessments for the experimental data
-            updatedAssessment: '' // Updated assessment value
+            updatedAssessment: '', // Updated assessment value
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -2016,36 +2034,54 @@ var ExperimentalViewer = React.createClass({
     assessmentSubmit: function(e) {
         var updatedExperimental;
 
-        // Write the assessment to the DB, if there was one.
-        this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
-            var experimental = this.props.context;
+        // GET the experimental object to have the most up-to-date version
+        this.getRestData('/experimental/' + this.props.context.uuid).then(data => {
+            this.setState({submitBusy: true});
+            var experimental = data;
 
-            // If we made a new assessment, add it to the experimental data's assessments
-            if (assessmentInfo.assessment && !assessmentInfo.update) {
-                updatedExperimental = curator.flatten(experimental);
-                if (!updatedExperimental.assessments) {
-                    updatedExperimental.assessments = [];
+            // Write the assessment to the DB, if there was one.
+            return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
+                // If we made a new assessment, add it to the experimental data's assessments
+                if (assessmentInfo.assessment && !assessmentInfo.update) {
+                    updatedExperimental = curator.flatten(experimental);
+                    if (!updatedExperimental.assessments) {
+                        updatedExperimental.assessments = [];
+                    }
+                    updatedExperimental.assessments.push(assessmentInfo.assessment['@id']);
+
+                    // Write the updated experimental data object to the DB
+                    return this.putRestData('/experimental/' + experimental.uuid, updatedExperimental).then(data => {
+                        return this.getRestData('/experimental/' + data['@graph'][0].uuid);
+                    });
                 }
-                updatedExperimental.assessments.push(assessmentInfo.assessment['@id']);
 
-                // Write the updated experimental data object to the DB
-                return this.putRestData('/experimental/' + experimental.uuid, updatedExperimental).then(data => {
-                    return this.getRestData('/experimental/' + data['@graph'][0].uuid);
-                });
-            }
+                // Didn't update the experimental data object; if updated the assessment, reload the experimental data
+                if (assessmentInfo.update) {
+                    return this.getRestData('/experimental/' + experimental.uuid);
+                }
 
-            // Didn't update the experimental data object; if updated the assessment, reload the experimental data
-            if (assessmentInfo.update) {
-                return this.getRestData('/experimental/' + experimental.uuid);
-            }
-
-            // Not updating the experimental data
-            return Promise.resolve(experimental);
+                // Not updating the experimental data
+                return Promise.resolve(experimental);
+            });
         }).then(updatedExperimental => {
+            // update the assessmentTracker object so it accounts for any new assessments
+            var userAssessment;
+            var assessments = updatedExperimental.assessments;
+            var user = this.props.session && this.props.session.user_properties;
+
+            // Find if any assessments for the segregation are owned by the currently logged-in user
+            if (assessments && assessments.length) {
+                // Find the assessment belonging to the logged-in curator, if any.
+                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+            }
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, updatedExperimental.evidenceType);
+
             // Wrote the experimental data, so update the assessments state to the new assessment list
             if (updatedExperimental && updatedExperimental.assessments && updatedExperimental.assessments.length) {
                 this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
             }
+
+            this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
         }).catch(function(e) {
             console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);
@@ -2062,6 +2098,26 @@ var ExperimentalViewer = React.createClass({
         }
     },
 
+    componentWillReceiveProps: function(nextProps) {
+        if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
+            var experimental = this.props.context;
+            var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
+            var user = nextProps.session && nextProps.session.user_properties;
+
+            // Make an assessment tracker object once we get the logged in user info
+            if (!this.cv.assessmentTracker && user) {
+                var userAssessment;
+
+                // Find if any assessments for the segregation are owned by the currently logged-in user
+                if (assessments && assessments.length) {
+                    // Find the assessment belonging to the logged-in curator, if any.
+                    userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+                }
+                this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, experimental.evidenceType);
+            }
+        }
+    },
+
     render: function() {
         var experimental = this.props.context;
         var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
@@ -2070,18 +2126,6 @@ var ExperimentalViewer = React.createClass({
         var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the experimental data, but the experimental data's owner assessed it
         var othersAssessed = false; // TRUE if we own this experimental data, and others have assessed it
         var updateMsg = this.state.updatedAssessment ? 'Assessment updated to ' + this.state.updatedAssessment : '';
-
-        // Make an assessment tracker object once we get the logged in user info
-        if (!this.cv.assessmentTracker && user) {
-            var userAssessment;
-
-            // Find if any assessments for the segregation are owned by the currently logged-in user
-            if (assessments && assessments.length) {
-                // Find the assessment belonging to the logged-in curator, if any.
-                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
-            }
-            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, experimental.evidenceType);
-        }
 
         // See if others have assessed
         if (userExperimental) {
@@ -2232,7 +2276,7 @@ var ExperimentalViewer = React.createClass({
                             </div>
 
                             <div>
-                                <dt>Change Evidence for normal expression in disease tissue</dt>
+                                <dt>Evidence for normal expression in disease tissue</dt>
                                 <dd>{experimental.expression.normalExpression.evidence}</dd>
                             </div>
 
@@ -2463,7 +2507,7 @@ var ExperimentalViewer = React.createClass({
                     : null}
                     {this.cv.gdmUuid && (experimentalUserAssessed || userExperimental) ?
                         <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} updateMsg={updateMsg} />
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
                     : null}
                 </div>
             </div>

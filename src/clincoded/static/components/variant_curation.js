@@ -53,10 +53,12 @@ var VariantCuration = React.createClass({
         };
 
         return {
+            user: null, // login user uuid
             gdm: null, // GDM object given in UUID
             variant: null, // Variant object given in UUID
             pathogenicity: null, // If editing curation, pathogenicity we're editing
-            assessment: null // Assessment of pathogenicity
+            assessment: null, // Assessment of pathogenicity
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -67,6 +69,7 @@ var VariantCuration = React.createClass({
         var gdmUuid = this.queryValues.gdmUuid;
         var variantUuid = this.queryValues.variantUuid;
         var pathogenicityUuid = this.queryValues.pathogenicityUuid;
+        var user = this.queryValues.session_user;
 
         // Make an array of URIs to query the database. Don't include any that didn't include a query string.
         var uris = _.compact([
@@ -81,6 +84,7 @@ var VariantCuration = React.createClass({
         ).then(datas => {
             // See what we got back so we can build an object to copy in this React object's state to rerender the page.
             var stateObj = {};
+            stateObj.user = user;
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
                     case 'gdm':
@@ -227,7 +231,10 @@ var VariantCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
+            this.setState({submitBusy: true});
+
             var pathogenicityUuid = this.state.pathogenicity ? this.state.pathogenicity.uuid : '';
+            //var pathogenicityUuid = (this.state.pathogenicity && this.state.pathogenicity.submitted_by.uuid === this.state.user) ? this.state.pathogenicity.uuid : '';
 
             // If pathogenicity object has no assessment object found with currently logged-in user
             // and form assessment has non-default value. The assessment might be a new one without a type,
@@ -243,10 +250,11 @@ var VariantCuration = React.createClass({
 
                     // If we made a new assessment, add it to the pathogenicity's assessments
                     if (newAssessmentInfo.assessment && !newAssessmentInfo.update) {
-                        if (!newPathogenicity.assessments) {
-                            newPathogenicity.assessments = [];
-                        }
-                        newPathogenicity.assessments.push(newAssessmentInfo.assessment['@id']);
+                        //if (!newPathogenicity.assessments) {
+                        //    newPathogenicity.assessments = [];
+                        //}
+                        //newPathogenicity.assessments.push(newAssessmentInfo.assessment['@id']);
+                        newPathogenicity.assessments = [newAssessmentInfo.assessment['@id']]; // only login user's assessment is allowed.
                     }
 
                     // Assign a link to the pathogenicity's variant if new
@@ -273,12 +281,12 @@ var VariantCuration = React.createClass({
             }).then(pa => {
                 // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
                 var newPathogenicity = pa.pathogenicity;
-                var newAssessment = pa.assessment;
-                if (newPathogenicity && newAssessment && !newAssessment.evidence_id) {
+                //var newAssessment = pa.assessment;
+                //if (newPathogenicity && newAssessment && !newAssessment.evidence_id) {
                     // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
                     // Nothing relies on this operation completing, so don't wait for a promise from it.
-                    this.saveAssessment(this.cv.assessmentTracker, this.state.gdm.uuid, newPathogenicity.uuid, newAssessment);
-                }
+                //    this.saveAssessment(this.cv.assessmentTracker, this.state.gdm.uuid, newPathogenicity.uuid, newAssessment);
+                //}
 
                 // Next step relies on the pathogenicity, not the updated assessment
                 return Promise.resolve(newPathogenicity);
@@ -302,6 +310,7 @@ var VariantCuration = React.createClass({
                 return Promise.resolve(null);
             }).then(data => {
                 // Now go back to Record Curation
+                this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                 var gdmQs = this.state.gdm ? '?gdm=' + this.state.gdm.uuid : '';
                 var pmidQs = this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
                 this.context.navigate('/curation-central/' + gdmQs + pmidQs);
@@ -315,7 +324,8 @@ var VariantCuration = React.createClass({
         var gdm = this.state.gdm;
         var variant = this.state.variant;
         var pathogenicity = this.state.pathogenicity;
-        var otherPathogenicityList;
+        var otherPathogenicityList = [];
+        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         var curatorName = this.props.session && this.props.session.user_properties ? this.props.session.user_properties.title : '';
 
@@ -335,18 +345,28 @@ var VariantCuration = React.createClass({
 
         // If we're editing a pathogenicity, get a list of all the variant's pathogenicities, except for the one
         // we're editing. This is to display the list of past curations.
-        if (this.queryValues.all && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length) {
-            otherPathogenicityList = _(variant.associatedPathogenicities).filter(function(fp) {
-                return fp.submitted_by.uuid !== user;
-            });
+        // Edited by Kang Liu, 10/14/2015
+        if (this.queryValues.all && variant && gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
+            for (var i in gdm.variantPathogenicity) {
+                var pathoVariant = gdm.variantPathogenicity[i].variant;
+                if (pathoVariant.uuid === variant.uuid && gdm.variantPathogenicity[i].submitted_by.uuid !== user) {
+                    otherPathogenicityList.push(gdm.variantPathogenicity[i]);
+                }
+            }
         }
+        //if (this.queryValues.all && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length) {
+        //    otherPathogenicityList = _(variant.associatedPathogenicities).filter(function(fp) {
+        //        return fp.submitted_by.uuid !== user;
+        //    });
+        //}
+
 
         // Set up the deNovo type for the dropdown
         var denovoType = pathogenicity ? (pathogenicity.denovoType === "" ? "none" : pathogenicity.denovoType) : "none";
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} />
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
                 <div className="container">
                     {!this.queryValues.all && annotation && annotation.article ?
                         <div className="curation-pmid-summary">
@@ -434,13 +454,13 @@ var VariantCuration = React.createClass({
                                         : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} note="Note: To Edit the pathogenicity evaluation, first change your assessment to “Not assessed” and click Save, then Edit the Variant again."/> : null) }
                                         <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue} accordion open />
                                         <div className="curation-submit clearfix">
-                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" />
+                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ?
                                                 <a href={'/curation-central/?gdm=' + gdm.uuid + (this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '')} className="btn btn-default btn-inline-spacer pull-right">Cancel</a>
                                             : null}
                                         </div>
                                     </Form>
-                                    {otherPathogenicityList ?
+                                    {otherPathogenicityList.length > 0 ?
                                         <div>
                                             {otherPathogenicityList.map(function(pathogenicity) {
                                                 return <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} named />;

@@ -39,7 +39,8 @@
             "probandAssociatedWithBoth": true,
             "additionalInformation": "11 of the 15 family members were sequenced",
             "variants": [
-                "df8135d4-2685-11e5-af19-60f81dc5b05a"
+                "df8135d4-2685-11e5-af19-60f81dc5b05a",
+                "3b3af7f0-2685-11e5-bc56-60f81dc5b05a"
             ],
             "assessments": [
                 "4ce80303-622a-4238-887e-f89ef9321be0"
@@ -81,6 +82,28 @@
             "additionalInformation": "The coding Exon 3 was PCR ampilified and sequenced",
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
+        "segregation": {
+            "dateTime": "2015-06-27T09:35:18.000000+00:00",
+            "pedigreeDescription": "K8725",
+            "pedigreeSize": 15,
+            "numberOfGenerationInPedigree": 3,
+            "consanguineousFamily": false,
+            "numberOfCases": 5,
+            "numberOfParentsUnaffectedCarriers": 1,
+            "numberOfAffectedAlleles": 8,
+            "numberOfAffectedWithOneVariant": 2,
+            "numberOfAffectedWithTwoVariants": 3,
+            "numberOfUnaffectedCarriers": 3,
+            "numberOfUnaffectedIndividuals": 10,
+            "probandAssociatedWithBoth": true,
+            "additionalInformation": "11 of the 15 family members were sequenced",
+            "variants": [
+                "d9717187-2685-11e5-9eac-60f81dc5b05a"
+            ]
+        },
+        "individualIncluded": [
+            "446140ed-902d-429b-8a6b-855154e68185"
+        ],
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "date_created": "2015-07-12T22:47:10.000000+00:00"
@@ -108,6 +131,31 @@
             "additionalInformation": "additional info here.",
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
+        "segregation": {
+            "dateTime": "2015-07-27T09:35:18.000000+00:00",
+            "pedigreeDescription": "K8725",
+            "pedigreeSize": 15,
+            "numberOfGenerationInPedigree": 3,
+            "consanguineousFamily": false,
+            "numberOfCases": 5,
+            "numberOfParentsUnaffectedCarriers": 1,
+            "numberOfAffectedAlleles": 8,
+            "numberOfAffectedWithOneVariant": 2,
+            "numberOfAffectedWithTwoVariants": 3,
+            "numberOfUnaffectedCarriers": 3,
+            "numberOfUnaffectedIndividuals": 10,
+            "probandAssociatedWithBoth": true,
+            "additionalInformation": "11 of the 15 family members were sequenced",
+            "variants": [
+                "c71fc085-2683-11e5-b9fe-60f81dc5b05a"
+            ],
+            "assessments": [
+                "de3e1fc5-2f33-40ba-9a07-83676b25fe5b"
+            ]
+        },
+        "individualIncluded": [
+            "fd7ca9bb-5beb-4dde-95c9-80b54f9ad702"
+        ],
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "date_created": "2015-07-19T22:47:10.000000+00:00"
@@ -134,6 +182,31 @@
             "additionalInformation": "additional info here.",
             "dateTime": "2015-07-14T22:47:10.000000+00:00"
         },
+        "segregation": {
+            "dateTime": "2015-07-27T09:35:18.000000+00:00",
+            "pedigreeDescription": "K8725",
+            "pedigreeSize": 15,
+            "numberOfGenerationInPedigree": 3,
+            "consanguineousFamily": false,
+            "numberOfCases": 5,
+            "numberOfParentsUnaffectedCarriers": 1,
+            "numberOfAffectedAlleles": 8,
+            "numberOfAffectedWithOneVariant": 2,
+            "numberOfAffectedWithTwoVariants": 3,
+            "numberOfUnaffectedCarriers": 3,
+            "numberOfUnaffectedIndividuals": 10,
+            "probandAssociatedWithBoth": true,
+            "additionalInformation": "11 of the 15 family members were sequenced",
+            "variants": [
+                "e496545c-2685-11e5-a4b3-60f81dc5b05a"
+            ],
+            "assessments": [
+                "6bd9a5f3-9c93-4027-8d0a-619ed8419c6a"
+            ]
+        },
+        "individualIncluded": [
+            "201aa720-636f-458b-97b4-cbb5336d4978"
+        ],
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
         "date_created": "2015-07-16T22:47:10.000000+00:00"

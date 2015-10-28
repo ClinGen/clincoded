@@ -102,9 +102,9 @@
             "title": "Last Modified",
             "type": "string"
         },
-        "numberOfAssessmnet": {
+        "numberOfAssessment": {
             "title": "# Assessment",
-            "type": "integer"
+            "type": "string"
         }
     }
 }

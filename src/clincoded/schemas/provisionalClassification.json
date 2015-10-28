@@ -4,7 +4,7 @@
     "id": "/profiles/provisionalClassification.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["totalScore"],
+    "required": ["totalScore", "autoClassification"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -19,7 +19,8 @@
         "totalScore": {
             "title": "Total Score",
             "description": "Total score calculated from all selected evidences",
-            "type": "string"
+            "type": "number",
+            "minimum": 0
         },
         "autoClassification": {
             "title": "Classification assigned automatically",
@@ -29,14 +30,12 @@
         "alteredClassification": {
             "title": "Classification Altered",
             "description": "Classification assigned by curator",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
-        "Reasons": {
+        "reasons": {
             "title": "Reasons",
             "description": "Reasons for changing the classification",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "active": {
             "title": "Active",
@@ -46,7 +45,7 @@
         }
     },
     "columns": {
-        "submitted_by": {
+        "submitted_by.title": {
             "title": "Owner",
             "type": "string"
         },
@@ -60,7 +59,7 @@
         },
         "totalScore": {
             "title": "Total Score",
-            "type": "string"
+            "type": "number"
         },
         "autoClassification": {
             "title": "Assigned Classification",
@@ -70,7 +69,7 @@
             "title": "Altered Classification",
             "type": "string"
         },
-        "Reasons": {
+        "reasons": {
             "title": "Reasons",
             "type": "string"
         },
