@@ -1049,7 +1049,7 @@
         "groups": [
             "admin"
         ],
-        "job_title": "Software Engineer",
+        "job_title": "Admin",
         "lab": "/labs/j-michael-cherry/",
         "last_name": "田中",
         "submits_for": [
@@ -1064,7 +1064,7 @@
         "groups": [
             "admin"
         ],
-        "job_title": "Software Engineer",
+        "job_title": "Admin",
         "lab": "/labs/j-michael-cherry/",
         "last_name": "Tanaka",
         "submits_for": [
@@ -1096,7 +1096,7 @@
         "groups": [
             "admin"
         ],
-        "job_title": "Software Engineer",
+        "job_title": "Admin",
         "lab": "/labs/j-michael-cherry/",
         "last_name": "Dalton",
         "submits_for": [
@@ -1111,7 +1111,7 @@
         "groups": [
             "admin"
         ],
-        "job_title": "Software Engineer",
+        "job_title": "Admin",
         "lab": "/labs/j-michael-cherry/",
         "last_name": "Liu",
         "submits_for": [
@@ -1124,7 +1124,6 @@
         "email": "tsneddon@stanford.edu",
         "first_name": "Tam",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "Senior Biocuration Scientist",
@@ -1140,7 +1139,6 @@
         "email": "selinad@stanford.edu",
         "first_name": "Selina",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "Senior Biocuration Scientist",
@@ -1158,7 +1156,7 @@
         "groups": [
             "admin"
         ],
-        "job_title": "Software Engineer",
+        "job_title": "Admin",
         "lab": "/labs/j-michael-cherry/",
         "last_name": "Choi",
         "submits_for": [
@@ -1173,7 +1171,7 @@
         "groups": [
             "admin"
         ],
-        "job_title": "Software Engineer",
+        "job_title": "Admin",
         "lab": "/labs/j-michael-cherry/",
         "last_name": "최",
         "submits_for": [
@@ -1188,7 +1186,7 @@
         "groups": [
             "admin"
         ],
-        "job_title": "Software Engineer",
+        "job_title": "Admin",
         "lab": "/labs/j-michael-cherry/",
         "last_name": "Hitz",
         "submits_for": [
@@ -1216,7 +1214,6 @@
         "email": "strande@email.unc.edu",
         "first_name": "Tasha",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1232,7 +1229,6 @@
         "email": "rajarshi.ghosh@bcm.edu",
         "first_name": "Raj",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1248,7 +1244,6 @@
         "email": "eriggs@geisinger.edu",
         "first_name": "Erin",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1264,7 +1259,6 @@
         "email": "obirsoy@partners.org",
         "first_name": "Ozge",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1280,7 +1274,6 @@
         "email": "ahbuchanan@geisinger.edu",
         "first_name": "Adam",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1296,7 +1289,6 @@
         "email": "karen.dalton@stanford.edu",
         "first_name": "Karen",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1314,7 +1306,6 @@
         "last_name": "Dwight",
         "uuid": "585bfe53-693b-491e-a826-ebfe0fcde1ee",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1331,7 +1322,6 @@
         "last_name": "Dwight",
         "uuid": "f9d1d629-71f4-4727-93e7-177480875aa4",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1347,7 +1337,6 @@
         "last_name": "Seifert",
         "uuid": "826f1002-3c77-4b99-8078-9114ba32d6cb",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1363,7 +1352,6 @@
         "last_name": "Homstad",
         "uuid": "7743d500-d120-4126-a5e7-840e7eb48cb6",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1379,7 +1367,6 @@
         "last_name": "Prabhu",
         "uuid": "0855e814-ba10-4115-b10f-2a721ea39fe3",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1395,7 +1382,6 @@
         "last_name": "Eilbeck",
         "uuid": "a7512ad8-19bb-485a-b005-4313e059b843",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1411,7 +1397,6 @@
         "last_name": "Mao",
         "uuid": "5e0406c0-169b-42ba-b354-40b539d25919",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1427,7 +1412,6 @@
         "last_name": "Corty",
         "uuid": "470c2892-75f1-41c0-8ee7-4e7b86f76508",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1443,7 +1427,6 @@
         "last_name": "Si",
         "uuid": "d932f5e6-71a3-4505-bff9-c19cb73acce5",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1459,7 +1442,6 @@
         "last_name": "Ruiz",
         "uuid": "a5802d0f-aafe-438d-bb4c-48ed43fc197d",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1475,7 +1457,6 @@
         "last_name": "Lee",
         "uuid": "44c1e179-a0f1-4c88-b8be-df691f022ef5",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1491,7 +1472,6 @@
         "last_name": "Babb",
         "uuid": "353d62a5-d395-44b0-a580-017d9923480e",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1507,7 +1487,6 @@
         "last_name": "Harrison",
         "uuid": "5311f455-bcde-4d12-8bd0-cd7ee65d0db4",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1523,7 +1502,6 @@
         "last_name": "Rehm",
         "uuid": "e23fa61b-492d-4b59-8254-c12f8af82a88",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1539,7 +1517,6 @@
         "last_name": "Buchan",
         "uuid": "6a6fde1a-a1b5-4d3d-a7b8-2aa95196c1af",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1555,7 +1532,6 @@
         "last_name": "Sneddon",
         "uuid": "75bf9943-e1db-4327-bd00-bcf37c00cc56",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1571,7 +1547,6 @@
         "last_name": "Liu",
         "uuid": "b99c5c3e-ff1e-408a-9806-8941cbfd21ae",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1587,7 +1562,6 @@
         "last_name": "Aronson",
         "uuid": "6f8e543b-a2fe-4d03-b71b-5255428bd04c",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1603,7 +1577,6 @@
         "last_name": "Patel",
         "uuid": "0c37cfba-8063-4d1a-83a8-bb008d9780ca",
         "groups": [
-            "ClinGen Curator",
             "admin"
         ],
         "job_title": "ClinGen Curator",
@@ -1619,7 +1592,21 @@
         "last_name": "Wright",
         "uuid": "c0a70214-08a8-48a0-ba8d-521bed321d4a",
         "groups": [
-            "ClinGen Curator",
+            "admin"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "bheale@gmail.com",
+        "first_name": "Bret",
+        "last_name": "Heale",
+        "uuid": "21ce9c9f-6a0f-4905-9e74-ca35aec8800c",
+        "groups": [
             "admin"
         ],
         "job_title": "ClinGen Curator",
