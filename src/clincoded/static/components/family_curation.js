@@ -975,7 +975,7 @@ var FamilyCuration = React.createClass({
                                 <h2>Family: {this.state.familyName ? <span>{this.state.familyName}</span> : <span className="no-entry">No entry</span>}</h2>
                                 {groups && groups.length ?
                                     <h2>
-                                        {'Group association: ' + groups.map(function(group) { return group.label; }).join(', ')}
+                                        Groups association: {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}
                                     </h2>
                                 : null}
                             </div>
@@ -1602,7 +1602,7 @@ var FamilyViewer = React.createClass({
                             <h2>
                                 Group association:&nbsp;
                                 {groups.map(function(group, i) {
-                                    return <span key={i}>{i > 0 ? ', ' : ''}{group.label}</span>;
+                                    return <span key={i}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>;
                                 })}
                             </h2>
                         : null}
@@ -1612,22 +1612,14 @@ var FamilyViewer = React.createClass({
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
                                 <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
-                                    if (i == family.commonDiagnosis.length - 1) {
-                                        return <span key={disease.orphaNumber}><a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a> ({disease.term})</span>
-                                    } else {
-                                        return <span key={disease.orphaNumber}><a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a> ({disease.term}), </span>
-                                    }
+                                    return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a> ({disease.term})</span>;
                                 })}</dd>
                             </div>
 
                             <div>
                                 <dt>HPO IDs</dt>
                                 <dd>{family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.map(function(hpo, i) {
-                                    if (i == family.hpoIdInDiagnosis.length - 1) {
-                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>
-                                    } else {
-                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a>, </span>
-                                    }
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                 })}</dd>
                             </div>
 
@@ -1639,11 +1631,7 @@ var FamilyViewer = React.createClass({
                             <div>
                                 <dt>NOT HPO IDs</dt>
                                 <dd>{family.hpoIdInElimination && family.hpoIdInElimination.map(function(hpo, i) {
-                                    if (i == family.hpoIdInElimination.length - 1) {
-                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>
-                                    } else {
-                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a>, </span>
-                                    }
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                 })}</dd>
                             </div>
 
@@ -1784,11 +1772,7 @@ var FamilyViewer = React.createClass({
 
                             <dt>Other PMID(s) that report evidence about this same Family</dt>
                             <dd>{family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
-                                if (i == family.otherPMIDs.length - 1) {
-                                    return <span key={article.pmid}><a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>
-                                } else {
-                                    return <span key={article.pmid}><a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a>, </span>
-                                }
+                                return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
                             })}</dd>
                         </dl>
                     </Panel>

@@ -714,29 +714,29 @@ var IndividualCuration = React.createClass({
         var groupTitles = [];
         if (individual) {
             // Editing an individual. get associated family titles, and associated group titles
-            groupTitles = groups.map(function(group) { return group.label; });
+            groupTitles = groups.map(function(group) { return {'label': group.label, '@id': group['@id']}; });
             familyTitles = families.map(function(family) {
                 // If this family has associated groups, add their titles to groupTitles.
                 if (family.associatedGroups && family.associatedGroups.length) {
-                    groupTitles = groupTitles.concat(family.associatedGroups.map(function(group) { return group.label; }));
+                    groupTitles = groupTitles.concat(family.associatedGroups.map(function(group) { return {'label': group.label, '@id': group['@id']}; }));
                 }
-                return family.label;
+                return {'label': family.label, '@id': family['@id']};
             });
         } else {
             // Curating an individual.
             if (families) {
                 // Given a family in the query string. Get title from first (only) family.
-                familyTitles[0] = families[0].label;
+                familyTitles[0] = {'label': families[0].label, '@id': families[0]['@id']};
 
                 // If the given family has associated groups, add those to group titles
                 if (families[0].associatedGroups && families[0].associatedGroups.length) {
                     groupTitles = families[0].associatedGroups.map(function(group) {
-                        return group.label;
+                        return {'label': group.label, '@id': group['@id']};
                     });
                 }
             } else if (groups) {
                 // Given a group in the query string. Get title from first (only) group.
-                groupTitles[0] = groups[0].label;
+                groupTitles[0] = {'label': groups[0].label, '@id': groups[0]['@id']};
             }
         }
 
@@ -774,12 +774,12 @@ var IndividualCuration = React.createClass({
                                 <h2>Individual: {this.state.individualName ? <span>{this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</h2>
                                 {familyTitles.length ?
                                     <h2>
-                                        {'Family association: ' + familyTitles.join(', ')}
+                                        Family association: {familyTitles.map(function(family, i) { return <span>{i > 0 ? ', ' : ''}<a href={family['@id']}>{family.label}</a></span>; })}
                                     </h2>
                                 : null}
                                 {groupTitles.length ?
                                     <h2>
-                                        {'Group association: ' + groupTitles.join(', ')}
+                                        Group association: {groupTitles.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}
                                     </h2>
                                 : null}
                             </div>
@@ -1259,7 +1259,7 @@ var IndividualViewer = React.createClass({
                 return (
                     <span key={group.uuid}>
                         {i++ > 0 ? ', ' : ''}
-                        {group.label}
+                        <a href={group['@id']}>{group.label}</a>
                     </span>
                 );
             });
@@ -1267,7 +1267,7 @@ var IndividualViewer = React.createClass({
                 <span key={family.uuid}>
                     <span key={family.uuid}>
                         {j > 0 ? ', ' : ''}
-                        {family.label}
+                        <a href={family['@id']}>{family.label}</a>
                     </span>
                 </span>
             );
@@ -1311,22 +1311,14 @@ var IndividualViewer = React.createClass({
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
                                 <dd>{individual.diagnosis && individual.diagnosis.map(function(disease, i) {
-                                    if (i == individual.diagnosis.length - 1) {
-                                        return <span key={disease.orphaNumber}><a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a> ({disease.term})</span>
-                                    } else {
-                                        return <span key={disease.orphaNumber}><a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a> ({disease.term}), </span>
-                                    }
+                                    return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a> ({disease.term})</span>;
                                 })}</dd>
                             </div>
 
                             <div>
                                 <dt>HPO IDs</dt>
                                 <dd>{individual.hpoIdInDiagnosis && individual.hpoIdInDiagnosis.map(function(hpo, i) {
-                                    if (i == individual.hpoIdInDiagnosis.length - 1) {
-                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>
-                                    } else {
-                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a>, </span>
-                                    }
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                 })}</dd>
                             </div>
 
@@ -1338,11 +1330,7 @@ var IndividualViewer = React.createClass({
                             <div>
                                 <dt>NOT HPO IDs</dt>
                                 <dd>{individual.hpoIdInElimination && individual.hpoIdInElimination.map(function(hpo, i) {
-                                    if (i == individual.hpoIdInElimination.length - 1) {
-                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>
-                                    } else {
-                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a>, </span>
-                                    }
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                 })}</dd>
                             </div>
 
@@ -1466,11 +1454,7 @@ var IndividualViewer = React.createClass({
 
                             <dt>Other PMID(s) that report evidence about this same Individual</dt>
                             <dd>{individual.otherPMIDs && individual.otherPMIDs.map(function(article, i) {
-                                if (i == individual.otherPMIDs.length - 1) {
-                                    return <span key={article.pmid}><a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>
-                                } else {
-                                    return <span key={article.pmid}><a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a>, </span>
-                                }
+                                return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
                             })}</dd>
                         </dl>
                     </Panel>

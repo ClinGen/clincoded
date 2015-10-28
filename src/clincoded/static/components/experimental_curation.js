@@ -2172,11 +2172,7 @@ var ExperimentalViewer = React.createClass({
                             <div>
                                 <dt>Other gene(s) with same function as gene in record</dt>
                                 <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(function(gene, i) {
-                                    if (i == experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.length - 1) {
-                                        return <span key={gene.symbol}><a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>
-                                    } else {
-                                        return <span key={gene.symbol}><a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a>, </span>
-                                    }
+                                    return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
                                 })}</dd>
                             </div>
 
@@ -2208,11 +2204,7 @@ var ExperimentalViewer = React.createClass({
                             <div>
                                 <dt>HPO ID(s)</dt>
                                 <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.map(function(hpo, i) {
-                                    if (i == experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.length - 1) {
-                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>
-                                    } else {
-                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a>, </span>
-                                    }
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                 })}</dd>
                             </div>
 
@@ -2239,11 +2231,7 @@ var ExperimentalViewer = React.createClass({
                             <div>
                                 <dt>Interacting Gene(s)</dt>
                                 <dd>{experimental.proteinInteractions.interactingGenes && experimental.proteinInteractions.interactingGenes.map(function(gene, i) {
-                                    if (i == experimental.proteinInteractions.interactingGenes.length - 1) {
-                                        return <span key={gene.symbol}><a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>
-                                    } else {
-                                        return <span key={gene.symbol}><a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a>, </span>
-                                    }
+                                    return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
                                 })}</dd>
                             </div>
 
