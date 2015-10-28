@@ -10,7 +10,8 @@ var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var parseAndLogError = require('./mixins').parseAndLogError;
-
+var modal = require('../libs/bootstrap/modal');
+var Modal = modal.Modal;
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
@@ -87,6 +88,15 @@ var ProvisionalCuration = React.createClass({
                     }
                 }
             }
+
+            // filter assessments for specific user and gdm
+            var temp = [];
+            for (var i in stateObj.assessments) {
+                if (stateObj.assessments[i].submitted_by.uuid === stateObj.user && stateObj.assessments[i].evidence_gdm === stateObj.gdm.uuid) {
+                    temp.push(stateObj.assessments[i]);
+                }
+            }
+            stateObj.assessments = temp;
 
             this.setState(stateObj);
 
@@ -185,67 +195,76 @@ var ProvisionalCuration = React.createClass({
         var gdm = this.state.gdm ? this.state.gdm : null;
         var provisional = this.state.provisional ? this.state.provisional : null;
 
+        var show_clsfctn = queryKeyValue('classification', this.props.href);
         return (
             <div>
-                { gdm ?
-                    <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
-                        <div className="container">
-                            {
-                                (provisional && edit === 'yes') ?
-                                EditCurrent.call(this)
-                                :
-                                (   calculate === 'yes' ?
-                                    <div>
-                                        <h1>Curation Summary and Provisional Classification</h1>
-                                        {
-                                            provisional ?
-                                            <PanelGroup accordion>
-                                                <Panel title="Currently Saved Calculation and Classification" open>
-                                                    <div className="row">
-                                                            <div className="col-sm-5"><strong>Generated:</strong></div>
-                                                            <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
-                                                        </div>
-                                                        <div className="row">
-                                                            <div className="col-sm-5"><strong>Total Score:</strong></div>
-                                                            <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
-                                                        </div>
-                                                        <div className="row">
-                                                            <div className="col-sm-5">
-                                                                <strong>Calculated Clinical Validity Classification:</strong>
-                                                            </div>
-                                                            <div className="col-sm-7"><span>{provisional.autoClassification}</span></div>
-                                                        </div>
-                                                        <div className="row">
-                                                            <div className="col-sm-5">
-                                                                <strong>Selected Clinical Validity Classification:</strong>
-                                                            </div>
-                                                            <div className="col-sm-7"><span>{provisional.alteredClassification}</span></div>
-                                                        </div>
-                                                        <div className="row">
-                                                            <div className="col-sm-5">
-                                                                <strong>Reason(s):</strong>
-                                                            </div>
-                                                            <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
-                                                        </div>
-                                                    </Panel>
-                                                </PanelGroup>
-                                            : null
-                                        }
-                                        <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                            {NewCalculation.call(this)}
-                                            <div className='modal-footer'>
-                                                <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                                                <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
-                                            </div>
-                                        </Form>
-                                    </div>
-                                    :
-                                    null
-                                )
-                            }
-                        </div>
+                { show_clsfctn === 'display' ?
+                    <div className="container">
+                        <h1>Clinical Validity Classifications</h1>
+                        <img src={"../static/img/classification-values.png"} />
                     </div>
+                    :
+                    gdm ?
+                        <div>
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                            <div className="container">
+                                {
+                                    (provisional && edit === 'yes') ?
+                                    EditCurrent.call(this)
+                                    :
+                                    (   calculate === 'yes' ?
+                                        <div>
+                                            <h1>Curation Summary & Provisional Classification</h1>
+                                            {
+                                                provisional ?
+                                                <PanelGroup accordion>
+                                                    <Panel title="Last Saved Summary & Provisional Classification" open>
+                                                        <div className="row">
+                                                                <div className="col-sm-5"><strong>Date Generated:</strong></div>
+                                                                <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5"><strong>Total Score:</strong></div>
+                                                                <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5">
+                                                                    <strong>Calculated Clinical Validity Classification:</strong>
+                                                                </div>
+                                                                <div className="col-sm-7"><span>{provisional.autoClassification}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5">
+                                                                    <strong>Selected Clinical Validity Classification:</strong>
+                                                                </div>
+                                                                <div className="col-sm-7"><span>{provisional.alteredClassification}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5">
+                                                                    <strong>Reason(s):</strong>
+                                                                </div>
+                                                                <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
+                                                            </div>
+                                                            <div className="row">&nbsp;</div>
+                                                        </Panel>
+                                                    </PanelGroup>
+                                                : null
+                                            }
+                                            {AssessmentSummary.call(this)}
+                                            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                                {NewCalculation.call(this)}
+                                                <div className='modal-footer'>
+                                                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                                                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
+                                                </div>
+                                            </Form>
+                                        </div>
+                                        :
+                                        null
+                                    )
+                                }
+                            </div>
+                        </div>
                     : null
                 }
             </div>
@@ -267,18 +286,23 @@ var EditCurrent = function() {
                 <PanelGroup accordion>
                     <Panel title="Currently Saved Calculation and Classification" open>
                         <div className="row">
-                            <div className="col-sm-5"><strong className="pull-right">otal Score:</strong></div>
+                            <div className="col-sm-5"><strong className="pull-right">Total Score:</strong></div>
                             <div className="col-sm-7"><span>{this.state.totalScore}</span></div>
                         </div>
+                        <br />
                         <div className="row">
                             <div className="col-sm-5">
-                                <strong className="pull-right">Calculated Clinical Validity Classification:</strong
-                            ></div>
+                                <strong className="pull-right">Calculated&nbsp;
+                                    <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>
+                                    :
+                                </strong>
+                            </div>
                             <div className="col-sm-7"><span>{this.state.autoClassification}</span></div>
                         </div>
+                        <br />
                         <div className="row">
-                            <Input type="select" ref="alteredClassification" label="Select Provisional Clinical Validity Classification:"
-                                value={alteredClassification} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
+                            <Input type="select" ref="alteredClassification" value={alteredClassification} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
+                                label={<strong>Select Provisional <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
                                 groupClassName="form-group" handleChange={this.handleChange}>
                                 <option value="Definitive">Definitive</option>
                                 <option value="Strong">Strong</option>
@@ -320,15 +344,94 @@ var EditCurrent = function() {
 };
 
 
+var AssessmentSummary = function() {
+    var assessments = this.state.assessments;
+    var userAssessments = {
+        "variantSpt": 0,
+        "variantReview": 0,
+        "variantCntdct": 0,
+        "expSpt": 0,
+        "expReview": 0,
+        "expCntdct": 0,
+        "segSpt": 0,
+        "segReview": 0,
+        "segCntdct": 0
+    };
+    for (var i in assessments) {
+        if (assessments[i].value === 'Supports' && assessments[i].evidence_type === 'Pathogenicity') {
+            userAssessments.variantSpt += 1;
+        }
+        else if (assessments[i].value === 'Review' && assessments[i].evidence_type === 'Pathogenicity') {
+            userAssessments.variantReview += 1;
+        }
+        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Pathogenicity') {
+            userAssessments.variantCntdct += 1;
+        }
+        else if (assessments[i].value === 'Supports' && assessments[i].evidence_type === 'Segregation') {
+            userAssessments.segSpt += 1;
+        }
+        else if (assessments[i].value === 'Review' && assessments[i].evidence_type === 'Segregation') {
+            userAssessments.segReview += 1;
+        }
+        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Segregation') {
+            userAssessments.segCntdct += 1;
+        }
+        else if (assessments[i].value === 'Supports') {
+            userAssessments.expSpt += 1;
+        }
+        else if (assessments[i].value === 'Review') {
+            userAssessments.expReview += 1;
+        }
+        else if (assessments[i].value === 'Contradicts') {
+            userAssessments.expCntdct += 1;
+        }
+    }
+
+    return (
+        <PanelGroup accordion>
+            <Panel title="New Count of Assessments" open>
+                <table>
+                    <tr>
+                        <td style={{width:'150px', 'text-align':'center'}}>&nbsp;</td>
+                        <td style={{width:'150px', 'text-align':'center'}}><strong>Segregation</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}><strong>Variant</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}><strong>Experimental</strong></td>
+                    </tr>
+                    <tr>
+                        <td style={{width:'150px', 'text-align':'right'}}><strong>Supports</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segSpt}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantSpt}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expSpt}</td>
+                    </tr>
+                    <tr>
+                        <td style={{width:'150px', 'text-align':'right'}}><strong>Review</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segReview}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantReview}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expReview}</td>
+                    </tr>
+                    <tr>
+                        <td style={{width:'150px', 'text-align':'right'}}><strong>Contradicts</strong></td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segCntdct}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantCntdct}</td>
+                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expCntdct}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">&nbsp;</td>
+                    </tr>
+                </table>
+            </Panel>
+        </PanelGroup>
+    );
+};
+
+
 var NewCalculation = function() {
     var gdm = this.state.gdm;
-    var assessments = this.state.assessments;
 
 // Gegerate pathogenicity id list and collect experimental id list from all assessments
 // condition: assessed by login user, value as Supports, current gdm
 // count piece number at each experimental type and add score at 3 different categories
     var pathoList = [];
-    //var expList = [];
     var exp_scores = [0, 0, 0];
     var expType = {
         "Expression": 0,
@@ -346,12 +449,12 @@ var NewCalculation = function() {
     var gdmPathoList = gdm.variantPathogenicity;
     var variantIdList = [];
     for (var i in gdmPathoList) {
+
         // pick up variants from login user's pathogenicity assessed as Supports.
         if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
             for (var j in gdmPathoList[i].assessments) {
                 if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
                     var variantUuid = gdmPathoList[i].variant.uuid;
-                    //var variantUuid = gdmPathoList[i].variant['@id'].substr(10).replace('/', '');
                     variantIdList.push(variantUuid);
                     break;
                 }
@@ -361,9 +464,11 @@ var NewCalculation = function() {
 
 // Collect all individuals in all annotations, pass to function filter with article info (experimental data is not necessary)
     var annotations = gdm.annotations;
-    var familiesCollected = [];
     var individualsCollected = [];
+    var allProbandInd = [];
     for (var i in annotations) {
+          allProbandInd.push(getProbandIndividual(annotations[i], []));
+
         if (annotations[i].groups && annotations[i].groups.length > 0) {
             var groups = annotations[i].groups;
             for (var j in groups) {
@@ -374,7 +479,6 @@ var NewCalculation = function() {
                         }
                     }
                 }
-                    //familiesCollected = filter(familiesCollected, groups[j].familyIncluded, annotations[i].article, variantIdList);
                 if (groups[j].individualIncluded && groups[j].individualIncluded.length > 0) {
                     individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, variantIdList);
                 }
@@ -386,13 +490,12 @@ var NewCalculation = function() {
                     individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, variantIdList);
                 }
             }
-            //familiesCollected = filter(familiesCollected, annotations[i].families, annotations[i].article, variantIdList);
         }
         if (annotations[i].individuals && annotations[i].individuals.length > 0) {
             individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, variantIdList);
         }
 
-        // collect experimental assessed support
+        // collect experimental assessed support, check matrix
         if (annotations[i].experimentalData && annotations[i].experimentalData.length > 0) {
             for (var j in annotations[i].experimentalData) {
                 var exp = annotations[i].experimentalData[j];
@@ -404,9 +507,6 @@ var NewCalculation = function() {
                             if (exp.evidenceType === 'Expression') {
                                 expType[subTypeKey] += 1;
                                 exp_scores[0] += 0.5;
-                                //if (!in_array(evid_id, expList)) {
-                                //    expList.push(evid_id);
-                                //}
                             }
                             else if (exp.evidenceType === 'Protein Interactions') {
                                 expType[subTypeKey] += 1;
@@ -469,12 +569,6 @@ var NewCalculation = function() {
     var articleCollected = [];
     var year = new Date();
     var earliest = year.getFullYear();
-    for (var i in familiesCollected) {
-        if (!in_array(familiesCollected[i].pmid, articleCollected) && familiesCollected[i].pmid != '') {
-            articleCollected.push(familiesCollected[i].pmid);
-            earliest = get_earliest_year(earliest, familiesCollected[i].date);
-        }
-    }
     for (var i in individualsCollected) {
         if (!in_array(individualsCollected[i].pmid, articleCollected) && individualsCollected[i].pmid != '') {
             articleCollected.push(individualsCollected[i].pmid);
@@ -497,7 +591,8 @@ var NewCalculation = function() {
         timeScore = 0;
     }
 
-    var proband = count_proband(familiesCollected) + count_proband(individualsCollected);
+    var proband = individualsCollected.length;
+    //var proband = count_proband(familiesCollected) + count_proband(individualsCollected);
     if (proband > 18) {
         probandScore = 7;
     }
@@ -560,14 +655,32 @@ var NewCalculation = function() {
     this.state.totalScore = totalScore;
     this.state.autoClassification = autoClassification;
 
+    var contradicts = {
+        "Variant": 0,
+        "Experimental": 0,
+        "Segregation": 0
+    };
+    var assessments = this.state.assessments;
+    for (var i in assessments) {
+        if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Pathogenicity') {
+            contradicts.Variant += 1;
+        }
+        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Segregation') {
+            contradicts.Segregation += 1;
+        }
+        else if (assessments[i].value === 'Contradicts' ) {
+            contradicts.Experimental += 1;
+        }
+    }
+
     return (
                 <PanelGroup accordion>
-                    <Panel title="New Calculation and Classification" open>
+                    <Panel title="New Summary & Provisional Classification" open>
                         <div className="form-group">
                             <div>
-                                The calculated values below are based on the set of saved evidence that exists when the "Generate New Summary"
-                                is clicked. To save these values as the "Current Summary & Provisional Classification" calculated values and make
-                                any changes to the Provisional Classification, you must click the Save button below.
+                                The calculated values below are based on the set of saved evidence that existed when the "Generate New Summary"
+                                button was clicked. To save these values and the calculated or selected Classification, click "Save" below - they
+                                will then represent the new "Last Saved Summary & Provisional Classification".
                             </div>
                             <div><span>&nbsp;</span></div>
                             <div className="row">
@@ -642,13 +755,19 @@ var NewCalculation = function() {
                             <br />
                             <div className="row">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Calculated Clinical Validity Classification:</strong>
+                                    <strong className="pull-right">Calculated&nbsp;
+                                        <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:
+                                    </strong>
                                 </div>
-                                <div className="col-sm-7"><span>{this.state.autoClassification}</span></div>
+                                <div className="col-sm-7">
+                                    {this.state.autoClassification}
+                                </div>
                             </div>
                             <br />
-                            <Input type="select" ref="alteredClassification" label="Select Provisional Clinical Validity Classification:"
-                                wrapperClassName="col-sm-7" defaultValue={this.state.autoClassification} labelClassName="col-sm-5 control-label"
+                            <Input type="select" ref="alteredClassification"
+                                label={<strong>Select Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
+                                labelClassName="col-sm-5 control-label"
+                                wrapperClassName="col-sm-7" defaultValue={this.state.autoClassification}
                                 groupClassName="form-group">
                                 <option value="Definitive">Definitive</option>
                                 <option value="Strong">Strong</option>
@@ -664,7 +783,7 @@ var NewCalculation = function() {
                             <div className="col-sm-5"><span className="pull-right">&nbsp;</span></div>
                             <div className="col-sm-7">
                                 <span>
-                                **Note: If your selected Clinical Validity Classification is different from the Calculated value, provide a reason to expain why you changed it.
+                                Note: If your selected Clinical Validity Classification is different from the Calculated value, provide a reason to expain why you changed it.
                                 </span>
                             </div>
                         </div>
@@ -672,6 +791,7 @@ var NewCalculation = function() {
                 </PanelGroup>
     );
 };
+
 
 var in_array = function(item, list) {
     for(var i in list){
@@ -689,6 +809,25 @@ var get_earliest_year = function(earliest, dateStr) {
         return theYear;
     }
     return earliest;
+};
+
+var getProbandIndividual = function(obj, probandIndividuals) {
+    if (obj['@type'][0] === 'individual' && obj.proband) {
+        probandIndividuals.push(obj.uuid);
+    }
+    else {
+        //var keys = Object.keys(obj);
+        for (var key in obj) {
+            if ((key === 'groups' || key === 'families' || key === 'individuals' || key === 'familyIncluded' || key === 'individualIncluded') && obj[key].length > 0) {
+                var subList = obj[key];
+                for (var i in subList) {
+                    probandIndividuals = getProbandIndividual(subList[i], probandIndividuals);
+                }
+                //return probandIndividuals;
+            }
+        }
+    }
+    return probandIndividuals;
 };
 
 var filter = function(target, branch, article, idList) {
@@ -723,14 +862,4 @@ var filter = function(target, branch, article, idList) {
     });
 
     return target;
-};
-
-var count_proband = function(evidenceList) {
-    var proband = 0;
-    for (var i in evidenceList) {
-        if (i === 0 || evidenceList[i].evidence !== '') {
-            proband++;
-        }
-    }
-    return proband;
 };
