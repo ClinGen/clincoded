@@ -377,7 +377,7 @@ var VariantCuration = React.createClass({
                     <div className="viewer-titles">
                         <h1>{(pathogenicity ? 'Edit' : 'Curate') + ' Variant Information'}</h1>
                         {variant ?
-                            <h2>{variant.clinvarVariantId ? <span><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></span> : <span>{'Description: ' + variant.otherDescription}</span>}</h2>
+                            <h2>{variant.clinvarVariantId ? <span>VariationId: <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></span> : <span>{'Description: ' + variant.otherDescription}</span>}</h2>
                         : null}
                         {curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null}
                     </div>
