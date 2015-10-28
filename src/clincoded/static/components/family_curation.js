@@ -1612,21 +1612,24 @@ var FamilyViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
-                                <dd>
-                                    {family.commonDiagnosis.map(function(disease, i) {
-                                        return (
-                                            <span key={disease.orphaNumber}>
-                                                {i > 0 ? ', ' : ''}
-                                                {'ORPHA' + disease.orphaNumber}
-                                            </span>
-                                        );
-                                    })}
-                                </dd>
+                                <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
+                                    if (i == family.commonDiagnosis.length - 1) {
+                                        return <span key={disease.orphaNumber}><a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a> ({disease.term})</span>
+                                    } else {
+                                        return <span key={disease.orphaNumber}><a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a> ({disease.term}), </span>
+                                    }
+                                })}</dd>
                             </div>
 
                             <div>
                                 <dt>HPO IDs</dt>
-                                <dd>{family.hpoIdInDiagnosis.join(', ')}</dd>
+                                <dd>{family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.map(function(hpo, i) {
+                                    if (i == family.hpoIdInDiagnosis.length - 1) {
+                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>
+                                    } else {
+                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a>, </span>
+                                    }
+                                })}</dd>
                             </div>
 
                             <div>
@@ -1636,7 +1639,13 @@ var FamilyViewer = React.createClass({
 
                             <div>
                                 <dt>NOT HPO IDs</dt>
-                                <dd>{family.hpoIdInElimination.join(', ')}</dd>
+                                <dd>{family.hpoIdInElimination && family.hpoIdInElimination.map(function(hpo, i) {
+                                    if (i == family.hpoIdInElimination.length - 1) {
+                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>
+                                    } else {
+                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a>, </span>
+                                    }
+                                })}</dd>
                             </div>
 
                             <div>
@@ -1754,7 +1763,7 @@ var FamilyViewer = React.createClass({
                                     <dl className="dl-horizontal">
                                         <div>
                                             <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId}</dd>
+                                            <dd>{ variant.clinvarVariantId ? <a href={external_url_map['ClinVar'] + '/variation/' + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
                                         </div>
 
                                         <div>
@@ -1775,16 +1784,13 @@ var FamilyViewer = React.createClass({
                             </div>
 
                             <dt>Other PMID(s) that report evidence about this same Family</dt>
-                            <dd>
-                                {family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
-                                    return (
-                                        <span key={i}>
-                                            {i > 0 ? ', ' : ''}
-                                            {article.pmid}
-                                        </span>
-                                    );
-                                })}
-                            </dd>
+                            <dd>{family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
+                                if (i == family.otherPMIDs.length - 1) {
+                                    return <span key={article.pmid}><a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>
+                                } else {
+                                    return <span key={article.pmid}><a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a>, </span>
+                                }
+                            })}</dd>
                         </dl>
                     </Panel>
                 </div>

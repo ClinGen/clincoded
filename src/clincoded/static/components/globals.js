@@ -145,6 +145,7 @@ module.exports.external_url_map = {
     'Entrez': 'http://www.ncbi.nlm.nih.gov/gene/',
     'OMIM': 'http://omim.org/',
     'ClinVar': 'http://www.ncbi.nlm.nih.gov/clinvar/',
+    'HPO': 'http://compbio.charite.de/hpoweb/showterm?id=',
     'HPOBrowser': 'http://compbio.charite.de/hpoweb/showterm?id=HP:0000118',
     'Uberon': 'http://uberon.github.io/',
     'GO_Slim': 'http://bit.ly/1fxDvhV',
