@@ -17,6 +17,7 @@ var Input = form.Input;
 var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
+var external_url_map = globals.external_url_map;
 
 
 var CurationMixin = module.exports.CurationMixin = {
@@ -389,7 +390,8 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
                     {this.props.displayJournal ? authorsAll : authors}
                     {article.title + ' '}
                     {this.props.displayJournal ? <i>{article.journal + '. '}</i> : null}
-                    <strong>{date[1]}</strong>{date[2]}
+                    <strong>{date[1]}</strong>{date[2]}&nbsp;
+                    <a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a>
                 </p>
             );
         } else {
