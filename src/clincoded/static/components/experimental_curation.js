@@ -1983,7 +1983,7 @@ var ExperimentalDataVariant = function() {
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"/>
                         <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVar'] + 'variation/139214/'} target="_blank">example</a>: 139214).
+                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSeach'] + '139214/'} target="_blank">example</a>: 139214).
                         </p>
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -2151,7 +2151,7 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Identified function of gene in this record</dt>
-                                <dd>{experimental.biochemicalFunction.identifiedFunction}</dd>
+                                <dd>{experimental.biochemicalFunction.identifiedFunction ? <a href={external_url_map['QuickGoSearch'] + experimental.biochemicalFunction.identifiedFunction} title={"GO entry for " + experimental.biochemicalFunction.identifiedFunction + " in new tab"} target="_blank">{experimental.biochemicalFunction.identifiedFunction}</a> : null}</dd>
                             </div>
 
                             <div>
@@ -2171,7 +2171,13 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Other gene(s) with same function as gene in record</dt>
-                                <dd>{joinGenes(experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes)}</dd>
+                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(function(gene, i) {
+                                    if (i == experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.length - 1) {
+                                        return <span key={gene.symbol}><a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>
+                                    } else {
+                                        return <span key={gene.symbol}><a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a>, </span>
+                                    }
+                                })}</dd>
                             </div>
 
                             <div>
@@ -2201,7 +2207,13 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>HPO ID(s)</dt>
-                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ')}</dd>
+                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.map(function(hpo, i) {
+                                    if (i == experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.length - 1) {
+                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>
+                                    } else {
+                                        return <span key={hpo}><a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a>, </span>
+                                    }
+                                })}</dd>
                             </div>
 
                             <div>
@@ -2226,7 +2238,13 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Interacting Gene(s)</dt>
-                                <dd>{joinGenes(experimental.proteinInteractions.interactingGenes)}</dd>
+                                <dd>{experimental.proteinInteractions.interactingGenes && experimental.proteinInteractions.interactingGenes.map(function(gene, i) {
+                                    if (i == experimental.proteinInteractions.interactingGenes.length - 1) {
+                                        return <span key={gene.symbol}><a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>
+                                    } else {
+                                        return <span key={gene.symbol}><a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a>, </span>
+                                    }
+                                })}</dd>
                             </div>
 
                             <div>
@@ -2261,7 +2279,7 @@ var ExperimentalViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient</dt>
-                                <dd>{experimental.expression.organOfTissue}</dd>
+                                <dd>{experimental.expression.organOfTissue ? <a href={external_url_map['UberonSearch'] + experimental.expression.organOfTissue} title={"Uberon entry for " + experimental.expression.organOfTissue + " in new tab"} target="_blank">{experimental.expression.organOfTissue}</a> : null}</dd>
                             </div>
                         </dl>
                     </Panel>
@@ -2316,12 +2334,12 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>Patient cell type</dt>
-                                <dd>{experimental.functionalAlteration.patientCellType}</dd>
+                                <dd>{experimental.functionalAlteration.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCellType} title={"CL entry for " + experimental.functionalAlteration.patientCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCellType}</a> : null}</dd>
                             </div>
 
                             <div>
                                 <dt>Engineered cell type</dt>
-                                <dd>{experimental.functionalAlteration.engineeredEquivalentCellType}</dd>
+                                <dd>{experimental.functionalAlteration.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.functionalAlteration.engineeredEquivalentCellType} title={"EFO entry for " + experimental.functionalAlteration.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.engineeredEquivalentCellType}</a> : null}</dd>
                             </div>
 
                             <div>
@@ -2331,7 +2349,7 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>Normal function of gene</dt>
-                                <dd>{experimental.functionalAlteration.normalFunctionOfGene}</dd>
+                                <dd>{experimental.functionalAlteration.normalFunctionOfGene ? <a href={external_url_map['QuickGoSearch'] + experimental.functionalAlteration.normalFunctionOfGene} title={"GO entry for " + experimental.functionalAlteration.normalFunctionOfGene + " in new tab"} target="_blank">{experimental.functionalAlteration.normalFunctionOfGene}</a> : null}</dd>
                             </div>
 
                             <div>
@@ -2361,7 +2379,7 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>Cell-culture type/line</dt>
-                                <dd>{experimental.modelSystems.cellCulture}</dd>
+                                <dd>{experimental.modelSystems.cellCulture ? <a href={external_url_map['EFO'] + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
                             </div>
 
                             <div>
@@ -2371,7 +2389,7 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>Phenotype(s) observed in model system (HPO)</dt>
-                                <dd>{experimental.modelSystems.phenotypeHPOObserved}</dd>
+                                <dd>{experimental.modelSystems.phenotypeHPOObserved ? <a href={external_url_map['HPO'] + experimental.modelSystems.phenotypeHPOObserved} title={"HPO Browser entry for " + experimental.modelSystems.phenotypeHPOObserved + " in new tab"} target="_blank">{experimental.modelSystems.phenotypeHPOObserved}</a> : null}</dd>
                             </div>
 
                             <div>
@@ -2381,7 +2399,7 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>Human phenotype(s) (HPO)</dt>
-                                <dd>{experimental.modelSystems.phenotypeHPO}</dd>
+                                <dd>{experimental.modelSystems.phenotypeHPO ? <a href={external_url_map['HPO'] + experimental.modelSystems.phenotypeHPO} title={"HPO Browser entry for " + experimental.modelSystems.phenotypeHPO + " in new tab"} target="_blank">{experimental.modelSystems.phenotypeHPO}</a> : null}</dd>
                             </div>
 
                             <div>
@@ -2411,12 +2429,12 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>Patient cell type</dt>
-                                <dd>{experimental.rescue.patientCellType}</dd>
+                                <dd>{experimental.rescue.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCellType} title={"CL entry for " + experimental.rescue.patientCellType + " in new tab"} target="_blank">{experimental.rescue.patientCellType}</a> : null}</dd>
                             </div>
 
                             <div>
                                 <dt>Engineered equivalent cell type</dt>
-                                <dd>{experimental.rescue.engineeredEquivalentCellType}</dd>
+                                <dd>{experimental.rescue.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.rescue.engineeredEquivalentCellType} title={"EFO entry for " + experimental.rescue.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.rescue.engineeredEquivalentCellType}</a> : null}</dd>
                             </div>
 
                             <div>
@@ -2426,7 +2444,7 @@ var ExperimentalViewer = React.createClass({
 
                             <div>
                                 <dt>Phenotype to rescue</dt>
-                                <dd>{experimental.rescue.phenotypeHPO}</dd>
+                                <dd>{experimental.rescue.phenotypeHPO ? <a href={external_url_map['HPO'] + experimental.rescue.phenotypeHPO} title={"HPO Browser entry for " + experimental.rescue.phenotypeHPO + " in new tab"} target="_blank">{experimental.rescue.phenotypeHPO}</a> : null}</dd>
                             </div>
 
                             <div>
@@ -2470,7 +2488,7 @@ var ExperimentalViewer = React.createClass({
                                     <dl className="dl-horizontal">
                                         <div>
                                             <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId}</dd>
+                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
                                         </div>
 
                                         <div>

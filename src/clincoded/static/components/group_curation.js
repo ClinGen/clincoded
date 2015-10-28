@@ -855,7 +855,7 @@ var GroupViewer = React.createClass({
                             <div>
                                 <dt># individuals with variant in gene being curated</dt>
                                 <dd>{context.numberOfIndividualsWithVariantInCuratedGene}</dd>
-                            </div>
+                            </div>ClinVarSearch
 
                             <div>
                                 <dt># individuals without variant in gene being curated</dt>
