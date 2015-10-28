@@ -84,10 +84,7 @@
                 "geneImplicatedWithDisease": true,
                 "evidenceInPaper": "Paragraph 21-30, page 55"
             }
-        },
-        "variants": [
-            "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
-        ]
+        }
     },
     {
         "uuid": "9bb72f27-8ad8-4fc7-a2a6-03810088ddf1",
@@ -111,9 +108,6 @@
                 "evidenceInPaper": "Paragraph 2-12, page 12"
             }
         },
-        "variants": [
-            "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
-        ],
         "assessments": [
             "550d702b-2a4c-11e5-856d-60f81dc5b05a"
         ]
@@ -128,9 +122,9 @@
         "evidenceType": "Rescue",
         "rescue": {
             "patientCellOrEngineeredEquivalent": "Patient cells",
-            "patientCellType": "EFO_12345678",
+            "patientCellType": "CL_0001234",
             "descriptionOfGeneAlteration": "some description about cell here",
-            "phenotypeHPO": "HP:xxxxxxx",
+            "phenotypeHPO": "HP:0000007",
             "rescueMethod": "rescue method here (not method object in clinical data)",
             "wildTypeRescuePhenotype": true,
             "patientVariantRescue": true,
@@ -188,7 +182,8 @@
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
         ],
         "assessments": [
-            "a4aeb035-0a9c-41e0-9963-1deeb4e1301d"
+            "a4aeb035-0a9c-41e0-9963-1deeb4e1301d",
+            "39738201-96b3-4bdd-94d8-99a57a8eea71"
         ]
     }
 ]
