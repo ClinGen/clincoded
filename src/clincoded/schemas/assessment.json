@@ -52,11 +52,7 @@
             "type": "string"
         },
         "evidence_type": {
-            "title": "Evidence",
-            "type": "string"
-        },
-        "evidence_id": {
-            "title": "Evidence ID",
+            "title": "Evidence Type",
             "type": "string"
         },
         "evidence_gdm": {

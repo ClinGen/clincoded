@@ -34,8 +34,7 @@
         "sex": {
             "title": "Sex",
             "description": "Sex",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "hpoIdInDiagnosis": {
             "title": "HPO ID(s)",
@@ -51,8 +50,7 @@
         "termsInDiagnosis": {
             "title": "Non-HPO term(s)",
             "description": "Non-HPO terms (separated by comma) for the disease",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "hpoIdInElimination": {
             "title": "HPO ID(s) Eliminated",
@@ -68,20 +66,17 @@
         "termsInElimination": {
             "title": "Non-HPO term(s) Eliminated",
             "description": "Non-HPO terms (separated by comma) eliminated from the disease",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "countryOfOrigin": {
             "title": "Country Of Origin",
             "description": "Country in which the family original live",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "ethnicity": {
             "title": "Ethnicity",
             "description": "Ethnicity",
             "type": "string",
-            "default": "",
             "enum": [
                 "",
                 "Hispanic or Latino",
@@ -92,7 +87,6 @@
             "title": "Race",
             "description": "Race",
             "type": "string",
-            "default": "",
             "enum": [
                 "",
                 "American Indian or Alaska Native",
@@ -215,8 +209,7 @@
         "additionalInformation": {
             "title": "Additional Information",
             "description": "List of Additional information for the individual",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "otherPMIDs": {
             "title": "Other PMIDs",
