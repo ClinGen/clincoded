@@ -179,10 +179,10 @@ $status-types:
 //   GDM status   FontAwesome suffix    Icon color
     (header,      circle,               $table-header-fg),
     (final,       check-circle,         #00c000),
-    (draft,       check-circle-o,       #4060ff),
+    (draft,       check-circle-o,       #808080),
     (provisional, adjust,               #808080),
-    (in-progress, dot-circle-o,         #f09000),
-    (created,     circle-o,             #f040ff);
+    (in-progress, dot-circle-o,         #808080),
+    (created,     circle-o,             #808080);
 
 // Generate the audit icon classes for each of the audit types
 @each $status-type, $suffix, $color in $status-types {
