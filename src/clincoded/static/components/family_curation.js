@@ -749,7 +749,6 @@ var FamilyCuration = React.createClass({
                 }).then(newFamily => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
-                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut && !initvar) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -1763,7 +1762,7 @@ var FamilyViewer = React.createClass({
                                     <dl className="dl-horizontal">
                                         <div>
                                             <dt>ClinVar VariationID</dt>
-                                            <dd>{ variant.clinvarVariantId ? <a href={external_url_map['ClinVar'] + '/variation/' + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
+                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVar'] + '/variation/' + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
                                         </div>
 
                                         <div>
