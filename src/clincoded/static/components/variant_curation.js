@@ -371,7 +371,7 @@ var VariantCuration = React.createClass({
                 <div className="container">
                     {!this.queryValues.all && annotation && annotation.article ?
                         <div className="curation-pmid-summary">
-                            <PmidSummary article={annotation.article} displayJournal />
+                            <PmidSummary article={annotation.article} displayJournal pmidLinkout />
                         </div>
                     : null}
                     <div className="viewer-titles">

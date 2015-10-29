@@ -448,7 +448,7 @@ var GroupCuration = React.createClass({
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
-                                    <PmidSummary article={this.state.annotation.article} displayJournal />
+                                    <PmidSummary article={this.state.annotation.article} displayJournal pmidLinkout />
                                 </div>
                             : null}
                             <div className="viewer-titles">
