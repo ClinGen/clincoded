@@ -223,6 +223,36 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "ecorty@email.unc.edu",
+        "first_name": "Edward",
+        "last_name": "Corty",
+        "uuid": "470c2892-75f1-41c0-8ee7-4e7b86f76508",
+        "groups": [
+            "admin"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "kristy_lee@med.unc.edu",
+        "first_name": "Kristy",
+        "last_name": "Lee",
+        "uuid": "44c1e179-a0f1-4c88-b8be-df691f022ef5",
+        "groups": [
+            "admin"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 
 ]
