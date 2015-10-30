@@ -1,10 +1,21 @@
 from urllib.parse import quote
-import os.path
+import os
+import pwd
 import sys
 try:
     import subprocess32 as subprocess
 except ImportError:
     import subprocess
+
+
+def _demote_as_postgres():
+    if os.getuid() == 0:
+        # Only root user need to be demoted, and we also assume that
+        # PostgreSQL is installed using deb package so there's a user
+        # named "postgres" already
+        pw_record = pwd.getpwnam('postgres')
+        os.setgid(pw_record.pw_gid)
+        os.setuid(pw_record.pw_uid)
 
 
 def initdb(datadir, prefix='', echo=False):
@@ -16,6 +27,7 @@ def initdb(datadir, prefix='', echo=False):
     ]
     output = subprocess.check_output(
         init_args,
+        preexec_fn=_demote_as_postgres,
         close_fds=True,
         stderr=subprocess.STDOUT,
     )
@@ -34,6 +46,7 @@ def server_process(datadir, prefix='', echo=False):
     ]
     process = subprocess.Popen(
         args,
+        preexec_fn=_demote_as_postgres,
         close_fds=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
