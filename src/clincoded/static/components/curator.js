@@ -36,9 +36,12 @@ var CurationMixin = module.exports.CurationMixin = {
         ).then(gdmObj => {
             var gdm = flatten(gdmObj);
             gdm.omimId = newOmimId;
-            return this.putRestData('/gdm/' + gdmUuid, gdm);
-        }).then(data => {
-            this.setState({currOmimId: newOmimId});
+            return this.putRestData('/gdm/' + gdmUuid, gdm).then(data => {
+                return Promise.resolve(gdmObj);
+            });
+        }).then(gdmObj => {
+            gdmObj.omimId = newOmimId;
+            this.setState({currGdm: gdmObj, currOmimId: newOmimId});
         }).catch(e => {
             console.log('UPDATEOMIMID %o', e);
         });
