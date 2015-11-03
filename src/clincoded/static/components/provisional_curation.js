@@ -418,7 +418,7 @@ var NewCalculation = function() {
 
                         // collection segregation assessments
                         if (groups[j].familyIncluded[k].segregation) {
-                            userAssessments[segNot] += 1;
+                            userAssessments['segNot'] += 1;
 
                             if (groups[j].familyIncluded[k].segregation.assessments && groups[j].familyIncluded[k].segregation.assessments.length > 0) {
                                 for (var l in groups[j].familyIncluded[k].segregation.assessments) {

@@ -155,7 +155,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <h1>{gene.symbol} – {disease.term}</h1>
                             <h2>{mode}</h2>
                             <div className="provisional-info-panel">
-                                <table style={{'width':'100%'}}>
+                                <table border="1" style={{'width':'100%'}}>
                                     <tr>
                                         <td>
                                             <div className="provisional-title">
@@ -181,7 +181,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                     <div className="provisional-data-left"><span>No Reported Evidence</span></div>
                                             }
                                         </td>
-                                        <td className="button-box">
+                                        <td className="button-box" rowSpan="2">
                                             { summaryButton ?
                                                 <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
                                                     { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
@@ -191,6 +191,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                             }
                                         </td>
                                     </tr>
+                                    <tr style={{height:'10px'}}></tr>
                                 </table>
                             </div>
                         </div>
