@@ -109,11 +109,11 @@ var App = module.exports = React.createClass({
                     <link rel="stylesheet" href="/static/css/style.css" />
                     <script src="/static/build/bundle.js" async defer></script>
                 </head>
-                <body onClick={this.handleClick} onSubmit={this.handleSubmit} className={this.state.demoWarning ? "demo-background" : ""}>
+                <body onClick={this.handleClick} onSubmit={this.handleSubmit} className={this.state.demoWarning2 ? "demo-background" : ""}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
-                    {this.state.demoWarning2 ?
+                    {this.state.demoWarning ?
                         <div>
                         <div className="demo-left"></div>
                         <div className="demo-right"></div>

@@ -153,11 +153,11 @@ dl.dl-horizontal {
 }
 
 .demo-background {
-    background: #ffaeae;
+    background: #880000;
 }
 
 .demo-top, .demo-bottom, .demo-left, .demo-right {
-    background: red;
+    background: #880000;
     position: fixed;
     z-index: 999;
 }
@@ -165,13 +165,13 @@ dl.dl-horizontal {
 .demo-top, .demo-bottom {
     left: 0;
     right: 0;
-    height: 10px;
+    height: 12px;
 }
 
 .demo-left, .demo-right {
     top: 0;
     bottom: 0;
-    width: 10px;
+    width: 14px;
 }
 
 .demo-top {
