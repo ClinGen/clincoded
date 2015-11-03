@@ -340,11 +340,6 @@ var EditCurrent = function() {
 var NewCalculation = function() {
     var gdm = this.state.gdm;
 
-// Collect all individuals in all annotations, pass to function filter with article info (experimental data is not necessary)
-    //var summaryData = seaerch_annotation(gdm.annotations, 'prband');
-    //var individualsCollected = summaryData["Individual"];
-    //var exp_scores = summaryData["expScore"];
-    //var expType = summaryData["expType"];
     var userAssessments = {
         "variantSpt": 0,
         "variantReview": 0,
@@ -359,15 +354,11 @@ var NewCalculation = function() {
         "segCntdct": 0,
         "segNot": 0
     };
-// Gegerate pathogenicity id list and collect experimental id list from all assessments
-// condition: assessed by login user, value as Supports, current gdm
-// count piece number at each experimental type and add score at 3 different categories
-    //var pathoList = [];
-// Collect variants from pathogenicity
+
+    // Collect variants from pathogenicity
     var gdmPathoList = gdm.variantPathogenicity;
     var pathoVariantIdList = [];
     for (var i in gdmPathoList) {
-
         // pick up variants from login user's pathogenicity assessed as Supports.
         if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
             for (var j in gdmPathoList[i].assessments) {
@@ -401,15 +392,17 @@ var NewCalculation = function() {
     var individualsCollected = [];
     var proband_variants = [];
 
+    // scan gdm
     var annotations = gdm.annotations ? gdm.annotations : [];
     for (var i in annotations) {
-        //allProbandInd.push(getProbandIndividual(annotations[i], []));
 
         if (annotations[i].groups && annotations[i].groups.length > 0) {
             var groups = annotations[i].groups;
             for (var j in groups) {
                 if (groups[j].familyIncluded && groups[j].familyIncluded.length > 0) {
                     for (var k in groups[j].familyIncluded) {
+
+                        // collect individuals
                         if (groups[j].familyIncluded[k].individualIncluded && groups[j].familyIncluded[k].individualIncluded.length > 0) {
                             individualsCollected = filter(individualsCollected, groups[j].familyIncluded[k].individualIncluded, annotations[i].article, pathoVariantIdList ); // same as above
 
@@ -866,25 +859,6 @@ var get_earliest_year = function(earliest, dateStr) {
         return theYear;
     }
     return earliest;
-};
-
-var getProbandIndividual = function(obj, probandIndividuals) {
-    if (obj['@type'][0] === 'individual' && obj.proband) {
-        probandIndividuals.push(obj.uuid);
-    }
-    else {
-        //var keys = Object.keys(obj);
-        for (var key in obj) {
-            if ((key === 'groups' || key === 'families' || key === 'individuals' || key === 'familyIncluded' || key === 'individualIncluded') && obj[key].length > 0) {
-                var subList = obj[key];
-                for (var i in subList) {
-                    probandIndividuals = getProbandIndividual(subList[i], probandIndividuals);
-                }
-                //return probandIndividuals;
-            }
-        }
-    }
-    return probandIndividuals;
 };
 
 var filter = function(target, branch, article, idList) {
