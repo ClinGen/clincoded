@@ -151,3 +151,41 @@ dl.dl-horizontal {
     margin-bottom: 0;
     border-radius: 0;
 }
+
+.demo-background {
+    background: #ffaeae;
+}
+
+.demo-top, .demo-bottom, .demo-left, .demo-right {
+    background: red;
+    position: fixed;
+    z-index: 999;
+}
+
+.demo-top, .demo-bottom {
+    left: 0;
+    right: 0;
+    height: 10px;
+}
+
+.demo-left, .demo-right {
+    top: 0;
+    bottom: 0;
+    width: 10px;
+}
+
+.demo-top {
+    top: 0;
+}
+
+.demo-bottom {
+    bottom: 0;
+}
+
+.demo-left {
+    left: 0;
+}
+
+.demo-right {
+    right: 0;
+}
