@@ -430,6 +430,20 @@
 .provisional-info-panel {
     width: 100%;
     border-top: 2px solid #aaa;
+    padding-bottom: 10px;
+
+    table {
+        width: 100%
+    }
+
+    td {
+        text-align: left;
+    }
+
+    .button-box {
+        width: 200px;
+        vertical-align: middle;
+    }
 
     .provisional-title {
         text-align: left;
@@ -456,6 +470,16 @@
         .btn {
             margin: 10px 0 10px 0;
         }
+    }
+}
+
+.assessment-counting {
+    td {
+        text-align: center;
+        width: 150px;
+    }
+    .values {
+        text-align: right;
     }
 }
 

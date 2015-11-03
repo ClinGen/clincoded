@@ -157,7 +157,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <div className="provisional-info-panel">
                                 <table style={{'width':'100%'}}>
                                     <tr>
-                                        <td style={{'textAlign':'left'}}>
+                                        <td>
                                             <div className="provisional-title">
                                                 <strong>Last Saved Summary & Provisional Classification</strong>
                                             </div>
@@ -181,16 +181,15 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                     <div className="provisional-data-left"><span>No Reported Evidence</span></div>
                                             }
                                         </td>
-                                        { summaryButton ?
-                                            <td style={{'width':'200px', 'vertical-align':'middle'}}>
+                                        <td className="button-box">
+                                            { summaryButton ?
                                                 <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
                                                     { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
                                                 </a>
-                                            </td>
-                                            :
-                                            <td style={{'width':'200px'}}>&nbsp;</td>
-                                        }
-
+                                                :
+                                                null
+                                            }
+                                        </td>
                                     </tr>
                                 </table>
                             </div>

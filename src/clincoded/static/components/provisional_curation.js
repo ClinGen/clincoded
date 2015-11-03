@@ -250,14 +250,7 @@ var ProvisionalCuration = React.createClass({
                                                     </PanelGroup>
                                                 : null
                                             }
-                                            {AssessmentSummary.call(this)}
-                                            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                                {NewCalculation.call(this)}
-                                                <div className='modal-footer'>
-                                                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                                                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
-                                                </div>
-                                            </Form>
+                                            {NewCalculation.call(this)}
                                         </div>
                                         :
                                         null
@@ -344,94 +337,55 @@ var EditCurrent = function() {
 };
 
 
-var AssessmentSummary = function() {
-    var assessments = this.state.assessments;
+var NewCalculation = function() {
+    var gdm = this.state.gdm;
+
+// Collect all individuals in all annotations, pass to function filter with article info (experimental data is not necessary)
+    //var summaryData = seaerch_annotation(gdm.annotations, 'prband');
+    //var individualsCollected = summaryData["Individual"];
+    //var exp_scores = summaryData["expScore"];
+    //var expType = summaryData["expType"];
     var userAssessments = {
         "variantSpt": 0,
         "variantReview": 0,
         "variantCntdct": 0,
+        "variantNot": 0,
         "expSpt": 0,
         "expReview": 0,
         "expCntdct": 0,
+        "expNot": 0,
         "segSpt": 0,
         "segReview": 0,
-        "segCntdct": 0
+        "segCntdct": 0,
+        "segNot": 0
     };
-    for (var i in assessments) {
-        if (assessments[i].value === 'Supports' && assessments[i].evidence_type === 'Pathogenicity') {
-            userAssessments.variantSpt += 1;
-        }
-        else if (assessments[i].value === 'Review' && assessments[i].evidence_type === 'Pathogenicity') {
-            userAssessments.variantReview += 1;
-        }
-        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Pathogenicity') {
-            userAssessments.variantCntdct += 1;
-        }
-        else if (assessments[i].value === 'Supports' && assessments[i].evidence_type === 'Segregation') {
-            userAssessments.segSpt += 1;
-        }
-        else if (assessments[i].value === 'Review' && assessments[i].evidence_type === 'Segregation') {
-            userAssessments.segReview += 1;
-        }
-        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Segregation') {
-            userAssessments.segCntdct += 1;
-        }
-        else if (assessments[i].value === 'Supports') {
-            userAssessments.expSpt += 1;
-        }
-        else if (assessments[i].value === 'Review') {
-            userAssessments.expReview += 1;
-        }
-        else if (assessments[i].value === 'Contradicts') {
-            userAssessments.expCntdct += 1;
-        }
-    }
-
-    return (
-        <PanelGroup accordion>
-            <Panel title="New Count of Assessments" open>
-                <table>
-                    <tr>
-                        <td style={{width:'150px', 'text-align':'center'}}>&nbsp;</td>
-                        <td style={{width:'150px', 'text-align':'center'}}><strong>Segregation</strong></td>
-                        <td style={{width:'150px', 'text-align':'center'}}><strong>Variant</strong></td>
-                        <td style={{width:'150px', 'text-align':'center'}}><strong>Experimental</strong></td>
-                    </tr>
-                    <tr>
-                        <td style={{width:'150px', 'text-align':'right'}}><strong>Supports</strong></td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segSpt}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantSpt}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expSpt}</td>
-                    </tr>
-                    <tr>
-                        <td style={{width:'150px', 'text-align':'right'}}><strong>Review</strong></td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segReview}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantReview}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expReview}</td>
-                    </tr>
-                    <tr>
-                        <td style={{width:'150px', 'text-align':'right'}}><strong>Contradicts</strong></td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segCntdct}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantCntdct}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expCntdct}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="4">&nbsp;</td>
-                    </tr>
-                </table>
-            </Panel>
-        </PanelGroup>
-    );
-};
-
-
-var NewCalculation = function() {
-    var gdm = this.state.gdm;
-
 // Gegerate pathogenicity id list and collect experimental id list from all assessments
 // condition: assessed by login user, value as Supports, current gdm
 // count piece number at each experimental type and add score at 3 different categories
-    var pathoList = [];
+    //var pathoList = [];
+// Collect variants from pathogenicity
+    var gdmPathoList = gdm.variantPathogenicity;
+    var pathoVariantIdList = [];
+    for (var i in gdmPathoList) {
+
+        // pick up variants from login user's pathogenicity assessed as Supports.
+        if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
+            for (var j in gdmPathoList[i].assessments) {
+                if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
+                    var variantUuid = gdmPathoList[i].variant.uuid;
+                    pathoVariantIdList.push(variantUuid);
+                    userAssessments['variantSpt'] += 1;
+                }
+                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Review') {
+                    userAssessments['variantReview'] += 1;
+                }
+                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Contradicts') {
+                    userAssessments['variantCntdct'] += 1;
+                }
+            }
+        }
+    }
+
     var exp_scores = [0, 0, 0];
     var expType = {
         "Expression": 0,
@@ -444,30 +398,12 @@ var NewCalculation = function() {
         "Rescue (Patient cells)": 0,
         "Rescue (Engineered equivalent)": 0
     }
-
-// Generate variantIdList
-    var gdmPathoList = gdm.variantPathogenicity;
-    var variantIdList = [];
-    for (var i in gdmPathoList) {
-
-        // pick up variants from login user's pathogenicity assessed as Supports.
-        if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
-            for (var j in gdmPathoList[i].assessments) {
-                if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
-                    var variantUuid = gdmPathoList[i].variant.uuid;
-                    variantIdList.push(variantUuid);
-                    break;
-                }
-            }
-        }
-    }
-
-// Collect all individuals in all annotations, pass to function filter with article info (experimental data is not necessary)
-    var annotations = gdm.annotations;
     var individualsCollected = [];
-    var allProbandInd = [];
+    var proband_variants = [];
+
+    var annotations = gdm.annotations ? gdm.annotations : [];
     for (var i in annotations) {
-          allProbandInd.push(getProbandIndividual(annotations[i], []));
+        //allProbandInd.push(getProbandIndividual(annotations[i], []));
 
         if (annotations[i].groups && annotations[i].groups.length > 0) {
             var groups = annotations[i].groups;
@@ -475,24 +411,100 @@ var NewCalculation = function() {
                 if (groups[j].familyIncluded && groups[j].familyIncluded.length > 0) {
                     for (var k in groups[j].familyIncluded) {
                         if (groups[j].familyIncluded[k].individualIncluded && groups[j].familyIncluded[k].individualIncluded.length > 0) {
-                            individualsCollected = filter(individualsCollected, groups[j].familyIncluded[k].individualIncluded, annotations[i].article, variantIdList); // same as above
+                            individualsCollected = filter(individualsCollected, groups[j].familyIncluded[k].individualIncluded, annotations[i].article, pathoVariantIdList ); // same as above
+
+                            for (var n in individualsCollected) {
+                                var indVariants = individualsCollected[n]['allVariants'];
+                                for (var m in indVariants) {
+                                    if (!in_array(indVariants[m], proband_variants)) {
+                                        proband_variants.push(indVariants[m]);
+                                    }
+                                }
+                            }
+                        }
+
+                        // collection segregation assessments
+                        if (groups[j].familyIncluded[k].segregation) {
+                            userAssessments[segNot] += 1;
+
+                            if (groups[j].familyIncluded[k].segregation.assessments && groups[j].familyIncluded[k].segregation.assessments.length > 0) {
+                                for (var l in groups[j].familyIncluded[k].segregation.assessments) {
+                                    var this_assessment = groups[j].familyIncluded[k].segregation.assessments[l];
+                                    if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
+                                        userAssessments['segSpt'] += 1;
+                                    }
+                                    else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Review') {
+                                        userAssessments['segReview'] += 1;
+                                    }
+                                    else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Contradicts') {
+                                        userAssessments['segCntdct'] += 1;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
                 if (groups[j].individualIncluded && groups[j].individualIncluded.length > 0) {
-                    individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, variantIdList);
+                    individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, pathoVariantIdList );
+
+                    for (var n in individualsCollected) {
+                        var indVariants = individualsCollected[n]['allVariants'];
+                        for (var m in indVariants) {
+                            if (!in_array(indVariants[m], proband_variants)) {
+                                proband_variants.push(indVariants[m]);
+                            }
+                        }
+                    }
                 }
             }
         }
         if (annotations[i].families && annotations[i].families.length > 0) {
             for (var j in annotations[i].families) {
                 if (annotations[i].families[j].individualIncluded && annotations[i].families[j].individualIncluded.length > 0) {
-                    individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, variantIdList);
+                    individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, pathoVariantIdList );
+
+                    for (var n in individualsCollected) {
+                        var indVariants = individualsCollected[n]['allVariants'];
+                        for (var m in indVariants) {
+                            if (!in_array(indVariants[m], proband_variants)) {
+                                proband_variants.push(indVariants[m]);
+                            }
+                        }
+                    }
+
+                }
+
+                if (annotations[i].families[j].segregation) {
+                    userAssessments['segNot'] += 1;
+
+                    if (annotations[i].families[j].segregation.assessments && annotations[i].families[j].segregation.assessments.length > 0) {
+                        for (var l in annotations[i].families[j].segregation.assessments) {
+                            var this_assessment = annotations[i].families[j].segregation.assessments[l];
+                            if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
+                                userAssessments['segSpt'] += 1;
+                            }
+                            else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Review') {
+                                userAssessments['segReview'] += 1;
+                            }
+                            else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Contradicts') {
+                                userAssessments['segCntdct'] += 1;
+                            }
+                        }
+                    }
                 }
             }
         }
         if (annotations[i].individuals && annotations[i].individuals.length > 0) {
-            individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, variantIdList);
+            individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, pathoVariantIdList );
+
+            for (var n in individualsCollected) {
+                var indVariants = individualsCollected[n]['allVariants'];
+                for (var m in indVariants) {
+                    if (!in_array(indVariants[m], proband_variants)) {
+                        proband_variants.push(indVariants[m]);
+                    }
+                }
+            }
         }
 
         // collect experimental assessed support, check matrix
@@ -500,6 +512,8 @@ var NewCalculation = function() {
             for (var j in annotations[i].experimentalData) {
                 var exp = annotations[i].experimentalData[j];
                 var subTypeKey = exp.evidenceType;
+
+                userAssessments['expNot'] += 1;
 
                 if (exp.assessments && exp.assessments.length > 0) {
                     for (var j in exp.assessments) {
@@ -547,7 +561,14 @@ var NewCalculation = function() {
                                 expType[subTypeKey] += 1;
                                 exp_scores[2] += 1;
                             }
-                            break;
+
+                            userAssessments['expSpt'] += 1;
+                        }
+                        else if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Review') {
+                            userAssessments['expReview'] += 1;
+                        }
+                        else if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Contradicts') {
+                            userAssessments['expCntdct'] += 1;
                         }
                     }
                 }
@@ -555,7 +576,11 @@ var NewCalculation = function() {
         }
     }
 
-// Compare designed max value at each score category and get the total experimental score
+    userAssessments['variantNot'] = proband_variants.length - userAssessments['variantSpt'] - userAssessments['variantReview'] - userAssessments['variantCntdct'];
+    userAssessments['expNot'] = userAssessments['expNot'] - userAssessments['expSpt'] - userAssessments['expReview'] - userAssessments['expCntdct'];
+    userAssessments['segNot'] = userAssessments['segNot'] - userAssessments['segSpt'] - userAssessments['segReview'] - userAssessments['segCntdct'];
+
+    // Compare designed max value at each score category and get the total experimental score
     var finalExperimentalScore = 0;
     for (var i in exp_scores) {
         var max = 2; // set max value for each type
@@ -565,18 +590,22 @@ var NewCalculation = function() {
         finalExperimentalScore += (exp_scores[i] <= max) ? exp_scores[i] : max; // not more than the max
     }
 
-// Collect articles and find the earliest publication year
+    // Collect articles and find the earliest publication year
+    var proband = 0;
     var articleCollected = [];
     var year = new Date();
     var earliest = year.getFullYear();
     for (var i in individualsCollected) {
-        if (!in_array(individualsCollected[i].pmid, articleCollected) && individualsCollected[i].pmid != '') {
-            articleCollected.push(individualsCollected[i].pmid);
-            earliest = get_earliest_year(earliest, individualsCollected[i].date);
+        if (individualsCollected[i].pmid && individualsCollected[i].pmid != '') {
+            proband += 1;
+            if (!in_array(individualsCollected[i].pmid, articleCollected)) {
+                articleCollected.push(individualsCollected[i].pmid);
+                earliest = get_earliest_year(earliest, individualsCollected[i].date);
+            }
         }
     }
 
-// get final scores
+    // get final scores
     var currentYear = year.getFullYear();
     //var years = (currentYear.valueOf() - earliest.valueOf()) + ' = ' + currentYear + ' - ' + earliest;
     var time = currentYear.valueOf() - earliest.valueOf();
@@ -591,7 +620,6 @@ var NewCalculation = function() {
         timeScore = 0;
     }
 
-    var proband = individualsCollected.length;
     //var proband = count_proband(familiesCollected) + count_proband(individualsCollected);
     if (proband > 18) {
         probandScore = 7;
@@ -655,25 +683,49 @@ var NewCalculation = function() {
     this.state.totalScore = totalScore;
     this.state.autoClassification = autoClassification;
 
-    var contradicts = {
-        "Variant": 0,
-        "Experimental": 0,
-        "Segregation": 0
-    };
-    var assessments = this.state.assessments;
-    for (var i in assessments) {
-        if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Pathogenicity') {
-            contradicts.Variant += 1;
-        }
-        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Segregation') {
-            contradicts.Segregation += 1;
-        }
-        else if (assessments[i].value === 'Contradicts' ) {
-            contradicts.Experimental += 1;
-        }
-    }
-
     return (
+        <div>
+            <PanelGroup accordion>
+                <Panel title="New Count of Assessments" open>
+                    <table className="assessment-counting">
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td><strong>Segregation</strong></td>
+                            <td><strong>Variant</strong></td>
+                            <td><strong>Experimental</strong></td>
+                        </tr>
+                        <tr>
+                            <td className="values"><strong>Supports</strong></td>
+                            <td>{userAssessments.segSpt}</td>
+                            <td>{userAssessments.variantSpt}</td>
+                            <td>{userAssessments.expSpt}</td>
+                        </tr>
+                        <tr>
+                            <td className="values"><strong>Review</strong></td>
+                            <td>{userAssessments.segReview}</td>
+                            <td>{userAssessments.variantReview}</td>
+                            <td>{userAssessments.expReview}</td>
+                            <td>{userAssessments.v}</td>
+                        </tr>
+                        <tr>
+                            <td className="values"><strong>Contradicts</strong></td>
+                            <td >{userAssessments.segCntdct}</td>
+                            <td>{userAssessments.variantCntdct}</td>
+                            <td>{userAssessments.expCntdct}</td>
+                        </tr>
+                        <tr>
+                            <td className="values"><strong>Not Assessed</strong></td>
+                            <td >{userAssessments.segNot}</td>
+                            <td>{userAssessments.variantNot}</td>
+                            <td>{userAssessments.expNot}</td>
+                        </tr>
+                        <tr>
+                            <td colSpan="4">&nbsp;</td>
+                        </tr>
+                    </table>
+                </Panel>
+            </PanelGroup>
+            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <PanelGroup accordion>
                     <Panel title="New Summary & Provisional Classification" open>
                         <div className="form-group">
@@ -789,9 +841,14 @@ var NewCalculation = function() {
                         </div>
                     </Panel>
                 </PanelGroup>
+                <div className='modal-footer'>
+                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
+                </div>
+            </Form>
+        </div>
     );
 };
-
 
 var in_array = function(item, list) {
     for(var i in list){
@@ -832,32 +889,45 @@ var getProbandIndividual = function(obj, probandIndividuals) {
 
 var filter = function(target, branch, article, idList) {
     branch.forEach(function(obj) {
-        var variantIds = [];
+        // in each individual
+        var supportedVariants = [], allVariants = [];
         var allAssessed = false;
 
         if (obj.proband && obj.variants && obj.variants.length > 0) {
-            // pick up proband individuals if all associated variant assessed Support
             for (var j in obj.variants) {
                 if (!in_array(obj.variants[j].uuid, idList)) {
                     allAssessed = false;
-                    break;
                 }
                 else {
                     allAssessed = true;
-                    variantIds.push(obj.variants[j].uuid);
+                    // collect supported variants in proband individual
+                    supportedVariants.push(obj.variants[j].uuid);
                 }
+
+                // collect all variants in proband individual
+                allVariants.push(obj.variants[j].uuid)
             }
 
+            // pick up proband individuals if all associated variant assessed Support
             if (allAssessed) {
                 target.push(
                     {
                         "evidence":obj.uuid,
-                        "variants":variantIds,
+                        "supportedVariants":supportedVariants,
                         "pmid":article.pmid,
-                        "date": article.date
+                        "date": article.date,
+                        "allVariants": allVariants
                     }
                 );
             }
+            else {
+                target.push(
+                    {
+                        "allVariants": allVariants
+                    }
+                );
+            }
+
         }
     });
 
