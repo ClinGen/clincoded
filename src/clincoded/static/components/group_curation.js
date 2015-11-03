@@ -404,7 +404,6 @@ var GroupCuration = React.createClass({
                 }).then(data => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Group Submit page.
-                    this.setState({submitBusy: false}); // done / form submission; turn the submit button back on, just in case
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -449,7 +448,7 @@ var GroupCuration = React.createClass({
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
-                                    <PmidSummary article={this.state.annotation.article} displayJournal />
+                                    <PmidSummary article={this.state.annotation.article} displayJournal pmidLinkout />
                                 </div>
                             : null}
                             <div className="viewer-titles">
@@ -749,21 +748,16 @@ var GroupViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
-                                <dd>
-                                    {context.commonDiagnosis.map(function(disease, i) {
-                                        return (
-                                            <span key={disease.orphaNumber}>
-                                                {i > 0 ? ', ' : ''}
-                                                {'ORPHA' + disease.orphaNumber}
-                                            </span>
-                                        );
-                                    })}
-                                </dd>
+                                <dd>{context.commonDiagnosis && context.commonDiagnosis.map(function(disease, i) {
+                                    return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                })}</dd>
                             </div>
 
                             <div>
                                 <dt>HPO IDs</dt>
-                                <dd>{context.hpoIdInDiagnosis.join(', ')}</dd>
+                                <dd>{context.hpoIdInDiagnosis && context.hpoIdInDiagnosis.map(function(hpo, i) {
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                })}</dd>
                             </div>
 
                             <div>
@@ -773,7 +767,9 @@ var GroupViewer = React.createClass({
 
                             <div>
                                 <dt>NOT HPO IDs</dt>
-                                <dd>{context.hpoIdInElimination.join(', ')}</dd>
+                                <dd>{context.hpoIdInElimination && context.hpoIdInElimination.map(function(hpo, i) {
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                })}</dd>
                             </div>
 
                             <div>
@@ -847,7 +843,7 @@ var GroupViewer = React.createClass({
                             <div>
                                 <dt># individuals with variant in gene being curated</dt>
                                 <dd>{context.numberOfIndividualsWithVariantInCuratedGene}</dd>
-                            </div>
+                            </div>ClinVarSearch
 
                             <div>
                                 <dt># individuals without variant in gene being curated</dt>
@@ -861,7 +857,9 @@ var GroupViewer = React.createClass({
 
                             <div>
                                 <dt>Other genes found to have variants in them</dt>
-                                <dd>{context.otherGenes && context.otherGenes.map(function(gene) { return gene.symbol; }).join(', ')}</dd>
+                                <dd>{context.otherGenes && context.otherGenes.map(function(gene, i) {
+                                    return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
+                                })}</dd>
                             </div>
                         </dl>
                     </Panel>
@@ -924,12 +922,7 @@ var GroupViewer = React.createClass({
 
                             <dt>Other PMID(s) that report evidence about this same group</dt>
                             <dd>{context.otherPMIDs && context.otherPMIDs.map(function(article, i) {
-                                return (
-                                    <span key={i}>
-                                        {i > 0 ? ', ' : ''}
-                                        {article.pmid}
-                                    </span>
-                                );
+                                return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
                             })}</dd>
                         </dl>
                     </Panel>
