@@ -105,7 +105,7 @@ var IndividualCuration = React.createClass({
         }
     },
 
-    // Handle a click on the family's copy orphanet button
+    // Handle a click on a copy orphanet button
     handleClick: function(obj, e) {
         e.preventDefault(); e.stopPropagation();
         var associatedObjs;
