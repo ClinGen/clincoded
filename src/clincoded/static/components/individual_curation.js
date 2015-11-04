@@ -105,6 +105,42 @@ var IndividualCuration = React.createClass({
         }
     },
 
+    // Handle a click on the family's copy orphanet button
+    handleClickGroup: function(e) {
+        e.preventDefault(); e.stopPropagation();
+        var associatedGroups;
+        var orphanetVal = '';
+        if (this.state.group) {
+            // We have a group, so get the disease array from it.
+            associatedGroups = this.state.group;
+        }
+        if (associatedGroups) {
+            orphanetVal = associatedGroups.commonDiagnosis.map(function(disease, i) {
+                    return ('ORPHA' + disease.orphaNumber);
+                }).join(', ');
+        }
+        this.refs['orphanetid'].setValue(orphanetVal);
+    },
+
+    // Handle a click on the family's copy orphanet button
+    handleClickFamily: function(e) {
+        e.preventDefault(); e.stopPropagation();
+
+        var associatedFamilies;
+        var orphanetValTemp = [];
+        var orphanetVal = '';
+        if (this.state.family) {
+            // We have a group, so get the disease array from it.
+            associatedFamilies = this.state.family;
+        }
+        if (associatedFamilies) {
+            orphanetVal = associatedFamilies.commonDiagnosis.map(function(disease, i) {
+                    return ('ORPHA' + disease.orphaNumber);
+                }).join(', ');
+        }
+        this.refs['orphanetid'].setValue(orphanetVal);
+    },
+
     // Load objects from query string into the state variables. Must have already parsed the query string
     // and set the queryValues property of this React class.
     loadData: function() {
@@ -972,6 +1008,14 @@ var IndividualCommonDiseases = function() {
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId probandLabel={probandLabel} />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+            {associatedGroups ?
+            <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
+                clickHandler={this.handleClickGroup} />
+            : null}
+            {associatedFamilies ?
+            <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Family"
+                clickHandler={this.handleClickFamily} />
+            : null}
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
