@@ -91,7 +91,8 @@
             "enum": [
                 "",
                 "Hispanic or Latino",
-                "Not Hispanic or Latino"
+                "Not Hispanic or Latino",
+                "Unknown"
             ]
         },
         "race": {
