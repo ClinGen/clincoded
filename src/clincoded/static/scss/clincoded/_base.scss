@@ -12,6 +12,7 @@ body {
 
 .container {
     position: relative;
+    background: #fff;
 }
 
 h1, .h1 { font-size: $font-size-h1; font-weight: 300; }
@@ -152,40 +153,13 @@ dl.dl-horizontal {
     border-radius: 0;
 }
 
+.alert-demo {
+    color: white;
+    background: #880000;
+    border-top: 1px solid red;
+    border-bottom: 1px solid red;
+}
+
 .demo-background {
-    background: #880000;
-}
-
-.demo-top, .demo-bottom, .demo-left, .demo-right {
-    background: #880000;
-    position: fixed;
-    z-index: 999;
-}
-
-.demo-top, .demo-bottom {
-    left: 0;
-    right: 0;
-    height: 12px;
-}
-
-.demo-left, .demo-right {
-    top: 0;
-    bottom: 0;
-    width: 14px;
-}
-
-.demo-top {
-    top: 0;
-}
-
-.demo-bottom {
-    bottom: 0;
-}
-
-.demo-left {
-    left: 0;
-}
-
-.demo-right {
-    right: 0;
+    background-image: url(/static/img/test-bg.svg);
 }
