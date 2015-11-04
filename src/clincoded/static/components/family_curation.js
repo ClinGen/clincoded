@@ -467,12 +467,14 @@ var FamilyCuration = React.createClass({
                         return Promise.resolve(diseases);
                     } else {
                         // Get array of missing Orphanet IDs
+                        this.setState({submitBusy: false}); // submit error; re-enable submit button
                         var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
                         this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
                         throw diseases;
                     }
                 }, e => {
                     // The given orpha IDs couldn't be retrieved for some reason.
+                    this.setState({submitBusy: false}); // submit error; re-enable submit button
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
