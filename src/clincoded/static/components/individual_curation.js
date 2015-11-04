@@ -9,6 +9,7 @@ var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
+var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -362,20 +363,57 @@ var IndividualCuration = React.createClass({
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
-                    // Handle 'Add any other PMID(s) that have evidence about this same Individual' list of PMIDs
-                    if (pmids) {
+                    // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
+                    if (pmids && pmids.length) {
                         // User entered at least one PMID
                         searchStr = '/search/?type=article&' + pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
                         return this.getRestData(searchStr).then(articles => {
                             if (articles['@graph'].length === pmids.length) {
-                                // Successfully retrieved all genes
+                                // Successfully retrieved all PMIDs, so just set individualArticles and return
                                 individualArticles = articles;
                                 return Promise.resolve(articles);
                             } else {
-                                this.setState({submitBusy: false}); // submit error; re-enable submit button
+                                // some PMIDs were not in our db already
+                                // generate list of PMIDs and pubmed URLs for those PMIDs
                                 var missingPmids = _.difference(pmids, articles['@graph'].map(function(article) { return article.pmid; }));
-                                this.setFormErrors('otherpmids', missingPmids.join(', ') + ' not found');
-                                throw articles;
+                                var missingPmidsUrls = [];
+                                for (var missingPmidsIndex = 0; missingPmidsIndex < missingPmids.length; missingPmidsIndex++) {
+                                    missingPmidsUrls.push(external_url_map['PubMedSearch']  + missingPmids[missingPmidsIndex]);
+                                }
+                                // get the XML for the missing PMIDs
+                                return this.getRestDatasXml(missingPmidsUrls).then(xml => {
+                                    var newArticles = [];
+                                    var invalidPmids = [];
+                                    var tempArticle;
+                                    // loop through the resulting XMLs and parsePubmed them
+                                    for (var xmlIndex = 0; xmlIndex < xml.length; xmlIndex++) {
+                                        tempArticle = parsePubmed(xml[xmlIndex]);
+                                        // check to see if Pubmed actually had an entry for the PMID
+                                        if ('pmid' in tempArticle) {
+                                            newArticles.push(tempArticle);
+                                        } else {
+                                            // PMID was not found at Pubmed
+                                            invalidPmids.push(missingPmids[xmlIndex]);
+                                        }
+                                    }
+                                    // if there were invalid PMIDs, throw an error with a list of them
+                                    if (invalidPmids.length > 0) {
+                                        this.setState({submitBusy: false}); // submit error; re-enable submit button
+                                        this.setFormErrors('otherpmids', 'PMID(s) ' + invalidPmids.join(', ') + ' not found');
+                                        throw invalidPmids;
+                                    }
+                                    // otherwise, post the valid PMIDs
+                                    if (newArticles.length > 0) {
+                                        return this.postRestDatas('/articles', newArticles).then(data => {
+                                            for (var dataIndex = 0; dataIndex < data.length; dataIndex++) {
+                                                articles['@graph'].push(data[dataIndex]['@graph'][0]);
+                                            }
+                                            individualArticles = articles;
+                                            return Promise.resolve(data);
+                                        });
+                                    }
+                                    return Promise(articles);
+                                });
                             }
                         });
                     } else {
@@ -543,7 +581,6 @@ var IndividualCuration = React.createClass({
                 }).then(data => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
-                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -677,29 +714,29 @@ var IndividualCuration = React.createClass({
         var groupTitles = [];
         if (individual) {
             // Editing an individual. get associated family titles, and associated group titles
-            groupTitles = groups.map(function(group) { return group.label; });
+            groupTitles = groups.map(function(group) { return {'label': group.label, '@id': group['@id']}; });
             familyTitles = families.map(function(family) {
                 // If this family has associated groups, add their titles to groupTitles.
                 if (family.associatedGroups && family.associatedGroups.length) {
-                    groupTitles = groupTitles.concat(family.associatedGroups.map(function(group) { return group.label; }));
+                    groupTitles = groupTitles.concat(family.associatedGroups.map(function(group) { return {'label': group.label, '@id': group['@id']}; }));
                 }
-                return family.label;
+                return {'label': family.label, '@id': family['@id']};
             });
         } else {
             // Curating an individual.
             if (families) {
                 // Given a family in the query string. Get title from first (only) family.
-                familyTitles[0] = families[0].label;
+                familyTitles[0] = {'label': families[0].label, '@id': families[0]['@id']};
 
                 // If the given family has associated groups, add those to group titles
                 if (families[0].associatedGroups && families[0].associatedGroups.length) {
                     groupTitles = families[0].associatedGroups.map(function(group) {
-                        return group.label;
+                        return {'label': group.label, '@id': group['@id']};
                     });
                 }
             } else if (groups) {
                 // Given a group in the query string. Get title from first (only) group.
-                groupTitles[0] = groups[0].label;
+                groupTitles[0] = {'label': groups[0].label, '@id': groups[0]['@id']};
             }
         }
 
@@ -729,7 +766,7 @@ var IndividualCuration = React.createClass({
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
-                                    <PmidSummary article={annotation.article} displayJournal />
+                                    <PmidSummary article={annotation.article} displayJournal pmidLinkout />
                                 </div>
                             : null}
                             <div className="viewer-titles">
@@ -737,12 +774,12 @@ var IndividualCuration = React.createClass({
                                 <h2>Individual: {this.state.individualName ? <span>{this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</h2>
                                 {familyTitles.length ?
                                     <h2>
-                                        {'Family association: ' + familyTitles.join(', ')}
+                                        Family association: {familyTitles.map(function(family, i) { return <span>{i > 0 ? ', ' : ''}<a href={family['@id']}>{family.label}</a></span>; })}
                                     </h2>
                                 : null}
                                 {groupTitles.length ?
                                     <h2>
-                                        {'Group association: ' + groupTitles.join(', ')}
+                                        Group association: {groupTitles.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}
                                     </h2>
                                 : null}
                             </div>
@@ -901,9 +938,9 @@ var IndividualCommonDiseases = function() {
 
     // If we're editing an individual, make editable values of the complex properties
     if (individual) {
-        orphanetidVal = individual.diagnosis ? individual.diagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
-        hpoidVal = individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis.join() : null;
-        nothpoidVal = individual.hpoIdInElimination ? individual.hpoIdInElimination.join() : null;
+        orphanetidVal = individual.diagnosis ? individual.diagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : null;
+        hpoidVal = individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis.join(', ') : null;
+        nothpoidVal = individual.hpoIdInElimination ? individual.hpoIdInElimination.join(', ') : null;
     }
 
     // Make a list of diseases from the group, either from the given group,
@@ -1118,7 +1155,7 @@ var IndividualVariantInfo = function() {
                                     error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                                 <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                                    The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVar'] + 'variation/139214/'} target="_blank">example</a>: 139214).
+                                    The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
                                 </p>
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1165,7 +1202,7 @@ var IndividualAdditional = function() {
 
     // If editing an individual, get its existing articles
     if (individual) {
-        otherpmidsVal = individual.otherPMIDs ? individual.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
+        otherpmidsVal = individual.otherPMIDs ? individual.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
     }
 
     return (
@@ -1222,7 +1259,7 @@ var IndividualViewer = React.createClass({
                 return (
                     <span key={group.uuid}>
                         {i++ > 0 ? ', ' : ''}
-                        {group.label}
+                        <a href={group['@id']}>{group.label}</a>
                     </span>
                 );
             });
@@ -1230,7 +1267,7 @@ var IndividualViewer = React.createClass({
                 <span key={family.uuid}>
                     <span key={family.uuid}>
                         {j > 0 ? ', ' : ''}
-                        {family.label}
+                        <a href={family['@id']}>{family.label}</a>
                     </span>
                 </span>
             );
@@ -1273,21 +1310,16 @@ var IndividualViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
-                                <dd>
-                                    {individual.diagnosis.map(function(disease, i) {
-                                        return (
-                                            <span key={disease.orphaNumber}>
-                                                {i > 0 ? ', ' : ''}
-                                                {'ORPHA' + disease.orphaNumber}
-                                            </span>
-                                        );
-                                    })}
-                                </dd>
+                                <dd>{individual.diagnosis && individual.diagnosis.map(function(disease, i) {
+                                    return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                })}</dd>
                             </div>
 
                             <div>
                                 <dt>HPO IDs</dt>
-                                <dd>{individual.hpoIdInDiagnosis.join(', ')}</dd>
+                                <dd>{individual.hpoIdInDiagnosis && individual.hpoIdInDiagnosis.map(function(hpo, i) {
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                })}</dd>
                             </div>
 
                             <div>
@@ -1297,7 +1329,9 @@ var IndividualViewer = React.createClass({
 
                             <div>
                                 <dt>NOT HPO IDs</dt>
-                                <dd>{individual.hpoIdInElimination.join(', ')}</dd>
+                                <dd>{individual.hpoIdInElimination && individual.hpoIdInElimination.map(function(hpo, i) {
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                })}</dd>
                             </div>
 
                             <div>
@@ -1398,7 +1432,7 @@ var IndividualViewer = React.createClass({
                                     <dl className="dl-horizontal">
                                         <div>
                                             <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId}</dd>
+                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
                                         </div>
 
                                         <div>
@@ -1419,16 +1453,9 @@ var IndividualViewer = React.createClass({
                             </div>
 
                             <dt>Other PMID(s) that report evidence about this same Individual</dt>
-                            <dd>
-                                {individual.otherPMIDs && individual.otherPMIDs.map(function(article, i) {
-                                    return (
-                                        <span key={i}>
-                                            {i > 0 ? ', ' : ''}
-                                            {article.pmid}
-                                        </span>
-                                    );
-                                })}
-                            </dd>
+                            <dd>{individual.otherPMIDs && individual.otherPMIDs.map(function(article, i) {
+                                return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
+                            })}</dd>
                         </dl>
                     </Panel>
                 </div>

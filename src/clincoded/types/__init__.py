@@ -746,9 +746,11 @@ class Assessment(Item):
     embedded = [
         'submitted_by',
         'pathogenicity_assessed',
+        'experimental_assessed',
     ]
     rev = {
         'pathogenicity_assessed': ('pathogenicity', 'assessments'),
+        'experimental_assessed': ('experimental', 'assessments')
     }
 
     @calculated_property(schema={
@@ -758,6 +760,14 @@ class Assessment(Item):
     })
     def pathogenicity_assessed(self, request, pathogenicity_assessed):
         return paths_filtered_by_status(request, pathogenicity_assessed)
+
+    @calculated_property(schema={
+        "title": "Experimental Assessed",
+        "type": ["string", "object"],
+        "linkFrom": "experimental.assessments"
+    })
+    def experimental_assessed(self, request, experimental_assessed):
+        return paths_filtered_by_status(request, experimental_assessed)
 
 
 @collection(

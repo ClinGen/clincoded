@@ -17,6 +17,7 @@ var Input = form.Input;
 var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
+var external_url_map = globals.external_url_map;
 
 
 var CurationMixin = module.exports.CurationMixin = {
@@ -35,9 +36,12 @@ var CurationMixin = module.exports.CurationMixin = {
         ).then(gdmObj => {
             var gdm = flatten(gdmObj);
             gdm.omimId = newOmimId;
-            return this.putRestData('/gdm/' + gdmUuid, gdm);
-        }).then(data => {
-            this.setState({currOmimId: newOmimId});
+            return this.putRestData('/gdm/' + gdmUuid, gdm).then(data => {
+                return Promise.resolve(gdmObj);
+            });
+        }).then(gdmObj => {
+            gdmObj.omimId = newOmimId;
+            this.setState({currGdm: gdmObj, currOmimId: newOmimId});
         }).catch(e => {
             console.log('UPDATEOMIMID %o', e);
         });
@@ -78,7 +82,6 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
 
         var provisional;
-        //var summaryInfo = 'none';
         var provisionalExist = false;
         var summaryButton = false;
         if (gdm && gdm['@type'][0] === 'gdm') {
@@ -92,7 +95,6 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 for (var i in gdm.provisionalClassifications) {
                     if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
                         provisionalExist = true;
-                        //summaryInfo = 'provisional';
                         provisional = gdm.provisionalClassifications[i];
                         break;
                     }
@@ -158,14 +160,14 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                     <tr>
                                         <td style={{'textAlign':'left'}}>
                                             <div className="provisional-title">
-                                                <strong>Current Summary & Provisional Classification</strong>
+                                                <strong>Last Saved Summary & Provisional Classification</strong>
                                             </div>
                                             {   provisionalExist ?
                                                     <div>
                                                         <div className="provisional-data-left">
                                                             <span>
-                                                                Current Summary<br />
-                                                                Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                                Last Saved Summary<br />
+                                                                Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
                                                             </span>
                                                         </div>
                                                         <div className="provisional-data-center">
@@ -217,7 +219,7 @@ var getUserPathogenicity = function(gdm, session) {
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
         for (var i in gdm.variantPathogenicity) {
             var this_patho = gdm.variantPathogenicity[i];
-            if (userMatch(this_patho.submitted_by, session) && this_patho.assessments && this_patho.assessments[0].value === 'Supports') {
+            if (userMatch(this_patho.submitted_by, session) && this_patho.assessments && this_patho.assessments.length > 0 && this_patho.assessments[0].value === 'Supports') {
                 supportedVariants.push(this_patho.variant.uuid);
             }
         }
@@ -372,25 +374,28 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
 var PmidSummary = module.exports.PmidSummary = React.createClass({
     propTypes: {
         article: React.PropTypes.object, // Article object to display
-        displayJournal: React.PropTypes.bool // T to display article journal
+        displayJournal: React.PropTypes.bool, // T to display article journal
+        pmidLinkout: React.PropTypes.bool // T to display pmid linkout
     },
 
     render: function() {
-        var authors;
+        var authors, authorsAll;
         var article = this.props.article;
         if (article && Object.keys(article).length) {
             var date = (/^([\d]{4})(.*?)$/).exec(article.date);
 
             if (article.authors && article.authors.length) {
                 authors = article.authors[0] + (article.authors.length > 1 ? ' et al. ' : '. ');
+                authorsAll = article.authors.join(', ') + '. ';
             }
 
             return (
                 <p>
-                    {authors}
+                    {this.props.displayJournal ? authorsAll : authors}
                     {article.title + ' '}
                     {this.props.displayJournal ? <i>{article.journal + '. '}</i> : null}
                     <strong>{date[1]}</strong>{date[2]}
+                    {this.props.pmidLinkout ? <span>&nbsp;<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span> : null}
                 </p>
             );
         } else {
@@ -1026,7 +1031,7 @@ var getPathogenicityFromVariant = function(gdm, curatorUuid, variantUuid) {
     var pathogenicity = null;
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
         for (var i in gdm.variantPathogenicity) {
-            if (gdm.variantPathogenicity[i].submitted_by.uuid === curatorUuid && gdm.variantPathogenicity[i].variant.uuid == variantUuid) {
+            if (gdm.variantPathogenicity[i].submitted_by.uuid === curatorUuid && gdm.variantPathogenicity[i].variant.uuid === variantUuid) {
                 pathogenicity = gdm.variantPathogenicity[i];
             }
         }
@@ -1260,7 +1265,7 @@ module.exports.capture = {
 
     // Find all the comma-separated PMID occurrences. Return all valid PMIDs in an array.
     pmids: function(s) {
-        return captureBase(s, /^\s*(\d{1,10})\s*$/);
+        return captureBase(s, /^\s*([1-9]{1}\d*)\s*$/);
     },
 
     // Find all the comma-separated HPO ID occurrences. Return all valid HPO ID in an array.

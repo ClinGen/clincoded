@@ -9,6 +9,7 @@ var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
+var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -228,14 +229,51 @@ var GroupCuration = React.createClass({
                         searchStr = '/search/?type=article&' + pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
                         return this.getRestData(searchStr).then(articles => {
                             if (articles['@graph'].length === pmids.length) {
-                                // Successfully retrieved all genes
+                                // Successfully retrieved all PMIDs, so just set groupArticles and return
                                 groupArticles = articles;
                                 return Promise.resolve(articles);
                             } else {
-                                this.setState({submitBusy: false}); // submit error; re-enable submit button
+                                // some PMIDs were not in our db already
+                                // generate list of PMIDs and pubmed URLs for those PMIDs
                                 var missingPmids = _.difference(pmids, articles['@graph'].map(function(article) { return article.pmid; }));
-                                this.setFormErrors('otherpmids', missingPmids.join(', ') + ' not found');
-                                throw articles;
+                                var missingPmidsUrls = [];
+                                for (var missingPmidsIndex = 0; missingPmidsIndex < missingPmids.length; missingPmidsIndex++) {
+                                    missingPmidsUrls.push(external_url_map['PubMedSearch']  + missingPmids[missingPmidsIndex]);
+                                }
+                                // get the XML for the missing PMIDs
+                                return this.getRestDatasXml(missingPmidsUrls).then(xml => {
+                                    var newArticles = [];
+                                    var invalidPmids = [];
+                                    var tempArticle;
+                                    // loop through the resulting XMLs and parsePubmed them
+                                    for (var xmlIndex = 0; xmlIndex < xml.length; xmlIndex++) {
+                                        tempArticle = parsePubmed(xml[xmlIndex]);
+                                        // check to see if Pubmed actually had an entry for the PMID
+                                        if ('pmid' in tempArticle) {
+                                            newArticles.push(tempArticle);
+                                        } else {
+                                            // PMID was not found at Pubmed
+                                            invalidPmids.push(missingPmids[xmlIndex]);
+                                        }
+                                    }
+                                    // if there were invalid PMIDs, throw an error with a list of them
+                                    if (invalidPmids.length > 0) {
+                                        this.setState({submitBusy: false}); // submit error; re-enable submit button
+                                        this.setFormErrors('otherpmids', 'PMID(s) ' + invalidPmids.join(', ') + ' not found');
+                                        throw invalidPmids;
+                                    }
+                                    // otherwise, post the valid PMIDs
+                                    if (newArticles.length > 0) {
+                                        return this.postRestDatas('/articles', newArticles).then(data => {
+                                            for (var dataIndex = 0; dataIndex < data.length; dataIndex++) {
+                                                articles['@graph'].push(data[dataIndex]['@graph'][0]);
+                                            }
+                                            groupArticles = articles;
+                                            return Promise.resolve(data);
+                                        });
+                                    }
+                                    return Promise(articles);
+                                });
                             }
                         });
                     } else {
@@ -366,7 +404,6 @@ var GroupCuration = React.createClass({
                 }).then(data => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Group Submit page.
-                    this.setState({submitBusy: false}); // done / form submission; turn the submit button back on, just in case
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -411,7 +448,7 @@ var GroupCuration = React.createClass({
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
-                                    <PmidSummary article={this.state.annotation.article} displayJournal />
+                                    <PmidSummary article={this.state.annotation.article} displayJournal pmidLinkout />
                                 </div>
                             : null}
                             <div className="viewer-titles">
@@ -490,9 +527,9 @@ var GroupCommonDiseases = function() {
     var orphanetidVal, hpoidVal, nothpoidVal;
 
     if (group) {
-        orphanetidVal = group.commonDiagnosis ? group.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join() : null;
-        hpoidVal = group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis.join() : null;
-        nothpoidVal = group.hpoIdInElimination ? group.hpoIdInElimination.join() : null;
+        orphanetidVal = group.commonDiagnosis ? group.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : null;
+        hpoidVal = group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis.join(', ') : null;
+        nothpoidVal = group.hpoIdInElimination ? group.hpoIdInElimination.join(', ') : null;
     }
 
     return (
@@ -676,7 +713,7 @@ var GroupAdditional = function() {
     var otherpmidsVal;
     var group = this.state.group;
     if (group) {
-        otherpmidsVal = group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join() : null;
+        otherpmidsVal = group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
     }
 
 
@@ -711,21 +748,16 @@ var GroupViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
-                                <dd>
-                                    {context.commonDiagnosis.map(function(disease, i) {
-                                        return (
-                                            <span key={disease.orphaNumber}>
-                                                {i > 0 ? ', ' : ''}
-                                                {'ORPHA' + disease.orphaNumber}
-                                            </span>
-                                        );
-                                    })}
-                                </dd>
+                                <dd>{context.commonDiagnosis && context.commonDiagnosis.map(function(disease, i) {
+                                    return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                })}</dd>
                             </div>
 
                             <div>
                                 <dt>HPO IDs</dt>
-                                <dd>{context.hpoIdInDiagnosis.join(', ')}</dd>
+                                <dd>{context.hpoIdInDiagnosis && context.hpoIdInDiagnosis.map(function(hpo, i) {
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                })}</dd>
                             </div>
 
                             <div>
@@ -735,7 +767,9 @@ var GroupViewer = React.createClass({
 
                             <div>
                                 <dt>NOT HPO IDs</dt>
-                                <dd>{context.hpoIdInElimination.join(', ')}</dd>
+                                <dd>{context.hpoIdInElimination && context.hpoIdInElimination.map(function(hpo, i) {
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                })}</dd>
                             </div>
 
                             <div>
@@ -809,7 +843,7 @@ var GroupViewer = React.createClass({
                             <div>
                                 <dt># individuals with variant in gene being curated</dt>
                                 <dd>{context.numberOfIndividualsWithVariantInCuratedGene}</dd>
-                            </div>
+                            </div>ClinVarSearch
 
                             <div>
                                 <dt># individuals without variant in gene being curated</dt>
@@ -823,7 +857,9 @@ var GroupViewer = React.createClass({
 
                             <div>
                                 <dt>Other genes found to have variants in them</dt>
-                                <dd>{context.otherGenes && context.otherGenes.map(function(gene) { return gene.symbol; }).join(', ')}</dd>
+                                <dd>{context.otherGenes && context.otherGenes.map(function(gene, i) {
+                                    return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
+                                })}</dd>
                             </div>
                         </dl>
                     </Panel>
@@ -886,12 +922,7 @@ var GroupViewer = React.createClass({
 
                             <dt>Other PMID(s) that report evidence about this same group</dt>
                             <dd>{context.otherPMIDs && context.otherPMIDs.map(function(article, i) {
-                                return (
-                                    <span key={i}>
-                                        {i > 0 ? ', ' : ''}
-                                        {article.pmid}
-                                    </span>
-                                );
+                                return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
                             })}</dd>
                         </dl>
                     </Panel>
