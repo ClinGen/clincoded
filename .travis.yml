@@ -23,7 +23,7 @@ before_install:
   - postgres --version
   - initdb --version
   - elasticsearch -v
-  - nvm install 4
+  - nvm install 5
   - node --version
 install:
   - npm config set python /usr/bin/python2.7
