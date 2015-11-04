@@ -774,7 +774,6 @@ var FamilyCuration = React.createClass({
                 }).then(newFamily => {
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
-                    this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut && !initvar) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -993,7 +992,7 @@ var FamilyCuration = React.createClass({
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
-                                    <PmidSummary article={annotation.article} displayJournal />
+                                    <PmidSummary article={annotation.article} displayJournal pmidLinkout />
                                 </div>
                             : null}
                             <div className="viewer-titles">
@@ -1001,7 +1000,7 @@ var FamilyCuration = React.createClass({
                                 <h2>Family: {this.state.familyName ? <span>{this.state.familyName}</span> : <span className="no-entry">No entry</span>}</h2>
                                 {groups && groups.length ?
                                     <h2>
-                                        {'Group association: ' + groups.map(function(group) { return group.label; }).join(', ')}
+                                        Groups association: {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}
                                     </h2>
                                 : null}
                             </div>
@@ -1394,7 +1393,7 @@ var FamilyVariant = function() {
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                         <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVar'] + 'variation/139214/'} target="_blank">example</a>: 139214).
+                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
                         </p>
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1632,7 +1631,7 @@ var FamilyViewer = React.createClass({
                             <h2>
                                 Group association:&nbsp;
                                 {groups.map(function(group, i) {
-                                    return <span key={i}>{i > 0 ? ', ' : ''}{group.label}</span>;
+                                    return <span key={i}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>;
                                 })}
                             </h2>
                         : null}
@@ -1641,21 +1640,16 @@ var FamilyViewer = React.createClass({
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Orphanet Common Diagnosis</dt>
-                                <dd>
-                                    {family.commonDiagnosis.map(function(disease, i) {
-                                        return (
-                                            <span key={disease.orphaNumber}>
-                                                {i > 0 ? ', ' : ''}
-                                                {'ORPHA' + disease.orphaNumber}
-                                            </span>
-                                        );
-                                    })}
-                                </dd>
+                                <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
+                                    return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                })}</dd>
                             </div>
 
                             <div>
                                 <dt>HPO IDs</dt>
-                                <dd>{family.hpoIdInDiagnosis.join(', ')}</dd>
+                                <dd>{family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.map(function(hpo, i) {
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                })}</dd>
                             </div>
 
                             <div>
@@ -1665,7 +1659,9 @@ var FamilyViewer = React.createClass({
 
                             <div>
                                 <dt>NOT HPO IDs</dt>
-                                <dd>{family.hpoIdInElimination.join(', ')}</dd>
+                                <dd>{family.hpoIdInElimination && family.hpoIdInElimination.map(function(hpo, i) {
+                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                })}</dd>
                             </div>
 
                             <div>
@@ -1783,7 +1779,7 @@ var FamilyViewer = React.createClass({
                                     <dl className="dl-horizontal">
                                         <div>
                                             <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId}</dd>
+                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
                                         </div>
 
                                         <div>
@@ -1804,16 +1800,9 @@ var FamilyViewer = React.createClass({
                             </div>
 
                             <dt>Other PMID(s) that report evidence about this same Family</dt>
-                            <dd>
-                                {family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
-                                    return (
-                                        <span key={i}>
-                                            {i > 0 ? ', ' : ''}
-                                            {article.pmid}
-                                        </span>
-                                    );
-                                })}
-                            </dd>
+                            <dd>{family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
+                                return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
+                            })}</dd>
                         </dl>
                     </Panel>
                 </div>
