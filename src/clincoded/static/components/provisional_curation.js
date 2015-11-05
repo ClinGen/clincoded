@@ -292,10 +292,8 @@ var Classification = function() {
                     </tr>
                     <tr>
                         <td rowSpan='7' className="verticalCell">
-                            <div className="verticalBox">
-                                <div className="verticalContent spptEvd">
-                                    Supportive&nbsp;Evidence
-                                </div>
+                            <div className="verticalContent spptEvd" style={{width:'30px'}}>
+                                Supportive&nbsp;Evidence
                             </div>
                         </td>
                         <td className="levelCell">DEFINITIVE</td>
@@ -357,10 +355,8 @@ var Classification = function() {
                     <tr className="narrowLine"></tr>
                     <tr>
                         <td className="verticalCell">
-                            <div className="verticalBox">
-                                <div className="verticalContent cntrdctEvd">
-                                    Contradictory&nbsp;Evidence
-                                </div>
+                            <div className="verticalContent cntrdctEvd">
+                                Contradictory&nbsp;Evidence
                             </div>
                         </td>
                         <td className="levelCell">
@@ -473,7 +469,7 @@ var SummaryMatrix = function() {
                 </tr>
                 <tr>
                     <td className="title">Time (yrs)</td>
-                    <td className="description"># of years since initial report defining a<br />gene-disease association (if &les; 2 pubs,<br />then max score for time = 1)</td>
+                    <td className="description"># of years since initial report defining a<br />gene-disease association (if &#10877; 2 pubs,<br />then max score for time = 1)</td>
                     <td>current<br />yr</td>
                     <td>1-3 yr</td>
                     <td>&gt;3 yr</td>
