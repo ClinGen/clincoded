@@ -1106,6 +1106,8 @@ var IndividualDemographics = function() {
 var IndividualVariantInfo = function() {
     var individual = this.state.individual;
     var family = this.state.family;
+    var gdm = this.state.gdm;
+    var annotation = this.state.annotation;
     var variants = individual && individual.variants;
 
     return (
@@ -1115,7 +1117,7 @@ var IndividualVariantInfo = function() {
                     {variants.map(function(variant, i) {
                         return (
                             <div key={i} className="variant-view-panel variant-view-panel-edit">
-                                <p>To edit variants(s) for this proband, you must edit its Family because the variant is associated with the Family’s segregation.</p>
+                                <p>To edit variants(s) for this proband, you must edit its Family (<a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>{family.label}</a>) because the variant is associated with the Family’s segregation.</p>
                                 <h5>Variant {i + 1}</h5>
                                 <dl className="dl-horizontal">
                                     <div>
