@@ -196,69 +196,82 @@ var ProvisionalCuration = React.createClass({
         var provisional = this.state.provisional ? this.state.provisional : null;
 
         var show_clsfctn = queryKeyValue('classification', this.props.href);
+        var summaryMatrix = queryKeyValue('summarymatrix', this.props.href);
+        var expMatrix = queryKeyValue('expmatrix', this.props.href);
         return (
             <div>
                 { show_clsfctn === 'display' ?
-                    <div className="container">
-                        <h1>Clinical Validity Classifications</h1>
-                        <img src={"../static/img/classification-values.png"} />
-                    </div>
+                    Classification.call()
                     :
-                    gdm ?
-                        <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
-                            <div className="container">
-                                {
-                                    (provisional && edit === 'yes') ?
-                                    EditCurrent.call(this)
-                                    :
-                                    (   calculate === 'yes' ?
-                                        <div>
-                                            <h1>Curation Summary & Provisional Classification</h1>
-                                            {
-                                                provisional ?
-                                                <PanelGroup accordion>
-                                                    <Panel title="Last Saved Summary & Provisional Classification" open>
-                                                        <div className="row">
-                                                                <div className="col-sm-5"><strong>Date Generated:</strong></div>
-                                                                <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5"><strong>Total Score:</strong></div>
-                                                                <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5">
-                                                                    <strong>Calculated Clinical Validity Classification:</strong>
-                                                                </div>
-                                                                <div className="col-sm-7"><span>{provisional.autoClassification}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5">
-                                                                    <strong>Selected Clinical Validity Classification:</strong>
-                                                                </div>
-                                                                <div className="col-sm-7"><span>{provisional.alteredClassification}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5">
-                                                                    <strong>Reason(s):</strong>
-                                                                </div>
-                                                                <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
-                                                            </div>
-                                                            <div className="row">&nbsp;</div>
-                                                        </Panel>
-                                                    </PanelGroup>
-                                                : null
-                                            }
-                                            {NewCalculation.call(this)}
-                                        </div>
-                                        :
-                                        null
-                                    )
-                                }
-                            </div>
-                        </div>
-                    : null
+                    ( summaryMatrix === 'display' ?
+                        SummaryMatrix.call()
+                        :
+                        ( expMatrix === 'display' ?
+                            ExperimentalMatrix.call()
+                            :
+                            gdm ?
+                                <div>
+                                    <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                                    <div className="container">
+                                        {
+                                            (provisional && edit === 'yes') ?
+                                            EditCurrent.call(this)
+                                            :
+                                            (   calculate === 'yes' ?
+                                                <div>
+                                                    <h1>Curation Summary & Provisional Classification</h1>
+                                                    {
+                                                        provisional ?
+                                                        <PanelGroup accordion>
+                                                            <Panel title="Last Saved Summary & Provisional Classification" open>
+                                                                <div className="row">
+                                                                        <div className="col-sm-5"><strong>Date Generated:</strong></div>
+                                                                        <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
+                                                                    </div>
+                                                                    <div className="row">
+                                                                        <div className="col-sm-5">
+                                                                            <a href="/provisional-curation/?summarymatrix=display" target="_block">
+                                                                                <strong>Total Score:</strong>
+                                                                            </a>
+                                                                        </div>
+                                                                        <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
+                                                                    </div>
+                                                                    <div className="row">
+                                                                        <div className="col-sm-5">
+                                                                            <strong>Calculated Clinical Validity Classification:</strong>
+                                                                        </div>
+                                                                        <div className="col-sm-7"><span>{provisional.autoClassification}</span></div>
+                                                                    </div>
+                                                                    <div className="row">
+                                                                        <div className="col-sm-5">
+                                                                            <strong>Selected Clinical Validity Classification:</strong>
+                                                                        </div>
+                                                                        <div className="col-sm-7"><span>{provisional.alteredClassification}</span></div>
+                                                                    </div>
+                                                                    <div className="row">
+                                                                        <div className="col-sm-5">
+                                                                            <strong>Reason(s):</strong>
+                                                                        </div>
+                                                                        <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
+                                                                    </div>
+                                                                    <div className="row">&nbsp;</div>
+                                                                </Panel>
+                                                            </PanelGroup>
+                                                        :
+                                                        null
+                                                    }
+                                                    {NewCalculation.call(this)}
+                                                </div>
+                                                :
+                                                null
+                                            )
+                                        }
+                                    </div>
+                                </div>
+                            :
+                            null
+                        )
+                    )
                 }
             </div>
         );
@@ -266,6 +279,313 @@ var ProvisionalCuration = React.createClass({
 });
 
 globals.curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
+
+var Classification = function() {
+    return (
+        <div className="container" style={{'padding-bottom':'10px'}}>
+            <h1>Clinical Validity Classifications</h1>
+            <div className="classificationTable">
+                <table>
+                    <tr className="greyRow">
+                        <td colSpan='2' className="titleCell">Evidence Level</td>
+                        <td className="titleCell">Evidence Description</td>
+                    </tr>
+                    <tr>
+                        <td rowSpan='7' className="verticalCell">
+                            <div className="verticalBox">
+                                <div className="verticalContent spptEvd">
+                                    Supportive&nbsp;Evidence
+                                </div>
+                            </div>
+                        </td>
+                        <td className="levelCell">DEFINITIVE</td>
+                        <td>
+                            The role of this gene in this particular disease hase been repeatedly demonstrated in both the research and clinical
+                            diagnostic settings, and has been upheld over time (in general, at lease 3 years). No convincing evidence has emerged
+                            that contradicts the role of the gene in the specified disease.
+                        </td>
+                    </tr>
+                    <tr className="narrowLine"></tr>
+                    <tr>
+                        <td className="levelCell">STRONG</td>
+                        <td>
+                            The role of this gene in disease has been independently demonstrated in at least two separate studies providing&nbsp;
+                            <strong>strong</strong> supporting evidence for this gene&#39;s role in diseae, such as the following types of evidence:
+                            <ul>
+                                <li>Strong variant-level evidence demonstrating numerous unrelated brobands with variants that provide convincing
+                                evidence for disease causality&sup1;</li>
+                                <li>Compelling gene-level evidence from different types of supporting experimental data&sup2;.</li>
+                            </ul>
+                            In addition, no convincing evidence has emerged that contradicts the role of the gene in the noted disease.
+                        </td>
+                    </tr>
+                    <tr className="narrowLine"></tr>
+                    <tr>
+                        <td className="levelCell">MODERATE</td>
+                        <td>
+                            There is <strong>moderate</strong> evidence to support a causal role for this gene in this diseaese, such as:
+                            <ul>
+                                <li>At least 3 unrelated brobands with variants that provide convincing evidence for disease causality&sup1;</li>
+                                <li>Moderate experimental data&sup2; supporting the gene-disease association</li>
+                            </ul>
+                            The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged
+                            that contradicts the role of the gene in the noded disease.
+                        </td>
+                    </tr>
+                    <tr className="narrowLine"></tr>
+                    <tr>
+                        <td className="levelCell">LIMITED</td>
+                        <td>
+                            There is <strong>limited</strong> evidence to support a causal role for this gene in this disease, such as:
+                            <ul>
+                                <li>Fewer than three observations of variants that provide convincing evidence for disease causality&sup1;</li>
+                                <li>Multiple variants reported in unrelated probands but <i>without</i> sufficient evidence that the variants alter function</li>
+                                <li>Limited experimental data&sup2; supporting the gene-disease association</li>
+                            </ul>
+                            The role of this gene in  disease may not have been independently reported, but no convincing evidence has emerged that
+                            contradicts the role of the gene in the noted disease.
+                        </td>
+                    </tr>
+                    <tr className="narrowLine"></tr>
+                    <tr>
+                        <td colSpan="2" className="levelCell">NO REPORTED<br />EVIDENCE</td>
+                        <td>
+                            No evidence reported for a causal role in disease. These genes might be &#34;candidate&#34; genes based on animal models or implication
+                            in pathways known to be involved in human diseases, but no reports have implicated the gene in human disease cases.
+                        </td>
+                    </tr>
+                    <tr className="narrowLine"></tr>
+                    <tr>
+                        <td className="verticalCell">
+                            <div className="verticalBox">
+                                <div className="verticalContent cntrdctEvd">
+                                    Contradictory&nbsp;Evidence
+                                </div>
+                            </div>
+                        </td>
+                        <td className="levelCell">
+                            CONFLICTING<br />EVIDENCE<br />REPORTED
+                        </td>
+                        <td>
+                            Although there has been an assertion of a gene-disease association, conflicting evidence for the role of this gene in disease has arisen
+                            since the time of the initial report indicating a disease association. Depending on the quantity and quality of evidence disputing the
+                            association, the gene/disease association may be further defined by the following two sub-categories:
+                            <ol className="olTitle">
+                                <li type="1">
+                                    Disputed
+                                    <ol className="olContent">
+                                        <li type="a">
+                                            Convincing evidence <i>disputing</i> a role for this gene in this disease has arisen since the initial report identifying an
+                                            association between the gene and disease.
+                                        </li>
+                                        <li type="a">
+                                            Refuting evidence need not outweigh existing evidence supporting the gene:disease association.
+                                        </li>
+                                    </ol>
+                                </li>
+                                <li type="1">
+                                    Refuted
+                                    <ol className="olContent">
+                                        <li type="a">
+                                            Evidence refuting the role of the gene in the specified disease has been reported and significantly outweighs any evidence
+                                            supporting the role.
+                                        </li>
+                                        <li type="a">
+                                            This designation is to be applied at the discretion of clinical domain experts after thorough review of available evidence
+                                        </li>
+                                    </ol>
+                                </li>
+                            </ol>
+                        </td>
+                    </tr>
+                    <tr className="greyRow">
+                        <td colSpan="3" className="levelCell">NOTES</td>
+                    </tr>
+                    <tr>
+                        <td colSpan="3">
+                            <p>
+                                &sup1;Variants that have evidence to disrupt function and/or have other strong genetic and population data (e.g. <i>de novo</i>&nbsp;
+                                occurrence, absence in controls, etc) can be used as evidence in support of a variant&#39;s causality in this framework.
+                            </p>
+                            <p>&sup2;Examples of appropriate types of supporting experimental data based on those outlined in MacArthur et al. 2014.</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+var SummaryMatrix = function() {
+    return (
+        <div className="container">
+            <h1>Summary Scores</h1>
+            <table className="summary-matrix" style={{'border-collapse':'collapse'}}>
+                <tr>
+                    <td rowSpan="2" className="title larger top-single-cell">Assertion<br />Criteria</td>
+                    <td rowSpan="2" className="title larger top-single-cell">Criteria Description</td>
+                    <td colSpan="8" className="title top-multiple-cell">Number of Points</td>
+                </tr>
+                <tr>
+                    <td className="title top-number-cell">0</td>
+                    <td className="title top-number-cell">1</td>
+                    <td className="title top-number-cell">2</td>
+                    <td className="title top-number-cell">3</td>
+                    <td className="title top-number-cell">4</td>
+                    <td className="title top-number-cell">5</td>
+                    <td className="title top-number-cell">6</td>
+                    <td className="title top-number-cell most-left">7</td>
+                </tr>
+                <tr>
+                    <td className="title"># Probands</td>
+                    <td className="description">Total # of curated unrelated probands<br />with variants that provide convincing<br />evidence for disease causality</td>
+                    <td>N/A</td>
+                    <td>1-3</td>
+                    <td>4-6</td>
+                    <td>7-9</td>
+                    <td>10-12</td>
+                    <td>13-15</td>
+                    <td>16-18</td>
+                    <td>19+</td>
+                </tr>
+                <tr>
+                    <td className="title">Experimental<br />Evidence<br />Points</td>
+                    <td className="description"># of points assigned for gene-level<br />experimental evidence supporting a role<br />for this gene in disease</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6+</td>
+                    <td className="empty-cell"></td>
+                </tr>
+                <tr>
+                    <td className="title"># Publications</td>
+                    <td className="description"># of curated independent publications<br />reporting human variants in the gene<br />under consideration</td>
+                    <td>N/A</td>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5+</td>
+                    <td colSpan="2" className="empty-cell"></td>
+                </tr>
+                <tr>
+                    <td className="title">Time (yrs)</td>
+                    <td className="description"># of years since initial report defining a<br />gene-disease association (if &les; 2 pubs,<br />then max score for time = 1)</td>
+                    <td>current<br />yr</td>
+                    <td>1-3 yr</td>
+                    <td>&gt;3 yr</td>
+                    <td colSpan="5" className="empty-cell"></td>
+                </tr>
+                <tr className="bottom-rows">
+                    <td colSpan="2" className="description">Is there valid contradictory evidence?</td>
+                    <td>Yes/No</td>
+                    <td colSpan="4" rowSpan="2">
+                        <table>
+                            <tr>
+                                <td className="title total-score-cell">Classification</td>
+                                <td className="title total-score-cell">Total Score</td>
+                            </tr>
+                            <tr>
+                                <td className="total-score-cell">Limited</td>
+                                <td className="total-score-cell">2-8</td>
+                            </tr>
+                            <tr>
+                                <td className="total-score-cell">Moderate</td>
+                                <td className="total-score-cell">9-12</td>
+                            </tr>
+                            <tr>
+                                <td className="total-score-cell">Strong</td>
+                                <td className="total-score-cell">13-16</td>
+                            </tr>
+                            <tr>
+                                <td className="total-score-cell">Definitive</td>
+                                <td className="total-score-cell">17-20</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td colSpan="3" rowSpan="2" className="inner-table-box">
+                        <table>
+                            <tr><td className="top-cell">Calculated<br />Classification</td></tr>
+                            <tr><td>Curator<br />Classification</td></tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr className="bottom-rows">
+                    <td>Description of<br />Contradictory<br />Evidence</td>
+                    <td colSpan="2">&nbsp;</td>
+                </tr>
+            </table>
+        </div>
+    );
+};
+
+var ExperimentalMatrix = function() {
+    return (
+        <div className="container">
+            <h1>Experimental Score</h1>
+            <table className="exp-matrix">
+                <tr className="top-row">
+                    <td className="title">Evidence<br />Category</td>
+                    <td className="title">Evidence Type</td>
+                    <td className="title">Score Range</td>
+                    <td className="title">Recommended<br />points/evidence</td>
+                    <td className="title max-score">Max<br />Score</td>
+                </tr>
+                <tr>
+                    <td className="title" rowSpan="3">Function</td>
+                    <td>Biochemical Function</td>
+                    <td>&frac12; - 2</td>
+                    <td rowSpan="3">&frac12; for each piece of<br />evidence in any<br />category</td>
+                    <td className="title" rowSpan="3">2</td>
+                </tr>
+                <tr>
+                    <td>Protein Interaction</td>
+                    <td>&frac12; - 2</td>
+                </tr>
+                <tr>
+                    <td>Expression</td>
+                    <td>&frac12; - 2</td>
+                </tr>
+                <tr className="middle-row">
+                    <td className="title">Functional<br />Alteration</td>
+                    <td>Pateint cells<br />Non-pateint cells</td>
+                    <td>1 - 2<br />&frac12; - 1</td>
+                    <td>1<br />&frac12;</td>
+                    <td className="title">2</td>
+                </tr>
+                <tr>
+                    <td className="title" rowSpan="4">Models and<br />Rescue</td>
+                    <td>Animal model</td>
+                    <td>2 - 4</td>
+                    <td>2</td>
+                    <td className="title" rowSpan="4">4</td>
+                </tr>
+                <tr>
+                    <td>Cell culture model</td>
+                    <td>&frac12; - 2</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>Rescue in patient cells</td>
+                    <td>2 - 4</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>Rescue in engineered<br />equivalent</td>
+                    <td>&frac12; - 2</td>
+                    <td>1</td>
+                </tr>
+                <tr className="middle-row">
+                    <td className="bottom-score" colSpan="4">Total Final Score</td>
+                    <td className="bottom-score">0 - 8</td>
+                </tr>
+            </table>
+        </div>
+    );
+};
 
 var EditCurrent = function() {
     var alteredClassification = this.state.provisional.alteredClassification ? this.state.provisional.alteredClassification : 'none';
@@ -279,7 +599,11 @@ var EditCurrent = function() {
                 <PanelGroup accordion>
                     <Panel title="Currently Saved Calculation and Classification" open>
                         <div className="row">
-                            <div className="col-sm-5"><strong className="pull-right">Total Score:</strong></div>
+                            <div className="col-sm-5">
+                                <a href="/provisional-curation/?summarymatrix=display">
+                                    <strong className="pull-right">Total Score:</strong>
+                                </a>
+                            </div>
                             <div className="col-sm-7"><span>{this.state.totalScore}</span></div>
                         </div>
                         <br />
@@ -729,7 +1053,11 @@ var NewCalculation = function() {
                             </div>
                             <div><span>&nbsp;</span></div>
                             <div className="row">
-                                <div className="col-sm-5"><strong className="pull-right">Total Score:</strong></div>
+                                <div className="col-sm-5">
+                                    <a href="/provisional-curation/?summarymatrix=display" target="_block">
+                                        <strong className="pull-right">Total Score:</strong>
+                                    </a>
+                                </div>
                                 <div className="col-sm-7"><strong>{this.state.totalScore}</strong></div>
                             </div>
                             <br />
@@ -757,7 +1085,11 @@ var NewCalculation = function() {
                                                 null
                                             );
                                         })}
-                                        <tr><td className="td-title"><strong>Final Experimental Score</strong></td>
+                                        <tr><td className="td-title"><strong>Final</strong>&nbsp;
+                                                <a href="/provisional-curation/?expmatrix=display" target="_block">
+                                                    <strong>Experimental Score</strong>
+                                                </a>
+                                            </td>
                                             <td className="td-score"><span>&nbsp;</span></td>
                                             <td className="td-score"><strong>{expScore}</strong></td>
                                         </tr>
