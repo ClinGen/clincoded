@@ -1,0 +1,174 @@
+#cloud-config
+
+# $ aws ec2 run-instances --user-data file://prod-nginx.yml --security-groups "ssh-http-https" --image-id ami-5189a661 --instance-type t2.medium --region us-west-2
+# Must copy private ssl keys manually to /etc/nginx/ssl/*/server.key then restart nginx.
+# Choose instance size based on network performance required.
+
+apt_sources:
+- source: ppa:nginx/stable
+
+bootcmd:
+- cloud-init-per once ssh-users-ca echo "TrustedUserCAKeys /etc/ssh/users_ca.pub" >> /etc/ssh/sshd_config
+
+output:
+  all: '| tee -a /var/log/cloud-init-output.log'
+
+package_upgrade: true
+
+packages:
+- nginx
+- ntp
+- unattended-upgrades
+- update-notifier-common
+
+power_state:
+  mode: reboot
+
+write_files:
+- path: /etc/apt/apt.conf.d/20auto-upgrades
+  content: |
+    APT::Periodic::Update-Package-Lists "1";
+    APT::Periodic::Unattended-Upgrade "1";
+
+- path: /etc/apt/apt.conf.d/50unattended-upgrades
+  content: |
+    Unattended-Upgrade::Allowed-Origins {
+        "${distro_id} ${distro_codename}-security";
+    };
+    Unattended-Upgrade::Automatic-Reboot "true";
+
+- path: /etc/motd
+  content: |
+    #############################################
+    ##         Nginx proxy server              ##
+    ##  For demo instances:                    ##
+    ##  ssh <name>.instance.clinicalgenome.org ##
+    #############################################
+
+- path: /etc/nginx/nginx.conf
+  content: |
+    user www-data;
+    worker_processes  auto;
+    worker_rlimit_nofile 8192;
+    events {
+        worker_connections  2048;
+    }
+    http {
+        resolver 172.31.0.2;  # AWS VPC DNS Server
+        resolver_timeout 5s;
+        include  mime.types;
+        client_max_body_size 500m;
+        default_type  application/octet-stream;
+        keepalive_timeout  65;
+        ssl_session_cache  shared:SSL:10m;
+        ssl_session_timeout  10m;
+
+        proxy_buffers 8 16k;
+        proxy_send_timeout    5m;
+        proxy_read_timeout    5m;
+        send_timeout    5m;
+
+        upstream curation {
+            server www.clinicalgenome.org;
+            keepalive 10;
+        }
+
+        server {
+            listen 80;
+            location = /robots.txt {
+                proxy_set_header  Host  $host;
+                proxy_set_header  X-Forwarded-For    $proxy_add_x_forwarded_for;
+                proxy_set_header  X-Forwarded-Proto  $scheme;
+                proxy_pass  http://app;
+                proxy_http_version  1.1;
+                proxy_set_header  Connection  "";
+            }
+            location / {
+                if ($request_method !~ ^(GET)|(HEAD)$) {
+                    return 405;
+                }
+                return  301  https://$host$request_uri;
+            }
+        }
+
+        server {
+            listen 443 ssl spdy;
+            server_name curation.clinicalgenome.org;
+            ssl_certificate         /etc/nginx/ssl/curation.clinicalgenome.org/server.chained.crt;
+            ssl_certificate_key     /etc/nginx/ssl/curation.clinicalgenome.org/server.key;
+            location / {
+                proxy_set_header  Host  $host;
+                proxy_set_header  X-Forwarded-For    $proxy_add_x_forwarded_for;
+                proxy_set_header  X-Forwarded-Proto  $scheme;
+                proxy_pass  http://curation;
+                proxy_http_version  1.1;
+                proxy_set_header  Connection  "";
+            }
+            location ~ ^/_proxy/(.*)$ {
+                internal;
+                proxy_buffering off;
+                proxy_pass $1$is_args$args;
+            }
+        }
+
+    }
+
+- path: /etc/nginx/ssl/curation.clinicalgenome.org/server.chained.crt
+  content: |
+    -----BEGIN CERTIFICATE-----
+    MIIFATCCA+mgAwIBAgISESFq2YGULR31KOldHaFEwUnhMA0GCSqGSIb3DQEBCwUA
+    MEwxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMSIwIAYD
+    VQQDExlBbHBoYVNTTCBDQSAtIFNIQTI1NiAtIEcyMB4XDTE1MDcyMTIzNDQwNloX
+    DTE4MDcyMTIzNDQwNlowSzEhMB8GA1UECxMYRG9tYWluIENvbnRyb2wgVmFsaWRh
+    dGVkMSYwJAYDVQQDDB0qLmN1cmF0aW9uLmNsaW5pY2FsZ2Vub21lLm9yZzCCASIw
+    DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALc6EAQhzIU8YhQ9l7jTTr7kUiLD
+    Pl/08H8Vh5fdjtBznD6ITyYiwpgIQdc3+seDPircucM2vwE9EWtJgHwaGFuoXBh8
+    kSkkS2uPuGvo2mBXOf786M5pWBjvOaQtKUCclUg7NDUxVsj3UwAzVglk3g9EbaBU
+    rrD5VqwPVbO+mc0w52yOeqiFoP8IZWJ7e6l65eofD56n4jr39KMLnQdDp29mVYYb
+    USp7eMHuKQ3OIPp5GTY54KQt7owz3DvLU0P5CGUpaHfk88gL7hgMuXAIl6p5q9AU
+    CZ/qODX3Wtpu5TIe0Q79wdxFFtmhOZ8akUqt7LK5ci7dhhaj541Dn0rvLXcCAwEA
+    AaOCAdwwggHYMA4GA1UdDwEB/wQEAwIFoDBJBgNVHSAEQjBAMD4GBmeBDAECATA0
+    MDIGCCsGAQUFBwIBFiZodHRwczovL3d3dy5nbG9iYWxzaWduLmNvbS9yZXBvc2l0
+    b3J5LzBFBgNVHREEPjA8gh0qLmN1cmF0aW9uLmNsaW5pY2FsZ2Vub21lLm9yZ4Ib
+    Y3VyYXRpb24uY2xpbmljYWxnZW5vbWUub3JnMAkGA1UdEwQCMAAwHQYDVR0lBBYw
+    FAYIKwYBBQUHAwEGCCsGAQUFBwMCMD4GA1UdHwQ3MDUwM6AxoC+GLWh0dHA6Ly9j
+    cmwyLmFscGhhc3NsLmNvbS9ncy9nc2FscGhhc2hhMmcyLmNybDCBiQYIKwYBBQUH
+    AQEEfTB7MEIGCCsGAQUFBzAChjZodHRwOi8vc2VjdXJlMi5hbHBoYXNzbC5jb20v
+    Y2FjZXJ0L2dzYWxwaGFzaGEyZzJyMS5jcnQwNQYIKwYBBQUHMAGGKWh0dHA6Ly9v
+    Y3NwMi5nbG9iYWxzaWduLmNvbS9nc2FscGhhc2hhMmcyMB0GA1UdDgQWBBRcWbX6
+    QwSy9mG402SEZFISIL1hTzAfBgNVHSMEGDAWgBT1zdU8CFD5ak86t5faVoPmadJo
+    9zANBgkqhkiG9w0BAQsFAAOCAQEAQu2WI74Tv2lMJgwhDWP58pU5U+iDcOyaz3yL
+    OWgsggMbpCcvMjz5kGKi6TdAbtX1iatVp7ue+JRRHGYmvD0TR7/BOFUXLov1Y70J
+    D71A6LQuqIRIhPA7XHe3tzQVH1Qv1FIGUpece+sCLhZtWZNi1habfBqdudXcNSy/
+    QShFCRUithcsaRNQuOcYtwsjZ5HXrsmSTPml8WT7JOw/wvDefpyJWsZbpmWRF2q3
+    76V8Y4nP560acYgdf1yDo4lOuH+zJw9tB9/bZr3dpB/Mv/4Bmni2S4X8+zr6BBKS
+    M+0DehkOxYQESIRVDwtZz1Qwu3oGC3lYSk516cOQo+3eLipy2A==
+    -----END CERTIFICATE-----
+    -----BEGIN CERTIFICATE-----
+    MIIETTCCAzWgAwIBAgILBAAAAAABRE7wNjEwDQYJKoZIhvcNAQELBQAwVzELMAkG
+    A1UEBhMCQkUxGTAXBgNVBAoTEEdsb2JhbFNpZ24gbnYtc2ExEDAOBgNVBAsTB1Jv
+    b3QgQ0ExGzAZBgNVBAMTEkdsb2JhbFNpZ24gUm9vdCBDQTAeFw0xNDAyMjAxMDAw
+    MDBaFw0yNDAyMjAxMDAwMDBaMEwxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9i
+    YWxTaWduIG52LXNhMSIwIAYDVQQDExlBbHBoYVNTTCBDQSAtIFNIQTI1NiAtIEcy
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2gHs5OxzYPt+j2q3xhfj
+    kmQy1KwA2aIPue3ua4qGypJn2XTXXUcCPI9A1p5tFM3D2ik5pw8FCmiiZhoexLKL
+    dljlq10dj0CzOYvvHoN9ItDjqQAu7FPPYhmFRChMwCfLew7sEGQAEKQFzKByvkFs
+    MVtI5LHsuSPrVU3QfWJKpbSlpFmFxSWRpv6mCZ8GEG2PgQxkQF5zAJrgLmWYVBAA
+    cJjI4e00X9icxw3A1iNZRfz+VXqG7pRgIvGu0eZVRvaZxRsIdF+ssGSEj4k4HKGn
+    kCFPAm694GFn1PhChw8K98kEbSqpL+9Cpd/do1PbmB6B+Zpye1reTz5/olig4het
+    ZwIDAQABo4IBIzCCAR8wDgYDVR0PAQH/BAQDAgEGMBIGA1UdEwEB/wQIMAYBAf8C
+    AQAwHQYDVR0OBBYEFPXN1TwIUPlqTzq3l9pWg+Zp0mj3MEUGA1UdIAQ+MDwwOgYE
+    VR0gADAyMDAGCCsGAQUFBwIBFiRodHRwczovL3d3dy5hbHBoYXNzbC5jb20vcmVw
+    b3NpdG9yeS8wMwYDVR0fBCwwKjAooCagJIYiaHR0cDovL2NybC5nbG9iYWxzaWdu
+    Lm5ldC9yb290LmNybDA9BggrBgEFBQcBAQQxMC8wLQYIKwYBBQUHMAGGIWh0dHA6
+    Ly9vY3NwLmdsb2JhbHNpZ24uY29tL3Jvb3RyMTAfBgNVHSMEGDAWgBRge2YaRQ2X
+    yolQL30EzTSo//z9SzANBgkqhkiG9w0BAQsFAAOCAQEAYEBoFkfnFo3bXKFWKsv0
+    XJuwHqJL9csCP/gLofKnQtS3TOvjZoDzJUN4LhsXVgdSGMvRqOzm+3M+pGKMgLTS
+    xRJzo9P6Aji+Yz2EuJnB8br3n8NA0VgYU8Fi3a8YQn80TsVD1XGwMADH45CuP1eG
+    l87qDBKOInDjZqdUfy4oy9RU0LMeYmcI+Sfhy+NmuCQbiWqJRGXy2UzSWByMTsCV
+    odTvZy84IOgu/5ZR8LrYPZJwR2UcnnNytGAMXOLRc3bgr07i5TelRS+KIz6HxzDm
+    MTh89N1SyvNTBCVXVmaU6Avu5gMUTu79bZRknl7OedSyps9AsUSoPocZXun4IRZZUw==
+    -----END CERTIFICATE-----
+
+- path: /etc/ssh/users_ca.pub
+  content: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCmiM5UBd3Rant92xxhCVZFW+U+gUN3aLkICO1gzOGr/Ps173YgzgVPmdKdiI6vBzCZ8BXMG/aeiBHk2LKA+vFjh1/sFRA51nA+hnBzXuIbWYpsTHaGG3BFhnAP8tzDm/7MYRkIeXLwZRwTeFtrMd9MR/HGBVG5HmbM/jtrvTRWZVwFnXRxLQ3Rs5Y9v1QKOrZs4w5tt3iKBiBr+kJKhDHV5O8COowxjcfSqCZmfafVJQNR+8Dg6cvaizqY+ykHpgzc+a7oXJfo1LDDQELl0DGIPDIa340jMDjSSVV0o+RpjbIXTtH4m3TDpKRmZsTQrnHCMNSp5Uk7mMkhKwIwX1SP clincoded-dev@clinicalgenome.org

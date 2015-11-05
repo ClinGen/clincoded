@@ -145,10 +145,15 @@ module.exports.external_url_map = {
     'Entrez': 'http://www.ncbi.nlm.nih.gov/gene/',
     'OMIM': 'http://omim.org/',
     'ClinVar': 'http://www.ncbi.nlm.nih.gov/clinvar/',
+    'ClinVarSearch': 'http://www.ncbi.nlm.nih.gov/clinvar/variation/',
+    'HPO': 'http://compbio.charite.de/hpoweb/showterm?id=',
     'HPOBrowser': 'http://compbio.charite.de/hpoweb/showterm?id=HP:0000118',
     'Uberon': 'http://uberon.github.io/',
+    'UberonSearch': 'http://www.ontobee.org/browser/rdf.php?o=UBERON&iri=http://purl.obolibrary.org/obo/',
     'GO_Slim': 'http://bit.ly/1fxDvhV',
+    'QuickGoSearch': 'http://www.ebi.ac.uk/QuickGO/GTerm?id=',
     'CL': 'http://www.ontobee.org/browser/index.php?o=CL',
+    'CLSearch': 'http://www.ontobee.org/browser/rdf.php?o=CL&iri=http://purl.obolibrary.org/obo/',
     'EFO': 'http://www.ebi.ac.uk/efo/'
 };
 

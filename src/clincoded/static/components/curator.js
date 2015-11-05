@@ -17,6 +17,7 @@ var Input = form.Input;
 var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
+var external_url_map = globals.external_url_map;
 
 
 var CurationMixin = module.exports.CurationMixin = {
@@ -35,9 +36,12 @@ var CurationMixin = module.exports.CurationMixin = {
         ).then(gdmObj => {
             var gdm = flatten(gdmObj);
             gdm.omimId = newOmimId;
-            return this.putRestData('/gdm/' + gdmUuid, gdm);
-        }).then(data => {
-            this.setState({currOmimId: newOmimId});
+            return this.putRestData('/gdm/' + gdmUuid, gdm).then(data => {
+                return Promise.resolve(gdmObj);
+            });
+        }).then(gdmObj => {
+            gdmObj.omimId = newOmimId;
+            this.setState({currGdm: gdmObj, currOmimId: newOmimId});
         }).catch(e => {
             console.log('UPDATEOMIMID %o', e);
         });
@@ -370,7 +374,8 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
 var PmidSummary = module.exports.PmidSummary = React.createClass({
     propTypes: {
         article: React.PropTypes.object, // Article object to display
-        displayJournal: React.PropTypes.bool // T to display article journal
+        displayJournal: React.PropTypes.bool, // T to display article journal
+        pmidLinkout: React.PropTypes.bool // T to display pmid linkout
     },
 
     render: function() {
@@ -390,6 +395,7 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
                     {article.title + ' '}
                     {this.props.displayJournal ? <i>{article.journal + '. '}</i> : null}
                     <strong>{date[1]}</strong>{date[2]}
+                    {this.props.pmidLinkout ? <span>&nbsp;<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span> : null}
                 </p>
             );
         } else {
