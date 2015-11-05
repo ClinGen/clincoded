@@ -534,10 +534,10 @@ var AuditMixin = audit.AuditMixin;
                 href = this.props.searchBase + field + '=' + term;
             }
             return (
-                <li id={selected ? "selected" : null} key={term}>
+                <li id={selected ? "selected" : ""} key={term}>
                     {selected ? '' : <span className="bar" style={barStyle}></span>}
                     {field === 'lot_reviews.status' ? <span className={globals.statusClass(term, 'indicator pull-left facet-term-key icon icon-circle')}></span> : null}
-                    <a id={selected ? "selected" : null} href={href} onClick={href ? this.props.onFilter : null}>
+                    <a id={selected ? "selected" : ""} href={href} onClick={href ? this.props.onFilter : null}>
                         <span className="pull-right">{count} {selected && this.props.canDeselect ? <i className="icon icon-times-circle-o"></i> : ''}</span>
                         <span className="facet-item">
                             {em ? <em>{title}</em> : <span>{title}</span>}
@@ -554,7 +554,7 @@ var AuditMixin = audit.AuditMixin;
             var filters = this.props.filters;
             var title;
             try {
-                title = types[term];
+                title = types[term].title;
             } catch (e) {
                 title = term;
             }
