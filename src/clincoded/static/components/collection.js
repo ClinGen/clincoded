@@ -349,7 +349,7 @@ var Table = module.exports.Table = React.createClass({
         }
         var cellIndex = target.cellIndex;
         var reversed = '';
-        var sorton = this.refs.sorton.getDOMNode();
+        var sorton = this.refs.sorton;
         if (this.props.defaultSortOn !== cellIndex) {
             sorton.value = cellIndex;
         } else {
@@ -358,7 +358,7 @@ var Table = module.exports.Table = React.createClass({
         if (this.state.sortOn == cellIndex) {
             reversed = !this.state.reversed || '';
         }
-        this.refs.reversed.getDOMNode().value = reversed;
+        this.refs.reversed.value = reversed;
         event.preventDefault();
         event.stopPropagation();
         this.submit();
@@ -379,7 +379,7 @@ var Table = module.exports.Table = React.createClass({
 
     submit: function () {
         // form.submit() does not fire onsubmit handlers...
-        var target = this.refs.form.getDOMNode();
+        var target = this.refs.form;
 
         // IE8 does not support the Event constructor
         if (!this.hasEvent) {
@@ -392,7 +392,7 @@ var Table = module.exports.Table = React.createClass({
     },
     
     clearFilter: function (event) {
-        this.refs.q.getDOMNode().value = '';
+        this.refs.q.value = '';
         this.submitTimer = setTimeout(this.submit);
     }, 
 
