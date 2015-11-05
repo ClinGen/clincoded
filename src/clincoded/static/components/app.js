@@ -37,8 +37,14 @@ var App = module.exports = React.createClass({
         logout: 'triggerLogout',
     },
 
+    // Note on context. state.context set from initial props. Navigating to other pages sets this state.
+    // This state gets passed as a property to ContentView, so it should be referenced as props.context
+    // from there.
     getInitialState: function() {
         return {
+            context: this.props.context, // Close to anti-pattern, but puts *initial* context into state
+            slow: this.props.slow,
+            href: this.props.href,
             errors: [],
             portal: portal,
             demoWarning: !/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)
@@ -57,8 +63,8 @@ var App = module.exports = React.createClass({
 
     render: function() {
         var content;
-        var context = this.props.context;
-        var href_url = url.parse(this.props.href);
+        var context = this.state.context;
+        var href_url = url.parse(this.state.href);
         // Switching between collections may leave component in place
         var key = context && context['@id'];
         var current_action = this.currentAction();
@@ -67,7 +73,7 @@ var App = module.exports = React.createClass({
         }
         if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
-            content = <ContentView {...this.props} context={context}
+            content = <ContentView {...this.props} context={context} href={this.state.href}
                 loadingComplete={this.state.loadingComplete} session={this.state.session}
                 portal={this.state.portal} navigate={this.navigate} href_url={href_url} />;
         }
@@ -76,7 +82,7 @@ var App = module.exports = React.createClass({
         });
 
         var appClass = 'done';
-        if (this.props.slow) {
+        if (this.state.slow) {
             appClass = 'communicating';
         }
 

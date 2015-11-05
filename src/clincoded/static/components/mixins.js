@@ -227,8 +227,7 @@ module.exports.Persona = {
                 }
                 // If there is an error, show the error messages
                 navigator.id.logout();
-                this.setProps({context: data});
-                this.setState({loadingComplete: true});
+                this.setState({context: data, loadingComplete: true});
             });
         });
     },
@@ -255,7 +254,7 @@ module.exports.Persona = {
         }, err => {
             parseError(err).then(data => {
                 data.title = 'Logout failure: ' + data.title;
-                this.setProps({context: data});
+                this.setState({context: data});
             });
         });
     },
@@ -328,7 +327,6 @@ module.exports.HistoryAndTriggers = {
     getInitialState: function () {
         return {
             contextRequest: null,
-            href: null,
             unsavedChanges: []
         };
     },
@@ -495,12 +493,12 @@ module.exports.HistoryAndTriggers = {
         var request = this.state.contextRequest;
         var href = window.location.href;
         if (event.state) {
-            // Abort inflight xhr before setProps
+            // Abort inflight xhr before setState
             if (request) request.abort();
-            this.setProps({
-                context: event.state
+            this.setState({
+                context: event.state,
+                href: href
             });
-            this.stateState({href: href});
         }
         // Always async update in case of server side changes.
         // Triggers standard analytics handling.
@@ -568,7 +566,7 @@ module.exports.HistoryAndTriggers = {
             } else {
                 window.history.pushState(window.state, '', href + fragment);
             }
-            this.setProps({href: href + fragment});
+            this.setState({href: href + fragment});
             return;
         }
 
@@ -579,7 +577,7 @@ module.exports.HistoryAndTriggers = {
         var timeout = new Timeout(this.SLOW_REQUEST_TIME);
 
         Promise.race([request, timeout.promise]).then(v => {
-            if (v instanceof Timeout) this.setProps({'slow': true});
+            if (v instanceof Timeout) this.setState({'slow': true});
         });
 
         var promise = request.then(response => {
@@ -631,7 +629,7 @@ module.exports.HistoryAndTriggers = {
             // Might fail due to too large data
             window.history.replaceState(null, '', window.location.href);
         }
-        this.setProps({
+        this.setState({
             context: data,
             slow: false
         });
