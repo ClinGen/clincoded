@@ -232,17 +232,19 @@ var Dashboard = React.createClass({
                         <Panel panelClassName="panel-dashboard">
                             <h3>Your Gene-Disease Records</h3>
                             {this.state.gdmList.length > 0 ?
-                            <div className="gdm-list">
+                            <ul>
                                 {this.state.gdmList.map(function(item) {
                                     return (
-                                        <div className="gdm-item" key={item.uuid}>
-                                            <a href={"/curation-central/?gdm=" + item.uuid}><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></a><br />
-                                            <strong>Status</strong>: {item.status}<br />
-                                            <strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}
-                                        </div>
+                                    <a className="block-link" href={"/curation-central/?gdm=" + item.uuid}>
+                                    <li key={item.uuid}>
+                                        <span className="block-link-color"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span><br />
+                                        <span className="block-link-no-color"><strong>Status</strong>: {item.status}<br />
+                                        <strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                                    </li>
+                                    </a>
                                     );
                                 })}
-                            </div>
+                            </ul>
                             : "You have not created any Gene-Disease-Mode of Inheritance entries."}
                         </Panel>
                     </div>
