@@ -165,11 +165,34 @@ var FamilyCuration = React.createClass({
         }
     },
 
-    // Handle a click on the copy orphanet button
-    handleClick: function(e) {
+    // Handle a click on a copy orphanet button
+    handleClick: function(fromTarget, e) {
         e.preventDefault(); e.stopPropagation();
-        var orphanetVal = this.refs['orphanetid'].getValue();
-        this.refs['individualorphanetid'].setValue(orphanetVal);
+        var associatedGroups;
+        var orphanetValTemp = [];
+        var orphanetVal = '';
+        if (fromTarget == 'group') {
+            if (this.state.group) {
+                // We have a group, so get the disease array from it.
+                associatedGroups = [this.state.group];
+            } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
+                // We have a family with associated groups. Combine the diseases from all groups.
+                associatedGroups = this.state.family.associatedGroups;
+            }
+            if (associatedGroups && associatedGroups.length > 0) {
+                orphanetVal = associatedGroups.map(function(associatedGroup, i) {
+                    return (
+                        associatedGroup.commonDiagnosis.map(function(disease, i) {
+                            return ('ORPHA' + disease.orphaNumber);
+                        }).join(', ')
+                    );
+                });
+            }
+            this.refs['orphanetid'].setValue(orphanetVal.join(', '));
+        } else if (fromTarget == 'family') {
+            orphanetVal = this.refs['orphanetid'].getValue();
+            this.refs['individualorphanetid'].setValue(orphanetVal);
+        }
     },
 
     // Load objects from query string into the state variables. Must have already parsed the query string
@@ -444,12 +467,14 @@ var FamilyCuration = React.createClass({
                         return Promise.resolve(diseases);
                     } else {
                         // Get array of missing Orphanet IDs
+                        this.setState({submitBusy: false}); // submit error; re-enable submit button
                         var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
                         this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
                         throw diseases;
                     }
                 }, e => {
                     // The given orpha IDs couldn't be retrieved for some reason.
+                    this.setState({submitBusy: false}); // submit error; re-enable submit button
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
@@ -1124,6 +1149,10 @@ var FamilyCommonDiseases = function() {
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+            {associatedGroups ?
+            <Input type="button" ref="orphanetcopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
+                clickHandler={this.handleClick.bind(this, 'group')} />
+            : null}
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
@@ -1381,7 +1410,7 @@ var FamilyVariant = function() {
                         buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
                     <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
-                        clickHandler={this.handleClick} />
+                        clickHandler={this.handleClick.bind(this, 'family')} />
                 </div>
             : null}
             {this.state.variantCount < MAX_VARIANTS ?
