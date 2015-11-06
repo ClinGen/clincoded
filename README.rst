@@ -32,10 +32,22 @@ Note: For Mac < 10.9, the system python doesn't work. You should install Python 
 
     $ brew install python3
 
-Install Node 0.10 from homebrew/versions::
+Install Node v5  (check version: `node --version`)
 
-    $ brew tap homebrew/versions
-    $ brew install node010
+  * via homebrew (homebrew will indicate if you need to unlink a prior version of node)::
+
+    $ brew install node
+
+  * or via nvm::
+
+    $ npm install -g nvm
+    $ nvm install 5.0
+    $ nvm use 5.0
+
+Insure you are using npm 3 (check version: `npm --version`), if necessary update npm to npm 3::
+
+    $ npm install npm -g
+
 
 If you need to update dependencies::
 
