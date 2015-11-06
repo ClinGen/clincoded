@@ -2,7 +2,6 @@
     "esnext": true,
     "node": true,
     "predef": [
-        "DOMParser",
         "afterEach",
         "beforeEach",
         "describe",
@@ -10,9 +9,10 @@
         "it",
         "jest",
         "pit",
-        "window",
         "xdescribe",
-        "xit"
+        "xit",
+        "window",
+        "document"
     ],
     "globalstrict": true,
     "newcap": false,
