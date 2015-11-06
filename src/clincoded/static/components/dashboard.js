@@ -225,7 +225,7 @@ var Dashboard = React.createClass({
                                     return <li key={item.uuid}>{item.displayText}; <i>{item.timestamp}</i></li>;
                                 })}
                             </ul>
-                            : "You have no activity to display."}
+                            : <li>You have no activity to display.</li>}
                         </Panel>
                     </div>
                     <div className="col-md-6">
@@ -245,7 +245,7 @@ var Dashboard = React.createClass({
                                     );
                                 })}
                             </ul>
-                            : "You have not created any Gene-Disease-Mode of Inheritance entries."}
+                            : <li>You have not created any Gene-Disease-Mode of Inheritance entries.</li>}
                         </Panel>
                     </div>
                 </div>
