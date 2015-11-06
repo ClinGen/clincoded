@@ -230,9 +230,7 @@ var ProvisionalCuration = React.createClass({
                                                                     </div>
                                                                     <div className="row">
                                                                         <div className="col-sm-5">
-                                                                            <a href="/provisional-curation/?summarymatrix=display" target="_block">
-                                                                                <strong>Total Score:</strong>
-                                                                            </a>
+                                                                            <strong>Total Score:</strong>
                                                                         </div>
                                                                         <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
                                                                     </div>
@@ -299,7 +297,7 @@ var Classification = function() {
                         <td className="levelCell">DEFINITIVE</td>
                         <td>
                             The role of this gene in this particular disease hase been repeatedly demonstrated in both the research and clinical
-                            diagnostic settings, and has been upheld over time (in general, at lease 3 years). No convincing evidence has emerged
+                            diagnostic settings, and has been upheld over time (in general, at least 3 years). No convincing evidence has emerged
                             that contradicts the role of the gene in the specified disease.
                         </td>
                     </tr>
@@ -308,9 +306,9 @@ var Classification = function() {
                         <td className="levelCell">STRONG</td>
                         <td>
                             The role of this gene in disease has been independently demonstrated in at least two separate studies providing&nbsp;
-                            <strong>strong</strong> supporting evidence for this gene&#39;s role in diseae, such as the following types of evidence:
+                            <strong>strong</strong> supporting evidence for this gene&#39;s role in disease, such as the following types of evidence:
                             <ul>
-                                <li>Strong variant-level evidence demonstrating numerous unrelated brobands with variants that provide convincing
+                                <li>Strong variant-level evidence demonstrating numerous unrelated probands with variants that provide convincing
                                 evidence for disease causality&sup1;</li>
                                 <li>Compelling gene-level evidence from different types of supporting experimental data&sup2;.</li>
                             </ul>
@@ -323,7 +321,7 @@ var Classification = function() {
                         <td>
                             There is <strong>moderate</strong> evidence to support a causal role for this gene in this diseaese, such as:
                             <ul>
-                                <li>At least 3 unrelated brobands with variants that provide convincing evidence for disease causality&sup1;</li>
+                                <li>At least 3 unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
                                 <li>Moderate experimental data&sup2; supporting the gene-disease association</li>
                             </ul>
                             The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged
@@ -415,7 +413,7 @@ var Classification = function() {
 var SummaryMatrix = function() {
     return (
         <div className="container">
-            <h1>Summary Scores</h1>
+            <h1>Summary Matrix</h1>
             <table className="summary-matrix" style={{'border-collapse':'collapse'}}>
                 <tr>
                     <td rowSpan="2" className="title larger top-single-cell">Assertion<br />Criteria</td>
@@ -521,7 +519,7 @@ var SummaryMatrix = function() {
 var ExperimentalMatrix = function() {
     return (
         <div className="container">
-            <h1>Experimental Score</h1>
+            <h1>Experimental Weighting System</h1>
             <table className="exp-matrix">
                 <tr className="top-row">
                     <td className="title">Evidence<br />Category</td>
@@ -547,7 +545,7 @@ var ExperimentalMatrix = function() {
                 </tr>
                 <tr className="middle-row">
                     <td className="title">Functional<br />Alteration</td>
-                    <td>Pateint cells<br />Non-pateint cells</td>
+                    <td>Patient cells<br />Non-Patient Cells</td>
                     <td>1 - 2<br />&frac12; - 1</td>
                     <td>1<br />&frac12;</td>
                     <td className="title">2</td>
@@ -1050,9 +1048,11 @@ var NewCalculation = function() {
                             <div><span>&nbsp;</span></div>
                             <div className="row">
                                 <div className="col-sm-5">
-                                    <a href="/provisional-curation/?summarymatrix=display" target="_block">
-                                        <strong className="pull-right">Total Score:</strong>
-                                    </a>
+                                    <strong className="pull-right">
+                                        Total Score (
+                                        <a href="/provisional-curation/?summarymatrix=display" target="_block">Summary Matrix</a>
+                                        ):
+                                    </strong>
                                 </div>
                                 <div className="col-sm-7"><strong>{this.state.totalScore}</strong></div>
                             </div>
@@ -1081,10 +1081,13 @@ var NewCalculation = function() {
                                                 null
                                             );
                                         })}
-                                        <tr><td className="td-title"><strong>Final</strong>&nbsp;
-                                                <a href="/provisional-curation/?expmatrix=display" target="_block">
-                                                    <strong>Experimental Score</strong>
-                                                </a>
+                                        <tr><td className="td-title">
+                                                <strong>Final Experimental Score&nbsp;(
+                                                    <a href="/provisional-curation/?expmatrix=display" target="_block">
+                                                        Weighting System
+                                                    </a>
+                                                    )
+                                                </strong>
                                             </td>
                                             <td className="td-score"><span>&nbsp;</span></td>
                                             <td className="td-score"><strong>{expScore}</strong></td>
