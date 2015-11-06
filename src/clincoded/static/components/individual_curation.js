@@ -879,7 +879,7 @@ var IndividualName = function(displayNote) {
             {family && !familyProbandExists ?
             <div className="col-sm-7 col-sm-offset-5">
                 <p className="alert alert-warning">
-                    The proband for a Family must be created through the <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + this.queryValues.familyUuid}>Edit Family page</a>. This page is only for adding non-probands to the Family.
+                    This page is only for adding non-probands to the Family. To create a proband for this Family, please edit its Family page: <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + this.queryValues.familyUuid}>Edit {family.label}</a>
                 </p>
             </div>
             : null}
@@ -1131,6 +1131,8 @@ var IndividualDemographics = function() {
 var IndividualVariantInfo = function() {
     var individual = this.state.individual;
     var family = this.state.family;
+    var gdm = this.state.gdm;
+    var annotation = this.state.annotation;
     var variants = individual && individual.variants;
 
     return (
@@ -1140,7 +1142,7 @@ var IndividualVariantInfo = function() {
                     {variants.map(function(variant, i) {
                         return (
                             <div key={i} className="variant-view-panel variant-view-panel-edit">
-                                <p>To edit variants(s) for this proband, you must edit its Family because the variant is associated with the Family’s segregation.</p>
+                                <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
                                 <h5>Variant {i + 1}</h5>
                                 <dl className="dl-horizontal">
                                     <div>
