@@ -58,11 +58,14 @@ var CurationCentral = React.createClass({
     },
 
     // Retrieve the GDM object from the DB with the given uuid
-    getGdm: function(uuid, pmid) {
+    getGdm: function(uuid, pmids) {
         this.getRestData('/gdm/' + uuid, null, true).then(gdm => {
             // The GDM object successfully retrieved; set the Curator Central component
             this.setState({currGdm: gdm, currOmimId: gdm.omimId});
-            this.currPmidChange(pmid);
+            var currPmidChange = this.currPmidChange;
+            pmids.forEach(function(pmid) {
+                currPmidChange(pmid);
+            });
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
@@ -72,39 +75,56 @@ var CurationCentral = React.createClass({
         var gdmUuid = queryKeyValue('gdm', this.props.href);
         var pmid = queryKeyValue('pmid', this.props.href);
         if (gdmUuid) {
-            this.getGdm(gdmUuid, pmid);
+            this.getGdm(gdmUuid, [pmid]);
         }
     },
 
-    // Add an article whose object is given to the current GDM
-    updateGdmArticles: function(article) {
-        var newAnnotation;
-        var currGdm = this.state.currGdm;
+    // Add articles whose objects are given to the current GDM
+    updateGdmArticles: function(articles) {
+        var newAnnotations = [],
+            newPmids = [],
+            articleCount = articles.length,
+            currGdm = this.state.currGdm;
 
-        // Put together a new annotation object with the article reference
-        var newAnnotationObj = {
-            article: article.pmid,
-            active: true
-        };
+        for (var i = 0; i < articleCount; i ++) {
+            var article = articles[i];
 
-        // Post new annotation to the DB. fetch returns a JS promise.
-        this.postRestData('/evidence/', newAnnotationObj).then(data => {
-            // Save the new annotation; fetch the currently displayed GDM as an object without its embedded
-            // objects; basically the object as it exists in the DB. We'll update that and write it back to the DB.
-            return (data['@graph'][0]);
-        }).then(newAnnotation => {
-            var gdmObj = curator.flatten(currGdm);
+            // Put together a new annotation object with the article reference
+            var newAnnotationObj = {
+                article: article.pmid,
+                active: true
+            };
 
-            // Add our new annotation reference to the array of annotations in the GDM.
-            if (!gdmObj.annotations) {
-                gdmObj.annotations = [];
-            }
-            gdmObj.annotations.push(newAnnotation['@id']);
-            return this.putRestData('/gdm/' + currGdm.uuid, gdmObj);
-        }).then(data => {
-            // Retrieve the updated GDM and set it as the new state GDM to force a rerendering.
-            this.getGdm(data['@graph'][0].uuid, article.pmid);
-        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
+            newPmids.push(article.pmid);
+
+            // Post new annotation to the DB. fetch returns a JS promise.
+            this.postRestData('/evidence/', newAnnotationObj).then(data => {
+                // Save the new annotation; fetch the currently displayed GDM as an object without its embedded
+                // objects; basically the object as it exists in the DB. We'll update that and write it back to the DB.
+                return (data['@graph'][0]);
+            }).then(newAnnotation => {
+                newAnnotations.push(newAnnotation['@id']);
+
+                if (newAnnotations.length === articleCount) {
+                    // Add new annotation reference to the array of annotations in the GDM
+                    // only if all annotations are fetched
+                    var gdmObj = curator.flatten(currGdm);
+
+                    if (!gdmObj.annotations) {
+                        gdmObj.annotations = [];
+                    }
+                    gdmObj.annotations = gdmObj.annotations.concat(newAnnotations);
+                    return this.putRestData('/gdm/' + currGdm.uuid, gdmObj);
+                }
+
+                return null;
+            }).then(data => {
+                if (data !== null) {
+                    // Retrieve the updated GDM and set it as the new state GDM to force a rerendering.
+                    this.getGdm(data['@graph'][0].uuid, newPmids);
+                }
+            }).catch(parseAndLogError.bind(undefined, 'putRequest'));
+        }
     },
 
     render: function() {
@@ -198,7 +218,7 @@ var PmidSelectionList = React.createClass({
         return (
             <div className="pmid-selection-wrapper">
                 <div className="pmid-selection-add">
-                    <Modal title='Add new PubMed Article'>
+                    <Modal title='Add new PubMed Article(s)'>
                         <button className="btn btn-primary pmid-selection-add-btn" modal={<AddPmidModal protocol={this.props.protocol} closeModal={this.closeModal} updateGdmArticles={this.props.updateGdmArticles} currGdm={this.props.currGdm} />}>
                             Add New PMID(s)
                         </button>
@@ -248,32 +268,52 @@ var AddPmidModal = React.createClass({
     // Form content validation
     validateForm: function() {
         // Start with default validation
-        var valid = this.validateDefault();
-        var formInput = this.getFormValue('pmid');
+        var formInputLength,
+            valid = this.validateDefault(),
+            formInput = this.getFormValue('pmid');
 
-        // valid if input isn't zero-filled
-        if (valid && formInput.match(/^0+$/)) {
-            valid = false;
-            this.setFormErrors('pmid', 'This PMID does not exist');
-        }
-        // valid if input isn't zero-leading
-        if (valid && formInput.match(/^0+/)) {
-            valid = false;
-            this.setFormErrors('pmid', 'Please re-enter PMID without any leading 0\'s');
-        }
-        // valid if the input only has numbers
-        if (valid && !formInput.match(/^[0-9]*$/)) {
-            valid = false;
-            this.setFormErrors('pmid', 'Only numbers allowed');
-        }
-        // valid if input isn't already associated with GDM
-        if (valid) {
-            for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
-                if (this.props.currGdm.annotations[i].article.pmid == formInput) {
-                    valid = false;
-                    this.setFormErrors('pmid', 'This article has already been associated with this Gene-Disease Record');
+        formInput = formInput.split(/[,\s]+/g);
+        formInputLength = formInput.length;
+
+        for (var i = 0; i < formInputLength; i ++) {
+            var pmid = formInput[i];
+            // valid if input isn't zero-filled
+            if (valid && pmid.match(/^0+$/)) {
+                valid = false;
+                this.setFormErrors('pmid', 'PMID ' + pmid + ' does not exist');
+            }
+            // valid if input isn't zero-leading
+            if (valid && pmid.match(/^0/)) {
+                valid = false;
+                this.setFormErrors('pmid', 'PMID ' + pmid + ' has leading 0, please re-enter');
+            }
+            // valid if the input only has numbers
+            if (valid && !pmid.match(/^[0-9]*$/)) {
+                valid = false;
+                this.setFormErrors('pmid', 'Only numbers allowed, not "' + pmid + '"');
+            }
+            // valid if the input only appears once
+            if (valid && formInput.indexOf(pmid, i + 1) != -1) {
+                valid = false;
+                this.setFormErrors('pmid', 'PMID ' + pmid + ' is inputed more than once');
+            }
+            // valid if input isn't already associated with GDM
+            if (valid) {
+                var annotationsLength = this.props.currGdm.annotations.length;
+                for (var j = 0; j < annotationsLength; j ++) {
+                    if (this.props.currGdm.annotations[j].article.pmid == pmid) {
+                        valid = false;
+                        this.setFormErrors('pmid', 'This article has already been associated with this Gene-Disease Record ' + pmid);
+                    }
                 }
             }
+            if (!valid) {
+                break;
+            }
+        }
+
+        if (valid) {
+            this.saveFormValue('pmid_array', formInput);
         }
 
         return valid;
@@ -285,28 +325,45 @@ var AddPmidModal = React.createClass({
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.saveFormValue('pmid', this.refs.pmid.getValue());
         if (this.validateForm()) {
-            // Form is valid -- we have a good PMID. Fetch the article with that PMID
-            var enteredPmid = this.getFormValue('pmid');
-            this.getRestData('/articles/' + enteredPmid).then(article => {
-                // Close the modal; update the GDM with this article.
-                return Promise.resolve(article);
-            }, e => {
-                var url = this.props.protocol + external_url_map['PubMedSearch'];
-                // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
-                return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
-                    var newArticle = parsePubmed(xml);
-                    // if the PubMed article for this PMID doesn't exist, display an error
-                    if (!('pmid' in newArticle)) this.setFormErrors('pmid', 'This PMID does not exist');
-                    return this.postRestData('/articles/', newArticle).then(data => {
-                        return Promise.resolve(data['@graph'][0]);
+            // Form is valid -- we have several good PMIDs. Fetch the articles with those PMIDs
+            var breakLoop = false,
+                allArticles = [],
+                enteredPmids = this.getFormValue('pmid_array'),
+                pmidCount = enteredPmids.length;
+            for (var i = 0; i < pmidCount; i ++) {
+                var enteredPmid = enteredPmids[i];
+                breakLoop = false;
+                this.getRestData('/articles/' + enteredPmid).then(article => {
+                    // update the GDM with this article.
+                    return Promise.resolve(article);
+                }, e => {
+                    var url = this.props.protocol + external_url_map['PubMedSearch'],
+                        enteredPmid = e.url.replace(/^.+\/articles\/(\d+)\/?$/, '$1');  // scoped
+                    // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
+                    return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
+                        var newArticle = parsePubmed(xml);
+                        // if the PubMed article for this PMID doesn't exist, display an error
+                        if (!('pmid' in newArticle)) {
+                            this.setFormErrors('pmid', 'PMID does not exist');
+                            breakLoop = true;
+                            return Promise.resolve(null);
+                        }
+                        return this.postRestData('/articles/', newArticle).then(data => {
+                            return Promise.resolve(data['@graph'][0]);
+                        });
                     });
+                }).then(article => {
+                    if (!breakLoop) {
+                        allArticles.push(article);
+                    }
+                    if (allArticles.length === pmidCount) {
+                        // close modal and update GDM articles only if all articles are created
+                        this.props.closeModal();
+                        this.props.updateGdmArticles(allArticles);
+                    }
                 });
-            }).then(article => {
-                this.props.closeModal();
-                this.props.updateGdmArticles(article);
-            }).catch(function(e) {
-                console.log('ERROR %o', e);
-            });
+                if (breakLoop) break;
+            }
         }
     },
 
@@ -327,9 +384,9 @@ var AddPmidModal = React.createClass({
         return (
             <Form submitHandler={this.submitForm} formClassName="form-std">
                 <div className="modal-body">
-                    <Input type="text" ref="pmid" label="Enter a PMID"
+                    <Input type="text" ref="pmid" label="Enter PMID(s)"
                         error={this.getFormError('pmid')} clearError={this.clrFormErrors.bind(null, 'pmid')}
-                        labelClassName="control-label" groupClassName="form-group" required />
+                        labelClassName="control-label" groupClassName="form-group" placeholder="Use comma or space as delimiter" required />
                 </div>
                 <div className='modal-footer'>
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
