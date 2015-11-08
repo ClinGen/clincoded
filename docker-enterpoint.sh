@@ -24,4 +24,4 @@ mkdir -p /data/clincoded
 chmod 777 /data/clincoded
 rm -rf /tmp/clincoded
 ln -s /data/clincoded /tmp/clincoded
-PATH=$PATH:/usr/lib/postgresql/9.4/bin:/usr/share/elasticsearch/bin bin/dev-servers development.ini --app-name app $INITARGS & while ! nc -z 127.0.0.1 5432 && ! nc -z 127.0.0.1 9200; do sleep 5; done; while bin/grunt watch; sleep 5; do echo; done & while bin/compass watch; sleep 5; do echo; done & bin/pserve development.ini --reload
+PATH=$PATH:/usr/lib/postgresql/9.4/bin:/usr/share/elasticsearch/bin bin/dev-servers development.ini --app-name app $INITARGS & while ! test -S /tmp/clincoded/pgdata/.s.PGSQL.5432 || ! nc -z 127.0.0.1 9200; do sleep 5; done; while bin/grunt watch; sleep 5; do echo; done & while bin/compass watch; sleep 5; do echo; done & bin/pserve development.ini --reload
