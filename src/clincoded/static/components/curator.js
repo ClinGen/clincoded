@@ -827,10 +827,28 @@ var DiseaseRecordHeader = React.createClass({
         updateOmimId: React.PropTypes.func // Function to call when OMIM ID changes
     },
 
+    handleDeleteClick: function(e) {
+        e.preventDefault();
+        if (window.confirm('Are you sure you want to delete this OMIM ID?')) {
+            // set to an empty string since it's the default value
+            this.props.updateOmimId(this.props.gdm.uuid, '');
+        }
+    },
+
     render: function() {
-        var gdm = this.props.gdm;
-        var disease = gdm && gdm.disease;
-        var addEdit = this.props.omimId ? 'Edit' : 'Add';
+        var gdm = this.props.gdm,
+            disease = gdm && gdm.disease,
+            addEdit = 'Add',
+            deleteRender = [];
+
+        if (this.props.omimId) {
+            addEdit = 'Edit';
+            deleteRender = [
+                <span>[</span>,
+                <a onClick={this.handleDeleteClick} href="#">Delete</a>,
+                <span>]</span>
+            ];
+        }
 
         return (
             <div className="col-xs-12 col-sm-3 gutter-exc">
@@ -847,7 +865,7 @@ var DiseaseRecordHeader = React.createClass({
                                 : null}&nbsp;
                                 {this.props.updateOmimId ?
                                     <Modal title="Add/Change OMIM ID" wrapperClassName="edit-omim-modal">
-                                        <span>[</span><a modal={<AddOmimIdModal gdm={gdm} closeModal={this.closeModal} updateOmimId={this.props.updateOmimId} />} href="#">{addEdit}</a><span>]</span>
+                                        <span>[</span><a modal={<AddOmimIdModal gdm={gdm} originalOmimId={this.props.omimId} closeModal={this.closeModal} updateOmimId={this.props.updateOmimId} />} href="#">{addEdit}</a><span>]</span>{deleteRender}
                                     </Modal>
                                 : null}
                             </dd>
@@ -866,6 +884,7 @@ var AddOmimIdModal = React.createClass({
 
     propTypes: {
         gdm: React.PropTypes.object.isRequired, // GDM being affected
+        originalOmimId: React.PropTypes.string, // Original OMIM ID to display in input box
         closeModal: React.PropTypes.func.isRequired, // Function to call to close the modal
         updateOmimId: React.PropTypes.func.isRequired // Function to call when we have a new OMIM ID
     },
@@ -893,7 +912,7 @@ var AddOmimIdModal = React.createClass({
             // Form is valid -- we have a good OMIM ID. Close the modal and update the current GDM's OMIM ID
             this.props.closeModal();
             var enteredOmimId = this.getFormValue('omimid');
-                this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
+            this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
         }
     },
 
@@ -911,16 +930,17 @@ var AddOmimIdModal = React.createClass({
     },
 
     render: function() {
+        var submitTitle = this.props.originalOmimId ? 'Change OMIM ID' : 'Add OMIM ID';
         return (
             <Form submitHandler={this.submitForm} formClassName="form-std">
                 <div className="modal-body">
                     <Input type="text" ref="omimid" label="Enter an OMIM ID"
                         error={this.getFormError('omimid')} clearError={this.clrFormErrors.bind(null, 'omim')}
-                        labelClassName="control-label" groupClassName="form-group" required />
+                        labelClassName="control-label" groupClassName="form-group" value={this.props.originalOmimId} required />
                 </div>
                 <div className='modal-footer'>
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Add/Change OMIM ID" />
+                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title={submitTitle} />
                 </div>
             </Form>
         );
