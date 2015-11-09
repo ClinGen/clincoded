@@ -7,7 +7,7 @@ Feature: Generics
         When I visit "/genes/"
         Then I should see "DICER1"
         When I visit "/gdm/"
-        Then I should see "3e144866-16d9-11e5-b451-60f81dc5b05a"
+        Then I should see "Autosomal dominant inheritance (HP:0000006)"
         When I visit "/evidence/"
         Then I should see "8078586"
         When I visit "/groups/"

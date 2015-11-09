@@ -33,5 +33,6 @@ require('./edit');
 require('./inputs');
 require('./provisional_curation');
 require('./add_curator');
+require('./gdm');
 
 module.exports = require('./app');

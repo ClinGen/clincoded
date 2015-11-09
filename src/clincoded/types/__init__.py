@@ -5,6 +5,7 @@ from contentbase.schema_utils import (
 from contentbase import (
     calculated_property,
     collection,
+    ROOT
 )
 from pyramid.traversal import find_root
 from .base import (
@@ -312,6 +313,22 @@ class Gdm(Item):
         gene_symbol = gene.replace('/genes/', '').replace('/', '')
         orpha_id = disease.replace('/diseases/', '').replace('/', '')
         return gene_symbol + '-' + orpha_id + '-' + modeCode
+
+    @calculated_property(schema={
+        "title": "Last Edited",
+        "type": "string",
+    })
+    def last_annotations_modified(seft, registry):
+        dates = []
+        anno_collection = registry[ROOT].by_item_type['annotation']
+        for uuid in seft.properties['annotations']:
+            anno = anno_collection[uuid].properties
+            dates.append(anno.get('last_modified',
+                                  anno.get('date_created', '')))
+        if dates:
+            return sorted(dates, reverse=True)[0]
+        else:
+            return ""
 
 
 @collection(
