@@ -902,10 +902,12 @@ var AddOmimIdModal = React.createClass({
     cancelForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
-        //only a mouse click on cancel button closes modal
-        //(do not let the enter key [which evaluates to 0 mouse
-        //clicks] be accepted to close modal)
-        if (e.detail >= 1){
+        // Only a mouse click on cancel button closes modal
+        // (do not let the enter key [which evaluates to 0 mouse
+        // clicks] be accepted to close modal)
+        // In most browsers can use event.detail to detect mouse clicks,
+        // but in IE there's no way you had to use the screenX trick
+        if (e.detail >= 1 || e.screenX > 0) {
             this.props.closeModal();
         }
     },

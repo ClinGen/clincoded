@@ -178,7 +178,9 @@ var ProvisionalCuration = React.createClass({
         e.stopPropagation();
 
         // click Cancel button will go back to view - current
-        if (e.detail >= 1){
+        // In most browsers can use event.detail to detect mouse clicks,
+        // but in IE there's no way you had to use the screenX trick
+        if (e.detail >= 1 || e.screenX > 0) {
             window.history.go(-1);
             //var backUrl = '/curation-central/?gdm=' + this.state.gdm.uuid;
             //backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
