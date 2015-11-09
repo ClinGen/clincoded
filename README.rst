@@ -13,8 +13,41 @@ PROD
 
 This software creates an object store and user interface for the collection of mappings between human diseases and genetic variation as input by the ClinGen curation staff.
 
-Baseline Dependendencies
-=========================
+Installation
+============
+
+With docker and docker-compose
+------------------------------
+If you have installed `docker <https://www.docker.com/>`_ and `docker-compose <https://docs.docker.com/compose/install/>`_, you don't have to go through the whole steps of manual installation. Just run the command below then you are good to go. This command will build a docker image (if necessary) and instantiate a docker container to run ``clincoded``::
+
+    $ docker-compose up -d
+
+Now browse to the interface at http://localhost:6543/.
+
+Note: For Mac OSX, you may need to edit the OSX's ``/etc/hosts`` file to point domain "dev.clincalgenome.org" to IP address of docker VM host. Then replace the "localhost:6543" to "dev.clincalgenome.org:6543" to access the interface.
+
+To see the logs output of the docker container::
+
+    $ docker logs clincoded_web_1
+
+To stop, start or restart a running instance::
+
+    $ docker-compose stop
+    $ docker-compose start
+    $ docker-compose restart
+
+You can build or rebuild (without cache) the docker image with these commands::
+
+    $ docker-compose build
+    $ docker-compose build --no-cache
+
+To log in the docker container::
+
+    $ docker exec -it clincoded_web_1 /bin/bash
+
+To delete the docker container (for re-instantiate a fresh one)::
+
+    $ docker-compose rm
 
 Mac OSX
 --------

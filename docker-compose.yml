@@ -1,0 +1,8 @@
+web:
+  build: .
+  volumes:
+    - ./:/code
+  privileged: true
+  tty: true
+  ports:
+    - "6543:6543"

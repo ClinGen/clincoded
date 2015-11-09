@@ -6,36 +6,12 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
-requires = [
-    'Pillow',
-    'PyBrowserID',
-    'SQLAlchemy>=1.0.0b1',
-    'WSGIProxy2',
-    'WebTest',
-    'boto',
-    'elasticsearch',
-    'future',
-    'humanfriendly',
-    'jsonschema',
-    'loremipsum',
-    'passlib',
-    'psutil',
-    'pyramid',
-    'pyramid_localroles',
-    'pyramid_multiauth',
-    'pyramid_tm',
-    'python-magic',
-    'pytz',
-    'rdflib',
-    'rdflib-jsonld',
-    'rfc3987',
-    'setuptools',
-    'simplejson',
-    'strict_rfc3339',
-    'subprocess_middleware',
-    'xlrd',
-    'zope.sqlalchemy',
-]
+
+def read_requires(filename):
+    with open(filename) as fp:
+        return [l.strip() for l in fp.readlines() if not l.startswith('#')]
+
+requires = read_requires('requirements.txt')
 
 if sys.version_info.major == 2:
     requires.extend([
@@ -43,11 +19,7 @@ if sys.version_info.major == 2:
         'subprocess32',
     ])
 
-tests_require = [
-    'pytest>=2.4.0',
-    'pytest-bdd',
-    'pytest-splinter',
-]
+tests_require = read_requires('test-requires.txt')
 
 setup(
     name='clincoded',
