@@ -35,7 +35,7 @@ audit_facets = [
 
 
 def get_filtered_query(term, search_fields, result_fields, principals):
-    return {
+    query = {
         'query': {
             'query_string': {
                 'query': term,
@@ -57,19 +57,20 @@ def get_filtered_query(term, search_fields, result_fields, principals):
         'aggs': {},
         '_source': list(result_fields),
     }
+    return query
 
 
 def sanitize_search_string(text):
     return sanitize_search_string_re.sub(r'\\\g<0>', text)
 
 
-def get_sort_order():
+def get_sort_order(sort, order):
     """
     specifies sort order for elasticsearch results
     """
     return {
-        'embedded.date_created': {
-            'order': 'desc',
+        ('embedded.' + sort): {
+            'order': order,
             'ignore_unmapped': True,
         }
     }
@@ -127,7 +128,8 @@ def set_filters(request, query, result):
     used_filters = {}
     for field, term in request.params.items():
         if field in ['type', 'limit', 'mode', 'searchTerm',
-                     'format', 'frame', 'datastore', 'field']:
+                     'format', 'frame', 'datastore', 'field',
+                     'searchSort', 'searchOrder']:
             continue
 
         # Add filter to result
@@ -359,7 +361,9 @@ def search(context, request, search_type=None):
 
     # Sorting the files when search term is not specified
     if search_term == '*':
-        query['sort'] = get_sort_order()
+        sort = request.params.get('searchSort', 'date_created')
+        order = 'asc' if request.params.get('searchOrder') == 'asc' else 'desc'
+        query['sort'] = get_sort_order(sort, order)
         query['query']['match_all'] = {}
         del query['query']['query_string']
     elif len(doc_types) != 1:

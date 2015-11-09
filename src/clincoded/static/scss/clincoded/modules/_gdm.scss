@@ -1,0 +1,48 @@
+.icon {
+    &.icon-in-progress {
+        color: $color-in-progress;
+    }
+    &.icon-success {
+        color: $color-success;
+    }
+}
+
+.icon-legend {
+    .icon, span {
+        vertical-align: middle;
+    }
+}
+
+table.gdm-table {
+    border: 1px solid $color-table-border;
+    .col-headers {
+        background-color: transparent;
+    }
+    tbody > tr, thead > tr, > tr {
+        > th {
+            color: #fff;
+            background-color: $color-trim;
+        }
+        > th, > td {
+            border-top: none;
+            border-bottom: none;
+            border-left: 1px solid #fff; 
+            &:first-child {
+                border-left: none;
+            }
+            em {
+                font-weight: 300;
+            }
+        }
+        > td:first-child {
+            text-align: center;
+            vertical-align: middle;
+        }
+        &:nth-of-type(even) > td {
+            background-color: $color-table-even-row;
+        }
+        &:nth-of-type(odd) > td {
+            background-color: $color-table-odd-row;
+        }
+    }
+}

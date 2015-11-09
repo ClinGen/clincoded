@@ -164,8 +164,16 @@
             "title": "Creation Date",
             "type": "string"
         },
+        "last_annotations_modified": {
+            "title": "Last Edited",
+            "type": "string"
+        },
         "submitted_by.uuid": {
             "title": "Submitted by",
+            "type": "string"
+        },
+        "submitted_by.title": {
+            "title": "Creator",
             "type": "string"
         }
     },

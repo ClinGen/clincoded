@@ -66,10 +66,15 @@ class Data {
         reverse = !!reverse;
         if (this.sortedOn === sortColumn && this.reversed === reverse) return;
         this.sortedOn = sortColumn;
-        this.reversed = reverse;            
+        this.reversed = reverse;
         this.rows.sort(function (rowA, rowB) {
             var a = '' + rowA.cells[sortColumn].sortable;
             var b = '' + rowB.cells[sortColumn].sortable;
+            if (!isNaN(a) && !isNaN(b)) {
+              // both numbers, sorted as numbers
+              a = parseFloat(a);
+              b = parseFloat(b);
+            }
             if (a < b) {
                 return reverse ? 1 : -1;
             } else if (a > b) {
@@ -99,14 +104,90 @@ var RowView = function (props) {
     );
 };
 
+var TableMetaView = function (matchCount, totalCount, state, handleKeyUp, clearFilter, searchTerm, searchSort, searchOrder) {
+    var loading_or_total;
+
+    if (state.communicating) {
+        loading_or_total = <i className="icon icon-refresh icon-spin"></i>;
+    } else {
+        loading_or_total = <span>Displaying {matchCount} of {totalCount} records</span>;
+    }
+
+    return (
+        <div className="table-meta">
+            <div className="container">
+                <div className="row table-summary">
+                    <div className="col-sm-6 table-count">
+                        {loading_or_total}
+                    </div>
+                    <form ref="form" className="form-inline col-sm-6 table-filter" onKeyUp={handleKeyUp}
+                        data-skiprequest="true" data-removeempty="true">
+                        <div className="form-group table-filter-input">
+                            <label htmlFor="table-filter">Filter table by:</label>
+                            <input ref="searchTerm" disabled={state.communicating || undefined}
+                                name="searchTerm" type="search" defaultValue={searchTerm}
+                                className="form-control" id="table-filter" />
+                            { searchTerm ? <i className="icon icon-times-circle clear-input-icon" onClick={clearFilter}></i> : null }
+                        </div>
+                        <input ref="searchSort" type="hidden" name="searchSort" defaultValue={searchSort} />
+                        <input ref="searchOrder" type="hidden" name="searchOrder" defaultValue={searchOrder} />
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+var guessColumns = function (props) {
+    var column_list = props.context.columns;
+    var columns = [];
+    if (!column_list || Object.keys(column_list).length === 0) {
+        for (var key in props.context['@graph'][0]) {
+            if (key.slice(0, 1) != '@' && key.search(/(uuid|_no|accession)/) == -1) {
+                columns.push(key);
+            }
+        }
+        columns.sort();
+        columns.unshift('@id');
+    } else {
+        for(var column in column_list) {
+            columns.push(column);
+        }
+    }
+    return columns;
+};
+
+
+var ColumnTitleView = function (titles, column) {
+    return [titles[column] && titles[column]['title'] || column, true];
+};
+
+
 var Table = module.exports.Table = React.createClass({
     contextTypes: {
         fetch: React.PropTypes.func
     },
 
+    propTypes: {
+        defaultSortOn: React.PropTypes.string,
+        guessColumns: React.PropTypes.func,
+        lookupColumn: React.PropTypes.func,
+        ColumnTitleView: React.PropTypes.func,
+        RowView: React.PropTypes.func,
+        TableMetaView: React.PropTypes.func,
+        tableClassName: React.PropTypes.string
+    },
+
     getDefaultProps: function () {
         return {
-            defaultSortOn: 0
+            defaultSortOn: 'date_created',
+            guessColumns: guessColumns,
+            lookupColumn: lookup_column,
+            ColumnTitleView: ColumnTitleView,
+            RowView: RowView,
+            TableMetaView: TableMetaView,
+            tableClassName: 'table-striped table-bordered table-condensed'
         };
     },
 
@@ -141,42 +222,29 @@ var Table = module.exports.Table = React.createClass({
 
     extractParams: function(props) {
         var params = url.parse(props.href, true).query;
-        var sorton = parseInt(params.sorton, 10);
-        if (isNaN(sorton)) {
-            sorton = props.defaultSortOn;
-        }
+        var sorton = params.searchSort;
+        // if (props.context.columns.indexOf(sorton) === -1) {
+        //     sorton = props.defaultSortOn;
+        // }
         var state = {
             sortOn: sorton,
-            reversed: params.reversed || false,
-            searchTerm: params.q || ''
+            reversed: params.searchOrder !== 'asc',  // the default searchOrder is desc
+            searchTerm: params.searchTerm || ''
         };
         this.setState(state);
         return state;
     },
 
     guessColumns: function (props) {
-        var column_list = props.context.columns;
-        var columns = [];
-        if (!column_list || Object.keys(column_list).length === 0) {
-            for (var key in props.context['@graph'][0]) {
-                if (key.slice(0, 1) != '@' && key.search(/(uuid|_no|accession)/) == -1) {
-                    columns.push(key);
-                }
-            }
-            columns.sort();
-            columns.unshift('@id');
-        } else {
-            for(var column in column_list) {
-                columns.push(column);
-            }
-        }
+        var columns = this.props.guessColumns(props);
         this.setState({columns: columns});
         return columns;
     },
 
     extractData: function (props, columns) {
-        var context = props.context;
         columns = columns || this.state.columns;
+        var lookupColumn = this.props.lookupColumn,
+            context = props.context;
         var rows = context['@graph'].map(function (item) {
             var cells = columns.map(function (column) {
                 var factory;
@@ -184,7 +252,7 @@ var Table = module.exports.Table = React.createClass({
                 //if (factory) {
                 //    return factory({context: item, column: column});
                 //}
-                var value = lookup_column(item, column);
+                var value = lookupColumn(item, column);
                 if (column == '@id') {
                     factory = globals.listing_titles.lookup(item);
                     value = factory({context: item});
@@ -238,32 +306,50 @@ var Table = module.exports.Table = React.createClass({
     },
 
     render: function () {
-        var columns = this.state.columns;
-        var context = this.props.context;
-        var defaultSortOn = this.props.defaultSortOn;
-        var sortOn = this.state.sortOn;
-        var reversed = this.state.reversed;
-        var searchTerm = this.state.searchTerm;
+        var self = this,
+            columns = this.state.columns,
+            context = this.props.context,
+            TableMetaView = this.props.TableMetaView,
+            ColumnTitleView = this.props.ColumnTitleView,
+            RowView = this.props.RowView,
+            defaultSortOn = this.props.defaultSortOn,
+            sortOn = this.state.sortOn,
+            reversed = this.state.reversed,
+            searchTerm = this.state.searchTerm,
+            titles = context.columns || {},
+            data = this.state.data,
+            params = url.parse(this.props.href, true).query,
+            total = context.count || data.rows.length,
+            sortOnIndex = columns.indexOf(sortOn);
+
         this.state.searchTerm = searchTerm;
-        var titles = context.columns || {};
-        var data = this.state.data;
-        var params = url.parse(this.props.href, true).query;
-        var total = context.count || data.rows.length;
-        data.sort(sortOn, reversed);
-        var self = this;
+        if (sortOnIndex > -1) {
+          data.sort(sortOnIndex, reversed);
+        }
         var headers = columns.map(function (column, index) {
             var className;
-            if (index === sortOn) {
+            if (column === sortOn) {
                 className = reversed ? "tcell-desc" : "tcell-asc";
             } else {
                 className = "tcell-sort";
             }
-            return (
-                <th onClick={self.handleClickHeader} key={index}>
-                    {titles[column] && titles[column]['title'] || column}
-                    <i className={className}></i>
-                </th>
-            );
+            var sortable, column_title = ColumnTitleView(titles, column);
+            sortable = column_title[1];
+            column_title = column_title[0];
+            if (sortable) {
+                return (
+                    <th className="sortable" onClick={self.handleClickHeader.bind(self, column)} key={index}>
+                        {column_title}
+                        <i className={className}></i>
+                    </th>
+                );
+            } else {
+                return (
+                    <th key={index}>
+                        {column_title}
+                    </th>
+                );
+            }
         });
         var searchTermLower = this.state.searchTerm.trim().toLowerCase();
         var matching = [];
@@ -286,39 +372,15 @@ var Table = module.exports.Table = React.createClass({
         rows.push.apply(rows, not_matching.map(function (row) {
             return RowView({row: row, hidden: true});
         }));
-        var loading_or_total;
-        if (this.state.communicating) {
-            loading_or_total = <i className="icon icon-refresh icon-spin"></i>;
-        } else {
-            loading_or_total = <span>Displaying {matching.length} of {total} records</span>;
-        }
+
+        var table_meta = TableMetaView(matching.length, total, this.state, this.handleKeyUp, this.clearFilter, searchTerm, sortOn, reversed ? '' : 'asc');
 
         return (
             <div>
-                <div className="table-meta">
-                    <div className="container">
-                        <div className="row table-summary">
-                            <div className="col-sm-6 table-count">
-                                {loading_or_total}
-                            </div>
-                            <form ref="form" className="form-inline col-sm-6 table-filter" onKeyUp={this.handleKeyUp} 
-                                data-skiprequest="true" data-removeempty="true">
-                                <div className="form-group table-filter-input">
-                                    <label htmlFor="table-filter">Filter table by:</label>
-                                    <input ref="q" disabled={this.state.communicating || undefined} 
-                                        name="q" type="search" defaultValue={searchTerm} 
-                                        className="form-control" id="table-filter" /> 
-                                    <i className="icon icon-times-circle clear-input-icon" hidden={!searchTerm} onClick={this.clearFilter}></i>
-                                </div>
-                                <input ref="sorton" type="hidden" name="sorton" defaultValue={sortOn !== defaultSortOn ? sortOn : ''} />
-                                <input ref="reversed" type="hidden" name="reversed" defaultValue={!!reversed || ''} />
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                {table_meta}
                 <div className="container">
                     <div className="table-responsive">
-                        <table className="table table-striped table-bordered table-condensed sticky-area">
+                        <table className={"table sticky-area " + this.props.tableClassName}>
                             <thead className="sticky-header">
                                 <tr className="col-headers">
                                     {headers}
@@ -342,23 +404,14 @@ var Table = module.exports.Table = React.createClass({
         });
     },
 
-    handleClickHeader: function (event) {
-        var target = event.target;
+    handleClickHeader: function (column, event) {
+        var order, target = event.target;
         while (target.tagName != 'TH') {
             target = target.parentElement;
         }
-        var cellIndex = target.cellIndex;
-        var reversed = '';
-        var sorton = this.refs.sorton.getDOMNode();
-        if (this.props.defaultSortOn !== cellIndex) {
-            sorton.value = cellIndex;
-        } else {
-            sorton.value = '';
-        }
-        if (this.state.sortOn == cellIndex) {
-            reversed = !this.state.reversed || '';
-        }
-        this.refs.reversed.getDOMNode().value = reversed;
+        this.refs.searchSort.getDOMNode().value = column;
+        order = this.state.reversed ? 'asc': '';
+        this.refs.searchOrder.getDOMNode().value = order;
         event.preventDefault();
         event.stopPropagation();
         this.submit();
@@ -390,11 +443,11 @@ var Table = module.exports.Table = React.createClass({
         var event = new Event('submit', {bubbles: true, cancelable: true});
         target.dispatchEvent(event);
     },
-    
+
     clearFilter: function (event) {
-        this.refs.q.getDOMNode().value = '';
+        this.refs.searchTerm.getDOMNode().value = '';
         this.submitTimer = setTimeout(this.submit);
-    }, 
+    },
 
     componentWillUnmount: function () {
         if (typeof this.submitTimer != 'undefined') {

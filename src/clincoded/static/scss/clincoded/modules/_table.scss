@@ -7,6 +7,17 @@
     line-height: $input-height-base;
 }
 
+@media (min-width: $screen-lg-min) {
+    .table-header-search {
+        position: absolute;
+        top: -100%;
+        width: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
+        box-sizing: border-box;
+    }
+}
+
 .table-summary {
     padding: 0;
 
@@ -51,7 +62,9 @@
     th {
         position: relative;
         padding-right: 20px !important;
-        cursor: pointer;
+        &.sortable {
+          cursor: pointer;
+        }
     }
 }
 
@@ -60,6 +73,7 @@
     position: absolute;
     right: 5px;
     bottom: 7px;
+    font-size: 1rem;
 }
 
 .tcell-sort {
