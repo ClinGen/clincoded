@@ -52,7 +52,7 @@ var ProvisionalCuration = React.createClass({
         // get gdm and all assessments from db.
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '', // search for entire data set of the gdm
-            gdmUuid ? '/assessments/' : '' // search for all assessments from db
+            //gdmUuid ? '/assessments/' : '' // search for all assessments from db
         ]);
         this.getRestDatas(
             uris
@@ -65,9 +65,9 @@ var ProvisionalCuration = React.createClass({
                     case 'gdm':
                         stateObj.gdm = data;
                         break;
-                    case 'assessment_collection':
-                        stateObj.assessments = data['@graph'];
-                        break;
+                    //case 'assessment_collection':
+                    //    stateObj.assessments = data['@graph'];
+                    //    break;
                     default:
                         break;
                 }
@@ -90,13 +90,13 @@ var ProvisionalCuration = React.createClass({
             }
 
             // filter assessments for specific user and gdm
-            var temp = [];
-            for (var i in stateObj.assessments) {
-                if (stateObj.assessments[i].submitted_by.uuid === stateObj.user && stateObj.assessments[i].evidence_gdm === stateObj.gdm.uuid) {
-                    temp.push(stateObj.assessments[i]);
-                }
-            }
-            stateObj.assessments = temp;
+            //var temp = [];
+            //for (var i in stateObj.assessments) {
+            //    if (stateObj.assessments[i].submitted_by.uuid === stateObj.user && stateObj.assessments[i].evidence_gdm === stateObj.gdm.uuid) {
+            //        temp.push(stateObj.assessments[i]);
+             //   }
+            //}
+            //stateObj.assessments = temp;
 
             this.setState(stateObj);
 
@@ -188,7 +188,7 @@ var ProvisionalCuration = React.createClass({
 
     render: function() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        this.queryValues.pmid = queryKeyValue('pmid', this.props.href) ? queryKeyValue('pmid', this.props.href) : '';
+        //this.queryValues.pmid = queryKeyValue('pmid', this.props.href) ? queryKeyValue('pmid', this.props.href) : '';
         var calculate = queryKeyValue('calculate', this.props.href);
         var edit = queryKeyValue('edit', this.props.href);
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
@@ -675,21 +675,25 @@ var NewCalculation = function() {
 
     // Collect variants from pathogenicity
     var gdmPathoList = gdm.variantPathogenicity;
-    var pathoVariantIdList = [];
+    var pathoVariantIdList = {
+        "support": [],
+        "review": [],
+        "contradict": []
+    }
+    //var pathoVariantIdList = [];
     for (var i in gdmPathoList) {
-        // pick up variants from login user's pathogenicity assessed as Supports.
+        var variantUuid = gdmPathoList[i].variant.uuid;
+        // Collect login user's variant assessments, separated as 3 different values.
         if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
             for (var j in gdmPathoList[i].assessments) {
                 if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
-                    var variantUuid = gdmPathoList[i].variant.uuid;
-                    pathoVariantIdList.push(variantUuid);
-                    userAssessments['variantSpt'] += 1;
+                    pathoVariantIdList['support'].push(variantUuid);
                 }
                 else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Review') {
-                    userAssessments['variantReview'] += 1;
+                    pathoVariantIdList['review'].push(variantUuid);
                 }
                 else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Contradicts') {
-                    userAssessments['variantCntdct'] += 1;
+                    pathoVariantIdList['contradict'].push(variantUuid);
                 }
             }
         }
@@ -707,7 +711,13 @@ var NewCalculation = function() {
         "Rescue (Patient cells)": 0,
         "Rescue (Engineered equivalent)": 0
     }
-    var individualsCollected = [];
+    var individualsCollected = {
+        "probandInd": [],
+        "allVariants": [],
+        "sptVariants": [],
+        "rvwVariants": [],
+        "cntdctVariants": []
+    };
     var proband_variants = [];
 
     // scan gdm
@@ -722,16 +732,7 @@ var NewCalculation = function() {
 
                         // collect individuals
                         if (groups[j].familyIncluded[k].individualIncluded && groups[j].familyIncluded[k].individualIncluded.length > 0) {
-                            individualsCollected = filter(individualsCollected, groups[j].familyIncluded[k].individualIncluded, annotations[i].article, pathoVariantIdList ); // same as above
-
-                            for (var n in individualsCollected) {
-                                var indVariants = individualsCollected[n]['allVariants'];
-                                for (var m in indVariants) {
-                                    if (!in_array(indVariants[m], proband_variants)) {
-                                        proband_variants.push(indVariants[m]);
-                                    }
-                                }
-                            }
+                            individualsCollected = filter(individualsCollected, groups[j].familyIncluded[k].individualIncluded, annotations[i].article, pathoVariantIdList);
                         }
 
                         // collection segregation assessments
@@ -756,33 +757,14 @@ var NewCalculation = function() {
                     }
                 }
                 if (groups[j].individualIncluded && groups[j].individualIncluded.length > 0) {
-                    individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, pathoVariantIdList );
-
-                    for (var n in individualsCollected) {
-                        var indVariants = individualsCollected[n]['allVariants'];
-                        for (var m in indVariants) {
-                            if (!in_array(indVariants[m], proband_variants)) {
-                                proband_variants.push(indVariants[m]);
-                            }
-                        }
-                    }
+                    individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, pathoVariantIdList);
                 }
             }
         }
         if (annotations[i].families && annotations[i].families.length > 0) {
             for (var j in annotations[i].families) {
                 if (annotations[i].families[j].individualIncluded && annotations[i].families[j].individualIncluded.length > 0) {
-                    individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, pathoVariantIdList );
-
-                    for (var n in individualsCollected) {
-                        var indVariants = individualsCollected[n]['allVariants'];
-                        for (var m in indVariants) {
-                            if (!in_array(indVariants[m], proband_variants)) {
-                                proband_variants.push(indVariants[m]);
-                            }
-                        }
-                    }
-
+                    individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, pathoVariantIdList);
                 }
 
                 if (annotations[i].families[j].segregation) {
@@ -806,16 +788,7 @@ var NewCalculation = function() {
             }
         }
         if (annotations[i].individuals && annotations[i].individuals.length > 0) {
-            individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, pathoVariantIdList );
-
-            for (var n in individualsCollected) {
-                var indVariants = individualsCollected[n]['allVariants'];
-                for (var m in indVariants) {
-                    if (!in_array(indVariants[m], proband_variants)) {
-                        proband_variants.push(indVariants[m]);
-                    }
-                }
-            }
+            individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, pathoVariantIdList);
         }
 
         // collect experimental assessed support, check matrix
@@ -887,7 +860,10 @@ var NewCalculation = function() {
         }
     }
 
-    userAssessments['variantNot'] = proband_variants.length - userAssessments['variantSpt'] - userAssessments['variantReview'] - userAssessments['variantCntdct'];
+    userAssessments['variantSpt'] = individualsCollected['sptVariants'].length;
+    userAssessments['variantReview'] = individualsCollected['rvwVariants'].length;
+    userAssessments['variantCntdct'] = individualsCollected['cntdctVariants'].length;
+    userAssessments['variantNot'] = individualsCollected['allVariants'].length - userAssessments['variantSpt'] - userAssessments['variantReview'] - userAssessments['variantCntdct'];
     userAssessments['expNot'] = userAssessments['expNot'] - userAssessments['expSpt'] - userAssessments['expReview'] - userAssessments['expCntdct'];
     userAssessments['segNot'] = userAssessments['segNot'] - userAssessments['segSpt'] - userAssessments['segReview'] - userAssessments['segCntdct'];
 
@@ -906,12 +882,12 @@ var NewCalculation = function() {
     var articleCollected = [];
     var year = new Date();
     var earliest = year.getFullYear();
-    for (var i in individualsCollected) {
-        if (individualsCollected[i].pmid && individualsCollected[i].pmid != '') {
+    for (var i in individualsCollected['probandInd']) {
+        if (individualsCollected['probandInd'][i].pmid && individualsCollected['probandInd'][i].pmid != '') {
             proband += 1;
-            if (!in_array(individualsCollected[i].pmid, articleCollected)) {
-                articleCollected.push(individualsCollected[i].pmid);
-                earliest = get_earliest_year(earliest, individualsCollected[i].date);
+            if (!in_array(individualsCollected['probandInd'][i].pmid, articleCollected)) {
+                articleCollected.push(individualsCollected['probandInd'][i].pmid);
+                earliest = get_earliest_year(earliest, individualsCollected['probandInd'][i].date);
             }
         }
     }
@@ -1193,46 +1169,51 @@ var get_earliest_year = function(earliest, dateStr) {
 };
 
 var filter = function(target, branch, article, idList) {
-    branch.forEach(function(obj) {
-        // in each individual
-        var supportedVariants = [], allVariants = [];
-        var allAssessed = false;
+    var allVariants = target['allVariants'], sptVariants = target['sptVariants'], rvwVariants = target['rvwVariants'], cntdctVariants = target['cntdctVariants'];
+    var patho_spt = idList['support'], patho_rvw = idList['review'], patho_cntdct = idList['contradict'];
 
+    branch.forEach(function(obj) {
         if (obj.proband && obj.variants && obj.variants.length > 0) {
+            // counting at probands only
+            var allSupported = true;
             for (var j in obj.variants) {
-                if (!in_array(obj.variants[j].uuid, idList)) {
-                    allAssessed = false;
+                // collect all distinct variants from proband individuals
+                if (!in_array(obj.variants[j].uuid, allVariants)) {
+                    allVariants.push(obj.variants[j].uuid);
+                }
+
+                // collect variant assessments, separated by 3 different values.
+                if (!in_array(obj.variants[j].uuid, patho_spt)) {
+                    allSupported = false;
+
+                    if (in_array(obj.variants[j].uuid, patho_rvw) && !in_array(obj.variants[j].uuid, rvwVariants)) {
+                        rvwVariants.push(obj.variants[j].uuid);
+                    }
+                    else if (in_array(obj.variants[j].uuid, patho_cntdct) && !in_array(obj.variants[j].uuid, cntdctVariants)) {
+                        cntdctVariants.push(obj.variants[j].uuid);
+                    }
                 }
                 else {
-                    allAssessed = true;
-                    // collect supported variants in proband individual
-                    supportedVariants.push(obj.variants[j].uuid);
+                    if (!in_array(obj.variants[j].uuid, sptVariants)) {
+                        sptVariants.push(obj.variants[j].uuid);
+                    }
                 }
-
-                // collect all variants in proband individual
-                allVariants.push(obj.variants[j].uuid)
             }
 
-            // pick up proband individuals if all associated variant assessed Support
-            if (allAssessed) {
-                target.push(
+            if (allSupported) {
+                target["probandInd"].push(
                     {
                         "evidence":obj.uuid,
-                        "supportedVariants":supportedVariants,
                         "pmid":article.pmid,
-                        "date": article.date,
-                        "allVariants": allVariants
-                    }
-                );
-            }
-            else {
-                target.push(
-                    {
-                        "allVariants": allVariants
+                        "date": article.date
                     }
                 );
             }
 
+            target["allVariants"] = allVariants;
+            target["sptVariants"] = sptVariants;
+            target["rvwVariants"] = rvwVariants;
+            target["cntdctVariants"] = cntdctVariants;
         }
     });
 
