@@ -862,3 +862,18 @@ class Document(ItemWithAttachment, Item):
     item_type = 'document'
     schema = load_schema('clincoded:schemas/document.json')
     embedded = ['lab', 'award', 'submitted_by']
+
+@collection(
+    name='histories',
+    properties={
+        'title': "User operation history",
+        'description': 'History of user operations',
+    })
+class History(Item):
+    item_type = 'history'
+    schema = load_schema('clincoded:schemas/history.json')
+    embedded = [
+        'primary',
+        'secondary',
+        'associated'
+    ]

@@ -1,0 +1,102 @@
+{
+    "title": "History",
+    "description": "Schema for tracking user actions.",
+    "id": "/profiles/history.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["operation"],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "operation": {
+            "title": "User operation",
+            "description": "The class of operation that the user performed",
+            "type": "string",
+            "enum": [
+                "add",
+                "modify",
+                "delete"
+            ]
+        },
+        "primary": {
+            "title": "Primary object",
+            "description": "Embed of the primary object of an operation",
+            "type": "string",
+            "linkTo": [
+                "articles",
+                "assessment",
+                "experimental",
+                "families",
+                "gdm",
+                "groups",
+                "individuals",
+                "pathogenicity",
+                "provisional",
+                "variants"
+            ]
+        },
+        "primaryHref": {
+            "title": "Primary href",
+            "description": "URI to the primary object; might be more complex than its @id",
+            "type": "string"
+        },
+        "secondary": {
+            "title": "Secondary object",
+            "description": "Embed of the secondary object of an operation",
+            "type": "string",
+            "linkTo": [
+                "articles",
+                "assessment",
+                "experimental",
+                "families",
+                "gdm",
+                "groups",
+                "individuals",
+                "pathogenicity",
+                "provisional",
+                "variants"
+            ]
+        },
+        "secondaryHref": {
+            "title": "Secondary href",
+            "description": "URI to the secondary object; might be more complex than its @id",
+            "type": "string"
+        },
+        "associated": {
+            "title": "Associated object",
+            "description": "Embed of the associated object of an operation",
+            "type": "string",
+            "linkTo": [
+                "articles",
+                "assessment",
+                "experimental",
+                "families",
+                "gdm",
+                "groups",
+                "individuals",
+                "pathogenicity",
+                "provisional",
+                "variants"
+            ]
+        },
+        "associatedHref": {
+            "title": "Associated href",
+            "description": "URI to the associated object; might be more complex than its @id",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A plain text description of the operation with embedded codes to insert primary, secondary, and associated object references.",
+            "type": "string",
+            "default": ""
+        }
+    }
+}
