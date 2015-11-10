@@ -410,109 +410,50 @@ var Classification = function() {
     );
 };
 
-var SummaryMatrix = function() {
+var SummaryMatrix = function(proband) {
+    var probandScore;
+    if (proband > 18) {
+        probandScore = 7;
+    }
+    else if (proband > 15) {
+        probandScore = 6;
+    }
+    else if (proband > 12) {
+        probandScore = 5;
+    }
+    else if (proband > 9) {
+        probandScore = 4;
+    }
+    else if (proband > 6) {
+        probandScore = 3;
+    }
+    else if (proband > 3) {
+        probandScore = 2;
+    }
+    else if (proband >= 1) {
+        probandScore = 1;
+    }
+    else {
+        probandScore = 0;
+    }
+
+    var pointTD = [0,1,2,3,4,5,6,7];
+
+    var  probandRow = [];
+    for(var i=0; i<8; i++) {
+        if (i === probandScore) {
+            probandRow.push(probandScore);
+        }
+        else {
+            probandRow.push('');
+        }
+    }
+
     return (
-        <div className="container">
-            <h1>Summary Matrix</h1>
-            <table className="summary-matrix" style={{'border-collapse':'collapse'}}>
-                <tr>
-                    <td rowSpan="2" className="title larger top-single-cell">Assertion<br />Criteria</td>
-                    <td rowSpan="2" className="title larger top-single-cell">Criteria Description</td>
-                    <td colSpan="8" className="title top-multiple-cell">Number of Points</td>
-                </tr>
-                <tr>
-                    <td className="title top-number-cell">0</td>
-                    <td className="title top-number-cell">1</td>
-                    <td className="title top-number-cell">2</td>
-                    <td className="title top-number-cell">3</td>
-                    <td className="title top-number-cell">4</td>
-                    <td className="title top-number-cell">5</td>
-                    <td className="title top-number-cell">6</td>
-                    <td className="title top-number-cell most-left">7</td>
-                </tr>
-                <tr>
-                    <td className="title"># Probands</td>
-                    <td className="description">Total # of curated unrelated probands<br />with variants that provide convincing<br />evidence for disease causality</td>
-                    <td>N/A</td>
-                    <td>1-3</td>
-                    <td>4-6</td>
-                    <td>7-9</td>
-                    <td>10-12</td>
-                    <td>13-15</td>
-                    <td>16-18</td>
-                    <td>19+</td>
-                </tr>
-                <tr>
-                    <td className="title">Experimental<br />Evidence<br />Points</td>
-                    <td className="description"># of points assigned for gene-level<br />experimental evidence supporting a role<br />for this gene in disease</td>
-                    <td>0</td>
-                    <td>1</td>
-                    <td>2</td>
-                    <td>3</td>
-                    <td>4</td>
-                    <td>5</td>
-                    <td>6+</td>
-                    <td className="empty-cell"></td>
-                </tr>
-                <tr>
-                    <td className="title"># Publications</td>
-                    <td className="description"># of curated independent publications<br />reporting human variants in the gene<br />under consideration</td>
-                    <td>N/A</td>
-                    <td>1</td>
-                    <td>2</td>
-                    <td>3</td>
-                    <td>4</td>
-                    <td>5+</td>
-                    <td colSpan="2" className="empty-cell"></td>
-                </tr>
-                <tr>
-                    <td className="title">Time (yrs)</td>
-                    <td className="description"># of years since initial report defining a<br />gene-disease association (if &#10877; 2 pubs,<br />then max score for time = 1)</td>
-                    <td>current<br />yr</td>
-                    <td>1-3 yr</td>
-                    <td>&gt;3 yr</td>
-                    <td colSpan="5" className="empty-cell"></td>
-                </tr>
-                <tr className="bottom-rows">
-                    <td colSpan="2" className="description">Is there valid contradictory evidence?</td>
-                    <td>Yes/No</td>
-                    <td colSpan="4" rowSpan="2">
-                        <table>
-                            <tr>
-                                <td className="title total-score-cell">Classification</td>
-                                <td className="title total-score-cell">Total Score</td>
-                            </tr>
-                            <tr>
-                                <td className="total-score-cell">Limited</td>
-                                <td className="total-score-cell">2-8</td>
-                            </tr>
-                            <tr>
-                                <td className="total-score-cell">Moderate</td>
-                                <td className="total-score-cell">9-12</td>
-                            </tr>
-                            <tr>
-                                <td className="total-score-cell">Strong</td>
-                                <td className="total-score-cell">13-16</td>
-                            </tr>
-                            <tr>
-                                <td className="total-score-cell">Definitive</td>
-                                <td className="total-score-cell">17-20</td>
-                            </tr>
-                        </table>
-                    </td>
-                    <td colSpan="3" rowSpan="2" className="inner-table-box">
-                        <table>
-                            <tr><td className="top-cell">Calculated<br />Classification</td></tr>
-                            <tr><td>Curator<br />Classification</td></tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr className="bottom-rows">
-                    <td>Description of<br />Contradictory<br />Evidence</td>
-                    <td colSpan="2">&nbsp;</td>
-                </tr>
-            </table>
-        </div>
+        <tr>{pointTD.map(function(i) {
+                return <td className={i===probandScore ? 'user-count' : null}>{probandRow[i]}</td>;
+            })}
+        </tr>
     );
 };
 
@@ -954,21 +895,52 @@ var NewCalculation = function() {
 
     var totalScore = probandScore + pubScore + timeScore + expScore;
     var autoClassification = 'No Reported Evidence';
-    if (totalScore > 16){
+    if (Math.round(totalScore) > 16){
         autoClassification = 'Definitive';
     }
-    else if (totalScore > 12) {
+    else if (Math.round(totalScore) > 12) {
         autoClassification = 'Strong';
     }
-    else if (totalScore > 9) {
+    else if (Math.round(totalScore) > 8) {
         autoClassification = 'Moderate';
     }
-    else if (totalScore > 1) {
+    else if (Math.round(totalScore) > 2) {
         autoClassification = 'Limited';
     }
 
     this.state.totalScore = totalScore;
     this.state.autoClassification = autoClassification;
+
+    var probandRow = [], expRow = [], pubRow = [], timeRow = [];
+    for(var i=0; i<8; i++) {
+        if (i === probandScore) {
+            probandRow.push(proband);
+        }
+        else {
+            probandRow.push('');
+        }
+
+        if (i === Math.round(expScore)) {
+            expRow.push(finalExperimentalScore);
+        }
+        else if (i < 7) {
+            expRow.push('');
+        }
+
+        if (i === pubScore) {
+            pubRow.push(articleCollected.length);
+        }
+        else if (i < 6) {
+            pubRow.push('');
+        }
+
+        if (i === timeScore) {
+            timeRow.push(time);
+        }
+        else if (i < 3) {
+            timeRow.push('');
+        }
+    }
 
     return (
         <div>
@@ -1022,6 +994,132 @@ var NewCalculation = function() {
                                 will then represent the new "Last Saved Summary & Provisional Classification".
                             </div>
                             <div><span>&nbsp;</span></div>
+                            <br />
+                            <div className="container">
+                                <table className="summary-matrix" style={{'background-color':'#efefef'}}>
+                                    <tr>
+                                        <td rowSpan="2" className="title larger top-single-cell">Assertion<br />Criteria</td>
+                                        <td rowSpan="2" className="title larger top-single-cell">Criteria Description</td>
+                                        <td colSpan="8" className="title top-multiple-cell">Number of Points</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="title top-number-cell">0</td>
+                                        <td className="title top-number-cell">1</td>
+                                        <td className="title top-number-cell">2</td>
+                                        <td className="title top-number-cell">3</td>
+                                        <td className="title top-number-cell">4</td>
+                                        <td className="title top-number-cell">5</td>
+                                        <td className="title top-number-cell">6</td>
+                                        <td className="title top-number-cell most-right">7</td>
+                                    </tr>
+                                    <tr>
+                                        <td rowSpan="2" className="title"># Probands</td>
+                                        <td rowSpan="2" className="description">Total # of curated unrelated probands<br />with variants that provide convincing<br />evidence for disease causality</td>
+                                        <td>N/A</td>
+                                        <td>1-3</td>
+                                        <td>4-6</td>
+                                        <td>7-9</td>
+                                        <td>10-12</td>
+                                        <td>13-15</td>
+                                        <td>16-18</td>
+                                        <td>19+</td>
+                                    </tr>
+                                    <tr style={{'border-bottom':'solid 2px #000'}}>
+                                        {probandRow.map(function(item) {
+                                            return <td className={item !== '' ? 'user-count' : null}>{item}</td>;
+                                        })}
+                                    </tr>
+                                    <tr>
+                                        <td rowSpan="2" className="title">Experimental<br />Evidence<br />Points</td>
+                                        <td rowSpan="2" className="description"># of points assigned for gene-level<br />experimental evidence supporting a role<br />for this gene in disease</td>
+                                        <td>0</td>
+                                        <td>1</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td>5</td>
+                                        <td>6+</td>
+                                        <td rowSpan="2" className="empty-cell"></td>
+                                    </tr>
+                                    <tr style={{'border-bottom':'solid 2px #000'}}>
+                                        {expRow.map(function(item) {
+                                            return <td className={item !== '' ? 'user-count' : null}>{item}</td>;
+                                        })}
+                                    </tr>
+                                    <tr>
+                                        <td rowSpan="2"  className="title"># Publications</td>
+                                        <td rowSpan="2" className="description"># of curated independent publications<br />reporting human variants in the gene<br />under consideration</td>
+                                        <td>N/A</td>
+                                        <td>1</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td>5+</td>
+                                        <td rowSpan="2" colSpan="2" className="empty-cell"></td>
+                                    </tr>
+                                    <tr style={{'border-bottom':'solid 2px #000'}}>
+                                        {pubRow.map(function(item) {
+                                            return <td className={item !== '' ? 'user-count' : null}>{item}</td>;
+                                        })}
+                                    </tr>
+                                    <tr>
+                                        <td rowSpan="2" className="title">Time (yrs)</td>
+                                        <td rowSpan="2" className="description"># of years since initial report defining a<br />gene-disease association (if &#10877; 2 pubs,<br />then max score for time = 1)</td>
+                                        <td>current<br />yr</td>
+                                        <td>1-3 yr</td>
+                                        <td>&gt;3 yr</td>
+                                        <td rowSpan="2" colSpan="5" className="empty-cell"></td>
+                                    </tr>
+                                    <tr style={{'border-bottom':'solid 2px #000'}}>
+                                        {timeRow.map(function(item) {
+                                            return <td className={item !== '' ? 'user-count' : null}>{item}</td>;
+                                        })}
+                                    </tr>
+                                    <tr>
+                                        <td colSpan="2" className="total-score title larger">Total Score</td>
+                                        <td colSpan="8" className="user-count larger">{totalScore}</td>
+                                    </tr>
+                                    <tr className="bottom-rows">
+                                        <td colSpan="2" className="description">Is there valid contradictory evidence?</td>
+                                        <td>Yes/No</td>
+                                        <td colSpan="4" rowSpan="2">
+                                            <table>
+                                                <tr>
+                                                    <td className="title total-score-cell">Classification</td>
+                                                    <td className="title total-score-cell">Total Score</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="total-score-cell">Limited</td>
+                                                    <td className="total-score-cell">2-8</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="total-score-cell">Moderate</td>
+                                                    <td className="total-score-cell">9-12</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="total-score-cell">Strong</td>
+                                                    <td className="total-score-cell">13-16</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="total-score-cell">Definitive</td>
+                                                    <td className="total-score-cell">17-20</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <td colSpan="3" rowSpan="2" className="inner-table-box">
+                                            <table>
+                                                <tr><td className="top-cell">Calculated<br />Classification</td></tr>
+                                                <tr><td>Curator<br />Classification</td></tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr className="bottom-rows">
+                                        <td>Description of<br />Contradictory<br />Evidence</td>
+                                        <td colSpan="2">&nbsp;</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <br />
                             <div className="row">
                                 <div className="col-sm-5">
                                     <strong className="pull-right">
@@ -1032,7 +1130,6 @@ var NewCalculation = function() {
                                 </div>
                                 <div className="col-sm-7"><strong>{this.state.totalScore}</strong></div>
                             </div>
-                            <br />
                             <div className="row">
                                 <div className="col-sm-5">
                                     <strong className="pull-right">Scoring Details:</strong>
