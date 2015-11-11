@@ -33,7 +33,7 @@ ORDER = [
     'pathogenicity',
     'provisionalClassification',
     'gdm',
-    'history',
+    'curatorHistory',
     'curator_page', # keep at bottom so it can load other type data
 ]
 

@@ -866,12 +866,12 @@ class Document(ItemWithAttachment, Item):
 @collection(
     name='histories',
     properties={
-        'title': "User operation history",
-        'description': 'History of user operations',
+        'title': "Curation operation history",
+        'description': 'History of curator operations',
     })
 class History(Item):
     item_type = 'history'
-    schema = load_schema('clincoded:schemas/history.json')
+    schema = load_schema('clincoded:schemas/curatorHistory.json')
     embedded = [
         'primary',
         'secondary',

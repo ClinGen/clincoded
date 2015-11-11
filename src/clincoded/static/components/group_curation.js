@@ -9,6 +9,7 @@ var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
+var CuratorHistory = require('./curator_history');
 var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 
 var CurationMixin = curator.CurationMixin;
@@ -28,7 +29,7 @@ var external_url_map = globals.external_url_map;
 
 
 var GroupCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -397,11 +398,17 @@ var GroupCuration = React.createClass({
                         }
 
                         // Post the modified annotation to the DB, then go back to Curation Central
-                        return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
+                        return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                            return Promise.resolve({group: newGroup, annotation: data['@graph'][0]});
+                        });
                     } else {
-                        return Promise.resolve(null);
+                        // Modifying an existing group; don't need to modify the annotation
+                        return Promise.resolve({group: newGroup, annotation: null});
                     }
                 }).then(data => {
+                    // Record history of the group creation
+                    this.recordOperation('add', {primaryUri: '/gdm'});
+
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Group Submit page.
                     this.resetAllFormValues();

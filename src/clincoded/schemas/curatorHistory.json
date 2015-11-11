@@ -1,10 +1,10 @@
 {
-    "title": "History",
-    "description": "Schema for tracking user actions.",
-    "id": "/profiles/history.json",
+    "title": "Curator history",
+    "description": "Schema for tracking curator actions.",
+    "id": "/profiles/curatorHistory.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["operation"],
+    "required": ["operationType"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -16,9 +16,9 @@
         "schema_version": {
             "default": "1"
         },
-        "operation": {
-            "title": "User operation",
-            "description": "The class of operation that the user performed",
+        "operationType": {
+            "title": "Curator operation type",
+            "description": "The class of operation that the curator performed",
             "type": "string",
             "enum": [
                 "add",
