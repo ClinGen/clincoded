@@ -401,13 +401,18 @@ var GroupCuration = React.createClass({
                         return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
                             return Promise.resolve({group: newGroup, annotation: data['@graph'][0]});
                         });
-                    } else {
-                        // Modifying an existing group; don't need to modify the annotation
-                        return Promise.resolve({group: newGroup, annotation: null});
                     }
+
+                    // Modifying an existing group; don't need to modify the annotation
+                    return Promise.resolve({group: newGroup, annotation: null});
                 }).then(data => {
                     // Record history of the group creation
-                    this.recordOperation('add', {primaryUri: '/gdm'});
+                    if (data.annotation) {
+                        // Record the creation of a new group
+                    } else {
+                        // Record the modification of an existing group
+                        this.recordHistory('modify', 'Group {P:' + data.group.label + '} modified', {P: {uri: data.group['@id'], object: data.group['@id']}});
+                    }
 
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Group Submit page.

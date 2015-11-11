@@ -4,7 +4,7 @@
     "id": "/profiles/curatorHistory.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["operationType"],
+    "required": ["operationType", "description"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -26,71 +26,103 @@
                 "delete"
             ]
         },
-        "primary": {
-            "title": "Primary object",
-            "description": "Embed of the primary object of an operation",
-            "type": "string",
-            "linkTo": [
-                "articles",
-                "assessment",
-                "experimental",
-                "families",
-                "gdm",
-                "groups",
-                "individuals",
-                "pathogenicity",
-                "provisional",
-                "variants"
-            ]
-        },
-        "primaryHref": {
-            "title": "Primary href",
-            "description": "URI to the primary object; might be more complex than its @id",
-            "type": "string"
-        },
-        "secondary": {
-            "title": "Secondary object",
-            "description": "Embed of the secondary object of an operation",
-            "type": "string",
-            "linkTo": [
-                "articles",
-                "assessment",
-                "experimental",
-                "families",
-                "gdm",
-                "groups",
-                "individuals",
-                "pathogenicity",
-                "provisional",
-                "variants"
-            ]
-        },
-        "secondaryHref": {
-            "title": "Secondary href",
-            "description": "URI to the secondary object; might be more complex than its @id",
-            "type": "string"
-        },
-        "associated": {
-            "title": "Associated object",
-            "description": "Embed of the associated object of an operation",
-            "type": "string",
-            "linkTo": [
-                "articles",
-                "assessment",
-                "experimental",
-                "families",
-                "gdm",
-                "groups",
-                "individuals",
-                "pathogenicity",
-                "provisional",
-                "variants"
-            ]
-        },
-        "associatedHref": {
-            "title": "Associated href",
-            "description": "URI to the associated object; might be more complex than its @id",
-            "type": "string"
+        "elements": {
+            "title": "History elements",
+            "description": "Elements describing the primary, secondary, and associated objects",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "P": {
+                    "title": "Primary object information",
+                    "description": "Information about the primary object of a history item",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "uri": {
+                            "title": "Primary URI",
+                            "description": "URI to link to the primary object display",
+                            "type": "string"
+                        },
+                        "object": {
+                            "title": "Primary object",
+                            "description": "Reference to the primary object",
+                            "type": "string",
+                            "linkTo": [
+                                "articles",
+                                "assessment",
+                                "experimental",
+                                "families",
+                                "gdm",
+                                "groups",
+                                "individuals",
+                                "pathogenicity",
+                                "provisional",
+                                "variants"
+                            ]
+                        }
+                    }
+                },
+                "S": {
+                    "title": "Secondary object information",
+                    "description": "Information about the secondary object of a history item",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "uri": {
+                            "title": "Secondary URI",
+                            "description": "URI to link to the secondary object display",
+                            "type": "string"
+                        },
+                        "object": {
+                            "title": "Secondary object",
+                            "description": "Reference to the secondary object",
+                            "type": "string",
+                            "linkTo": [
+                                "articles",
+                                "assessment",
+                                "experimental",
+                                "families",
+                                "gdm",
+                                "groups",
+                                "individuals",
+                                "pathogenicity",
+                                "provisional",
+                                "variants"
+                            ]
+                        }
+                    }
+                },
+                "A": {
+                    "title": "Associated object information",
+                    "description": "Information about the associated object of a history item",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "uri": {
+                            "title": "Associated URI",
+                            "description": "URI to link to the associated object display",
+                            "type": "string"
+                        },
+                        "object": {
+                            "title": "Associated object",
+                            "description": "Reference to the associated object",
+                            "type": "string",
+                            "linkTo": [
+                                "articles",
+                                "assessment",
+                                "experimental",
+                                "families",
+                                "gdm",
+                                "groups",
+                                "individuals",
+                                "pathogenicity",
+                                "provisional",
+                                "variants"
+                            ]
+                        }
+                    }
+                }
+            }
         },
         "description": {
             "title": "Description",

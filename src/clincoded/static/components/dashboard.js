@@ -8,6 +8,7 @@ var form = require('../libs/bootstrap/form');
 var panel = require('../libs/bootstrap/panel');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
+var CuratorHistory = require('./curator_history');
 
 var Form = form.Form;
 var FormMixin = form.FormMixin;
@@ -17,7 +18,7 @@ var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
 
 var Dashboard = React.createClass({
-    mixins: [RestMixin],
+    mixins: [RestMixin, CuratorHistory],
 
     getInitialState: function() {
         return {
@@ -25,7 +26,8 @@ var Dashboard = React.createClass({
             userStatus: '',
             lastLogin: '',
             recentHistory: [],
-            gdmList: []
+            gdmList: [],
+            histories: []
         };
     },
 
@@ -194,6 +196,9 @@ var Dashboard = React.createClass({
             this.setUserData(this.props.session.user_properties);
             this.getData(this.props.session);
         }
+        this.getHistories().then(histories => {
+            this.setState({histories: histories});
+        });
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -226,6 +231,14 @@ var Dashboard = React.createClass({
                                 })}
                             </ul>
                             : <li>You have no activity to display.</li>}
+                            {this.state.histories.length ?
+                                <ul>
+                                    {this.state.histories.map(function(history) {
+                                        var description = this.historyRender(history);
+                                        return <li key={history.uuid}>{description}</li>;
+                                    })}
+                                </ul>
+                            : null}
                         </Panel>
                     </div>
                     <div className="col-md-6">

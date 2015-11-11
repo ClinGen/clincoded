@@ -1,4 +1,5 @@
 'use strict';
+var React = require('react');
 
 // The curator history records operations performed by the currently logged-in curator on the database.
 // It consists mainly of three objects and a description:
@@ -28,23 +29,40 @@ module.exports = {
     //     associatedUri: URI of the associated object
     //     description: Human-readable description of the operation, with embedded codes
     // }
-    recordOperation: function(operationType, operationMeta) {
+    recordHistory: function(operationType, description, operationMeta) {
         var historyItem = {
             operationType: operationType,
+            description: description
         };
-
-        // Copy the URIs into the curator history object
-        if (operationMeta.primaryUri) {
-            historyItem.primaryHref = operationMeta.primaryUri;
-        }
-        if (operationMeta.secondaryUri) {
-            historyItem.secondaryHref = operationMeta.secondaryUri;
-        }
-        if (operationMeta.associatedUri) {
-            historyItem.associatedHref = operationMeta.associatedUri;
-        }
+        historyItem.elements = {};
+        historyItem.elements.P = {};
+        historyItem.elements.P.uri = operationMeta.P.uri;
+        historyItem.elements.P.object = operationMeta.P.object;
 
         this.postRestData('/histories/', historyItem);
         return true;
+    },
+
+    getHistories: function() {
+        return this.getRestData('/histories').then(data => {
+            return data['@graph'];
+        });
+    },
+
+    renderHistory: function(history) {
+        var re = /\{([PSA]):(.*?)\}/g;
+        var result;
+        var output = [];
+        var lastSlice = 0;
+
+        do {
+            // Get the next matching embedded code
+            result = re.exec(history.description);
+            if (result) {
+                // Put the text before the embedded code
+                output.push(<span>{result.input.slice(lastSlice, result.index)}</span>);
+                lastSlice += result[0].length;
+            }
+        } while (result);
     }
 };
