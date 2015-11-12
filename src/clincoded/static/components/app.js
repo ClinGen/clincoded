@@ -38,10 +38,20 @@ var App = module.exports = React.createClass({
     },
 
     getInitialState: function() {
+        var demoWarning = false;
+        var productionWarning = false;
+        if (/production.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // check if production URL. Enable productionWarning if it is.
+            productionWarning = true;
+        } else if (!/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // if neither production nor curation URL, enable demoWarning.
+            demoWarning = true;
+        }
         return {
             errors: [],
             portal: portal,
-            demoWarning: !/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)
+            demoWarning: demoWarning,
+            productionWarning: productionWarning
         };
     },
 
@@ -117,6 +127,9 @@ var App = module.exports = React.createClass({
                         <Header session={this.state.session} />
                         {this.state.demoWarning ?
                         <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
+                        : null}
+                        {this.state.productionWarning ?
+                        <Notice noticeType='warning' noticeMessage={<span><strong>Note:</strong> This is a production version of the site. Any data you enter will be permanently saved. Please use the <a href="http://curation.clinicalgenome.org/">main site</a> instead.</span>} />
                         : null}
                         {content}
                     </div>
