@@ -129,7 +129,7 @@ var App = module.exports = React.createClass({
                         <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
                         : null}
                         {this.state.productionWarning ?
-                        <Notice noticeType='production' noticeMessage={<span><strong>Please use <a href="http://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
+                        <Notice noticeType='production' noticeMessage={<span><strong>Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
                         : null}
                         {content}
                     </div>
