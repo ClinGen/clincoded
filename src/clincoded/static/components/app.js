@@ -129,7 +129,7 @@ var App = module.exports = React.createClass({
                         <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
                         : null}
                         {this.state.productionWarning ?
-                        <Notice noticeType='warning' noticeMessage={<span><strong>Note:</strong> This is a production version of the site. Any data you enter will be permanently saved. Please use the <a href="http://curation.clinicalgenome.org/">main site</a> instead.</span>} />
+                        <Notice noticeType='production' noticeMessage={<span><strong>Please use <a href="http://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
                         : null}
                         {content}
                     </div>
@@ -174,7 +174,7 @@ var Header = React.createClass({
 
 // Render the notice bar, under header, if needed
 // Usage: <Notice noticeType='[TYPE]' noticeMessage={<span>[MESSAGE]</span>} {noticeClosable} />
-// Valid noticeTypes: success, info, warning, danger (bootstrap defaults), and demo (clingen custom)
+// Valid noticeTypes: success, info, warning, danger (bootstrap defaults), and demo, production (clingen customs)
 var Notice = React.createClass({
     getInitialState: function () {
         return { noticeVisible: true };
