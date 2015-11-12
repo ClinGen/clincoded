@@ -144,8 +144,8 @@
             "title": "OMIM ID",
             "type": "string"
         },
-        "status": {
-            "title": "Status",
+        "gdm_status": {
+            "title": "GDM Status",
             "type": "string"
         },
         "annotations": {
