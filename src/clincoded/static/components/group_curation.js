@@ -409,6 +409,11 @@ var GroupCuration = React.createClass({
                     // Record history of the group creation
                     if (data.annotation) {
                         // Record the creation of a new group
+                        var gdmText = this.state.gdm.gene.symbol + '-' + this.state.gdm.disease.term + ' ' + this.state.gdm.modeInheritance;
+                        this.recordHistory('add', 'Group {P:' + data.group.label + '} added to {S:' + gdmText + '} for {A:PMID:' + this.state.annotation.article.pmid + '}',
+                            {P: {uri: data.group['@id'], object: data.group['@id']},
+                             S: {object: this.state.gdm['@id']},
+                             A: {uri: '/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid, object: this.state.annotation.article['@id']}});
                     } else {
                         // Record the modification of an existing group
                         this.recordHistory('modify', 'Group {P:' + data.group.label + '} modified', {P: {uri: data.group['@id'], object: data.group['@id']}});

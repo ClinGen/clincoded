@@ -48,16 +48,16 @@
                             "description": "Reference to the primary object",
                             "type": "string",
                             "linkTo": [
-                                "articles",
+                                "article",
                                 "assessment",
                                 "experimental",
-                                "families",
+                                "family",
                                 "gdm",
-                                "groups",
-                                "individuals",
+                                "group",
+                                "individual",
                                 "pathogenicity",
-                                "provisional",
-                                "variants"
+                                "provisionalClassification",
+                                "variant"
                             ]
                         }
                     }
@@ -78,16 +78,16 @@
                             "description": "Reference to the secondary object",
                             "type": "string",
                             "linkTo": [
-                                "articles",
+                                "article",
                                 "assessment",
                                 "experimental",
-                                "families",
+                                "family",
                                 "gdm",
-                                "groups",
-                                "individuals",
+                                "group",
+                                "individual",
                                 "pathogenicity",
-                                "provisional",
-                                "variants"
+                                "provisionalClassification",
+                                "variant"
                             ]
                         }
                     }
@@ -108,16 +108,16 @@
                             "description": "Reference to the associated object",
                             "type": "string",
                             "linkTo": [
-                                "articles",
+                                "article",
                                 "assessment",
                                 "experimental",
-                                "families",
+                                "family",
                                 "gdm",
-                                "groups",
-                                "individuals",
+                                "group",
+                                "individual",
                                 "pathogenicity",
-                                "provisional",
-                                "variants"
+                                "provisionalClassification",
+                                "variant"
                             ]
                         }
                     }

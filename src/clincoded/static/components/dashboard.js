@@ -233,9 +233,9 @@ var Dashboard = React.createClass({
                             : <li>You have no activity to display.</li>}
                             {this.state.histories.length ?
                                 <ul>
-                                    {this.state.histories.map(function(history) {
-                                        var description = this.historyRender(history);
-                                        return <li key={history.uuid}>{description}</li>;
+                                    {this.state.histories.map(history => {
+                                        var parts = this.renderHistory(history);
+                                        return <li key={history.uuid}>{parts}</li>;
                                     })}
                                 </ul>
                             : null}
