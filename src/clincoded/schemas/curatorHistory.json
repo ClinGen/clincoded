@@ -4,7 +4,7 @@
     "id": "/profiles/curatorHistory.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["operationType", "description"],
+    "required": ["operationType"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -26,109 +26,70 @@
                 "delete"
             ]
         },
-        "elements": {
-            "title": "History elements",
-            "description": "Elements describing the primary, secondary, and associated objects",
+        "primary": {
+            "title": "Primary object",
+            "description": "Reference to the primary object",
+            "type": "string",
+            "linkTo": [
+                "article",
+                "assessment",
+                "experimental",
+                "family",
+                "gdm",
+                "group",
+                "individual",
+                "pathogenicity",
+                "provisionalClassification",
+                "variant"
+            ]
+        },
+        "meta": {
+            "title": "History meta",
+            "description": "Type-dependent data about the history item",
             "type": "object",
-            "additionalProperties": false,
             "properties": {
-                "P": {
-                    "title": "Primary object information",
-                    "description": "Information about the primary object of a history item",
+                "group": {
+                    "title": "Group history",
+                    "description": "History data for groups",
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
-                        "uri": {
-                            "title": "Primary URI",
-                            "description": "URI to link to the primary object display",
-                            "type": "string"
-                        },
-                        "object": {
-                            "title": "Primary object",
-                            "description": "Reference to the primary object",
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the group",
                             "type": "string",
-                            "linkTo": [
-                                "article",
-                                "assessment",
-                                "experimental",
-                                "family",
-                                "gdm",
-                                "group",
-                                "individual",
-                                "pathogenicity",
-                                "provisionalClassification",
-                                "variant"
-                            ]
-                        }
-                    }
-                },
-                "S": {
-                    "title": "Secondary object information",
-                    "description": "Information about the secondary object of a history item",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "uri": {
-                            "title": "Secondary URI",
-                            "description": "URI to link to the secondary object display",
-                            "type": "string"
+                            "linkTo": "gdm"
                         },
-                        "object": {
-                            "title": "Secondary object",
-                            "description": "Reference to the secondary object",
+                        "article": {
+                            "title": "Article",
+                            "description": "GDM article the group provides evidence for",
                             "type": "string",
-                            "linkTo": [
-                                "article",
-                                "assessment",
-                                "experimental",
-                                "family",
-                                "gdm",
-                                "group",
-                                "individual",
-                                "pathogenicity",
-                                "provisionalClassification",
-                                "variant"
-                            ]
-                        }
-                    }
-                },
-                "A": {
-                    "title": "Associated object information",
-                    "description": "Information about the associated object of a history item",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "uri": {
-                            "title": "Associated URI",
-                            "description": "URI to link to the associated object display",
-                            "type": "string"
-                        },
-                        "object": {
-                            "title": "Associated object",
-                            "description": "Reference to the associated object",
-                            "type": "string",
-                            "linkTo": [
-                                "article",
-                                "assessment",
-                                "experimental",
-                                "family",
-                                "gdm",
-                                "group",
-                                "individual",
-                                "pathogenicity",
-                                "provisionalClassification",
-                                "variant"
-                            ]
+                            "linkTo": "article"
                         }
                     }
                 }
             }
+        }
+    },
+    "columns": {
+        "operationType": {
+            "title": "Curator operation type",
+            "type": "string"
         },
-        "description": {
-            "title": "Description",
-            "description": "A plain text description of the operation with embedded codes to insert primary, secondary, and associated object references.",
-            "type": "string",
-            "default": ""
+        "primary": {
+            "title": "Primary object information",
+            "type": "object"
+        },
+        "meta.group.gdm": {
+            "title": "GDM",
+            "type": "string"
+        },
+        "meta.group.article": {
+            "title": "Article",
+            "type": "string"
+        },
+        "date_created": {
+            "title": "Creation Date",
+            "type": "string"
         }
     }
 }

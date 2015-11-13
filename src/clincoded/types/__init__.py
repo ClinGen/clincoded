@@ -872,3 +872,10 @@ class Document(ItemWithAttachment, Item):
 class History(Item):
     item_type = 'history'
     schema = load_schema('clincoded:schemas/curatorHistory.json')
+    embedded = [
+        'primary',
+        'meta.group.gdm',
+        'meta.group.gdm.gene',
+        'meta.group.gdm.disease',
+        'meta.group.article',
+    ]

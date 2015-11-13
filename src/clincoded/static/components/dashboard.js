@@ -234,8 +234,9 @@ var Dashboard = React.createClass({
                             {this.state.histories.length ?
                                 <ul>
                                     {this.state.histories.map(history => {
-                                        var parts = this.renderHistory(history);
-                                        return <li key={history.uuid}>{parts}</li>;
+                                        // Call the history display view based on the primary object
+                                        var HistoryView = globals.history_views.lookup(history.primary, history.operationType);
+                                        return <HistoryView key={history.uuid} history={history} />;
                                     })}
                                 </ul>
                             : null}

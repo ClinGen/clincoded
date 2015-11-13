@@ -31,13 +31,13 @@ module.exports = {
     //     associatedUri: URI of the associated object
     //     description: Human-readable description of the operation, with embedded codes
     // }
-    recordHistory: function(operationType, description, operationMeta) {
+    recordHistory: function(operationType, primary, meta) {
         // Put the history object together
         var historyItem = {
             operationType: operationType,
-            description: description
+            primary: primary['@id'],
+            meta: meta
         };
-        historyItem.elements = operationMeta;
 
         // Write the history object to the database. No one relies on the result, so don't
         // bother with the promise. If an error happens, it does catch though.
@@ -49,50 +49,5 @@ module.exports = {
         return this.getRestData('/histories').then(data => {
             return data['@graph'];
         });
-    },
-
-    renderHistory: function(history) {
-        var re = /\{([PSA]):(.*?)\}/g;
-        var result;
-        var output = [];
-        var lastSlice = 0;
-        var preText = '';
-
-        do {
-            // Get the next matching embedded code
-            result = re.exec(history.description);
-            if (result) {
-                // Output the text that comes before the embedded code, if any.
-                if (lastSlice < result.index) {
-                    preText = history.description.slice(lastSlice, result.index);
-                    output.push(<span>{preText}</span>);
-                }
-
-                // Advance the next slice beyond the preText and the embedded code
-                lastSlice += preText.length + result[0].length;
-                preText = '';
-
-                // Output the embedded code as an anchor
-                var part = result[1];
-                var uri = history.elements[part] && history.elements[part].uri;
-                if (uri) {
-                    // Have a URI; enclose the link text within the link
-                    output.push(<a href={uri}>{result[2]}</a>);
-                } else {
-                    // No URI, just output the link text with no link
-                    output.push(<span>{result[2]}</span>);
-                }
-            }
-        } while (result);
-
-        // Output the text after the last embedded code, if any
-        var postText = history.description.slice(lastSlice);
-        if (postText && postText.length) {
-            output.push(<span>{history.description.slice(lastSlice)}</span>);
-        }
-
-        // Add the date and time to the end
-        output.push(<span>{'; ' + moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>);
-        return output;
     }
 };

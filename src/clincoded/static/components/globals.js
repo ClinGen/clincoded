@@ -20,6 +20,9 @@ module.exports.blocks = new Registry();
 // Curator page view
 module.exports.curator_page = new Registry();
 
+// History display view
+module.exports.history_views = new Registry();
+
 
 var itemClass = module.exports.itemClass = function (context, htmlClass) {
     htmlClass = htmlClass || '';
