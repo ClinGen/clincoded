@@ -280,7 +280,7 @@ globals.curator_page.register(ProvisionalCuration,  'curator_page', 'provisional
 
 var Classification = function() {
     return (
-        <div className="container" style={{'padding-bottom':'10px'}}>
+        <div className="container classification-cell">
             <h1>Clinical Validity Classifications</h1>
             <div className="classificationTable">
                 <table>
@@ -290,7 +290,7 @@ var Classification = function() {
                     </tr>
                     <tr>
                         <td rowSpan='7' className="verticalCell">
-                            <div className="verticalContent spptEvd" style={{width:'30px'}}>
+                            <div className="verticalContent spptEvd">
                                 Supportive&nbsp;Evidence
                             </div>
                         </td>
@@ -301,7 +301,7 @@ var Classification = function() {
                             that contradicts the role of the gene in the specified disease.
                         </td>
                     </tr>
-                    <tr className="narrowLine"></tr>
+                    <tr className="narrow-line"></tr>
                     <tr>
                         <td className="levelCell">STRONG</td>
                         <td>
@@ -315,7 +315,7 @@ var Classification = function() {
                             In addition, no convincing evidence has emerged that contradicts the role of the gene in the noted disease.
                         </td>
                     </tr>
-                    <tr className="narrowLine"></tr>
+                    <tr className="narrow-line"></tr>
                     <tr>
                         <td className="levelCell">MODERATE</td>
                         <td>
@@ -328,7 +328,7 @@ var Classification = function() {
                             that contradicts the role of the gene in the noded disease.
                         </td>
                     </tr>
-                    <tr className="narrowLine"></tr>
+                    <tr className="narrow-line"></tr>
                     <tr>
                         <td className="levelCell">LIMITED</td>
                         <td>
@@ -342,7 +342,7 @@ var Classification = function() {
                             contradicts the role of the gene in the noted disease.
                         </td>
                     </tr>
-                    <tr className="narrowLine"></tr>
+                    <tr className="narrow-line"></tr>
                     <tr>
                         <td colSpan="2" className="levelCell">NO REPORTED<br />EVIDENCE</td>
                         <td>
@@ -350,7 +350,7 @@ var Classification = function() {
                             in pathways known to be involved in human diseases, but no reports have implicated the gene in human disease cases.
                         </td>
                     </tr>
-                    <tr className="narrowLine"></tr>
+                    <tr className="narrow-line"></tr>
                     <tr>
                         <td className="verticalCell">
                             <div className="verticalContent cntrdctEvd">
@@ -451,74 +451,9 @@ var SummaryMatrix = function(proband) {
 
     return (
         <tr>{pointTD.map(function(i) {
-                return <td className={i===probandScore ? 'user-count' : null}>{probandRow[i]}</td>;
+                return <td className={i===probandScore ? 'count-cells' : null}>{probandRow[i]}</td>;
             })}
         </tr>
-    );
-};
-
-var ExperimentalMatrix = function() {
-    return (
-        <div className="container">
-            <h1>Experimental Weighting System</h1>
-            <table className="exp-matrix">
-                <tr className="top-row">
-                    <td className="title">Evidence<br />Category</td>
-                    <td className="title">Evidence Type</td>
-                    <td className="title">Score Range</td>
-                    <td className="title">Recommended<br />points/evidence</td>
-                    <td className="title max-score">Max<br />Score</td>
-                </tr>
-                <tr>
-                    <td className="title" rowSpan="3">Function</td>
-                    <td>Biochemical Function</td>
-                    <td>&frac12; - 2</td>
-                    <td rowSpan="3">&frac12; for each piece of<br />evidence in any<br />category</td>
-                    <td className="title" rowSpan="3">2</td>
-                </tr>
-                <tr>
-                    <td>Protein Interaction</td>
-                    <td>&frac12; - 2</td>
-                </tr>
-                <tr>
-                    <td>Expression</td>
-                    <td>&frac12; - 2</td>
-                </tr>
-                <tr className="middle-row">
-                    <td className="title">Functional<br />Alteration</td>
-                    <td>Patient cells<br />Non-Patient Cells</td>
-                    <td>1 - 2<br />&frac12; - 1</td>
-                    <td>1<br />&frac12;</td>
-                    <td className="title">2</td>
-                </tr>
-                <tr>
-                    <td className="title" rowSpan="4">Models and<br />Rescue</td>
-                    <td>Animal model</td>
-                    <td>2 - 4</td>
-                    <td>2</td>
-                    <td className="title" rowSpan="4">4</td>
-                </tr>
-                <tr>
-                    <td>Cell culture model</td>
-                    <td>&frac12; - 2</td>
-                    <td>1</td>
-                </tr>
-                <tr>
-                    <td>Rescue in patient cells</td>
-                    <td>2 - 4</td>
-                    <td>2</td>
-                </tr>
-                <tr>
-                    <td>Rescue in engineered<br />equivalent</td>
-                    <td>&frac12; - 2</td>
-                    <td>1</td>
-                </tr>
-                <tr className="middle-row">
-                    <td className="bottom-score" colSpan="4">Total Final Score</td>
-                    <td className="bottom-score">0 - 8</td>
-                </tr>
-            </table>
-        </div>
     );
 };
 
@@ -594,7 +529,6 @@ var EditCurrent = function() {
         </div>
     );
 };
-
 
 var NewCalculation = function() {
     var gdm = this.state.gdm;
@@ -920,13 +854,6 @@ var NewCalculation = function() {
             probandRow.push('');
         }
 
-        if (i === Math.round(expScore)) {
-            expRow.push(finalExperimentalScore);
-        }
-        else if (i < 7) {
-            expRow.push('');
-        }
-
         if (i === pubScore) {
             pubRow.push(articleCollected.length);
         }
@@ -996,25 +923,29 @@ var NewCalculation = function() {
                             <div><span>&nbsp;</span></div>
                             <br />
                             <div className="container">
-                                <table className="summary-matrix" style={{'background-color':'#efefef'}}>
+                                <table className="summary-matrix">
                                     <tr>
-                                        <td rowSpan="2" className="title larger top-single-cell">Assertion<br />Criteria</td>
-                                        <td rowSpan="2" className="title larger top-single-cell">Criteria Description</td>
+                                        <td rowSpan="2" className="title larger top-single-cell area-bottom-cells most-left">Assertion<br />Criteria</td>
+                                        <td rowSpan="2" className="title larger top-single-cell area-bottom-cells">Criteria Description</td>
                                         <td colSpan="8" className="title top-multiple-cell">Number of Points</td>
+                                        <td rowSpan="2" className="title larger score-vertical-cell">
+                                            <div className="score-vertical-content vertical-transform-1">Score</div>
+                                        </td>
                                     </tr>
-                                    <tr>
-                                        <td className="title top-number-cell">0</td>
-                                        <td className="title top-number-cell">1</td>
-                                        <td className="title top-number-cell">2</td>
-                                        <td className="title top-number-cell">3</td>
-                                        <td className="title top-number-cell">4</td>
-                                        <td className="title top-number-cell">5</td>
-                                        <td className="title top-number-cell">6</td>
-                                        <td className="title top-number-cell most-right">7</td>
+                                    <tr className="area-bottom-cells">
+                                        <td className="title larger score-cells top-number-cell">0</td>
+                                        <td className="title larger score-cells top-number-cell">1</td>
+                                        <td className="title larger score-cells top-number-cell">2</td>
+                                        <td className="title larger score-cells top-number-cell">3</td>
+                                        <td className="title larger score-cells top-number-cell">4</td>
+                                        <td className="title larger score-cells top-number-cell">5</td>
+                                        <td className="title larger score-cells top-number-cell">6</td>
+                                        <td className="title larger score-cells top-number-cell">7</td>
                                     </tr>
-                                    <tr>
-                                        <td rowSpan="2" className="title"># Probands</td>
-                                        <td rowSpan="2" className="description">Total # of curated unrelated probands<br />with variants that provide convincing<br />evidence for disease causality</td>
+                                    <tr className="narrow-line"></tr>
+                                    <tr className="area-top-cells">
+                                        <td rowSpan="2" className="title most-left"># Probands</td>
+                                        <td rowSpan="2" className="description">Total # of curated unrelated probands with variants that provide convincing evidence for disease causality</td>
                                         <td>N/A</td>
                                         <td>1-3</td>
                                         <td>4-6</td>
@@ -1023,32 +954,18 @@ var NewCalculation = function() {
                                         <td>13-15</td>
                                         <td>16-18</td>
                                         <td>19+</td>
+                                        <td rowSpan="2" className="result-cells score-cells title larger">{probandScore}</td>
                                     </tr>
-                                    <tr style={{'border-bottom':'solid 2px #000'}}>
-                                        {probandRow.map(function(item) {
-                                            return <td className={item !== '' ? 'user-count' : null}>{item}</td>;
+                                    <tr className="dark-row">
+                                        {probandRow.map(function(item, i) {
+                                            return (
+                                                <td className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
+                                            );
                                         })}
                                     </tr>
                                     <tr>
-                                        <td rowSpan="2" className="title">Experimental<br />Evidence<br />Points</td>
-                                        <td rowSpan="2" className="description"># of points assigned for gene-level<br />experimental evidence supporting a role<br />for this gene in disease</td>
-                                        <td>0</td>
-                                        <td>1</td>
-                                        <td>2</td>
-                                        <td>3</td>
-                                        <td>4</td>
-                                        <td>5</td>
-                                        <td>6+</td>
-                                        <td rowSpan="2" className="empty-cell"></td>
-                                    </tr>
-                                    <tr style={{'border-bottom':'solid 2px #000'}}>
-                                        {expRow.map(function(item) {
-                                            return <td className={item !== '' ? 'user-count' : null}>{item}</td>;
-                                        })}
-                                    </tr>
-                                    <tr>
-                                        <td rowSpan="2"  className="title"># Publications</td>
-                                        <td rowSpan="2" className="description"># of curated independent publications<br />reporting human variants in the gene<br />under consideration</td>
+                                        <td rowSpan="2"  className="title most-left"># Publications</td>
+                                        <td rowSpan="2" className="description"># of curated independent publications reporting human variants in the gene under consideration</td>
                                         <td>N/A</td>
                                         <td>1</td>
                                         <td>2</td>
@@ -1056,151 +973,155 @@ var NewCalculation = function() {
                                         <td>4</td>
                                         <td>5+</td>
                                         <td rowSpan="2" colSpan="2" className="empty-cell"></td>
+                                        <td rowSpan="2" className="result-cells score-cells title larger">{pubScore}</td>
                                     </tr>
-                                    <tr style={{'border-bottom':'solid 2px #000'}}>
-                                        {pubRow.map(function(item) {
-                                            return <td className={item !== '' ? 'user-count' : null}>{item}</td>;
+                                    <tr className="dark-row">
+                                        {pubRow.map(function(item, i) {
+                                            return (
+                                                <td className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
+                                            );
                                         })}
                                     </tr>
                                     <tr>
-                                        <td rowSpan="2" className="title">Time (yrs)</td>
-                                        <td rowSpan="2" className="description"># of years since initial report defining a<br />gene-disease association (if &#10877; 2 pubs,<br />then max score for time = 1)</td>
-                                        <td>current<br />yr</td>
+                                        <td rowSpan="2" className="title area-bottom-cells most-left">Time (yrs)</td>
+                                        <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#10877; 2 pubs, then max score for time = 1)</td>
+                                        <td>current yr</td>
                                         <td>1-3 yr</td>
                                         <td>&gt;3 yr</td>
-                                        <td rowSpan="2" colSpan="5" className="empty-cell"></td>
+                                        <td rowSpan="2" colSpan="5" className="empty-cell area-bottom-cells">&nbsp;</td>
+                                        <td rowSpan="2" className="result-cells score-cells title larger area-bottom-cells">{timeScore}</td>
                                     </tr>
-                                    <tr style={{'border-bottom':'solid 2px #000'}}>
-                                        {timeRow.map(function(item) {
-                                            return <td className={item !== '' ? 'user-count' : null}>{item}</td>;
+                                    <tr className="dark-row area-bottom-cells">
+                                        {timeRow.map(function(item, i) {
+                                            return (
+                                                <td className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
+                                            );
                                         })}
                                     </tr>
+                                    <tr className="narrow-line"></tr>
+                                    <tr className="area-top-cells area-bottom-cells">
+                                        <td className="title most-left">Experimental<br />Evidence<br />Points</td>
+                                        <td className="description" ># of points assigned for gene-level experimental evidence supporting a role for this gene in disease</td>
+                                        <td colSpan="8">
+                                            <table className="exp-matrix">
+                                                <tr className="top-row">
+                                                    <td style={{'width':'120px'}}>Category</td>
+                                                    <td style={{'width':'180px'}}>Type</td>
+                                                    <td className="score-vertical-cell">
+                                                        <div className="score-vertical-content vertical-transform-1">Unit<br />Point</div>
+                                                    </td>
+                                                    <td className="score-vertical-cell">
+                                                        <div className="score-vertical-content vertical-transform-1">Count</div>
+                                                    </td>
+                                                    <td className="score-vertical-cell">
+                                                        <div className="score-vertical-content vertical-transform-2">Max in<br />Category</div>
+                                                    </td>
+                                                    <td className="score-vertical-cell">
+                                                        <div className="score-vertical-content vertical-transform-1">Sub-<br />Score</div>
+                                                    </td>
+                                                    <td className="score-vertical-cell">
+                                                        <div className="score-vertical-content vertical-transform-1">Max<br />Total</div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td rowSpan="3" className="title" style={{'width':'120px'}}>Function</td>
+                                                    <td className="title">Biochemical Function</td>
+                                                    <td>0.5</td>
+                                                    <td className={expType['Biochemical Function'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Biochemical Function'] > 0 ? expType['Biochemical Function'] : ''}</td>
+                                                    <td rowSpan="3">2</td>
+                                                    <td rowSpan="3" className={exp_scores[0] > 0 ? 'result-cells title larger score-cells' : 'dark-cells'}>{exp_scores[0] > 0 ? (exp_scores[0] < 2 ? exp_scores[0] : 2) : ''}</td>
+                                                    <td rowSpan="9">6</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Protein Interaction</td>
+                                                    <td>0.5</td>
+                                                    <td className={expType['Protein Interactions'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Protein Interactions'] > 0 ? expType['Protein Interactions'] : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Expression</td>
+                                                    <td>0.5</td>
+                                                    <td className={expType['Expression'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Expression'] > 0 ? expType['Expression'] : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td rowSpan="2" className="title" style={{'width':'120px'}}>Functional<br />Alteration</td>
+                                                    <td className="title">Patient Cells</td>
+                                                    <td>1</td>
+                                                    <td className={expType['Functional Alteration (Patient cells)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Patient cells)'] > 0 ? expType['Functional Alteration (Patient cells)'] : ''}</td>
+                                                    <td rowSpan="2">2</td>
+                                                    <td rowSpan="2" className={exp_scores[1] > 0 ? 'result-cells title larger score-cells' : 'dark-cells'}>{exp_scores[1] > 0 ? (exp_scores[1] < 2 ? exp_scores[1]: 2) : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Non-Patient Cells</td>
+                                                    <td>0.5</td>
+                                                    <td className={expType['Functional Alteration (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Engineered equivalent)'] > 0 ? expType['Functional Alteration (Engineered equivalent)'] : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td rowSpan="4" className="title" style={{'width':'120px'}}>Models and<br />Rescue</td>
+                                                    <td className="title">Animal Model</td>
+                                                    <td>2</td>
+                                                    <td className={expType['Model Systems (Animal model)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Model Systems (Animal model)'] > 0 ? expType['Model Systems (Animal model)'] : ''}</td>
+                                                    <td rowSpan="4">4</td>
+                                                    <td rowSpan="4" className={exp_scores[2] > 0 ? 'result-cells title larger score-cells' : 'dark-cells'}>{exp_scores[2] > 0 ? (exp_scores[2] < 4 ? exp_scores[2] : 4) : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Cell Culture Model</td>
+                                                    <td>1</td>
+                                                    <td className={expType['Model Systems (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Model Systems (Engineered equivalent)'] > 0 ? expType['Model Systems (Engineered equivalent)'] : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Rescue in Patient Cells</td>
+                                                    <td>2</td>
+                                                    <td className={expType['Rescue (Patient cells)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Rescue (Patient cells)'] > 0 ? expType['Rescue (Patient cells)'] : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Rescue in Engineered Equivalent</td>
+                                                    <td>1</td>
+                                                    <td className={expType['Rescue (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Rescue (Engineered equivalent)'] > 0 ? expType['Rescue (Engineered equivalent)'] : ''}</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <td className="title larger result-cells score-cells">{expScore}</td>
+                                    </tr>
+                                    <tr className="narrow-line"></tr>
                                     <tr>
-                                        <td colSpan="2" className="total-score title larger">Total Score</td>
-                                        <td colSpan="8" className="user-count larger">{totalScore}</td>
+                                        <td colSpan="10" className="total-score-cell title larger area-top-cells area-bottom-cells">Total Score</td>
+                                        <td className="result-cells title larger score-cells larger area-top-cells area-bottom-cells">{totalScore}</td>
                                     </tr>
-                                    <tr className="bottom-rows">
-                                        <td colSpan="2" className="description">Is there valid contradictory evidence?</td>
-                                        <td>Yes/No</td>
-                                        <td colSpan="4" rowSpan="2">
+                                    <tr className="narrow-line"></tr>
+                                    <tr className="classification-row">
+                                        <td colSpan="3" className="description">Is there valid contradictory evidence? Yes/No</td>
+                                        <td colSpan="8" rowSpan="2" className="inner-table-box">
                                             <table>
                                                 <tr>
-                                                    <td className="title total-score-cell">Classification</td>
-                                                    <td className="title total-score-cell">Total Score</td>
+                                                    <td className="title">Classification</td>
+                                                    <td className="title">Total Score</td>
                                                 </tr>
-                                                <tr>
-                                                    <td className="total-score-cell">Limited</td>
-                                                    <td className="total-score-cell">2-8</td>
+                                                <tr className={autoClassification === 'Limited' ? 'high-light-row' : null}>
+                                                    <td>Limited</td>
+                                                    <td className={autoClassification === 'Limited' ? "title score-cells" : "non-high-light"}>2-8</td>
                                                 </tr>
-                                                <tr>
-                                                    <td className="total-score-cell">Moderate</td>
-                                                    <td className="total-score-cell">9-12</td>
+                                                <tr className={autoClassification === 'Moderate' ? 'high-light-row' : null}>
+                                                    <td>Moderate</td>
+                                                    <td className={autoClassification === 'Moderate' ? "title score-cells" : "non-high-light"}>9-12</td>
                                                 </tr>
-                                                <tr>
-                                                    <td className="total-score-cell">Strong</td>
-                                                    <td className="total-score-cell">13-16</td>
+                                                <tr className={autoClassification === 'Strong' ? 'high-light-row' : null}>
+                                                    <td>Strong</td>
+                                                    <td className={autoClassification === 'Strong' ? "title score-cells" : "non-high-light"}>13-16</td>
                                                 </tr>
-                                                <tr>
-                                                    <td className="total-score-cell">Definitive</td>
-                                                    <td className="total-score-cell">17-20</td>
+                                                <tr className={autoClassification === 'Definitive' ? 'high-light-row' : null}>
+                                                    <td>Definitive</td>
+                                                    <td className={autoClassification === 'Definitive' ? "title score-cells" : "non-high-light"}>17-20</td>
                                                 </tr>
                                             </table>
                                         </td>
-                                        <td colSpan="3" rowSpan="2" className="inner-table-box">
-                                            <table>
-                                                <tr><td className="top-cell">Calculated<br />Classification</td></tr>
-                                                <tr><td>Curator<br />Classification</td></tr>
-                                            </table>
-                                        </td>
                                     </tr>
-                                    <tr className="bottom-rows">
+                                    <tr className="classification-row">
                                         <td>Description of<br />Contradictory<br />Evidence</td>
                                         <td colSpan="2">&nbsp;</td>
                                     </tr>
                                 </table>
                             </div>
                             <br />
-                            <div className="row">
-                                <div className="col-sm-5">
-                                    <strong className="pull-right">
-                                        Total Score (
-                                        <a href="/provisional-curation/?summarymatrix=display" target="_block">Summary Matrix</a>
-                                        ):
-                                    </strong>
-                                </div>
-                                <div className="col-sm-7"><strong>{this.state.totalScore}</strong></div>
-                            </div>
-                            <div className="row">
-                                <div className="col-sm-5">
-                                    <strong className="pull-right">Scoring Details:</strong>
-                                </div>
-                                <div className="col-sm-7">
-                                    <table className="summary-scoring">
-                                        <tr>
-                                            <td className="td-title"><strong>Evidence</strong></td>
-                                            <td className="td-score"><strong>Count</strong></td>
-                                            <td className="td-score"><strong>Score</strong></td>
-                                        </tr>
-                                        <tr><td cols="3">&nbsp;</td></tr>
-                                        {Object.keys(expType).map(function(key) {
-                                            return (
-                                                expType[key] > 0 ?
-                                                    <tr>
-                                                        <td className="td-title">{key}</td>
-                                                        <td className="td-score">{expType[key]}</td>
-                                                        <td className="td-score">&nbsp;</td>
-                                                    </tr>
-                                                :
-                                                null
-                                            );
-                                        })}
-                                        <tr><td className="td-title">
-                                                <strong>Final Experimental Score&nbsp;(
-                                                    <a href="/provisional-curation/?expmatrix=display" target="_block">
-                                                        Weighting System
-                                                    </a>
-                                                    )
-                                                </strong>
-                                            </td>
-                                            <td className="td-score"><span>&nbsp;</span></td>
-                                            <td className="td-score"><strong>{expScore}</strong></td>
-                                        </tr>
-                                        <tr><td cols="3"><strong>&nbsp;</strong></td></tr>
-                                        <tr>
-                                            <td className="td-title">Number of probands with variants assessed as "Supports" pathogenicity</td>
-                                            <td className="td-score">{proband}</td>
-                                            <td className="td-score">&nbsp;</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="td-title"><strong>Proband Score</strong></td>
-                                            <td className="td-score"><span>&nbsp;</span></td>
-                                            <td className="td-score"><strong>{probandScore}</strong></td>
-                                        </tr>
-                                        <tr><td cols="3"><span>&nbsp;</span></td></tr>
-                                        <tr>
-                                            <td className="td-title">Clinical Publications</td>
-                                            <td className="td-score">{articleCollected.length}</td>
-                                            <td className="td-score">&nbsp;</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="td-title"><strong>Publication Score</strong></td>
-                                            <td className="td-score">&nbsp;</td>
-                                            <td className="td-score"><strong>{pubScore}</strong></td>
-                                        </tr>
-                                        <tr><td cols="3"><span>&nbsp;</span></td></tr>
-                                        <tr>
-                                            <td className="td-title">Number of years since first report</td>
-                                            <td className="td-score">{time}</td>
-                                            <td className="td-score">&nbsp;</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="td-title"><strong>Time Score (First Clinical Report)</strong></td>
-                                            <td className="td-score">&nbsp;</td>
-                                            <td className="td-score"><strong>{timeScore}</strong></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
                             <br />
                             <div className="row">
                                 <div className="col-sm-5">
