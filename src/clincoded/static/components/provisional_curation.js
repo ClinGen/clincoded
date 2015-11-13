@@ -410,50 +410,68 @@ var Classification = function() {
     );
 };
 
-var SummaryMatrix = function(proband) {
-    var probandScore;
-    if (proband > 18) {
-        probandScore = 7;
-    }
-    else if (proband > 15) {
-        probandScore = 6;
-    }
-    else if (proband > 12) {
-        probandScore = 5;
-    }
-    else if (proband > 9) {
-        probandScore = 4;
-    }
-    else if (proband > 6) {
-        probandScore = 3;
-    }
-    else if (proband > 3) {
-        probandScore = 2;
-    }
-    else if (proband >= 1) {
-        probandScore = 1;
-    }
-    else {
-        probandScore = 0;
-    }
-
-    var pointTD = [0,1,2,3,4,5,6,7];
-
-    var  probandRow = [];
-    for(var i=0; i<8; i++) {
-        if (i === probandScore) {
-            probandRow.push(probandScore);
-        }
-        else {
-            probandRow.push('');
-        }
-    }
-
+var LimitedClassification = function() {
     return (
-        <tr>{pointTD.map(function(i) {
-                return <td className={i===probandScore ? 'count-cells' : null}>{probandRow[i]}</td>;
-            })}
-        </tr>
+        <div>
+            <p style={{'font-weight':'bold', 'text-decoration':'underline'}}>LIMITED CLASSIFICATION</p>
+            <p>There is <strong>limited</strong> evidence to support a causal role for this gene in this disease, such as:</p>
+            <p>
+                <ul>
+                    <li>Fewer than three observations of variants that provide convincing evidence for disease causality&sup1;</li>
+                    <li>Multiple variants reported in unrelated probands but <i>without</i> sufficient evidence that the variants alter function</li>
+                    <li>Limited experimental data&sup2; supporting the gene-disease association</li>
+                </ul>
+            </p>
+            <p>The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged that contradicts the role of the gene in the noted disease.</p>
+        </div>
+    );
+};
+
+var ModerateClassification = function() {
+    return (
+        <div>
+            <p style={{'font-weight':'bold', 'text-decoration':'underline'}}>MODERATE CLASSIFICATION</p>
+            <p>There is <strong>moderate</strong> evidence to support a causal role for this gene in this diseaese, such as:</p>
+            <p>
+                <ul>
+                    <li>At least 3 unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
+                    <li>Moderate experimental data&sup2; supporting the gene-disease association</li>
+                </ul>
+            </p>
+            <p>The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged that contradicts the role of the gene in the noded disease.</p>
+        </div>
+    );
+};
+
+var StrongClassification = function() {
+    return (
+        <div>
+            <p style={{'font-weight':'bold', 'text-decoration':'underline'}}>STRONG CLASSIFICATION</p>
+            <p>
+                The role of this gene in disease has been independently demonstrated in at least two separate studies providing&nbsp;
+                <strong>strong</strong> supporting evidence for this gene&#39;s role in disease, such as the following types of evidence:
+            </p>
+            <p>
+                <ul>
+                    <li>Strong variant-level evidence demonstrating numerous unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
+                    <li>Compelling gene-level evidence from different types of supporting experimental data&sup2;.</li>
+                </ul>
+            </p>
+            <p>In addition, no convincing evidence has emerged that contradicts the role of the gene in the noted disease.</p>
+        </div>
+    );
+};
+
+var DefinitiveClassification = function() {
+    return (
+        <div>
+            <p style={{'font-weight':'bold', 'text-decoration':'underline'}}>DEFINITIVE CLASSIFICATION</p>
+            <p>
+                The role of this gene in this particular disease hase been repeatedly demonstrated in both the research and clinical
+                diagnostic settings, and has been upheld over time (in general, at least 3 years). No convincing evidence has emerged
+                that contradicts the role of the gene in the specified disease.
+            </p>
+        </div>
     );
 };
 
@@ -928,8 +946,8 @@ var NewCalculation = function() {
                                         <td rowSpan="2" className="title larger top-single-cell area-bottom-cells most-left">Assertion<br />Criteria</td>
                                         <td rowSpan="2" className="title larger top-single-cell area-bottom-cells">Criteria Description</td>
                                         <td colSpan="8" className="title top-multiple-cell">Number of Points</td>
-                                        <td rowSpan="2" className="title larger score-vertical-cell">
-                                            <div className="score-vertical-content vertical-transform-1">Score</div>
+                                        <td rowSpan="2" className="title larger vertical-title-most-left-cell area-bottom-cells">
+                                            <div className="vertical-transform-0">Score</div>
                                         </td>
                                     </tr>
                                     <tr className="area-bottom-cells">
@@ -1005,26 +1023,26 @@ var NewCalculation = function() {
                                         <td colSpan="8">
                                             <table className="exp-matrix">
                                                 <tr className="top-row">
-                                                    <td style={{'width':'120px'}}>Category</td>
-                                                    <td style={{'width':'180px'}}>Type</td>
-                                                    <td className="score-vertical-cell">
-                                                        <div className="score-vertical-content vertical-transform-1">Unit<br />Score</div>
+                                                    <td className="exp-evidence-category-cells">Evidence Category</td>
+                                                    <td>Evidence Type</td>
+                                                    <td className="exp-vertical-title-cells">
+                                                        <div className="score-vertical-content vertical-transform-2">Evidence<br />Points</div>
                                                     </td>
-                                                    <td className="score-vertical-cell">
+                                                    <td className="exp-vertical-title-cells">
                                                         <div className="score-vertical-content vertical-transform-1">Count</div>
                                                     </td>
-                                                    <td className="score-vertical-cell">
-                                                        <div className="score-vertical-content vertical-transform-2">Max in<br />Category</div>
+                                                    <td className="exp-vertical-title-cells">
+                                                        <div className="score-vertical-content vertical-transform-2">Category<br /> Max Score</div>
                                                     </td>
-                                                    <td className="score-vertical-cell">
+                                                    <td className="exp-vertical-title-cells">
                                                         <div className="score-vertical-content vertical-transform-2">Category<br />Score</div>
                                                     </td>
-                                                    <td className="score-vertical-cell">
-                                                        <div className="score-vertical-content vertical-transform-2">Exp. Max<br />Score</div>
+                                                    <td className="exp-vertical-title-cells">
+                                                        <div className="score-vertical-content vertical-transform-3">Experimental<br />Max Score</div>
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td rowSpan="3" className="title" style={{'width':'120px'}}>Function</td>
+                                                    <td rowSpan="3" className="title" className="title exp-evidence-category-cells">Function</td>
                                                     <td className="title">Biochemical Function</td>
                                                     <td>0.5</td>
                                                     <td className={expType['Biochemical Function'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Biochemical Function'] > 0 ? expType['Biochemical Function'] : ''}</td>
@@ -1043,7 +1061,7 @@ var NewCalculation = function() {
                                                     <td className={expType['Expression'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Expression'] > 0 ? expType['Expression'] : ''}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td rowSpan="2" className="title" style={{'width':'120px'}}>Functional<br />Alteration</td>
+                                                    <td rowSpan="2" className="title" className="title exp-evidence-category-cells">Functional<br />Alteration</td>
                                                     <td className="title">Patient Cells</td>
                                                     <td>1</td>
                                                     <td className={expType['Functional Alteration (Patient cells)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Patient cells)'] > 0 ? expType['Functional Alteration (Patient cells)'] : ''}</td>
@@ -1056,7 +1074,7 @@ var NewCalculation = function() {
                                                     <td className={expType['Functional Alteration (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Engineered equivalent)'] > 0 ? expType['Functional Alteration (Engineered equivalent)'] : ''}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td rowSpan="4" className="title" style={{'width':'120px'}}>Models and<br />Rescue</td>
+                                                    <td rowSpan="4" className="title" className="title exp-evidence-category-cells">Models and<br />Rescue</td>
                                                     <td className="title">Animal Model</td>
                                                     <td>2</td>
                                                     <td className={expType['Model Systems (Animal model)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Model Systems (Animal model)'] > 0 ? expType['Model Systems (Animal model)'] : ''}</td>
@@ -1089,35 +1107,63 @@ var NewCalculation = function() {
                                     </tr>
                                     <tr className="narrow-line"></tr>
                                     <tr className="classification-row">
-                                        <td colSpan="3" className="description">Is there valid contradictory evidence? Yes/No</td>
-                                        <td colSpan="8" rowSpan="2" className="inner-table-box">
+                                        <td colSpan="7" style={{'text-align':'left', 'padding':'none', 'margin':'none'}}>
+                                            <table style={{'width':'100%', 'padding':'none', 'border':'none'}}>
+                                                <tr>
+                                                    <td className="description" style={{'background-color':'#fff'}}>
+                                                        {   autoClassification === 'Limited' ? LimitedClassification.call() :
+                                                            (   autoClassification === 'Moderate' ? ModerateClassification.call() :
+                                                                (   autoClassification === 'Strong' ? StrongClassification.call() :
+                                                                    (   autoClassification === 'Definitive' ? DefinitiveClassification.call() : null)
+                                                                )
+                                                            )
+                                                        }
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="description">
+                                                        <p style={{'text-align':'center', 'font-weight':'bold', 'text-decoration':'underline'}}>NOTES</p>
+                                                        <p>
+                                                            &sup1;Variants that have evidence to disrupt function and/or have other strong genetic and population data (e.g. <i>de novo</i>&nbsp;
+                                                            occurrence, absence in controls, etc) can be used as evidence in support of a variant&#39;s causality in this framework.
+                                                        </p>
+                                                        <p>&sup2;Examples of appropriate types of supporting experimental data based on those outlined in MacArthur et al. 2014.</p>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <td colSpan="4" className="inner-table-box" style={{'padding-top':'20px', 'vertical-align':'top', 'border-collapse':'separate', 'border-spacing':'5px'}}>
                                             <table>
                                                 <tr>
                                                     <td className="title">Classification</td>
                                                     <td className="title">Total Score</td>
                                                 </tr>
+                                                <tr className="narrow-line"></tr>
                                                 <tr className={autoClassification === 'Limited' ? 'high-light-row' : null}>
                                                     <td>Limited</td>
                                                     <td className={autoClassification === 'Limited' ? "title score-cells" : "non-high-light"}>2-8</td>
                                                 </tr>
+                                                <tr className="narrow-line"></tr>
                                                 <tr className={autoClassification === 'Moderate' ? 'high-light-row' : null}>
                                                     <td>Moderate</td>
                                                     <td className={autoClassification === 'Moderate' ? "title score-cells" : "non-high-light"}>9-12</td>
                                                 </tr>
+                                                <tr className="narrow-line"></tr>
                                                 <tr className={autoClassification === 'Strong' ? 'high-light-row' : null}>
                                                     <td>Strong</td>
                                                     <td className={autoClassification === 'Strong' ? "title score-cells" : "non-high-light"}>13-16</td>
                                                 </tr>
+                                                <tr className="narrow-line"></tr>
                                                 <tr className={autoClassification === 'Definitive' ? 'high-light-row' : null}>
                                                     <td>Definitive</td>
                                                     <td className={autoClassification === 'Definitive' ? "title score-cells" : "non-high-light"}>17-20</td>
                                                 </tr>
+                                                <tr style={{'height':'50px'}}></tr>
+                                                <tr>
+                                                    <td colSpan="2" style={{'border-top':'solid 1px #000', 'vertical-align':'middle'}}>Description of half point round here</td>
+                                                </tr>
                                             </table>
                                         </td>
-                                    </tr>
-                                    <tr className="classification-row">
-                                        <td>Description of<br />Contradictory<br />Evidence</td>
-                                        <td colSpan="2">&nbsp;</td>
                                     </tr>
                                 </table>
                             </div>

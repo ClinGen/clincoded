@@ -524,6 +524,7 @@
     .classification-row {
         background-color: #ddd;
     }
+
     .count-title-row {
         height: 30px;
     }
@@ -625,21 +626,30 @@
         color: #d96;
     }
 
-    .score-vertical-cell {
+    .vertical-title-most-left-cell {
         height: 80px;
         width: 30px;
-        border-bottom: solid 2px #000;
     }
+
     .score-vertical-content {
         display: inline-block;
         white-space: nowrap;
         width: 22px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .vertical-transform-0 {
+        @include transform(rotate(90deg) translate(0px, -3px));
     }
     .vertical-transform-1 {
-        @include transform(rotate(90deg) translate(-5px, 0));
+        @include transform(rotate(90deg) translate(-10px, 0));
     }
     .vertical-transform-2 {
         @include transform(rotate(90deg) translate(-18px, 0));
+    }
+    .vertical-transform-3 {
+        @include transform(rotate(90deg) translate(-30px, 0px));
     }
 }
 
@@ -660,10 +670,22 @@
     td {
         padding: 5px 10px 5px 10px;
     }
+
+    .exp-evidence-category-cells {
+        width: 100px;
+    }
+
+    .exp-vertical-title-cells {
+        height: 110px;
+        width: 50px;
+        border-bottom: solid 2px #000;
+        text-align: center;
+        vertical-align: middle;
+    }
 }
 
 .narrow-line {
-    height: 4px;
+    height: 3px;
 }
 
 .classification-cell {
