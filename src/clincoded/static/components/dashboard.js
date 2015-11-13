@@ -249,7 +249,7 @@ var Dashboard = React.createClass({
                             <ul>
                                 {this.state.gdmList.map(function(item) {
                                     return (
-                                    <a className="block-link" href={"/curation-central/?gdm=" + item.uuid}>
+                                    <a key={item.uuid} className="block-link" href={"/curation-central/?gdm=" + item.uuid}>
                                     <li key={item.uuid}>
                                         <span className="block-link-color"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span><br />
                                         <span className="block-link-no-color"><strong>Status</strong>: {item.status}<br />
