@@ -41,8 +41,13 @@ ALLOW_LAB_SUBMITTER_EDIT = [
 ]
 
 ALLOW_CURRENT = [
-    (Allow, Authenticated, 'view'),
-    (Allow, 'group.admin', 'edit'),
+    (Allow, Authenticated, ALL_PERMISSIONS),
+    (Allow, 'group.admin', ALL_PERMISSIONS)
+]
+
+CURATOR = [
+    (Allow, Authenticated, ALL_PERMISSIONS),
+    (Allow, 'group.admin', ALL_PERMISSIONS)
 ]
 
 ONLY_ADMIN_VIEW = [
@@ -80,7 +85,7 @@ class Collection(contentbase.Collection):
         # XXX collections should be setup after all types are registered.
         # Don't access type_info.schema here as that precaches calculated schema too early.
         if 'lab' in self.type_info.factory.schema['properties']:
-            self.__acl__ = ALLOW_SUBMITTER_ADD
+            self.__acl__ = CURATOR
 
     def get(self, name, default=None):
         resource = super(Collection, self).get(name, None)
@@ -105,6 +110,7 @@ class Item(contentbase.Item):
     Collection = Collection
     STATUS_ACL = {
         # standard_status
+        'in progress': ALLOW_CURRENT,
         'released': ALLOW_CURRENT,
         'deleted': DELETED,
         'replaced': DELETED,
