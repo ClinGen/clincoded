@@ -68,6 +68,32 @@
                             "linkTo": "article"
                         }
                     }
+                },
+                "family": {
+                    "title": "Family history",
+                    "description": "History metadata for families",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the family",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
+                        "group": {
+                            "title": "Group",
+                            "description": "Group that's the object of the family",
+                            "type": "string",
+                            "linkTo": "group"
+                        },
+                        "article": {
+                            "title": "Article",
+                            "description": "GDM article the family provides evidence for",
+                            "type": "string",
+                            "linkTo": "article"
+                        }
+                    }
                 }
             }
         }
@@ -82,11 +108,23 @@
             "type": "object"
         },
         "meta.group.gdm": {
-            "title": "GDM",
+            "title": "Group GDM",
             "type": "string"
         },
         "meta.group.article": {
-            "title": "Article",
+            "title": "Group article",
+            "type": "string"
+        },
+        "meta.family.gdm": {
+            "title": "Family GDM",
+            "type": "string"
+        },
+        "meta.family.group": {
+            "title": "Family group",
+            "type": "string"
+        },
+        "meta.family.article": {
+            "title": "Family article",
             "type": "string"
         },
         "date_created": {

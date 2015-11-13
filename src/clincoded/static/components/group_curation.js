@@ -420,12 +420,7 @@ var GroupCuration = React.createClass({
                         this.recordHistory('add', data.group, meta);
                     } else {
                         // Record the modification of an existing group
-                        meta = {
-                            group: {
-                                gdm: this.state.gdm['@id']
-                            }
-                        };
-                        this.recordHistory('modify', data.group, meta);
+                        this.recordHistory('modify', data.group);
                     }
 
                     // Navigate back to Curation Central page.

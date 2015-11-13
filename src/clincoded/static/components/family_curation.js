@@ -12,6 +12,7 @@ var methods = require('./methods');
 var individual_curation = require('./individual_curation');
 var Assessments = require('./assessment');
 var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
+var CuratorHistory = require('./curator_history');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -69,7 +70,7 @@ var initialCv = {
 
 
 var FamilyCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -736,6 +737,7 @@ var FamilyCuration = React.createClass({
                     // If we're adding this family to a group, update the group with this family; otherwise update the annotation
                     // with the family.
                     if (!this.state.family) {
+                        // Adding a new family
                         if (this.state.group) {
                             // Add the newly saved families to the group
                             var group = curator.flatten(this.state.group);
@@ -749,7 +751,7 @@ var FamilyCuration = React.createClass({
                             // Post the modified annotation to the DB, then go back to Curation Central
                             promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(data => {
                                 // The next step needs the family, not the group it was written to
-                                return newFamily;
+                                return {family: newFamily, group: data['@graph'][0]};
                             });
                         } else {
                             // Not part of a group, so add the family to the annotation instead.
@@ -762,23 +764,52 @@ var FamilyCuration = React.createClass({
                             annotation.families.push(newFamily['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                            promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(annotation => {
                                 // The next step needs the family, not the group it was written to
-                                return newFamily;
+                                return {family: newFamily, annotation: annotation};
                             });
                         }
                     } else {
-                        promise = Promise.resolve(newFamily);
+                        // Editing an existing family
+                        promise = Promise.resolve({family: newFamily});
                     }
                     return promise;
-                }).then(newFamily => {
+                }).then(data => {
+                    // Add to the user history. data.family always contains the new or edited family. data.group contains the group the family was
+                    // added to, if it was added to a group. data.annotation contains the annotation the family was added to, if it was added to
+                    // the annotation. If neither data.group nor data.annotation exist, data.family holds the existing family that was modified.
+                    var meta;
+                    if (data.annotation) {
+                        // Record the creation of a new family added to a GDM
+                        meta = {
+                            family: {
+                                gdm: this.state.gdm['@id'],
+                                article: this.state.annotation.article['@id']
+                            }
+                        };
+                        this.recordHistory('add', data.family, meta);
+                    } else if (data.group) {
+                        // Record the creation of a new family added to a group
+                        meta = {
+                            family: {
+                                gdm: this.state.gdm['@id'],
+                                group: data.group['@id'],
+                                article: this.state.annotation.article['@id']
+                            }
+                        };
+                        this.recordHistory('add', data.family, meta);
+                    } else {
+                        // Record the modification of an existing family
+                        this.recordHistory('modify', data.family);
+                    }
+
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut && !initvar) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                     } else {
-                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + newFamily.uuid + '&evidence=' + this.state.annotation.uuid + (initvar ? '&initvar' : '') + (hadvar ? '&hadvar' : ''));
+                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + data.family.uuid + '&evidence=' + this.state.annotation.uuid + (initvar ? '&initvar' : '') + (hadvar ? '&hadvar' : ''));
                     }
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
@@ -1919,3 +1950,62 @@ var FamilySegregationViewer = function(segregation, assessments, open) {
         </Panel>
     );
 };
+
+
+// Display a history item for adding a family
+var FamilyAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var family = history.primary;
+        var gdm = history.meta.family.gdm;
+        var group = history.meta.family.group;
+        var article = history.meta.family.article;
+
+        return (
+            <div>
+                <a href={family['@id']}>{family.label}</a>
+                <span> added to </span>
+                {group ?
+                    <span>group <a href={group['@id']}>{group ? <span>{group.label}</span> : null}</a></span>
+                :
+                    <span>
+                        <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                        <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                    </span>
+                }
+                <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(FamilyAddHistory, 'family', 'add');
+
+
+// Display a history item for modifying a family
+var FamilyModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var family = history.primary;
+
+        return (
+            <div>
+                <a href={family['@id']}>{family.label}</a>
+                <span> modified</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(FamilyModifyHistory, 'family', 'modify');
+
+
+// Display a history item for deleting a family
+var FamilyDeleteHistory = React.createClass({
+    render: function() {
+        return <div>FAMILYDELETE</div>;
+    }
+});
+
+globals.history_views.register(FamilyDeleteHistory, 'family', 'delete');

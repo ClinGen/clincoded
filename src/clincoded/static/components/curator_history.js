@@ -18,8 +18,10 @@ module.exports = {
         var historyItem = {
             operationType: operationType,
             primary: primary['@id'],
-            meta: meta
         };
+        if (meta) {
+            historyItem.meta = meta;
+        }
 
         // Write the history object to the database. No one relies on the result, so don't
         // bother with the promise. If an error happens, it does catch though.
