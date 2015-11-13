@@ -943,7 +943,7 @@ var NewCalculation = function() {
                                         <td className="title larger score-cells top-number-cell">7</td>
                                     </tr>
                                     <tr className="narrow-line"></tr>
-                                    <tr className="area-top-cells">
+                                    <tr className="area-top-cells count-title-row">
                                         <td rowSpan="2" className="title most-left"># Probands</td>
                                         <td rowSpan="2" className="description">Total # of curated unrelated probands with variants that provide convincing evidence for disease causality</td>
                                         <td>N/A</td>
@@ -963,7 +963,7 @@ var NewCalculation = function() {
                                             );
                                         })}
                                     </tr>
-                                    <tr>
+                                    <tr className="count-title-row">
                                         <td rowSpan="2"  className="title most-left"># Publications</td>
                                         <td rowSpan="2" className="description"># of curated independent publications reporting human variants in the gene under consideration</td>
                                         <td>N/A</td>
@@ -982,7 +982,7 @@ var NewCalculation = function() {
                                             );
                                         })}
                                     </tr>
-                                    <tr>
+                                    <tr className="count-title-row">
                                         <td rowSpan="2" className="title area-bottom-cells most-left">Time (yrs)</td>
                                         <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#10877; 2 pubs, then max score for time = 1)</td>
                                         <td>current yr</td>
@@ -1008,7 +1008,7 @@ var NewCalculation = function() {
                                                     <td style={{'width':'120px'}}>Category</td>
                                                     <td style={{'width':'180px'}}>Type</td>
                                                     <td className="score-vertical-cell">
-                                                        <div className="score-vertical-content vertical-transform-1">Unit<br />Point</div>
+                                                        <div className="score-vertical-content vertical-transform-1">Unit<br />Score</div>
                                                     </td>
                                                     <td className="score-vertical-cell">
                                                         <div className="score-vertical-content vertical-transform-1">Count</div>
@@ -1017,10 +1017,10 @@ var NewCalculation = function() {
                                                         <div className="score-vertical-content vertical-transform-2">Max in<br />Category</div>
                                                     </td>
                                                     <td className="score-vertical-cell">
-                                                        <div className="score-vertical-content vertical-transform-1">Sub-<br />Score</div>
+                                                        <div className="score-vertical-content vertical-transform-2">Category<br />Score</div>
                                                     </td>
                                                     <td className="score-vertical-cell">
-                                                        <div className="score-vertical-content vertical-transform-1">Max<br />Total</div>
+                                                        <div className="score-vertical-content vertical-transform-2">Exp. Max<br />Score</div>
                                                     </td>
                                                 </tr>
                                                 <tr>
