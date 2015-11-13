@@ -45,11 +45,6 @@ ALLOW_CURRENT = [
     (Allow, 'group.admin', ALL_PERMISSIONS)
 ]
 
-CURATOR = [
-    (Allow, Authenticated, ALL_PERMISSIONS),
-    (Allow, 'group.admin', ALL_PERMISSIONS)
-]
-
 ONLY_ADMIN_VIEW = [
     (Allow, 'group.admin', ALL_PERMISSIONS),
     (Allow, 'group.read-only-admin', ['view']),
@@ -85,7 +80,7 @@ class Collection(contentbase.Collection):
         # XXX collections should be setup after all types are registered.
         # Don't access type_info.schema here as that precaches calculated schema too early.
         if 'lab' in self.type_info.factory.schema['properties']:
-            self.__acl__ = CURATOR
+            self.__acl__ = ALLOW_SUBMITTER_ADD
 
     def get(self, name, default=None):
         resource = super(Collection, self).get(name, None)
