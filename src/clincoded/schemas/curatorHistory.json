@@ -47,11 +47,13 @@
             "title": "History meta",
             "description": "Type-dependent data about the history item",
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "group": {
                     "title": "Group history",
-                    "description": "History data for groups",
+                    "description": "History metadata for groups",
                     "type": "object",
+                    "additionalProperties": false,
                     "properties": {
                         "gdm": {
                             "title": "GDM",

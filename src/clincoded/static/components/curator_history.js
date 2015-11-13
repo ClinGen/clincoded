@@ -1,36 +1,18 @@
 'use strict';
 var React = require('react');
 var moment = require('moment');
+var globals = require('./globals');
+
 
 // The curator history records operations performed by the currently logged-in curator on the database.
-// It comprises an operation type, references to three objects, and a description. The three objects
-// include:
-// 
-// * Primary Object: The object that represents the operation even though other objects might
-//   also need updating, e.g. When adding a group, the group is primary, and the modified
-//   annotation is secondary. Think of this as the subject of a sentence describing the operation.
-//
-// * Secondary Object: The object that gets affected by the primary object's operation,e.g. the
-//   annotation when a group gets added. Think of this as the object of a sentence describing
-//   the operation.
-//
-// * Associated Object: Any other object related to the operation, e.g. the selected PubMed
-//   article when adding a Group to a GDM. Think of this as the indirect object of a sentence
-//   describing the operation.
-//
-// * Description: String that gets displayed when displaying a history item. It includes embedded
-//   codes so that object identifiers can be placed into the string as well as links to
-//   their objects.
+// It comprises an operation type, and operation-specific metadata.
 
 module.exports = {
-    // Record an operation on the ClinGen database performed by the curator. The operation to record
-    // gets passed in the "operation" object which must contain the optional properties:
-    // {
-    //     primaryUri: URI of the primary object
-    //     secondaryUri: URI of the secondary object
-    //     associatedUri: URI of the associated object
-    //     description: Human-readable description of the operation, with embedded codes
-    // }
+    // Record an operation on the ClinGen database performed by the curator. A promise gets returned,
+    // though likely it gets ignored because operations relying on this returning seem unusual.
+    //   operationType: Type of operation: 'add', 'modify', 'delete'
+    //   primary: Primary object of operation, e.g. group, family, etc.
+    //   meta: Metadata that varies depending on the type of the primary object.
     recordHistory: function(operationType, primary, meta) {
         // Put the history object together
         var historyItem = {
@@ -41,13 +23,30 @@ module.exports = {
 
         // Write the history object to the database. No one relies on the result, so don't
         // bother with the promise. If an error happens, it does catch though.
-        this.postRestData('/histories/', historyItem);
+        return this.postRestData('/histories/', historyItem);
     },
 
-    // Get a list of history objects
-    getHistories: function() {
+    // Get a list of history objects from the DB. It returns a promise with the array of history items sorted by
+    // last_modification date. To limit the number of returned history items, pass the maximum number you want
+    // in the 'limit' parameter. The following example retrieves a maximum of five history items and displays them
+    // as an array to the console once the histories get retrieved.
+    //
+    // this.getHistories(5).then(histories => { console.log('Item: %o', histories); });
+    getHistories: function(limit) {
+        var historyUri = '/histories/' + (limit ? '?limit=' + limit : '');
         return this.getRestData('/histories').then(data => {
             return data['@graph'];
         });
+    },
+
+    // Get the history component to display the object that the given history item describes. The actual component varies
+    // depending on the type of the primary object of the history item, and other code registers components to display
+    // specific kinds of history items.
+    // 
+    // If you have an individual history item returned from the getHistories() array, you can display the history item with:
+    //   var HistoryView = this.getHistoryView(history);
+    //   <HistoryView history={history} />
+    getHistoryView: function(history) {
+        return globals.history_views.lookup(history.primary, history.operationType);
     }
 };

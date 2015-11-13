@@ -985,6 +985,7 @@ var GroupAddHistory = React.createClass({
 globals.history_views.register(GroupAddHistory, 'group', 'add');
 
 
+// Display a history item for modifying a group
 var GroupModifyHistory = React.createClass({
     render: function() {
         var history = this.props.history;
