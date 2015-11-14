@@ -126,6 +126,26 @@
                             "linkTo": "article"
                         }
                     }
+                },
+                "experimental": {
+                    "title": "Experimental history",
+                    "description": "History metadata for experimental data",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the experimental data",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
+                        "article": {
+                            "title": "Article",
+                            "description": "GDM article the experimental data provides evidence for",
+                            "type": "string",
+                            "linkTo": "article"
+                        }
+                    }
                 }
             }
         }
@@ -173,6 +193,10 @@
         },
         "meta.individual.article": {
             "title": "Individual article",
+            "type": "string"
+        },
+        "meta.experimental.gdm": {
+            "title": "Experimental data GDM",
             "type": "string"
         },
         "date_created": {

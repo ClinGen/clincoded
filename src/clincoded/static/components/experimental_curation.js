@@ -10,6 +10,7 @@ var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var Assessments = require('./assessment');
+var CuratorHistory = require('./curator_history');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -53,7 +54,7 @@ function joinGenes(input) {
 }
 
 var ExperimentalCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -1053,12 +1054,12 @@ var ExperimentalCuration = React.createClass({
                     if (this.state.experimental) {
                         // We're editing a experimental. PUT the new group object to the DB to update the existing one.
                         promise = this.putRestData('/experimental/' + this.state.experimental.uuid, newExperimental).then(data => {
-                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
+                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0], experimentalAdded: false});
                         });
                     } else {
                         // We created an experimental data item; post it to the DB
                         promise = this.postRestData('/experimental/', newExperimental).then(data => {
-                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
+                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0], experimentalAdded: true});
                         }).then(newExperimental => {
                             savedExperimental = newExperimental.data;
                             if (!this.state.experimental) {
@@ -1073,10 +1074,10 @@ var ExperimentalCuration = React.createClass({
 
                                 // Post the modified annotation to the DB, then go back to Curation Central
                                 return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                                    return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
+                                    return Promise.resolve({assessment: assessment.assessment, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
                                 });
                             } else {
-                                return Promise.resolve(null);
+                                return Promise.resolve({assessment: null, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
                             }
                         });
                     }
@@ -1086,7 +1087,7 @@ var ExperimentalCuration = React.createClass({
                     // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
                     var newAssessment = data.assessment;
                     var gdmUuid = this.state.gdm && this.state.gdm.uuid;
-                    var experimentalUuid = savedExperimental ? savedExperimental.uuid : this.state.experimental.uuid;
+                    var experimentalUuid = data.data ? data.data.uuid : this.state.experimental.uuid;
                     if (newAssessment && !newAssessment.evidence_id) {
                         // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
                         // Nothing relies on this operation completing, so don't wait for a promise from it.
@@ -1094,8 +1095,24 @@ var ExperimentalCuration = React.createClass({
                     }
 
                     // Next step relies on the pathogenicity, not the updated assessment
-                    return Promise.resolve(savedExperimental);
+                    return Promise.resolve(data);
                 }).then(data => {
+                    // Record history of the group creation
+                    var meta;
+                    if (data.experimentalAdded) {
+                        // Record the creation of new experimental data
+                        meta = {
+                            experimental: {
+                                gdm: this.state.gdm['@id'],
+                                article: this.state.annotation.article['@id']
+                            }
+                        };
+                        this.recordHistory('add', data.data, meta);
+                    } else {
+                        // Record the modification of an existing group
+                        this.recordHistory('modify', data.data);
+                    }
+
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -2521,3 +2538,55 @@ var ExperimentalViewer = React.createClass({
 });
 
 globals.content_views.register(ExperimentalViewer, 'experimental');
+
+
+// Display a history item for adding experimental data
+var ExperimentalAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var experimental = history.primary;
+        var gdm = history.meta.experimental.gdm;
+
+        return (
+            <div>
+                <a href={experimental['@id']}>{experimental.label}</a>
+                <span> added to </span>
+                <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(ExperimentalAddHistory, 'experimental', 'add');
+
+
+// Display a history item for modifying experimental data
+var ExperimentModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var experimental = history.primary;
+
+        return (
+            <div>
+                <a href={experimental['@id']}>{experimental.label}</a>
+                <span> modified</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(ExperimentModifyHistory, 'experimental', 'modify');
+
+
+// Display a history item for deleting experimental data
+var ExperimentDeleteHistory = React.createClass({
+    render: function() {
+        return <div>EXPERIMENTALDELETE</div>;
+    }
+});
+
+globals.history_views.register(ExperimentDeleteHistory, 'experimental', 'delete');

@@ -889,4 +889,7 @@ class History(Item):
         'meta.individual.group',
         'meta.individual.family',
         'meta.individual.article',
+        'meta.experimental.gdm',
+        'meta.experimental.gdm.gene',
+        'meta.experimental.gdm.disease',
     ]
