@@ -10,6 +10,7 @@ var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
+var CuratorHistory = require('./curator_history');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -37,7 +38,7 @@ var VAR_OTHER = 2; // Other description entered in a panel
 
 
 var IndividualCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -319,7 +320,6 @@ var IndividualCuration = React.createClass({
             var currIndividual = this.state.individual;
             var newIndividual = {}; // Holds the new group object;
             var individualDiseases = null, individualArticles, individualVariants = [];
-            var savedIndividuals; // Array of saved written to DB
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
@@ -530,79 +530,101 @@ var IndividualCuration = React.createClass({
                 }).then(data => {
                     // Make a new individual object based on form fields.
                     var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants, hpoids, nothpoids);
-
-                    // Prep for multiple family writes, based on the family count dropdown (only appears when creating a new family,
-                    // not when editing a family). This is a count of *extra* families, so add 1 to it to get the number of families
-                    // to create.
-                    var individualPromises = [];
-                    var individualCount = parseInt(this.getFormValue('extraindividualcount'), 10);
-                    individualCount = individualCount ? individualCount + 1 : 1;
-
-                    // Write the new individual object(s) to the DB
-                    for (var i = 0; i < individualCount; ++i) {
-                        var individualLabel;
-                        if (i > 0) {
-                            individualLabel = this.getFormValue('extraindividualname' + (i - 1));
-                        }
-                        individualPromises.push(this.writeIndividualObj(newIndividual, individualLabel));
-                    }
-                    return Promise.all(individualPromises);
-                }).then(newIndividuals => {
+                    return this.writeIndividualObj(newIndividual);
+                }).then(newIndividual => {
                     var promise;
-                    savedIndividuals = newIndividuals;
 
                     // If we're adding this individual to a group, update the group with this family; otherwise update the annotation
                     // with the family.
                     if (!this.state.individual) {
                         if (this.state.group) {
-                            // Add the newly saved families to the group
+                            // Add the newly saved individual to a group
                             var group = curator.flatten(this.state.group);
                             if (!group.individualIncluded) {
                                 group.individualIncluded = [];
                             }
-
-                            // Merge existing families in the annotation with the new set of families.
-                            Array.prototype.push.apply(group.individualIncluded, savedIndividuals.map(function(individual) { return individual['@id']; }));
+                            group.individualIncluded.push(newIndividual['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/groups/' + this.state.group.uuid, group);
+                            promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(data => {
+                                return {individual: newIndividual, group: data['@graph'][0]};
+                            });
                         } else if (this.state.family) {
-                            // Add the newly saved families to the group
+                            // Add the newly saved individual to a family
                             var family = curator.flatten(this.state.family);
                             if (!family.individualIncluded) {
                                 family.individualIncluded = [];
                             }
-
-                            // Merge existing families in the annotation with the new set of families.
-                            Array.prototype.push.apply(family.individualIncluded, savedIndividuals.map(function(individual) { return individual['@id']; }));
+                            family.individualIncluded.push(newIndividual['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/families/' + this.state.family.uuid, family);
+                            promise = this.putRestData('/families/' + this.state.family.uuid, family).then(data => {
+                                return {individual: newIndividual, family: data['@graph'][0]};
+                            });
                         } else {
-                            // Not part of a group, so add the family to the annotation instead.
+                            // Not part of a group, so add the individual to the annotation instead.
                             var annotation = curator.flatten(this.state.annotation);
                             if (!annotation.individuals) {
                                 annotation.individuals = [];
                             }
-
-                            // Merge existing families in the annotation with the new set of families.
-                            Array.prototype.push.apply(annotation.individuals, savedIndividuals.map(function(individual) { return individual['@id']; }));
+                            annotation.individuals.push(newIndividual['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
+                            promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                                return {individual: newIndividual, annotation: data['@graph'][0]};
+                            });
                         }
                     } else {
-                        promise = Promise.resolve(null);
+                        // Editing an individual; not creating one
+                        promise = Promise.resolve({individual: newIndividual});
                     }
                     return promise;
                 }).then(data => {
+                    // Add to the user history. data.family always contains the new or edited family. data.group contains the group the family was
+                    // added to, if it was added to a group. data.annotation contains the annotation the family was added to, if it was added to
+                    // the annotation. If neither data.group nor data.annotation exist, data.family holds the existing family that was modified.
+                    var meta;
+                    if (data.annotation) {
+                        // Record the creation of a new family added to a GDM
+                        meta = {
+                            individual: {
+                                gdm: this.state.gdm['@id'],
+                                article: this.state.annotation.article['@id']
+                            }
+                        };
+                        this.recordHistory('add', data.individual, meta);
+                    } else if (data.group) {
+                        // Record the creation of a new family added to a group
+                        meta = {
+                            individual: {
+                                gdm: this.state.gdm['@id'],
+                                group: data.group['@id'],
+                                article: this.state.annotation.article['@id']
+                            }
+                        };
+                        this.recordHistory('add', data.individual, meta);
+                    } else if (data.family) {
+                        // Record the creation of a new family added to a group
+                        meta = {
+                            individual: {
+                                gdm: this.state.gdm['@id'],
+                                family: data.family['@id'],
+                                article: this.state.annotation.article['@id']
+                            }
+                        };
+                        this.recordHistory('add', data.individual, meta);
+                    } else {
+                        // Record the modification of an existing family
+                        this.recordHistory('modify', data.individual);
+                    }
+
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                     } else {
-                        var submitLink = '/individual-submit/?gdm=' + this.state.gdm.uuid + '&evidence=' + this.state.annotation.uuid + '&individual=' + savedIndividuals[0].uuid;
+                        var submitLink = '/individual-submit/?gdm=' + this.state.gdm.uuid + '&evidence=' + this.state.annotation.uuid + '&individual=' + data.individual.uuid;
                         if (this.state.family) {
                             submitLink += '&family=' + this.state.family.uuid;
                         } else if (this.state.group) {
@@ -870,7 +892,7 @@ var IndividualName = function(displayNote) {
     if (individual && individual.proband) familyProbandExists = individual.proband;
     if (family && family.individualIncluded && family.individualIncluded.length && family.individualIncluded.length > 0) {
         for (var i = 0; i < family.individualIncluded.length; i++) {
-            if (family.individualIncluded[i].proband == true) familyProbandExists = true;
+            if (family.individualIncluded[i].proband === true) familyProbandExists = true;
         }
     }
 
@@ -1552,3 +1574,69 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
     }
     return Promise.resolve(null);
 };
+
+
+// Display a history item for adding an individual
+var IndividualAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var individual = history.primary;
+        var gdm = history.meta.individual.gdm;
+        var group = history.meta.individual.group;
+        var family = history.meta.individual.family;
+        var article = history.meta.individual.article;
+
+        return (
+            <div>
+                <a href={individual['@id']}>{individual.label}</a>
+                <span> added to </span>
+                {family ?
+                    <span>family <a href={family['@id']}>{family.label}</a></span>
+                : 
+                    <span>
+                        {group ?
+                            <span>group <a href={group['@id']}>{group.label}</a></span>
+                        :
+                            <span>
+                                <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                            </span>
+                        }
+                    </span>
+                }
+                <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(IndividualAddHistory, 'individual', 'add');
+
+
+// Display a history item for modifying an individual
+var IndividualModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var individual = history.primary;
+
+        return (
+            <div>
+                <a href={individual['@id']}>{individual.label}</a>
+                <span> modified</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(IndividualModifyHistory, 'individual', 'modify');
+
+
+// Display a history item for deleting an individual
+var IndividualDeleteHistory = React.createClass({
+    render: function() {
+        return <div>INDIVIDUALDELETE</div>;
+    }
+});
+
+globals.history_views.register(IndividualDeleteHistory, 'individual', 'delete');

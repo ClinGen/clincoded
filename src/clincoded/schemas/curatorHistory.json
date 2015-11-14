@@ -94,6 +94,38 @@
                             "linkTo": "article"
                         }
                     }
+                },
+                "individual": {
+                    "title": "Individual history",
+                    "description": "History metadata for individuals",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the individual",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
+                        "group": {
+                            "title": "Group",
+                            "description": "Group that's the object of the individual",
+                            "type": "string",
+                            "linkTo": "group"
+                        },
+                        "family": {
+                            "title": "Family",
+                            "description": "Group that's the object of the individual",
+                            "type": "string",
+                            "linkTo": "family"
+                        },
+                        "article": {
+                            "title": "Article",
+                            "description": "GDM article the individual provides evidence for",
+                            "type": "string",
+                            "linkTo": "article"
+                        }
+                    }
                 }
             }
         }
@@ -125,6 +157,22 @@
         },
         "meta.family.article": {
             "title": "Family article",
+            "type": "string"
+        },
+        "meta.individual.gdm": {
+            "title": "Individual GDM",
+            "type": "string"
+        },
+        "meta.individual.group": {
+            "title": "Individual group",
+            "type": "string"
+        },
+        "meta.individual.family": {
+            "title": "Individual family",
+            "type": "string"
+        },
+        "meta.individual.article": {
+            "title": "Individual article",
             "type": "string"
         },
         "date_created": {

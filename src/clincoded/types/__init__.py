@@ -883,4 +883,10 @@ class History(Item):
         'meta.family.gdm.disease',
         'meta.family.group',
         'meta.family.article',
+        'meta.individual.gdm',
+        'meta.individual.gdm.gene',
+        'meta.individual.gdm.disease',
+        'meta.individual.group',
+        'meta.individual.family',
+        'meta.individual.article',
     ]
