@@ -2546,11 +2546,12 @@ var ExperimentalAddHistory = React.createClass({
         var history = this.props.history;
         var experimental = history.primary;
         var gdm = history.meta.experimental.gdm;
+        var article = history.meta.experimental.article;
 
         return (
             <div>
                 <a href={experimental['@id']}>{experimental.label}</a>
-                <span> added to </span>
+                <span> ({experimental.evidenceType}) added to </span>
                 <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
                 <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>

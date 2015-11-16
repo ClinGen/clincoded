@@ -892,4 +892,5 @@ class History(Item):
         'meta.experimental.gdm',
         'meta.experimental.gdm.gene',
         'meta.experimental.gdm.disease',
+        'meta.experimental.article',
     ]
