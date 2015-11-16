@@ -49,6 +49,20 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+                "article": {
+                    "title": "PMID added to GDM history",
+                    "description": "History metadata for adding a PMID to a GDM",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the PMID",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        }
+                    }
+                },
                 "group": {
                     "title": "Group history",
                     "description": "History metadata for groups",
@@ -158,6 +172,10 @@
         "primary": {
             "title": "Primary object information",
             "type": "object"
+        },
+        "meta.article.gdm": {
+            "title": "GDM of PMID",
+            "type": "string"
         },
         "meta.group.gdm": {
             "title": "Group GDM",

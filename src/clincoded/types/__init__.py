@@ -874,6 +874,9 @@ class History(Item):
     schema = load_schema('clincoded:schemas/curatorHistory.json')
     embedded = [
         'primary',
+        'meta.article.gdm',
+        'meta.article.gdm.gene',
+        'meta.article.gdm.disease',
         'meta.group.gdm',
         'meta.group.gdm.gene',
         'meta.group.gdm.disease',

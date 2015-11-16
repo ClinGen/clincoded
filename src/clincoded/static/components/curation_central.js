@@ -10,6 +10,7 @@ var form = require('../libs/bootstrap/form');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
 var CurationMixin = require('./curator').CurationMixin;
+var CuratorHistory = require('./curator_history');
 var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 
 var Modal = modal.Modal;
@@ -29,7 +30,7 @@ var userMatch = globals.userMatch;
 
 // Curator page content
 var CurationCentral = React.createClass({
-    mixins: [RestMixin, CurationMixin],
+    mixins: [RestMixin, CurationMixin, CuratorHistory],
 
     getInitialState: function() {
         return {
@@ -59,11 +60,12 @@ var CurationCentral = React.createClass({
 
     // Retrieve the GDM object from the DB with the given uuid
     getGdm: function(uuid, pmid) {
-        this.getRestData('/gdm/' + uuid, null, true).then(gdm => {
+        return this.getRestData('/gdm/' + uuid, null, true).then(gdm => {
             // The GDM object successfully retrieved; set the Curator Central component
             this.setState({currGdm: gdm, currOmimId: gdm.omimId});
             this.currPmidChange(pmid);
-        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
+            return gdm;
+        }).catch(parseAndLogError.bind(undefined, 'getGdm'));
     },
 
     // After the Curator Central page component mounts, grab the uuid from the query string and
@@ -100,10 +102,20 @@ var CurationCentral = React.createClass({
                 gdmObj.annotations = [];
             }
             gdmObj.annotations.push(newAnnotation['@id']);
-            return this.putRestData('/gdm/' + currGdm.uuid, gdmObj);
-        }).then(data => {
+            return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
+                return data['@graph'][0];
+            });
+        }).then(gdm => {
+            // Record history of adding a PMID to a GDM
+            var meta = {
+                article: {
+                    gdm: gdm['@id']
+                }
+            };
+            this.recordHistory('add', article, meta);
+
             // Retrieve the updated GDM and set it as the new state GDM to force a rerendering.
-            this.getGdm(data['@graph'][0].uuid, article.pmid);
+            return this.getGdm(gdm.uuid, article.pmid);
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
@@ -340,3 +352,35 @@ var AddPmidModal = React.createClass({
         );
     }
 });
+
+
+// Display a history item for adding a PMID to a GDM
+var PmidGdmAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var article = history.primary;
+        var gdm = history.meta.article.gdm;
+
+        return (
+            <div>
+                <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a>
+                <span> added to </span>
+                <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(PmidGdmAddHistory, 'article', 'add');
+
+
+// Display a history item for deleting a PMID from a GDM
+var PmidGdmDeleteHistory = React.createClass({
+    render: function() {
+        return <div>PMIDGDMDELETE</div>;
+    }
+});
+
+globals.history_views.register(PmidGdmDeleteHistory, 'article', 'delete');
