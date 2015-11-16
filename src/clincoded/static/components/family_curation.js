@@ -361,7 +361,7 @@ var FamilyCuration = React.createClass({
         // Either update or create the family object in the DB
         if (this.state.family) {
             // We're editing a family. PUT the new family object to the DB to update the existing one.
-            return this.putRestData('/families/' + this.state.family.uuid, writerFamily).then(data => {
+            return this.putRestData('/families/' + this.state.family.uuid + '?render=false', writerFamily).then(data => {
                 return Promise.resolve(data['@graph'][0]);
             });
         } else {
@@ -910,6 +910,9 @@ var FamilyCuration = React.createClass({
         var value = this.getFormValue('malecount');
         if (value) { newFamily.numberOfMale = parseInt(value, 10); }
 
+        value = this.getFormValue('status');
+        if (value) { newFamily.status = value; }
+
         value = this.getFormValue('femalecount');
         if (value) { newFamily.numberOfFemale = parseInt(value, 10); }
 
@@ -1086,6 +1089,10 @@ var FamilyName = function(displayNote) {
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one family with IDENTICAL information, you can indicate this at the bottom of this form.</p>
             : null}
+
+            <Input type="text" ref="status" label="STATUS" value={family && family.status}
+                error={this.getFormError('status')} clearError={this.clrFormErrors.bind(null, 'status')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 };
@@ -1524,7 +1531,7 @@ var FamilyViewer = React.createClass({
                     updatedFamily.segregation.assessments.push(assessmentInfo.assessment['@id']);
 
                     // Write the updated family object to the DB
-                    return this.putRestData('/families/' + family.uuid, updatedFamily).then(data => {
+                    return this.putRestData('/families/' + family.uuid + '?render=false', updatedFamily).then(data => {
                         return this.getRestData('/families/' + data['@graph'][0].uuid);
                     });
                 }

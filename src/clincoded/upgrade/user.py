@@ -1,8 +1,8 @@
 from contentbase.upgrader import upgrade_step
 
 
-@upgrade_step('user', '', '4')
-def user_0_4(value, system):
+@upgrade_step('user', '3', '4')
+def user_3_4(value, system):
     # https://github.com/ClinGen/clincoded/issues/453
     if value['uuid'] not in [
         '627eedbc-7cb3-4de3-9743-a86266e435a6', # Forest
