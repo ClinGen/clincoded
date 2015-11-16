@@ -63,6 +63,29 @@
                         }
                     }
                 },
+                "gdm": {
+                    "title": "OMIM ID change to GDM history",
+                    "description": "History metadata for changing/adding an OMIM ID to a GDM",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "omimId": {
+                            "title": "OMIM ID",
+                            "description": "New OMIM ID for the GDM",
+                            "type": "string"
+                        },
+                        "gene": {
+                            "title": "HGNC Symbol",
+                            "description": "HGNC Symbol of gene from GDM",
+                            "type": "string"
+                        },
+                        "disease": {
+                            "title": "Orpha ID",
+                            "description": "Unique id for Orphanet phenotypes.",
+                            "type": "string"
+                        }
+                    }
+                },
                 "group": {
                     "title": "Group history",
                     "description": "History metadata for groups",
@@ -219,6 +242,18 @@
         },
         "meta.experimental.article": {
             "title": "Experimental data article",
+            "type": "string"
+        },
+        "meta.gdm.omimId": {
+            "title": "OMIM ID change to GDM history",
+            "type": "string"
+        },
+        "meta.gdm.gene": {
+            "title": "HGNC Symbol",
+            "type": "string"
+        },
+        "meta.gdm.disease": {
+            "title": "Orpha ID",
             "type": "string"
         },
         "date_created": {

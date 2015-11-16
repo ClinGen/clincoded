@@ -10,6 +10,7 @@ var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var Assessments = require('./assessment');
+var CuratorHistory = require('./curator_history');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -33,7 +34,7 @@ var external_url_map = globals.external_url_map;
 
 
 var VariantCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func

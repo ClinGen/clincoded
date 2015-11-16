@@ -10,6 +10,7 @@ var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var parseAndLogError = require('./mixins').parseAndLogError;
+var CuratorHistory = require('./curator_history');
 var modal = require('../libs/bootstrap/modal');
 var Modal = modal.Modal;
 var CurationMixin = curator.CurationMixin;
@@ -25,7 +26,7 @@ var queryKeyValue = globals.queryKeyValue;
 var userMatch = globals.userMatch;
 
 var ProvisionalCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func,

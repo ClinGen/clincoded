@@ -6,6 +6,7 @@ var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
+var CuratorHistory = require('./curator_history');
 var parseAndLogError = require('./mixins').parseAndLogError;
 
 var Panel = panel.Panel;
@@ -42,6 +43,16 @@ var CurationMixin = module.exports.CurationMixin = {
         }).then(gdmObj => {
             gdmObj.omimId = newOmimId;
             this.setState({currGdm: gdmObj, currOmimId: newOmimId});
+
+            // Record history of changing the GDM's OMIM ID
+            var meta = {
+                gdm: {
+                    omimId: newOmimId,
+                    gene: gdmObj.gene.symbol,
+                    disease: gdmObj.disease.term
+                }
+            };
+            this.recordHistory('modify', gdmObj, meta);
         }).catch(e => {
             console.log('UPDATEOMIMID %o', e);
         });
@@ -1720,3 +1731,34 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
         </div>
     );
 };
+
+
+// Display a history item for adding a PMID to a GDM
+var GdmOmimModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var gdm = history.primary;
+        var gdmMeta = history.meta.gdm;
+
+        return (
+            <div>
+                <strong>{gdmMeta.gene}-{gdmMeta.disease}-</strong>
+                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                <span> OMIM ID changed to {gdmMeta.omimId}</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(GdmOmimModifyHistory, 'gdm', 'modify');
+
+
+// Display a history item for deleting a PMID from a GDM
+var GdmOmimDeleteHistory = React.createClass({
+    render: function() {
+        return <div>GDMOMIMDELETE</div>;
+    }
+});
+
+globals.history_views.register(GdmOmimDeleteHistory, 'gdm', 'delete');
