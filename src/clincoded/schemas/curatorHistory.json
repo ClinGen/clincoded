@@ -45,7 +45,7 @@
         },
         "meta": {
             "title": "History meta",
-            "description": "Type-dependent data about the history item",
+            "description": "Type-dependent (@type) data about the history item",
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -269,7 +269,7 @@
             "title": "Orpha ID",
             "type": "string"
         },
-        "meta.pathogenicity": {
+        "meta.pathogenicity.variantId": {
             "title": "Pathogenicity",
             "type": "string"
         },

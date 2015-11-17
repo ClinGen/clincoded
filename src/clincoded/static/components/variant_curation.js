@@ -609,11 +609,10 @@ var PathogenicityAddModHistory = React.createClass({
     render: function() {
         var history = this.props.history;
         var pathogenicity = history.primary;
-        var variantId = pathogenicity.variant;
 
         return (
             <div>
-                <span>Variant “{variantId}” added</span>
+                <span>Variant “{history.meta.pathogenicity.variantId}” {history.operationType === 'add' ? <span>added</span> : <span>modified</span>}</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
