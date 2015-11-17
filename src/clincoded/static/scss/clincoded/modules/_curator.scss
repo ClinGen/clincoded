@@ -520,10 +520,8 @@
     border: solid 3px #000;
     border-collapse: collapse;
     font-size: 14px;
-
-    .classification-row {
-        background-color: #ddd;
-    }
+    position: relative;
+    width: 90%;
 
     .count-title-row {
         height: 30px;
@@ -578,15 +576,22 @@
         text-align: left;
     }
 
-    .inner-table-box {
-        padding: 5px 10px 5px 10px;
+    .classification-cell {
+        background-color: #fff;
+    }
+
+    .classification-score-top {
+        padding: 30px 10px 30px 10px;
         text-align: center;
-        vertical-align: middle;
+        vertical-align: top;
+        background-color: #ddd;
+        border-bottom: none;
 
         table {
             padding: 0;
             margin: 0 auto;
-            width: 90%;
+            border-collapse: collapse;
+            border-spacing: 5px;
 
             .high-light-row {
                 height: 28px;
@@ -602,6 +607,18 @@
             .non-high-light {
                 color: #c85;
             }
+        }
+    }
+
+    .classification-score-bottom {
+        padding: 0px 10px 15px 10px;
+        text-align: left;
+        border-top: none;
+        background-color: #ddd;
+        vertical-align: bottom;
+
+        p {
+            padding-left: 50px;
         }
     }
 
@@ -651,6 +668,20 @@
     .vertical-transform-3 {
         @include transform(rotate(90deg) translate(-30px, 0px));
     }
+
+    .underline-text {
+        text-decoration: underline;
+    }
+
+    .title-p {
+        text-align: center;
+    }
+
+    hr {
+        width: 100%;
+        border: none;
+        border-top: solid 1px #000;
+    }
 }
 
 .exp-matrix {
@@ -658,6 +689,7 @@
     margin: none;
     width: 100%;
     font-size: 14px;
+    border: none;
 
     .top-row {
         background-color: #47b;

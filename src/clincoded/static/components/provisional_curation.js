@@ -413,7 +413,7 @@ var Classification = function() {
 var LimitedClassification = function() {
     return (
         <div>
-            <p style={{'font-weight':'bold', 'text-decoration':'underline'}}>LIMITED CLASSIFICATION</p>
+            <p className="title underline-text title-p">LIMITED CLASSIFICATION</p>
             <p>There is <strong>limited</strong> evidence to support a causal role for this gene in this disease, such as:</p>
             <p>
                 <ul>
@@ -430,7 +430,7 @@ var LimitedClassification = function() {
 var ModerateClassification = function() {
     return (
         <div>
-            <p style={{'font-weight':'bold', 'text-decoration':'underline'}}>MODERATE CLASSIFICATION</p>
+            <p className="title underline-text title-p">MODERATE CLASSIFICATION</p>
             <p>There is <strong>moderate</strong> evidence to support a causal role for this gene in this diseaese, such as:</p>
             <p>
                 <ul>
@@ -446,7 +446,7 @@ var ModerateClassification = function() {
 var StrongClassification = function() {
     return (
         <div>
-            <p style={{'font-weight':'bold', 'text-decoration':'underline'}}>STRONG CLASSIFICATION</p>
+            <p className="title underline-text title-p">STRONG CLASSIFICATION</p>
             <p>
                 The role of this gene in disease has been independently demonstrated in at least two separate studies providing&nbsp;
                 <strong>strong</strong> supporting evidence for this gene&#39;s role in disease, such as the following types of evidence:
@@ -465,7 +465,7 @@ var StrongClassification = function() {
 var DefinitiveClassification = function() {
     return (
         <div>
-            <p style={{'font-weight':'bold', 'text-decoration':'underline'}}>DEFINITIVE CLASSIFICATION</p>
+            <p className="title underline-text title-p">DEFINITIVE CLASSIFICATION</p>
             <p>
                 The role of this gene in this particular disease hase been repeatedly demonstrated in both the research and clinical
                 diagnostic settings, and has been upheld over time (in general, at least 3 years). No convincing evidence has emerged
@@ -487,11 +487,7 @@ var EditCurrent = function() {
                 <PanelGroup accordion>
                     <Panel title="Currently Saved Calculation and Classification" open>
                         <div className="row">
-                            <div className="col-sm-5">
-                                <a href="/provisional-curation/?summarymatrix=display">
-                                    <strong className="pull-right">Total Score:</strong>
-                                </a>
-                            </div>
+                            <div className="col-sm-5"><strong className="pull-right">Total Score:</strong></div>
                             <div className="col-sm-7"><span>{this.state.totalScore}</span></div>
                         </div>
                         <br />
@@ -847,16 +843,16 @@ var NewCalculation = function() {
 
     var totalScore = probandScore + pubScore + timeScore + expScore;
     var autoClassification = 'No Reported Evidence';
-    if (Math.round(totalScore) > 16){
+    if (Math.floor(totalScore) >= 17){
         autoClassification = 'Definitive';
     }
-    else if (Math.round(totalScore) > 12) {
+    else if (Math.floor(totalScore) >= 13) {
         autoClassification = 'Strong';
     }
-    else if (Math.round(totalScore) > 8) {
+    else if (Math.floor(totalScore) >= 9) {
         autoClassification = 'Moderate';
     }
-    else if (Math.round(totalScore) > 2) {
+    else if (Math.floor(totalScore) >= 2) {
         autoClassification = 'Limited';
     }
 
@@ -1106,33 +1102,24 @@ var NewCalculation = function() {
                                         <td className="result-cells title larger score-cells larger area-top-cells area-bottom-cells">{totalScore}</td>
                                     </tr>
                                     <tr className="narrow-line"></tr>
-                                    <tr className="classification-row">
-                                        <td colSpan="7" style={{'text-align':'left', 'padding':'none', 'margin':'none'}}>
-                                            <table style={{'width':'100%', 'padding':'none', 'border':'none'}}>
-                                                <tr>
-                                                    <td className="description" style={{'background-color':'#fff'}}>
-                                                        {   autoClassification === 'Limited' ? LimitedClassification.call() :
-                                                            (   autoClassification === 'Moderate' ? ModerateClassification.call() :
-                                                                (   autoClassification === 'Strong' ? StrongClassification.call() :
-                                                                    (   autoClassification === 'Definitive' ? DefinitiveClassification.call() : null)
-                                                                )
-                                                            )
-                                                        }
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td className="description">
-                                                        <p style={{'text-align':'center', 'font-weight':'bold', 'text-decoration':'underline'}}>NOTES</p>
-                                                        <p>
-                                                            &sup1;Variants that have evidence to disrupt function and/or have other strong genetic and population data (e.g. <i>de novo</i>&nbsp;
-                                                            occurrence, absence in controls, etc) can be used as evidence in support of a variant&#39;s causality in this framework.
-                                                        </p>
-                                                        <p>&sup2;Examples of appropriate types of supporting experimental data based on those outlined in MacArthur et al. 2014.</p>
-                                                    </td>
-                                                </tr>
-                                            </table>
+                                    <tr>
+                                        <td colSpan="7" rowSpan="2" className="description classification-cell">
+                                            {   autoClassification === 'Limited' ? LimitedClassification.call() :
+                                                (   autoClassification === 'Moderate' ? ModerateClassification.call() :
+                                                    (   autoClassification === 'Strong' ? StrongClassification.call() :
+                                                        (   autoClassification === 'Definitive' ? DefinitiveClassification.call() : null)
+                                                    )
+                                                )
+                                            }
+                                            <hr />
+                                            <p className="title title-p">Notes</p>
+                                            <p>
+                                                &sup1;Variants that have evidence to disrupt function and/or have other strong genetic and population data (e.g. <i>de novo</i>&nbsp;
+                                                occurrence, absence in controls, etc) can be used as evidence in support of a variant&#39;s causality in this framework.
+                                            </p>
+                                            <p>&sup2;Examples of appropriate types of supporting experimental data based on those outlined in MacArthur et al. 2014.</p>
                                         </td>
-                                        <td colSpan="4" className="inner-table-box" style={{'padding-top':'20px', 'vertical-align':'top', 'border-collapse':'separate', 'border-spacing':'5px'}}>
+                                        <td colSpan="4" className="classification-score-top">
                                             <table>
                                                 <tr>
                                                     <td className="title">Classification</td>
@@ -1158,11 +1145,14 @@ var NewCalculation = function() {
                                                     <td>Definitive</td>
                                                     <td className={autoClassification === 'Definitive' ? "title score-cells" : "non-high-light"}>17-20</td>
                                                 </tr>
-                                                <tr style={{'height':'50px'}}></tr>
-                                                <tr>
-                                                    <td colSpan="2" style={{'border-top':'solid 1px #000', 'vertical-align':'middle'}}>Description of half point round here</td>
-                                                </tr>
                                             </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colSpan="4" className="classification-score-bottom">
+                                            <hr />
+                                            <span className="title">Note:</span> If a total score contains a half point, it is rounded down to the nearest whole integer
+                                            when calculating the clinical validity classification.
                                         </td>
                                     </tr>
                                 </table>
