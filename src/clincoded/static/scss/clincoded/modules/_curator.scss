@@ -571,7 +571,7 @@
     }
 
     .description {
-        width: 240px;
+        width: 250px;
         padding: 5px 10px 5px 10px;
         text-align: left;
     }
@@ -581,7 +581,7 @@
     }
 
     .classification-score-top {
-        padding: 30px 10px 30px 10px;
+        padding: 20px 10px 10px 10px;
         text-align: center;
         vertical-align: top;
         background-color: #ddd;
@@ -592,6 +592,7 @@
             margin: 0 auto;
             border-collapse: collapse;
             border-spacing: 5px;
+            width: 90%;
 
             .high-light-row {
                 height: 28px;
@@ -611,15 +612,11 @@
     }
 
     .classification-score-bottom {
-        padding: 0px 10px 15px 10px;
+        padding: 10px 10px 0px 10px;
         text-align: left;
         border-top: none;
         background-color: #ddd;
         vertical-align: bottom;
-
-        p {
-            padding-left: 50px;
-        }
     }
 
     .total-score-cell {
@@ -678,7 +675,7 @@
     }
 
     hr {
-        width: 100%;
+        width: 80%;
         border: none;
         border-top: solid 1px #000;
     }
@@ -719,7 +716,9 @@
 .narrow-line {
     height: 3px;
 }
-
+.narrow-line-2 {
+    height: 10px;
+}
 .classification-cell {
     border-bottom: 10px;
 }

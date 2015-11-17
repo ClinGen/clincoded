@@ -49,10 +49,9 @@ var ProvisionalCuration = React.createClass({
     loadData: function() {
         var gdmUuid = this.queryValues.gdmUuid;
 
-        // get gdm and all assessments from db.
+        // get gdm from db.
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '', // search for entire data set of the gdm
-            //gdmUuid ? '/assessments/' : '' // search for all assessments from db
         ]);
         this.getRestDatas(
             uris
@@ -65,9 +64,6 @@ var ProvisionalCuration = React.createClass({
                     case 'gdm':
                         stateObj.gdm = data;
                         break;
-                    //case 'assessment_collection':
-                    //    stateObj.assessments = data['@graph'];
-                    //    break;
                     default:
                         break;
                 }
@@ -89,15 +85,6 @@ var ProvisionalCuration = React.createClass({
                 }
             }
 
-            // filter assessments for specific user and gdm
-            //var temp = [];
-            //for (var i in stateObj.assessments) {
-            //    if (stateObj.assessments[i].submitted_by.uuid === stateObj.user && stateObj.assessments[i].evidence_gdm === stateObj.gdm.uuid) {
-            //        temp.push(stateObj.assessments[i]);
-             //   }
-            //}
-            //stateObj.assessments = temp;
-
             this.setState(stateObj);
 
             return Promise.resolve();
@@ -107,7 +94,6 @@ var ProvisionalCuration = React.createClass({
     },
 
     componentDidMount: function() {
-        //this.clrFormErrors.bind(null, 'reasons');
         this.loadData();
     },
 
@@ -139,7 +125,6 @@ var ProvisionalCuration = React.createClass({
                 if (this.state.provisional) { // edit existing provisional
                     this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
                         this.resetAllFormValues();
-                        //this.context.navigate(backUrl);
                         window.history.go(-1);
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = : %o', e);
@@ -162,7 +147,6 @@ var ProvisionalCuration = React.createClass({
                         });
                     }).then(savedGdm => {
                         this.resetAllFormValues();
-                        //this.context.navigate(backUrl);
                         window.history.go(-1);
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = %o', e);
@@ -180,9 +164,6 @@ var ProvisionalCuration = React.createClass({
         // click Cancel button will go back to view - current
         if (e.detail >= 1){
             window.history.go(-1);
-            //var backUrl = '/curation-central/?gdm=' + this.state.gdm.uuid;
-            //backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
-            //this.context.navigate(backUrl);
         }
     },
 
@@ -569,7 +550,7 @@ var NewCalculation = function() {
         "review": [],
         "contradict": []
     }
-    //var pathoVariantIdList = [];
+
     for (var i in gdmPathoList) {
         var variantUuid = gdmPathoList[i].variant.uuid;
         // Collect login user's variant assessments, separated as 3 different values.
@@ -783,7 +764,6 @@ var NewCalculation = function() {
 
     // get final scores
     var currentYear = year.getFullYear();
-    //var years = (currentYear.valueOf() - earliest.valueOf()) + ' = ' + currentYear + ' - ' + earliest;
     var time = currentYear.valueOf() - earliest.valueOf();
     var timeScore = 0, probandScore = 0, pubScore = 0, expScore = 0;
     if (time >= 3) {
@@ -796,7 +776,6 @@ var NewCalculation = function() {
         timeScore = 0;
     }
 
-    //var proband = count_proband(familiesCollected) + count_proband(individualsCollected);
     if (proband > 18) {
         probandScore = 7;
     }
@@ -1125,22 +1104,22 @@ var NewCalculation = function() {
                                                     <td className="title">Classification</td>
                                                     <td className="title">Total Score</td>
                                                 </tr>
-                                                <tr className="narrow-line"></tr>
+                                                <tr className="narrow-line-2"></tr>
                                                 <tr className={autoClassification === 'Limited' ? 'high-light-row' : null}>
                                                     <td>Limited</td>
                                                     <td className={autoClassification === 'Limited' ? "title score-cells" : "non-high-light"}>2-8</td>
                                                 </tr>
-                                                <tr className="narrow-line"></tr>
+                                                <tr className="narrow-line-2"></tr>
                                                 <tr className={autoClassification === 'Moderate' ? 'high-light-row' : null}>
                                                     <td>Moderate</td>
                                                     <td className={autoClassification === 'Moderate' ? "title score-cells" : "non-high-light"}>9-12</td>
                                                 </tr>
-                                                <tr className="narrow-line"></tr>
+                                                <tr className="narrow-line-2"></tr>
                                                 <tr className={autoClassification === 'Strong' ? 'high-light-row' : null}>
                                                     <td>Strong</td>
                                                     <td className={autoClassification === 'Strong' ? "title score-cells" : "non-high-light"}>13-16</td>
                                                 </tr>
-                                                <tr className="narrow-line"></tr>
+                                                <tr className="narrow-line-2"></tr>
                                                 <tr className={autoClassification === 'Definitive' ? 'high-light-row' : null}>
                                                     <td>Definitive</td>
                                                     <td className={autoClassification === 'Definitive' ? "title score-cells" : "non-high-light"}>17-20</td>
@@ -1150,9 +1129,10 @@ var NewCalculation = function() {
                                     </tr>
                                     <tr>
                                         <td colSpan="4" className="classification-score-bottom">
-                                            <hr />
-                                            <span className="title">Note:</span> If a total score contains a half point, it is rounded down to the nearest whole integer
-                                            when calculating the clinical validity classification.
+                                            <p className="alert alert-info">
+                                                <span className="title">Note:</span> If the total calculated score contains a half point, it is rounded down to the
+                                                nearest whole integer for determining the calculated classification.
+                                            </p>
                                         </td>
                                     </tr>
                                 </table>
