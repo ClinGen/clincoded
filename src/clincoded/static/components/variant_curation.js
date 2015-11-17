@@ -306,11 +306,21 @@ var VariantCuration = React.createClass({
 
                     // Write the updated GDM
                     return this.putRestData('/gdm/' + this.state.gdm.uuid, newGdm).then(data => {
-                        return Promise.resolve(data['@graph'][0]);
+                        return Promise.resolve({pathogenicity: pathogenicity, modified: false});
                     });
                 }
-                return Promise.resolve(null);
+
+                // Existing pathogenicity modified
+                return Promise.resolve({pathogenicity: pathogenicity, modified: true});
             }).then(data => {
+                // Write the pathogenicity history
+                var meta = {
+                    pathogenicity: {
+                        variantId: this.state.variant.clinvarVariantId ? this.state.variant.clinvarVariantId : this.state.variant.otherDescription
+                    }
+                };
+                this.recordHistory(data.modified ? 'modify' : 'add', data.pathogenicity, meta);
+
                 // Now go back to Record Curation
                 this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                 var gdmQs = this.state.gdm ? '?gdm=' + this.state.gdm.uuid : '';
@@ -576,7 +586,7 @@ var VariantCurationView = React.createClass({
 var VariantViewer = React.createClass({
     render: function() {
         var pathogenicity = this.props.context;
-        var variant = pathogenicity.variant;
+        var variant = pathogenicity.variantId;
 
         return (
             <div className="container">
@@ -592,3 +602,33 @@ var VariantViewer = React.createClass({
 });
 
 globals.content_views.register(VariantViewer, 'pathogenicity');
+
+
+// Display a history item for adding variant pathogenicities
+var PathogenicityAddModHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var pathogenicity = history.primary;
+        var variantId = pathogenicity.variant;
+
+        return (
+            <div>
+                <span>Variant “{variantId}” added</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'add');
+globals.history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'modify');
+
+
+// Display a history item for deleting variant pathogenicities
+var PathogenicityDeleteHistory = React.createClass({
+    render: function() {
+        return <div>PATHOGENICITYDELETE</div>;
+    }
+});
+
+globals.history_views.register(PathogenicityDeleteHistory, 'pathogenicity', 'delete');

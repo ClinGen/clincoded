@@ -183,6 +183,19 @@
                             "linkTo": "article"
                         }
                     }
+                },
+                "pathogenicity": {
+                    "title": "Pathogenicity history",
+                    "description": "History metadata for variant pathogenicity additions and modifications",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "variantId": {
+                            "title": "Variant ID",
+                            "description": "ID of the variant this pathogenicity evaluates",
+                            "type": "string"
+                        }
+                    }
                 }
             }
         }
@@ -254,6 +267,10 @@
         },
         "meta.gdm.disease": {
             "title": "Orpha ID",
+            "type": "string"
+        },
+        "meta.pathogenicity": {
+            "title": "Pathogenicity",
             "type": "string"
         },
         "date_created": {
