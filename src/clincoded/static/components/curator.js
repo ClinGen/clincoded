@@ -1743,7 +1743,7 @@ var GdmOmimModifyHistory = React.createClass({
 
         return (
             <div>
-                <strong>{gdmMeta.gene}-{gdmMeta.disease}-</strong>
+                <strong>{gdmMeta.gene.symbol}-{gdmMeta.disease.term}-</strong>
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
                 <span> OMIM ID changed to {gdmMeta.omimId}</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
@@ -1756,10 +1756,10 @@ globals.history_views.register(GdmOmimModifyHistory, 'gdm', 'modify');
 
 
 // Display a history item for deleting a PMID from a GDM
-var GdmOmimDeleteHistory = React.createClass({
+var GdmDeleteHistory = React.createClass({
     render: function() {
-        return <div>GDMOMIMDELETE</div>;
+        return <div>GDMDELETE</div>;
     }
 });
 
-globals.history_views.register(GdmOmimDeleteHistory, 'gdm', 'delete');
+globals.history_views.register(GdmDeleteHistory, 'gdm', 'delete');

@@ -9,6 +9,7 @@ var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
+var CuratorHistory = require('./curator_history');
 
 var Form = form.Form;
 var FormMixin = form.FormMixin;
@@ -40,7 +41,7 @@ var hpoValues = [
 
 
 var CreateGeneDisease = React.createClass({
-    mixins: [FormMixin, RestMixin, ModalMixin],
+    mixins: [FormMixin, RestMixin, ModalMixin, CuratorHistory],
 
     contextTypes: {
         fetch: React.PropTypes.func,
@@ -110,13 +111,17 @@ var CreateGeneDisease = React.createClass({
                         return this.postRestData('/gdm/', newGdm).then(data => {
                             var newGdm = data['@graph'][0];
 
-                            // Record history of adding a PMID to a GDM
+                            // Record history of adding a GDM
                             var meta = {
                                 gdm: {
+                                    operation: 'add',
+                                    gene: newGdm.gene,
+                                    disease: newGdm.disease
                                 }
                             };
-                            //this.recordHistory('add', gdm, meta);
+                            this.recordHistory('add', newGdm, meta);
 
+                            // Navigate to Record Curation
                             var uuid = data['@graph'][0].uuid;
                             this.context.navigate('/curation-central/?gdm=' + uuid);
                         });
@@ -214,3 +219,27 @@ var ConfirmEditGdm = React.createClass({
         );
     }
 });
+
+
+// Display a history item for adding a PMID to a GDM
+var GdmAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var gdm = history.primary;
+        var gdmMeta = history.meta.gdm;
+        var gdmHref = '/curation-central/?gdm=' + gdm.uuid;
+
+        return (
+            <div>
+                <a href={gdmHref}>
+                    <strong>{gdmMeta.gene.symbol}-{gdmMeta.disease.term}-</strong>
+                    <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                </a>
+                <span> created</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(GdmAddHistory, 'gdm', 'add');
