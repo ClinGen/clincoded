@@ -55,6 +55,15 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "add",
+                            "enum": [
+                                "add"
+                            ]
+                        },
                         "gdm": {
                             "title": "GDM",
                             "description": "GDM that's the object of the PMID",
@@ -69,6 +78,16 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "add",
+                            "enum": [
+                                "add",
+                                "omim"
+                            ]
+                        },
                         "omimId": {
                             "title": "OMIM ID",
                             "description": "New OMIM ID for the GDM",
@@ -76,13 +95,15 @@
                         },
                         "gene": {
                             "title": "HGNC Symbol",
-                            "description": "HGNC Symbol of gene from GDM",
-                            "type": "string"
+                            "description": "HGNC Symbol of gene.",
+                            "type": "string",
+                            "linkTo": "gene"
                         },
                         "disease": {
                             "title": "Orpha ID",
                             "description": "Unique id for Orphanet phenotypes.",
-                            "type": "string"
+                            "type": "string",
+                            "linkTo": "orphaPhenotype"
                         }
                     }
                 },
@@ -92,6 +113,15 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
                         "gdm": {
                             "title": "GDM",
                             "description": "GDM that's the object of the group",
@@ -112,6 +142,15 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
                         "gdm": {
                             "title": "GDM",
                             "description": "GDM that's the object of the family",
@@ -138,6 +177,15 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
                         "gdm": {
                             "title": "GDM",
                             "description": "GDM that's the object of the individual",
@@ -170,6 +218,15 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
                         "gdm": {
                             "title": "GDM",
                             "description": "GDM that's the object of the experimental data",
@@ -190,6 +247,15 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
                         "variantId": {
                             "title": "Variant ID",
                             "description": "ID of the variant this pathogenicity evaluates",

@@ -47,9 +47,10 @@ var CurationMixin = module.exports.CurationMixin = {
             // Record history of changing the GDM's OMIM ID
             var meta = {
                 gdm: {
+                    operation: 'omim',
                     omimId: newOmimId,
-                    gene: gdmObj.gene.symbol,
-                    disease: gdmObj.disease.term
+                    gene: gdmObj.gene['@id'],
+                    disease: gdmObj.disease['@id']
                 }
             };
             this.recordHistory('modify', gdmObj, meta);

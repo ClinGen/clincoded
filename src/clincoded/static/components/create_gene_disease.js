@@ -108,6 +108,15 @@ var CreateGeneDisease = React.createClass({
                         // Post the new GDM to the DB. Once promise returns, go to /curation-central page with the UUID
                         // of the new GDM in the query string.
                         return this.postRestData('/gdm/', newGdm).then(data => {
+                            var newGdm = data['@graph'][0];
+
+                            // Record history of adding a PMID to a GDM
+                            var meta = {
+                                gdm: {
+                                }
+                            };
+                            //this.recordHistory('add', gdm, meta);
+
                             var uuid = data['@graph'][0].uuid;
                             this.context.navigate('/curation-central/?gdm=' + uuid);
                         });
