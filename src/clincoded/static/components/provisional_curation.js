@@ -45,7 +45,7 @@ var ProvisionalCuration = React.createClass({
         };
     },
 
-    loadData: function(url) {
+    loadData: function() {
         var gdmUuid = this.queryValues.gdmUuid;
 
         // get gdm from db.
@@ -94,7 +94,7 @@ var ProvisionalCuration = React.createClass({
     },
 
     componentDidMount: function() {
-        this.loadData(document.referrer);
+        this.loadData();
     },
 
     submitForm: function(e) {
@@ -863,7 +863,7 @@ var NewCalculation = function() {
                         <tr>
                             <td>&nbsp;</td>
                             <td><strong>Segregation</strong></td>
-                            <td><strong>Variant</strong></td>
+                            <td><strong>Variant (proband only)</strong></td>
                             <td><strong>Experimental</strong></td>
                         </tr>
                         <tr>
