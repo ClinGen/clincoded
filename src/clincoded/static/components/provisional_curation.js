@@ -36,17 +36,16 @@ var ProvisionalCuration = React.createClass({
 
     getInitialState: function() {
         return {
-            //urlFrom: document.referrer,
             user: null, // login user uuid
             gdm: null, // current gdm object, must be null initially.
             provisional: null, // login user's existing provisional object, must be null initially.
-            assessments: null,  // list of all assessments, must be nul initially.
+            //assessments: null,  // list of all assessments, must be nul initially.
             totalScore: null,
             autoClassification: null
         };
     },
 
-    loadData: function() {
+    loadData: function(url) {
         var gdmUuid = this.queryValues.gdmUuid;
 
         // get gdm from db.
@@ -85,6 +84,7 @@ var ProvisionalCuration = React.createClass({
                 }
             }
 
+            stateObj.previousUrl = url;
             this.setState(stateObj);
 
             return Promise.resolve();
@@ -94,7 +94,7 @@ var ProvisionalCuration = React.createClass({
     },
 
     componentDidMount: function() {
-        this.loadData();
+        this.loadData(document.referrer);
     },
 
     submitForm: function(e) {
@@ -169,7 +169,6 @@ var ProvisionalCuration = React.createClass({
 
     render: function() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        //this.queryValues.pmid = queryKeyValue('pmid', this.props.href) ? queryKeyValue('pmid', this.props.href) : '';
         var calculate = queryKeyValue('calculate', this.props.href);
         var edit = queryKeyValue('edit', this.props.href);
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
@@ -184,72 +183,66 @@ var ProvisionalCuration = React.createClass({
                 { show_clsfctn === 'display' ?
                     Classification.call()
                     :
-                    ( summaryMatrix === 'display' ?
-                        SummaryMatrix.call()
-                        :
-                        ( expMatrix === 'display' ?
-                            ExperimentalMatrix.call()
-                            :
-                            gdm ?
-                                <div>
-                                    <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
-                                    <div className="container">
-                                        {
-                                            (provisional && edit === 'yes') ?
-                                            EditCurrent.call(this)
-                                            :
-                                            (   calculate === 'yes' ?
-                                                <div>
-                                                    <h1>Curation Summary & Provisional Classification</h1>
-                                                    {
-                                                        provisional ?
-                                                        <PanelGroup accordion>
-                                                            <Panel title="Last Saved Summary & Provisional Classification" open>
-                                                                <div className="row">
-                                                                        <div className="col-sm-5"><strong>Date Generated:</strong></div>
-                                                                        <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
-                                                                    </div>
-                                                                    <div className="row">
-                                                                        <div className="col-sm-5">
-                                                                            <strong>Total Score:</strong>
-                                                                        </div>
-                                                                        <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
-                                                                    </div>
-                                                                    <div className="row">
-                                                                        <div className="col-sm-5">
-                                                                            <strong>Calculated Clinical Validity Classification:</strong>
-                                                                        </div>
-                                                                        <div className="col-sm-7"><span>{provisional.autoClassification}</span></div>
-                                                                    </div>
-                                                                    <div className="row">
-                                                                        <div className="col-sm-5">
-                                                                            <strong>Selected Clinical Validity Classification:</strong>
-                                                                        </div>
-                                                                        <div className="col-sm-7"><span>{provisional.alteredClassification}</span></div>
-                                                                    </div>
-                                                                    <div className="row">
-                                                                        <div className="col-sm-5">
-                                                                            <strong>Reason(s):</strong>
-                                                                        </div>
-                                                                        <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
-                                                                    </div>
-                                                                    <div className="row">&nbsp;</div>
-                                                                </Panel>
-                                                            </PanelGroup>
-                                                        :
-                                                        null
-                                                    }
-                                                    {NewCalculation.call(this)}
-                                                </div>
+                    ( gdm ?
+                        <div>
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true}/>
+                            <div className="container">
+                                <div>Previous Page: {this.state.previousUrl}</div>
+                                {
+                                    (provisional && edit === 'yes') ?
+                                    EditCurrent.call(this)
+                                    :
+                                    (   calculate === 'yes' ?
+                                        <div>
+                                            <h1>Curation Summary & Provisional Classification</h1>
+                                            {
+                                                provisional ?
+                                                <PanelGroup accordion>
+                                                    <Panel title="Last Saved Summary & Provisional Classification" open>
+                                                        <div className="row">
+                                                                <div className="col-sm-5"><strong>Date Generated:</strong></div>
+                                                                <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5">
+                                                                    <strong>Total Score:</strong>
+                                                                </div>
+                                                                <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5">
+                                                                    <strong>Calculated Clinical Validity Classification:</strong>
+                                                                </div>
+                                                                <div className="col-sm-7"><span>{provisional.autoClassification}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5">
+                                                                    <strong>Selected Clinical Validity Classification:</strong>
+                                                                </div>
+                                                                <div className="col-sm-7"><span>{provisional.alteredClassification}</span></div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-sm-5">
+                                                                    <strong>Reason(s):</strong>
+                                                                </div>
+                                                                <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
+                                                            </div>
+                                                            <div className="row">&nbsp;</div>
+                                                        </Panel>
+                                                    </PanelGroup>
                                                 :
                                                 null
-                                            )
-                                        }
-                                    </div>
-                                </div>
-                            :
-                            null
-                        )
+                                            }
+                                            {NewCalculation.call(this)}
+                                        </div>
+                                        :
+                                        null
+                                    )
+                                }
+                            </div>
+                        </div>
+                        :
+                        null
                     )
                 }
             </div>

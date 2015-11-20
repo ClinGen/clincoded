@@ -80,10 +80,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
     render: function() {
         var gdm = this.props.gdm;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
+        var summaryPage = this.props.summaryPage ? true : false;
 
         var provisional;
         var provisionalExist = false;
         var summaryButton = false;
+
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
@@ -173,8 +175,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                         <div className="provisional-data-center">
                                                             <span>
                                                                 Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                Provisional Classification: {provisional.alteredClassification}&nbsp;&nbsp;
-                                                                [<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]
+                                                                Provisional Classification: {provisional.alteredClassification}
+                                                                { summaryPage ?
+                                                                    null
+                                                                    :
+                                                                    <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
+                                                                }
                                                             </span>
                                                         </div>
                                                     </div>
@@ -184,9 +190,13 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                         </td>
                                         <td className="button-box" rowSpan="2">
                                             { summaryButton ?
-                                                <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                                    { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
-                                                </a>
+                                                ( summaryPage ?
+                                                    null
+                                                    :
+                                                    <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                        { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
+                                                    </a>
+                                                )
                                                 :
                                                 null
                                             }
