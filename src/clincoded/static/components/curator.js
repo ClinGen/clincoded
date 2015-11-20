@@ -1720,3 +1720,25 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
         </div>
     );
 };
+
+var DeleteConfirmModal = module.exports.DeleteConfirmModal = React.createClass({
+    mixins: [RestMixin, ModalMixin],
+    propTypes: {
+        closeModal: React.PropTypes.func, // Function to call to close the modal
+        deleteTarget: React.PropTypes.object, // deleteTarget
+    },
+    contextTypes: {
+        fetch: React.PropTypes.func // Function to perform a search
+    },
+    deleteAction: function() {
+        this.props.deleteTarget['status'] = 'deleted';
+        return this.putRestData('/families/' + this.prop.deleteTarget.uuid, this.prop.deleteTarget).then(data => {
+            return Promise.resolve(data['@graph'][0]);
+        });
+    },
+    render: function() {
+        return (
+            <div>{this.prop.deleteTarget.label}<br />{this.prop.deleteTarget.status}</div>
+        );
+    }
+});
