@@ -262,6 +262,42 @@
                             "type": "string"
                         }
                     }
+                },
+                "assessment": {
+                    "title": "Assessment history",
+                    "description": "History metadata for assessments",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "enum": [
+                                "pathogenicity",
+                                "segregation",
+                                "experimental"
+                            ]
+                        },
+                        "experimental": {
+                            "title": "Assessed experimental data",
+                            "description": "Experimental data object being assessed",
+                            "type": "string",
+                            "linkTo": "experimental"
+                        },
+                        "family": {
+                            "title": "Assessed family segregation",
+                            "description": "Family of segregation object being assessed",
+                            "type": "string",
+                            "linkTo": "family"
+                        },
+                        "variant": {
+                            "title": "Assessed variant",
+                            "description": "Variant object being assessed",
+                            "type": "string",
+                            "linkTo": "variant"
+                        }
+                    }
                 }
             }
         }
@@ -338,6 +374,10 @@
         "meta.pathogenicity.variantId": {
             "title": "Pathogenicity",
             "type": "string"
+        },
+        "meta.assessment": {
+            "title": "Assessment metadata",
+            "type": "object"
         },
         "date_created": {
             "title": "Creation Date",

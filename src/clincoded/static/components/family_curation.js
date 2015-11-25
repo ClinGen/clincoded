@@ -714,7 +714,7 @@ var FamilyCuration = React.createClass({
 
                     // Write the new family object to the DB
                     return this.writeFamilyObj(newFamily).then(newFamily => {
-                        return Promise.resolve({family: newFamily, assessment: data.assessment});
+                        return Promise.resolve({family: newFamily, assessment: data.assessment, updatedAssessment: data.updatedAssessment});
                     });
                 }).then(data => {
                     // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
@@ -725,14 +725,21 @@ var FamilyCuration = React.createClass({
 
                     if (newFamily && newAssessment && !newAssessment.evidence_id) {
                         // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
-                        // Nothing relies on this operation completing, so don't wait for a promise from it.
-                        this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid, newAssessment);
+                        return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid, newAssessment).then(assessment => {
+                            return Promise.resolve({family: newFamily, assessment: assessment, updatedAssessment: data.updatedAssessment});
+                        });
                     }
 
                     // Next step relies on the pathogenicity, not the updated assessment
-                    return Promise.resolve(newFamily);
-                }).then(newFamily => {
+                    return Promise.resolve({family: newFamily, assessment: data.assessment, updatedAssessment: data.updatedAssessment});
+                }).then(data => {
+                    var newFamily = data.family;
                     var promise;
+
+                    // If we're assessing a family segregation, write that to history
+                    if (newFamily && data.assessment) {
+                        this.saveAssessmentHistory(data.assessment, newFamily, data.updatedAssessment);
+                    }
 
                     // If we're adding this family to a group, update the group with this family; otherwise update the annotation
                     // with the family.

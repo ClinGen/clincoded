@@ -195,7 +195,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                             }
                                         </td>
                                         { summaryButton ?
-                                            <td style={{'width':'200px', 'vertical-align':'middle'}}>
+                                            <td style={{'width':'200px', 'verticalAlign':'middle'}}>
                                                 <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
                                                     { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
                                                 </a>

@@ -281,14 +281,12 @@ var VariantCuration = React.createClass({
                 // No pathogenicity to write because the pathogenicity form is read-only (assessed).
                 return Promise.resolve({pathogenicity: null, assessment: newAssessmentInfo.assessment});
             }).then(pa => {
-                // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
                 var newPathogenicity = pa.pathogenicity;
-                //var newAssessment = pa.assessment;
-                //if (newPathogenicity && newAssessment && !newAssessment.evidence_id) {
-                    // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
-                    // Nothing relies on this operation completing, so don't wait for a promise from it.
-                //    this.saveAssessment(this.cv.assessmentTracker, this.state.gdm.uuid, newPathogenicity.uuid, newAssessment);
-                //}
+
+                // Write the assessment history
+                if (newPathogenicity) {
+                    this.saveAssessmentHistory(pa.assessment, this.state.variant, false);
+                }
 
                 // Next step relies on the pathogenicity, not the updated assessment
                 return Promise.resolve(newPathogenicity);

@@ -1054,12 +1054,12 @@ var ExperimentalCuration = React.createClass({
                     if (this.state.experimental) {
                         // We're editing a experimental. PUT the new group object to the DB to update the existing one.
                         promise = this.putRestData('/experimental/' + this.state.experimental.uuid, newExperimental).then(data => {
-                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0], experimentalAdded: false});
+                            return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: data['@graph'][0], experimentalAdded: false});
                         });
                     } else {
                         // We created an experimental data item; post it to the DB
                         promise = this.postRestData('/experimental/', newExperimental).then(data => {
-                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0], experimentalAdded: true});
+                            return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: data['@graph'][0], experimentalAdded: true});
                         }).then(newExperimental => {
                             savedExperimental = newExperimental.data;
                             if (!this.state.experimental) {
@@ -1074,10 +1074,10 @@ var ExperimentalCuration = React.createClass({
 
                                 // Post the modified annotation to the DB, then go back to Curation Central
                                 return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                                    return Promise.resolve({assessment: assessment.assessment, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
+                                    return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
                                 });
                             } else {
-                                return Promise.resolve({assessment: null, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
+                                return Promise.resolve({assessment: null, updatedAssessment: false, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
                             }
                         });
                     }
@@ -1097,6 +1097,11 @@ var ExperimentalCuration = React.createClass({
                     // Next step relies on the pathogenicity, not the updated assessment
                     return Promise.resolve(data);
                 }).then(data => {
+                    // If we're assessing a family segregation, write that to history
+                    if (data.data && data.assessment) {
+                        this.saveAssessmentHistory(data.assessment, data.data, data.updatedAssessment);
+                    }
+
                     // Record history of the group creation
                     var meta;
                     if (data.experimentalAdded) {
@@ -2573,7 +2578,7 @@ var ExperimentModifyHistory = React.createClass({
         return (
             <div>
                 <a href={experimental['@id']}>{experimental.label}</a>
-                <span> modified</span>
+                <span> ({experimental.evidenceType}) modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
