@@ -580,43 +580,11 @@ var IndividualCuration = React.createClass({
                     }
                     return promise;
                 }).then(data => {
-                    // Add to the user history. data.family always contains the new or edited family. data.group contains the group the family was
-                    // added to, if it was added to a group. data.annotation contains the annotation the family was added to, if it was added to
-                    // the annotation. If neither data.group nor data.annotation exist, data.family holds the existing family that was modified.
-                    var meta;
-                    if (data.annotation) {
-                        // Record the creation of a new family added to a GDM
-                        meta = {
-                            individual: {
-                                gdm: this.state.gdm['@id'],
-                                article: this.state.annotation.article['@id']
-                            }
-                        };
-                        this.recordHistory('add', data.individual, meta);
-                    } else if (data.group) {
-                        // Record the creation of a new family added to a group
-                        meta = {
-                            individual: {
-                                gdm: this.state.gdm['@id'],
-                                group: data.group['@id'],
-                                article: this.state.annotation.article['@id']
-                            }
-                        };
-                        this.recordHistory('add', data.individual, meta);
-                    } else if (data.family) {
-                        // Record the creation of a new family added to a group
-                        meta = {
-                            individual: {
-                                gdm: this.state.gdm['@id'],
-                                family: data.family['@id'],
-                                article: this.state.annotation.article['@id']
-                            }
-                        };
-                        this.recordHistory('add', data.individual, meta);
-                    } else {
-                        // Record the modification of an existing family
-                        this.recordHistory('modify', data.individual);
-                    }
+                    // Add to the user history. data.individual always contains the new or edited individual. data.group contains the group the individual was
+                    // added to, if it was added to a group. data.annotation contains the annotation the individual was added to, if it was added to
+                    // the annotation, and data.family contains the family the individual was added to, if it was added to a family. If none of data.group,
+                    // data.family, nor data.annotation exist, data.individual holds the existing individual that was modified.
+                    recordIndividualHistory(this.state.gdm, this.state.annotation, data.individual, data.group, data.family, this);
 
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
@@ -1573,6 +1541,49 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         });
     }
     return Promise.resolve(null);
+};
+
+
+var recordIndividualHistory = module.exports.recordIndividualHistory = function(gdm, annotation, individual, group, family, context) {
+    // Add to the user history. data.individual always contains the new or edited individual. data.group contains the group the individual was
+    // added to, if it was added to a group. data.annotation contains the annotation the individual was added to, if it was added to
+    // the annotation, and data.family contains the family the individual was added to, if it was added to a family. If none of data.group,
+    // data.family, nor data.annotation exist, data.individual holds the existing individual that was modified.
+    var meta;
+
+    if (annotation) {
+        // Record the creation of a new individual added to a GDM
+        meta = {
+            individual: {
+                gdm: gdm['@id'],
+                article: annotation.article['@id']
+            }
+        };
+        context.recordHistory('add', individual, meta);
+    } else if (group) {
+        // Record the creation of a new family added to a group
+        meta = {
+            individual: {
+                gdm: gdm['@id'],
+                group: group['@id'],
+                article: annotation.article['@id']
+            }
+        };
+        context.recordHistory('add', individual, meta);
+    } else if (family) {
+        // Record the creation of a new family added to a group
+        meta = {
+            individual: {
+                gdm: gdm['@id'],
+                family: family['@id'],
+                article: annotation.article['@id']
+            }
+        };
+        context.recordHistory('add', individual, meta);
+    } else {
+        // Record the modification of an existing family
+        context.recordHistory('modify', individual);
+    }
 };
 
 

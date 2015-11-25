@@ -200,7 +200,7 @@
                         },
                         "family": {
                             "title": "Family",
-                            "description": "Group that's the object of the individual",
+                            "description": "Family that's the object of the individual",
                             "type": "string",
                             "linkTo": "family"
                         },

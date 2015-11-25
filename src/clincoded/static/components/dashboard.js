@@ -77,9 +77,40 @@ var Dashboard = React.createClass({
         });
     },
 
+    getData: function(session) {
+        // Retrieve all GDMs and other objects related to user via search
+        this.getRestDatas(['/gdm/', '/search/?type=gdm&limit=10&submitted_by.uuid=' + session.user_properties.uuid], [function() {}, function() {}]).then(data => {
+            // Search objects successfully retrieved; process results
+            // GDM results; finds GDMs created by user, and also creates PMID-GDM mapping table
+            // (stopgap measure until article -> GDM mapping ability is incorporated)
+            var tempGdmList = [], tempRecentHistory = [];
+            var gdmMapping = {};
+            for (var i = 0; i < data[0]['@graph'].length; i++) {
+                // loop through GDMs
+                var gdm = data[0]['@graph'][i];
+                if (userMatch(gdm.submitted_by, session)) {
+                    tempGdmList.push({
+                        uuid: gdm.uuid,
+                        gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
+                        gdmModel: this.cleanGdmModelName(gdm.modeInheritance),
+                        status: gdm.status,
+                        date_created: gdm.date_created
+                    });
+                }
+                // loop through annotations, if they exist, and map annotation UUIDs to GDMs
+                if (gdm.annotations) gdmMapping = this.gdmMappingLoop(gdmMapping, gdm.annotations, gdm.uuid,
+                    gdm.gene.symbol, gdm.disease.term, gdm.modeInheritance, null);
+            }
+
+            // Set states for cleaned results
+            this.setState({gdmList: tempGdmList});
+        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
+    },
+
     componentDidMount: function() {
         if (this.props.session.user_properties) {
             this.setUserData(this.props.session.user_properties);
+            this.getData(this.props.session);
         }
         this.getHistories().then(histories => {
             this.setState({histories: histories});
@@ -89,6 +120,7 @@ var Dashboard = React.createClass({
     componentWillReceiveProps: function(nextProps) {
         if (nextProps.session.user_properties) {
             this.setUserData(nextProps.session.user_properties);
+            this.getData(nextProps.session);
         }
     },
 

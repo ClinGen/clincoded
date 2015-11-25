@@ -32,6 +32,7 @@ var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var makeStarterIndividual = individual_curation.makeStarterIndividual;
 var updateProbandVariants = individual_curation.updateProbandVariants;
+var recordIndividualHistory = individual_curation.recordIndividualHistory;
 var external_url_map = globals.external_url_map;
 
 // Will be great to convert to 'const' when available
@@ -714,7 +715,7 @@ var FamilyCuration = React.createClass({
 
                     // Write the new family object to the DB
                     return this.writeFamilyObj(newFamily).then(newFamily => {
-                        return Promise.resolve({family: newFamily, assessment: data.assessment, updatedAssessment: data.updatedAssessment});
+                        return Promise.resolve({family: newFamily, starterIndividual: data.individual, assessment: data.assessment, updatedAssessment: data.updatedAssessment});
                     });
                 }).then(data => {
                     // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
@@ -726,12 +727,12 @@ var FamilyCuration = React.createClass({
                     if (newFamily && newAssessment && !newAssessment.evidence_id) {
                         // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
                         return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid, newAssessment).then(assessmentInfo => {
-                            return Promise.resolve({family: newFamily, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
+                            return Promise.resolve({family: newFamily, starterIndividual: data.starterIndividual, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
                         });
                     }
 
                     // Next step relies on the pathogenicity, not the updated assessment
-                    return Promise.resolve({family: newFamily, assessment: data.assessment, updatedAssessment: data.updatedAssessment});
+                    return Promise.resolve({family: newFamily, starterIndividual: data.starterIndividual, assessment: data.assessment, updatedAssessment: data.updatedAssessment});
                 }).then(data => {
                     var newFamily = data.family;
                     var promise;
@@ -758,7 +759,7 @@ var FamilyCuration = React.createClass({
                             // Post the modified annotation to the DB, then go back to Curation Central
                             promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(data => {
                                 // The next step needs the family, not the group it was written to
-                                return {family: newFamily, group: data['@graph'][0]};
+                                return {family: newFamily, group: data['@graph'][0], starterIndividual: data.starterIndividual};
                             });
                         } else {
                             // Not part of a group, so add the family to the annotation instead.
@@ -773,12 +774,12 @@ var FamilyCuration = React.createClass({
                             // Post the modified annotation to the DB, then go back to Curation Central
                             promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(annotation => {
                                 // The next step needs the family, not the group it was written to
-                                return {family: newFamily, annotation: annotation};
+                                return {family: newFamily, starterIndividual: data.starterIndividual, annotation: annotation};
                             });
                         }
                     } else {
                         // Editing an existing family
-                        promise = Promise.resolve({family: newFamily});
+                        promise = Promise.resolve({family: newFamily, starterIndividual: data.starterIndividual});
                     }
                     return promise;
                 }).then(data => {
@@ -808,6 +809,11 @@ var FamilyCuration = React.createClass({
                     } else {
                         // Record the modification of an existing family
                         this.recordHistory('modify', data.family);
+                    }
+
+                    // If we made a starter individual, record that history
+                    if (data.starterIndividual) {
+                        recordIndividualHistory(this.state.gdm, this.state.annotation, data.starterIndividual, data.group, data.family, this);
                     }
 
                     // Navigate back to Curation Central page.
