@@ -280,7 +280,7 @@ var AssessmentAddModHistory = React.createClass({
                 var experimental = assessmentMeta.experimental;
                 assessmentRender = (
                     <div>
-                        <span>Assessed experimental data <a href={experimental['@id']}>{experimental.label}</a> segregation to {assessmentMeta.value}</span>
+                        <span>Assessed experimental data <a href={experimental['@id']}>{experimental.label}</a> to {assessmentMeta.value}</span>
                         <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                     </div>
                 );

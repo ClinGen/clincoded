@@ -25,7 +25,6 @@ var Dashboard = React.createClass({
             userName: '',
             userStatus: '',
             lastLogin: '',
-            recentHistory: [],
             gdmList: [],
             histories: []
         };
@@ -78,123 +77,9 @@ var Dashboard = React.createClass({
         });
     },
 
-    getData: function(session) {
-        // Retrieve all GDMs and other objects related to user via search
-        this.getRestDatas(['/gdm/', '/search/?type=gdm&type=annotation&type=group&type=family&type=individual&type=experimental&limit=10&submitted_by.uuid=' +
-            session.user_properties.uuid], [function() {}, function() {}]).then(data => {
-            // Search objects successfully retrieved; process results
-            // GDM results; finds GDMs created by user, and also creates PMID-GDM mapping table
-            // (stopgap measure until article -> GDM mapping ability is incorporated)
-            var tempGdmList = [], tempRecentHistory = [];
-            var gdmMapping = {};
-            for (var i = 0; i < data[0]['@graph'].length; i++) {
-                // loop through GDMs
-                var gdm = data[0]['@graph'][i];
-                if (userMatch(gdm.submitted_by, session)) {
-                    tempGdmList.push({
-                        uuid: gdm.uuid,
-                        gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
-                        gdmModel: this.cleanGdmModelName(gdm.modeInheritance),
-                        status: gdm.status,
-                        date_created: gdm.date_created
-                    });
-                }
-                // loop through annotations, if they exist, and map annotation UUIDs to GDMs
-                if (gdm.annotations) gdmMapping = this.gdmMappingLoop(gdmMapping, gdm.annotations, gdm.uuid,
-                    gdm.gene.symbol, gdm.disease.term, gdm.modeInheritance, null);
-            }
-            // Recent History panel results
-            for (var i = 0; i < data[1]['@graph'].length; i++) {
-                // loop through search results for history panel results
-                var display = false;
-                var result = data[1]['@graph'][i];
-                var tempDisplayText = '';
-                var tempUrl = '';
-                var tempTimestamp = '';
-                var tempDateTime = moment(result.date_created).format("YYYY MMM DD, h:mm a");
-                switch (result['@type'][0]) {
-                    case 'annotation':
-                        if (result.uuid in gdmMapping) {
-                            tempUrl = "/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + result.article.pmid;
-                            tempDisplayText = <span><a href={tempUrl}>PMID:{result.article.pmid}</a> added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i></span>;
-                            tempTimestamp = "added " + tempDateTime;
-                            display = true;
-                        }
-                        break;
-                    case 'experimental':
-                        if (result.uuid in gdmMapping) {
-                            tempUrl = "/experimental/" + result.uuid + "/";
-                            tempDisplayText = <span><a href={tempUrl}>{result.label}</a> ({result.evidenceType}) added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
-                            tempTimestamp = "added " + tempDateTime;
-                            display = true;
-                        }
-                        break;
-                    case 'family':
-                        if (result.uuid in gdmMapping) {
-                            tempUrl = "/families/" + result.uuid + "/";
-                            tempTimestamp = "added " + tempDateTime;
-                            display = true;
-                            if (gdmMapping[result.uuid].extraInfo.parent) {
-                                // for families associated with a group
-                                tempDisplayText = <span><a href={tempUrl}>{result.label}</a> associated with <a href={gdmMapping[result.uuid].extraInfo.parentUrl}>{gdmMapping[result.uuid].extraInfo.parent}</a> in <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
-                            }
-                            else {
-                                // for families not associated with a group
-                                tempDisplayText = <span><a href={tempUrl}>{result.label}</a> added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
-                            }
-                        }
-                        break;
-                    case 'gdm':
-                        tempUrl = "/curation-central/?gdm=" + result.uuid;
-                        tempDisplayText = <span><a href={tempUrl}><strong>{this.cleanGdmGeneDiseaseName(result.gene.symbol, result.disease.term)}</strong>–<i>{this.cleanGdmModelName(result.modeInheritance)}</i></a></span>;
-                        tempTimestamp = "created " + tempDateTime;
-                        display = true;
-                        break;
-                    case 'group':
-                        if (result.uuid in gdmMapping) {
-                            tempUrl = "/groups/" + result.uuid + "/";
-                            tempDisplayText = <span><a href={tempUrl}>{result.label}</a> added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
-                            tempTimestamp = "added " + tempDateTime;
-                            display = true;
-                        }
-                        break;
-                    case 'individual':
-                        if (result.uuid in gdmMapping) {
-                            tempUrl = "/individual/" + result.uuid + "/";
-                            tempTimestamp = "added " + tempDateTime;
-                            display = true;
-                            if (gdmMapping[result.uuid].extraInfo.parent) {
-                                tempDisplayText = <span><a href={tempUrl}>{result.label}</a> associated with <a href={gdmMapping[result.uuid].extraInfo.parentUrl}>{gdmMapping[result.uuid].extraInfo.parent}</a> in <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
-                            }
-                            else {
-                                // for individuals not associated with a group or family
-                                tempDisplayText = <span><a href={tempUrl}>{result.label}</a> added to <strong>{gdmMapping[result.uuid].displayName}</strong>–<i>{gdmMapping[result.uuid].displayName2}</i> for <a href={"/curation-central/?gdm=" + gdmMapping[result.uuid].uuid + "&pmid=" + gdmMapping[result.uuid].extraInfo.pmid}>PMID:{gdmMapping[result.uuid].extraInfo.pmid}</a></span>;
-                            }
-                        }
-                        break;
-                    default:
-                        tempDisplayText = 'Item';
-                }
-                if (display === true) {
-                    tempRecentHistory.push({
-                        uuid: result.uuid,
-                        displayText: tempDisplayText,
-                        timestamp: tempTimestamp
-                    });
-                }
-            }
-            // Set states for cleaned results
-            this.setState({
-                recentHistory: tempRecentHistory,
-                gdmList: tempGdmList
-            });
-        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
-    },
-
     componentDidMount: function() {
         if (this.props.session.user_properties) {
             this.setUserData(this.props.session.user_properties);
-            this.getData(this.props.session);
         }
         this.getHistories().then(histories => {
             this.setState({histories: histories});
@@ -204,7 +89,6 @@ var Dashboard = React.createClass({
     componentWillReceiveProps: function(nextProps) {
         if (nextProps.session.user_properties) {
             this.setUserData(nextProps.session.user_properties);
-            this.getData(nextProps.session);
         }
     },
 
@@ -224,22 +108,17 @@ var Dashboard = React.createClass({
                         </Panel>
                         <Panel panelClassName="panel-dashboard">
                             <h3>Your Recent History</h3>
-                            {this.state.recentHistory.length > 0 ?
-                            <ul>
-                                {this.state.recentHistory.map(function(item) {
-                                    return <li key={item.uuid}>{item.displayText}; <i>{item.timestamp}</i></li>;
-                                })}
-                            </ul>
-                            : <li>You have no activity to display.</li>}
                             {this.state.histories.length ?
                                 <ul>
                                     {this.state.histories.map(history => {
                                         // Call the history display view based on the primary object
                                         var HistoryView = this.getHistoryView(history);
-                                        return <HistoryView key={history.uuid} history={history} />;
+                                        return <li key={history.uuid}><HistoryView history={history} /></li>;
                                     })}
                                 </ul>
-                            : null}
+                            :
+                                <li>You have no activity to display.</li>
+                            }
                         </Panel>
                     </div>
                     <div className="col-md-6">
