@@ -147,6 +147,7 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
             meta = {
                 assessment: {
                     operation: 'experimental',
+                    value: assessment.value,
                     experimental: evidence['@id']
                 }
             };
@@ -155,6 +156,7 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
             meta = {
                 assessment: {
                     operation: 'segregation',
+                    value: assessment.value,
                     family: evidence['@id']
                 }
             };
@@ -163,6 +165,7 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
             meta = {
                 assessment: {
                     operation: 'pathogenicity',
+                    value: assessment.value,
                     variant: evidence['@id']
                 }
             };
@@ -257,7 +260,7 @@ var AssessmentAddModHistory = React.createClass({
                 var variantId = variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription;
                 assessmentRender = (
                     <div>
-                        <span>Assessed variant “{variantId}” pathogenicity</span>
+                        <span>Assessed variant “{variantId}” pathogenicity to {assessmentMeta.value}</span>
                         <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                     </div>
                 );
@@ -267,7 +270,7 @@ var AssessmentAddModHistory = React.createClass({
                 var family = assessmentMeta.family;
                 assessmentRender = (
                     <div>
-                        <span>Assessed family “{family.label}” segregation</span>
+                        <span>Assessed family <a href={family['@id']}>{family.label}</a> segregation to {assessmentMeta.value}</span>
                         <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                     </div>
                 );
@@ -277,7 +280,7 @@ var AssessmentAddModHistory = React.createClass({
                 var experimental = assessmentMeta.experimental;
                 assessmentRender = (
                     <div>
-                        <span>Assessed experimental data “{experimental.label}” segregation</span>
+                        <span>Assessed experimental data <a href={experimental['@id']}>{experimental.label}</a> segregation to {assessmentMeta.value}</span>
                         <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                     </div>
                 );

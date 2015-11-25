@@ -2036,7 +2036,7 @@ var LabelOtherVariant = React.createClass({
 
 
 var ExperimentalViewer = React.createClass({
-    mixins: [RestMixin, AssessmentMixin],
+    mixins: [RestMixin, AssessmentMixin, CuratorHistory],
 
     cv: {
         assessmentTracker: null, // Tracking object for a single assessment
@@ -2062,6 +2062,9 @@ var ExperimentalViewer = React.createClass({
 
             // Write the assessment to the DB, if there was one.
             return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
+                // Save assessment to history
+                this.saveAssessmentHistory(assessmentInfo.assessment, experimental, assessmentInfo.update);
+
                 // If we made a new assessment, add it to the experimental data's assessments
                 if (assessmentInfo.assessment && !assessmentInfo.update) {
                     updatedExperimental = curator.flatten(experimental);

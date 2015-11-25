@@ -284,9 +284,7 @@ var VariantCuration = React.createClass({
                 var newPathogenicity = pa.pathogenicity;
 
                 // Write the assessment history
-                if (newPathogenicity) {
-                    this.saveAssessmentHistory(pa.assessment, this.state.variant, false);
-                }
+                this.saveAssessmentHistory(pa.assessment, this.state.variant, false);
 
                 // Next step relies on the pathogenicity, not the updated assessment
                 return Promise.resolve(newPathogenicity);
@@ -317,7 +315,7 @@ var VariantCuration = React.createClass({
                         variantId: this.state.variant.clinvarVariantId ? this.state.variant.clinvarVariantId : this.state.variant.otherDescription
                     }
                 };
-                this.recordHistory(data.modified ? 'modify' : 'add', data.pathogenicity, meta);
+                this.recordHistory(data.modified ? 'modify' : 'add', data.pathogenicity ? data.pathogenicity : this.state.pathogenicity, meta);
 
                 // Now go back to Record Curation
                 this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case

@@ -279,6 +279,17 @@
                                 "experimental"
                             ]
                         },
+                        "value": {
+                            "title": "Value",
+                            "description": "Value of assessment",
+                            "type": "string",
+                            "enum": [
+                                "Not Assessed",
+                                "Supports",
+                                "Review",
+                                "Contradicts"
+                            ]
+                        },
                         "experimental": {
                             "title": "Assessed experimental data",
                             "description": "Experimental data object being assessed",

@@ -725,8 +725,8 @@ var FamilyCuration = React.createClass({
 
                     if (newFamily && newAssessment && !newAssessment.evidence_id) {
                         // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
-                        return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid, newAssessment).then(assessment => {
-                            return Promise.resolve({family: newFamily, assessment: assessment, updatedAssessment: data.updatedAssessment});
+                        return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid, newAssessment).then(assessmentInfo => {
+                            return Promise.resolve({family: newFamily, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
                         });
                     }
 
@@ -1523,11 +1523,11 @@ function segregationExists(segregation) {
                  (segregation.additionalInformation && segregation.additionalInformation.length > 0);
     }
     return exists;
-};
+}
 
 
 var FamilyViewer = React.createClass({
-    mixins: [RestMixin, AssessmentMixin],
+    mixins: [RestMixin, AssessmentMixin, CuratorHistory],
 
     cv: {
         assessmentTracker: null, // Tracking object for a single assessment
@@ -1553,6 +1553,9 @@ var FamilyViewer = React.createClass({
 
             // Write the assessment to the DB, if there was one.
             return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
+                // If we're assessing a family segregation, write that to history
+                this.saveAssessmentHistory(assessmentInfo.assessment, family, assessmentInfo.update);
+
                 // If we made a new assessment, add it to the family's assessments
                 if (assessmentInfo.assessment && !assessmentInfo.update) {
                      updatedFamily = curator.flatten(family);
