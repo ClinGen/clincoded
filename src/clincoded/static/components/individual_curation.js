@@ -1551,11 +1551,12 @@ var recordIndividualHistory = module.exports.recordIndividualHistory = function(
     // data.family, nor data.annotation exist, data.individual holds the existing individual that was modified.
     var meta;
 
-    if (annotation) {
-        // Record the creation of a new individual added to a GDM
+    if (family) {
+        // Record the creation of a new family added to a group
         meta = {
             individual: {
                 gdm: gdm['@id'],
+                family: family['@id'],
                 article: annotation.article['@id']
             }
         };
@@ -1570,12 +1571,11 @@ var recordIndividualHistory = module.exports.recordIndividualHistory = function(
             }
         };
         context.recordHistory('add', individual, meta);
-    } else if (family) {
-        // Record the creation of a new family added to a group
+    } else if (annotation) {
+        // Record the creation of a new individual added to a GDM
         meta = {
             individual: {
                 gdm: gdm['@id'],
-                family: family['@id'],
                 article: annotation.article['@id']
             }
         };
