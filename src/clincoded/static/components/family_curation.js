@@ -1982,7 +1982,7 @@ var FamilyAddHistory = React.createClass({
                 <a href={family['@id']}>{family.label}</a>
                 <span> added to </span>
                 {group ?
-                    <span>group <a href={group['@id']}>{group}</a></span>
+                    <span>group <a href={group['@id']}>{group.label}</a></span>
                 :
                     <span>
                         <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>

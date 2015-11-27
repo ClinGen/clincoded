@@ -142,6 +142,10 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
     saveAssessmentHistory: function(assessment, evidence, update) {
         var meta;
 
+        if (!assessment) {
+            return Promise.resolve(null);
+        }
+
         if (experimentalTypes.indexOf(assessment.evidence_type) >= 0) {
             // Experimental assessment
             meta = {

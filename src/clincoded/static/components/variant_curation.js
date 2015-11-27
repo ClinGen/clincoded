@@ -284,7 +284,9 @@ var VariantCuration = React.createClass({
                 var newPathogenicity = pa.pathogenicity;
 
                 // Write the assessment history
-                this.saveAssessmentHistory(pa.assessment, this.state.variant, false);
+                if (pa.assessment) {
+                    this.saveAssessmentHistory(pa.assessment, this.state.variant, false);
+                }
 
                 // Next step relies on the pathogenicity, not the updated assessment
                 return Promise.resolve(newPathogenicity);
@@ -608,7 +610,7 @@ var PathogenicityAddModHistory = React.createClass({
 
         return (
             <div>
-                <span>Variant “{history.meta.pathogenicity.variantId}” {history.operationType === 'add' ? <span>added</span> : <span>modified</span>}</span>
+                <span>Variant “{history.meta.pathogenicity.variantId}” pathogenicity {history.operationType === 'add' ? <span>added</span> : <span>modified</span>}</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
