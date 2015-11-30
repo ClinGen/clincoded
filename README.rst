@@ -213,15 +213,12 @@ Notes on SublimeLinter
 To setup SublimeLinter with Sublime Text 3, first install the linters::
 
     $ easy_install-2.7 flake8
-    $ npm install -g jshint
-    $ npm install -g jsxhint
+    $ npm install -g eslint
 
 After first setting up `Package Control`_ (follow install and usage instructions on site), use it to install the following packages in Sublime Text 3:
 
     * sublimelinter
     * sublimelinter-flake8
-    * sublimelinter-jsxhint
-    * jsx
-    * sublimelinter-jshint
+    * SublimeLinter-contrib-eslint (`instructions <https://github.com/roadhump/SublimeLinter-eslint#plugin-installation>`_)
 
 .. _`Package Control`: https://sublime.wbond.net/
