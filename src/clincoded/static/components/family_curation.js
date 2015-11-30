@@ -222,24 +222,24 @@ var FamilyCuration = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
-                        stateObj.gdm = data;
-                        break;
+                case 'gdm':
+                    stateObj.gdm = data;
+                    break;
 
-                    case 'group':
-                        stateObj.group = data;
-                        break;
+                case 'group':
+                    stateObj.group = data;
+                    break;
 
-                    case 'family':
-                        stateObj.family = data;
-                        break;
+                case 'family':
+                    stateObj.family = data;
+                    break;
 
-                    case 'annotation':
-                        stateObj.annotation = data;
-                        break;
+                case 'annotation':
+                    stateObj.annotation = data;
+                    break;
 
-                    default:
-                        break;
+                default:
+                    break;
                 }
             });
 
@@ -1485,7 +1485,7 @@ function segregationExists(segregation) {
                  (segregation.additionalInformation && segregation.additionalInformation.length > 0);
     }
     return exists;
-};
+}
 
 
 var FamilyViewer = React.createClass({
@@ -1517,7 +1517,7 @@ var FamilyViewer = React.createClass({
             return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
                 // If we made a new assessment, add it to the family's assessments
                 if (assessmentInfo.assessment && !assessmentInfo.update) {
-                     updatedFamily = curator.flatten(family);
+                    updatedFamily = curator.flatten(family);
                     if (!updatedFamily.segregation.assessments) {
                         updatedFamily.segregation.assessments = [];
                     }

@@ -62,14 +62,14 @@ var ProvisionalCuration = React.createClass({
 
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
-                        stateObj.gdm = data;
-                        break;
-                    case 'assessment_collection':
-                        stateObj.assessments = data['@graph'];
-                        break;
-                    default:
-                        break;
+                case 'gdm':
+                    stateObj.gdm = data;
+                    break;
+                case 'assessment_collection':
+                    stateObj.assessments = data['@graph'];
+                    break;
+                default:
+                    break;
                 }
             });
 
@@ -443,7 +443,7 @@ var NewCalculation = function() {
         "Model Systems (Engineered equivalent)": 0,
         "Rescue (Patient cells)": 0,
         "Rescue (Engineered equivalent)": 0
-    }
+    };
 
 // Generate variantIdList
     var gdmPathoList = gdm.variantPathogenicity;

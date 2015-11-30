@@ -34,7 +34,7 @@ var App = module.exports = React.createClass({
 
     triggers: {
         login: 'triggerLogin',
-        logout: 'triggerLogout',
+        logout: 'triggerLogout'
     },
 
     getInitialState: function() {

@@ -116,8 +116,8 @@ var IndividualCuration = React.createClass({
         }
         if (associatedObjs) {
             orphanetVal = associatedObjs.commonDiagnosis.map(function(disease, i) {
-                    return ('ORPHA' + disease.orphaNumber);
-                }).join(', ');
+                return ('ORPHA' + disease.orphaNumber);
+            }).join(', ');
         }
         this.refs['orphanetid'].setValue(orphanetVal);
     },
@@ -148,28 +148,28 @@ var IndividualCuration = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
-                        stateObj.gdm = data;
-                        break;
+                case 'gdm':
+                    stateObj.gdm = data;
+                    break;
 
-                    case 'group':
-                        stateObj.group = data;
-                        break;
+                case 'group':
+                    stateObj.group = data;
+                    break;
 
-                    case 'family':
-                        stateObj.family = data;
-                        break;
+                case 'family':
+                    stateObj.family = data;
+                    break;
 
-                    case 'individual':
-                        stateObj.individual = data;
-                        break;
+                case 'individual':
+                    stateObj.individual = data;
+                    break;
 
-                    case 'annotation':
-                        stateObj.annotation = data;
-                        break;
+                case 'annotation':
+                    stateObj.annotation = data;
+                    break;
 
-                    default:
-                        break;
+                default:
+                    break;
                 }
             });
 
@@ -1242,20 +1242,6 @@ var IndividualAdditional = function() {
         </div>
     );
 };
-
-// HTML labels for inputs follow.
-var LabelAdditional = React.createClass({
-    render: function() {
-        return <span>Additional Information about Individual{this.props.probandLabel}:</span>;
-    }
-});
-
-var LabelOtherPmids = React.createClass({
-    render: function() {
-        return <span>Enter PMID(s) that report evidence about this Individual{this.props.probandLabel}:</span>;
-    }
-});
-
 
 // HTML labels for inputs follow.
 var LabelAdditional = React.createClass({

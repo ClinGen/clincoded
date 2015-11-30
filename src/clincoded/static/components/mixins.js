@@ -34,8 +34,8 @@ var parseAndLogError = module.exports.parseAndLogError = function (cause, respon
     var promise = parseError(response);
     promise.then(data => {
         ga('send', 'exception', {
-        'exDescription': '' + cause + ':' + data.code + ':' + data.title,
-        'location': window.location.href
+            'exDescription': '' + cause + ':' + data.code + ':' + data.title,
+            'location': window.location.href
         });
     });
     return promise;
@@ -67,7 +67,7 @@ module.exports.RenderLess = {
             }
         }
         return false;
-    },
+    }
 };
 
 class Timeout {
@@ -208,7 +208,7 @@ module.exports.Persona = {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({assertion: assertion}),
+            body: JSON.stringify({assertion: assertion})
         })
         .then(response => {
             if (!response.ok) throw response;

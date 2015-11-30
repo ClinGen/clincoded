@@ -88,20 +88,20 @@ var VariantCuration = React.createClass({
             stateObj.user = user;
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
-                        stateObj.gdm = data;
-                        break;
+                case 'gdm':
+                    stateObj.gdm = data;
+                    break;
 
-                    case 'variant':
-                        stateObj.variant = data;
-                        break;
+                case 'variant':
+                    stateObj.variant = data;
+                    break;
 
-                    case 'pathogenicity':
-                        stateObj.pathogenicity = data;
-                        break;
+                case 'pathogenicity':
+                    stateObj.pathogenicity = data;
+                    break;
 
-                    default:
-                        break;
+                default:
+                    break;
                 }
             });
 

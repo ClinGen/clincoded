@@ -338,7 +338,7 @@ var Table = module.exports.Table = React.createClass({
         this.setState({
             data: this.extractData(this.props),
             communicating: this.fetchAll(this.props),
-            mounted: true,
+            mounted: true
         });
     },
 

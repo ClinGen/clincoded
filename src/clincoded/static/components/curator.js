@@ -893,7 +893,7 @@ var AddOmimIdModal = React.createClass({
             // Form is valid -- we have a good OMIM ID. Close the modal and update the current GDM's OMIM ID
             this.props.closeModal();
             var enteredOmimId = this.getFormValue('omimid');
-                this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
+            this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
         }
     },
 
@@ -1291,7 +1291,7 @@ module.exports.capture = {
     // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.
     clids: function(s) {
         return captureBase(s, /^\s*(CL_\d{7})\s*$/i, true);
-    },
+    }
 };
 
 
@@ -1316,44 +1316,44 @@ var flatten = module.exports.flatten = function(obj, type) {
 
     if (obj) {
         switch(type) {
-            case 'gdm':
-                flat = flattenGdm(obj);
-                break;
+        case 'gdm':
+            flat = flattenGdm(obj);
+            break;
 
-            case 'annotation':
-                flat = flattenAnnotation(obj);
-                break;
+        case 'annotation':
+            flat = flattenAnnotation(obj);
+            break;
 
-            case 'group':
-                flat = flattenGroup(obj);
-                break;
+        case 'group':
+            flat = flattenGroup(obj);
+            break;
 
-            case 'family':
-                flat = flattenFamily(obj);
-                break;
+        case 'family':
+            flat = flattenFamily(obj);
+            break;
 
-            case 'individual':
-                flat = flattenIndividual(obj);
-                break;
+        case 'individual':
+            flat = flattenIndividual(obj);
+            break;
 
-            case 'pathogenicity':
-                flat = flattenPathogenicity(obj);
-                break;
+        case 'pathogenicity':
+            flat = flattenPathogenicity(obj);
+            break;
 
-            case 'experimental':
-                flat = flattenExperimental(obj);
-                break;
+        case 'experimental':
+            flat = flattenExperimental(obj);
+            break;
 
-            case 'assessment':
-                flat = flattenAssessment(obj);
-                break;
+        case 'assessment':
+            flat = flattenAssessment(obj);
+            break;
 
-            case 'provisionalClassification':
-                flat = flattenProvisional(obj);
-                break;
+        case 'provisionalClassification':
+            flat = flattenProvisional(obj);
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
 
         // Flatten submitted_by
