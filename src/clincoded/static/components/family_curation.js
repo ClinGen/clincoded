@@ -757,9 +757,9 @@ var FamilyCuration = React.createClass({
                             group.familyIncluded.push(newFamily['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(data => {
+                            promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(groupGraph => {
                                 // The next step needs the family, not the group it was written to
-                                return {family: newFamily, group: data['@graph'][0], starterIndividual: data.starterIndividual};
+                                return {family: newFamily, group: groupGraph['@graph'][0], starterIndividual: data.starterIndividual};
                             });
                         } else {
                             // Not part of a group, so add the family to the annotation instead.
