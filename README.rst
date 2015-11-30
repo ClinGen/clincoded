@@ -214,11 +214,13 @@ To setup SublimeLinter with Sublime Text 3, first install the linters::
 
     $ easy_install-2.7 flake8
     $ npm install -g eslint
+    $ npm install -g eslint-plugin-react
 
 After first setting up `Package Control`_ (follow install and usage instructions on site), use it to install the following packages in Sublime Text 3:
 
     * sublimelinter
     * sublimelinter-flake8
     * SublimeLinter-contrib-eslint (`instructions <https://github.com/roadhump/SublimeLinter-eslint#plugin-installation>`_)
+    * babel (`instructions <https://github.com/babel/babel-sublime#setting-as-the-default-syntax>`_)
 
 .. _`Package Control`: https://sublime.wbond.net/
