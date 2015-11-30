@@ -1979,7 +1979,7 @@ var FamilyAddHistory = React.createClass({
 
         return (
             <div>
-                <a href={family['@id']}>{family.label}</a>
+                Family <a href={family['@id']}>{family.label}</a>
                 <span> added to </span>
                 {group ?
                     <span>group <a href={group['@id']}>{group.label}</a></span>
@@ -2006,7 +2006,7 @@ var FamilyModifyHistory = React.createClass({
 
         return (
             <div>
-                <a href={family['@id']}>{family.label}</a>
+                Family <a href={family['@id']}>{family.label}</a>
                 <span> modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>

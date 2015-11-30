@@ -966,7 +966,7 @@ var GroupAddHistory = React.createClass({
 
         return (
             <div>
-                <a href={group['@id']}>{group.label}</a>
+                Group <a href={group['@id']}>{group.label}</a>
                 <span> added to </span>
                 <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
@@ -988,7 +988,7 @@ var GroupModifyHistory = React.createClass({
 
         return (
             <div>
-                <a href={group['@id']}>{group.label}</a>
+                Group <a href={group['@id']}>{group.label}</a>
                 <span> modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>

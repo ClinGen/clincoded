@@ -2558,7 +2558,7 @@ var ExperimentalAddHistory = React.createClass({
 
         return (
             <div>
-                <a href={experimental['@id']}>{experimental.label}</a>
+                Experimental data <a href={experimental['@id']}>{experimental.label}</a>
                 <span> ({experimental.evidenceType}) added to </span>
                 <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
@@ -2580,7 +2580,7 @@ var ExperimentModifyHistory = React.createClass({
 
         return (
             <div>
-                <a href={experimental['@id']}>{experimental.label}</a>
+                Experimental data <a href={experimental['@id']}>{experimental.label}</a>
                 <span> ({experimental.evidenceType}) modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>

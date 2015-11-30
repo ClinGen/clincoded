@@ -1599,7 +1599,7 @@ var IndividualAddHistory = React.createClass({
 
         return (
             <div>
-                <a href={individual['@id']}>{individual.label}</a>
+                Individual <a href={individual['@id']}>{individual.label}</a>
                 <span> added to </span>
                 {family ?
                     <span>family <a href={family['@id']}>{family.label}</a></span>
@@ -1632,7 +1632,7 @@ var IndividualModifyHistory = React.createClass({
 
         return (
             <div>
-                <a href={individual['@id']}>{individual.label}</a>
+                Individual <a href={individual['@id']}>{individual.label}</a>
                 <span> modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
