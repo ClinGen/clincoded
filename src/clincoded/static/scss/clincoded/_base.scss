@@ -151,3 +151,14 @@ dl.dl-horizontal {
     margin-bottom: 0;
     border-radius: 0;
 }
+
+.alert-demo {
+    color: white;
+    background: #880000;
+    border-top: 1px solid red;
+    border-bottom: 1px solid red;
+}
+
+.demo-background {
+    background-image: url(/static/img/test-bg.svg);
+}

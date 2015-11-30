@@ -105,6 +105,23 @@ var IndividualCuration = React.createClass({
         }
     },
 
+    // Handle a click on a copy orphanet button
+    handleClick: function(obj, e) {
+        e.preventDefault(); e.stopPropagation();
+        var associatedObjs;
+        var orphanetVal = '';
+        if (obj) {
+            // We have a group, so get the disease array from it.
+            associatedObjs = obj;
+        }
+        if (associatedObjs) {
+            orphanetVal = associatedObjs.commonDiagnosis.map(function(disease, i) {
+                    return ('ORPHA' + disease.orphaNumber);
+                }).join(', ');
+        }
+        this.refs['orphanetid'].setValue(orphanetVal);
+    },
+
     // Load objects from query string into the state variables. Must have already parsed the query string
     // and set the queryValues property of this React class.
     loadData: function() {
@@ -862,7 +879,7 @@ var IndividualName = function(displayNote) {
             {family && !familyProbandExists ?
             <div className="col-sm-7 col-sm-offset-5">
                 <p className="alert alert-warning">
-                    The proband for a Family must be created through the <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + this.queryValues.familyUuid}>Edit Family page</a>. This page is only for adding non-probands to the Family.
+                    This page is only for adding non-probands to the Family. To create a proband for this Family, please edit its Family page: <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + this.queryValues.familyUuid}>Edit {family.label}</a>
                 </p>
             </div>
             : null}
@@ -971,6 +988,14 @@ var IndividualCommonDiseases = function() {
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId probandLabel={probandLabel} />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+            {associatedGroups ?
+            <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
+                clickHandler={this.handleClick.bind(this, group)} />
+            : null}
+            {associatedFamilies ?
+            <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Family"
+                clickHandler={this.handleClick.bind(this, family)} />
+            : null}
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
@@ -1106,6 +1131,8 @@ var IndividualDemographics = function() {
 var IndividualVariantInfo = function() {
     var individual = this.state.individual;
     var family = this.state.family;
+    var gdm = this.state.gdm;
+    var annotation = this.state.annotation;
     var variants = individual && individual.variants;
 
     return (
@@ -1115,7 +1142,7 @@ var IndividualVariantInfo = function() {
                     {variants.map(function(variant, i) {
                         return (
                             <div key={i} className="variant-view-panel variant-view-panel-edit">
-                                <p>To edit variants(s) for this proband, you must edit its Family because the variant is associated with the Family’s segregation.</p>
+                                <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
                                 <h5>Variant {i + 1}</h5>
                                 <dl className="dl-horizontal">
                                     <div>
