@@ -62,14 +62,14 @@ var ProvisionalCuration = React.createClass({
 
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                case 'gdm':
-                    stateObj.gdm = data;
-                    break;
-                case 'assessment_collection':
-                    stateObj.assessments = data['@graph'];
-                    break;
-                default:
-                    break;
+                    case 'gdm':
+                        stateObj.gdm = data;
+                        break;
+                    case 'assessment_collection':
+                        stateObj.assessments = data['@graph'];
+                        break;
+                    default:
+                        break;
                 }
             });
 
