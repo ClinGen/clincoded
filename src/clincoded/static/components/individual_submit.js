@@ -54,28 +54,28 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                case 'gdm':
-                    stateObj.gdm = data;
-                    break;
+                    case 'gdm':
+                        stateObj.gdm = data;
+                        break;
 
-                case 'group':
-                    stateObj.group = data;
-                    break;
+                    case 'group':
+                        stateObj.group = data;
+                        break;
 
-                case 'family':
-                    stateObj.family = data;
-                    break;
+                    case 'family':
+                        stateObj.family = data;
+                        break;
 
-                case 'individual':
-                    stateObj.individual = data;
-                    break;
+                    case 'individual':
+                        stateObj.individual = data;
+                        break;
 
-                case 'annotation':
-                    stateObj.annotation = data;
-                    break;
+                    case 'annotation':
+                        stateObj.annotation = data;
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
                 }
             });
 
