@@ -1097,13 +1097,8 @@ var ExperimentalCuration = React.createClass({
                     // Next step relies on the pathogenicity, not the updated assessment
                     return Promise.resolve(data);
                 }).then(data => {
-                    // If we're assessing a family segregation, write that to history
-                    if (data.data && data.assessment) {
-                        this.saveAssessmentHistory(data.assessment, data.data, data.updatedAssessment);
-                    }
-
                     // Record history of the group creation
-                    var meta;
+                    var meta, historyPromise;
                     if (data.experimentalAdded) {
                         // Record the creation of new experimental data
                         meta = {
@@ -1112,11 +1107,19 @@ var ExperimentalCuration = React.createClass({
                                 article: this.state.annotation.article['@id']
                             }
                         };
-                        this.recordHistory('add', data.data, meta);
+                        historyPromise = this.recordHistory('add', data.data, meta);
                     } else {
                         // Record the modification of an existing group
-                        this.recordHistory('modify', data.data);
+                        historyPromise = this.recordHistory('modify', data.data);
                     }
+
+                    // After writing the experimental data history, write the assessment if any
+                    historyPromise.then(() => {
+                        // If we're assessing a family segregation, write that to history
+                        if (data.data && data.assessment) {
+                            this.saveAssessmentHistory(data.assessment, data.data, data.updatedAssessment);
+                        }
+                    });
 
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {

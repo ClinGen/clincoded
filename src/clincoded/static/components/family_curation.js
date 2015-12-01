@@ -682,7 +682,7 @@ var FamilyCuration = React.createClass({
 
                     // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the family.
                     return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid).then(assessmentInfo => {
-                        return Promise.resolve({individual: individual, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
+                        return Promise.resolve({starterIndividual: individual, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
                     });
                 }).then(data => {
                     // Make a list of assessments along with the new one if necessary
@@ -706,16 +706,16 @@ var FamilyCuration = React.createClass({
                     familyCount = familyCount ? familyCount + 1 : 1;
 
                     // Assign the starter individual if we made one
-                    if (data.individual) {
+                    if (data.starterIndividual) {
                         if (!newFamily.individualIncluded) {
                             newFamily.individualIncluded = [];
                         }
-                        newFamily.individualIncluded.push(data.individual['@id']);
+                        newFamily.individualIncluded.push(data.starterIndividual['@id']);
                     }
 
                     // Write the new family object to the DB
                     return this.writeFamilyObj(newFamily).then(newFamily => {
-                        return Promise.resolve({family: newFamily, starterIndividual: data.individual, assessment: data.assessment, updatedAssessment: data.updatedAssessment});
+                        return Promise.resolve(_.extend(data, {family: newFamily}));
                     });
                 }).then(data => {
                     // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
@@ -727,20 +727,15 @@ var FamilyCuration = React.createClass({
                     if (newFamily && newAssessment && !newAssessment.evidence_id) {
                         // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
                         return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid, newAssessment).then(assessmentInfo => {
-                            return Promise.resolve({family: newFamily, starterIndividual: data.starterIndividual, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
+                            return Promise.resolve(_.extend(data, {assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update}));
                         });
                     }
 
                     // Next step relies on the pathogenicity, not the updated assessment
-                    return Promise.resolve({family: newFamily, starterIndividual: data.starterIndividual, assessment: data.assessment, updatedAssessment: data.updatedAssessment});
+                    return Promise.resolve(data);
                 }).then(data => {
                     var newFamily = data.family;
                     var promise;
-
-                    // If we're assessing a family segregation, write that to history
-                    if (newFamily && data.assessment) {
-                        this.saveAssessmentHistory(data.assessment, newFamily, data.updatedAssessment);
-                    }
 
                     // If we're adding this family to a group, update the group with this family; otherwise update the annotation
                     // with the family.
@@ -759,7 +754,7 @@ var FamilyCuration = React.createClass({
                             // Post the modified annotation to the DB, then go back to Curation Central
                             promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(groupGraph => {
                                 // The next step needs the family, not the group it was written to
-                                return {family: newFamily, group: groupGraph['@graph'][0], starterIndividual: data.starterIndividual};
+                                return Promise.resolve(_.extend(data, {group: groupGraph['@graph'][0]}));
                             });
                         } else {
                             // Not part of a group, so add the family to the annotation instead.
@@ -774,19 +769,20 @@ var FamilyCuration = React.createClass({
                             // Post the modified annotation to the DB, then go back to Curation Central
                             promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(annotation => {
                                 // The next step needs the family, not the group it was written to
-                                return {family: newFamily, starterIndividual: data.starterIndividual, annotation: annotation};
+                                return Promise.resolve(_.extend(data, {annotation: annotation}));
                             });
                         }
                     } else {
                         // Editing an existing family
-                        promise = Promise.resolve({family: newFamily, starterIndividual: data.starterIndividual});
+                        promise = Promise.resolve(data);
                     }
                     return promise;
                 }).then(data => {
                     // Add to the user history. data.family always contains the new or edited family. data.group contains the group the family was
                     // added to, if it was added to a group. data.annotation contains the annotation the family was added to, if it was added to
                     // the annotation. If neither data.group nor data.annotation exist, data.family holds the existing family that was modified.
-                    var meta;
+                    var meta, historyPromise;
+
                     if (data.annotation) {
                         // Record the creation of a new family added to a GDM
                         meta = {
@@ -795,7 +791,7 @@ var FamilyCuration = React.createClass({
                                 article: this.state.annotation.article['@id']
                             }
                         };
-                        this.recordHistory('add', data.family, meta);
+                        historyPromise = this.recordHistory('add', data.family, meta);
                     } else if (data.group) {
                         // Record the creation of a new family added to a group
                         meta = {
@@ -805,16 +801,26 @@ var FamilyCuration = React.createClass({
                                 article: this.state.annotation.article['@id']
                             }
                         };
-                        this.recordHistory('add', data.family, meta);
+                        historyPromise = this.recordHistory('add', data.family, meta);
                     } else {
                         // Record the modification of an existing family
-                        this.recordHistory('modify', data.family);
+                        historyPromise = this.recordHistory('modify', data.family);
                     }
 
-                    // If we made a starter individual, record that history
-                    if (data.starterIndividual) {
-                        recordIndividualHistory(this.state.gdm, this.state.annotation, data.starterIndividual, data.group, data.family, this);
-                    }
+                    // Once we're done writing the family history, write the other related histories
+                    historyPromise.then(() => {
+                        // Write the starter individual history if there was one
+                        if (data.starterIndividual) {
+                            return recordIndividualHistory(this.state.gdm, this.state.annotation, data.starterIndividual, data.group, data.family, this);
+                        }
+                        return Promise.resolve(null);
+                    }).then(() => {
+                        // If we're assessing a family segregation, write that to history
+                        if (data.family && data.assessment) {
+                            this.saveAssessmentHistory(data.assessment, data.family, data.updatedAssessment);
+                        }
+                        return Promise.resolve(null);
+                    });
 
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.

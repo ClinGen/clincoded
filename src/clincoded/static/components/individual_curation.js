@@ -1549,7 +1549,7 @@ var recordIndividualHistory = module.exports.recordIndividualHistory = function(
     // added to, if it was added to a group. data.annotation contains the annotation the individual was added to, if it was added to
     // the annotation, and data.family contains the family the individual was added to, if it was added to a family. If none of data.group,
     // data.family, nor data.annotation exist, data.individual holds the existing individual that was modified.
-    var meta;
+    var meta, historyPromise;
 
     if (family) {
         // Record the creation of a new family added to a group
@@ -1560,7 +1560,7 @@ var recordIndividualHistory = module.exports.recordIndividualHistory = function(
                 article: annotation.article['@id']
             }
         };
-        context.recordHistory('add', individual, meta);
+        historyPromise = context.recordHistory('add', individual, meta);
     } else if (group) {
         // Record the creation of a new family added to a group
         meta = {
@@ -1570,7 +1570,7 @@ var recordIndividualHistory = module.exports.recordIndividualHistory = function(
                 article: annotation.article['@id']
             }
         };
-        context.recordHistory('add', individual, meta);
+        historyPromise = context.recordHistory('add', individual, meta);
     } else if (annotation) {
         // Record the creation of a new individual added to a GDM
         meta = {
@@ -1579,11 +1579,13 @@ var recordIndividualHistory = module.exports.recordIndividualHistory = function(
                 article: annotation.article['@id']
             }
         };
-        context.recordHistory('add', individual, meta);
+        historyPromise = ontext.recordHistory('add', individual, meta);
     } else {
         // Record the modification of an existing family
-        context.recordHistory('modify', individual);
+        historyPromise = context.recordHistory('modify', individual);
     }
+
+    return historyPromise;
 };
 
 
