@@ -280,36 +280,26 @@ var VariantCuration = React.createClass({
 
                 // No pathogenicity to write because the pathogenicity form is read-only (assessed).
                 return Promise.resolve({pathogenicity: null, assessment: newAssessmentInfo.assessment});
-            }).then(pa => {
-                var newPathogenicity = pa.pathogenicity;
-
-                // Write the assessment history
-                if (pa.assessment) {
-                    this.saveAssessmentHistory(pa.assessment, this.state.variant, false);
-                }
-
-                // Next step relies on the pathogenicity, not the updated assessment
-                return Promise.resolve(newPathogenicity);
-            }).then(pathogenicity => {
+            }).then(data => {
                 // Given pathogenicity has been saved (created or updated).
                 // Now update the GDM to include the pathogenicity if it's new
-                if (!this.state.pathogenicity && this.state.gdm && pathogenicity) {
+                if (!this.state.pathogenicity && this.state.gdm && data.pathogenicity) {
                     // New pathogenicity; add it to the GDM’s pathogenicity array.
                     var newGdm = curator.flatten(this.state.gdm);
                     if (newGdm.variantPathogenicity && newGdm.variantPathogenicity.length) {
-                        newGdm.variantPathogenicity.push(pathogenicity['@id']);
+                        newGdm.variantPathogenicity.push(data.pathogenicity['@id']);
                     } else {
-                        newGdm.variantPathogenicity = [pathogenicity['@id']];
+                        newGdm.variantPathogenicity = [data.pathogenicity['@id']];
                     }
 
                     // Write the updated GDM
-                    return this.putRestData('/gdm/' + this.state.gdm.uuid, newGdm).then(data => {
-                        return Promise.resolve({pathogenicity: pathogenicity, modified: false});
+                    return this.putRestData('/gdm/' + this.state.gdm.uuid, newGdm).then(() => {
+                        return Promise.resolve(_.extend(data, {modified: false}));
                     });
                 }
 
                 // Existing pathogenicity modified
-                return Promise.resolve({pathogenicity: pathogenicity, modified: true});
+                return Promise.resolve(_.extend(data, {modified: true}));
             }).then(data => {
                 // Write the pathogenicity history
                 var meta = {
@@ -317,7 +307,9 @@ var VariantCuration = React.createClass({
                         variantId: this.state.variant.clinvarVariantId ? this.state.variant.clinvarVariantId : this.state.variant.otherDescription
                     }
                 };
-                this.recordHistory(data.modified ? 'modify' : 'add', data.pathogenicity ? data.pathogenicity : this.state.pathogenicity, meta);
+                this.recordHistory(data.modified ? 'modify' : 'add', data.pathogenicity ? data.pathogenicity : this.state.pathogenicity, meta).then(() => {
+                    return this.saveAssessmentHistory(data.assessment, this.state.variant, false);
+                });
 
                 // Now go back to Record Curation
                 this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
