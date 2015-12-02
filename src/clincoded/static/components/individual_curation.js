@@ -547,7 +547,7 @@ var IndividualCuration = React.createClass({
 
                             // Post the modified annotation to the DB, then go back to Curation Central
                             promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(data => {
-                                return {individual: newIndividual, group: data['@graph'][0]};
+                                return {individual: newIndividual, group: data['@graph'][0], modified: false};
                             });
                         } else if (this.state.family) {
                             // Add the newly saved individual to a family
@@ -559,7 +559,7 @@ var IndividualCuration = React.createClass({
 
                             // Post the modified annotation to the DB, then go back to Curation Central
                             promise = this.putRestData('/families/' + this.state.family.uuid, family).then(data => {
-                                return {individual: newIndividual, family: data['@graph'][0]};
+                                return {individual: newIndividual, family: data['@graph'][0], modified: false};
                             });
                         } else {
                             // Not part of a group, so add the individual to the annotation instead.
@@ -571,12 +571,12 @@ var IndividualCuration = React.createClass({
 
                             // Post the modified annotation to the DB, then go back to Curation Central
                             promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                                return {individual: newIndividual, annotation: data['@graph'][0]};
+                                return {individual: newIndividual, annotation: data['@graph'][0], modified: false};
                             });
                         }
                     } else {
                         // Editing an individual; not creating one
-                        promise = Promise.resolve({individual: newIndividual});
+                        promise = Promise.resolve({individual: newIndividual, modified: true});
                     }
                     return promise;
                 }).then(data => {
@@ -584,7 +584,7 @@ var IndividualCuration = React.createClass({
                     // added to, if it was added to a group. data.annotation contains the annotation the individual was added to, if it was added to
                     // the annotation, and data.family contains the family the individual was added to, if it was added to a family. If none of data.group,
                     // data.family, nor data.annotation exist, data.individual holds the existing individual that was modified.
-                    recordIndividualHistory(this.state.gdm, this.state.annotation, data.individual, data.group, data.family, this);
+                    recordIndividualHistory(this.state.gdm, this.state.annotation, data.individual, data.group, data.family, data.modified, this);
 
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
@@ -1544,45 +1544,46 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
 };
 
 
-var recordIndividualHistory = module.exports.recordIndividualHistory = function(gdm, annotation, individual, group, family, context) {
+var recordIndividualHistory = module.exports.recordIndividualHistory = function(gdm, annotation, individual, group, family, modified, context) {
     // Add to the user history. data.individual always contains the new or edited individual. data.group contains the group the individual was
     // added to, if it was added to a group. data.annotation contains the annotation the individual was added to, if it was added to
     // the annotation, and data.family contains the family the individual was added to, if it was added to a family. If none of data.group,
     // data.family, nor data.annotation exist, data.individual holds the existing individual that was modified.
     var meta, historyPromise;
 
-    if (family) {
-        // Record the creation of a new family added to a group
-        meta = {
-            individual: {
-                gdm: gdm['@id'],
-                family: family['@id'],
-                article: annotation.article['@id']
-            }
-        };
-        historyPromise = context.recordHistory('add', individual, meta);
-    } else if (group) {
-        // Record the creation of a new family added to a group
-        meta = {
-            individual: {
-                gdm: gdm['@id'],
-                group: group['@id'],
-                article: annotation.article['@id']
-            }
-        };
-        historyPromise = context.recordHistory('add', individual, meta);
-    } else if (annotation) {
-        // Record the creation of a new individual added to a GDM
-        meta = {
-            individual: {
-                gdm: gdm['@id'],
-                article: annotation.article['@id']
-            }
-        };
-        historyPromise = context.recordHistory('add', individual, meta);
-    } else {
-        // Record the modification of an existing family
+    if (modified){
         historyPromise = context.recordHistory('modify', individual);
+    } else {
+        if (family) {
+            // Record the creation of a new individual added to a family
+            meta = {
+                individual: {
+                    gdm: gdm['@id'],
+                    family: family['@id'],
+                    article: annotation.article['@id']
+                }
+            };
+            historyPromise = context.recordHistory('add', individual, meta);
+        } else if (group) {
+            // Record the creation of a new individual added to a group
+            meta = {
+                individual: {
+                    gdm: gdm['@id'],
+                    group: group['@id'],
+                    article: annotation.article['@id']
+                }
+            };
+            historyPromise = context.recordHistory('add', individual, meta);
+        } else if (annotation) {
+            // Record the creation of a new individual added to a GDM
+            meta = {
+                individual: {
+                    gdm: gdm['@id'],
+                    article: annotation.article['@id']
+                }
+            };
+            historyPromise = context.recordHistory('add', individual, meta);
+        }
     }
 
     return historyPromise;

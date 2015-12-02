@@ -811,7 +811,7 @@ var FamilyCuration = React.createClass({
                     historyPromise.then(() => {
                         // Write the starter individual history if there was one
                         if (data.starterIndividual) {
-                            return recordIndividualHistory(this.state.gdm, this.state.annotation, data.starterIndividual, data.group, data.family, this);
+                            return recordIndividualHistory(this.state.gdm, this.state.annotation, data.starterIndividual, data.group, data.family, false, this);
                         }
                         return Promise.resolve(null);
                     }).then(() => {

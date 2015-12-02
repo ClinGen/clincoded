@@ -1743,8 +1743,10 @@ var GdmOmimModifyHistory = React.createClass({
 
         return (
             <div>
-                <strong>{gdmMeta.gene.symbol}-{gdmMeta.disease.term}-</strong>
-                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                <a href={'/curation-central/?gdm=' + gdm.uuid}>
+                    <strong>{gdmMeta.gene.symbol}-{gdmMeta.disease.term}-</strong>
+                    <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                </a>
                 <span> OMIM ID changed to {gdmMeta.omimId}</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
