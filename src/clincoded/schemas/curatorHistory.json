@@ -302,6 +302,12 @@
                                 "Contradicts"
                             ]
                         },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM for the object being assessed",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
                         "experimental": {
                             "title": "Assessed experimental data",
                             "description": "Experimental data object being assessed",
@@ -314,9 +320,15 @@
                             "type": "string",
                             "linkTo": "family"
                         },
+                        "pathogenicity": {
+                            "title": "Assessed pathogenicity",
+                            "description": "Pathogenicity object being assessed",
+                            "type": "string",
+                            "linkTo": "pathogenicity"
+                        },
                         "variant": {
-                            "title": "Assessed variant",
-                            "description": "Variant object being assessed",
+                            "title": "Variant",
+                            "description": "Variant associated with the given pathogenicity",
                             "type": "string",
                             "linkTo": "variant"
                         }

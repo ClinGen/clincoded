@@ -1117,7 +1117,7 @@ var ExperimentalCuration = React.createClass({
                     historyPromise.then(() => {
                         // If we're assessing a family segregation, write that to history
                         if (data.data && data.assessment) {
-                            this.saveAssessmentHistory(data.assessment, data.data, data.updatedAssessment);
+                            this.saveAssessmentHistory(data.assessment, this.state.gdm, data.data, data.updatedAssessment);
                         }
                     });
 
@@ -2066,7 +2066,7 @@ var ExperimentalViewer = React.createClass({
             // Write the assessment to the DB, if there was one.
             return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
                 // Save assessment to history
-                this.saveAssessmentHistory(assessmentInfo.assessment, experimental, assessmentInfo.update);
+                this.saveAssessmentHistory(assessmentInfo.assessment, null, experimental, assessmentInfo.update);
 
                 // If we made a new assessment, add it to the experimental data's assessments
                 if (assessmentInfo.assessment && !assessmentInfo.update) {

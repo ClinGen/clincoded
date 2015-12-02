@@ -145,7 +145,7 @@ var Dashboard = React.createClass({
                                     {this.state.histories.map(history => {
                                         // Call the history display view based on the primary object
                                         var HistoryView = this.getHistoryView(history);
-                                        return <li key={history.uuid}><HistoryView history={history} /></li>;
+                                        return <li key={history.uuid}><HistoryView history={history} user={this.props.session && this.props.session.user_properties} /></li>;
                                     })}
                                 </ul>
                             :

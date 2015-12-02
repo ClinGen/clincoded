@@ -310,7 +310,7 @@ var VariantCuration = React.createClass({
                     }
                 };
                 this.recordHistory(data.modified ? 'modify' : 'add', data.pathogenicity ? data.pathogenicity : this.state.pathogenicity, meta).then(() => {
-                    return this.saveAssessmentHistory(data.assessment, this.state.variant, false);
+                    return this.saveAssessmentHistory(data.assessment, this.state.gdm, data.pathogenicity ? data.pathogenicity : this.state.pathogenicity, false);
                 });
 
                 // Now go back to Record Curation
@@ -598,12 +598,18 @@ globals.content_views.register(VariantViewer, 'pathogenicity');
 
 // Display a history item for adding variant pathogenicities
 var PathogenicityAddModHistory = React.createClass({
+    propTypes: {
+        history: React.PropTypes.object.isRequired, // History object
+        user: React.PropTypes.object // User session session ? '&user=' + session.user_properties.uuid : ''
+    },
+
     render: function() {
         var history = this.props.history;
         var pathogenicity = history.primary;
         var gdm = history.meta.pathogenicity.gdm;
         var variant = history.meta.pathogenicity.variant;
-        var pathogenicityUri = '/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid + '&pathogenicity=' + pathogenicity.uuid;
+        var user = this.props.user;
+        var pathogenicityUri = '/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid + '&pathogenicity=' + pathogenicity.uuid + (user ? '&user=' + user.uuid : '');
 
         return (
             <div>

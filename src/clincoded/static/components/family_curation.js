@@ -817,7 +817,7 @@ var FamilyCuration = React.createClass({
                     }).then(() => {
                         // If we're assessing a family segregation, write that to history
                         if (data.family && data.assessment) {
-                            this.saveAssessmentHistory(data.assessment, data.family, data.updatedAssessment);
+                            this.saveAssessmentHistory(data.assessment, this.state.gdm, data.family, data.updatedAssessment);
                         }
                         return Promise.resolve(null);
                     });
@@ -1566,7 +1566,7 @@ var FamilyViewer = React.createClass({
             // Write the assessment to the DB, if there was one.
             return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
                 // If we're assessing a family segregation, write that to history
-                this.saveAssessmentHistory(assessmentInfo.assessment, family, assessmentInfo.update);
+                this.saveAssessmentHistory(assessmentInfo.assessment, null, family, assessmentInfo.update);
 
                 // If we made a new assessment, add it to the family's assessments
                 if (assessmentInfo.assessment && !assessmentInfo.update) {

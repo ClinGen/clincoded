@@ -900,7 +900,9 @@ class History(Item):
         'meta.experimental.article',
         'meta.pathogenicity.variant',
         'meta.pathogenicity.gdm',
+        'meta.assessment.gdm',
         'meta.assessment.experimental',
         'meta.assessment.family',
+        'meta.assessment.pathogenicity',
         'meta.assessment.variant',
     ]

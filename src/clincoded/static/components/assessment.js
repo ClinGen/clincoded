@@ -139,7 +139,7 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
         });
     },
 
-    saveAssessmentHistory: function(assessment, evidence, update) {
+    saveAssessmentHistory: function(assessment, gdm, evidence, update) {
         var meta;
 
         if (!assessment) {
@@ -166,11 +166,15 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
             };
         } else if (assessment.evidence_type === 'Pathogenicity') {
             // Variant pathogenicity assessment
+            var variant = (typeof evidence.variant === 'string') ? evidence.variant : evidence.variant['@id'];
+
             meta = {
                 assessment: {
                     operation: 'pathogenicity',
                     value: assessment.value,
-                    variant: evidence['@id']
+                    gdm: gdm['@id'],
+                    pathogenicity: evidence['@id'],
+                    variant: variant
                 }
             };
         } else {
@@ -252,6 +256,11 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
 
 // Display a history item for adding or or modifying an assessment
 var AssessmentAddModHistory = React.createClass({
+    propTypes: {
+        history: React.PropTypes.object.isRequired, // History object
+        user: React.PropTypes.object // User session session ? '&user=' + session.user_properties.uuid : ''
+    },
+
     render: function() {
         var history = this.props.history;
         var assessment = history.primary;
@@ -260,11 +269,15 @@ var AssessmentAddModHistory = React.createClass({
 
         switch (assessmentMeta.operation) {
             case 'pathogenicity':
+                var gdm = assessmentMeta.gdm;
+                var pathogenicity = assessmentMeta.pathogenicity;
                 var variant = assessmentMeta.variant;
                 var variantId = variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription;
+                var user = this.props.user;
+                var pathogenicityUri = '/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid + '&pathogenicity=' + pathogenicity.uuid + (user ? '&user=' + user.uuid : '');
                 assessmentRender = (
                     <div>
-                        <span>Assessed variant “{variantId}” pathogenicity to {assessmentMeta.value}</span>
+                        <span>Assessed variant <a href={pathogenicityUri}>{variantId}</a> pathogenicity to {assessmentMeta.value}</span>
                         <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                     </div>
                 );
