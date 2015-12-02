@@ -1579,7 +1579,7 @@ var recordIndividualHistory = module.exports.recordIndividualHistory = function(
                 article: annotation.article['@id']
             }
         };
-        historyPromise = ontext.recordHistory('add', individual, meta);
+        historyPromise = context.recordHistory('add', individual, meta);
     } else {
         // Record the modification of an existing family
         historyPromise = context.recordHistory('modify', individual);

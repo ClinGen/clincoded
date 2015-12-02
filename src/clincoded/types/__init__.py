@@ -898,6 +898,8 @@ class History(Item):
         'meta.experimental.gdm.gene',
         'meta.experimental.gdm.disease',
         'meta.experimental.article',
+        'meta.pathogenicity.variant',
+        'meta.pathogenicity.gdm',
         'meta.assessment.experimental',
         'meta.assessment.family',
         'meta.assessment.variant',

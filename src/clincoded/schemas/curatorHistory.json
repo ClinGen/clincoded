@@ -258,8 +258,20 @@
                         },
                         "variantId": {
                             "title": "Variant ID",
-                            "description": "ID of the variant this pathogenicity evaluates",
+                            "description": "Historical ID of the variant this pathogenicity evaluates",
                             "type": "string"
+                        },
+                        "variant": {
+                            "title": "Assessed variant",
+                            "description": "Variant object for the pathogenicity",
+                            "type": "string",
+                            "linkTo": "variant"
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the pathogenicity",
+                            "type": "string",
+                            "linkTo": "gdm"
                         }
                     }
                 },
@@ -382,7 +394,7 @@
             "title": "Orpha ID",
             "type": "string"
         },
-        "meta.pathogenicity.variantId": {
+        "meta.pathogenicity": {
             "title": "Pathogenicity",
             "type": "string"
         },

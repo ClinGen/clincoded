@@ -304,7 +304,9 @@ var VariantCuration = React.createClass({
                 // Write the pathogenicity history
                 var meta = {
                     pathogenicity: {
-                        variantId: this.state.variant.clinvarVariantId ? this.state.variant.clinvarVariantId : this.state.variant.otherDescription
+                        variantId: this.state.variant.clinvarVariantId ? this.state.variant.clinvarVariantId : this.state.variant.otherDescription,
+                        variant: this.state.variant['@id'],
+                        gdm: this.state.gdm['@id']
                     }
                 };
                 this.recordHistory(data.modified ? 'modify' : 'add', data.pathogenicity ? data.pathogenicity : this.state.pathogenicity, meta).then(() => {
@@ -599,10 +601,13 @@ var PathogenicityAddModHistory = React.createClass({
     render: function() {
         var history = this.props.history;
         var pathogenicity = history.primary;
+        var gdm = history.meta.pathogenicity.gdm;
+        var variant = history.meta.pathogenicity.variant;
+        var pathogenicityUri = '/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid + '&pathogenicity=' + pathogenicity.uuid;
 
         return (
             <div>
-                <span>Variant “{history.meta.pathogenicity.variantId}” pathogenicity {history.operationType === 'add' ? <span>added</span> : <span>modified</span>}</span>
+                <span>Variant <a href={pathogenicityUri}>{history.meta.pathogenicity.variantId}</a> pathogenicity {history.operationType === 'add' ? <span>added</span> : <span>modified</span>}</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
