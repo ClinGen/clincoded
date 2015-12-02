@@ -241,6 +241,29 @@
                         }
                     }
                 },
+                "provisionalClassification": {
+                    "title": "Provisional classification history",
+                    "description": "History metadata for provisional classifications",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM for the provisional classification",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        }
+                    }
+                },
                 "pathogenicity": {
                     "title": "Pathogenicity history",
                     "description": "History metadata for variant pathogenicity additions and modifications",
@@ -384,6 +407,10 @@
         },
         "meta.individual.article": {
             "title": "Individual article",
+            "type": "string"
+        },
+        "meta.provisionalClassification.gdm": {
+            "title": "Provisional classification GDM",
             "type": "string"
         },
         "meta.experimental.gdm": {

@@ -139,6 +139,14 @@ var ProvisionalCuration = React.createClass({
                 backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
                 if (this.state.provisional) { // edit existing provisional
                     this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
+                        // Record provisional classification history
+                        var meta = {
+                            provisionalClassification: {
+                                gdm: this.state.gdm['@id']
+                            }
+                        };
+                        this.recordHistory('modify', data['@graph'][0], meta);
+
                         this.resetAllFormValues();
                         //this.context.navigate(backUrl);
                         window.history.go(-1);
@@ -150,6 +158,14 @@ var ProvisionalCuration = React.createClass({
                     this.postRestData('/provisional/', newProvisional).then(data => {
                         return data['@graph'][0];
                     }).then(savedProvisional => {
+                        // Record provisional classification history
+                        var meta = {
+                            provisionalClassification: {
+                                gdm: this.state.gdm['@id']
+                            }
+                        };
+                        this.recordHistory('add', savedProvisional, meta);
+
                         var theGdm = curator.flatten(this.state.gdm);
                         if (theGdm.provisionalClassifications) {
                             theGdm.provisionalClassifications.push(savedProvisional['@id']);
@@ -864,3 +880,52 @@ var filter = function(target, branch, article, idList) {
 
     return target;
 };
+
+
+// Display a history item for adding a family
+var ProvisionalAddModHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var gdm = history.meta.provisionalClassification.gdm;
+
+        return (
+            <div>
+                <span>Provisional classification added to </span>
+                <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(ProvisionalAddModHistory, 'provisionalClassification', 'add');
+
+
+// Display a history item for modifying a family
+var ProvisionalModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var gdm = history.meta.provisionalClassification.gdm;
+
+        return (
+            <div>
+                <span>Provisional classification for </span>
+                <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                <span> modified</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(ProvisionalModifyHistory, 'provisionalClassification', 'modify');
+
+
+// Display a history item for deleting a family
+var ProvisionalDeleteHistory = React.createClass({
+    render: function() {
+        return <div>PROVISIONALDELETE</div>;
+    }
+});
+
+globals.history_views.register(ProvisionalDeleteHistory, 'provisionalClassification', 'delete');
