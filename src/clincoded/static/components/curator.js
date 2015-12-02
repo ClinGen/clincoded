@@ -13,6 +13,7 @@ var Modal = modal.Modal;
 var ModalMixin = modal.ModalMixin;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
+var RestMixin = require('./rest').RestMixin;
 var Input = form.Input;
 var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
@@ -1721,14 +1722,10 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
     );
 };
 
+/*
 var DeleteConfirmModal = module.exports.DeleteConfirmModal = React.createClass({
     mixins: [RestMixin, ModalMixin],
     propTypes: {
-        closeModal: React.PropTypes.func, // Function to call to close the modal
-        deleteTarget: React.PropTypes.object, // deleteTarget
-    },
-    contextTypes: {
-        fetch: React.PropTypes.func // Function to perform a search
     },
     deleteAction: function() {
         this.props.deleteTarget['status'] = 'deleted';
@@ -1738,7 +1735,72 @@ var DeleteConfirmModal = module.exports.DeleteConfirmModal = React.createClass({
     },
     render: function() {
         return (
-            <div>{this.prop.deleteTarget.label}<br />{this.prop.deleteTarget.status}</div>
+            <div>Hey</div>
         );
     }
 });
+*/
+
+var DeleteButton = module.exports.DeleteButton = React.createClass({
+    mixins: [ModalMixin],
+    propTypes: {
+        item: React.PropTypes.object,
+    },
+    render: function() {
+        return (
+            <Modal title="Delete Item">
+                <a className="btn btn-warning pull-left" modal={<DeleteButtonModal item={this.props.item} closeModal={this.closeModal} />}>
+                    Delete
+                </a>
+            </Modal>
+        );
+    }
+
+});
+
+var DeleteButtonModal = React.createClass({
+    mixins: [RestMixin],
+    propTypes: {
+        closeModal: React.PropTypes.func, // Function to call to close the modal
+        item: React.PropTypes.object,
+    },
+
+    deleteItem: function(e) {
+        e.preventDefault(); e.stopPropagation();
+        var deletedItem = flatten(this.props.item);
+        deletedItem.status = 'deleted';
+        console.log(this.props.item);
+        return this.putRestData('/families/' + this.props.item.uuid, deletedItem).then(data => {
+            return Promise.resolve(data['@graph'][0]);
+        });
+        //this.context.navigate('/curation-central/?gdm=' + this.props.gdm.uuid); // ADD PMID TO ME
+    },
+
+    // Called when the modal form's cancel button is clicked. Just closes the modal like
+    // nothing happened.
+    cancelForm: function(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+
+        //only a mouse click on cancel button closes modal
+        //(do not let the enter key [which evaluates to 0 mouse
+        //clicks] be accepted to close modal)
+        if (e.detail >= 1){
+            this.props.closeModal();
+        }
+    },
+
+    render: function() {
+        return (
+            <div>
+                <div className="modal-body">
+                    Are you sure you would like to delete this item?
+                </div>
+                <div className="modal-footer">
+                    <Input type="button" inputClassName="btn-primary btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" />
+                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                </div>
+            </div>
+        );
+    }
+});
+

@@ -35,6 +35,7 @@ var country_codes = globals.country_codes;
 var makeStarterIndividual = individual_curation.makeStarterIndividual;
 var updateProbandVariants = individual_curation.updateProbandVariants;
 var external_url_map = globals.external_url_map;
+var DeleteButton = curator.DeleteButton;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
@@ -398,8 +399,6 @@ var FamilyCuration = React.createClass({
     // Called when a form is submitted.
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        console.log(e);
-        return False;
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
@@ -1059,11 +1058,9 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
-                                            <Modal title='Delete?'>
-                                            <button className="btn btn-warning" modal={<curator.DeleteConfirmModal deleteTarget={curator.flatten(this.state.family)} closeModal={this.closeModal} />}>
-                                                DElete
-                                            </button>
-                                            </Modal>
+                                            {this.state.family ?
+                                                <DeleteButton item={this.state.family} />
+                                            : null}
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
