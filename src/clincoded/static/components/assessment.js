@@ -277,7 +277,7 @@ var AssessmentAddModHistory = React.createClass({
                 var pathogenicityUri = '/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid + '&pathogenicity=' + pathogenicity.uuid + (user ? '&user=' + user.uuid : '');
                 assessmentRender = (
                     <div>
-                        <span>Assessed variant <a href={pathogenicityUri}>{variantId}</a> pathogenicity to {assessmentMeta.value}</span>
+                        <span>Variant <a href={pathogenicityUri}>{variantId}</a> pathogenicity assessed as {assessmentMeta.value}</span>
                         <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                     </div>
                 );
@@ -287,7 +287,7 @@ var AssessmentAddModHistory = React.createClass({
                 var family = assessmentMeta.family;
                 assessmentRender = (
                     <div>
-                        <span>Assessed family <a href={family['@id']}>{family.label}</a> segregation to {assessmentMeta.value}</span>
+                        <span>Family <a href={family['@id']}>{family.label}</a> segregation assessed as {assessmentMeta.value}</span>
                         <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                     </div>
                 );
@@ -297,7 +297,7 @@ var AssessmentAddModHistory = React.createClass({
                 var experimental = assessmentMeta.experimental;
                 assessmentRender = (
                     <div>
-                        <span>Assessed experimental data <a href={experimental['@id']}>{experimental.label}</a> to {assessmentMeta.value}</span>
+                        <span>Experimental data <a href={experimental['@id']}>{experimental.label}</a> assessed as {assessmentMeta.value}</span>
                         <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                     </div>
                 );
