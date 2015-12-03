@@ -1766,15 +1766,19 @@ var DeleteButtonModal = React.createClass({
     deleteItem: function(e) {
         e.preventDefault(); e.stopPropagation();
         this.setState({submitBusy: true});
-        // prepare the item to be deleted: flatten it and set its status as deleted
-        var deletedItem = flatten(this.props.item);
-        deletedItem.status = 'deleted';
-        // prepare the parent of the item to be deleted
+        var deletedItem;
         var deletedParent;
-        this.getRestData(this.props.parent['@id'], null, true).then(parent => {
+        this.getRestData(this.props.item['@id'], null, true).then(item => {
+            // get up-to-date target item and set its status to deleted
+            deletedItem = flatten(item);
+            deletedItem.status = 'deleted';
+            return Promise.resolve(item);
+        }).then(item => {
             // get up-to-date parent object; also bypass issue of certain certain embedded parent
             // items in edit pages being un-flattenable
-            return Promise.resolve(parent);
+            return this.getRestData(this.props.parent['@id'], null, true).then(parent => {
+                return Promise.resolve(parent);
+            });
         }).then(parent => {
             // flatten parent object and remove link to deleted item as appropriate
             deletedParent = flatten(parent);

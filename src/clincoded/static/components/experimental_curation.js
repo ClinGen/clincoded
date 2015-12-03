@@ -28,6 +28,7 @@ var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var external_url_map = globals.external_url_map;
+var DeleteButton = curator.DeleteButton;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 5;
@@ -1221,6 +1222,9 @@ var ExperimentalCuration = React.createClass({
                                             </PanelGroup>
                                         : null}
                                         <div className="curation-submit clearfix">
+                                            {experimental ?
+                                                <DeleteButton gdm={gdm} parent={annotation} item={experimental} pmid={pmid} />
+                                            : null}
                                             {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
                                                 <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
 
