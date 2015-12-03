@@ -443,7 +443,7 @@ var NewCalculation = function() {
         "Model Systems (Engineered equivalent)": 0,
         "Rescue (Patient cells)": 0,
         "Rescue (Engineered equivalent)": 0
-    };
+    }
 
 // Generate variantIdList
     var gdmPathoList = gdm.variantPathogenicity;
