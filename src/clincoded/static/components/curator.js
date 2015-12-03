@@ -1722,58 +1722,95 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
     );
 };
 
-/*
-var DeleteConfirmModal = module.exports.DeleteConfirmModal = React.createClass({
-    mixins: [RestMixin, ModalMixin],
-    propTypes: {
-    },
-    deleteAction: function() {
-        this.props.deleteTarget['status'] = 'deleted';
-        return this.putRestData('/families/' + this.prop.deleteTarget.uuid, this.prop.deleteTarget).then(data => {
-            return Promise.resolve(data['@graph'][0]);
-        });
-    },
-    render: function() {
-        return (
-            <div>Hey</div>
-        );
-    }
-});
-*/
-
+// Mixin for delete button (and associated modal) of Group, Family, Individual, and Experimental
+// Data objects. This mixin only renderes the button; please see DeleteButtonModal for bulk of
+// functionality
 var DeleteButton = module.exports.DeleteButton = React.createClass({
     mixins: [ModalMixin],
     propTypes: {
+        gdm: React.PropTypes.object,
+        parent: React.PropTypes.object,
         item: React.PropTypes.object,
+        pmid: React.PropTypes.string,
     },
     render: function() {
         return (
             <Modal title="Delete Item">
-                <a className="btn btn-warning pull-left" modal={<DeleteButtonModal item={this.props.item} closeModal={this.closeModal} />}>
+                <a className="btn btn-warning pull-left" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
                     Delete
                 </a>
             </Modal>
         );
     }
-
 });
 
+// Delete Button confirmation modal. Sets target item to have status of 'deleted', and removes
+// the 'deleted' entry from its parent object. Forwards user back to curation central on delete
+// success
 var DeleteButtonModal = React.createClass({
     mixins: [RestMixin],
     propTypes: {
-        closeModal: React.PropTypes.func, // Function to call to close the modal
+        gdm: React.PropTypes.object,
+        parent: React.PropTypes.object,
         item: React.PropTypes.object,
+        pmid: React.PropTypes.string,
+        closeModal: React.PropTypes.func, // Function to call to close the modal
+    },
+
+    getInitialState: function() {
+        return {
+            submitBusy: false // True while form is submitting
+        };
     },
 
     deleteItem: function(e) {
         e.preventDefault(); e.stopPropagation();
+        this.setState({submitBusy: true});
+        // prepare the item to be deleted: flatten it and set its status as deleted
         var deletedItem = flatten(this.props.item);
         deletedItem.status = 'deleted';
-        console.log(this.props.item);
-        return this.putRestData('/families/' + this.props.item.uuid, deletedItem).then(data => {
-            return Promise.resolve(data['@graph'][0]);
+        // prepare the parent of the item to be deleted
+        var deletedParent;
+        this.getRestData(this.props.parent['@id'], null, true).then(parent => {
+            // get up-to-date parent object; also bypass issue of certain certain embedded parent
+            // items in edit pages being un-flattenable
+            return Promise.resolve(parent);
+        }).then(parent => {
+            // flatten parent object and remove link to deleted item as appropriate
+            deletedParent = flatten(parent);
+            if (parent['@type'][0] == 'annotation') {
+                if (this.props.item['@type'][0] == 'group') {
+                    deletedParent.groups = _.without(deletedParent.groups, this.props.item['@id']);
+                } else if (this.props.item['@type'][0] == 'family') {
+                    deletedParent.families = _.without(deletedParent.families, this.props.item['@id']);
+                } else if (this.props.item['@type'][0] == 'individual') {
+                    deletedParent.individuals = _.without(deletedParent.individuals, this.props.item['@id']);
+                } else if (this.props.item['@type'][0] == 'experimental') {
+                    deletedParent.experimentalData = _.without(deletedParent.experimentalData, this.props.item['@id']);
+                }
+            } else {
+                if (this.props.item['@type'][0] == 'family') {
+                    deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, this.props.item['@id']);
+                } else if (this.props.item['@type'][0] == 'individual') {
+                    deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, this.props.item['@id']);
+                }
+            }
+            // PUT updated parent object w/ removed link to deleted item
+            return this.putRestData(this.props.parent['@id'], deletedParent).then(data => {
+                return Promise.resolve(data['@graph'][0]);
+            });
+        }).then(data => {
+            // PUT deleted item w/ updated status
+            return this.putRestData(this.props.item['@id'], deletedItem).then(data => {
+                return Promise.resolve(data['@graph'][0]);
+            });
+        }).then(data => {
+            // forward user to curation central w/ PMID selected
+            window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
+        }).catch(function(e) {
+            this.setState({submitBusy: false});
+            console.log('DELETE ERROR: %o', e);
         });
-        //this.context.navigate('/curation-central/?gdm=' + this.props.gdm.uuid); // ADD PMID TO ME
     },
 
     // Called when the modal form's cancel button is clicked. Just closes the modal like
@@ -1796,7 +1833,7 @@ var DeleteButtonModal = React.createClass({
                     Are you sure you would like to delete this item?
                 </div>
                 <div className="modal-footer">
-                    <Input type="button" inputClassName="btn-primary btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" />
+                    <Input type="button" inputClassName="btn-primary btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
                 </div>
             </div>

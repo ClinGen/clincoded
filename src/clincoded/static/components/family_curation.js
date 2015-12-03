@@ -1058,8 +1058,8 @@ var FamilyCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
-                                            {this.state.family ?
-                                                <DeleteButton item={this.state.family} />
+                                            {family ?
+                                                <DeleteButton gdm={gdm} parent={groups ? groups[0] : annotation} item={family} pmid={pmid} />
                                             : null}
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
