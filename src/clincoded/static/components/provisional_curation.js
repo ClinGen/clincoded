@@ -895,9 +895,10 @@ var ProvisionalAddModHistory = React.createClass({
 
         return (
             <div>
-                <span>Provisional classification {meta.alteredClassification} added to </span>
+                <span><a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'} title="View/edit provisional classification">Provisional classification</a> {meta.alteredClassification.toUpperCase()} added to </span>
                 <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
     }
@@ -915,10 +916,10 @@ var ProvisionalModifyHistory = React.createClass({
 
         return (
             <div>
-                <span>Provisional classification {meta.alteredClassification} for </span>
+                <span><a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'} title="View/edit provisional classification">Provisional classification</a> modified to {meta.alteredClassification.toUpperCase()} for </span>
                 <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
-                <span> modified</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
     }
