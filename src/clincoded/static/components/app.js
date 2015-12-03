@@ -38,10 +38,20 @@ var App = module.exports = React.createClass({
     },
 
     getInitialState: function() {
+        var demoWarning = false;
+        var productionWarning = false;
+        if (/production.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // check if production URL. Enable productionWarning if it is.
+            productionWarning = true;
+        } else if (!/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // if neither production nor curation URL, enable demoWarning.
+            demoWarning = true;
+        }
         return {
             errors: [],
             portal: portal,
-            demoWarning: !/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)
+            demoWarning: demoWarning,
+            productionWarning: productionWarning
         };
     },
 
@@ -118,6 +128,9 @@ var App = module.exports = React.createClass({
                         {this.state.demoWarning ?
                         <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
                         : null}
+                        {this.state.productionWarning ?
+                        <Notice noticeType='production' noticeMessage={<span><strong>Do not use this URL for entering data. Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
+                        : null}
                         {content}
                     </div>
                 </body>
@@ -161,7 +174,7 @@ var Header = React.createClass({
 
 // Render the notice bar, under header, if needed
 // Usage: <Notice noticeType='[TYPE]' noticeMessage={<span>[MESSAGE]</span>} {noticeClosable} />
-// Valid noticeTypes: success, info, warning, danger (bootstrap defaults), and demo (clingen custom)
+// Valid noticeTypes: success, info, warning, danger (bootstrap defaults), and demo, production (clingen customs)
 var Notice = React.createClass({
     getInitialState: function () {
         return { noticeVisible: true };
