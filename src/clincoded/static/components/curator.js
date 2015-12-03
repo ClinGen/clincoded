@@ -6,7 +6,6 @@ var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
-var CuratorHistory = require('./curator_history');
 var parseAndLogError = require('./mixins').parseAndLogError;
 
 var Panel = panel.Panel;
@@ -43,17 +42,6 @@ var CurationMixin = module.exports.CurationMixin = {
         }).then(gdmObj => {
             gdmObj.omimId = newOmimId;
             this.setState({currGdm: gdmObj, currOmimId: newOmimId});
-
-            // Record history of changing the GDM's OMIM ID
-            var meta = {
-                gdm: {
-                    operation: 'omim',
-                    omimId: newOmimId,
-                    gene: gdmObj.gene['@id'],
-                    disease: gdmObj.disease['@id']
-                }
-            };
-            this.recordHistory('modify', gdmObj, meta);
         }).catch(e => {
             console.log('UPDATEOMIMID %o', e);
         });
@@ -92,10 +80,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
     render: function() {
         var gdm = this.props.gdm;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
+        var summaryPage = this.props.summaryPage ? true : false;
 
         var provisional;
         var provisionalExist = false;
         var summaryButton = false;
+
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
@@ -168,9 +158,9 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <h1>{gene.symbol} – {disease.term}</h1>
                             <h2>{mode}</h2>
                             <div className="provisional-info-panel">
-                                <table style={{'width':'100%'}}>
+                                <table border="1" style={{'width':'100%'}}>
                                     <tr>
-                                        <td style={{'textAlign':'left'}}>
+                                        <td>
                                             <div className="provisional-title">
                                                 <strong>Last Saved Summary & Provisional Classification</strong>
                                             </div>
@@ -185,8 +175,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                         <div className="provisional-data-center">
                                                             <span>
                                                                 Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                Provisional Classification: {provisional.alteredClassification}&nbsp;&nbsp;
-                                                                [<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]
+                                                                Provisional Classification: {provisional.alteredClassification}
+                                                                { summaryPage ?
+                                                                    null
+                                                                    :
+                                                                    <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
+                                                                }
                                                             </span>
                                                         </div>
                                                     </div>
@@ -194,17 +188,21 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                     <div className="provisional-data-left"><span>No Reported Evidence</span></div>
                                             }
                                         </td>
-                                        { summaryButton ?
-                                            <td style={{'width':'200px', 'verticalAlign':'middle'}}>
-                                                <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                                    { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
-                                                </a>
-                                            </td>
-                                            :
-                                            <td style={{'width':'200px'}}>&nbsp;</td>
-                                        }
-
+                                        <td className="button-box" rowSpan="2">
+                                            { summaryButton ?
+                                                ( summaryPage ?
+                                                    null
+                                                    :
+                                                    <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                        { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
+                                                    </a>
+                                                )
+                                                :
+                                                null
+                                            }
+                                        </td>
                                     </tr>
+                                    <tr style={{height:'10px'}}></tr>
                                 </table>
                             </div>
                         </div>
@@ -1732,36 +1730,3 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
         </div>
     );
 };
-
-
-// Display a history item for adding a PMID to a GDM
-var GdmOmimModifyHistory = React.createClass({
-    render: function() {
-        var history = this.props.history;
-        var gdm = history.primary;
-        var gdmMeta = history.meta.gdm;
-
-        return (
-            <div>
-                <a href={'/curation-central/?gdm=' + gdm.uuid}>
-                    <strong>{gdmMeta.gene.symbol}-{gdmMeta.disease.term}-</strong>
-                    <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
-                </a>
-                <span> OMIM ID changed to {gdmMeta.omimId}</span>
-                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
-            </div>
-        );
-    }
-});
-
-globals.history_views.register(GdmOmimModifyHistory, 'gdm', 'modify');
-
-
-// Display a history item for deleting a PMID from a GDM
-var GdmDeleteHistory = React.createClass({
-    render: function() {
-        return <div>GDMDELETE</div>;
-    }
-});
-
-globals.history_views.register(GdmDeleteHistory, 'gdm', 'delete');

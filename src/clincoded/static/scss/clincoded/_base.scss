@@ -162,3 +162,13 @@ dl.dl-horizontal {
 .demo-background {
     background-image: url(/static/img/test-bg.svg);
 }
+
+.alert-production {
+    color: #8a6d3b;
+    background: #fed84d;
+    height: 80px;
+    border-top: 1px solid #f4b61f;
+    border-bottom: 1px solid #f4b61f;
+    text-align: center;
+    line-height: 50px;
+}
