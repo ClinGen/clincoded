@@ -1544,7 +1544,7 @@
     {
         "email": "kg.liu@stanford.edu",
         "first_name": "Kang",
-        "last_name": "Liu",
+        "last_name": "L-1",
         "uuid": "b99c5c3e-ff1e-408a-9806-8941cbfd21ae",
         "groups": [
             "admin"
@@ -1615,6 +1615,20 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "kgliu0101@gmail.com",
+        "first_name": "Kang",
+        "last_name": "L-2",
+        "uuid": "00082d69-3f6f-4b14-9e98-64b94be3f067",
+        "groups": [
+            "admin"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
-
 ]
