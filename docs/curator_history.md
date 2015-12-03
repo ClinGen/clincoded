@@ -131,10 +131,48 @@ Each module controlling the ```primary``` object has the responsibility to displ
 
 ##### Usage
 
-When a history object with a ```primary``` object type matching the ```@type``` parameter needs displaying, and with an operation type matching ```operationType``` (see the ```recordHistory``` specification above)
+When a history object with a ```primary``` object type matching the ```@type``` parameter needs displaying, and with an operation type matching ```operationType``` (see the ```recordHistory``` specification above; the ```operationType``` parameter matches this ```operationType``` parameter), the component gets called to display the item.
+
+The component receives two properties:
+
+* ```history```: The history object to display including its ```meta``` and sub-objects.
+* ```user```: The current user when available. Rarely used.
 
 ```
+var DisplayAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var primaryObject = history.primary;
+        var secondaryObject = history.meta.type.secondary;
 
-globals.history_views.register(PmidGdmAddHistory, 'article', 'add');
+        return (
+            <div>
+               <h1>Object added: {primaryObject.title}</h1>
+               <p>Info: {secondaryObject.info}</p>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(DisplayAddHistory, 'article', 'add');
+
+
+// Display a history item for deleting a PMID from a GDM
+var DisplayDeleteHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var primaryObject = history.primary;
+        var secondaryObject = history.meta.type.secondary;
+
+        return (
+            <div>
+               <h1>Object deleted: {primaryObject.title}</h1>
+               <p>Info: {secondaryObject.info}</p>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(DisplayDeleteHistory, 'article', 'delete');
 
 ```
