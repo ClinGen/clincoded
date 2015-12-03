@@ -25,7 +25,7 @@ var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var external_url_map = globals.external_url_map;
-
+var DeleteButton = curator.DeleteButton;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
@@ -832,6 +832,9 @@ var IndividualCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
+                                            {individual ?
+                                                <DeleteButton gdm={gdm} parent={families.length > 0 ? families[0] : (groups.length > 0 ? groups[0] : annotation)} item={individual} pmid={pmid} />
+                                            : null}
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>

@@ -1812,7 +1812,6 @@ var DeleteButtonModal = React.createClass({
             // forward user to curation central w/ PMID selected
             window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
         }).catch(function(e) {
-            this.setState({submitBusy: false});
             console.log('DELETE ERROR: %o', e);
         });
     },
