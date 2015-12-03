@@ -18,7 +18,7 @@ module.exports = {
         // Put the history object together
         var historyItem = {
             operationType: operationType,
-            primary: primary['@id'],
+            primary: primary['@id']
         };
         if (meta) {
             historyItem.meta = meta;
@@ -36,11 +36,14 @@ module.exports = {
     // as an array to the console once the histories get retrieved.
     //
     // this.getHistories(5).then(histories => { console.log('Item: %o', histories); });
-    getHistories: function(limit) {
-        var historyUri = '/histories/' + (limit ? '?limit=' + limit : '');
-        return this.getRestData('/histories').then(data => {
-            return data['@graph'];
-        });
+    getHistories: function(limit, user) {
+        if (user) {
+            var historyUri = '/histories/' + ((limit || user) ? '?' : '') + (limit ? 'limit=' + limit : '') + (user ? (limit ? '&' : '') + 'submitted_by.uuid=' + user.uuid : '');
+            return this.getRestData(historyUri).then(data => {
+                return data['@graph'];
+            });
+        }
+        return Promise.resolve(null);
     },
 
     // Get the history component to display the object that the given history item describes. The actual component varies

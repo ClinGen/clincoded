@@ -112,8 +112,10 @@ var Dashboard = React.createClass({
             this.setUserData(this.props.session.user_properties);
             this.getData(this.props.session);
         }
-        this.getHistories().then(histories => {
-            this.setState({histories: histories});
+        this.getHistories(10, this.props.session.user_properties).then(histories => {
+            if (histories) {
+                this.setState({histories: histories});
+            }
         });
     },
 
@@ -122,6 +124,11 @@ var Dashboard = React.createClass({
             this.setUserData(nextProps.session.user_properties);
             this.getData(nextProps.session);
         }
+        this.getHistories(10, this.props.session.user_properties).then(histories => {
+            if (histories) {
+                this.setState({histories: histories});
+            }
+        });
     },
 
     render: function() {

@@ -908,4 +908,5 @@ class History(Item):
         'meta.assessment.family',
         'meta.assessment.pathogenicity',
         'meta.assessment.variant',
+        'submitted_by',
     ]
