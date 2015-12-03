@@ -898,7 +898,6 @@ class History(Item):
         'meta.experimental.gdm.gene',
         'meta.experimental.gdm.disease',
         'meta.experimental.article',
-        'meta.provisionalClassification',
         'meta.provisionalClassification.gdm',
         'meta.provisionalClassification.gdm.gene',
         'meta.provisionalClassification.gdm.disease',

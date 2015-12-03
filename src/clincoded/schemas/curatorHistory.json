@@ -414,6 +414,10 @@
             "title": "Individual article",
             "type": "string"
         },
+        "meta.provisionalClassification": {
+            "title": "Provisional classification meta",
+            "type": "string"
+        },
         "meta.provisionalClassification.gdm": {
             "title": "Provisional classification GDM",
             "type": "string"
