@@ -139,13 +139,16 @@ var ProvisionalCuration = React.createClass({
                 backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
                 if (this.state.provisional) { // edit existing provisional
                     this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
+                        var provisionalClassification = data['@graph'][0];
+
                         // Record provisional classification history
                         var meta = {
                             provisionalClassification: {
-                                gdm: this.state.gdm['@id']
+                                gdm: this.state.gdm['@id'],
+                                alteredClassification: provisionalClassification.alteredClassification
                             }
                         };
-                        this.recordHistory('modify', data['@graph'][0], meta);
+                        this.recordHistory('modify', provisionalClassification, meta);
 
                         this.resetAllFormValues();
                         //this.context.navigate(backUrl);
@@ -161,7 +164,8 @@ var ProvisionalCuration = React.createClass({
                         // Record provisional classification history
                         var meta = {
                             provisionalClassification: {
-                                gdm: this.state.gdm['@id']
+                                gdm: this.state.gdm['@id'],
+                                alteredClassification: savedProvisional.alteredClassification
                             }
                         };
                         this.recordHistory('add', savedProvisional, meta);
@@ -886,11 +890,12 @@ var filter = function(target, branch, article, idList) {
 var ProvisionalAddModHistory = React.createClass({
     render: function() {
         var history = this.props.history;
-        var gdm = history.meta.provisionalClassification.gdm;
+        var meta = history.meta.provisionalClassification;
+        var gdm = meta.gdm;
 
         return (
             <div>
-                <span>Provisional classification added to </span>
+                <span>Provisional classification {meta.alteredClassification} added to </span>
                 <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
             </div>
@@ -905,11 +910,12 @@ globals.history_views.register(ProvisionalAddModHistory, 'provisionalClassificat
 var ProvisionalModifyHistory = React.createClass({
     render: function() {
         var history = this.props.history;
-        var gdm = history.meta.provisionalClassification.gdm;
+        var meta = history.meta.provisionalClassification;
+        var gdm = meta.gdm;
 
         return (
             <div>
-                <span>Provisional classification for </span>
+                <span>Provisional classification {meta.alteredClassification} for </span>
                 <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
                 <span> modified</span>

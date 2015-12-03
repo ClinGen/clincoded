@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var _ = require('underscore');
 var moment = require('moment');
 var globals = require('./globals');
 
@@ -36,10 +37,9 @@ module.exports = {
     // as an array to the console once the histories get retrieved.
     //
     // this.getHistories(5).then(histories => { console.log('Item: %o', histories); });
-    getHistories: function(limit, user) {
+    getHistories: function(user, limit) {
         if (user) {
-            var historyUri = '/histories/' + ((limit || user) ? '?' : '') + (limit ? 'limit=' + limit : '') + (user ? (limit ? '&' : '') + 'submitted_by.uuid=' + user.uuid : '');
-            return this.getRestData(historyUri).then(data => {
+            return this.getRestData('/histories/?submitted_by.uuid=' + user.uuid + (limit ? '&limit=' + limit : '')).then(data => {
                 return data['@graph'];
             });
         }

@@ -261,6 +261,11 @@
                             "description": "GDM for the provisional classification",
                             "type": "string",
                             "linkTo": "gdm"
+                        },
+                        "alteredClassification": {
+                            "title": "Classification",
+                            "description": "User-altered provisional classification",
+                            "type": "string"
                         }
                     }
                 },
