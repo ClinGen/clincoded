@@ -187,7 +187,6 @@ var ProvisionalCuration = React.createClass({
                         <div>
                             <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true}/>
                             <div className="container">
-                                <div>Previous Page: {this.state.previousUrl}</div>
                                 {
                                     (provisional && edit === 'yes') ?
                                     EditCurrent.call(this)
