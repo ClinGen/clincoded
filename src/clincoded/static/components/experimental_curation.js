@@ -114,7 +114,7 @@ var ExperimentalCuration = React.createClass({
                 'A. The gene is expressed in tissues relevant to the disease of interest',
                 'B. The gene is altered in expression in patients who have the disease'
             ],
-            'Functional Alteration': ['The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents'],
+            'Functional Alteration': ['The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations or engineered equivalents'],
             'Model Systems': ['Non-human animal OR cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state'],
             'Rescue': ['The cellular phenotype in patient-derived cells OR engineered equivalents can be rescued by addition of the wild-type gene product']
         };
@@ -1273,7 +1273,7 @@ var ExperimentalNameType = function() {
                         <strong>Biochemical Function</strong>: The gene product performs a biochemical function shared with other known genes in the disease of interest, OR the gene product is consistent with the observed phenotype(s)<br /><br />
                         <strong>Protein Interactions</strong>: The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest<br /><br />
                         <strong>Expression</strong>: The gene is expressed in tissues relevant to the disease of interest, OR the gene is altered in expression in patients who have the disease<br /><br />
-                        <strong>Functional Alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents<br /><br />
+                        <strong>Functional Alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations or engineered equivalents<br /><br />
                         <strong>Model Systems</strong>: Non-human animal OR cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state<br /><br />
                         <strong>Rescue</strong>: The cellular phenotype in patient-derived cells OR engineered equivalents can be rescued by addition of the wild-type gene product
                     </p>
