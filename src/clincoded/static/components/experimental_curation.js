@@ -1505,15 +1505,15 @@ var TypeProteinInteractions = function() {
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>coimmunoprecipitation (M:0019)</option>
-                <option>pull down (M:0096)</option>
-                <option>affinity chromatography technology (M:0004)</option>
-                <option>protein cross-linking with a bifunctional reagent (M0031)</option>
-                <option>comigration in gel electrophoresis (M:0807)</option>
+                <option>affinity chromatography technology (MI:0004)</option>,
+                <option>coimmunoprecipitation (MI:0019)</option>,
+                <option>comigration in gel electrophoresis (MI:0807)</option>,
+                <option>electron microscopy (MI:0040)</option>,
+                <option>protein cross-linking with a bifunctional reagent (MI:0031)</option>,
+                <option>pull down (MI:0096)</option>,
+                <option>synthetic genetic analysis (MI:0441)</option>,
+                <option>two hybrid (MI:0018)</option>,
                 <option>x-ray crystallography (MI:0114)</option>
-                <option>electron microscopy (MI:0040)</option>
-                <option>synthetic genetic analysis (MI:0441)</option>
-                <option>two hybrid (MI:0018)</option>
             </Input>
             <Input type="checkbox" ref="geneImplicatedInDisease" label="Has this gene or genes been implicated in the above disease?:"
                 error={this.getFormError('geneImplicatedInDisease')} clearError={this.clrFormErrors.bind(null, 'geneImplicatedInDisease')}
