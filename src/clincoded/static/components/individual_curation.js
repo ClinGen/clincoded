@@ -121,8 +121,8 @@ var IndividualCuration = React.createClass({
         }
         if (associatedObjs) {
             orphanetVal = associatedObjs.commonDiagnosis.map(function(disease, i) {
-                    return ('ORPHA' + disease.orphaNumber);
-                }).join(', ');
+                return ('ORPHA' + disease.orphaNumber);
+            }).join(', ');
         }
         this.refs['orphanetid'].setValue(orphanetVal);
     },
@@ -1267,20 +1267,6 @@ var IndividualAdditional = function() {
         </div>
     );
 };
-
-// HTML labels for inputs follow.
-var LabelAdditional = React.createClass({
-    render: function() {
-        return <span>Additional Information about Individual{this.props.probandLabel}:</span>;
-    }
-});
-
-var LabelOtherPmids = React.createClass({
-    render: function() {
-        return <span>Enter PMID(s) that report evidence about this Individual{this.props.probandLabel}:</span>;
-    }
-});
-
 
 // HTML labels for inputs follow.
 var LabelAdditional = React.createClass({

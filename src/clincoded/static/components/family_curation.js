@@ -1485,7 +1485,7 @@ function segregationExists(segregation) {
                  (segregation.additionalInformation && segregation.additionalInformation.length > 0);
     }
     return exists;
-};
+}
 
 
 var FamilyViewer = React.createClass({
@@ -1517,7 +1517,7 @@ var FamilyViewer = React.createClass({
             return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
                 // If we made a new assessment, add it to the family's assessments
                 if (assessmentInfo.assessment && !assessmentInfo.update) {
-                     updatedFamily = curator.flatten(family);
+                    updatedFamily = curator.flatten(family);
                     if (!updatedFamily.segregation.assessments) {
                         updatedFamily.segregation.assessments = [];
                     }
