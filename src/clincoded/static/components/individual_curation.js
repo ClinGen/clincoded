@@ -1017,7 +1017,7 @@ var IndividualCommonDiseases = function() {
             <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
                 clickHandler={this.handleClick.bind(this, group)} />
             : null}
-            {associatedFamilies ?
+            {associatedFamilies && family.commonDiagnosis && family.commonDiagnosis.length > 0 ?
             <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Family"
                 clickHandler={this.handleClick.bind(this, family)} />
             : null}

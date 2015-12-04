@@ -1492,9 +1492,11 @@ function flattenFamily(family) {
     var flat = cloneSimpleProps(family, familySimpleProps);
 
     // Flatten diseases
-    flat.commonDiagnosis = family.commonDiagnosis.map(function(disease) {
-        return disease['@id'];
-    });
+    if (family.commonDiagnosis && family.commonDiagnosis.length > 0) {
+        flat.commonDiagnosis = family.commonDiagnosis.map(function(disease) {
+            return disease['@id'];
+        });
+    }
 
     // Flatten segregation variants
     if (family.segregation) {
@@ -1715,14 +1717,18 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
                                     <strong className="pull-right">Orphanet Diseases Associated with {title}:</strong>
                                 </div>
                                 <div className="col-sm-7">
-                                    {obj.commonDiagnosis.map(function(disease, i) {
-                                        return (
-                                            <span key={disease.orphaNumber}>
-                                                {i > 0 ? ', ' : ''}
-                                                {'ORPHA' + disease.orphaNumber}
-                                            </span>
-                                        );
-                                    })}
+                                    { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
+                                        obj.commonDiagnosis.map(function(disease, i) {
+                                            return (
+                                                <span key={disease.orphaNumber}>
+                                                    {i > 0 ? ', ' : ''}
+                                                    {'ORPHA' + disease.orphaNumber}
+                                                </span>
+                                            );
+                                        })
+                                        :
+                                        <span>&nbsp;</span>
+                                    }
                                 </div>
                             </div>
                         );
