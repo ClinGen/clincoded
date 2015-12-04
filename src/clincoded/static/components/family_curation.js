@@ -1575,7 +1575,7 @@ var FamilyViewer = React.createClass({
 
                 // If we made a new assessment, add it to the family's assessments
                 if (assessmentInfo.assessment && !assessmentInfo.update) {
-                     updatedFamily = curator.flatten(family);
+                    updatedFamily = curator.flatten(family);
                     if (!updatedFamily.segregation.assessments) {
                         updatedFamily.segregation.assessments = [];
                     }

@@ -223,7 +223,7 @@ var FetchedForm = React.createClass({
         var schemas = this.props.schemas;
         return {
             schema: null,
-            value: this.props.context || jsonSchemaToDefaultValue(schemas[type]),
+            value: this.props.context || jsonSchemaToDefaultValue(schemas[type])
         };
     },
 

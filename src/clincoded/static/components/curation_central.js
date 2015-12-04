@@ -1,8 +1,6 @@
 'use strict';
 var React = require('react');
 var _ = require('underscore');
-var url = require('url');
-var moment = require('moment');
 var globals = require('./globals');
 var curator = require('./curator');
 var modal = require('../libs/bootstrap/modal');
@@ -80,7 +78,6 @@ var CurationCentral = React.createClass({
 
     // Add an article whose object is given to the current GDM
     updateGdmArticles: function(article) {
-        var newAnnotation;
         var currGdm = this.state.currGdm;
 
         // Put together a new annotation object with the article reference
@@ -302,7 +299,7 @@ var AddPmidModal = React.createClass({
             this.getRestData('/articles/' + enteredPmid).then(article => {
                 // Close the modal; update the GDM with this article.
                 return Promise.resolve(article);
-            }, e => {
+            }, () => {
                 var url = this.props.protocol + external_url_map['PubMedSearch'];
                 // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
