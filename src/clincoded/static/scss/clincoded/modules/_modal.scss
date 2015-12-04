@@ -5,6 +5,18 @@
     border-bottom: 1px solid $color-trim-dark;
 }
 
+.modal-success {
+    background-color: #5cb85c;
+}
+
+.modal-info {
+    background-color: #5bc0de;
+}
+
+.modal-warning {
+    background-color: #f0ad4e;
+}
+
 .modal-danger {
     background-color: #d9534f;
 }
