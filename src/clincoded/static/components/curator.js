@@ -1735,8 +1735,8 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
     },
     render: function() {
         return (
-            <Modal title="Delete Item">
-                <a className="btn btn-warning pull-left" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
+            <Modal title="Delete Item" modalClass="modal-danger">
+                <a className="btn btn-danger pull-left" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
                     Delete
                 </a>
             </Modal>
