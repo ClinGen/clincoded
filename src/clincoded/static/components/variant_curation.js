@@ -642,7 +642,7 @@ var VariantAddHistory = React.createClass({
 
         return (
             <div>
-                <span>Variant “{variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription}” added</span>
+                <span>Variant <strong>{variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription}</strong> added</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
