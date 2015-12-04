@@ -1016,6 +1016,11 @@ var ExperimentalCuration = React.createClass({
                             '/variants/', newVariants
                         ).then(results => {
                             if (results && results.length) {
+                                // Write the new variants to history
+                                results.forEach(function(result) {
+                                    this.recordHistory('add', result['@graph'][0]);
+                                }, this);
+
                                 // Add the newly written variants to the experimental data
                                 results.forEach(result => {
                                     experimentalDataVariants.push('/variants/' + result['@graph'][0].uuid + '/');

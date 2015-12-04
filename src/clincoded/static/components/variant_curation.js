@@ -632,3 +632,31 @@ var PathogenicityDeleteHistory = React.createClass({
 });
 
 globals.history_views.register(PathogenicityDeleteHistory, 'pathogenicity', 'delete');
+
+
+// Display a history item for adding a variant
+var VariantAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var variant = history.primary;
+
+        return (
+            <div>
+                <span>Variant “{variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription}” added</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(VariantAddHistory, 'variant', 'add');
+
+
+// Display a history item for adding a variant
+var VariantDeleteHistory = React.createClass({
+    render: function() {
+        return <div>VARIANTDELETE</div>;
+    }
+});
+
+globals.history_views.register(VariantDeleteHistory, 'variant', 'delete');

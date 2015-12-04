@@ -635,6 +635,11 @@ var FamilyCuration = React.createClass({
                             '/variants/', newVariants
                         ).then(results => {
                             if (results && results.length) {
+                                // Write the new variants to history
+                                results.forEach(function(result) {
+                                    this.recordHistory('add', result['@graph'][0]);
+                                }, this);
+
                                 // Add the newly written variants to the family
                                 results.forEach(result => {
                                     familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
