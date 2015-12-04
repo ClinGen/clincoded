@@ -1512,6 +1512,8 @@ var TypeProteinInteractions = function() {
                 <option>comigration in gel electrophoresis (M:0807)</option>
                 <option>x-ray crystallography (MI:0114)</option>
                 <option>electron microscopy (MI:0040)</option>
+                <option>synthetic genetic analysis (MI:0441)</option>
+                <option>two hybrid (MI:0018)</option>
             </Input>
             <Input type="checkbox" ref="geneImplicatedInDisease" label="Has this gene or genes been implicated in the above disease?:"
                 error={this.getFormError('geneImplicatedInDisease')} clearError={this.clrFormErrors.bind(null, 'geneImplicatedInDisease')}
