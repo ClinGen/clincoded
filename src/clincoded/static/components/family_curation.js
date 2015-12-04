@@ -84,6 +84,7 @@ var FamilyCuration = React.createClass({
         this.cv.assessmentTracker = initialCv;
 
         return {
+            orpha: null, // string entered in Orphanet id input box
             gdm: null, // GDM object given in query string
             group: null, // Group object given in query string
             family: null, // If we're editing a group, this gets the fleshed-out group object we're editing
@@ -110,6 +111,10 @@ var FamilyCuration = React.createClass({
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
         } else if (ref === 'familyname') {
             this.setState({familyName: this.refs[ref].getValue()});
+        } else if (ref === 'orphanetid' && this.refs[ref].getValue()) {
+            this.setState({orpha: true});
+        } else if (ref === 'orphanetid') {
+            this.setState({orpha: false});
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -251,6 +256,13 @@ var FamilyCuration = React.createClass({
             // Update the family name
             if (stateObj.family) {
                 this.setState({familyName: stateObj.family.label});
+
+                if (stateObj.family.commonDiagnosis && stateObj.family.commonDiagnosis.length > 0) {
+                    this.setState({orpha: true});
+                }
+                else {
+                    this.setState({orpha: false});
+                }
             }
 
             if (stateObj.family) {
@@ -1160,7 +1172,7 @@ var FamilyCommonDiseases = function() {
         <div className="row">
             {curator.renderOrphanets(associatedGroups, 'Group')}
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
-                error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
+                error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             {associatedGroups ?
             <Input type="button" ref="orphanetcopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
@@ -1422,8 +1434,12 @@ var FamilyVariant = function() {
                         error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
                         buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                    <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
+                    { this.state.orpha ?
+                        <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
                         clickHandler={this.handleClick.bind(this, 'family')} />
+                        :
+                        null
+                    }
                 </div>
             : null}
             {this.state.variantCount < MAX_VARIANTS ?

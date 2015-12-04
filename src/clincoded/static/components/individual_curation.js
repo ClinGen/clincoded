@@ -186,6 +186,14 @@ var IndividualCuration = React.createClass({
             // Update the individual name
             if (stateObj.individual) {
                 this.setState({individualName: stateObj.individual.label});
+
+                if (stateObj.individual.proband) {
+                    // proband individual
+                    this.setState({proband_selected: true});
+                }
+                else {
+                    this.setState({proband_selected: false});
+                }
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
