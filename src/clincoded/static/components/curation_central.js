@@ -2,6 +2,7 @@
 var React = require('react');
 var _ = require('underscore');
 var globals = require('./globals');
+var moment = require('moment');
 var curator = require('./curator');
 var modal = require('../libs/bootstrap/modal');
 var form = require('../libs/bootstrap/form');
