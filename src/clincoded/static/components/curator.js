@@ -80,10 +80,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
     render: function() {
         var gdm = this.props.gdm;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
+        var summaryPage = this.props.summaryPage ? true : false;
 
         var provisional;
         var provisionalExist = false;
         var summaryButton = false;
+
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
@@ -156,9 +158,9 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <h1>{gene.symbol} – {disease.term}</h1>
                             <h2>{mode}</h2>
                             <div className="provisional-info-panel">
-                                <table style={{'width':'100%'}}>
+                                <table border="1" style={{'width':'100%'}}>
                                     <tr>
-                                        <td style={{'textAlign':'left'}}>
+                                        <td>
                                             <div className="provisional-title">
                                                 <strong>Last Saved Summary & Provisional Classification</strong>
                                             </div>
@@ -173,8 +175,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                         <div className="provisional-data-center">
                                                             <span>
                                                                 Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                Provisional Classification: {provisional.alteredClassification}&nbsp;&nbsp;
-                                                                [<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]
+                                                                Provisional Classification: {provisional.alteredClassification}
+                                                                { summaryPage ?
+                                                                    null
+                                                                    :
+                                                                    <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
+                                                                }
                                                             </span>
                                                         </div>
                                                     </div>
@@ -182,17 +188,21 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                     <div className="provisional-data-left"><span>No Reported Evidence</span></div>
                                             }
                                         </td>
-                                        { summaryButton ?
-                                            <td style={{'width':'200px', 'vertical-align':'middle'}}>
-                                                <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                                    { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
-                                                </a>
-                                            </td>
-                                            :
-                                            <td style={{'width':'200px'}}>&nbsp;</td>
-                                        }
-
+                                        <td className="button-box" rowSpan="2">
+                                            { summaryButton ?
+                                                ( summaryPage ?
+                                                    null
+                                                    :
+                                                    <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                        { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
+                                                    </a>
+                                                )
+                                                :
+                                                null
+                                            }
+                                        </td>
                                     </tr>
+                                    <tr style={{height:'10px'}}></tr>
                                 </table>
                             </div>
                         </div>
@@ -893,7 +903,7 @@ var AddOmimIdModal = React.createClass({
             // Form is valid -- we have a good OMIM ID. Close the modal and update the current GDM's OMIM ID
             this.props.closeModal();
             var enteredOmimId = this.getFormValue('omimid');
-                this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
+            this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
         }
     },
 
@@ -1303,7 +1313,7 @@ module.exports.capture = {
     // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.
     clids: function(s) {
         return captureBase(s, /^\s*(CL_\d{7})\s*$/i, true);
-    },
+    }
 };
 
 

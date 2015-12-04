@@ -136,6 +136,6 @@ module.exports = {
         newMethod.dateTime = moment().format();
 
         return Object.keys(newMethod).length ? newMethod : null;
-    },
+    }
 
 };
