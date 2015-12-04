@@ -18,6 +18,8 @@ matrix:
       env: BROWSER=Chrome
     - python: "3.4"
       env: BROWSER=
+notifications:
+  - slack: clingenstanford:Cz4XCySRRlxX80votrW1lnJ8
 before_install:
   - whereis elasticsearch
   - postgres --version
