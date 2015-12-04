@@ -1550,9 +1550,11 @@ function flattenIndividual(individual) {
     var flat = cloneSimpleProps(individual, individualSimpleProps);
 
     // Flatten diseases
-    flat.diagnosis = individual.diagnosis.map(function(disease) {
-        return disease['@id'];
-    });
+    if (individual.diagnosis && individual.diagnosis.length > 0) {
+        flat.diagnosis = individual.diagnosis.map(function(disease) {
+            return disease['@id'];
+        });
+    }
 
     // Flatten other PMIDs
     if (individual.otherPMIDs && individual.otherPMIDs.length) {
