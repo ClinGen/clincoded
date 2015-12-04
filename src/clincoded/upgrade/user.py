@@ -1,5 +1,8 @@
 from contentbase.upgrader import upgrade_step
 
+@upgrade_step('user', '', '3')
+def user_0_3(value, system):
+    pass
 
 @upgrade_step('user', '3', '4')
 def user_3_4(value, system):
