@@ -903,7 +903,7 @@ var AddOmimIdModal = React.createClass({
             // Form is valid -- we have a good OMIM ID. Close the modal and update the current GDM's OMIM ID
             this.props.closeModal();
             var enteredOmimId = this.getFormValue('omimid');
-                this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
+            this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
         }
     },
 
@@ -1301,7 +1301,7 @@ module.exports.capture = {
     // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.
     clids: function(s) {
         return captureBase(s, /^\s*(CL_\d{7})\s*$/i, true);
-    },
+    }
 };
 
 
