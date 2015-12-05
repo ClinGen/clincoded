@@ -1759,7 +1759,7 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
                     </a>
                 </div>
                 :
-                <div className="delete-button-wrapper">
+                <div className="delete-button-wrapper pull-right">
                     <a className="btn btn-danger" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
                         Delete
                     </a>
