@@ -1222,14 +1222,14 @@ var ExperimentalCuration = React.createClass({
                                             </PanelGroup>
                                         : null}
                                         <div className="curation-submit clearfix">
-                                            {experimental ?
-                                                <DeleteButton gdm={gdm} parent={annotation} item={experimental} pmid={pmid} />
-                                            : null}
                                             {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
                                                 <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
 
                                             : null}
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
+                                            {experimental ?
+                                                <DeleteButton gdm={gdm} parent={annotation} item={experimental} pmid={pmid} disabled={this.cv.othersAssessed} />
+                                            : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>

@@ -487,11 +487,11 @@ var GroupCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
+                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
+                                            {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             {group ?
                                                 <DeleteButton gdm={gdm} parent={annotation} item={group} pmid={pmid} />
                                             : null}
-                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
-                                            {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>

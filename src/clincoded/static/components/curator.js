@@ -1732,13 +1732,40 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
         parent: React.PropTypes.object,
         item: React.PropTypes.object,
         pmid: React.PropTypes.string,
+        disabled: React.PropTypes.bool,
     },
+
+    getInitialState: function() {
+        return {
+            noticeVisible: false // True while form is submitting
+        };
+    },
+
+    showNotice: function() {
+        this.setState({noticeVisible: true});
+    },
+
+    hideNotice: function() {
+        this.setState({noticeVisible: false});
+    },
+
     render: function() {
         return (
             <Modal title="Delete Item" modalClass="modal-danger">
-                <a className="btn btn-danger pull-left" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
-                    Delete
-                </a>
+                {this.props.disabled ?
+                <div className="delete-button-wrapper pull-right" onMouseEnter={this.showNotice} onMouseLeave={this.hideNotice}>
+                    <a className="btn btn-danger" disabled="disabled">
+                        Delete
+                    </a>
+                </div>
+                :
+                <div className="delete-button-wrapper">
+                    <a className="btn btn-danger" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
+                        Delete
+                    </a>
+                </div>
+                }
+                {this.state.noticeVisible ? <span className="delete-notice pull-right">This item cannot be deleted because it has been assessed by another user.</span> : <span></span>}
             </Modal>
         );
     }
