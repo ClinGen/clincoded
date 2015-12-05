@@ -1751,7 +1751,7 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
 
     render: function() {
         return (
-            <Modal title="Delete Item" modalClass="modal-danger">
+            <span>
                 {this.props.disabled ?
                 <div className="delete-button-wrapper pull-right" onMouseEnter={this.showNotice} onMouseLeave={this.hideNotice}>
                     <a className="btn btn-danger" disabled="disabled">
@@ -1759,14 +1759,14 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
                     </a>
                 </div>
                 :
-                <div className="delete-button-wrapper pull-right">
+                <div className="delete-button-wrapper pull-right"><Modal title="Delete Item" modalClass="modal-danger">
                     <a className="btn btn-danger" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
                         Delete
                     </a>
-                </div>
+                </Modal></div>
                 }
                 {this.state.noticeVisible ? <span className="delete-notice pull-right">This item cannot be deleted because it has been assessed by another user.</span> : <span></span>}
-            </Modal>
+                </span>
         );
     }
 });
