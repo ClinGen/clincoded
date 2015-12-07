@@ -1005,9 +1005,19 @@ globals.history_views.register(GroupModifyHistory, 'group', 'modify');
 // Display a history item for deleting a group
 var GroupDeleteHistory = React.createClass({
     render: function() {
-        var group = this.props.history.primary;
+        var history = this.props.history;
+        var group = history.primary;
 
-        return <div>Group {group.label} deleted</div>;
+        // Prepare to display a note about associated families and individuals
+        var collateralObjects = !!(group.familyIncluded && group.familyIncluded.length) || !!(group.individualIncluded && group.individualIncluded.length);
+
+        return (
+            <div>
+                <span>Group {group.label} deleted</span>
+                <span>{collateralObjects ? ' along with any associated families and individuals' : ''}</span>
+                <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
     }
 });
 

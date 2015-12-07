@@ -2037,12 +2037,13 @@ globals.history_views.register(FamilyModifyHistory, 'family', 'modify');
 // Display a history item for deleting a family
 var FamilyDeleteHistory = React.createClass({
     render: function() {
-        var family = this.props.history.primary;
+        var history = this.props.history;
+        var family = history.primary;
 
         return (
             <div>
                 <span>Family {family.label} deleted</span>
-                <span>; {moment(family.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
     }

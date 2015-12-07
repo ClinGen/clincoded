@@ -1643,9 +1643,15 @@ globals.history_views.register(IndividualModifyHistory, 'individual', 'modify');
 // Display a history item for deleting an individual
 var IndividualDeleteHistory = React.createClass({
     render: function() {
-        var individual = this.props.history.primary;
+        var history = this.props.history;
+        var individual = history.primary;
 
-        return <div>Individual {individual.label} deleted</div>;
+        return (
+            <div>
+                <span>Individual {individual.label} deleted</span>
+                <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
     }
 });
 
