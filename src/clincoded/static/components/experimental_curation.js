@@ -1385,7 +1385,7 @@ var TypeBiochemicalFunction = function() {
             : null}
         </div>
     );
-}
+};
 
 // HTML labels for Biochemical Functions panel
 var LabelIdentifiedFunction = React.createClass({
@@ -1438,7 +1438,7 @@ var TypeBiochemicalFunctionA = function() {
                 inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // HTML labels for Biochemical Functions panel A
 var LabelGenesWithSameFunction = React.createClass({
@@ -1489,17 +1489,17 @@ var TypeBiochemicalFunctionB = function() {
                 inputDisabled={!(this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT) || this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // HTML labels for Biochemical Functions panel B
 var LabelHPOIDs = React.createClass({
     render: function() {
-        return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
+        return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
 });
 var LabelPhenotypesFT = React.createClass({
     render: function() {
-        return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>
+        return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>;
     }
 });
 
@@ -1539,13 +1539,15 @@ var TypeProteinInteractions = function() {
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>coimmunoprecipitation (M:0019)</option>
-                <option>pull down (M:0096)</option>
-                <option>affinity chromatography technology (M:0004)</option>
-                <option>protein cross-linking with a bifunctional reagent (M0031)</option>
-                <option>comigration in gel electrophoresis (M:0807)</option>
+                <option>affinity chromatography technology (MI:0004)</option>,
+                <option>coimmunoprecipitation (MI:0019)</option>,
+                <option>comigration in gel electrophoresis (MI:0807)</option>,
+                <option>electron microscopy (MI:0040)</option>,
+                <option>protein cross-linking with a bifunctional reagent (MI:0031)</option>,
+                <option>pull down (MI:0096)</option>,
+                <option>synthetic genetic analysis (MI:0441)</option>,
+                <option>two hybrid (MI:0018)</option>,
                 <option>x-ray crystallography (MI:0114)</option>
-                <option>electron microscopy (MI:0040)</option>
             </Input>
             <Input type="checkbox" ref="geneImplicatedInDisease" label="Has this gene or genes been implicated in the above disease?:"
                 error={this.getFormError('geneImplicatedInDisease')} clearError={this.clrFormErrors.bind(null, 'geneImplicatedInDisease')}
@@ -1563,7 +1565,7 @@ var TypeProteinInteractions = function() {
                 rows="5" value={proteinInteractions.evidenceInPaper}inputDisabled={!this.state.geneImplicatedInDisease || this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // HTML labels for Protein Interactions panel
 var LabelInteractingGenes = React.createClass({
@@ -1595,7 +1597,7 @@ var TypeExpression = function() {
             : null}
         </div>
     );
-}
+};
 
 // HTML labels for Expression panel.
 var LabelUberonId = React.createClass({
@@ -1631,7 +1633,7 @@ var TypeExpressionA = function() {
                 rows="5" value={expression.normalExpression.evidenceInPaper} inputDisabled={!this.state.expressedInTissue || this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 var TypeExpressionB = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
@@ -1660,7 +1662,7 @@ var TypeExpressionB = function() {
                 rows="5" value={expression.alteredExpression.evidenceInPaper} inputDisabled={!this.state.expressedInPatients || this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // Functional Alteration type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
@@ -1727,7 +1729,7 @@ var TypeFunctionalAlteration = function() {
                 rows="5" value={functionalAlteration.evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // HTML labels for Functional Alterations panel.
 var LabelFAPatientCellType = React.createClass({
@@ -1848,7 +1850,7 @@ var TypeModelSystems = function() {
                 rows="5" value={modelSystems.evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // HTML labels for Model Systems panel.
 var LabelCellCulture = React.createClass({
@@ -1960,7 +1962,7 @@ var TypeRescue = function() {
                 rows="5" inputDisabled={!this.state.wildTypeRescuePhenotype || this.cv.othersAssessed} value={rescue.evidenceInPaper} />
         </div>
     );
-}
+};
 
 // HTML labels for Rescue panel
 var LabelRPatientCellType = React.createClass({

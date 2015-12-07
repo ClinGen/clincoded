@@ -168,13 +168,15 @@
                     "description": "Experimental Interaction Detection",
                     "type": "string",
                     "enum": [
-                        "coimmunoprecipitation (M:0019)",
-                        "pull down (M:0096)",
-                        "affinity chromatography technology (M:0004)",
-                        "protein cross-linking with a bifunctional reagent (M0031)",
-                        "comigration in gel electrophoresis (M:0807)",
-                        "x-ray crystallography (MI:0114)",
-                        "electron microscopy (MI:0040)"
+                        "affinity chromatography technology (MI:0004)",
+                        "coimmunoprecipitation (MI:0019)",
+                        "comigration in gel electrophoresis (MI:0807)",
+                        "electron microscopy (MI:0040)",
+                        "protein cross-linking with a bifunctional reagent (MI:0031)",
+                        "pull down (MI:0096)",
+                        "synthetic genetic analysis (MI:0441)",
+                        "two hybrid (MI:0018)",
+                        "x-ray crystallography (MI:0114)"
                     ]
                 },
                 "geneImplicatedInDisease": {
