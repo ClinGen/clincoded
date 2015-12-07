@@ -17,7 +17,6 @@ var Input = form.Input;
 var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
-var external_url_map = globals.external_url_map;
 
 
 var CurationMixin = module.exports.CurationMixin = {
