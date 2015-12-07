@@ -1860,11 +1860,17 @@ var DeleteButtonModal = React.createClass({
     },
 
     render: function() {
+        var message;
+        if (this.props.item['@type'][0] == 'group') {
+            message = <p><strong>Warning</strong>: If there are any Families and/or Individuals associated with this Group, they will be deleted when the Group is deleted. Are you sure you would like to delete this item?</p>;
+        } else if (this.props.item['@type'][0] == 'family') {
+            message = <p><strong>Warning</strong>: If there are any Individuals associated with this Family, they will be deleted when the Family is deleted. Are you sure you would like to delete this item?</p>;
+        } else if (this.props.item['@type'][0] == 'individual' || this.props.item['@type'][0] == 'experimental') {
+            message = <p>Are you sure you would like to delete this item?</p>;
+        }
         return (
             <div>
-                <div className="modal-body">
-                    Are you sure you would like to delete this item?
-                </div>
+                <div className="modal-body">{message}</div>
                 <div className="modal-footer">
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
                     <Input type="button" inputClassName="btn-danger btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
