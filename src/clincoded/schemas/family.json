@@ -388,16 +388,20 @@
             "title": "Label",
             "type": "string"
         },
-        "submitted_by.title": {
+        "commonDiagnosis": {
+            "title": "Common Diagnosis",
+            "type": "string"
+        },
+        "individualIncluded": {
+            "title": "Individual",
+            "type": "string"
+        },
+        "submitted_by.uuid": {
             "title": "Creator",
             "type": "string"
         },
         "date_created": {
             "title": "Creation Date",
-            "type": "string"
-        },
-        "last_modified": {
-            "title": "Last Modified",
             "type": "string"
         }
     },

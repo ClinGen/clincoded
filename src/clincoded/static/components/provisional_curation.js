@@ -185,7 +185,7 @@ var ProvisionalCuration = React.createClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} />
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true}/>
                             <div className="container">
                                 {
                                     (provisional && edit === 'yes') ?
@@ -541,7 +541,7 @@ var NewCalculation = function() {
         "support": [],
         "review": [],
         "contradict": []
-    };
+    }
 
     for (var i in gdmPathoList) {
         var variantUuid = gdmPathoList[i].variant.uuid;
@@ -572,7 +572,7 @@ var NewCalculation = function() {
         "Model Systems (Engineered equivalent)": 0,
         "Rescue (Patient cells)": 0,
         "Rescue (Engineered equivalent)": 0
-    };
+    }
     var individualsCollected = {
         "probandInd": [],
         "allVariants": [],
