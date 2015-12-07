@@ -473,6 +473,7 @@ var FamilyCuration = React.createClass({
                     searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
                 }
                 else {
+                    // a temp solution to match the callback function structure because we need to function the page in a short time.
                     searchStr = '/gene/NGLY1';
                 }
                 this.setState({submitBusy: true});

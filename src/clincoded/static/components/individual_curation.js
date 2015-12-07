@@ -377,6 +377,7 @@ var IndividualCuration = React.createClass({
                     searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
                 }
                 else {
+                    // a temp solution to match the callback structure. Need to change later.
                     searchStr = '/gene/NGLY1';
                 }
                 this.setState({submitBusy: true});
