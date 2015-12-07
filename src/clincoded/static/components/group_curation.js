@@ -1005,7 +1005,9 @@ globals.history_views.register(GroupModifyHistory, 'group', 'modify');
 // Display a history item for deleting a group
 var GroupDeleteHistory = React.createClass({
     render: function() {
-        return <div>GROUPDELETE</div>;
+        var group = this.props.history.primary;
+
+        return <div>Group {group.label} deleted</div>;
     }
 });
 

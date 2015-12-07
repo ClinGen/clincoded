@@ -2606,7 +2606,14 @@ globals.history_views.register(ExperimentModifyHistory, 'experimental', 'modify'
 // Display a history item for deleting experimental data
 var ExperimentDeleteHistory = React.createClass({
     render: function() {
-        return <div>EXPERIMENTALDELETE</div>;
+        var experimental = this.props.history.primary;
+
+        return (
+            <div>
+                <span>Experimental data {experimental.label} deleted</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
     }
 });
 
