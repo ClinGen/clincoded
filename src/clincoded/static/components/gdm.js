@@ -136,7 +136,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                         </div>
                         {filteredGdms.sort(this.sortCol).map(function(gdm) {
                             var annotationOwners = curator.getAnnotationOwners(gdm);
-                            var latestAnnotation = curator.findLatestAnnotation(gdm);
+                            var latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
                             var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
                             var term = truncateString(gdm.disease.term, 30);
                             var createdTime = moment(gdm.date_created);

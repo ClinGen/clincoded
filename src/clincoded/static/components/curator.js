@@ -947,7 +947,7 @@ var CuratorRecordHeader = React.createClass({
     render: function() {
         var gdm = this.props.gdm;
         var annotationOwners = getAnnotationOwners(gdm);
-        var latestAnnotation = findLatestAnnotation(gdm);
+        var latestAnnotation = gdm && findLatestAnnotation(gdm);
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
@@ -956,7 +956,7 @@ var CuratorRecordHeader = React.createClass({
                         <dl className="inline-dl clearfix">
                             <dt>Status: </dt><dd>{gdm.status}</dd>
                             <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> – {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
-                            {annotationOwners && annotationOwners.length ?
+                            {annotationOwners && annotationOwners.length && latestAnnotation ?
                                 <div>
                                     <dt>Participants: </dt>
                                     <dd>
@@ -983,7 +983,7 @@ var CuratorRecordHeader = React.createClass({
 
 
 // Return the latest annotation in the given GDM. This is the internal version; use the memoized version externally.
-var _findLatestAnnotation = function(gdm) {
+var findLatestAnnotation = module.exports.findLatestAnnotation = function(gdm) {
     var annotations = gdm && gdm.annotations;
     var latestAnnotation = null;
     var latestTime = 0;
@@ -999,11 +999,6 @@ var _findLatestAnnotation = function(gdm) {
     }
     return latestAnnotation;
 };
-
-var findLatestAnnotation = module.exports.findLatestAnnotation = _.memoize(_findLatestAnnotation, function(gdm) {
-    return gdm ? gdm.uuid : null;
-});
-
 
 
 // Display buttons to bring up the PubMed and doi-specified web pages.
