@@ -1824,8 +1824,11 @@ var DeleteButtonModal = React.createClass({
                     deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, this.props.item['@id']);
                 } else if (this.props.item['@type'][0] == 'individual') {
                     deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, this.props.item['@id']);
+                    // Empty variants of parent object if target item is individual (parent should be family if not annotation)
+                    deletedParent.segregation.variants = [];
                 }
             }
+            console.log(deletedParent);
             // PUT updated parent object w/ removed link to deleted item
             return this.putRestData(this.props.parent['@id'], deletedParent).then(data => {
                 return Promise.resolve(data['@graph'][0]);
