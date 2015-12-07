@@ -6,6 +6,7 @@ var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
+var CuratorHistory = require('./curator_history');
 var parseAndLogError = require('./mixins').parseAndLogError;
 
 var Panel = panel.Panel;
@@ -13,8 +14,8 @@ var Modal = modal.Modal;
 var ModalMixin = modal.ModalMixin;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
+var RestMixin = require('./rest').RestMixin;
 var Input = form.Input;
-var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
 var external_url_map = globals.external_url_map;
@@ -106,7 +107,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
             var supportedVariants = getUserPathogenicity(gdm, session);
             if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && supportedVariants && supportedVariants.length > 0) {
-                for (var i in gdm.annotations) {
+                for (i in gdm.annotations) {
                     var annotation = gdm.annotations[i];
                     if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
                         summaryButton = true;
@@ -125,7 +126,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                         break;
                     }
                     else if (annotation.groups && annotation.groups.length > 0) {
-                        for (var j in annotation.groups) {
+                        for (j in annotation.groups) {
                             if (annotation.groups[j].familyIncluded && annotation.groups[j].familyIncluded.length > 0) {
                                 for (var k in annotation.groups[j].familyIncluded) {
                                     if (annotation.groups[j].familyIncluded[k].individualIncluded && annotation.groups[j].familyIncluded[k].individualIncluded.length > 0 &&
@@ -1730,3 +1731,155 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
         </div>
     );
 };
+
+// Mixin for delete button (and associated modal) of Group, Family, Individual, and Experimental
+// Data objects. This mixin only renderes the button; please see DeleteButtonModal for bulk of
+// functionality
+var DeleteButton = module.exports.DeleteButton = React.createClass({
+    mixins: [ModalMixin],
+    propTypes: {
+        gdm: React.PropTypes.object,
+        parent: React.PropTypes.object,
+        item: React.PropTypes.object,
+        pmid: React.PropTypes.string,
+        disabled: React.PropTypes.bool
+    },
+
+    getInitialState: function() {
+        return {
+            noticeVisible: false // True while form is submitting
+        };
+    },
+
+    showNotice: function() {
+        this.setState({noticeVisible: true});
+    },
+
+    hideNotice: function() {
+        this.setState({noticeVisible: false});
+    },
+
+    render: function() {
+        return (
+            <span>
+                {this.props.disabled ?
+                <div className="delete-button-wrapper pull-right" onMouseEnter={this.showNotice} onMouseLeave={this.hideNotice}>
+                    <a className="btn btn-danger" disabled="disabled">
+                        Delete
+                    </a>
+                </div>
+                :
+                <div className="delete-button-wrapper pull-right"><Modal title="Delete Item" modalClass="modal-danger">
+                    <a className="btn btn-danger" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
+                        Delete
+                    </a>
+                </Modal></div>
+                }
+                {this.state.noticeVisible ? <span className="delete-notice pull-right">This item cannot be deleted because it has been assessed by another user.</span> : <span></span>}
+                </span>
+        );
+    }
+});
+
+// Delete Button confirmation modal. Sets target item to have status of 'deleted', and removes
+// the 'deleted' entry from its parent object. Forwards user back to curation central on delete
+// success
+var DeleteButtonModal = React.createClass({
+    mixins: [RestMixin, CuratorHistory],
+    propTypes: {
+        gdm: React.PropTypes.object,
+        parent: React.PropTypes.object,
+        item: React.PropTypes.object,
+        pmid: React.PropTypes.string,
+        closeModal: React.PropTypes.func // Function to call to close the modal
+    },
+
+    getInitialState: function() {
+        return {
+            submitBusy: false // True while form is submitting
+        };
+    },
+
+    deleteItem: function(e) {
+        e.preventDefault(); e.stopPropagation();
+        this.setState({submitBusy: true});
+        var deletedItem;
+        var deletedParent;
+        this.getRestData(this.props.item['@id'], null, true).then(item => {
+            // get up-to-date target item and set its status to deleted
+            deletedItem = flatten(item);
+            deletedItem.status = 'deleted';
+            return Promise.resolve(item);
+        }).then(item => {
+            // get up-to-date parent object; also bypass issue of certain certain embedded parent
+            // items in edit pages being un-flattenable
+            return this.getRestData(this.props.parent['@id'], null, true).then(parent => {
+                return Promise.resolve(parent);
+            });
+        }).then(parent => {
+            // flatten parent object and remove link to deleted item as appropriate
+            deletedParent = flatten(parent);
+            if (parent['@type'][0] == 'annotation') {
+                if (this.props.item['@type'][0] == 'group') {
+                    deletedParent.groups = _.without(deletedParent.groups, this.props.item['@id']);
+                } else if (this.props.item['@type'][0] == 'family') {
+                    deletedParent.families = _.without(deletedParent.families, this.props.item['@id']);
+                } else if (this.props.item['@type'][0] == 'individual') {
+                    deletedParent.individuals = _.without(deletedParent.individuals, this.props.item['@id']);
+                } else if (this.props.item['@type'][0] == 'experimental') {
+                    deletedParent.experimentalData = _.without(deletedParent.experimentalData, this.props.item['@id']);
+                }
+            } else {
+                if (this.props.item['@type'][0] == 'family') {
+                    deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, this.props.item['@id']);
+                } else if (this.props.item['@type'][0] == 'individual') {
+                    deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, this.props.item['@id']);
+                }
+            }
+            // PUT updated parent object w/ removed link to deleted item
+            return this.putRestData(this.props.parent['@id'], deletedParent).then(data => {
+                return Promise.resolve(data['@graph'][0]);
+            });
+        }).then(data => {
+            // PUT deleted item w/ updated status
+            return this.putRestData(this.props.item['@id'], deletedItem).then(data => {
+                return Promise.resolve(data['@graph'][0]);
+            });
+        }).then(data => {
+            this.recordHistory('delete', this.props.item);
+
+            // forward user to curation central w/ PMID selected
+            window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
+        }).catch(function(e) {
+            console.log('DELETE ERROR: %o', e);
+        });
+    },
+
+    // Called when the modal form's cancel button is clicked. Just closes the modal like
+    // nothing happened.
+    cancelForm: function(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+
+        //only a mouse click on cancel button closes modal
+        //(do not let the enter key [which evaluates to 0 mouse
+        //clicks] be accepted to close modal)
+        if (e.detail >= 1){
+            this.props.closeModal();
+        }
+    },
+
+    render: function() {
+        return (
+            <div>
+                <div className="modal-body">
+                    Are you sure you would like to delete this item?
+                </div>
+                <div className="modal-footer">
+                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-danger btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
+                </div>
+            </div>
+        );
+    }
+});
+

@@ -5,6 +5,7 @@ var _ = require('underscore');
 var moment = require('moment');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
+var modal = require('../libs/bootstrap/modal');
 var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
@@ -14,6 +15,8 @@ var Assessments = require('./assessment');
 var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 var CuratorHistory = require('./curator_history');
 
+var Modal = modal.Modal;
+var ModalMixin = modal.ModalMixin;
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
@@ -34,6 +37,7 @@ var makeStarterIndividual = individual_curation.makeStarterIndividual;
 var updateProbandVariants = individual_curation.updateProbandVariants;
 var recordIndividualHistory = individual_curation.recordIndividualHistory;
 var external_url_map = globals.external_url_map;
+var DeleteButton = curator.DeleteButton;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
@@ -71,7 +75,7 @@ var initialCv = {
 
 
 var FamilyCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, ModalMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -397,7 +401,6 @@ var FamilyCuration = React.createClass({
     // Called when a form is submitted.
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
@@ -1112,6 +1115,9 @@ var FamilyCuration = React.createClass({
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
+                                            {family ?
+                                                <DeleteButton gdm={gdm} parent={groups.length > 0 ? groups[0] : annotation} item={family} pmid={pmid} disabled={this.cv.othersAssessed} />
+                                            : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>

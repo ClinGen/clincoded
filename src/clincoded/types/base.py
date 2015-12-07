@@ -41,8 +41,14 @@ ALLOW_LAB_SUBMITTER_EDIT = [
 ]
 
 ALLOW_CURRENT = [
-    (Allow, Authenticated, 'view'),
-    (Allow, 'group.admin', 'edit'),
+    (Allow, 'group.curator', ALL_PERMISSIONS),
+    (Allow, 'group.admin', ALL_PERMISSIONS)
+]
+
+ALLOW_CURRENT_NOVIEW = [
+    (Allow, 'group.curator', ['edit']),
+    (Deny, 'group.curator', ['view']),
+    (Allow, 'group.admin', ALL_PERMISSIONS)
 ]
 
 ONLY_ADMIN_VIEW = [
@@ -105,34 +111,10 @@ class Item(contentbase.Item):
     Collection = Collection
     STATUS_ACL = {
         # standard_status
+        'in progress': ALLOW_CURRENT,
         'released': ALLOW_CURRENT,
-        'deleted': DELETED,
+        'deleted': ALLOW_CURRENT_NOVIEW,
         'replaced': DELETED,
-
-        # shared_status
-        'current': ALLOW_CURRENT,
-        'disabled': ONLY_ADMIN_VIEW,
-
-        # file
-        'obsolete': ONLY_ADMIN_VIEW,
-
-        # antibody_characterization
-        'compliant': ALLOW_CURRENT,
-        'not compliant': ALLOW_CURRENT,
-        'not reviewed': ALLOW_CURRENT,
-        'not submitted for review by lab': ALLOW_CURRENT,
-
-        # antibody_lot
-        'eligible for new data': ALLOW_CURRENT,
-        'not eligible for new data': ALLOW_CURRENT,
-        'not pursued': ALLOW_CURRENT,
-
-        # dataset / experiment
-        'release ready': ALLOW_VIEWING_GROUP_VIEW,
-        'revoked': ALLOW_CURRENT,
-
-        # publication
-        'published': ALLOW_CURRENT,
     }
 
     @property
@@ -148,7 +130,7 @@ class Item(contentbase.Item):
         # Don't finalize to avoid validation here.
         properties = self.upgrade_properties().copy()
         status = properties.get('status')
-        return self.STATUS_ACL.get(status, ALLOW_LAB_SUBMITTER_EDIT)
+        return self.STATUS_ACL.get(status, ALLOW_CURRENT)
 
     def __ac_local_roles__(self):
         roles = {}

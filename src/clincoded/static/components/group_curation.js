@@ -26,7 +26,7 @@ var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var external_url_map = globals.external_url_map;
-
+var DeleteButton = curator.DeleteButton;
 
 var GroupCuration = React.createClass({
     mixins: [FormMixin, RestMixin, CurationMixin, CuratorHistory],
@@ -510,6 +510,9 @@ var GroupCuration = React.createClass({
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
+                                            {group ?
+                                                <DeleteButton gdm={gdm} parent={annotation} item={group} pmid={pmid} />
+                                            : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>

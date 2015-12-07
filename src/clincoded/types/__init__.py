@@ -262,10 +262,10 @@ class Gdm(Item):
     ]
 
     @calculated_property(schema={
-        "title": "Status",
+        "title": "GDM Status",
         "type": "string",
     })
-    def status(self, finalClassification, draftClassification, provisionalClassifications, annotations):
+    def gdm_status(self, finalClassification, draftClassification, provisionalClassifications, annotations):
         if finalClassification != '':
             return 'Final Classification'
         elif draftClassification != '':
