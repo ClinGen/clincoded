@@ -646,6 +646,16 @@ class Individual(Item):
     def associatedAnnotations(self, request, associatedAnnotations):
         return paths_filtered_by_status(request, associatedAnnotations)
 
+    @calculated_property(schema={
+        "title": "Proband String",
+        "type": "string"
+    })
+    def is_proband(self, proband):
+        if proband:
+            return 'Yes'
+        else:
+            return 'No'
+
 
 @collection(
     name='experimental',
