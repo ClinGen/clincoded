@@ -955,7 +955,7 @@ var CuratorRecordHeader = React.createClass({
                 <div className="curation-data-curator">
                     {gdm ?
                         <dl className="inline-dl clearfix">
-                            <dt>Status: </dt><dd>{gdm.status}</dd>
+                            <dt>Status: </dt><dd>{gdm.gdm_status}</dd>
                             <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> – {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
                             {annotationOwners && annotationOwners.length && latestAnnotation ?
                                 <div>

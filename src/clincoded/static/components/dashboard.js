@@ -93,7 +93,7 @@ var Dashboard = React.createClass({
                         uuid: gdm.uuid,
                         gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
                         gdmModel: this.cleanGdmModelName(gdm.modeInheritance),
-                        status: gdm.status,
+                        status: gdm.gdm_status,
                         date_created: gdm.date_created
                     });
                 }
