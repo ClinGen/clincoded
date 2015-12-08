@@ -945,34 +945,10 @@ var CuratorRecordHeader = React.createClass({
         gdm: React.PropTypes.object // GDM with curator data to display
     },
 
-    // Return the latest annotation in the given GDM
-    findLatestAnnotation: function() {
-        var gdm = this.props.gdm;
-        var annotations = gdm && gdm.annotations;
-        var latestAnnotation = {};
-        var latestTime = 0;
-        if (annotations && annotations.length) {
-            annotations.forEach(function(annotation) {
-                // Get Unix timestamp version of annotation's time and compare against the saved version.
-                var time = moment(annotation.date_created).format('x');
-                if (latestTime < time) {
-                    latestAnnotation = annotation;
-                    latestTime = time;
-                }
-            });
-        }
-        return latestAnnotation;
-    },
-
     render: function() {
         var gdm = this.props.gdm;
-        var owners = gdm && gdm.annotations.map(function(annotation) {
-            return annotation.submitted_by;
-        });
-        var annotationOwners = _.chain(owners).uniq(function(owner) {
-            return owner.uuid;
-        }).sortBy('last_name').value();
-        var latestAnnotation = this.findLatestAnnotation();
+        var annotationOwners = getAnnotationOwners(gdm);
+        var latestAnnotation = gdm && findLatestAnnotation(gdm);
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
@@ -981,7 +957,7 @@ var CuratorRecordHeader = React.createClass({
                         <dl className="inline-dl clearfix">
                             <dt>Status: </dt><dd>{gdm.status}</dd>
                             <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> – {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
-                            {annotationOwners && annotationOwners.length ?
+                            {annotationOwners && annotationOwners.length && latestAnnotation ?
                                 <div>
                                     <dt>Participants: </dt>
                                     <dd>
@@ -1005,6 +981,25 @@ var CuratorRecordHeader = React.createClass({
         );
     }
 });
+
+
+// Return the latest annotation in the given GDM. This is the internal version; use the memoized version externally.
+var findLatestAnnotation = module.exports.findLatestAnnotation = function(gdm) {
+    var annotations = gdm && gdm.annotations;
+    var latestAnnotation = null;
+    var latestTime = 0;
+    if (annotations && annotations.length) {
+        annotations.forEach(function(annotation) {
+            // Get Unix timestamp version of annotation's time and compare against the saved version.
+            var time = moment(annotation.date_created).format('x');
+            if (latestTime < time) {
+                latestAnnotation = annotation;
+                latestTime = time;
+            }
+        });
+    }
+    return latestAnnotation;
+};
 
 
 // Display buttons to bring up the PubMed and doi-specified web pages.
@@ -1161,6 +1156,18 @@ var collectGdmVariants = function(gdm) {
         });
     }
     return Object.keys(allVariants).length ? allVariants : null;
+};
+
+
+// Get a de-duped array of annotation submitted_by objects sorted by last name from the given GDM.
+var getAnnotationOwners = module.exports.getAnnotationOwners = function(gdm) {
+    var owners = gdm && gdm.annotations.map(function(annotation) {
+        return annotation.submitted_by;
+    });
+    var annotationOwners = _.chain(owners).uniq(function(owner) {
+        return owner.uuid;
+    }).sortBy('last_name').value();
+    return annotationOwners;
 };
 
 
