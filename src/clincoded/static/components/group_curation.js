@@ -9,6 +9,7 @@ var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
+var CuratorHistory = require('./curator_history');
 var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 
 var CurationMixin = curator.CurationMixin;
@@ -25,10 +26,10 @@ var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var external_url_map = globals.external_url_map;
-
+var DeleteButton = curator.DeleteButton;
 
 var GroupCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -397,11 +398,31 @@ var GroupCuration = React.createClass({
                         }
 
                         // Post the modified annotation to the DB, then go back to Curation Central
-                        return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation);
-                    } else {
-                        return Promise.resolve(null);
+                        return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                            return Promise.resolve({group: newGroup, annotation: data['@graph'][0]});
+                        });
                     }
+
+                    // Modifying an existing group; don't need to modify the annotation
+                    return Promise.resolve({group: newGroup, annotation: null});
                 }).then(data => {
+                    var meta;
+
+                    // Record history of the group creation
+                    if (data.annotation) {
+                        // Record the creation of a new group
+                        meta = {
+                            group: {
+                                gdm: this.state.gdm['@id'],
+                                article: this.state.annotation.article['@id']
+                            }
+                        };
+                        this.recordHistory('add', data.group, meta);
+                    } else {
+                        // Record the modification of an existing group
+                        this.recordHistory('modify', data.group);
+                    }
+
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Group Submit page.
                     this.resetAllFormValues();
@@ -489,6 +510,9 @@ var GroupCuration = React.createClass({
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
+                                            {group ?
+                                                <DeleteButton gdm={gdm} parent={annotation} item={group} pmid={pmid} />
+                                            : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>
@@ -933,3 +957,68 @@ var GroupViewer = React.createClass({
 });
 
 globals.content_views.register(GroupViewer, 'group');
+
+
+// Display a history item for adding a group
+var GroupAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var group = history.primary;
+        var gdm = history.meta.group.gdm;
+        var article = history.meta.group.article;
+
+        return (
+            <div>
+                Group <a href={group['@id']}>{group.label}</a>
+                <span> added to </span>
+                <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(GroupAddHistory, 'group', 'add');
+
+
+// Display a history item for modifying a group
+var GroupModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var group = history.primary;
+
+        return (
+            <div>
+                Group <a href={group['@id']}>{group.label}</a>
+                <span> modified</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(GroupModifyHistory, 'group', 'modify');
+
+
+// Display a history item for deleting a group
+var GroupDeleteHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var group = history.primary;
+
+        // Prepare to display a note about associated families and individuals
+        var collateralObjects = !!(group.familyIncluded && group.familyIncluded.length) || !!(group.individualIncluded && group.individualIncluded.length);
+
+        return (
+            <div>
+                <span>Group {group.label} deleted</span>
+                <span>{collateralObjects ? ' along with any associated families and individuals' : ''}</span>
+                <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(GroupDeleteHistory, 'group', 'delete');

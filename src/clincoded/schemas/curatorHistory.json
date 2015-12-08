@@ -1,0 +1,462 @@
+{
+    "title": "Curator history",
+    "description": "Schema for tracking curator actions.",
+    "id": "/profiles/curatorHistory.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["operationType"],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "operationType": {
+            "title": "Curator operation type",
+            "description": "The class of operation that the curator performed",
+            "type": "string",
+            "enum": [
+                "add",
+                "modify",
+                "delete"
+            ]
+        },
+        "primary": {
+            "title": "Primary object",
+            "description": "Reference to the primary object",
+            "type": "string",
+            "linkTo": [
+                "article",
+                "assessment",
+                "experimental",
+                "family",
+                "gdm",
+                "group",
+                "individual",
+                "pathogenicity",
+                "provisionalClassification",
+                "variant"
+            ]
+        },
+        "meta": {
+            "title": "History meta",
+            "description": "Type-dependent (@type) data about the history item",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "article": {
+                    "title": "PMID added to GDM history",
+                    "description": "History metadata for adding a PMID to a GDM",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "add",
+                            "enum": [
+                                "add"
+                            ]
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the PMID",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        }
+                    }
+                },
+                "gdm": {
+                    "title": "OMIM ID change to GDM history",
+                    "description": "History metadata for changing/adding an OMIM ID to a GDM",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "add",
+                            "enum": [
+                                "add",
+                                "omim"
+                            ]
+                        },
+                        "omimId": {
+                            "title": "OMIM ID",
+                            "description": "New OMIM ID for the GDM",
+                            "type": "string"
+                        },
+                        "gene": {
+                            "title": "HGNC Symbol",
+                            "description": "HGNC Symbol of gene.",
+                            "type": "string",
+                            "linkTo": "gene"
+                        },
+                        "disease": {
+                            "title": "Orpha ID",
+                            "description": "Unique id for Orphanet phenotypes.",
+                            "type": "string",
+                            "linkTo": "orphaPhenotype"
+                        }
+                    }
+                },
+                "group": {
+                    "title": "Group history",
+                    "description": "History metadata for groups",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the group",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
+                        "article": {
+                            "title": "Article",
+                            "description": "GDM article the group provides evidence for",
+                            "type": "string",
+                            "linkTo": "article"
+                        }
+                    }
+                },
+                "family": {
+                    "title": "Family history",
+                    "description": "History metadata for families",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the family",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
+                        "group": {
+                            "title": "Group",
+                            "description": "Group that's the object of the family",
+                            "type": "string",
+                            "linkTo": "group"
+                        },
+                        "article": {
+                            "title": "Article",
+                            "description": "GDM article the family provides evidence for",
+                            "type": "string",
+                            "linkTo": "article"
+                        }
+                    }
+                },
+                "individual": {
+                    "title": "Individual history",
+                    "description": "History metadata for individuals",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the individual",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
+                        "group": {
+                            "title": "Group",
+                            "description": "Group that's the object of the individual",
+                            "type": "string",
+                            "linkTo": "group"
+                        },
+                        "family": {
+                            "title": "Family",
+                            "description": "Family that's the object of the individual",
+                            "type": "string",
+                            "linkTo": "family"
+                        },
+                        "article": {
+                            "title": "Article",
+                            "description": "GDM article the individual provides evidence for",
+                            "type": "string",
+                            "linkTo": "article"
+                        }
+                    }
+                },
+                "experimental": {
+                    "title": "Experimental history",
+                    "description": "History metadata for experimental data",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the experimental data",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
+                        "article": {
+                            "title": "Article",
+                            "description": "GDM article the experimental data provides evidence for",
+                            "type": "string",
+                            "linkTo": "article"
+                        }
+                    }
+                },
+                "provisionalClassification": {
+                    "title": "Provisional classification history",
+                    "description": "History metadata for provisional classifications",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM for the provisional classification",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
+                        "alteredClassification": {
+                            "title": "Classification",
+                            "description": "User-altered provisional classification",
+                            "type": "string"
+                        }
+                    }
+                },
+                "pathogenicity": {
+                    "title": "Pathogenicity history",
+                    "description": "History metadata for variant pathogenicity additions and modifications",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
+                        "variantId": {
+                            "title": "Variant ID",
+                            "description": "Historical ID of the variant this pathogenicity evaluates",
+                            "type": "string"
+                        },
+                        "variant": {
+                            "title": "Assessed variant",
+                            "description": "Variant object for the pathogenicity",
+                            "type": "string",
+                            "linkTo": "variant"
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the pathogenicity",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        }
+                    }
+                },
+                "assessment": {
+                    "title": "Assessment history",
+                    "description": "History metadata for assessments",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "enum": [
+                                "pathogenicity",
+                                "segregation",
+                                "experimental"
+                            ]
+                        },
+                        "value": {
+                            "title": "Value",
+                            "description": "Value of assessment",
+                            "type": "string",
+                            "enum": [
+                                "Not Assessed",
+                                "Supports",
+                                "Review",
+                                "Contradicts"
+                            ]
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM for the object being assessed",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
+                        "experimental": {
+                            "title": "Assessed experimental data",
+                            "description": "Experimental data object being assessed",
+                            "type": "string",
+                            "linkTo": "experimental"
+                        },
+                        "family": {
+                            "title": "Assessed family segregation",
+                            "description": "Family of segregation object being assessed",
+                            "type": "string",
+                            "linkTo": "family"
+                        },
+                        "pathogenicity": {
+                            "title": "Assessed pathogenicity",
+                            "description": "Pathogenicity object being assessed",
+                            "type": "string",
+                            "linkTo": "pathogenicity"
+                        },
+                        "variant": {
+                            "title": "Variant",
+                            "description": "Variant associated with the given pathogenicity",
+                            "type": "string",
+                            "linkTo": "variant"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "columns": {
+        "operationType": {
+            "title": "Curator operation type",
+            "type": "string"
+        },
+        "primary": {
+            "title": "Primary object information",
+            "type": "object"
+        },
+        "meta.article.gdm": {
+            "title": "GDM of PMID",
+            "type": "string"
+        },
+        "meta.group.gdm": {
+            "title": "Group GDM",
+            "type": "string"
+        },
+        "meta.group.article": {
+            "title": "Group article",
+            "type": "string"
+        },
+        "meta.family.gdm": {
+            "title": "Family GDM",
+            "type": "string"
+        },
+        "meta.family.group": {
+            "title": "Family group",
+            "type": "string"
+        },
+        "meta.family.article": {
+            "title": "Family article",
+            "type": "string"
+        },
+        "meta.individual.gdm": {
+            "title": "Individual GDM",
+            "type": "string"
+        },
+        "meta.individual.group": {
+            "title": "Individual group",
+            "type": "string"
+        },
+        "meta.individual.family": {
+            "title": "Individual family",
+            "type": "string"
+        },
+        "meta.individual.article": {
+            "title": "Individual article",
+            "type": "string"
+        },
+        "meta.provisionalClassification": {
+            "title": "Provisional classification meta",
+            "type": "string"
+        },
+        "meta.provisionalClassification.gdm": {
+            "title": "Provisional classification GDM",
+            "type": "string"
+        },
+        "meta.experimental.gdm": {
+            "title": "Experimental data GDM",
+            "type": "string"
+        },
+        "meta.experimental.article": {
+            "title": "Experimental data article",
+            "type": "string"
+        },
+        "meta.gdm.omimId": {
+            "title": "OMIM ID change to GDM history",
+            "type": "string"
+        },
+        "meta.gdm.gene": {
+            "title": "HGNC Symbol",
+            "type": "string"
+        },
+        "meta.gdm.disease": {
+            "title": "Orpha ID",
+            "type": "string"
+        },
+        "meta.pathogenicity": {
+            "title": "Pathogenicity",
+            "type": "string"
+        },
+        "meta.assessment": {
+            "title": "Assessment metadata",
+            "type": "object"
+        },
+        "date_created": {
+            "title": "Creation Date",
+            "type": "string"
+        },
+        "uuid": {
+            "title": "UUID",
+            "type": "string"
+        }
+    }
+}

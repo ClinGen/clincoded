@@ -10,6 +10,7 @@ var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var Assessments = require('./assessment');
+var CuratorHistory = require('./curator_history');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -33,7 +34,7 @@ var external_url_map = globals.external_url_map;
 
 
 var VariantCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -279,37 +280,39 @@ var VariantCuration = React.createClass({
 
                 // No pathogenicity to write because the pathogenicity form is read-only (assessed).
                 return Promise.resolve({pathogenicity: null, assessment: newAssessmentInfo.assessment});
-            }).then(pa => {
-                // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
-                var newPathogenicity = pa.pathogenicity;
-                //var newAssessment = pa.assessment;
-                //if (newPathogenicity && newAssessment && !newAssessment.evidence_id) {
-                    // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
-                    // Nothing relies on this operation completing, so don't wait for a promise from it.
-                //    this.saveAssessment(this.cv.assessmentTracker, this.state.gdm.uuid, newPathogenicity.uuid, newAssessment);
-                //}
-
-                // Next step relies on the pathogenicity, not the updated assessment
-                return Promise.resolve(newPathogenicity);
-            }).then(pathogenicity => {
+            }).then(data => {
                 // Given pathogenicity has been saved (created or updated).
                 // Now update the GDM to include the pathogenicity if it's new
-                if (!this.state.pathogenicity && this.state.gdm && pathogenicity) {
+                if (!this.state.pathogenicity && this.state.gdm && data.pathogenicity) {
                     // New pathogenicity; add it to the GDM’s pathogenicity array.
                     var newGdm = curator.flatten(this.state.gdm);
                     if (newGdm.variantPathogenicity && newGdm.variantPathogenicity.length) {
-                        newGdm.variantPathogenicity.push(pathogenicity['@id']);
+                        newGdm.variantPathogenicity.push(data.pathogenicity['@id']);
                     } else {
-                        newGdm.variantPathogenicity = [pathogenicity['@id']];
+                        newGdm.variantPathogenicity = [data.pathogenicity['@id']];
                     }
 
                     // Write the updated GDM
-                    return this.putRestData('/gdm/' + this.state.gdm.uuid, newGdm).then(data => {
-                        return Promise.resolve(data['@graph'][0]);
+                    return this.putRestData('/gdm/' + this.state.gdm.uuid, newGdm).then(() => {
+                        return Promise.resolve(_.extend(data, {modified: false}));
                     });
                 }
-                return Promise.resolve(null);
+
+                // Existing pathogenicity modified
+                return Promise.resolve(_.extend(data, {modified: true}));
             }).then(data => {
+                // Write the pathogenicity history
+                var meta = {
+                    pathogenicity: {
+                        variantId: this.state.variant.clinvarVariantId ? this.state.variant.clinvarVariantId : this.state.variant.otherDescription,
+                        variant: this.state.variant['@id'],
+                        gdm: this.state.gdm['@id']
+                    }
+                };
+                this.recordHistory(data.modified ? 'modify' : 'add', data.pathogenicity ? data.pathogenicity : this.state.pathogenicity, meta).then(() => {
+                    return this.saveAssessmentHistory(data.assessment, this.state.gdm, data.pathogenicity ? data.pathogenicity : this.state.pathogenicity, false);
+                });
+
                 // Now go back to Record Curation
                 this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on, just in case
                 var gdmQs = this.state.gdm ? '?gdm=' + this.state.gdm.uuid : '';
@@ -575,7 +578,7 @@ var VariantCurationView = React.createClass({
 var VariantViewer = React.createClass({
     render: function() {
         var pathogenicity = this.props.context;
-        var variant = pathogenicity.variant;
+        var variant = pathogenicity.variantId;
 
         return (
             <div className="container">
@@ -591,3 +594,69 @@ var VariantViewer = React.createClass({
 });
 
 globals.content_views.register(VariantViewer, 'pathogenicity');
+
+
+// Display a history item for adding variant pathogenicities
+var PathogenicityAddModHistory = React.createClass({
+    propTypes: {
+        history: React.PropTypes.object.isRequired, // History object
+        user: React.PropTypes.object // User session session ? '&user=' + session.user_properties.uuid : ''
+    },
+
+    render: function() {
+        var history = this.props.history;
+        var pathogenicity = history.primary;
+        var gdm = history.meta.pathogenicity.gdm;
+        var variant = history.meta.pathogenicity.variant;
+        var user = this.props.user;
+        var pathogenicityUri = '/variant-curation/?all&gdm=' + gdm.uuid + '&variant=' + variant.uuid + '&pathogenicity=' + pathogenicity.uuid + (user ? '&user=' + user.uuid : '');
+
+        return (
+            <div>
+                <span>Variant <a href={pathogenicityUri}>{history.meta.pathogenicity.variantId}</a> pathogenicity {history.operationType === 'add' ? <span>added</span> : <span>modified</span>}</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'add');
+globals.history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'modify');
+
+
+// Display a history item for deleting variant pathogenicities
+var PathogenicityDeleteHistory = React.createClass({
+    render: function() {
+        return <div>PATHOGENICITYDELETE</div>;
+    }
+});
+
+globals.history_views.register(PathogenicityDeleteHistory, 'pathogenicity', 'delete');
+
+
+// Display a history item for adding a variant
+var VariantAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var variant = history.primary;
+
+        return (
+            <div>
+                <span>Variant <strong>{variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription}</strong> added</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(VariantAddHistory, 'variant', 'add');
+
+
+// Display a history item for adding a variant
+var VariantDeleteHistory = React.createClass({
+    render: function() {
+        return <div>VARIANTDELETE</div>;
+    }
+});
+
+globals.history_views.register(VariantDeleteHistory, 'variant', 'delete');

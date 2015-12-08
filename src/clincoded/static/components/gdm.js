@@ -47,8 +47,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         switch (this.state.sortCol) {
             case 'status':
                 var statuses = Object.keys(statusMappings);
-                var statusIndexA = statuses.indexOf(a.status);
-                var statusIndexB = statuses.indexOf(b.status);
+                var statusIndexA = statuses.indexOf(a.gdm_status);
+                var statusIndexB = statuses.indexOf(b.gdm_status);
                 diff = statusIndexA - statusIndexB;
                 break;
             case 'gdm':
@@ -142,13 +142,13 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                             var createdTime = moment(gdm.date_created);
                             var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
                             var participants = annotationOwners.map(function(owner) { return owner.title; }).join(', ');
-                            var statusString = statusMappings[gdm.status].cssClass; // Convert status string to CSS class
+                            var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
                             var iconClass = 'icon gdm-status-icon-' + statusString;
 
                             return (
                                 <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
                                     <div className="table-cell-gdm-status">
-                                        <span className={iconClass} title={gdm.status}></span>
+                                        <span className={iconClass} title={gdm.gdm_status}></span>
                                     </div>
 
                                     <div className="table-cell-gdm-main">

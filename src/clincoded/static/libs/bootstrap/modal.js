@@ -74,7 +74,8 @@ module.exports.ModalMixin = {
 var Modal = module.exports.Modal = React.createClass({
     propTypes: {
         title: React.PropTypes.string.isRequired, // Title in modal's header
-        wrapperClassName: React.PropTypes.string // CSS classes for modal trigger wrapper
+        wrapperClassName: React.PropTypes.string, // CSS classes for modal trigger wrapper
+        modalClass: React.PropTypes.string, // CSS class for modal header
     },
 
     contextTypes: {
@@ -118,7 +119,7 @@ var Modal = module.exports.Modal = React.createClass({
                         <div className="modal" style={{display: 'block'}}>
                             <div className="modal-dialog">
                                 <div className="modal-content">
-                                    <div className="modal-header">
+                                    <div className={"modal-header " + this.props.modalClass}>
                                         <h4 className="modal-title">{this.props.title}</h4>
                                     </div>
                                     {this.state.modal}
