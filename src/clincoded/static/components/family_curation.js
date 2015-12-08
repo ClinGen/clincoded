@@ -200,6 +200,7 @@ var FamilyCuration = React.createClass({
                 });
             }
             this.refs['orphanetid'].setValue(orphanetVal.join(', '));
+            this.setState({orpha: true});
         } else if (fromTarget == 'family') {
             orphanetVal = this.refs['orphanetid'].getValue();
             this.refs['individualorphanetid'].setValue(orphanetVal);
