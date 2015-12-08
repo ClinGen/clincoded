@@ -2040,9 +2040,13 @@ var FamilyDeleteHistory = React.createClass({
         var history = this.props.history;
         var family = history.primary;
 
+        // Prepare to display a note about associated families and individuals
+        var collateralObjects = !!(family.individualIncluded && family.individualIncluded.length);
+
         return (
             <div>
                 <span>Family {family.label} deleted</span>
+                <span>{collateralObjects ? ' along with any individuals' : ''}</span>
                 <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
