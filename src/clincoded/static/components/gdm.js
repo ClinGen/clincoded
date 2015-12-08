@@ -47,8 +47,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         switch (this.state.sortCol) {
             case 'status':
                 var statuses = Object.keys(statusMappings);
-                var statusIndexA = statuses.indexOf(a.status);
-                var statusIndexB = statuses.indexOf(b.status);
+                var statusIndexA = statuses.indexOf(a.gdm_status);
+                var statusIndexB = statuses.indexOf(b.gdm_status);
                 diff = statusIndexA - statusIndexB;
                 break;
             case 'gdm':
