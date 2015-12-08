@@ -49,6 +49,7 @@ var IndividualCuration = React.createClass({
 
     getInitialState: function() {
         return {
+            proband_selected: null, // select proband at the form
             gdm: null, // GDM object given in query string
             group: null, // Group object given in query string
             family: null, // Family object given in query string
@@ -103,6 +104,10 @@ var IndividualCuration = React.createClass({
                 currVariantOption[refSuffix] = VAR_NONE;
             }
             this.setState({variantOption: currVariantOption});
+        } else if (ref === 'proband' && this.refs[ref].getValue() === 'Yes') {
+            this.setState({proband_selected: true});
+        } else if (ref === 'proband') {
+            this.setState({proband_selected: false});
         }
     },
 
@@ -182,6 +187,14 @@ var IndividualCuration = React.createClass({
             // Update the individual name
             if (stateObj.individual) {
                 this.setState({individualName: stateObj.individual.label});
+
+                if (stateObj.individual.proband) {
+                    // proband individual
+                    this.setState({proband_selected: true});
+                }
+                else {
+                    this.setState({proband_selected: false});
+                }
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
@@ -329,7 +342,8 @@ var IndividualCuration = React.createClass({
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
-            if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
+            if (this.state.proband_selected && (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; }))) {
+                // ORPHA is not required for non-proband individual
                 // ORPHA list is bad
                 formError = true;
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
@@ -358,12 +372,22 @@ var IndividualCuration = React.createClass({
 
             if (!formError) {
                 // Build search string from given ORPHA IDs
-                var searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                var searchStr;
+                if (orphaIds && orphaIds.length > 0) {
+                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                }
+                else {
+                    // a temp solution to match the callback structure. Need to change later.
+                    searchStr = '/gene/NGLY1';
+                }
                 this.setState({submitBusy: true});
 
                 // Verify given Orpha ID exists in DB
                 this.getRestData(searchStr).then(diseases => {
-                    if (diseases['@graph'].length === orphaIds.length) {
+                    if (!orphaIds || orphaIds.length === 0) {
+                        // no Orpha id entered for non-proband
+                        return Promise.resolve(null);
+                    } else if (diseases['@graph'].length === orphaIds.length) {
                         // Successfully retrieved all diseases
                         individualDiseases = diseases;
                         return Promise.resolve(diseases);
@@ -628,6 +652,9 @@ var IndividualCuration = React.createClass({
         if (individualDiseases) {
             newIndividual.diagnosis = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
         }
+        else if (newIndividual.diagnosis && newIndividual.diagnosis.length > 0) {
+            delete newIndividual.diagnosis;
+        }
 
         // Fill in the individual fields from the Diseases & Phenotypes panel
         if (hpoids && hpoids.length) {
@@ -890,7 +917,7 @@ var IndividualName = function(displayNote) {
             {!family ?
                 <div className="clearfix">
                     <Input type="select" ref="proband" label="Is this Individual a proband:" value={individual && individual.proband ? "Yes" : (individual ? "No" : "none")}
-                        error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')}
+                        error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')} handleChange={this.handleChange}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
@@ -983,14 +1010,21 @@ var IndividualCommonDiseases = function() {
             {curator.renderOrphanets(associatedGroups, 'Group')}
             {curator.renderOrphanets(associatedFamilies, 'Family')}
 
-            <Input type="text" ref="orphanetid" label={<LabelOrphanetId probandLabel={probandLabel} />} value={orphanetidVal} placeholder="e.g. ORPHA15"
+            { this.state.proband_selected ?
+                <Input type="text" ref="orphanetid" label={<LabelOrphanetId probandLabel={probandLabel} />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                :
+                <Input type="text" ref="orphanetid" label={<LabelOrphanetId probandLabel={probandLabel} />} value={orphanetidVal} placeholder="e.g. ORPHA15"
+                error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            }
+
             {associatedGroups ?
             <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
                 clickHandler={this.handleClick.bind(this, group)} />
             : null}
-            {associatedFamilies ?
+            {associatedFamilies && family.commonDiagnosis && family.commonDiagnosis.length > 0 ?
             <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Family"
                 clickHandler={this.handleClick.bind(this, family)} />
             : null}

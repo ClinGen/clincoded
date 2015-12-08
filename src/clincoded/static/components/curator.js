@@ -18,8 +18,6 @@ var RestMixin = require('./rest').RestMixin;
 var Input = form.Input;
 var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
-var external_url_map = globals.external_url_map;
-
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -1500,9 +1498,11 @@ function flattenFamily(family) {
     var flat = cloneSimpleProps(family, familySimpleProps);
 
     // Flatten diseases
-    flat.commonDiagnosis = family.commonDiagnosis.map(function(disease) {
-        return disease['@id'];
-    });
+    if (family.commonDiagnosis && family.commonDiagnosis.length > 0) {
+        flat.commonDiagnosis = family.commonDiagnosis.map(function(disease) {
+            return disease['@id'];
+        });
+    }
 
     // Flatten segregation variants
     if (family.segregation) {
@@ -1558,9 +1558,11 @@ function flattenIndividual(individual) {
     var flat = cloneSimpleProps(individual, individualSimpleProps);
 
     // Flatten diseases
-    flat.diagnosis = individual.diagnosis.map(function(disease) {
-        return disease['@id'];
-    });
+    if (individual.diagnosis && individual.diagnosis.length > 0) {
+        flat.diagnosis = individual.diagnosis.map(function(disease) {
+            return disease['@id'];
+        });
+    }
 
     // Flatten other PMIDs
     if (individual.otherPMIDs && individual.otherPMIDs.length) {
@@ -1721,14 +1723,18 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
                                     <strong className="pull-right">Orphanet Diseases Associated with {title}:</strong>
                                 </div>
                                 <div className="col-sm-7">
-                                    {obj.commonDiagnosis.map(function(disease, i) {
-                                        return (
-                                            <span key={disease.orphaNumber}>
-                                                {i > 0 ? ', ' : ''}
-                                                {'ORPHA' + disease.orphaNumber}
-                                            </span>
-                                        );
-                                    })}
+                                    { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
+                                        obj.commonDiagnosis.map(function(disease, i) {
+                                            return (
+                                                <span key={disease.orphaNumber}>
+                                                    {i > 0 ? ', ' : ''}
+                                                    {'ORPHA' + disease.orphaNumber}
+                                                </span>
+                                            );
+                                        })
+                                        :
+                                        <span>&nbsp;</span>
+                                    }
                                 </div>
                             </div>
                         );
