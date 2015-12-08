@@ -61,7 +61,9 @@ var CurationCentral = React.createClass({
             // The GDM object successfully retrieved; set the Curator Central component
             this.setState({currGdm: gdm, currOmimId: gdm.omimId});
             this.currPmidChange(pmid);
-        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
+        }).catch(function(e) {
+            console.log('GETGDM ERROR=: %o', e);
+        });
     },
 
     // After the Curator Central page component mounts, grab the uuid from the query string and

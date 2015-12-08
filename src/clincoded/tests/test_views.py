@@ -7,7 +7,6 @@ def _type_length():
     ORDER = [
         'user',
         'gene',
-        'gdm',
         'orphaPhenotype',
         'curator_page',
     ]

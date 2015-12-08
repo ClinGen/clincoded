@@ -16,6 +16,7 @@ scenarios(
     'generics.feature',
     'create_gene_disease.feature',
     'curation_central.feature',
+    'gdm.feature',
 )
 
 
