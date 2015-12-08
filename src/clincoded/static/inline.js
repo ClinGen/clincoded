@@ -12,9 +12,10 @@ cookie.set('X-Stats', '', {path: '/', expires: new Date(0)});
 var ga = require('google-analytics');
 
 //existing trackers for gene curation app
+//note: curation-test is re-using the original curation-beta tracker
 var trackers = {
     'curation.clinicalgenome.org': 'UA-49947422-4',
-    'curation-beta.clinicalgenome.org': 'UA-49947422-6',
+    'curation-test.clinicalgenome.org': 'UA-49947422-6',
     'curation-demo.clinicalgenome.org': 'UA-49947422-5'
 };
 
@@ -25,9 +26,9 @@ var analyticsTrackerHostname = document.location.hostname;
 if (/^(www\.)?curation.clinicalgenome.org/.test(analyticsTrackerHostname)) {
     //production app
     analyticsTrackerHostname = 'curation.clinicalgenome.org';
-} else if (/^curation-beta.*.clinicalgenome.org/.test(analyticsTrackerHostname)){
-    //all curation-beta variants
-    analyticsTrackerHostname = 'curation-beta.clinicalgenome.org';
+} else if (/^curation-test.*.clinicalgenome.org/.test(analyticsTrackerHostname)){
+    //all curation-test variants
+    analyticsTrackerHostname = 'curation-test.clinicalgenome.org';
 } else {
     //catch-all
     analyticsTrackerHostname = 'curation-demo.clinicalgenome.org';
