@@ -16,6 +16,7 @@ var Form = form.Form;
 var FormMixin = form.FormMixin;
 var RestMixin = require('./rest').RestMixin;
 var Input = form.Input;
+var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
 
