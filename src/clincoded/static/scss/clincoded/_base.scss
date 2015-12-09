@@ -151,3 +151,24 @@ dl.dl-horizontal {
     margin-bottom: 0;
     border-radius: 0;
 }
+
+.alert-demo {
+    color: white;
+    background: #880000;
+    border-top: 1px solid red;
+    border-bottom: 1px solid red;
+}
+
+.demo-background {
+    background-image: url(/static/img/test-bg.svg);
+}
+
+.alert-production {
+    color: #8a6d3b;
+    background: #fed84d;
+    height: 80px;
+    border-top: 1px solid #f4b61f;
+    border-bottom: 1px solid #f4b61f;
+    text-align: center;
+    line-height: 50px;
+}

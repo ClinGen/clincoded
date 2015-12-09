@@ -1169,7 +1169,7 @@
         "email": "minyoung.choi@stanford.edu",
         "first_name": "민영",
         "groups": [
-            "admin"
+            "curator"
         ],
         "job_title": "Admin",
         "lab": "/labs/j-michael-cherry/",
@@ -1544,7 +1544,7 @@
     {
         "email": "kg.liu@stanford.edu",
         "first_name": "Kang",
-        "last_name": "Liu",
+        "last_name": "L-1",
         "uuid": "b99c5c3e-ff1e-408a-9806-8941cbfd21ae",
         "groups": [
             "admin"
@@ -1615,6 +1615,50 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "kgliu0101@gmail.com",
+        "first_name": "Kang",
+        "last_name": "L-2",
+        "uuid": "00082d69-3f6f-4b14-9e98-64b94be3f067",
+        "groups": [
+            "admin"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "mathew.wright@stanford.edu",
+        "first_name": "Matt",
+        "last_name": "Wright2",
+        "uuid": "b07fad40-f48f-4edf-bb34-4fe94b32c735",
+        "groups": [
+            "admin"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "alwayswright@stanford.edu",
+        "first_name": "Matt",
+        "last_name": "Wright3",
+        "uuid": "768e4c49-9a39-4604-9c0d-c8a875c41814",
+        "groups": [
+            "admin"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
-
 ]

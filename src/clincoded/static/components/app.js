@@ -34,14 +34,24 @@ var App = module.exports = React.createClass({
 
     triggers: {
         login: 'triggerLogin',
-        logout: 'triggerLogout',
+        logout: 'triggerLogout'
     },
 
     getInitialState: function() {
+        var demoWarning = false;
+        var productionWarning = false;
+        if (/production.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // check if production URL. Enable productionWarning if it is.
+            productionWarning = true;
+        } else if (!/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // if neither production nor curation URL, enable demoWarning.
+            demoWarning = true;
+        }
         return {
             errors: [],
             portal: portal,
-            demoWarning: !/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)
+            demoWarning: demoWarning,
+            productionWarning: productionWarning
         };
     },
 
@@ -109,14 +119,17 @@ var App = module.exports = React.createClass({
                     <link rel="stylesheet" href="/static/css/style.css" />
                     <script src="/static/build/bundle.js" async defer></script>
                 </head>
-                <body onClick={this.handleClick} onSubmit={this.handleSubmit}>
+                <body onClick={this.handleClick} onSubmit={this.handleSubmit} className={this.state.demoWarning ? "demo-background" : ""}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
                     <div>
                         <Header session={this.state.session} />
                         {this.state.demoWarning ?
-                        <Notice noticeType='danger' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
+                        <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
+                        : null}
+                        {this.state.productionWarning ?
+                        <Notice noticeType='production' noticeMessage={<span><strong>Do not use this URL for entering data. Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
                         : null}
                         {content}
                     </div>
@@ -160,8 +173,8 @@ var Header = React.createClass({
 
 
 // Render the notice bar, under header, if needed
-// Usage: <Notice noticeType='[TYPE]' noticeMessage={<span>[MESSAGE]</span>} />
-// Appropriate noticeTypes: success, info, warning, danger (bootstrap defaults)
+// Usage: <Notice noticeType='[TYPE]' noticeMessage={<span>[MESSAGE]</span>} {noticeClosable} />
+// Valid noticeTypes: success, info, warning, danger (bootstrap defaults), and demo, production (clingen customs)
 var Notice = React.createClass({
     getInitialState: function () {
         return { noticeVisible: true };
@@ -176,7 +189,9 @@ var Notice = React.createClass({
                 <div className={noticeClass} role="alert">
                     <div className="container">
                         {this.props.noticeMessage}
+                        {this.props.noticeClosable ?
                         <button type="button" className="close" onClick={this.onClick}>&times;</button>
+                        : null}
                     </div>
                 </div>
             );

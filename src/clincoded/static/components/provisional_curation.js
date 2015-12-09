@@ -10,6 +10,7 @@ var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var parseAndLogError = require('./mixins').parseAndLogError;
+var CuratorHistory = require('./curator_history');
 var modal = require('../libs/bootstrap/modal');
 var Modal = modal.Modal;
 var CurationMixin = curator.CurationMixin;
@@ -25,7 +26,7 @@ var queryKeyValue = globals.queryKeyValue;
 var userMatch = globals.userMatch;
 
 var ProvisionalCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func,
@@ -36,11 +37,10 @@ var ProvisionalCuration = React.createClass({
 
     getInitialState: function() {
         return {
-            //urlFrom: document.referrer,
             user: null, // login user uuid
             gdm: null, // current gdm object, must be null initially.
             provisional: null, // login user's existing provisional object, must be null initially.
-            assessments: null,  // list of all assessments, must be nul initially.
+            //assessments: null,  // list of all assessments, must be nul initially.
             totalScore: null,
             autoClassification: null
         };
@@ -49,10 +49,9 @@ var ProvisionalCuration = React.createClass({
     loadData: function() {
         var gdmUuid = this.queryValues.gdmUuid;
 
-        // get gdm and all assessments from db.
+        // get gdm from db.
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '', // search for entire data set of the gdm
-            gdmUuid ? '/assessments/' : '' // search for all assessments from db
         ]);
         this.getRestDatas(
             uris
@@ -64,9 +63,6 @@ var ProvisionalCuration = React.createClass({
                 switch(data['@type'][0]) {
                     case 'gdm':
                         stateObj.gdm = data;
-                        break;
-                    case 'assessment_collection':
-                        stateObj.assessments = data['@graph'];
                         break;
                     default:
                         break;
@@ -89,15 +85,7 @@ var ProvisionalCuration = React.createClass({
                 }
             }
 
-            // filter assessments for specific user and gdm
-            var temp = [];
-            for (var i in stateObj.assessments) {
-                if (stateObj.assessments[i].submitted_by.uuid === stateObj.user && stateObj.assessments[i].evidence_gdm === stateObj.gdm.uuid) {
-                    temp.push(stateObj.assessments[i]);
-                }
-            }
-            stateObj.assessments = temp;
-
+            stateObj.previousUrl = url;
             this.setState(stateObj);
 
             return Promise.resolve();
@@ -107,7 +95,6 @@ var ProvisionalCuration = React.createClass({
     },
 
     componentDidMount: function() {
-        //this.clrFormErrors.bind(null, 'reasons');
         this.loadData();
     },
 
@@ -138,8 +125,18 @@ var ProvisionalCuration = React.createClass({
                 backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
                 if (this.state.provisional) { // edit existing provisional
                     this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
+                        var provisionalClassification = data['@graph'][0];
+
+                        // Record provisional classification history
+                        var meta = {
+                            provisionalClassification: {
+                                gdm: this.state.gdm['@id'],
+                                alteredClassification: provisionalClassification.alteredClassification
+                            }
+                        };
+                        this.recordHistory('modify', provisionalClassification, meta);
+
                         this.resetAllFormValues();
-                        //this.context.navigate(backUrl);
                         window.history.go(-1);
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = : %o', e);
@@ -149,6 +146,15 @@ var ProvisionalCuration = React.createClass({
                     this.postRestData('/provisional/', newProvisional).then(data => {
                         return data['@graph'][0];
                     }).then(savedProvisional => {
+                        // Record provisional classification history
+                        var meta = {
+                            provisionalClassification: {
+                                gdm: this.state.gdm['@id'],
+                                alteredClassification: savedProvisional.alteredClassification
+                            }
+                        };
+                        this.recordHistory('add', savedProvisional, meta);
+
                         var theGdm = curator.flatten(this.state.gdm);
                         if (theGdm.provisionalClassifications) {
                             theGdm.provisionalClassifications.push(savedProvisional['@id']);
@@ -162,7 +168,6 @@ var ProvisionalCuration = React.createClass({
                         });
                     }).then(savedGdm => {
                         this.resetAllFormValues();
-                        //this.context.navigate(backUrl);
                         window.history.go(-1);
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = %o', e);
@@ -180,15 +185,11 @@ var ProvisionalCuration = React.createClass({
         // click Cancel button will go back to view - current
         if (e.detail >= 1){
             window.history.go(-1);
-            //var backUrl = '/curation-central/?gdm=' + this.state.gdm.uuid;
-            //backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
-            //this.context.navigate(backUrl);
         }
     },
 
     render: function() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        this.queryValues.pmid = queryKeyValue('pmid', this.props.href) ? queryKeyValue('pmid', this.props.href) : '';
         var calculate = queryKeyValue('calculate', this.props.href);
         var edit = queryKeyValue('edit', this.props.href);
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
@@ -196,17 +197,16 @@ var ProvisionalCuration = React.createClass({
         var provisional = this.state.provisional ? this.state.provisional : null;
 
         var show_clsfctn = queryKeyValue('classification', this.props.href);
+        var summaryMatrix = queryKeyValue('summarymatrix', this.props.href);
+        var expMatrix = queryKeyValue('expmatrix', this.props.href);
         return (
             <div>
                 { show_clsfctn === 'display' ?
-                    <div className="container">
-                        <h1>Clinical Validity Classifications</h1>
-                        <img src={"../static/img/classification-values.png"} />
-                    </div>
+                    Classification.call()
                     :
-                    gdm ?
+                    ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true}/>
                             <div className="container">
                                 {
                                     (provisional && edit === 'yes') ?
@@ -224,7 +224,9 @@ var ProvisionalCuration = React.createClass({
                                                                 <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
                                                             </div>
                                                             <div className="row">
-                                                                <div className="col-sm-5"><strong>Total Score:</strong></div>
+                                                                <div className="col-sm-5">
+                                                                    <strong>Total Score:</strong>
+                                                                </div>
                                                                 <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
                                                             </div>
                                                             <div className="row">
@@ -248,16 +250,10 @@ var ProvisionalCuration = React.createClass({
                                                             <div className="row">&nbsp;</div>
                                                         </Panel>
                                                     </PanelGroup>
-                                                : null
+                                                :
+                                                null
                                             }
-                                            {AssessmentSummary.call(this)}
-                                            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                                {NewCalculation.call(this)}
-                                                <div className='modal-footer'>
-                                                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                                                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
-                                                </div>
-                                            </Form>
+                                            {NewCalculation.call(this)}
                                         </div>
                                         :
                                         null
@@ -265,7 +261,9 @@ var ProvisionalCuration = React.createClass({
                                 }
                             </div>
                         </div>
-                    : null
+                        :
+                        null
+                    )
                 }
             </div>
         );
@@ -273,6 +271,203 @@ var ProvisionalCuration = React.createClass({
 });
 
 globals.curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
+
+var Classification = function() {
+    return (
+        <div className="container classification-cell">
+            <h1>Clinical Validity Classifications</h1>
+            <div className="classificationTable">
+                <table>
+                    <tr className="greyRow">
+                        <td colSpan='2' className="titleCell">Evidence Level</td>
+                        <td className="titleCell">Evidence Description</td>
+                    </tr>
+                    <tr>
+                        <td rowSpan='7' className="verticalCell">
+                            <div className="verticalContent spptEvd">
+                                Supportive&nbsp;Evidence
+                            </div>
+                        </td>
+                        <td className="levelCell">DEFINITIVE</td>
+                        <td>
+                            The role of this gene in this particular disease hase been repeatedly demonstrated in both the research and clinical
+                            diagnostic settings, and has been upheld over time (in general, at least 3 years). No convincing evidence has emerged
+                            that contradicts the role of the gene in the specified disease.
+                        </td>
+                    </tr>
+                    <tr className="narrow-line"></tr>
+                    <tr>
+                        <td className="levelCell">STRONG</td>
+                        <td>
+                            The role of this gene in disease has been independently demonstrated in at least two separate studies providing&nbsp;
+                            <strong>strong</strong> supporting evidence for this gene&#39;s role in disease, such as the following types of evidence:
+                            <ul>
+                                <li>Strong variant-level evidence demonstrating numerous unrelated probands with variants that provide convincing
+                                evidence for disease causality&sup1;</li>
+                                <li>Compelling gene-level evidence from different types of supporting experimental data&sup2;.</li>
+                            </ul>
+                            In addition, no convincing evidence has emerged that contradicts the role of the gene in the noted disease.
+                        </td>
+                    </tr>
+                    <tr className="narrow-line"></tr>
+                    <tr>
+                        <td className="levelCell">MODERATE</td>
+                        <td>
+                            There is <strong>moderate</strong> evidence to support a causal role for this gene in this diseaese, such as:
+                            <ul>
+                                <li>At least 3 unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
+                                <li>Moderate experimental data&sup2; supporting the gene-disease association</li>
+                            </ul>
+                            The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged
+                            that contradicts the role of the gene in the noded disease.
+                        </td>
+                    </tr>
+                    <tr className="narrow-line"></tr>
+                    <tr>
+                        <td className="levelCell">LIMITED</td>
+                        <td>
+                            There is <strong>limited</strong> evidence to support a causal role for this gene in this disease, such as:
+                            <ul>
+                                <li>Fewer than three observations of variants that provide convincing evidence for disease causality&sup1;</li>
+                                <li>Multiple variants reported in unrelated probands but <i>without</i> sufficient evidence that the variants alter function</li>
+                                <li>Limited experimental data&sup2; supporting the gene-disease association</li>
+                            </ul>
+                            The role of this gene in  disease may not have been independently reported, but no convincing evidence has emerged that
+                            contradicts the role of the gene in the noted disease.
+                        </td>
+                    </tr>
+                    <tr className="narrow-line"></tr>
+                    <tr>
+                        <td colSpan="2" className="levelCell">NO REPORTED<br />EVIDENCE</td>
+                        <td>
+                            No evidence reported for a causal role in disease. These genes might be &#34;candidate&#34; genes based on animal models or implication
+                            in pathways known to be involved in human diseases, but no reports have implicated the gene in human disease cases.
+                        </td>
+                    </tr>
+                    <tr className="narrow-line"></tr>
+                    <tr>
+                        <td className="verticalCell">
+                            <div className="verticalContent cntrdctEvd">
+                                Contradictory&nbsp;Evidence
+                            </div>
+                        </td>
+                        <td className="levelCell">
+                            CONFLICTING<br />EVIDENCE<br />REPORTED
+                        </td>
+                        <td>
+                            Although there has been an assertion of a gene-disease association, conflicting evidence for the role of this gene in disease has arisen
+                            since the time of the initial report indicating a disease association. Depending on the quantity and quality of evidence disputing the
+                            association, the gene/disease association may be further defined by the following two sub-categories:
+                            <ol className="olTitle">
+                                <li type="1">
+                                    Disputed
+                                    <ol className="olContent">
+                                        <li type="a">
+                                            Convincing evidence <i>disputing</i> a role for this gene in this disease has arisen since the initial report identifying an
+                                            association between the gene and disease.
+                                        </li>
+                                        <li type="a">
+                                            Refuting evidence need not outweigh existing evidence supporting the gene:disease association.
+                                        </li>
+                                    </ol>
+                                </li>
+                                <li type="1">
+                                    Refuted
+                                    <ol className="olContent">
+                                        <li type="a">
+                                            Evidence refuting the role of the gene in the specified disease has been reported and significantly outweighs any evidence
+                                            supporting the role.
+                                        </li>
+                                        <li type="a">
+                                            This designation is to be applied at the discretion of clinical domain experts after thorough review of available evidence
+                                        </li>
+                                    </ol>
+                                </li>
+                            </ol>
+                        </td>
+                    </tr>
+                    <tr className="greyRow">
+                        <td colSpan="3" className="levelCell">NOTES</td>
+                    </tr>
+                    <tr>
+                        <td colSpan="3">
+                            <p>
+                                &sup1;Variants that have evidence to disrupt function and/or have other strong genetic and population data (e.g. <i>de novo</i>&nbsp;
+                                occurrence, absence in controls, etc) can be used as evidence in support of a variant&#39;s causality in this framework.
+                            </p>
+                            <p>&sup2;Examples of appropriate types of supporting experimental data based on those outlined in MacArthur et al. 2014.</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+var LimitedClassification = function() {
+    return (
+        <div>
+            <p className="title underline-text title-p">LIMITED CLASSIFICATION</p>
+            <p>There is <strong>limited</strong> evidence to support a causal role for this gene in this disease, such as:</p>
+            <p>
+                <ul>
+                    <li>Fewer than three observations of variants that provide convincing evidence for disease causality&sup1;</li>
+                    <li>Multiple variants reported in unrelated probands but <i>without</i> sufficient evidence that the variants alter function</li>
+                    <li>Limited experimental data&sup2; supporting the gene-disease association</li>
+                </ul>
+            </p>
+            <p>The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged that contradicts the role of the gene in the noted disease.</p>
+        </div>
+    );
+};
+
+var ModerateClassification = function() {
+    return (
+        <div>
+            <p className="title underline-text title-p">MODERATE CLASSIFICATION</p>
+            <p>There is <strong>moderate</strong> evidence to support a causal role for this gene in this diseaese, such as:</p>
+            <p>
+                <ul>
+                    <li>At least 3 unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
+                    <li>Moderate experimental data&sup2; supporting the gene-disease association</li>
+                </ul>
+            </p>
+            <p>The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged that contradicts the role of the gene in the noded disease.</p>
+        </div>
+    );
+};
+
+var StrongClassification = function() {
+    return (
+        <div>
+            <p className="title underline-text title-p">STRONG CLASSIFICATION</p>
+            <p>
+                The role of this gene in disease has been independently demonstrated in at least two separate studies providing&nbsp;
+                <strong>strong</strong> supporting evidence for this gene&#39;s role in disease, such as the following types of evidence:
+            </p>
+            <p>
+                <ul>
+                    <li>Strong variant-level evidence demonstrating numerous unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
+                    <li>Compelling gene-level evidence from different types of supporting experimental data&sup2;.</li>
+                </ul>
+            </p>
+            <p>In addition, no convincing evidence has emerged that contradicts the role of the gene in the noted disease.</p>
+        </div>
+    );
+};
+
+var DefinitiveClassification = function() {
+    return (
+        <div>
+            <p className="title underline-text title-p">DEFINITIVE CLASSIFICATION</p>
+            <p>
+                The role of this gene in this particular disease hase been repeatedly demonstrated in both the research and clinical
+                diagnostic settings, and has been upheld over time (in general, at least 3 years). No convincing evidence has emerged
+                that contradicts the role of the gene in the specified disease.
+            </p>
+        </div>
+    );
+};
 
 var EditCurrent = function() {
     var alteredClassification = this.state.provisional.alteredClassification ? this.state.provisional.alteredClassification : 'none';
@@ -343,95 +538,50 @@ var EditCurrent = function() {
     );
 };
 
+var NewCalculation = function() {
+    var gdm = this.state.gdm;
 
-var AssessmentSummary = function() {
-    var assessments = this.state.assessments;
     var userAssessments = {
         "variantSpt": 0,
         "variantReview": 0,
         "variantCntdct": 0,
+        "variantNot": 0,
         "expSpt": 0,
         "expReview": 0,
         "expCntdct": 0,
+        "expNot": 0,
         "segSpt": 0,
         "segReview": 0,
-        "segCntdct": 0
+        "segCntdct": 0,
+        "segNot": 0
     };
-    for (var i in assessments) {
-        if (assessments[i].value === 'Supports' && assessments[i].evidence_type === 'Pathogenicity') {
-            userAssessments.variantSpt += 1;
-        }
-        else if (assessments[i].value === 'Review' && assessments[i].evidence_type === 'Pathogenicity') {
-            userAssessments.variantReview += 1;
-        }
-        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Pathogenicity') {
-            userAssessments.variantCntdct += 1;
-        }
-        else if (assessments[i].value === 'Supports' && assessments[i].evidence_type === 'Segregation') {
-            userAssessments.segSpt += 1;
-        }
-        else if (assessments[i].value === 'Review' && assessments[i].evidence_type === 'Segregation') {
-            userAssessments.segReview += 1;
-        }
-        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Segregation') {
-            userAssessments.segCntdct += 1;
-        }
-        else if (assessments[i].value === 'Supports') {
-            userAssessments.expSpt += 1;
-        }
-        else if (assessments[i].value === 'Review') {
-            userAssessments.expReview += 1;
-        }
-        else if (assessments[i].value === 'Contradicts') {
-            userAssessments.expCntdct += 1;
+
+    // Collect variants from pathogenicity
+    var gdmPathoList = gdm.variantPathogenicity;
+    var pathoVariantIdList = {
+        "support": [],
+        "review": [],
+        "contradict": []
+    }
+
+    for (var i in gdmPathoList) {
+        var variantUuid = gdmPathoList[i].variant.uuid;
+        // Collect login user's variant assessments, separated as 3 different values.
+        if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
+            for (var j in gdmPathoList[i].assessments) {
+                if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
+                    pathoVariantIdList['support'].push(variantUuid);
+                }
+                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Review') {
+                    pathoVariantIdList['review'].push(variantUuid);
+                }
+                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Contradicts') {
+                    pathoVariantIdList['contradict'].push(variantUuid);
+                }
+            }
         }
     }
 
-    return (
-        <PanelGroup accordion>
-            <Panel title="New Count of Assessments" open>
-                <table>
-                    <tr>
-                        <td style={{width:'150px', 'text-align':'center'}}>&nbsp;</td>
-                        <td style={{width:'150px', 'text-align':'center'}}><strong>Segregation</strong></td>
-                        <td style={{width:'150px', 'text-align':'center'}}><strong>Variant</strong></td>
-                        <td style={{width:'150px', 'text-align':'center'}}><strong>Experimental</strong></td>
-                    </tr>
-                    <tr>
-                        <td style={{width:'150px', 'text-align':'right'}}><strong>Supports</strong></td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segSpt}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantSpt}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expSpt}</td>
-                    </tr>
-                    <tr>
-                        <td style={{width:'150px', 'text-align':'right'}}><strong>Review</strong></td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segReview}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantReview}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expReview}</td>
-                    </tr>
-                    <tr>
-                        <td style={{width:'150px', 'text-align':'right'}}><strong>Contradicts</strong></td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.segCntdct}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.variantCntdct}</td>
-                        <td style={{width:'150px', 'text-align':'center'}}>{userAssessments.expCntdct}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="4">&nbsp;</td>
-                    </tr>
-                </table>
-            </Panel>
-        </PanelGroup>
-    );
-};
-
-
-var NewCalculation = function() {
-    var gdm = this.state.gdm;
-
-// Gegerate pathogenicity id list and collect experimental id list from all assessments
-// condition: assessed by login user, value as Supports, current gdm
-// count piece number at each experimental type and add score at 3 different categories
-    var pathoList = [];
     var exp_scores = [0, 0, 0];
     var expType = {
         "Expression": 0,
@@ -444,55 +594,84 @@ var NewCalculation = function() {
         "Rescue (Patient cells)": 0,
         "Rescue (Engineered equivalent)": 0
     }
+    var individualsCollected = {
+        "probandInd": [],
+        "allVariants": [],
+        "sptVariants": [],
+        "rvwVariants": [],
+        "cntdctVariants": []
+    };
+    var proband_variants = [];
 
-// Generate variantIdList
-    var gdmPathoList = gdm.variantPathogenicity;
-    var variantIdList = [];
-    for (var i in gdmPathoList) {
-
-        // pick up variants from login user's pathogenicity assessed as Supports.
-        if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
-            for (var j in gdmPathoList[i].assessments) {
-                if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
-                    var variantUuid = gdmPathoList[i].variant.uuid;
-                    variantIdList.push(variantUuid);
-                    break;
-                }
-            }
-        }
-    }
-
-// Collect all individuals in all annotations, pass to function filter with article info (experimental data is not necessary)
-    var annotations = gdm.annotations;
-    var individualsCollected = [];
-    var allProbandInd = [];
+    // scan gdm
+    var annotations = gdm.annotations ? gdm.annotations : [];
     for (var i in annotations) {
-          allProbandInd.push(getProbandIndividual(annotations[i], []));
 
         if (annotations[i].groups && annotations[i].groups.length > 0) {
             var groups = annotations[i].groups;
             for (var j in groups) {
                 if (groups[j].familyIncluded && groups[j].familyIncluded.length > 0) {
                     for (var k in groups[j].familyIncluded) {
+
+                        // collect individuals
                         if (groups[j].familyIncluded[k].individualIncluded && groups[j].familyIncluded[k].individualIncluded.length > 0) {
-                            individualsCollected = filter(individualsCollected, groups[j].familyIncluded[k].individualIncluded, annotations[i].article, variantIdList); // same as above
+                            individualsCollected = filter(individualsCollected, groups[j].familyIncluded[k].individualIncluded, annotations[i].article, pathoVariantIdList);
+                        }
+
+                        // collection segregation assessments
+                        if (groups[j].familyIncluded[k].segregation) {
+                            userAssessments['segNot'] += 1;
+
+                            if (groups[j].familyIncluded[k].segregation.assessments && groups[j].familyIncluded[k].segregation.assessments.length > 0) {
+                                for (var l in groups[j].familyIncluded[k].segregation.assessments) {
+                                    var this_assessment = groups[j].familyIncluded[k].segregation.assessments[l];
+                                    if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
+                                        userAssessments['segSpt'] += 1;
+                                    }
+                                    else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Review') {
+                                        userAssessments['segReview'] += 1;
+                                    }
+                                    else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Contradicts') {
+                                        userAssessments['segCntdct'] += 1;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
                 if (groups[j].individualIncluded && groups[j].individualIncluded.length > 0) {
-                    individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, variantIdList);
+                    individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, pathoVariantIdList);
                 }
             }
         }
         if (annotations[i].families && annotations[i].families.length > 0) {
             for (var j in annotations[i].families) {
                 if (annotations[i].families[j].individualIncluded && annotations[i].families[j].individualIncluded.length > 0) {
-                    individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, variantIdList);
+                    individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, pathoVariantIdList);
+                }
+
+                if (annotations[i].families[j].segregation) {
+                    userAssessments['segNot'] += 1;
+
+                    if (annotations[i].families[j].segregation.assessments && annotations[i].families[j].segregation.assessments.length > 0) {
+                        for (var l in annotations[i].families[j].segregation.assessments) {
+                            var this_assessment = annotations[i].families[j].segregation.assessments[l];
+                            if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
+                                userAssessments['segSpt'] += 1;
+                            }
+                            else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Review') {
+                                userAssessments['segReview'] += 1;
+                            }
+                            else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Contradicts') {
+                                userAssessments['segCntdct'] += 1;
+                            }
+                        }
+                    }
                 }
             }
         }
         if (annotations[i].individuals && annotations[i].individuals.length > 0) {
-            individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, variantIdList);
+            individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, pathoVariantIdList);
         }
 
         // collect experimental assessed support, check matrix
@@ -500,6 +679,8 @@ var NewCalculation = function() {
             for (var j in annotations[i].experimentalData) {
                 var exp = annotations[i].experimentalData[j];
                 var subTypeKey = exp.evidenceType;
+
+                userAssessments['expNot'] += 1;
 
                 if (exp.assessments && exp.assessments.length > 0) {
                     for (var j in exp.assessments) {
@@ -547,7 +728,14 @@ var NewCalculation = function() {
                                 expType[subTypeKey] += 1;
                                 exp_scores[2] += 1;
                             }
-                            break;
+
+                            userAssessments['expSpt'] += 1;
+                        }
+                        else if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Review') {
+                            userAssessments['expReview'] += 1;
+                        }
+                        else if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Contradicts') {
+                            userAssessments['expCntdct'] += 1;
                         }
                     }
                 }
@@ -555,7 +743,14 @@ var NewCalculation = function() {
         }
     }
 
-// Compare designed max value at each score category and get the total experimental score
+    userAssessments['variantSpt'] = individualsCollected['sptVariants'].length;
+    userAssessments['variantReview'] = individualsCollected['rvwVariants'].length;
+    userAssessments['variantCntdct'] = individualsCollected['cntdctVariants'].length;
+    userAssessments['variantNot'] = individualsCollected['allVariants'].length - userAssessments['variantSpt'] - userAssessments['variantReview'] - userAssessments['variantCntdct'];
+    userAssessments['expNot'] = userAssessments['expNot'] - userAssessments['expSpt'] - userAssessments['expReview'] - userAssessments['expCntdct'];
+    userAssessments['segNot'] = userAssessments['segNot'] - userAssessments['segSpt'] - userAssessments['segReview'] - userAssessments['segCntdct'];
+
+    // Compare designed max value at each score category and get the total experimental score
     var finalExperimentalScore = 0;
     for (var i in exp_scores) {
         var max = 2; // set max value for each type
@@ -565,20 +760,23 @@ var NewCalculation = function() {
         finalExperimentalScore += (exp_scores[i] <= max) ? exp_scores[i] : max; // not more than the max
     }
 
-// Collect articles and find the earliest publication year
+    // Collect articles and find the earliest publication year
+    var proband = 0;
     var articleCollected = [];
     var year = new Date();
     var earliest = year.getFullYear();
-    for (var i in individualsCollected) {
-        if (!in_array(individualsCollected[i].pmid, articleCollected) && individualsCollected[i].pmid != '') {
-            articleCollected.push(individualsCollected[i].pmid);
-            earliest = get_earliest_year(earliest, individualsCollected[i].date);
+    for (var i in individualsCollected['probandInd']) {
+        if (individualsCollected['probandInd'][i].pmid && individualsCollected['probandInd'][i].pmid != '') {
+            proband += 1;
+            if (!in_array(individualsCollected['probandInd'][i].pmid, articleCollected)) {
+                articleCollected.push(individualsCollected['probandInd'][i].pmid);
+                earliest = get_earliest_year(earliest, individualsCollected['probandInd'][i].date);
+            }
         }
     }
 
-// get final scores
+    // get final scores
     var currentYear = year.getFullYear();
-    //var years = (currentYear.valueOf() - earliest.valueOf()) + ' = ' + currentYear + ' - ' + earliest;
     var time = currentYear.valueOf() - earliest.valueOf();
     var timeScore = 0, probandScore = 0, pubScore = 0, expScore = 0;
     if (time >= 3) {
@@ -591,8 +789,6 @@ var NewCalculation = function() {
         timeScore = 0;
     }
 
-    var proband = individualsCollected.length;
-    //var proband = count_proband(familiesCollected) + count_proband(individualsCollected);
     if (proband > 18) {
         probandScore = 7;
     }
@@ -639,41 +835,89 @@ var NewCalculation = function() {
 
     var totalScore = probandScore + pubScore + timeScore + expScore;
     var autoClassification = 'No Reported Evidence';
-    if (totalScore > 16){
+    if (Math.floor(totalScore) >= 17){
         autoClassification = 'Definitive';
     }
-    else if (totalScore > 12) {
+    else if (Math.floor(totalScore) >= 13) {
         autoClassification = 'Strong';
     }
-    else if (totalScore > 9) {
+    else if (Math.floor(totalScore) >= 9) {
         autoClassification = 'Moderate';
     }
-    else if (totalScore > 1) {
+    else if (Math.floor(totalScore) >= 2) {
         autoClassification = 'Limited';
     }
 
     this.state.totalScore = totalScore;
     this.state.autoClassification = autoClassification;
 
-    var contradicts = {
-        "Variant": 0,
-        "Experimental": 0,
-        "Segregation": 0
-    };
-    var assessments = this.state.assessments;
-    for (var i in assessments) {
-        if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Pathogenicity') {
-            contradicts.Variant += 1;
+    var probandRow = [], expRow = [], pubRow = [], timeRow = [];
+    for(var i=0; i<8; i++) {
+        if (i === probandScore) {
+            probandRow.push(proband);
         }
-        else if (assessments[i].value === 'Contradicts' && assessments[i].evidence_type === 'Segregation') {
-            contradicts.Segregation += 1;
+        else {
+            probandRow.push('');
         }
-        else if (assessments[i].value === 'Contradicts' ) {
-            contradicts.Experimental += 1;
+
+        if (i === pubScore) {
+            pubRow.push(articleCollected.length);
+        }
+        else if (i < 6) {
+            pubRow.push('');
+        }
+
+        if (i === timeScore) {
+            timeRow.push(time);
+        }
+        else if (i < 3) {
+            timeRow.push('');
         }
     }
 
     return (
+        <div>
+            <PanelGroup accordion>
+                <Panel title="New Count of Assessments" open>
+                    <table className="assessment-counting">
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td><strong>Segregation</strong></td>
+                            <td><strong>Variant (proband only)</strong></td>
+                            <td><strong>Experimental</strong></td>
+                        </tr>
+                        <tr>
+                            <td className="values"><strong>Supports</strong></td>
+                            <td>{userAssessments.segSpt}</td>
+                            <td>{userAssessments.variantSpt}</td>
+                            <td>{userAssessments.expSpt}</td>
+                        </tr>
+                        <tr>
+                            <td className="values"><strong>Review</strong></td>
+                            <td>{userAssessments.segReview}</td>
+                            <td>{userAssessments.variantReview}</td>
+                            <td>{userAssessments.expReview}</td>
+                            <td>{userAssessments.v}</td>
+                        </tr>
+                        <tr>
+                            <td className="values"><strong>Contradicts</strong></td>
+                            <td >{userAssessments.segCntdct}</td>
+                            <td>{userAssessments.variantCntdct}</td>
+                            <td>{userAssessments.expCntdct}</td>
+                        </tr>
+                        <tr>
+                            <td className="values"><strong>Not Assessed</strong></td>
+                            <td >{userAssessments.segNot}</td>
+                            <td>{userAssessments.variantNot}</td>
+                            <td>{userAssessments.expNot}</td>
+                        </tr>
+                        <tr>
+                            <td colSpan="4">&nbsp;</td>
+                        </tr>
+                    </table>
+                </Panel>
+            </PanelGroup>
+            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <PanelGroup accordion>
                     <Panel title="New Summary & Provisional Classification" open>
                         <div className="form-group">
@@ -683,75 +927,230 @@ var NewCalculation = function() {
                                 will then represent the new "Last Saved Summary & Provisional Classification".
                             </div>
                             <div><span>&nbsp;</span></div>
-                            <div className="row">
-                                <div className="col-sm-5"><strong className="pull-right">Total Score:</strong></div>
-                                <div className="col-sm-7"><strong>{this.state.totalScore}</strong></div>
-                            </div>
                             <br />
-                            <div className="row">
-                                <div className="col-sm-5">
-                                    <strong className="pull-right">Scoring Details:</strong>
-                                </div>
-                                <div className="col-sm-7">
-                                    <table className="summary-scoring">
-                                        <tr>
-                                            <td className="td-title"><strong>Evidence</strong></td>
-                                            <td className="td-score"><strong>Count</strong></td>
-                                            <td className="td-score"><strong>Score</strong></td>
-                                        </tr>
-                                        <tr><td cols="3">&nbsp;</td></tr>
-                                        {Object.keys(expType).map(function(key) {
+                            <div className="container">
+                                <table className="summary-matrix">
+                                    <tr>
+                                        <td rowSpan="2" className="title larger top-single-cell area-bottom-cells most-left">Assertion<br />Criteria</td>
+                                        <td rowSpan="2" className="title larger top-single-cell area-bottom-cells">Criteria Description</td>
+                                        <td colSpan="8" className="title top-multiple-cell">Number of Points</td>
+                                        <td rowSpan="2" className="title larger vertical-title-most-left-cell area-bottom-cells">
+                                            <div className="vertical-transform-0">Score</div>
+                                        </td>
+                                    </tr>
+                                    <tr className="area-bottom-cells">
+                                        <td className="title larger score-cells top-number-cell">0</td>
+                                        <td className="title larger score-cells top-number-cell">1</td>
+                                        <td className="title larger score-cells top-number-cell">2</td>
+                                        <td className="title larger score-cells top-number-cell">3</td>
+                                        <td className="title larger score-cells top-number-cell">4</td>
+                                        <td className="title larger score-cells top-number-cell">5</td>
+                                        <td className="title larger score-cells top-number-cell">6</td>
+                                        <td className="title larger score-cells top-number-cell">7</td>
+                                    </tr>
+                                    <tr className="narrow-line"></tr>
+                                    <tr className="area-top-cells count-title-row">
+                                        <td rowSpan="2" className="title most-left"># Probands</td>
+                                        <td rowSpan="2" className="description">Total # of curated unrelated probands with variants that provide convincing evidence for disease causality</td>
+                                        <td>N/A</td>
+                                        <td>1-3</td>
+                                        <td>4-6</td>
+                                        <td>7-9</td>
+                                        <td>10-12</td>
+                                        <td>13-15</td>
+                                        <td>16-18</td>
+                                        <td>19+</td>
+                                        <td rowSpan="2" className="result-cells score-cells title larger">{probandScore}</td>
+                                    </tr>
+                                    <tr className="dark-row">
+                                        {probandRow.map(function(item, i) {
                                             return (
-                                                expType[key] > 0 ?
-                                                    <tr>
-                                                        <td className="td-title">{key}</td>
-                                                        <td className="td-score">{expType[key]}</td>
-                                                        <td className="td-score">&nbsp;</td>
-                                                    </tr>
-                                                :
-                                                null
+                                                <td className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
                                             );
                                         })}
-                                        <tr><td className="td-title"><strong>Final Experimental Score</strong></td>
-                                            <td className="td-score"><span>&nbsp;</span></td>
-                                            <td className="td-score"><strong>{expScore}</strong></td>
-                                        </tr>
-                                        <tr><td cols="3"><strong>&nbsp;</strong></td></tr>
-                                        <tr>
-                                            <td className="td-title">Number of probands with variants assessed as "Supports" pathogenicity</td>
-                                            <td className="td-score">{proband}</td>
-                                            <td className="td-score">&nbsp;</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="td-title"><strong>Proband Score</strong></td>
-                                            <td className="td-score"><span>&nbsp;</span></td>
-                                            <td className="td-score"><strong>{probandScore}</strong></td>
-                                        </tr>
-                                        <tr><td cols="3"><span>&nbsp;</span></td></tr>
-                                        <tr>
-                                            <td className="td-title">Clinical Publications</td>
-                                            <td className="td-score">{articleCollected.length}</td>
-                                            <td className="td-score">&nbsp;</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="td-title"><strong>Publication Score</strong></td>
-                                            <td className="td-score">&nbsp;</td>
-                                            <td className="td-score"><strong>{pubScore}</strong></td>
-                                        </tr>
-                                        <tr><td cols="3"><span>&nbsp;</span></td></tr>
-                                        <tr>
-                                            <td className="td-title">Number of years since first report</td>
-                                            <td className="td-score">{time}</td>
-                                            <td className="td-score">&nbsp;</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="td-title"><strong>Time Score (First Clinical Report)</strong></td>
-                                            <td className="td-score">&nbsp;</td>
-                                            <td className="td-score"><strong>{timeScore}</strong></td>
-                                        </tr>
-                                    </table>
-                                </div>
+                                    </tr>
+                                    <tr className="count-title-row">
+                                        <td rowSpan="2"  className="title most-left"># Publications</td>
+                                        <td rowSpan="2" className="description"># of curated independent publications reporting human variants in the gene under consideration</td>
+                                        <td>N/A</td>
+                                        <td>1</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td>5+</td>
+                                        <td rowSpan="2" colSpan="2" className="empty-cell"></td>
+                                        <td rowSpan="2" className="result-cells score-cells title larger">{pubScore}</td>
+                                    </tr>
+                                    <tr className="dark-row">
+                                        {pubRow.map(function(item, i) {
+                                            return (
+                                                <td className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
+                                            );
+                                        })}
+                                    </tr>
+                                    <tr className="count-title-row">
+                                        <td rowSpan="2" className="title area-bottom-cells most-left">Time (yrs)</td>
+                                        <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#10877; 2 pubs, then max score for time = 1)</td>
+                                        <td>current yr</td>
+                                        <td>1-3 yr</td>
+                                        <td>&gt;3 yr</td>
+                                        <td rowSpan="2" colSpan="5" className="empty-cell area-bottom-cells">&nbsp;</td>
+                                        <td rowSpan="2" className="result-cells score-cells title larger area-bottom-cells">{timeScore}</td>
+                                    </tr>
+                                    <tr className="dark-row area-bottom-cells">
+                                        {timeRow.map(function(item, i) {
+                                            return (
+                                                <td className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
+                                            );
+                                        })}
+                                    </tr>
+                                    <tr className="narrow-line"></tr>
+                                    <tr className="area-top-cells area-bottom-cells">
+                                        <td className="title most-left">Experimental<br />Evidence<br />Points</td>
+                                        <td className="description" ># of points assigned for gene-level experimental evidence supporting a role for this gene in disease</td>
+                                        <td colSpan="8">
+                                            <table className="exp-matrix">
+                                                <tr className="top-row">
+                                                    <td className="exp-evidence-category-cells">Evidence Category</td>
+                                                    <td>Evidence Type</td>
+                                                    <td className="exp-vertical-title-cells">
+                                                        <div className="score-vertical-content vertical-transform-2">Evidence<br />Points</div>
+                                                    </td>
+                                                    <td className="exp-vertical-title-cells">
+                                                        <div className="score-vertical-content vertical-transform-1">Count</div>
+                                                    </td>
+                                                    <td className="exp-vertical-title-cells">
+                                                        <div className="score-vertical-content vertical-transform-2">Category<br /> Max Score</div>
+                                                    </td>
+                                                    <td className="exp-vertical-title-cells">
+                                                        <div className="score-vertical-content vertical-transform-2">Category<br />Score</div>
+                                                    </td>
+                                                    <td className="exp-vertical-title-cells">
+                                                        <div className="score-vertical-content vertical-transform-3">Experimental<br />Max Score</div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td rowSpan="3" className="title" className="title exp-evidence-category-cells">Function</td>
+                                                    <td className="title">Biochemical Function</td>
+                                                    <td>0.5</td>
+                                                    <td className={expType['Biochemical Function'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Biochemical Function'] > 0 ? expType['Biochemical Function'] : ''}</td>
+                                                    <td rowSpan="3">2</td>
+                                                    <td rowSpan="3" className={exp_scores[0] > 0 ? 'result-cells title larger score-cells' : 'dark-cells'}>{exp_scores[0] > 0 ? (exp_scores[0] < 2 ? exp_scores[0] : 2) : ''}</td>
+                                                    <td rowSpan="9">6</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Protein Interaction</td>
+                                                    <td>0.5</td>
+                                                    <td className={expType['Protein Interactions'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Protein Interactions'] > 0 ? expType['Protein Interactions'] : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Expression</td>
+                                                    <td>0.5</td>
+                                                    <td className={expType['Expression'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Expression'] > 0 ? expType['Expression'] : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td rowSpan="2" className="title" className="title exp-evidence-category-cells">Functional<br />Alteration</td>
+                                                    <td className="title">Patient Cells</td>
+                                                    <td>1</td>
+                                                    <td className={expType['Functional Alteration (Patient cells)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Patient cells)'] > 0 ? expType['Functional Alteration (Patient cells)'] : ''}</td>
+                                                    <td rowSpan="2">2</td>
+                                                    <td rowSpan="2" className={exp_scores[1] > 0 ? 'result-cells title larger score-cells' : 'dark-cells'}>{exp_scores[1] > 0 ? (exp_scores[1] < 2 ? exp_scores[1]: 2) : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Non-Patient Cells</td>
+                                                    <td>0.5</td>
+                                                    <td className={expType['Functional Alteration (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Engineered equivalent)'] > 0 ? expType['Functional Alteration (Engineered equivalent)'] : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td rowSpan="4" className="title" className="title exp-evidence-category-cells">Models and<br />Rescue</td>
+                                                    <td className="title">Animal Model</td>
+                                                    <td>2</td>
+                                                    <td className={expType['Model Systems (Animal model)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Model Systems (Animal model)'] > 0 ? expType['Model Systems (Animal model)'] : ''}</td>
+                                                    <td rowSpan="4">4</td>
+                                                    <td rowSpan="4" className={exp_scores[2] > 0 ? 'result-cells title larger score-cells' : 'dark-cells'}>{exp_scores[2] > 0 ? (exp_scores[2] < 4 ? exp_scores[2] : 4) : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Cell Culture Model</td>
+                                                    <td>1</td>
+                                                    <td className={expType['Model Systems (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Model Systems (Engineered equivalent)'] > 0 ? expType['Model Systems (Engineered equivalent)'] : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Rescue in Patient Cells</td>
+                                                    <td>2</td>
+                                                    <td className={expType['Rescue (Patient cells)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Rescue (Patient cells)'] > 0 ? expType['Rescue (Patient cells)'] : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="title">Rescue in Engineered Equivalent</td>
+                                                    <td>1</td>
+                                                    <td className={expType['Rescue (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Rescue (Engineered equivalent)'] > 0 ? expType['Rescue (Engineered equivalent)'] : ''}</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <td className="title larger result-cells score-cells">{expScore}</td>
+                                    </tr>
+                                    <tr className="narrow-line"></tr>
+                                    <tr>
+                                        <td colSpan="10" className="total-score-cell title larger area-top-cells area-bottom-cells">Total Score</td>
+                                        <td className="result-cells title larger score-cells larger area-top-cells area-bottom-cells">{totalScore}</td>
+                                    </tr>
+                                    <tr className="narrow-line"></tr>
+                                    <tr>
+                                        <td colSpan="7" rowSpan="2" className="description classification-cell">
+                                            {   autoClassification === 'Limited' ? LimitedClassification.call() :
+                                                (   autoClassification === 'Moderate' ? ModerateClassification.call() :
+                                                    (   autoClassification === 'Strong' ? StrongClassification.call() :
+                                                        (   autoClassification === 'Definitive' ? DefinitiveClassification.call() : null)
+                                                    )
+                                                )
+                                            }
+                                            <hr />
+                                            <p className="title title-p">Notes</p>
+                                            <p>
+                                                &sup1;Variants that have evidence to disrupt function and/or have other strong genetic and population data (e.g. <i>de novo</i>&nbsp;
+                                                occurrence, absence in controls, etc) can be used as evidence in support of a variant&#39;s causality in this framework.
+                                            </p>
+                                            <p>&sup2;Examples of appropriate types of supporting experimental data based on those outlined in MacArthur et al. 2014.</p>
+                                        </td>
+                                        <td colSpan="4" className="classification-score-top">
+                                            <table>
+                                                <tr>
+                                                    <td className="title">Classification</td>
+                                                    <td className="title">Total Score</td>
+                                                </tr>
+                                                <tr className="narrow-line-2"></tr>
+                                                <tr className={autoClassification === 'Limited' ? 'high-light-row' : null}>
+                                                    <td>Limited</td>
+                                                    <td className={autoClassification === 'Limited' ? "title score-cells" : "non-high-light"}>2-8</td>
+                                                </tr>
+                                                <tr className="narrow-line-2"></tr>
+                                                <tr className={autoClassification === 'Moderate' ? 'high-light-row' : null}>
+                                                    <td>Moderate</td>
+                                                    <td className={autoClassification === 'Moderate' ? "title score-cells" : "non-high-light"}>9-12</td>
+                                                </tr>
+                                                <tr className="narrow-line-2"></tr>
+                                                <tr className={autoClassification === 'Strong' ? 'high-light-row' : null}>
+                                                    <td>Strong</td>
+                                                    <td className={autoClassification === 'Strong' ? "title score-cells" : "non-high-light"}>13-16</td>
+                                                </tr>
+                                                <tr className="narrow-line-2"></tr>
+                                                <tr className={autoClassification === 'Definitive' ? 'high-light-row' : null}>
+                                                    <td>Definitive</td>
+                                                    <td className={autoClassification === 'Definitive' ? "title score-cells" : "non-high-light"}>17-20</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colSpan="4" className="classification-score-bottom">
+                                            <p className="alert alert-info">
+                                                <span className="title">Note:</span> If the total calculated score contains a half point, it is rounded down to the
+                                                nearest whole integer for determining the calculated classification.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
+                            <br />
                             <br />
                             <div className="row">
                                 <div className="col-sm-5">
@@ -789,9 +1188,14 @@ var NewCalculation = function() {
                         </div>
                     </Panel>
                 </PanelGroup>
+                <div className='modal-footer'>
+                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
+                </div>
+            </Form>
+        </div>
     );
 };
-
 
 var in_array = function(item, list) {
     for(var i in list){
@@ -811,55 +1215,106 @@ var get_earliest_year = function(earliest, dateStr) {
     return earliest;
 };
 
-var getProbandIndividual = function(obj, probandIndividuals) {
-    if (obj['@type'][0] === 'individual' && obj.proband) {
-        probandIndividuals.push(obj.uuid);
-    }
-    else {
-        //var keys = Object.keys(obj);
-        for (var key in obj) {
-            if ((key === 'groups' || key === 'families' || key === 'individuals' || key === 'familyIncluded' || key === 'individualIncluded') && obj[key].length > 0) {
-                var subList = obj[key];
-                for (var i in subList) {
-                    probandIndividuals = getProbandIndividual(subList[i], probandIndividuals);
-                }
-                //return probandIndividuals;
-            }
-        }
-    }
-    return probandIndividuals;
-};
-
 var filter = function(target, branch, article, idList) {
-    branch.forEach(function(obj) {
-        var variantIds = [];
-        var allAssessed = false;
+    var allVariants = target['allVariants'], sptVariants = target['sptVariants'], rvwVariants = target['rvwVariants'], cntdctVariants = target['cntdctVariants'];
+    var patho_spt = idList['support'], patho_rvw = idList['review'], patho_cntdct = idList['contradict'];
 
+    branch.forEach(function(obj) {
         if (obj.proband && obj.variants && obj.variants.length > 0) {
-            // pick up proband individuals if all associated variant assessed Support
+            // counting at probands only
+            var allSupported = true;
             for (var j in obj.variants) {
-                if (!in_array(obj.variants[j].uuid, idList)) {
-                    allAssessed = false;
-                    break;
+                // collect all distinct variants from proband individuals
+                if (!in_array(obj.variants[j].uuid, allVariants)) {
+                    allVariants.push(obj.variants[j].uuid);
+                }
+
+                // collect variant assessments, separated by 3 different values.
+                if (!in_array(obj.variants[j].uuid, patho_spt)) {
+                    allSupported = false;
+
+                    if (in_array(obj.variants[j].uuid, patho_rvw) && !in_array(obj.variants[j].uuid, rvwVariants)) {
+                        rvwVariants.push(obj.variants[j].uuid);
+                    }
+                    else if (in_array(obj.variants[j].uuid, patho_cntdct) && !in_array(obj.variants[j].uuid, cntdctVariants)) {
+                        cntdctVariants.push(obj.variants[j].uuid);
+                    }
                 }
                 else {
-                    allAssessed = true;
-                    variantIds.push(obj.variants[j].uuid);
+                    if (!in_array(obj.variants[j].uuid, sptVariants)) {
+                        sptVariants.push(obj.variants[j].uuid);
+                    }
                 }
             }
 
-            if (allAssessed) {
-                target.push(
+            if (allSupported) {
+                target["probandInd"].push(
                     {
                         "evidence":obj.uuid,
-                        "variants":variantIds,
                         "pmid":article.pmid,
                         "date": article.date
                     }
                 );
             }
+
+            target["allVariants"] = allVariants;
+            target["sptVariants"] = sptVariants;
+            target["rvwVariants"] = rvwVariants;
+            target["cntdctVariants"] = cntdctVariants;
         }
     });
 
     return target;
 };
+
+
+// Display a history item for adding a family
+var ProvisionalAddModHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var meta = history.meta.provisionalClassification;
+        var gdm = meta.gdm;
+
+        return (
+            <div>
+                <span><a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'} title="View/edit provisional classification">Provisional classification</a> {meta.alteredClassification.toUpperCase()} added to </span>
+                <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(ProvisionalAddModHistory, 'provisionalClassification', 'add');
+
+
+// Display a history item for modifying a family
+var ProvisionalModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var meta = history.meta.provisionalClassification;
+        var gdm = meta.gdm;
+
+        return (
+            <div>
+                <span><a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'} title="View/edit provisional classification">Provisional classification</a> modified to {meta.alteredClassification.toUpperCase()} for </span>
+                <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(ProvisionalModifyHistory, 'provisionalClassification', 'modify');
+
+
+// Display a history item for deleting a family
+var ProvisionalDeleteHistory = React.createClass({
+    render: function() {
+        return <div>PROVISIONALDELETE</div>;
+    }
+});
+
+globals.history_views.register(ProvisionalDeleteHistory, 'provisionalClassification', 'delete');
