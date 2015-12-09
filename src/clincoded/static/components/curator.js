@@ -1848,11 +1848,12 @@ var DeleteButtonModal = React.createClass({
                     deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, this.props.item['@id']);
                 } else if (this.props.item['@type'][0] == 'individual') {
                     deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, this.props.item['@id']);
-                    // Empty variants of parent object if target item is individual (parent should be family if not annotation)
-                    deletedParent.segregation.variants = [];
+                    if (parent['@type'][0] == 'family') {
+                        // Empty variants of parent object if target item is individual and parent is family
+                        deletedParent.segregation.variants = [];
+                    }
                 }
             }
-            console.log(deletedParent);
             // PUT updated parent object w/ removed link to deleted item
             return this.putRestData(this.props.parent['@id'], deletedParent).then(data => {
                 return Promise.resolve(data['@graph'][0]);
@@ -1863,10 +1864,13 @@ var DeleteButtonModal = React.createClass({
                 return Promise.resolve(data['@graph'][0]);
             });
         }).then(data => {
-            this.recordHistory('delete', this.props.item);
+            var historyPromise = this.recordHistory('delete', this.props.item);
 
-            // forward user to curation central w/ PMID selected
-            window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
+            historyPromise.then(() => {
+                // forward user to curation central w/ PMID selected after writing history
+                window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
+            });
+
         }).catch(function(e) {
             console.log('DELETE ERROR: %o', e);
         });
