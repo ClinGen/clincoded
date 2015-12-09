@@ -8,7 +8,6 @@ def user():
         'last_name': 'Liu',
         'email': 'kg.liu@stanford.edu',
         'groups': ['admin'],
-        'uuid': 'b99c5c3e-ff1e-408a-9806-8941cbfd21ae'
     }
 
 
