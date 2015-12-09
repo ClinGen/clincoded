@@ -1864,9 +1864,7 @@ var DeleteButtonModal = React.createClass({
                 return Promise.resolve(data['@graph'][0]);
             });
         }).then(data => {
-            var historyPromise = this.recordHistory('delete', this.props.item);
-
-            historyPromise.then(() => {
+            this.recordHistory('delete', this.props.item).then(() => {
                 // forward user to curation central w/ PMID selected after writing history
                 window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
             });
