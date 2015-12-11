@@ -191,9 +191,11 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                         <td className="button-box" rowSpan="2">
                                             { summaryButton ?
                                                 ( summaryPage ?
-                                                    null
+                                                    <button type="button" className="btn btn-primary" disabled="disabled">
+                                                        Generate New Summary
+                                                    </button>
                                                     :
-                                                    <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                    <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
                                                         { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
                                                     </a>
                                                 )
