@@ -51,7 +51,7 @@ var ProvisionalCuration = React.createClass({
 
         // get gdm from db.
         var uris = _.compact([
-            gdmUuid ? '/gdm/' + gdmUuid : '', // search for entire data set of the gdm
+            gdmUuid ? '/gdm/' + gdmUuid : '' // search for entire data set of the gdm
         ]);
         this.getRestDatas(
             uris
@@ -562,7 +562,7 @@ var NewCalculation = function() {
         "support": [],
         "review": [],
         "contradict": []
-    }
+    };
 
     for (var i in gdmPathoList) {
         var variantUuid = gdmPathoList[i].variant.uuid;
@@ -593,7 +593,7 @@ var NewCalculation = function() {
         "Model Systems (Engineered equivalent)": 0,
         "Rescue (Patient cells)": 0,
         "Rescue (Engineered equivalent)": 0
-    }
+    };
     var individualsCollected = {
         "probandInd": [],
         "allVariants": [],
@@ -606,7 +606,7 @@ var NewCalculation = function() {
     // scan gdm
     var annotations = gdm.annotations ? gdm.annotations : [];
     for (var i in annotations) {
-
+        var this_assessment;
         if (annotations[i].groups && annotations[i].groups.length > 0) {
             var groups = annotations[i].groups;
             for (var j in groups) {
@@ -624,7 +624,7 @@ var NewCalculation = function() {
 
                             if (groups[j].familyIncluded[k].segregation.assessments && groups[j].familyIncluded[k].segregation.assessments.length > 0) {
                                 for (var l in groups[j].familyIncluded[k].segregation.assessments) {
-                                    var this_assessment = groups[j].familyIncluded[k].segregation.assessments[l];
+                                    this_assessment = groups[j].familyIncluded[k].segregation.assessments[l];
                                     if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
                                         userAssessments['segSpt'] += 1;
                                     }
@@ -655,7 +655,7 @@ var NewCalculation = function() {
 
                     if (annotations[i].families[j].segregation.assessments && annotations[i].families[j].segregation.assessments.length > 0) {
                         for (var l in annotations[i].families[j].segregation.assessments) {
-                            var this_assessment = annotations[i].families[j].segregation.assessments[l];
+                            this_assessment = annotations[i].families[j].segregation.assessments[l];
                             if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
                                 userAssessments['segSpt'] += 1;
                             }
@@ -814,7 +814,6 @@ var NewCalculation = function() {
         probandScore = 0;
     }
 
-    var expScore = 0;
     if (finalExperimentalScore >= 6) {
         expScore = 6;
     }
@@ -822,7 +821,6 @@ var NewCalculation = function() {
         expScore = finalExperimentalScore;
     }
 
-    var pubScore = 0;
     if (articleCollected.length >= 5) {
         pubScore = 5;
     }
