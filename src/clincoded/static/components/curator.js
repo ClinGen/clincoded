@@ -1814,61 +1814,117 @@ var DeleteButtonModal = React.createClass({
         };
     },
 
+    deleteDeep: function(item) {
+        var ids = [];
+        var tempSubItem;
+        var deletedItem = flatten(item);
+        var hasChildren = false;
+
+        if (item.group) {
+            hasChildren = true;
+            ids = ids.concat(this.deleteDeepLoop(item.group));
+            deletedItem.group = [];
+        }
+        if (item.family) {
+            hasChildren = true;
+            ids = ids.concat(this.deleteDeepLoop(item.family));
+            deletedItem.family = [];
+        }
+        if (item.individual) {
+            hasChildren = true;
+            ids = ids.concat(this.deleteDeepLoop(item.individual));
+            deletedItem.individual = [];
+        }
+        if (item.familyIncluded) {
+            hasChildren = true;
+            ids = ids.concat(this.deleteDeepLoop(item.familyIncluded));
+            deletedItem.familyIncluded = [];
+        }
+        if (item.individualIncluded) {
+            hasChildren = true;
+            ids = ids.concat(this.deleteDeepLoop(item.individualIncluded));
+            deletedItem.individualIncluded = [];
+        }
+        if (item.experimentalData) {
+            hasChildren = true;
+            ids = ids.concat(this.deleteDeepLoop(item.experimentalData));
+            deletedItem.experimentalData = [];
+        }
+
+
+        deletedItem.status = 'deleted';
+        console.log(deletedItem);
+        return this.putRestData(item['@id'], deletedItem).then(data => {
+            return Promise.resolve(data['@graph'][0]);
+        }).then(data => {
+            return this.recordHistory('delete', item);
+        }).catch(function(e) {
+            console.log('DELETE DEEP ERROR: %o', e);
+        });
+    },
+
+    deleteDeepLoop: function(tempSubItem) {
+        var tempIds = [];
+        if (tempSubItem && tempSubItem.length > 0) {
+            for (var i = 0; i < tempSubItem.length; i++) {
+                tempIds = tempIds.concat(this.deleteDeep(tempSubItem[i]));
+                console.log(tempSubItem[i]);
+                tempIds.push(tempSubItem[i]['@id']);
+            }
+        }
+        return tempIds;
+    },
+
     deleteItem: function(e) {
         e.preventDefault(); e.stopPropagation();
         this.setState({submitBusy: true});
-        var deletedItem;
-        var deletedParent;
-        this.getRestData(this.props.item['@id'], null, true).then(item => {
-            // get up-to-date target item and set its status to deleted
-            deletedItem = flatten(item);
-            deletedItem.status = 'deleted';
-            return Promise.resolve(item);
+        var itemUuid = this.props.item['@id'];
+        var parentUuid = this.props.parent['@id'];
+
+        var deletedItemRaw, deletedItem, deletedParent;
+
+
+        this.getRestData(itemUuid, null, true).then(item => {
+            deletedItemRaw = item;
+            console.log(item);
+            return this.deleteDeep(item);
+            //return Promise.resolve(item);
         }).then(item => {
             // get up-to-date parent object; also bypass issue of certain certain embedded parent
             // items in edit pages being un-flattenable
-            return this.getRestData(this.props.parent['@id'], null, true).then(parent => {
-                return Promise.resolve(parent);
-            });
-        }).then(parent => {
-            // flatten parent object and remove link to deleted item as appropriate
-            deletedParent = flatten(parent);
-            if (parent['@type'][0] == 'annotation') {
-                if (this.props.item['@type'][0] == 'group') {
-                    deletedParent.groups = _.without(deletedParent.groups, this.props.item['@id']);
-                } else if (this.props.item['@type'][0] == 'family') {
-                    deletedParent.families = _.without(deletedParent.families, this.props.item['@id']);
-                } else if (this.props.item['@type'][0] == 'individual') {
-                    deletedParent.individuals = _.without(deletedParent.individuals, this.props.item['@id']);
-                } else if (this.props.item['@type'][0] == 'experimental') {
-                    deletedParent.experimentalData = _.without(deletedParent.experimentalData, this.props.item['@id']);
-                }
-            } else {
-                if (this.props.item['@type'][0] == 'family') {
-                    deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, this.props.item['@id']);
-                } else if (this.props.item['@type'][0] == 'individual') {
-                    deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, this.props.item['@id']);
-                    if (parent['@type'][0] == 'family') {
-                        // Empty variants of parent object if target item is individual and parent is family
-                        deletedParent.segregation.variants = [];
+            return this.getRestData(parentUuid, null, true).then(parent => {
+                // flatten parent object and remove link to deleted item as appropriate
+                deletedParent = flatten(parent);
+                if (parent['@type'][0] == 'annotation') {
+                    if (deletedItemRaw['@type'][0] == 'group') {
+                        deletedParent.groups = _.without(deletedParent.groups, itemUuid);
+                    } else if (deletedItemRaw['@type'][0] == 'family') {
+                        deletedParent.families = _.without(deletedParent.families, itemUuid);
+                    } else if (deletedItemRaw['@type'][0] == 'individual') {
+                        deletedParent.individuals = _.without(deletedParent.individuals, itemUuid);
+                    } else if (deletedItemRaw['@type'][0] == 'experimental') {
+                        deletedParent.experimentalData = _.without(deletedParent.experimentalData, itemUuid);
+                    }
+                } else {
+                    if (deletedItemRaw['@type'][0] == 'family') {
+                        deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, itemUuid);
+                    } else if (deletedItemRaw['@type'][0] == 'individual') {
+                        deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, itemUuid);
+                        if (parent['@type'][0] == 'family') {
+                            // Empty variants of parent object if target item is individual and parent is family
+                            deletedParent.segregation.variants = [];
+                        }
                     }
                 }
-            }
-            // PUT updated parent object w/ removed link to deleted item
-            return this.putRestData(this.props.parent['@id'], deletedParent).then(data => {
-                return Promise.resolve(data['@graph'][0]);
-            });
-        }).then(data => {
-            // PUT deleted item w/ updated status
-            return this.putRestData(this.props.item['@id'], deletedItem).then(data => {
-                return Promise.resolve(data['@graph'][0]);
+                // PUT updated parent object w/ removed link to deleted item
+                return this.putRestData(parentUuid, deletedParent).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
             });
         }).then(data => {
             this.recordHistory('delete', this.props.item).then(() => {
-                // forward user to curation central w/ PMID selected after writing history
-                window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
+                //window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
             });
-
         }).catch(function(e) {
             console.log('DELETE ERROR: %o', e);
         });
