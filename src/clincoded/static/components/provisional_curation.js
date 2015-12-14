@@ -564,11 +564,11 @@ var NewCalculation = function() {
         "contradict": []
     };
 
-    for (var i in gdmPathoList) {
+    for (let i in gdmPathoList) {
         var variantUuid = gdmPathoList[i].variant.uuid;
         // Collect login user's variant assessments, separated as 3 different values.
         if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
-            for (var j in gdmPathoList[i].assessments) {
+            for (let j in gdmPathoList[i].assessments) {
                 if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
                     pathoVariantIdList['support'].push(variantUuid);
                 }
@@ -605,13 +605,13 @@ var NewCalculation = function() {
 
     // scan gdm
     var annotations = gdm.annotations ? gdm.annotations : [];
-    for (var i in annotations) {
+    for (let i in annotations) {
         var this_assessment;
         if (annotations[i].groups && annotations[i].groups.length > 0) {
             var groups = annotations[i].groups;
-            for (var j in groups) {
+            for (let j in groups) {
                 if (groups[j].familyIncluded && groups[j].familyIncluded.length > 0) {
-                    for (var k in groups[j].familyIncluded) {
+                    for (let k in groups[j].familyIncluded) {
 
                         // collect individuals
                         if (groups[j].familyIncluded[k].individualIncluded && groups[j].familyIncluded[k].individualIncluded.length > 0) {
@@ -623,7 +623,7 @@ var NewCalculation = function() {
                             userAssessments['segNot'] += 1;
 
                             if (groups[j].familyIncluded[k].segregation.assessments && groups[j].familyIncluded[k].segregation.assessments.length > 0) {
-                                for (var l in groups[j].familyIncluded[k].segregation.assessments) {
+                                for (let l in groups[j].familyIncluded[k].segregation.assessments) {
                                     this_assessment = groups[j].familyIncluded[k].segregation.assessments[l];
                                     if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
                                         userAssessments['segSpt'] += 1;
@@ -645,7 +645,7 @@ var NewCalculation = function() {
             }
         }
         if (annotations[i].families && annotations[i].families.length > 0) {
-            for (var j in annotations[i].families) {
+            for (let j in annotations[i].families) {
                 if (annotations[i].families[j].individualIncluded && annotations[i].families[j].individualIncluded.length > 0) {
                     individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, pathoVariantIdList);
                 }
@@ -654,7 +654,7 @@ var NewCalculation = function() {
                     userAssessments['segNot'] += 1;
 
                     if (annotations[i].families[j].segregation.assessments && annotations[i].families[j].segregation.assessments.length > 0) {
-                        for (var l in annotations[i].families[j].segregation.assessments) {
+                        for (let l in annotations[i].families[j].segregation.assessments) {
                             this_assessment = annotations[i].families[j].segregation.assessments[l];
                             if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
                                 userAssessments['segSpt'] += 1;
@@ -676,14 +676,14 @@ var NewCalculation = function() {
 
         // collect experimental assessed support, check matrix
         if (annotations[i].experimentalData && annotations[i].experimentalData.length > 0) {
-            for (var j in annotations[i].experimentalData) {
+            for (let j in annotations[i].experimentalData) {
                 var exp = annotations[i].experimentalData[j];
                 var subTypeKey = exp.evidenceType;
 
                 userAssessments['expNot'] += 1;
 
                 if (exp.assessments && exp.assessments.length > 0) {
-                    for (var j in exp.assessments) {
+                    for (let j in exp.assessments) {
                         if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Supports') {
                             if (exp.evidenceType === 'Expression') {
                                 expType[subTypeKey] += 1;
@@ -752,7 +752,7 @@ var NewCalculation = function() {
 
     // Compare designed max value at each score category and get the total experimental score
     var finalExperimentalScore = 0;
-    for (var i in exp_scores) {
+    for (let i in exp_scores) {
         var max = 2; // set max value for each type
         if (i == 2) {
             max = 4;
@@ -765,7 +765,7 @@ var NewCalculation = function() {
     var articleCollected = [];
     var year = new Date();
     var earliest = year.getFullYear();
-    for (var i in individualsCollected['probandInd']) {
+    for (let i in individualsCollected['probandInd']) {
         if (individualsCollected['probandInd'][i].pmid && individualsCollected['probandInd'][i].pmid != '') {
             proband += 1;
             if (!in_array(individualsCollected['probandInd'][i].pmid, articleCollected)) {
@@ -850,7 +850,7 @@ var NewCalculation = function() {
     this.state.autoClassification = autoClassification;
 
     var probandRow = [], expRow = [], pubRow = [], timeRow = [];
-    for(var i=0; i<8; i++) {
+    for(let i=0; i<8; i++) {
         if (i === probandScore) {
             probandRow.push(proband);
         }
@@ -1196,7 +1196,7 @@ var NewCalculation = function() {
 };
 
 var in_array = function(item, list) {
-    for(var i in list){
+    for(let i in list){
         if (list[i] == item) {
             return true;
         }
@@ -1221,7 +1221,7 @@ var filter = function(target, branch, article, idList) {
         if (obj.proband && obj.variants && obj.variants.length > 0) {
             // counting at probands only
             var allSupported = true;
-            for (var j in obj.variants) {
+            for (let j in obj.variants) {
                 // collect all distinct variants from proband individuals
                 if (!in_array(obj.variants[j].uuid, allVariants)) {
                     allVariants.push(obj.variants[j].uuid);

@@ -94,7 +94,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
             if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
-                for (var i in gdm.provisionalClassifications) {
+                for (let i in gdm.provisionalClassifications) {
                     if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
                         provisionalExist = true;
                         provisional = gdm.provisionalClassifications[i];
@@ -106,14 +106,14 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
             var supportedVariants = getUserPathogenicity(gdm, session);
             if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && supportedVariants && supportedVariants.length > 0) {
-                for (i in gdm.annotations) {
+                for (let i in gdm.annotations) {
                     var annotation = gdm.annotations[i];
                     if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
                         summaryButton = true;
                         break;
                     }
                     if (!summaryButton && annotation.families && annotation.families.length > 0) {
-                        for (var j in annotation.families) {
+                        for (let j in annotation.families) {
                             if (annotation.families[j].individualIncluded && annotation.families[j].individualIncluded.length > 0 &&
                                 searchProbandIndividual(annotation.families[j].individualIncluded, supportedVariants)) {
                                 summaryButton = true;
@@ -125,9 +125,9 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                         break;
                     }
                     else if (annotation.groups && annotation.groups.length > 0) {
-                        for (j in annotation.groups) {
+                        for (let j in annotation.groups) {
                             if (annotation.groups[j].familyIncluded && annotation.groups[j].familyIncluded.length > 0) {
-                                for (var k in annotation.groups[j].familyIncluded) {
+                                for (let k in annotation.groups[j].familyIncluded) {
                                     if (annotation.groups[j].familyIncluded[k].individualIncluded && annotation.groups[j].familyIncluded[k].individualIncluded.length > 0 &&
                                         searchProbandIndividual(annotation.groups[j].familyIncluded[k].individualIncluded, supportedVariants)) {
                                         summaryButton = true;
@@ -229,7 +229,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 var getUserPathogenicity = function(gdm, session) {
     var supportedVariants = [];
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
-        for (var i in gdm.variantPathogenicity) {
+        for (let i in gdm.variantPathogenicity) {
             var this_patho = gdm.variantPathogenicity[i];
             if (userMatch(this_patho.submitted_by, session) && this_patho.assessments && this_patho.assessments.length > 0 && this_patho.assessments[0].value === 'Supports') {
                 supportedVariants.push(this_patho.variant.uuid);
@@ -240,9 +240,9 @@ var getUserPathogenicity = function(gdm, session) {
 };
 
 var all_in = function(individualVariantList, allSupportedlist) {
-    for(var i in individualVariantList) {
+    for(let i in individualVariantList) {
         var this_in = false;
-        for (var j in allSupportedlist) {
+        for (let j in allSupportedlist) {
             if (individualVariantList[i].uuid === allSupportedlist[j]) {
                 this_in = true;
                 break;
@@ -258,7 +258,7 @@ var all_in = function(individualVariantList, allSupportedlist) {
 
 // function to find one proband individual with all variants assessed.
 var searchProbandIndividual = function(individualList, variantList) {
-    for (var i in individualList) {
+    for (let i in individualList) {
         if (individualList[i].proband && individualList[i].variants && individualList[i].variants.length > 0 && all_in(individualList[i].variants, variantList)) {
             return true;
         }
