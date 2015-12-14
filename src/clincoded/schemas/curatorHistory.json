@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "operationType": {
             "title": "Curator operation type",
@@ -42,6 +42,12 @@
                 "provisionalClassification",
                 "variant"
             ]
+        },
+        "hidden": {
+            "title": "Hidden from Dashboard",
+            "description": "Whether or not item should be hidden from dashboard",
+            "type": "integer",
+            "default": 0
         },
         "meta": {
             "title": "History meta",
@@ -373,6 +379,10 @@
         "primary": {
             "title": "Primary object information",
             "type": "object"
+        },
+        "hidden": {
+            "title": "Hidden",
+            "type": "boolean"
         },
         "meta.article.gdm": {
             "title": "GDM of PMID",

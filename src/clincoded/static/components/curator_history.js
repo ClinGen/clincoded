@@ -19,7 +19,8 @@ module.exports = {
         // Put the history object together
         var historyItem = {
             operationType: operationType,
-            primary: primary['@id']
+            primary: primary['@id'],
+            hidden: 0
         };
         if (meta) {
             historyItem.meta = meta;
@@ -49,7 +50,7 @@ module.exports = {
     // Get the history component to display the object that the given history item describes. The actual component varies
     // depending on the type of the primary object of the history item, and other code registers components to display
     // specific kinds of history items.
-    // 
+    //
     // If you have an individual history item returned from the getHistories() array, you can display the history item with:
     //   var HistoryView = this.getHistoryView(history);
     //   <HistoryView history={history} />
