@@ -1746,8 +1746,8 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
     );
 };
 
-// Mixin for delete button (and associated modal) of Group, Family, Individual, and Experimental
-// Data objects. This mixin only renderes the button; please see DeleteButtonModal for bulk of
+// Class for delete button (and associated modal) of Group, Family, Individual, and Experimental
+// Data objects. This class only renderes the button; please see DeleteButtonModal for bulk of
 // functionality
 var DeleteButton = module.exports.DeleteButton = React.createClass({
     mixins: [ModalMixin],
@@ -1814,12 +1814,14 @@ var DeleteButtonModal = React.createClass({
         };
     },
 
+    // main recursive function that finds any child items, deletes them, and
+    // then deletes parent item, while creating necessary history items
     deleteDeep: function(item, depth) {
         var ids = [];
-        var tempSubItem;
         var deletedItem = flatten(item);
         var hasChildren = false;
 
+        // check possible child objects
         if (item.group) {
             hasChildren = true;
             ids = ids.concat(this.deleteDeepLoop(item.group, depth));
@@ -1851,30 +1853,35 @@ var DeleteButtonModal = React.createClass({
             deletedItem.experimentalData = [];
         }
 
+        // set current/parent item as deleted
         deletedItem.status = 'deleted';
-        console.log(deletedItem);
         return this.putRestData(item['@id'], deletedItem).then(data => {
+            // PUT deleted current/parent item
             return Promise.resolve(data['@graph'][0]);
         }).then(data => {
             var operationType = 'delete';
+            // add flags to operation type as needed
             if (depth > 0) {
                 operationType += '-hide';
             }
             if (hasChildren) {
                 operationType += '-hadChildren';
             }
+            // add history item
             return this.recordHistory(operationType, item);
         }).catch(function(e) {
             console.log('DELETE DEEP ERROR: %o', e);
         });
     },
 
+    // function for looping through a parent item's list of child items
+    // of a specific type
     deleteDeepLoop: function(tempSubItem, depth) {
         var tempIds = [];
         if (tempSubItem && tempSubItem.length > 0) {
             for (var i = 0; i < tempSubItem.length; i++) {
+                // call deleteDeep on child item to delete it and its children
                 tempIds = tempIds.concat(this.deleteDeep(tempSubItem[i], depth + 1));
-                console.log(tempSubItem[i]);
                 tempIds.push(tempSubItem[i]['@id']);
             }
         }
@@ -1886,9 +1893,7 @@ var DeleteButtonModal = React.createClass({
         this.setState({submitBusy: true});
         var itemUuid = this.props.item['@id'];
         var parentUuid = this.props.parent['@id'];
-
         var deletedItemRaw, deletedItem, deletedParent;
-
 
         this.getRestData(itemUuid, null, true).then(item => {
             deletedItemRaw = item;
@@ -1926,7 +1931,7 @@ var DeleteButtonModal = React.createClass({
                 });
             });
         }).then(data => {
-            //window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
+            window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
         }).catch(function(e) {
             console.log('DELETE ERROR: %o', e);
         });

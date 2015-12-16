@@ -388,7 +388,11 @@
         },
         "hidden": {
             "title": "Hidden",
-            "type": "boolean"
+            "type": "integer"
+        },
+        "hadChildren": {
+            "title": "Had Children",
+            "type": "integer"
         },
         "meta.article.gdm": {
             "title": "GDM of PMID",

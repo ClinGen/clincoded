@@ -13,6 +13,9 @@ module.exports = {
     // Record an operation on the ClinGen database performed by the curator. A promise gets returned,
     // though likely it gets ignored because operations relying on this returning seem unusual.
     //   operationType: Type of operation: 'add', 'modify', 'delete'
+    //      operationType value with appended '-hide' and/or '-hadChildren' substrings will have the
+    //          relevant flags activated in the history item, and the substrings will be removed from
+    //          operationType
     //   primary: Primary object of operation, e.g. group, family, etc.
     //   meta: Metadata that varies depending on the type of the primary object. See curatorHistory.json.
     recordHistory: function(operationType, primary, meta) {
