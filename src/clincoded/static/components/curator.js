@@ -1814,7 +1814,7 @@ var DeleteButtonModal = React.createClass({
         };
     },
 
-    deleteDeep: function(item) {
+    deleteDeep: function(item, depth) {
         var ids = [];
         var tempSubItem;
         var deletedItem = flatten(item);
@@ -1822,52 +1822,58 @@ var DeleteButtonModal = React.createClass({
 
         if (item.group) {
             hasChildren = true;
-            ids = ids.concat(this.deleteDeepLoop(item.group));
+            ids = ids.concat(this.deleteDeepLoop(item.group, depth));
             deletedItem.group = [];
         }
         if (item.family) {
             hasChildren = true;
-            ids = ids.concat(this.deleteDeepLoop(item.family));
+            ids = ids.concat(this.deleteDeepLoop(item.family, depth));
             deletedItem.family = [];
         }
         if (item.individual) {
             hasChildren = true;
-            ids = ids.concat(this.deleteDeepLoop(item.individual));
+            ids = ids.concat(this.deleteDeepLoop(item.individual, depth));
             deletedItem.individual = [];
         }
         if (item.familyIncluded) {
             hasChildren = true;
-            ids = ids.concat(this.deleteDeepLoop(item.familyIncluded));
+            ids = ids.concat(this.deleteDeepLoop(item.familyIncluded, depth));
             deletedItem.familyIncluded = [];
         }
         if (item.individualIncluded) {
             hasChildren = true;
-            ids = ids.concat(this.deleteDeepLoop(item.individualIncluded));
+            ids = ids.concat(this.deleteDeepLoop(item.individualIncluded, depth));
             deletedItem.individualIncluded = [];
         }
         if (item.experimentalData) {
             hasChildren = true;
-            ids = ids.concat(this.deleteDeepLoop(item.experimentalData));
+            ids = ids.concat(this.deleteDeepLoop(item.experimentalData, depth));
             deletedItem.experimentalData = [];
         }
-
 
         deletedItem.status = 'deleted';
         console.log(deletedItem);
         return this.putRestData(item['@id'], deletedItem).then(data => {
             return Promise.resolve(data['@graph'][0]);
         }).then(data => {
-            return this.recordHistory('delete', item);
+            var operationType = 'delete';
+            if (depth > 0) {
+                operationType += '-hide';
+            }
+            if (hasChildren) {
+                operationType += '-hadChildren';
+            }
+            return this.recordHistory(operationType, item);
         }).catch(function(e) {
             console.log('DELETE DEEP ERROR: %o', e);
         });
     },
 
-    deleteDeepLoop: function(tempSubItem) {
+    deleteDeepLoop: function(tempSubItem, depth) {
         var tempIds = [];
         if (tempSubItem && tempSubItem.length > 0) {
             for (var i = 0; i < tempSubItem.length; i++) {
-                tempIds = tempIds.concat(this.deleteDeep(tempSubItem[i]));
+                tempIds = tempIds.concat(this.deleteDeep(tempSubItem[i], depth + 1));
                 console.log(tempSubItem[i]);
                 tempIds.push(tempSubItem[i]['@id']);
             }
@@ -1886,9 +1892,7 @@ var DeleteButtonModal = React.createClass({
 
         this.getRestData(itemUuid, null, true).then(item => {
             deletedItemRaw = item;
-            console.log(item);
-            return this.deleteDeep(item);
-            //return Promise.resolve(item);
+            return this.deleteDeep(item, 0);
         }).then(item => {
             // get up-to-date parent object; also bypass issue of certain certain embedded parent
             // items in edit pages being un-flattenable
@@ -1922,9 +1926,7 @@ var DeleteButtonModal = React.createClass({
                 });
             });
         }).then(data => {
-            this.recordHistory('delete', this.props.item).then(() => {
-                //window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
-            });
+            //window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
         }).catch(function(e) {
             console.log('DELETE ERROR: %o', e);
         });

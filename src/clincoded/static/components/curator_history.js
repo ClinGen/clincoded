@@ -17,11 +17,20 @@ module.exports = {
     //   meta: Metadata that varies depending on the type of the primary object. See curatorHistory.json.
     recordHistory: function(operationType, primary, meta) {
         // Put the history object together
+        var hiddenIndex = operationType.indexOf('-hide');
+        var hadChildrenIndex = operationType.indexOf('-hadChildren');
+        operationType = operationType.replace('-hide', '').replace('-hadChildren', '');
         var historyItem = {
             operationType: operationType,
-            primary: primary['@id'],
-            hidden: 0
+            primary: primary['@id']
         };
+
+        if (hiddenIndex > -1) {
+            historyItem.hidden = 1;
+        }
+        if (hadChildrenIndex > -1) {
+            historyItem.hadChildren = 1;
+        }
         if (meta) {
             historyItem.meta = meta;
         }
@@ -38,9 +47,12 @@ module.exports = {
     // as an array to the console once the histories get retrieved.
     //
     // this.getHistories(5).then(histories => { console.log('Item: %o', histories); });
-    getHistories: function(user, limit) {
+    getHistories: function(user, limit, showHidden) {
+        if (!showHidden) {
+            showHidden = 0;
+        }
         if (user) {
-            return this.getRestData('/histories/?submitted_by.uuid=' + user.uuid + (limit ? '&limit=' + limit : '')).then(data => {
+            return this.getRestData('/histories/?submitted_by.uuid=' + user.uuid + (limit ? '&limit=' + limit : '') + (showHidden == 'all' ? '' : '&hidden=' + showHidden)).then(data => {
                 return data['@graph'];
             });
         }
