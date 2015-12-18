@@ -1824,34 +1824,47 @@ var DeleteButtonModal = React.createClass({
 
         // check possible child objects
         if (item.group) {
-            hasChildren = true;
+            if (item.group.length > 0) {
+                hasChildren = true;
+            }
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.group, depth, mode, 'groups'));
         }
         if (item.family) {
-            hasChildren = true;
+            if (item.family.length > 0) {
+                hasChildren = true;
+            }
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.family, depth, mode, 'families'));
         }
         if (item.individual) {
-            hasChildren = true;
+            if (item.individual.length > 0) {
+                hasChildren = true;
+            }
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.individual, depth, mode, 'individuals'));
         }
         if (item.familyIncluded) {
-            hasChildren = true;
+            if (item.familyIncluded.length > 0) {
+                hasChildren = true;
+            }
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.familyIncluded, depth, mode, 'families'));
         }
         if (item.individualIncluded) {
-            hasChildren = true;
+            if (item.individualIncluded.length > 0) {
+                hasChildren = true;
+            }
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.individualIncluded, depth, mode, 'individuals'));
         }
         if (item.experimentalData) {
-            hasChildren = true;
+            if (item.experimentalData.length > 0) {
+                hasChildren = true;
+            }
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.experimentalData, depth, mode, 'experimental datas'));
         }
 
-        // if the mode is 'delete', flatten the current item, set it as deleted
+        // if the mode is 'delete', get the items' parents' info if needed, flatten the current item, set it as deleted
         // and inactive, and load the PUT and history record promises into the payload
         if (mode == 'delete') {
             var parentInfo;
+            // if this is the target item being deleted, get its parent item information to store in the history object
             if (depth == 0) {
                 parentInfo = {};
                 if (item.associatedGdm && item.associatedGdm.length > 0) {
@@ -1868,6 +1881,7 @@ var DeleteButtonModal = React.createClass({
                     parentInfo.name = item.associatedFamilies[0].label;
                 }
             }
+            // flatten the target item
             var deletedItem = flatten(item);
             deletedItem.status = 'deleted';
             deletedItem.active = false;
@@ -1879,7 +1893,8 @@ var DeleteButtonModal = React.createClass({
             if (hasChildren) {
                 operationType += '-hadChildren';
             }
-            returnPayload.push(this.putRestData(item['@id'], deletedItem));
+            // push promises to payload
+            returnPayload.push(this.putRestData(item['@id'] + '?render=false', deletedItem));
             returnPayload.push(this.recordHistory(operationType, item, null, parentInfo));
         }
 
@@ -1908,6 +1923,7 @@ var DeleteButtonModal = React.createClass({
                 }
             } else {
                 if (mode == 'display') {
+                    // if childspace is empty, add a display line indicating the fact
                     tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;</span>;})}&#8627; no associated {type}</span>;
                     returnPayload.push(tempDisplayString);
                 }

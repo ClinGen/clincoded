@@ -105,8 +105,6 @@ def audit_item_status(value, system):
             linked_value['status'] == 'deleted'
         ):
             continue
-        if 'active' in linked_value and linked_value['status'] == 'deleted' and linked_value['active'] is False:
-            continue
         linked_level = STATUS_LEVEL.get(linked_value['status'], 50)
         if linked_level == 0:
             detail = '{} {} has {} subobject {}'.format(

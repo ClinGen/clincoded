@@ -46,9 +46,13 @@ ALLOW_CURRENT = [
 ]
 
 ALLOW_CURRENT_NOVIEW = [
-    (Allow, 'group.curator', ['edit']),
-    (Deny, 'group.curator', 'visible_for_edit'),
+    (Allow, 'group.curator', 'edit'),
+    (Deny, 'group.curator', 'view'),
     (Allow, 'group.admin', ALL_PERMISSIONS),
+    # Avoid schema validation errors during audit
+    (Allow, 'remoteuser.EMBED', ['view', 'expand', 'audit', 'import_items']),
+    (Allow, 'remoteuser.INDEXER', ['view', 'index']),
+    DENY_ALL,
 ]
 
 ONLY_ADMIN_VIEW = [
