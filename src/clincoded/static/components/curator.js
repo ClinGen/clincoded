@@ -1825,32 +1825,49 @@ var DeleteButtonModal = React.createClass({
         // check possible child objects
         if (item.group) {
             hasChildren = true;
-            returnPayload = returnPayload.concat(this.recurseItemLoop(item.group, depth, mode));
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.group, depth, mode, 'groups'));
         }
         if (item.family) {
             hasChildren = true;
-            returnPayload = returnPayload.concat(this.recurseItemLoop(item.family, depth, mode));
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.family, depth, mode, 'families'));
         }
         if (item.individual) {
             hasChildren = true;
-            returnPayload = returnPayload.concat(this.recurseItemLoop(item.individual, depth, mode));
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.individual, depth, mode, 'individuals'));
         }
         if (item.familyIncluded) {
             hasChildren = true;
-            returnPayload = returnPayload.concat(this.recurseItemLoop(item.familyIncluded, depth, mode));
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.familyIncluded, depth, mode, 'families'));
         }
         if (item.individualIncluded) {
             hasChildren = true;
-            returnPayload = returnPayload.concat(this.recurseItemLoop(item.individualIncluded, depth, mode));
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.individualIncluded, depth, mode, 'individuals'));
         }
         if (item.experimentalData) {
             hasChildren = true;
-            returnPayload = returnPayload.concat(this.recurseItemLoop(item.experimentalData, depth, mode));
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.experimentalData, depth, mode, 'experimental datas'));
         }
 
         // if the mode is 'delete', flatten the current item, set it as deleted
         // and inactive, and load the PUT and history record promises into the payload
         if (mode == 'delete') {
+            var parentInfo;
+            if (depth == 0) {
+                parentInfo = {};
+                if (item.associatedGdm && item.associatedGdm.length > 0) {
+                    parentInfo.id = item.associatedGdm[0]['@id'];
+                    parentInfo.name = item.associatedGdm[0].gdm_title;
+                } else if (item.associatedAnnotations && item.associatedAnnotations.length > 0) {
+                    parentInfo.id = item.associatedAnnotations[0]['@id'];
+                    parentInfo.name = item.associatedAnnotations[0].associatedGdm[0].gdm_title + ':' + item.associatedAnnotations[0].article.pmid;
+                } else if (item.associatedGroups && item.associatedGroups.length > 0) {
+                    parentInfo.id = item.associatedGroups[0]['@id'];
+                    parentInfo.name = item.associatedGroups[0].label;
+                } else if (item.associatedFamilies && item.associatedFamilies.length > 0) {
+                    parentInfo.id = item.associatedFamilies[0]['@id'];
+                    parentInfo.name = item.associatedFamilies[0].label;
+                }
+            }
             var deletedItem = flatten(item);
             deletedItem.status = 'deleted';
             deletedItem.active = false;
@@ -1863,7 +1880,7 @@ var DeleteButtonModal = React.createClass({
                 operationType += '-hadChildren';
             }
             returnPayload.push(this.putRestData(item['@id'], deletedItem));
-            returnPayload.push(this.recordHistory(operationType, item));
+            returnPayload.push(this.recordHistory(operationType, item, null, parentInfo));
         }
 
         // return the payload, whether it's promises, display texts, or @ids
@@ -1872,21 +1889,28 @@ var DeleteButtonModal = React.createClass({
 
     // function for looping through a parent item's list of child items
     // of a specific type
-    recurseItemLoop: function(tempSubItem, depth, mode) {
+    recurseItemLoop: function(tempSubItem, depth, mode, type) {
         var tempDisplayString;
         var returnPayload = [];
-        if (tempSubItem && tempSubItem.length > 0) {
-            for (var i = 0; i < tempSubItem.length; i++) {
-                if (mode == 'display') {
-                    // if the mode is 'display', generate the display string
-                    tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem[i]['@id']}>{tempSubItem[i]['@type'][0]} {tempSubItem[i]['label']}</a></span>;
-                    returnPayload.push(tempDisplayString);
-                } else if (mode == 'id') {
-                    // if the mode is 'id', grab the @ids of the child items
-                    returnPayload.push(tempSubItem[i]['@id']);
+        if (tempSubItem) {
+            if (tempSubItem.length > 0) {
+                for (var i = 0; i < tempSubItem.length; i++) {
+                    if (mode == 'display') {
+                        // if the mode is 'display', generate the display string
+                        tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem[i]['@id']}>{tempSubItem[i]['@type'][0]} {tempSubItem[i].label}</a></span>;
+                        returnPayload.push(tempDisplayString);
+                    } else if (mode == 'id') {
+                        // if the mode is 'id', grab the @ids of the child items
+                        returnPayload.push(tempSubItem[i]['@id']);
+                    }
+                    // call recurseItem on child item
+                    returnPayload = returnPayload.concat(this.recurseItem(tempSubItem[i], depth + 1, mode));
                 }
-                // call recurseItem on child item
-                returnPayload = returnPayload.concat(this.recurseItem(tempSubItem[i], depth + 1, mode));
+            } else {
+                if (mode == 'display') {
+                    tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;</span>;})}&#8627; no associated {type}</span>;
+                    returnPayload.push(tempDisplayString);
+                }
             }
         }
         return returnPayload;
@@ -1967,10 +1991,10 @@ var DeleteButtonModal = React.createClass({
         var message;
         // generate custom messages and generate display tree for group and family delete confirm modals
         if (this.props.item['@type'][0] == 'group') {
-            message = <p><strong>Warning</strong>: Deleting this Group will also delete the following associated Families and/or Individuals:</p>;
+            message = <p><strong>Warning</strong>: Deleting this Group will also delete any associated families and individuals (see below)</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
         } else if (this.props.item['@type'][0] == 'family') {
-            message = <p><strong>Warning</strong>: Deleting this Family will also delete the following associated Individuals:</p>;
+            message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see below)</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
         }
         return (
@@ -1984,7 +2008,7 @@ var DeleteButtonModal = React.createClass({
                     })}
                     <br /></div>
                     : null}
-                    <p>Are you sure you would like to delete this item?</p>
+                    <p>Are you sure you want to delete this item?</p>
                     </div>
                 <div className="modal-footer">
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />

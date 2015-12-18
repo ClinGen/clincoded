@@ -18,7 +18,7 @@ module.exports = {
     //          operationType
     //   primary: Primary object of operation, e.g. group, family, etc.
     //   meta: Metadata that varies depending on the type of the primary object. See curatorHistory.json.
-    recordHistory: function(operationType, primary, meta) {
+    recordHistory: function(operationType, primary, meta, parentInfo) {
         // Put the history object together
         var hiddenIndex = operationType.indexOf('-hide');
         var hadChildrenIndex = operationType.indexOf('-hadChildren');
@@ -36,6 +36,9 @@ module.exports = {
         }
         if (meta) {
             historyItem.meta = meta;
+        }
+        if (parentInfo) {
+            historyItem.parentInfo = parentInfo;
         }
 
         // Write the history object to the database and return a promise. In most cases probably, the
