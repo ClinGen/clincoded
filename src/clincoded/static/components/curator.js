@@ -1820,44 +1820,39 @@ var DeleteButtonModal = React.createClass({
     // called outside of the function.
     recurseItem: function(item, depth, mode) {
         var returnPayload = [];
-        var deletedItem = flatten(item);
         var hasChildren = false;
 
         // check possible child objects
         if (item.group) {
             hasChildren = true;
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.group, depth, mode));
-            deletedItem.group = [];
         }
         if (item.family) {
             hasChildren = true;
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.family, depth, mode));
-            deletedItem.family = [];
         }
         if (item.individual) {
             hasChildren = true;
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.individual, depth, mode));
-            deletedItem.individual = [];
         }
         if (item.familyIncluded) {
             hasChildren = true;
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.familyIncluded, depth, mode));
-            deletedItem.familyIncluded = [];
         }
         if (item.individualIncluded) {
             hasChildren = true;
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.individualIncluded, depth, mode));
-            deletedItem.individualIncluded = [];
         }
         if (item.experimentalData) {
             hasChildren = true;
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.experimentalData, depth, mode));
-            deletedItem.experimentalData = [];
         }
 
         if (mode == 'delete') {
             // if the mode is 'delete', set the current/parent item as deleted
+            var deletedItem = flatten(item);
             deletedItem.status = 'deleted';
+            deletedItem.active = false;
             return this.putRestData(item['@id'], deletedItem).then(data => {
                 // PUT deleted current/parent item
                 return Promise.resolve(data['@graph'][0]);

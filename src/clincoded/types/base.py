@@ -47,8 +47,8 @@ ALLOW_CURRENT = [
 
 ALLOW_CURRENT_NOVIEW = [
     (Allow, 'group.curator', ['edit']),
-    (Deny, 'group.curator', ['view']),
-    (Allow, 'group.admin', ALL_PERMISSIONS)
+    (Deny, 'group.curator', 'visible_for_edit'),
+    (Allow, 'group.admin', ALL_PERMISSIONS),
 ]
 
 ONLY_ADMIN_VIEW = [
