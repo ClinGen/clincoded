@@ -1814,10 +1814,10 @@ var DeleteButtonModal = React.createClass({
         };
     },
 
-    // main recursive function that finds any child items, and either deletes the child items and target item
-    // and genereate the history item, generates the display strings, or returns the @ids of all the items,
-    // depending on the mode. The depth specifies the 'depth' of the loop; should always be called at 0 when
-    // called outside of the function.
+    // main recursive function that finds any child items, and generates and returns either the promises
+    // for delete and history recording, the display strings, or the @ids of the items and its children,
+    // depending on the mode (delete, display, id, respectively). The depth specifies the 'depth' of the
+    // loop; should always be called at 0 when called outside of the function.
     recurseItem: function(item, depth, mode) {
         var returnPayload = [];
         var hasChildren = false;
@@ -1848,32 +1848,26 @@ var DeleteButtonModal = React.createClass({
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.experimentalData, depth, mode));
         }
 
+        // if the mode is 'delete', flatten the current item, set it as deleted
+        // and inactive, and load the PUT and history record promises into the payload
         if (mode == 'delete') {
-            // if the mode is 'delete', set the current/parent item as deleted
             var deletedItem = flatten(item);
             deletedItem.status = 'deleted';
             deletedItem.active = false;
-            return this.putRestData(item['@id'], deletedItem).then(data => {
-                // PUT deleted current/parent item
-                return Promise.resolve(data['@graph'][0]);
-            }).then(data => {
-                var operationType = 'delete';
-                // add flags to operation type as needed
-                if (depth > 0) {
-                    operationType += '-hide';
-                }
-                if (hasChildren) {
-                    operationType += '-hadChildren';
-                }
-                // add history item
-                return this.recordHistory(operationType, item);
-            }).catch(function(e) {
-                console.log('DELETE DEEP ERROR: %o', e);
-            });
-        } else if (mode == 'display' || mode == 'ids') {
-            // if the mode is anything else, just return the current payload
-            return returnPayload;
+            var operationType = 'delete';
+            // add flags to operationType as needed
+            if (depth > 0) {
+                operationType += '-hide';
+            }
+            if (hasChildren) {
+                operationType += '-hadChildren';
+            }
+            returnPayload.push(this.putRestData(item['@id'], deletedItem));
+            returnPayload.push(this.recordHistory(operationType, item));
         }
+
+        // return the payload, whether it's promises, display texts, or @ids
+        return returnPayload;
     },
 
     // function for looping through a parent item's list of child items
@@ -1907,32 +1901,34 @@ var DeleteButtonModal = React.createClass({
         this.setState({submitBusy: true});
         var itemUuid = this.props.item['@id'];
         var parentUuid = this.props.parent['@id'];
-        var deletedItemRaw, deletedItem, deletedParent;
+        var deletedItemType, deletedItem, deletedParent;
 
         this.getRestData(itemUuid, null, true).then(item => {
-            // get up-to-date target object, then delete it and its children
-            deletedItemRaw = item;
-            return this.recurseItem(item, 0, 'delete');
-        }).then(item => {
+            // get up-to-date target object, then get the promises for deleting it and
+            // all its children, along with the promises for any related history items
+            deletedItemType = item['@type'][0];
+            var deletePromises = this.recurseItem(item, 0, 'delete');
+            return Promise.all(deletePromises); // wait for ALL promises to resolve
+        }).then(rawData => {
             // get up-to-date parent object; also bypass issue of certain certain embedded parent
             // items in edit pages being un-flattenable
             return this.getRestData(parentUuid, null, true).then(parent => {
                 // flatten parent object and remove link to deleted item as appropriate
                 deletedParent = flatten(parent);
                 if (parent['@type'][0] == 'annotation') {
-                    if (deletedItemRaw['@type'][0] == 'group') {
+                    if (deletedItemType == 'group') {
                         deletedParent.groups = _.without(deletedParent.groups, itemUuid);
-                    } else if (deletedItemRaw['@type'][0] == 'family') {
+                    } else if (deletedItemType == 'family') {
                         deletedParent.families = _.without(deletedParent.families, itemUuid);
-                    } else if (deletedItemRaw['@type'][0] == 'individual') {
+                    } else if (deletedItemType == 'individual') {
                         deletedParent.individuals = _.without(deletedParent.individuals, itemUuid);
-                    } else if (deletedItemRaw['@type'][0] == 'experimental') {
+                    } else if (deletedItemType == 'experimental') {
                         deletedParent.experimentalData = _.without(deletedParent.experimentalData, itemUuid);
                     }
                 } else {
-                    if (deletedItemRaw['@type'][0] == 'family') {
+                    if (deletedItemType == 'family') {
                         deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, itemUuid);
-                    } else if (deletedItemRaw['@type'][0] == 'individual') {
+                    } else if (deletedItemType == 'individual') {
                         deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, itemUuid);
                         if (parent['@type'][0] == 'family') {
                             // Empty variants of parent object if target item is individual and parent is family
