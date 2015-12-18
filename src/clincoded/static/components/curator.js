@@ -1881,12 +1881,11 @@ var DeleteButtonModal = React.createClass({
                     parentInfo.name = item.associatedFamilies[0].label;
                 }
             }
-            // flatten the target item
+            // flatten the target item and set its status to deleted
             var deletedItem = flatten(item);
             deletedItem.status = 'deleted';
-            deletedItem.active = false;
+            // define operationType and add flags as needed
             var operationType = 'delete';
-            // add flags to operationType as needed
             if (depth > 0) {
                 operationType += '-hide';
             }
