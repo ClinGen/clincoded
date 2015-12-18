@@ -10,6 +10,7 @@ var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var Assessments = require('./assessment');
+var CuratorHistory = require('./curator_history');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
@@ -28,6 +29,7 @@ var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var external_url_map = globals.external_url_map;
+var DeleteButton = curator.DeleteButton;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 5;
@@ -53,7 +55,7 @@ function joinGenes(input) {
 }
 
 var ExperimentalCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -114,7 +116,7 @@ var ExperimentalCuration = React.createClass({
                 'A. The gene is expressed in tissues relevant to the disease of interest',
                 'B. The gene is altered in expression in patients who have the disease'
             ],
-            'Functional Alteration': ['The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents'],
+            'Functional Alteration': ['The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations or engineered equivalents'],
             'Model Systems': ['Non-human animal OR cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state'],
             'Rescue': ['The cellular phenotype in patient-derived cells OR engineered equivalents can be rescued by addition of the wild-type gene product']
         };
@@ -1015,6 +1017,11 @@ var ExperimentalCuration = React.createClass({
                             '/variants/', newVariants
                         ).then(results => {
                             if (results && results.length) {
+                                // Write the new variants to history
+                                results.forEach(function(result) {
+                                    this.recordHistory('add', result['@graph'][0]);
+                                }, this);
+
                                 // Add the newly written variants to the experimental data
                                 results.forEach(result => {
                                     experimentalDataVariants.push('/variants/' + result['@graph'][0].uuid + '/');
@@ -1053,12 +1060,12 @@ var ExperimentalCuration = React.createClass({
                     if (this.state.experimental) {
                         // We're editing a experimental. PUT the new group object to the DB to update the existing one.
                         promise = this.putRestData('/experimental/' + this.state.experimental.uuid, newExperimental).then(data => {
-                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
+                            return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: data['@graph'][0], experimentalAdded: false});
                         });
                     } else {
                         // We created an experimental data item; post it to the DB
                         promise = this.postRestData('/experimental/', newExperimental).then(data => {
-                            return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
+                            return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: data['@graph'][0], experimentalAdded: true});
                         }).then(newExperimental => {
                             savedExperimental = newExperimental.data;
                             if (!this.state.experimental) {
@@ -1073,10 +1080,10 @@ var ExperimentalCuration = React.createClass({
 
                                 // Post the modified annotation to the DB, then go back to Curation Central
                                 return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                                    return Promise.resolve({assessment: assessment.assessment, data: data['@graph'][0]});
+                                    return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
                                 });
                             } else {
-                                return Promise.resolve(null);
+                                return Promise.resolve({assessment: null, updatedAssessment: false, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
                             }
                         });
                     }
@@ -1086,7 +1093,7 @@ var ExperimentalCuration = React.createClass({
                     // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
                     var newAssessment = data.assessment;
                     var gdmUuid = this.state.gdm && this.state.gdm.uuid;
-                    var experimentalUuid = savedExperimental ? savedExperimental.uuid : this.state.experimental.uuid;
+                    var experimentalUuid = data.data ? data.data.uuid : this.state.experimental.uuid;
                     if (newAssessment && !newAssessment.evidence_id) {
                         // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
                         // Nothing relies on this operation completing, so don't wait for a promise from it.
@@ -1094,8 +1101,32 @@ var ExperimentalCuration = React.createClass({
                     }
 
                     // Next step relies on the pathogenicity, not the updated assessment
-                    return Promise.resolve(savedExperimental);
+                    return Promise.resolve(data);
                 }).then(data => {
+                    // Record history of the group creation
+                    var meta, historyPromise;
+                    if (data.experimentalAdded) {
+                        // Record the creation of new experimental data
+                        meta = {
+                            experimental: {
+                                gdm: this.state.gdm['@id'],
+                                article: this.state.annotation.article['@id']
+                            }
+                        };
+                        historyPromise = this.recordHistory('add', data.data, meta);
+                    } else {
+                        // Record the modification of an existing group
+                        historyPromise = this.recordHistory('modify', data.data);
+                    }
+
+                    // After writing the experimental data history, write the assessment if any
+                    historyPromise.then(() => {
+                        // If we're assessing a family segregation, write that to history
+                        if (data.data && data.assessment) {
+                            this.saveAssessmentHistory(data.assessment, this.state.gdm, data.data, data.updatedAssessment);
+                        }
+                    });
+
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -1226,6 +1257,9 @@ var ExperimentalCuration = React.createClass({
 
                                             : null}
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
+                                            {experimental ?
+                                                <DeleteButton gdm={gdm} parent={annotation} item={experimental} pmid={pmid} disabled={this.cv.othersAssessed} />
+                                            : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>
@@ -1273,7 +1307,7 @@ var ExperimentalNameType = function() {
                         <strong>Biochemical Function</strong>: The gene product performs a biochemical function shared with other known genes in the disease of interest, OR the gene product is consistent with the observed phenotype(s)<br /><br />
                         <strong>Protein Interactions</strong>: The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest<br /><br />
                         <strong>Expression</strong>: The gene is expressed in tissues relevant to the disease of interest, OR the gene is altered in expression in patients who have the disease<br /><br />
-                        <strong>Functional Alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations of engineered equivalents<br /><br />
+                        <strong>Functional Alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations or engineered equivalents<br /><br />
                         <strong>Model Systems</strong>: Non-human animal OR cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state<br /><br />
                         <strong>Rescue</strong>: The cellular phenotype in patient-derived cells OR engineered equivalents can be rescued by addition of the wild-type gene product
                     </p>
@@ -1351,7 +1385,7 @@ var TypeBiochemicalFunction = function() {
             : null}
         </div>
     );
-}
+};
 
 // HTML labels for Biochemical Functions panel
 var LabelIdentifiedFunction = React.createClass({
@@ -1404,7 +1438,7 @@ var TypeBiochemicalFunctionA = function() {
                 inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // HTML labels for Biochemical Functions panel A
 var LabelGenesWithSameFunction = React.createClass({
@@ -1455,17 +1489,17 @@ var TypeBiochemicalFunctionB = function() {
                 inputDisabled={!(this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT) || this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // HTML labels for Biochemical Functions panel B
 var LabelHPOIDs = React.createClass({
     render: function() {
-        return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
+        return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
 });
 var LabelPhenotypesFT = React.createClass({
     render: function() {
-        return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>
+        return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(free text)</span>:</span>;
     }
 });
 
@@ -1505,13 +1539,15 @@ var TypeProteinInteractions = function() {
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>coimmunoprecipitation (M:0019)</option>
-                <option>pull down (M:0096)</option>
-                <option>affinity chromatography technology (M:0004)</option>
-                <option>protein cross-linking with a bifunctional reagent (M0031)</option>
-                <option>comigration in gel electrophoresis (M:0807)</option>
+                <option>affinity chromatography technology (MI:0004)</option>,
+                <option>coimmunoprecipitation (MI:0019)</option>,
+                <option>comigration in gel electrophoresis (MI:0807)</option>,
+                <option>electron microscopy (MI:0040)</option>,
+                <option>protein cross-linking with a bifunctional reagent (MI:0031)</option>,
+                <option>pull down (MI:0096)</option>,
+                <option>synthetic genetic analysis (MI:0441)</option>,
+                <option>two hybrid (MI:0018)</option>,
                 <option>x-ray crystallography (MI:0114)</option>
-                <option>electron microscopy (MI:0040)</option>
             </Input>
             <Input type="checkbox" ref="geneImplicatedInDisease" label="Has this gene or genes been implicated in the above disease?:"
                 error={this.getFormError('geneImplicatedInDisease')} clearError={this.clrFormErrors.bind(null, 'geneImplicatedInDisease')}
@@ -1529,7 +1565,7 @@ var TypeProteinInteractions = function() {
                 rows="5" value={proteinInteractions.evidenceInPaper}inputDisabled={!this.state.geneImplicatedInDisease || this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // HTML labels for Protein Interactions panel
 var LabelInteractingGenes = React.createClass({
@@ -1561,7 +1597,7 @@ var TypeExpression = function() {
             : null}
         </div>
     );
-}
+};
 
 // HTML labels for Expression panel.
 var LabelUberonId = React.createClass({
@@ -1597,7 +1633,7 @@ var TypeExpressionA = function() {
                 rows="5" value={expression.normalExpression.evidenceInPaper} inputDisabled={!this.state.expressedInTissue || this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 var TypeExpressionB = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
@@ -1626,7 +1662,7 @@ var TypeExpressionB = function() {
                 rows="5" value={expression.alteredExpression.evidenceInPaper} inputDisabled={!this.state.expressedInPatients || this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // Functional Alteration type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
@@ -1693,7 +1729,7 @@ var TypeFunctionalAlteration = function() {
                 rows="5" value={functionalAlteration.evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // HTML labels for Functional Alterations panel.
 var LabelFAPatientCellType = React.createClass({
@@ -1814,7 +1850,7 @@ var TypeModelSystems = function() {
                 rows="5" value={modelSystems.evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
-}
+};
 
 // HTML labels for Model Systems panel.
 var LabelCellCulture = React.createClass({
@@ -1926,7 +1962,7 @@ var TypeRescue = function() {
                 rows="5" inputDisabled={!this.state.wildTypeRescuePhenotype || this.cv.othersAssessed} value={rescue.evidenceInPaper} />
         </div>
     );
-}
+};
 
 // HTML labels for Rescue panel
 var LabelRPatientCellType = React.createClass({
@@ -2014,7 +2050,7 @@ var LabelOtherVariant = React.createClass({
 
 
 var ExperimentalViewer = React.createClass({
-    mixins: [RestMixin, AssessmentMixin],
+    mixins: [RestMixin, AssessmentMixin, CuratorHistory],
 
     cv: {
         assessmentTracker: null, // Tracking object for a single assessment
@@ -2040,6 +2076,9 @@ var ExperimentalViewer = React.createClass({
 
             // Write the assessment to the DB, if there was one.
             return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
+                // Save assessment to history
+                this.saveAssessmentHistory(assessmentInfo.assessment, null, experimental, assessmentInfo.update);
+
                 // If we made a new assessment, add it to the experimental data's assessments
                 if (assessmentInfo.assessment && !assessmentInfo.update) {
                     updatedExperimental = curator.flatten(experimental);
@@ -2521,3 +2560,64 @@ var ExperimentalViewer = React.createClass({
 });
 
 globals.content_views.register(ExperimentalViewer, 'experimental');
+
+
+// Display a history item for adding experimental data
+var ExperimentalAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var experimental = history.primary;
+        var gdm = history.meta.experimental.gdm;
+        var article = history.meta.experimental.article;
+
+        return (
+            <div>
+                Experimental data <a href={experimental['@id']}>{experimental.label}</a>
+                <span> ({experimental.evidenceType}) added to </span>
+                <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(ExperimentalAddHistory, 'experimental', 'add');
+
+
+// Display a history item for modifying experimental data
+var ExperimentModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var experimental = history.primary;
+
+        return (
+            <div>
+                Experimental data <a href={experimental['@id']}>{experimental.label}</a>
+                <span> ({experimental.evidenceType}) modified</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(ExperimentModifyHistory, 'experimental', 'modify');
+
+
+// Display a history item for deleting experimental data
+var ExperimentDeleteHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var experimental = history.primary;
+
+        return (
+            <div>
+                <span>Experimental data {experimental.label} deleted</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(ExperimentDeleteHistory, 'experimental', 'delete');

@@ -47,7 +47,11 @@
         }
     },
     "columns": {
-        "submitted_by.uuid": {
+        "uuid": {
+            "title": "UUID",
+            "type": "string"
+        },
+        "submitted_by.email": {
             "title": "Owner",
             "type": "string"
         },

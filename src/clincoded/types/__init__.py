@@ -262,10 +262,10 @@ class Gdm(Item):
     ]
 
     @calculated_property(schema={
-        "title": "Status",
+        "title": "GDM Status",
         "type": "string",
     })
-    def status(self, finalClassification, draftClassification, provisionalClassifications, annotations):
+    def gdm_status(self, finalClassification, draftClassification, provisionalClassifications, annotations):
         if finalClassification != '':
             return 'Final Classification'
         elif draftClassification != '':
@@ -646,6 +646,16 @@ class Individual(Item):
     def associatedAnnotations(self, request, associatedAnnotations):
         return paths_filtered_by_status(request, associatedAnnotations)
 
+    @calculated_property(schema={
+        "title": "Proband String",
+        "type": "string"
+    })
+    def is_proband(self, proband):
+        if proband:
+            return 'Yes'
+        else:
+            return 'No'
+
 
 @collection(
     name='experimental',
@@ -862,3 +872,51 @@ class Document(ItemWithAttachment, Item):
     item_type = 'document'
     schema = load_schema('clincoded:schemas/document.json')
     embedded = ['lab', 'award', 'submitted_by']
+
+@collection(
+    name='histories',
+    properties={
+        'title': "Curation operation history",
+        'description': 'History of curator operations',
+    })
+class History(Item):
+    item_type = 'history'
+    schema = load_schema('clincoded:schemas/curatorHistory.json')
+    embedded = [
+        'primary',
+        'meta.gdm.gene',
+        'meta.gdm.disease',
+        'meta.article.gdm',
+        'meta.article.gdm.gene',
+        'meta.article.gdm.disease',
+        'meta.group.gdm',
+        'meta.group.gdm.gene',
+        'meta.group.gdm.disease',
+        'meta.group.article',
+        'meta.family.gdm',
+        'meta.family.gdm.gene',
+        'meta.family.gdm.disease',
+        'meta.family.group',
+        'meta.family.article',
+        'meta.individual.gdm',
+        'meta.individual.gdm.gene',
+        'meta.individual.gdm.disease',
+        'meta.individual.group',
+        'meta.individual.family',
+        'meta.individual.article',
+        'meta.experimental.gdm',
+        'meta.experimental.gdm.gene',
+        'meta.experimental.gdm.disease',
+        'meta.experimental.article',
+        'meta.provisionalClassification.gdm',
+        'meta.provisionalClassification.gdm.gene',
+        'meta.provisionalClassification.gdm.disease',
+        'meta.pathogenicity.variant',
+        'meta.pathogenicity.gdm',
+        'meta.assessment.gdm',
+        'meta.assessment.experimental',
+        'meta.assessment.family',
+        'meta.assessment.pathogenicity',
+        'meta.assessment.variant',
+        'submitted_by',
+    ]

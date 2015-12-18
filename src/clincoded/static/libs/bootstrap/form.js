@@ -248,8 +248,10 @@ var Input = module.exports.Input = React.createClass({
     setValue: function(val) {
         if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
             ReactDOM.findDOMNode(this.refs.input).value = val;
+            this.setState({value: val});
         } else if (this.props.type === 'checkbox') {
             ReactDOM.findDOMNode(this.refs.input).checked = val;
+            this.setState({value: val});
         }
     },
 

@@ -54,6 +54,7 @@ class ClinGenCurationRoot(Root):
         acl = acl_from_settings(self.registry.settings) + [
             (Allow, Everyone, ['list', 'search']),
             (Allow, 'group.submitter', ['search_audit', 'audit']),
+            (Allow, Authenticated, ALL_PERMISSIONS),
             (Allow, 'group.admin', ALL_PERMISSIONS),
             (Allow, 'group.forms', ('forms',)),
             # Avoid schema validation errors during audit

@@ -5,6 +5,7 @@ var _ = require('underscore');
 var moment = require('moment');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
+var modal = require('../libs/bootstrap/modal');
 var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
@@ -12,7 +13,10 @@ var methods = require('./methods');
 var individual_curation = require('./individual_curation');
 var Assessments = require('./assessment');
 var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
+var CuratorHistory = require('./curator_history');
 
+var Modal = modal.Modal;
+var ModalMixin = modal.ModalMixin;
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var CurationPalette = curator.CurationPalette;
@@ -31,7 +35,9 @@ var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var makeStarterIndividual = individual_curation.makeStarterIndividual;
 var updateProbandVariants = individual_curation.updateProbandVariants;
+var recordIndividualHistory = individual_curation.recordIndividualHistory;
 var external_url_map = globals.external_url_map;
+var DeleteButton = curator.DeleteButton;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
@@ -69,7 +75,7 @@ var initialCv = {
 
 
 var FamilyCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, ModalMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -84,6 +90,7 @@ var FamilyCuration = React.createClass({
         this.cv.assessmentTracker = initialCv;
 
         return {
+            orpha: null, // string entered in Orphanet id input box
             gdm: null, // GDM object given in query string
             group: null, // Group object given in query string
             family: null, // If we're editing a group, this gets the fleshed-out group object we're editing
@@ -110,6 +117,10 @@ var FamilyCuration = React.createClass({
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
         } else if (ref === 'familyname') {
             this.setState({familyName: this.refs[ref].getValue()});
+        } else if (ref === 'orphanetid' && this.refs[ref].getValue()) {
+            this.setState({orpha: true});
+        } else if (ref === 'orphanetid') {
+            this.setState({orpha: false});
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -165,11 +176,35 @@ var FamilyCuration = React.createClass({
         }
     },
 
-    // Handle a click on the copy orphanet button
-    handleClick: function(e) {
+    // Handle a click on a copy orphanet button
+    handleClick: function(fromTarget, e) {
         e.preventDefault(); e.stopPropagation();
-        var orphanetVal = this.refs['orphanetid'].getValue();
-        this.refs['individualorphanetid'].setValue(orphanetVal);
+        var associatedGroups;
+        var orphanetValTemp = [];
+        var orphanetVal = '';
+        if (fromTarget == 'group') {
+            if (this.state.group) {
+                // We have a group, so get the disease array from it.
+                associatedGroups = [this.state.group];
+            } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
+                // We have a family with associated groups. Combine the diseases from all groups.
+                associatedGroups = this.state.family.associatedGroups;
+            }
+            if (associatedGroups && associatedGroups.length > 0) {
+                orphanetVal = associatedGroups.map(function(associatedGroup, i) {
+                    return (
+                        associatedGroup.commonDiagnosis.map(function(disease, i) {
+                            return ('ORPHA' + disease.orphaNumber);
+                        }).join(', ')
+                    );
+                });
+            }
+            this.refs['orphanetid'].setValue(orphanetVal.join(', '));
+            this.setState({orpha: true});
+        } else if (fromTarget == 'family') {
+            orphanetVal = this.refs['orphanetid'].getValue();
+            this.refs['individualorphanetid'].setValue(orphanetVal);
+        }
     },
 
     // Load objects from query string into the state variables. Must have already parsed the query string
@@ -228,6 +263,13 @@ var FamilyCuration = React.createClass({
             // Update the family name
             if (stateObj.family) {
                 this.setState({familyName: stateObj.family.label});
+
+                if (stateObj.family.commonDiagnosis && stateObj.family.commonDiagnosis.length > 0) {
+                    this.setState({orpha: true});
+                }
+                else {
+                    this.setState({orpha: false});
+                }
             }
 
             if (stateObj.family) {
@@ -372,7 +414,6 @@ var FamilyCuration = React.createClass({
     // Called when a form is submitted.
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
@@ -395,11 +436,11 @@ var FamilyCuration = React.createClass({
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
-            if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
+            //if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
                 // ORPHA list is bad
-                formError = true;
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
-            }
+            //    formError = true;
+            //    this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+            //}
 
             // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
             if (this.state.variantCount > 0 && !this.state.probandIndividual) {
@@ -433,23 +474,35 @@ var FamilyCuration = React.createClass({
 
             if (!formError) {
                 // Build search string from given ORPHA IDs
-                var searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                var searchStr;
+                if (orphaIds && orphaIds.length > 0) {
+                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                }
+                else {
+                    // a temp solution to match the callback function structure because we need to function the page in a short time.
+                    searchStr = '/gene/NGLY1';
+                }
                 this.setState({submitBusy: true});
 
                 // Verify given Orpha ID exists in DB
                 this.getRestData(searchStr).then(diseases => {
-                    if (diseases['@graph'].length === orphaIds.length) {
+                    if (!orphaIds || orphaIds.length === 0) {
+                        // no Orpha id entered
+                        return Promise.resolve(null);
+                    } else if (diseases['@graph'].length === orphaIds.length) {
                         // Successfully retrieved all diseases
                         familyDiseases = diseases;
                         return Promise.resolve(diseases);
                     } else {
                         // Get array of missing Orphanet IDs
+                        this.setState({submitBusy: false}); // submit error; re-enable submit button
                         var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
                         this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
                         throw diseases;
                     }
                 }, e => {
                     // The given orpha IDs couldn't be retrieved for some reason.
+                    this.setState({submitBusy: false}); // submit error; re-enable submit button
                     this.setFormErrors('orphanetid', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
@@ -608,6 +661,11 @@ var FamilyCuration = React.createClass({
                             '/variants/', newVariants
                         ).then(results => {
                             if (results && results.length) {
+                                // Write the new variants to history
+                                results.forEach(function(result) {
+                                    this.recordHistory('add', result['@graph'][0]);
+                                }, this);
+
                                 // Add the newly written variants to the family
                                 results.forEach(result => {
                                     familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
@@ -655,7 +713,7 @@ var FamilyCuration = React.createClass({
 
                     // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the family.
                     return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid).then(assessmentInfo => {
-                        return Promise.resolve({individual: individual, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
+                        return Promise.resolve({starterIndividual: individual, assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
                     });
                 }).then(data => {
                     // Make a list of assessments along with the new one if necessary
@@ -679,16 +737,16 @@ var FamilyCuration = React.createClass({
                     familyCount = familyCount ? familyCount + 1 : 1;
 
                     // Assign the starter individual if we made one
-                    if (data.individual) {
+                    if (data.starterIndividual) {
                         if (!newFamily.individualIncluded) {
                             newFamily.individualIncluded = [];
                         }
-                        newFamily.individualIncluded.push(data.individual['@id']);
+                        newFamily.individualIncluded.push(data.starterIndividual['@id']);
                     }
 
                     // Write the new family object to the DB
                     return this.writeFamilyObj(newFamily).then(newFamily => {
-                        return Promise.resolve({family: newFamily, assessment: data.assessment});
+                        return Promise.resolve(_.extend(data, {family: newFamily}));
                     });
                 }).then(data => {
                     // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
@@ -699,18 +757,21 @@ var FamilyCuration = React.createClass({
 
                     if (newFamily && newAssessment && !newAssessment.evidence_id) {
                         // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
-                        // Nothing relies on this operation completing, so don't wait for a promise from it.
-                        this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid, newAssessment);
+                        return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, familyUuid, newAssessment).then(assessmentInfo => {
+                            return Promise.resolve(_.extend(data, {assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update}));
+                        });
                     }
 
                     // Next step relies on the pathogenicity, not the updated assessment
-                    return Promise.resolve(newFamily);
-                }).then(newFamily => {
+                    return Promise.resolve(data);
+                }).then(data => {
+                    var newFamily = data.family;
                     var promise;
 
                     // If we're adding this family to a group, update the group with this family; otherwise update the annotation
                     // with the family.
                     if (!this.state.family) {
+                        // Adding a new family
                         if (this.state.group) {
                             // Add the newly saved families to the group
                             var group = curator.flatten(this.state.group);
@@ -722,9 +783,9 @@ var FamilyCuration = React.createClass({
                             group.familyIncluded.push(newFamily['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(data => {
+                            promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(groupGraph => {
                                 // The next step needs the family, not the group it was written to
-                                return newFamily;
+                                return Promise.resolve(_.extend(data, {group: groupGraph['@graph'][0]}));
                             });
                         } else {
                             // Not part of a group, so add the family to the annotation instead.
@@ -737,23 +798,68 @@ var FamilyCuration = React.createClass({
                             annotation.families.push(newFamily['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                            promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(annotation => {
                                 // The next step needs the family, not the group it was written to
-                                return newFamily;
+                                return Promise.resolve(_.extend(data, {annotation: annotation}));
                             });
                         }
                     } else {
-                        promise = Promise.resolve(newFamily);
+                        // Editing an existing family
+                        promise = Promise.resolve(data);
                     }
                     return promise;
-                }).then(newFamily => {
+                }).then(data => {
+                    // Add to the user history. data.family always contains the new or edited family. data.group contains the group the family was
+                    // added to, if it was added to a group. data.annotation contains the annotation the family was added to, if it was added to
+                    // the annotation. If neither data.group nor data.annotation exist, data.family holds the existing family that was modified.
+                    var meta, historyPromise;
+
+                    if (data.annotation) {
+                        // Record the creation of a new family added to a GDM
+                        meta = {
+                            family: {
+                                gdm: this.state.gdm['@id'],
+                                article: this.state.annotation.article['@id']
+                            }
+                        };
+                        historyPromise = this.recordHistory('add', data.family, meta);
+                    } else if (data.group) {
+                        // Record the creation of a new family added to a group
+                        meta = {
+                            family: {
+                                gdm: this.state.gdm['@id'],
+                                group: data.group['@id'],
+                                article: this.state.annotation.article['@id']
+                            }
+                        };
+                        historyPromise = this.recordHistory('add', data.family, meta);
+                    } else {
+                        // Record the modification of an existing family
+                        historyPromise = this.recordHistory('modify', data.family);
+                    }
+
+                    // Once we're done writing the family history, write the other related histories
+                    historyPromise.then(() => {
+                        // Write the starter individual history if there was one
+                        if (data.starterIndividual) {
+                            return recordIndividualHistory(this.state.gdm, this.state.annotation, data.starterIndividual, data.group, data.family, false, this);
+                        }
+                        return Promise.resolve(null);
+                    }).then(() => {
+                        // If we're assessing a family segregation, write that to history
+                        if (data.family && data.assessment) {
+                            this.saveAssessmentHistory(data.assessment, this.state.gdm, data.family, data.updatedAssessment);
+                        }
+                        return Promise.resolve(null);
+                    });
+
                     // Navigate back to Curation Central page.
                     // FUTURE: Need to navigate to Family Submit page.
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut && !initvar) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                     } else {
-                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + newFamily.uuid + '&evidence=' + this.state.annotation.uuid + (initvar ? '&initvar' : '') + (hadvar ? '&hadvar' : ''));
+                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + data.family.uuid + '&evidence=' + this.state.annotation.uuid + (initvar ? '&initvar' : '') + (hadvar ? '&hadvar' : ''));
                     }
                 }).catch(function(e) {
                     console.log('FAMILY CREATION ERROR=: %o', e);
@@ -856,6 +962,10 @@ var FamilyCuration = React.createClass({
         // Get an array of all given disease IDs
         if (familyDiseases) {
             newFamily.commonDiagnosis = familyDiseases['@graph'].map(function(disease) { return disease['@id']; });
+        }
+        else if (newFamily.commonDiagnosis && newFamily.commonDiagnosis.length > 0) {
+            // if no Orpha id entered when edit family
+            delete newFamily.commonDiagnosis;
         }
 
         // Add array of other PMIDs
@@ -1032,6 +1142,9 @@ var FamilyCuration = React.createClass({
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
+                                            {family ?
+                                                <DeleteButton gdm={gdm} parent={groups.length > 0 ? groups[0] : annotation} item={family} pmid={pmid} disabled={this.cv.othersAssessed} />
+                                            : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>
@@ -1122,8 +1235,12 @@ var FamilyCommonDiseases = function() {
         <div className="row">
             {curator.renderOrphanets(associatedGroups, 'Group')}
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
-                error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            {associatedGroups ?
+            <Input type="button" ref="orphanetcopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
+                clickHandler={this.handleClick.bind(this, 'group')} />
+            : null}
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
@@ -1380,8 +1497,12 @@ var FamilyVariant = function() {
                         error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
                         buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                    <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
-                        clickHandler={this.handleClick} />
+                    { this.state.orpha ?
+                        <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
+                        clickHandler={this.handleClick.bind(this, 'family')} />
+                        :
+                        null
+                    }
                 </div>
             : null}
             {this.state.variantCount < MAX_VARIANTS ?
@@ -1456,11 +1577,11 @@ function segregationExists(segregation) {
                  (segregation.additionalInformation && segregation.additionalInformation.length > 0);
     }
     return exists;
-};
+}
 
 
 var FamilyViewer = React.createClass({
-    mixins: [RestMixin, AssessmentMixin],
+    mixins: [RestMixin, AssessmentMixin, CuratorHistory],
 
     cv: {
         assessmentTracker: null, // Tracking object for a single assessment
@@ -1486,9 +1607,12 @@ var FamilyViewer = React.createClass({
 
             // Write the assessment to the DB, if there was one.
             return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
+                // If we're assessing a family segregation, write that to history
+                this.saveAssessmentHistory(assessmentInfo.assessment, null, family, assessmentInfo.update);
+
                 // If we made a new assessment, add it to the family's assessments
                 if (assessmentInfo.assessment && !assessmentInfo.update) {
-                     updatedFamily = curator.flatten(family);
+                    updatedFamily = curator.flatten(family);
                     if (!updatedFamily.segregation.assessments) {
                         updatedFamily.segregation.assessments = [];
                     }
@@ -1890,3 +2014,74 @@ var FamilySegregationViewer = function(segregation, assessments, open) {
         </Panel>
     );
 };
+
+
+// Display a history item for adding a family
+var FamilyAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var family = history.primary;
+        var gdm = history.meta.family.gdm;
+        var group = history.meta.family.group;
+        var article = history.meta.family.article;
+
+        return (
+            <div>
+                Family <a href={family['@id']}>{family.label}</a>
+                <span> added to </span>
+                {group ?
+                    <span>group <a href={group['@id']}>{group.label}</a></span>
+                :
+                    <span>
+                        <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                        <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                    </span>
+                }
+                <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(FamilyAddHistory, 'family', 'add');
+
+
+// Display a history item for modifying a family
+var FamilyModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var family = history.primary;
+
+        return (
+            <div>
+                Family <a href={family['@id']}>{family.label}</a>
+                <span> modified</span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(FamilyModifyHistory, 'family', 'modify');
+
+
+// Display a history item for deleting a family
+var FamilyDeleteHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var family = history.primary;
+
+        // Prepare to display a note about associated families and individuals
+        var collateralObjects = !!(family.individualIncluded && family.individualIncluded.length);
+
+        return (
+            <div>
+                <span>Family {family.label} deleted</span>
+                <span>{collateralObjects ? ' along with any individuals' : ''}</span>
+                <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(FamilyDeleteHistory, 'family', 'delete');

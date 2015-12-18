@@ -42,7 +42,7 @@ var Param = module.exports.Param = React.createClass({
         if (!url) {
             this.props.handleFetch();
             this.setState({
-                fetchedRequest: undefined,
+                fetchedRequest: undefined
             });
         }
         request = this.context.fetch(url, {

@@ -10,11 +10,12 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/submitted" }
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/standard_status" }
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "gene": {
             "title": "HGNC Symbol",
@@ -144,8 +145,8 @@
             "title": "OMIM ID",
             "type": "string"
         },
-        "status": {
-            "title": "Status",
+        "gdm_status": {
+            "title": "GDM Status",
             "type": "string"
         },
         "annotations": {
@@ -166,6 +167,18 @@
         },
         "submitted_by.uuid": {
             "title": "Submitted by",
+            "type": "string"
+        },
+        "submitted_by.title": {
+            "title": "Creator",
+            "type": "string"
+        },
+        "submitted_by.last_name": {
+            "title": "Creator",
+            "type": "string"
+        },
+        "submitted_by.email": {
+            "title": "Creator email",
             "type": "string"
         }
     },

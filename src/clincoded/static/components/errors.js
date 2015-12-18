@@ -74,7 +74,7 @@ globals.content_views.register(HTTPForbidden, 'HTTPForbidden');
 var BlankWhileLoading = module.exports.BlankWhileLoading = function (props) {
     if (!props.loadingComplete) return "";
     return props.context.title;
-}
+};
 
 globals.listing_titles.register(BlankWhileLoading, 'HTTPForbidden');
 
