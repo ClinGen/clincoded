@@ -151,14 +151,9 @@ module.exports.Persona = {
         var cookie = require('cookie-monster');
         var session_cookie = cookie(document).get('session');
         if (this.props.session_cookie !== session_cookie) {
-            this.setProps({session_cookie: session_cookie});
-        }
-    },
-
-    componentWillReceiveProps: function (nextProps) {
-        if (this.props.session_cookie !== nextProps.session_cookie) {
+            this.setState({session_cookie: session_cookie});
             this.setState({
-                session: this.parseSessionCookie(nextProps.session_cookie)
+                session: this.parseSessionCookie(session_cookie)
             });
         }
     },
@@ -232,8 +227,7 @@ module.exports.Persona = {
                 }
                 // If there is an error, show the error messages
                 navigator.id.logout();
-                this.setProps({context: data});
-                this.setState({loadingComplete: true});
+                this.setState({context: data, loadingComplete: true});
             });
         });
     },
@@ -260,7 +254,7 @@ module.exports.Persona = {
         }, err => {
             parseError(err).then(data => {
                 data.title = 'Logout failure: ' + data.title;
-                this.setProps({context: data});
+                this.setState({context: data});
             });
         });
     },
@@ -332,6 +326,7 @@ module.exports.HistoryAndTriggers = {
 
     getInitialState: function () {
         return {
+            contextRequest: null,
             unsavedChanges: []
         };
     },
@@ -363,14 +358,14 @@ module.exports.HistoryAndTriggers = {
             window.onhashchange = this.onHashChange;
         }
         window.onbeforeunload = this.handleBeforeUnload;
-        if (this.props.href !== window.location.href) {
-            this.setProps({href: window.location.href});
+        if (this.state.href !== window.location.href) {
+            this.setState({href: window.location.href});
         }
     },
 
     onHashChange: function (event) {
         // IE8/9
-        this.setProps({href: window.location.href});
+        this.setState({href: window.location.href});
     },
 
     trigger: function (name) {
@@ -464,8 +459,8 @@ module.exports.HistoryAndTriggers = {
         if (!origin.same(target.action)) return;
 
         var options = {};
-        var action_url = url.parse(url.resolve(this.props.href, target.action));
-        options.replace = action_url.pathname == url.parse(this.props.href).pathname;
+        var action_url = url.parse(url.resolve(this.state.href, target.action));
+        options.replace = action_url.pathname == url.parse(this.state.href).pathname;
         var search = serialize(target);
         if (target.getAttribute('data-removeempty')) {
             search = search.split('&').filter(function (item) {
@@ -488,21 +483,21 @@ module.exports.HistoryAndTriggers = {
     handlePopState: function (event) {
         if (this.DISABLE_POPSTATE) return;
         if (!this.confirmNavigation()) {
-            window.history.pushState(window.state, '', this.props.href);
+            window.history.pushState(window.state, '', this.state.href);
             return;
         }
         if (!this.historyEnabled) {
             window.location.reload();
             return;
         }
-        var request = this.props.contextRequest;
+        var request = this.state.contextRequest;
         var href = window.location.href;
         if (event.state) {
-            // Abort inflight xhr before setProps
+            // Abort inflight xhr before setState
             if (request) request.abort();
-            this.setProps({
+            this.setState({
                 context: event.state,
-                href: href  // href should be consistent with context
+                href: href
             });
         }
         // Always async update in case of server side changes.
@@ -536,7 +531,7 @@ module.exports.HistoryAndTriggers = {
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
         options = options || {};
-        href = url.resolve(this.props.href, href);
+        href = url.resolve(this.state.href, href);
 
         // Strip url fragment.
         var fragment = '';
@@ -559,7 +554,7 @@ module.exports.HistoryAndTriggers = {
             return;
         }
 
-        var request = this.props.contextRequest;
+        var request = this.state.contextRequest;
 
         if (request) {
             request.abort();
@@ -571,7 +566,7 @@ module.exports.HistoryAndTriggers = {
             } else {
                 window.history.pushState(window.state, '', href + fragment);
             }
-            this.setProps({href: href + fragment});
+            this.setState({href: href + fragment});
             return;
         }
 
@@ -582,7 +577,7 @@ module.exports.HistoryAndTriggers = {
         var timeout = new Timeout(this.SLOW_REQUEST_TIME);
 
         Promise.race([request, timeout.promise]).then(v => {
-            if (v instanceof Timeout) this.setProps({'slow': true});
+            if (v instanceof Timeout) this.setState({'slow': true});
         });
 
         var promise = request.then(response => {
@@ -605,7 +600,7 @@ module.exports.HistoryAndTriggers = {
             } else {
                 window.history.pushState(null, '', response_url + fragment);
             }
-            this.setProps({
+            this.setState({
                 href: response_url + fragment
             });
             if (!response.ok) {
@@ -620,7 +615,7 @@ module.exports.HistoryAndTriggers = {
             promise = promise.then(this.scrollTo);
         }
 
-        this.setProps({
+        this.setState({
             contextRequest: request
         });
         return request;
@@ -634,7 +629,7 @@ module.exports.HistoryAndTriggers = {
             // Might fail due to too large data
             window.history.replaceState(null, '', window.location.href);
         }
-        this.setProps({
+        this.setState({
             context: data,
             slow: false
         });
@@ -642,7 +637,7 @@ module.exports.HistoryAndTriggers = {
     },
 
     componentDidUpdate: function () {
-        var xhr = this.props.contextRequest;
+        var xhr = this.state.contextRequest;
         if (!xhr || !xhr.xhr_end || xhr.browser_stats) return;
         var browser_end = 1 * new Date();
 

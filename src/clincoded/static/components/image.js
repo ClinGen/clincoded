@@ -1,6 +1,5 @@
 'use strict';
 var React = require('react');
-var cx = require('react/lib/cx');
 var globals = require('./globals');
 var url = require('url');
 
@@ -13,12 +12,12 @@ var Lightbox = module.exports.Lightbox = React.createClass({
 
     // Window resized; set max-height of image
     handleResize: function() {
-        this.setState({imgHeight: this.refs.lightbox.getDOMNode().offsetHeight - 40});
+        this.setState({imgHeight: this.refs.lightbox.offsetHeight - 40});
     },
 
     componentDidMount: function() {
         globals.bindEvent(window, 'resize', this.handleResize);
-        this.setState({imgHeight: this.refs.lightbox.getDOMNode().offsetHeight - 40});
+        this.setState({imgHeight: this.refs.lightbox.offsetHeight - 40});
     },
 
     componentWillUnmount: function() {
@@ -27,10 +26,7 @@ var Lightbox = module.exports.Lightbox = React.createClass({
 
     render: function() {
         var lightboxVisible = this.props.lightboxVisible;
-        var lightboxClass = cx({
-            "lightbox": true,
-            "active": lightboxVisible
-        });
+        var lightboxClass = 'lightbox' + (lightboxVisible ? ' active' : '');
         var imgStyle = {maxHeight: this.state.imgHeight};
 
         return (

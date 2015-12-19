@@ -6,6 +6,7 @@
 // handling validation errors.
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var _ = require('underscore');
 
 
@@ -221,7 +222,7 @@ var Input = module.exports.Input = React.createClass({
     // parent components.
     getValue: function() {
         if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'number' || this.props.type === 'textarea') {
-            return React.findDOMNode(this.refs.input).value.trim();
+            return ReactDOM.findDOMNode(this.refs.input).value.trim();
         } else if (this.props.type === 'select') {
             return this.getSelectedOption().trim();
         } else if (this.props.type === 'checkbox') {
@@ -246,17 +247,17 @@ var Input = module.exports.Input = React.createClass({
     // Set the value of an input
     setValue: function(val) {
         if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
-            React.findDOMNode(this.refs.input).value = val;
+            ReactDOM.findDOMNode(this.refs.input).value = val;
             this.setState({value: val});
         } else if (this.props.type === 'checkbox') {
-            React.findDOMNode(this.refs.input).checked = val;
+            ReactDOM.findDOMNode(this.refs.input).checked = val;
             this.setState({value: val});
         }
     },
 
     resetValue: function() {
         if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
-            React.findDOMNode(this.refs.input).value = '';
+            ReactDOM.findDOMNode(this.refs.input).value = '';
         } else if (this.props.type === 'select') {
             this.resetSelectedOption();
         } else if (this.props.type === 'checkbox') {
@@ -265,7 +266,7 @@ var Input = module.exports.Input = React.createClass({
     },
 
     resetSelectedOption: function() {
-        var selectNode = this.refs.input.getDOMNode();
+        var selectNode = this.refs.input;
         var optionNodes = selectNode.getElementsByTagName('option');
         if (optionNodes && optionNodes.length) {
             selectNode.value = optionNodes[0].value;
@@ -274,7 +275,7 @@ var Input = module.exports.Input = React.createClass({
 
     // Get the selected option from a <select> list
     getSelectedOption: function() {
-        var optionNodes = this.refs.input.getDOMNode().getElementsByTagName('option');
+        var optionNodes = this.refs.input.getElementsByTagName('option');
 
         // Get the DOM node for the selected <option>
         var selectedOptionNode = _(optionNodes).find(function(option) {
