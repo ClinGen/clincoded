@@ -568,39 +568,53 @@ var IndividualCuration = React.createClass({
                     if (!this.state.individual) {
                         if (this.state.group) {
                             // Add the newly saved individual to a group
-                            var group = curator.flatten(this.state.group);
-                            if (!group.individualIncluded) {
-                                group.individualIncluded = [];
-                            }
-                            group.individualIncluded.push(newIndividual['@id']);
+                            promise = this.getRestData('/groups/' + this.state.group.uuid, null, true).then(freshGroup => {
+                                var group = curator.flatten(freshGroup);
+                                if (!group.individualIncluded) {
+                                    group.individualIncluded = [];
+                                }
 
-                            // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(data => {
-                                return {individual: newIndividual, group: data['@graph'][0], modified: false};
+                                // Merge existing individuals in the group with the new set of individuals
+                                group.individualIncluded.push(newIndividual['@id']);
+
+                                // Post the modified group to the DB
+                                return this.putRestData('/groups/' + this.state.group.uuid, group).then(data => {
+                                    return {individual: newIndividual, group: data['@graph'][0], modified: false};
+                                });
                             });
                         } else if (this.state.family) {
                             // Add the newly saved individual to a family
-                            var family = curator.flatten(this.state.family);
-                            if (!family.individualIncluded) {
-                                family.individualIncluded = [];
-                            }
-                            family.individualIncluded.push(newIndividual['@id']);
+                            promise = this.getRestData('/families/' + this.state.family.uuid, null, true).then(freshFamily => {
+                                var family = curator.flatten(freshFamily);
+                                if (!family.individualIncluded) {
+                                    family.individualIncluded = [];
+                                }
 
-                            // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/families/' + this.state.family.uuid, family).then(data => {
-                                return {individual: newIndividual, family: data['@graph'][0], modified: false};
+                                // Merge existing individuals in the family with the new set of individuals.
+                                family.individualIncluded.push(newIndividual['@id']);
+
+                                // Post the modified family to the DB
+                                return this.putRestData('/families/' + this.state.family.uuid, family).then(data => {
+                                    return {individual: newIndividual, family: data['@graph'][0], modified: false};
+                                });
                             });
                         } else {
-                            // Not part of a group, so add the individual to the annotation instead.
-                            var annotation = curator.flatten(this.state.annotation);
-                            if (!annotation.individuals) {
-                                annotation.individuals = [];
-                            }
-                            annotation.individuals.push(newIndividual['@id']);
+                            // Not part of a group or family, so add the individual to the annotation instead.
+                            promise = this.getRestData('/evidence/' + this.state.annotation.uuid, null, true).then(freshAnnotation => {
+                                // Get a flattened copy of the fresh annotation object and put our new individual into it,
+                                // ready for writing.
+                                var annotation = curator.flatten(freshAnnotation);
+                                if (!annotation.individuals) {
+                                    annotation.individuals = [];
+                                }
 
-                            // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                                return {individual: newIndividual, annotation: data['@graph'][0], modified: false};
+                                // Merge existing individuals in the annotation with the new set of individuals.
+                                annotation.individuals.push(newIndividual['@id']);
+
+                                // Post the modified annotation to the DB
+                                return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                                    return {individual: newIndividual, annotation: data['@graph'][0], modified: false};
+                                });
                             });
                         }
                     } else {
@@ -615,8 +629,7 @@ var IndividualCuration = React.createClass({
                     // data.family, nor data.annotation exist, data.individual holds the existing individual that was modified.
                     recordIndividualHistory(this.state.gdm, this.state.annotation, data.individual, data.group, data.family, data.modified, this);
 
-                    // Navigate back to Curation Central page.
-                    // FUTURE: Need to navigate to Family Submit page.
+                    // Navigate to Curation Central or Family Submit page, depending on previous page
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -1634,7 +1647,7 @@ var IndividualAddHistory = React.createClass({
                 <span> added to </span>
                 {family ?
                     <span>family <a href={family['@id']}>{family.label}</a></span>
-                : 
+                :
                     <span>
                         {group ?
                             <span>group <a href={group['@id']}>{group.label}</a></span>

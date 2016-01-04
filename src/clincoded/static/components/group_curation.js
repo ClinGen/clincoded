@@ -396,10 +396,10 @@ var GroupCuration = React.createClass({
                                 annotation.groups = [];
                             }
 
-                            // merge in new group with new groups already in annotation
+                            // merge in new groups with new groups already in annotation
                             annotation.groups.push(newGroup['@id']);
 
-                            // Post the modified annotation to the DB, then go back to Curation Central
+                            // Post the modified annotation to the DB
                             return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
                                 return Promise.resolve({group: newGroup, annotation: data['@graph'][0]});
                             });
@@ -426,8 +426,7 @@ var GroupCuration = React.createClass({
                         this.recordHistory('modify', data.group);
                     }
 
-                    // Navigate back to Curation Central page.
-                    // FUTURE: Need to navigate to Group Submit page.
+                    // Navigate to Curation Central or Family Submit page, depending on previous page
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
