@@ -388,18 +388,20 @@ var GroupCuration = React.createClass({
                 }).then(newGroup => {
                     savedGroup = newGroup;
                     if (!this.state.group) {
-                        // Get a flattened copy of the annotation and put our new group into it,
-                        // ready for writing.
-                        var annotation = curator.flatten(this.state.annotation);
-                        if (annotation.groups) {
-                            annotation.groups.push(newGroup['@id']);
-                        } else {
-                            annotation.groups = [newGroup['@id']];
-                        }
+                        return this.getRestData('/evidence/' + this.state.annotation.uuid, null, true).then(freshAnnotation => {
+                            // Get a flattened copy of the fresh annotation object and put our new group into it,
+                            // ready for writing.
+                            var annotation = curator.flatten(freshAnnotation);
+                            if (annotation.groups) {
+                                annotation.groups.push(newGroup['@id']);
+                            } else {
+                                annotation.groups = [newGroup['@id']];
+                            }
 
-                        // Post the modified annotation to the DB, then go back to Curation Central
-                        return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                            return Promise.resolve({group: newGroup, annotation: data['@graph'][0]});
+                            // Post the modified annotation to the DB, then go back to Curation Central
+                            return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                                return Promise.resolve({group: newGroup, annotation: data['@graph'][0]});
+                            });
                         });
                     }
 
