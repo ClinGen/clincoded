@@ -779,8 +779,6 @@ var FamilyCuration = React.createClass({
                                 if (!group.familyIncluded) {
                                     group.familyIncluded = [];
                                 }
-
-                                // Merge existing families in the annotation with the new set of families.
                                 group.familyIncluded.push(newFamily['@id']);
 
                                 // Post the modified group to the DB
@@ -798,8 +796,6 @@ var FamilyCuration = React.createClass({
                                 if (!annotation.families) {
                                     annotation.families = [];
                                 }
-
-                                // Merge existing families in the annotation with the new set of families.
                                 annotation.families.push(newFamily['@id']);
 
                                 // Post the modified annotation to the DB

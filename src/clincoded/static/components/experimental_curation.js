@@ -1076,8 +1076,6 @@ var ExperimentalCuration = React.createClass({
                                     if (!annotation.experimentalData) {
                                         annotation.experimentalData = [];
                                     }
-
-                                    // merge in new experimental data with experimental data already in annotation
                                     annotation.experimentalData.push(newExperimental.data['@id']);
 
                                     // Post the modified annotation to the DB

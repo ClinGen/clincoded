@@ -284,17 +284,19 @@ var VariantCuration = React.createClass({
                 // Given pathogenicity has been saved (created or updated).
                 // Now update the GDM to include the pathogenicity if it's new
                 if (!this.state.pathogenicity && this.state.gdm && data.pathogenicity) {
-                    // New pathogenicity; add it to the GDM’s pathogenicity array.
-                    var newGdm = curator.flatten(this.state.gdm);
-                    if (newGdm.variantPathogenicity && newGdm.variantPathogenicity.length) {
-                        newGdm.variantPathogenicity.push(data.pathogenicity['@id']);
-                    } else {
-                        newGdm.variantPathogenicity = [data.pathogenicity['@id']];
-                    }
+                    return this.getRestData('/gdm/' + this.state.gdm.uuid, null, true).then(freshGdm => {
+                        // New pathogenicity; add it to the GDM’s pathogenicity array.
+                        var newGdm = curator.flatten(freshGdm);
+                        if (newGdm.variantPathogenicity && newGdm.variantPathogenicity.length) {
+                            newGdm.variantPathogenicity.push(data.pathogenicity['@id']);
+                        } else {
+                            newGdm.variantPathogenicity = [data.pathogenicity['@id']];
+                        }
 
-                    // Write the updated GDM
-                    return this.putRestData('/gdm/' + this.state.gdm.uuid, newGdm).then(() => {
-                        return Promise.resolve(_.extend(data, {modified: false}));
+                        // Write the updated GDM
+                        return this.putRestData('/gdm/' + this.state.gdm.uuid, newGdm).then(() => {
+                            return Promise.resolve(_.extend(data, {modified: false}));
+                        });
                     });
                 }
 

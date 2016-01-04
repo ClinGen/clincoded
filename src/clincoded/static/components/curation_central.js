@@ -97,12 +97,12 @@ var CurationCentral = React.createClass({
         }).then(newAnnotation => {
             return this.getRestData('/gdm/' + currGdm.uuid, null, true).then(freshGdm => {
                 var gdmObj = curator.flatten(freshGdm);
-
                 // Add our new annotation reference to the array of annotations in the GDM.
                 if (!gdmObj.annotations) {
                     gdmObj.annotations = [];
                 }
                 gdmObj.annotations.push(newAnnotation['@id']);
+
                 return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
                     return data['@graph'][0];
                 });

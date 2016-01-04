@@ -573,8 +573,6 @@ var IndividualCuration = React.createClass({
                                 if (!group.individualIncluded) {
                                     group.individualIncluded = [];
                                 }
-
-                                // Merge existing individuals in the group with the new set of individuals
                                 group.individualIncluded.push(newIndividual['@id']);
 
                                 // Post the modified group to the DB
@@ -589,8 +587,6 @@ var IndividualCuration = React.createClass({
                                 if (!family.individualIncluded) {
                                     family.individualIncluded = [];
                                 }
-
-                                // Merge existing individuals in the family with the new set of individuals.
                                 family.individualIncluded.push(newIndividual['@id']);
 
                                 // Post the modified family to the DB
@@ -607,8 +603,6 @@ var IndividualCuration = React.createClass({
                                 if (!annotation.individuals) {
                                     annotation.individuals = [];
                                 }
-
-                                // Merge existing individuals in the annotation with the new set of individuals.
                                 annotation.individuals.push(newIndividual['@id']);
 
                                 // Post the modified annotation to the DB
