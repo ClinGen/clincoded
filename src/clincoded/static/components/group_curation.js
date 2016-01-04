@@ -392,11 +392,12 @@ var GroupCuration = React.createClass({
                             // Get a flattened copy of the fresh annotation object and put our new group into it,
                             // ready for writing.
                             var annotation = curator.flatten(freshAnnotation);
-                            if (annotation.groups) {
-                                annotation.groups.push(newGroup['@id']);
-                            } else {
-                                annotation.groups = [newGroup['@id']];
+                            if (!annotation.groups) {
+                                annotation.groups = [];
                             }
+
+                            // merge in new group with new groups already in annotation
+                            annotation.groups.push(newGroup['@id']);
 
                             // Post the modified annotation to the DB, then go back to Curation Central
                             return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
