@@ -1911,7 +1911,7 @@ var DeleteButtonModal = React.createClass({
                 for (var i = 0; i < tempSubItem.length; i++) {
                     if (mode == 'display') {
                         // if the mode is 'display', generate the display string
-                        tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem[i]['@id']}>{tempSubItem[i]['@type'][0]} {tempSubItem[i].label}</a></span>;
+                        tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem[i]['@id']}>{tempSubItem[i]['@type'][0]} {tempSubItem[i].label}</a></span>;
                         returnPayload.push(tempDisplayString);
                     } else if (mode == 'id') {
                         // if the mode is 'id', grab the @ids of the child items
@@ -1923,7 +1923,7 @@ var DeleteButtonModal = React.createClass({
             } else {
                 if (mode == 'display') {
                     // if childspace is empty, add a display line indicating the fact
-                    tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;</span>;})}&#8627; no associated {type}</span>;
+                    tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; no associated {type}</span>;
                     returnPayload.push(tempDisplayString);
                 }
             }
@@ -2004,13 +2004,16 @@ var DeleteButtonModal = React.createClass({
     render: function() {
         var tree;
         var message;
-        // generate custom messages and generate display tree for group and family delete confirm modals
+        // generate custom messages and generate display tree for group and family delete confirm modals.
+        // generic message for everything else.
         if (this.props.item['@type'][0] == 'group') {
-            message = <p><strong>Warning</strong>: Deleting this Group will also delete any associated families and individuals (see below)</p>;
+            message = <p><strong>Warning</strong>: Deleting this Group will also delete any associated families and individuals (see any Families or Individuals associated with the Group under its name, bolded below). Are you sure you want to delete this item?</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
         } else if (this.props.item['@type'][0] == 'family') {
-            message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see below)</p>;
+            message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below). Are you sure you want to delete this item?</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
+        } else {
+            message = <p>Are you sure you want to delete this item?</p>;
         }
         return (
             <div>
@@ -2023,7 +2026,6 @@ var DeleteButtonModal = React.createClass({
                     })}
                     <br /></div>
                     : null}
-                    <p>Are you sure you want to delete this item?</p>
                     </div>
                 <div className="modal-footer">
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
