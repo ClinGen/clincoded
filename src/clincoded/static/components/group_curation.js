@@ -396,7 +396,7 @@ var GroupCuration = React.createClass({
                                 annotation.groups = [];
                             }
 
-                            // merge in new groups with new groups already in annotation
+                            // merge in new groups with groups already in annotation
                             annotation.groups.push(newGroup['@id']);
 
                             // Post the modified annotation to the DB
