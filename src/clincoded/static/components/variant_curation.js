@@ -247,35 +247,41 @@ var VariantCuration = React.createClass({
             promise.then(newAssessmentInfo => {
                 // If this pathogenicity was assessed, then there was no form, so don't write the pathogenicity.
                 if (!this.cv.assessmentTracker.isAssessed()) {
-                    // Convert form values to new flattened pathogenicity object.
-                    var newPathogenicity = this.formToPathogenicity(this.state.pathogenicity);
+                    // Get updated GDM object to make sure we don't create extra pathogenicity objects
+                    return this.getRestData('/gdm/' + this.state.gdm.uuid, null, true).then(freshGdm => {
+                        var freshPathogenicity = curator.getPathogenicityFromVariant(freshGdm, this.queryValues.session_user, this.queryValues.variantUuid);
+                        this.setState({'pathogenicity': freshPathogenicity});
 
-                    // If we made a new assessment, add it to the pathogenicity's assessments
-                    if (newAssessmentInfo.assessment && !newAssessmentInfo.update) {
-                        //if (!newPathogenicity.assessments) {
-                        //    newPathogenicity.assessments = [];
-                        //}
-                        //newPathogenicity.assessments.push(newAssessmentInfo.assessment['@id']);
-                        newPathogenicity.assessments = [newAssessmentInfo.assessment['@id']]; // only login user's assessment is allowed.
-                    }
+                        // Convert form values to new flattened pathogenicity object.
+                        var newPathogenicity = this.formToPathogenicity(this.state.pathogenicity);
 
-                    // Assign a link to the pathogenicity's variant if new
-                    if (!newPathogenicity.variant && this.state.variant) {
-                        newPathogenicity.variant = this.state.variant['@id'];
-                    }
+                        // If we made a new assessment, add it to the pathogenicity's assessments
+                        if (newAssessmentInfo.assessment && !newAssessmentInfo.update) {
+                            //if (!newPathogenicity.assessments) {
+                            //    newPathogenicity.assessments = [];
+                            //}
+                            //newPathogenicity.assessments.push(newAssessmentInfo.assessment['@id']);
+                            newPathogenicity.assessments = [newAssessmentInfo.assessment['@id']]; // only login user's assessment is allowed.
+                        }
 
-                    // Either update or create the pathogenicity object in the DB
-                    if (this.state.pathogenicity) {
-                        // We're editing a pathogenicity. PUT the new pathogenicity object to the DB to update the existing one.
-                        return this.putRestData('/pathogenicity/' + this.state.pathogenicity.uuid, newPathogenicity).then(data => {
-                            return Promise.resolve({pathogenicity: data['@graph'][0], assessment: newAssessmentInfo.assessment});
-                        });
-                    } else {
-                        // We created a pathogenicity; POST it to the DB
-                        return this.postRestData('/pathogenicity/', newPathogenicity).then(data => {
-                            return Promise.resolve({pathogenicity: data['@graph'][0], assessment: newAssessmentInfo.assessment});
-                        });
-                    }
+                        // Assign a link to the pathogenicity's variant if new
+                        if (!newPathogenicity.variant && this.state.variant) {
+                            newPathogenicity.variant = this.state.variant['@id'];
+                        }
+
+                        // Either update or create the pathogenicity object in the DB
+                        if (this.state.pathogenicity) {
+                            // We're editing a pathogenicity. PUT the new pathogenicity object to the DB to update the existing one.
+                            return this.putRestData('/pathogenicity/' + this.state.pathogenicity.uuid, newPathogenicity).then(data => {
+                                return Promise.resolve({pathogenicity: data['@graph'][0], assessment: newAssessmentInfo.assessment});
+                            });
+                        } else {
+                            // We created a pathogenicity; POST it to the DB
+                            return this.postRestData('/pathogenicity/', newPathogenicity).then(data => {
+                                return Promise.resolve({pathogenicity: data['@graph'][0], assessment: newAssessmentInfo.assessment});
+                            });
+                        }
+                    });
                 }
 
                 // No pathogenicity to write because the pathogenicity form is read-only (assessed).
