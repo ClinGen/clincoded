@@ -1030,7 +1030,7 @@ var NewCalculation = function() {
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td rowSpan="3" className="title" className="title exp-evidence-category-cells">Function</td>
+                                                    <td rowSpan="3" className="title exp-evidence-category-cells">Function</td>
                                                     <td className="title">Biochemical Function</td>
                                                     <td>0.5</td>
                                                     <td className={expType['Biochemical Function'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Biochemical Function'] > 0 ? expType['Biochemical Function'] : ''}</td>
@@ -1049,7 +1049,7 @@ var NewCalculation = function() {
                                                     <td className={expType['Expression'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Expression'] > 0 ? expType['Expression'] : ''}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td rowSpan="2" className="title" className="title exp-evidence-category-cells">Functional<br />Alteration</td>
+                                                    <td rowSpan="2" className="title exp-evidence-category-cells">Functional<br />Alteration</td>
                                                     <td className="title">Patient Cells</td>
                                                     <td>1</td>
                                                     <td className={expType['Functional Alteration (Patient cells)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Patient cells)'] > 0 ? expType['Functional Alteration (Patient cells)'] : ''}</td>
@@ -1062,7 +1062,7 @@ var NewCalculation = function() {
                                                     <td className={expType['Functional Alteration (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Engineered equivalent)'] > 0 ? expType['Functional Alteration (Engineered equivalent)'] : ''}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td rowSpan="4" className="title" className="title exp-evidence-category-cells">Models and<br />Rescue</td>
+                                                    <td rowSpan="4" className="title exp-evidence-category-cells">Models and<br />Rescue</td>
                                                     <td className="title">Animal Model</td>
                                                     <td>2</td>
                                                     <td className={expType['Model Systems (Animal model)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Model Systems (Animal model)'] > 0 ? expType['Model Systems (Animal model)'] : ''}</td>
