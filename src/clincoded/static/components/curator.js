@@ -1032,7 +1032,7 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
 //    }
 //    return pathogenicity;
 //};
-var getPathogenicityFromVariant = function(gdm, curatorUuid, variantUuid) {
+var getPathogenicityFromVariant = module.exports.getPathogenicityFromVariant = function(gdm, curatorUuid, variantUuid) {
     var pathogenicity = null;
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
         for (var i in gdm.variantPathogenicity) {
