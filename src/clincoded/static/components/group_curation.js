@@ -143,13 +143,38 @@ var GroupCuration = React.createClass({
             var geneSymbols = curator.capture.genes(this.getFormValue('othergenevariants'));
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
+            var hpotext = curator.capture.hpoids(this.getFormValue('phenoterms'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
 
+            var valid_orphaId = false;
+            var valid_phoId = false;
             // Check that all Orphanet IDs have the proper format (will check for existence later)
-            if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
+            if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
                 // ORPHA list is bad
                 formError = true;
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+            }
+            else if (orphaIds && orphaIds.length) {
+                valid_orphaId = true;
+            }
+
+            // Check HPO ID format
+            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
+                // HPOID list is bad
+                formError = true;
+                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+            else if (hpoids && hpoids.length) {
+                valid_phoId = true;
+            }
+
+            // Check Orphanet ID, HPO ID and HPO text
+            if (!valid_orphaId && !valid_phoId && (!hpotext || !hpotext.length)) {
+                // Can not empty at all of them
+                formError = true;
+                this.setFormErrors('orphanetid', 'Enter phenotype data');
+                this.setFormErrors('hpoid', 'Enter phenotype data');
+                this.setFormErrors('phenoterms', 'Enter phenotype data');
             }
 
             // Check that all gene symbols have the proper format (will check for existence later)
@@ -167,13 +192,6 @@ var GroupCuration = React.createClass({
             }
 
             // Check that all gene symbols have the proper format (will check for existence later)
-            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
-                // HPOID list is bad
-                formError = true;
-                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-            }
-
-            // Check that all gene symbols have the proper format (will check for existence later)
             if (nothpoids && nothpoids.length && _(nothpoids).any(function(id) { return id === null; })) {
                 // NOT HPOID list is bad
                 formError = true;
@@ -182,21 +200,32 @@ var GroupCuration = React.createClass({
 
             if (!formError) {
                 // Build search string from given ORPHA IDs
-                var searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                var searchStr;
+                if (valid_orphaId) {
+                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                }
+                else {
+                    searchStr = '';
+                }
                 this.setState({submitBusy: true});
 
                 // Verify given Orpha ID exists in DB
                 this.getRestData(searchStr).then(diseases => {
-                    if (diseases['@graph'].length === orphaIds.length) {
-                        // Successfully retrieved all diseases
-                        groupDiseases = diseases;
-                        return Promise.resolve(diseases);
-                    } else {
-                        // Get array of missing Orphanet IDs
-                        this.setState({submitBusy: false}); // submit error; re-enable submit button
-                        var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
-                        this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
-                        throw diseases;
+                    if (valid_orphaId) {
+                        if (diseases['@graph'].length === orphaIds.length) {
+                            // Successfully retrieved all diseases
+                            groupDiseases = diseases;
+                            return Promise.resolve(diseases);
+                        } else {
+                            // Get array of missing Orphanet IDs
+                            this.setState({submitBusy: false}); // submit error; re-enable submit button
+                            var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
+                            this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
+                            throw diseases;
+                        }
+                    }
+                    else {
+                        return Promise.resolve(null);
                     }
                 }, e => {
                     // The given orpha IDs couldn't be retrieved for some reason.
@@ -288,7 +317,12 @@ var GroupCuration = React.createClass({
                     newGroup.label = this.getFormValue('groupname');
 
                     // Get an array of all given disease IDs
-                    newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
+                    if (groupDiseases) {
+                        newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
+                    }
+                    else {
+                        delete newGroup.commonDiagnosis;
+                    }
 
                     // If a method object was created (at least one method field set), get its new object's
                     var newMethod = methods.create.call(this);
@@ -300,9 +334,15 @@ var GroupCuration = React.createClass({
                     if (hpoids && hpoids.length) {
                         newGroup.hpoIdInDiagnosis = hpoids;
                     }
+                    else if (newGroup.hpoIdInDiagnosis) {
+                        delete newGroup.hpoIdInDiagnosis;
+                    }
                     var phenoterms = this.getFormValue('phenoterms');
                     if (phenoterms) {
                         newGroup.termsInDiagnosis = phenoterms;
+                    }
+                    else if (newGroup.termsInDiagnosis) {
+                        delete newGroup.termsInDiagnosis;
                     }
                     if (nothpoids && nothpoids.length) {
                         newGroup.hpoIdInElimination = nothpoids;
@@ -559,12 +599,13 @@ var GroupCommonDiseases = function() {
     return (
         <div className="row">
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
-                error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                error={this.getFormError('orphanetid')} clearError={this.clrMultiFormErrors.bind(null, ['orphanetid', 'hpoid', 'phenoterms'])}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
-                error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
+                error={this.getFormError('hpoid')} clearError={this.clrMultiFormErrors.bind(null, ['orphanetid', 'hpoid', 'phenoterms'])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={group && group.termsInDiagnosis}
+                error={this.getFormError('phenoterms')} clearError={this.clrMultiFormErrors.bind(null, ['orphanetid', 'hpoid', 'phenoterms'])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Group</em> if they are specifically noted in the paper.</p>
             <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"

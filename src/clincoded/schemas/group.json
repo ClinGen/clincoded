@@ -6,7 +6,6 @@
     "type": "object",
     "required": [
         "label",
-        "commonDiagnosis",
         "totalNumberIndividuals"
     ],
     "identifyingProperties": ["uuid"],
@@ -349,24 +348,16 @@
             "title": "Creation Date",
             "type": "string"
         },
-        "commonDiagnosis": {
-            "title": "Common Diagnosis",
-            "type": "string"
-        },
         "totalNumberIndividuals": {
             "title": "Total Number Individuals",
             "type": "integer"
         },
-        "familyIncluded": {
-            "title": "Family Included",
-            "type": "string"
-        },
-        "individualIncluded": {
-            "title": "Individual Included",
-            "type": "string"
-        },
-        "submitted_by.uuid": {
+        "submitted_by.title": {
             "title": "Submitted by",
+            "type": "string"
+        },
+        "date_created": {
+            "title": "Creation Date",
             "type": "string"
         }
     }
