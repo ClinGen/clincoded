@@ -2007,18 +2007,17 @@ var DeleteButtonModal = React.createClass({
         // generate custom messages and generate display tree for group and family delete confirm modals.
         // generic message for everything else.
         if (this.props.item['@type'][0] == 'group') {
-            message = <p><strong>Warning</strong>: Deleting this Group will also delete any associated families and individuals (see any Families or Individuals associated with the Group under its name, bolded below). Are you sure you want to delete this item?</p>;
+            message = <p><strong>Warning</strong>: Deleting this Group will also delete any associated families and individuals (see any Families or Individuals associated with the Group under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
         } else if (this.props.item['@type'][0] == 'family') {
-            message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below). Are you sure you want to delete this item?</p>;
+            message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
-        } else {
-            message = <p>Are you sure you want to delete this item?</p>;
         }
         return (
             <div>
                 <div className="modal-body">
                     {message}
+                    <p>Are you sure you want to delete this item?</p>
                     {tree ?
                     <div><strong>{this.props.item['@type'][0]} {this.props.item.label}</strong><br />
                     {tree.map(function(treeItem, i) {
