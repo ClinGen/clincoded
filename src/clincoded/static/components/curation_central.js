@@ -62,6 +62,14 @@ var CurationCentral = React.createClass({
         return this.getRestData('/gdm/' + uuid, null, true).then(gdm => {
             // The GDM object successfully retrieved; set the Curator Central component
             this.setState({currGdm: gdm, currOmimId: gdm.omimId});
+            // If a PMID isn't pre-selected from the URL and PMIDs exist, select the first one in the PMID list by default
+            if (pmid == undefined && gdm.annotations && gdm.annotations.length > 0) {
+                var annotations = _(gdm.annotations).sortBy(function(annotation) {
+                    // Sort list of articles by first author
+                    return annotation.article.authors[0];
+                });
+                pmid = annotations[0].article.pmid;
+            }
             this.currPmidChange(pmid);
             return gdm;
         }).catch(function(e) {
