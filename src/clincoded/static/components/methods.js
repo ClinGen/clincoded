@@ -41,9 +41,9 @@ module.exports = {
                     <option disabled="disabled"></option>
                     <option>Exome sequencing</option>
                     <option>Genotyping</option>
-                    <option>HRM</option>
+                    <option>High resolution melting</option>
                     <option>PCR</option>
-                    <option>Sanger</option>
+                    <option>Sanger sequencing</option>
                     <option>Whole genome shotgun sequencing</option>
                 </Input>
                 <Input type="select" ref="genotypingmethod2" label="Method 2:" defaultValue="none" value={method.genotypingMethods && method.genotypingMethods[1] ? method.genotypingMethods[1] : null}
@@ -52,9 +52,9 @@ module.exports = {
                     <option disabled="disabled"></option>
                     <option>Exome sequencing</option>
                     <option>Genotyping</option>
-                    <option>HRM</option>
+                    <option>High resolution melting</option>
                     <option>PCR</option>
-                    <option>Sanger</option>
+                    <option>Sanger sequencing</option>
                     <option>Whole genome shotgun sequencing</option>
                 </Input>
                 <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={curator.booleanToDropdown(method.entireGeneSequenced)}
