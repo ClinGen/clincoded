@@ -499,14 +499,12 @@ var FamilyCuration = React.createClass({
             }
 
             if (!formError) {
-                // Build search string from given ORPHA IDs
+                // Build search string from given ORPHA IDs, empty string if no Orphanet id entered.
                 var searchStr;
                 if (orphaIds && orphaIds.length > 0) {
                     searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
                 }
                 else {
-                    // a temp solution to match the callback function structure because we need to function the page in a short time.
-                    //searchStr = '/gene/NGLY1';
                     searchStr = '';
                 }
                 this.setState({submitBusy: true});
@@ -526,6 +524,7 @@ var FamilyCuration = React.createClass({
                             throw diseases;
                         }
                     } else {
+                        // if no Orphanet id entered.
                         return Promise.resolve(null);
                     }
                 }, e => {

@@ -225,6 +225,7 @@ var GroupCuration = React.createClass({
                         }
                     }
                     else {
+                        // when no Orphanet id entered.
                         return Promise.resolve(null);
                     }
                 }, e => {
