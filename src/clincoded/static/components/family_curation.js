@@ -506,26 +506,27 @@ var FamilyCuration = React.createClass({
                 }
                 else {
                     // a temp solution to match the callback function structure because we need to function the page in a short time.
-                    searchStr = '/gene/NGLY1';
-                    //searchStr = '';
+                    //searchStr = '/gene/NGLY1';
+                    searchStr = '';
                 }
                 this.setState({submitBusy: true});
 
                 // Verify given Orpha ID exists in DB
                 this.getRestData(searchStr).then(diseases => {
-                    if (!orphaIds || orphaIds.length === 0) {
-                        // no Orpha id entered
-                        return Promise.resolve(null);
-                    } else if (diseases['@graph'].length === orphaIds.length) {
-                        // Successfully retrieved all diseases
-                        familyDiseases = diseases;
-                        return Promise.resolve(diseases);
+                    if (orphaIds && orphaIds.length) {
+                        if (diseases['@graph'].length === orphaIds.length) {
+                            // Successfully retrieved all diseases
+                            familyDiseases = diseases;
+                            return Promise.resolve(diseases);
+                        } else {
+                            // Get array of missing Orphanet IDs
+                            this.setState({submitBusy: false}); // submit error; re-enable submit button
+                            var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
+                            this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
+                            throw diseases;
+                        }
                     } else {
-                        // Get array of missing Orphanet IDs
-                        this.setState({submitBusy: false}); // submit error; re-enable submit button
-                        var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
-                        this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
-                        throw diseases;
+                        return Promise.resolve(null);
                     }
                 }, e => {
                     // The given orpha IDs couldn't be retrieved for some reason.
