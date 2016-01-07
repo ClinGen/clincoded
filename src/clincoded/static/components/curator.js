@@ -106,7 +106,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
             var supportedVariants = getUserPathogenicity(gdm, session);
             if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && supportedVariants && supportedVariants.length > 0) {
-                for (i in gdm.annotations) {
+                for (var i in gdm.annotations) {
                     var annotation = gdm.annotations[i];
                     if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
                         summaryButton = true;
@@ -125,7 +125,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                         break;
                     }
                     else if (annotation.groups && annotation.groups.length > 0) {
-                        for (j in annotation.groups) {
+                        for (var j in annotation.groups) {
                             if (annotation.groups[j].familyIncluded && annotation.groups[j].familyIncluded.length > 0) {
                                 for (var k in annotation.groups[j].familyIncluded) {
                                     if (annotation.groups[j].familyIncluded[k].individualIncluded && annotation.groups[j].familyIncluded[k].individualIncluded.length > 0 &&
@@ -191,9 +191,11 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                         <td className="button-box" rowSpan="2">
                                             { summaryButton ?
                                                 ( summaryPage ?
-                                                    null
+                                                    <button type="button" className="btn btn-primary" disabled="disabled">
+                                                        Generate New Summary
+                                                    </button>
                                                     :
-                                                    <a className="btn btn-primary" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                    <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
                                                         { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
                                                     </a>
                                                 )
