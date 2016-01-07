@@ -176,12 +176,14 @@ var FamilyCuration = React.createClass({
         }
     },
 
-    // Handle a click on a copy orphanet button
-    handleClick: function(fromTarget, e) {
+    // Handle a click on a copy orphanet button or copy phenotype button
+    handleClick: function(fromTarget, item, e) {
         e.preventDefault(); e.stopPropagation();
         var associatedGroups;
-        var orphanetValTemp = [];
+        //var orphanetValTemp = [];
         var orphanetVal = '';
+        var hpoIds = '';
+        var hpoFreeText = '';
         if (fromTarget == 'group') {
             if (this.state.group) {
                 // We have a group, so get the disease array from it.
@@ -191,16 +193,40 @@ var FamilyCuration = React.createClass({
                 associatedGroups = this.state.family.associatedGroups;
             }
             if (associatedGroups && associatedGroups.length > 0) {
-                orphanetVal = associatedGroups.map(function(associatedGroup, i) {
-                    return (
-                        associatedGroup.commonDiagnosis.map(function(disease, i) {
-                            return ('ORPHA' + disease.orphaNumber);
-                        }).join(', ')
-                    );
-                });
+                if (item === 'orphanetid') {
+                    orphanetVal = associatedGroups.map(function(associatedGroup, i) {
+                        return (
+                            associatedGroup.commonDiagnosis.map(function(disease, i) {
+                                return ('ORPHA' + disease.orphaNumber);
+                            }).join(', ')
+                        );
+                    });
+                    this.refs['orphanetid'].setValue(orphanetVal.join(', '));
+                    this.setState({orpha: true});
+                }
+                else if (item === 'phenotype') {
+                    hpoIds = associatedGroups.map(function(associatedGroup, i) {
+                        if (associatedGroup.hpoIdInDiagnosis && associatedGroup.hpoIdInDiagnosis.length) {
+                            return (
+                                associatedGroup.hpoIdInDiagnosis.map(function(hpoid, i) {
+                                    return (hpoid);
+                                }).join(', ')
+                            );
+                        }
+                    });
+                    if (hpoIds.length) {
+                        this.refs['hpoid'].setValue(hpoIds.join(', '));
+                    }
+                    hpoFreeText = associatedGroups.map(function(associatedGroup, i) {
+                        if (associatedGroup.termsInDiagnosis) {
+                            return associatedGroup.termsInDiagnosis;
+                        }
+                    });
+                    if (hpoFreeText !== '') {
+                        this.refs['phenoterms'].setValue(hpoFreeText.join(', '));
+                    }
+                }
             }
-            this.refs['orphanetid'].setValue(orphanetVal.join(', '));
-            this.setState({orpha: true});
         } else if (fromTarget == 'family') {
             orphanetVal = this.refs['orphanetid'].getValue();
             this.refs['individualorphanetid'].setValue(orphanetVal);
@@ -978,9 +1004,15 @@ var FamilyCuration = React.createClass({
         if (hpoTerms) {
             newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
         }
+        else if (newFamily.hpoIdInDiagnosis) {
+            delete newFamily.hpoIdInDiagnosis;
+        }
         var phenoterms = this.getFormValue('phenoterms');
         if (phenoterms) {
             newFamily.termsInDiagnosis = phenoterms;
+        }
+        else if (newFamily.termsInDiagnosis) {
+            delete newFamily.termsInDiagnosis;
         }
         hpoTerms = this.getFormValue('nothpoid');
         if (hpoTerms) {
@@ -1237,15 +1269,24 @@ var FamilyCommonDiseases = function() {
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            {associatedGroups ?
+            {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ?
             <Input type="button" ref="orphanetcopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
-                clickHandler={this.handleClick.bind(this, 'group')} />
+                clickHandler={this.handleClick.bind(this, 'group', 'orphanetid')} />
             : null}
+            {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
+            curator.renderPhenotype(associatedGroups, 'Group')
+            : null
+            }
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={family && family.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
+            <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Group"
+                clickHandler={this.handleClick.bind(this, 'group', 'phenotype')} />
+            : null
+            }
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Family</em> if they are specifically noted in the paper.</p>
             <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}

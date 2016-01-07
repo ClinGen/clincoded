@@ -507,6 +507,7 @@ class Group(Item):
     def associatedAnnotations(self, request, associatedAnnotations):
         return paths_filtered_by_status(request, associatedAnnotations)
 
+
 @collection(
     name='families',
     unique_key='family:uuid',

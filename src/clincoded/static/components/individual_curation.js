@@ -111,21 +111,28 @@ var IndividualCuration = React.createClass({
         }
     },
 
-    // Handle a click on a copy orphanet button
-    handleClick: function(obj, e) {
+    // Handle a click on a copy orphanet button or copy phenotype button
+    handleClick: function(obj, item, e) {
         e.preventDefault(); e.stopPropagation();
-        var associatedObjs;
         var orphanetVal = '';
-        if (obj) {
-            // We have a group, so get the disease array from it.
-            associatedObjs = obj;
-        }
-        if (associatedObjs) {
-            orphanetVal = associatedObjs.commonDiagnosis.map(function(disease, i) {
+        var hpoIds = '';
+
+        if (item === 'orphanet') {
+            orphanetVal = obj.commonDiagnosis.map(function(disease, i) {
                 return ('ORPHA' + disease.orphaNumber);
             }).join(', ');
+            this.refs['orphanetid'].setValue(orphanetVal);
+        } else if (item === 'phenotype') {
+            if (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length) {
+                hpoIds = obj.hpoIdInDiagnosis.map(function(hpoid, i) {
+                    return (hpoid);
+                }).join(', ');
+                this.refs['hpoid'].setValue(hpoIds);
+            }
+            if (obj.termsInDiagnosis) {
+                this.refs['phenoterms'].setValue(obj.termsInDiagnosis);
+            }
         }
-        this.refs['orphanetid'].setValue(orphanetVal);
     },
 
     // Load objects from query string into the state variables. Must have already parsed the query string
@@ -659,10 +666,14 @@ var IndividualCuration = React.createClass({
         // Fill in the individual fields from the Diseases & Phenotypes panel
         if (hpoids && hpoids.length) {
             newIndividual.hpoIdInDiagnosis = hpoids;
+        } else if (newIndividual.hpoIdInDiagnosis && newIndividual.hpoIdInDiagnosis.length) {
+            delete newIndividual.hpoIdInDiagnosis;
         }
         var phenoterms = this.getFormValue('phenoterms');
         if (phenoterms) {
             newIndividual.termsInDiagnosis = phenoterms;
+        } else if (newIndividual.termsInDiagnosis) {
+            delete newIndividual.termsInDiagnosis;
         }
         if (nothpoids && nothpoids.length) {
             newIndividual.hpoIdInElimination = nothpoids;
@@ -1022,17 +1033,35 @@ var IndividualCommonDiseases = function() {
 
             {associatedGroups ?
             <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
-                clickHandler={this.handleClick.bind(this, group)} />
+                clickHandler={this.handleClick.bind(this, associatedGroups[0], 'orphanet')} />
             : null}
             {associatedFamilies && family.commonDiagnosis && family.commonDiagnosis.length > 0 ?
             <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Family"
-                clickHandler={this.handleClick.bind(this, family)} />
+                clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'orphanet')} />
             : null}
+            {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
+            curator.renderPhenotype(associatedGroups, 'Group')
+            : null
+            }
+            {associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
+            curator.renderPhenotype(associatedFamilies, 'Family')
+            : null
+            }
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={individual && individual.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
+            <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Group"
+                clickHandler={this.handleClick.bind(this, associatedGroups[0], 'phenotype')} />
+            : null
+            }
+            {associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
+            <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Family"
+                clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'phenotype')} />
+            : null
+            }
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Individual</em> if they are specifically noted in the paper.</p>
             <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
@@ -1634,7 +1663,7 @@ var IndividualAddHistory = React.createClass({
                 <span> added to </span>
                 {family ?
                     <span>family <a href={family['@id']}>{family.label}</a></span>
-                : 
+                :
                     <span>
                         {group ?
                             <span>group <a href={group['@id']}>{group.label}</a></span>
