@@ -507,6 +507,7 @@ var FamilyCuration = React.createClass({
                 else {
                     // a temp solution to match the callback function structure because we need to function the page in a short time.
                     searchStr = '/gene/NGLY1';
+                    //searchStr = '';
                 }
                 this.setState({submitBusy: true});
 
@@ -1266,7 +1267,7 @@ var FamilyCommonDiseases = function() {
 
     return (
         <div className="row">
-            {curator.renderOrphanets(associatedGroups, 'Group')}
+            {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ? curator.renderOrphanets(associatedGroups, 'Group') : null}
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
