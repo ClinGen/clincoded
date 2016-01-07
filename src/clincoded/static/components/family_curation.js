@@ -992,7 +992,7 @@ var FamilyCuration = React.createClass({
             newFamily.commonDiagnosis = familyDiseases['@graph'].map(function(disease) { return disease['@id']; });
         }
         else if (newFamily.commonDiagnosis && newFamily.commonDiagnosis.length > 0) {
-            // if no Orpha id entered when edit family
+            // allow to delete oephanet ids when editing family
             delete newFamily.commonDiagnosis;
         }
 
@@ -1007,6 +1007,7 @@ var FamilyCuration = React.createClass({
             newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
         }
         else if (newFamily.hpoIdInDiagnosis) {
+            // allow to delete HPO ids
             delete newFamily.hpoIdInDiagnosis;
         }
         var phenoterms = this.getFormValue('phenoterms');
@@ -1014,6 +1015,7 @@ var FamilyCuration = React.createClass({
             newFamily.termsInDiagnosis = phenoterms;
         }
         else if (newFamily.termsInDiagnosis) {
+            // allow to delete phenotype free text
             delete newFamily.termsInDiagnosis;
         }
         hpoTerms = this.getFormValue('nothpoid');
@@ -1303,7 +1305,7 @@ var FamilyCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Common Disease(s) in Family:</span>;
+        return <span>Disease(s) in Common (<span style={{fontWeight: 'normal'}}><a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term</span>):</span>;
     }
 });
 
@@ -1316,8 +1318,8 @@ var LabelHpoId = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+                 <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
             </span>
         );
     }
@@ -1332,8 +1334,8 @@ var LabelPhenoTerms = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
-                Phenotype(s) (<span style={{fontWeight: 'normal'}}>free text</span>):
+                {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+                (<span style={{fontWeight: 'normal'}}>free text</span>):
             </span>
         );
     }
