@@ -1069,18 +1069,19 @@ var ExperimentalCuration = React.createClass({
                         }).then(newExperimental => {
                             savedExperimental = newExperimental.data;
                             if (!this.state.experimental) {
-                                // Get a flattened copy of the annotation and put our new group into it,
-                                // ready for writing.
-                                var annotation = curator.flatten(this.state.annotation);
-                                if (annotation.experimentalData) {
+                                return this.getRestData('/evidence/' + this.state.annotation.uuid, null, true).then(freshAnnotation => {
+                                    // Get a flattened copy of the fresh annotation object and put our new experimental data into it,
+                                    // ready for writing.
+                                    var annotation = curator.flatten(freshAnnotation);
+                                    if (!annotation.experimentalData) {
+                                        annotation.experimentalData = [];
+                                    }
                                     annotation.experimentalData.push(newExperimental.data['@id']);
-                                } else {
-                                    annotation.experimentalData = [newExperimental.data['@id']];
-                                }
 
-                                // Post the modified annotation to the DB, then go back to Curation Central
-                                return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                                    return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
+                                    // Post the modified annotation to the DB
+                                    return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                                        return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
+                                    });
                                 });
                             } else {
                                 return Promise.resolve({assessment: null, updatedAssessment: false, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});

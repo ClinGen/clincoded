@@ -103,15 +103,17 @@ var CurationCentral = React.createClass({
             // objects; basically the object as it exists in the DB. We'll update that and write it back to the DB.
             return (data['@graph'][0]);
         }).then(newAnnotation => {
-            var gdmObj = curator.flatten(currGdm);
+            return this.getRestData('/gdm/' + currGdm.uuid, null, true).then(freshGdm => {
+                var gdmObj = curator.flatten(freshGdm);
+                // Add our new annotation reference to the array of annotations in the GDM.
+                if (!gdmObj.annotations) {
+                    gdmObj.annotations = [];
+                }
+                gdmObj.annotations.push(newAnnotation['@id']);
 
-            // Add our new annotation reference to the array of annotations in the GDM.
-            if (!gdmObj.annotations) {
-                gdmObj.annotations = [];
-            }
-            gdmObj.annotations.push(newAnnotation['@id']);
-            return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
-                return data['@graph'][0];
+                return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
+                    return data['@graph'][0];
+                });
             });
         }).then(gdm => {
             // Record history of adding a PMID to a GDM
