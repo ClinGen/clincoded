@@ -122,6 +122,9 @@ var IndividualCuration = React.createClass({
                 return ('ORPHA' + disease.orphaNumber);
             }).join(', ');
             this.refs['orphanetid'].setValue(orphanetVal);
+            var errors = this.state.formErrors;
+            errors['orphanetid'] = '';
+            this.setState({formErrors: errors});
         } else if (item === 'phenotype') {
             if (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length) {
                 hpoIds = obj.hpoIdInDiagnosis.map(function(hpoid, i) {

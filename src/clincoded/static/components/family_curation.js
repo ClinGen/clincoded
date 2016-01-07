@@ -1544,7 +1544,7 @@ var FamilyVariant = function() {
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
                     { this.state.orpha ?
                         <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
-                        clickHandler={this.handleClick.bind(this, 'family')} />
+                        clickHandler={this.handleClick.bind(this, 'family', 'orphanetid')} />
                         :
                         null
                     }
