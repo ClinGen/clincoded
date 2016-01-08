@@ -208,12 +208,12 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                                         </p>
                                                     </div>
                                                     <div className="submit-results-buttons">
-                                                        <div className="col-md-7">
+                                                        <div className="col-md-6">
                                                             <span className="family-submit-results-btn">
                                                                 <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Add non-proband Individual</a>
                                                             </span>
                                                         </div>
-                                                        <div className="col-md-5">
+                                                        <div className="col-md-6">
                                                             <span className="family-submit-results-btn">
                                                                 <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
                                                             </span>

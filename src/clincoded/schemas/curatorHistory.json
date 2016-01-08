@@ -43,6 +43,36 @@
                 "variant"
             ]
         },
+        "hidden": {
+            "title": "Hidden from Dashboard",
+            "description": "Whether or not item should be hidden from dashboard",
+            "type": "integer",
+            "default": 0
+        },
+        "hadChildren": {
+            "title": "Had Children",
+            "description": "(Deleted) item had children associated with it",
+            "type": "integer",
+            "default": 0
+        },
+        "parentInfo": {
+            "title": "Parent Info",
+            "description": "Information of parent object",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "title": "ID of Parent",
+                    "description": "@id of Parent",
+                    "type": "string"
+                },
+                "name": {
+                    "title": "Name of Parent",
+                    "description": "Name of Parent",
+                    "type": "string"
+                }
+            }
+        },
         "meta": {
             "title": "History meta",
             "description": "Type-dependent (@type) data about the history item",
@@ -373,6 +403,22 @@
         "primary": {
             "title": "Primary object information",
             "type": "object"
+        },
+        "hidden": {
+            "title": "Hidden",
+            "type": "integer"
+        },
+        "hadChildren": {
+            "title": "Had Children",
+            "type": "integer"
+        },
+        "parentInfo.id": {
+            "title": "Parent @id",
+            "type": "string"
+        },
+        "parentInfo.name": {
+            "title": "Parent Name",
+            "type": "string"
         },
         "meta.article.gdm": {
             "title": "GDM of PMID",
