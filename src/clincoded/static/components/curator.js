@@ -1911,7 +1911,7 @@ var DeleteButtonModal = React.createClass({
                 for (var i = 0; i < tempSubItem.length; i++) {
                     if (mode == 'display') {
                         // if the mode is 'display', generate the display string
-                        tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem[i]['@id']}>{tempSubItem[i]['@type'][0]} {tempSubItem[i].label}</a></span>;
+                        tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem[i]['@id']} onClick={this.linkout}>{tempSubItem[i]['@type'][0]} {tempSubItem[i].label}</a></span>;
                         returnPayload.push(tempDisplayString);
                     } else if (mode == 'id') {
                         // if the mode is 'id', grab the @ids of the child items
@@ -1999,6 +1999,12 @@ var DeleteButtonModal = React.createClass({
         if (e.detail >= 1){
             this.props.closeModal();
         }
+    },
+
+    // Called when user clicks a link in the delete confirmation modal to view another object.
+    // Allows for scrolling in subsequent pages, as the initial modal rendering disabled scrolling.
+    linkout: function(e) {
+        this.props.closeModal();
     },
 
     render: function() {
