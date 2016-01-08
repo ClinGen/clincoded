@@ -1725,7 +1725,7 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
                         return (
                             <div key={obj.uuid} className="form-group">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Orphanet Diseases Associated with {title}:</strong>
+                                    <strong className="pull-right">Orphanet Disease(s) Associated with {title}:</strong>
                                 </div>
                                 <div className="col-sm-7">
                                     { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?

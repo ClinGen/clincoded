@@ -90,7 +90,7 @@ var FamilyCuration = React.createClass({
         this.cv.assessmentTracker = initialCv;
 
         return {
-            orpha: null, // string entered in Orphanet id input box
+            orpha: null, // boolean for entered in Orphanet id input box
             gdm: null, // GDM object given in query string
             group: null, // Group object given in query string
             family: null, // If we're editing a group, this gets the fleshed-out group object we're editing
@@ -1540,9 +1540,7 @@ var FamilyVariant = function() {
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
                     {this.state.orpha ?
                         <div className="form-group">
-                            <div className="col-sm-5">
-                                <strong className="pull-right">Orphanet Diseases Associated with Family:</strong>
-                            </div>
+                            <div className="col-sm-5"><strong className="pull-right">Orphanet Disease(s) Associated with Family:</strong></div>
                             <div className="col-sm-7">{this.refs['orphanetid'].getValue().toUpperCase()}</div>
                         </div>
                         : null
