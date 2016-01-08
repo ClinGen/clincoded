@@ -172,9 +172,9 @@ var GroupCuration = React.createClass({
             if (!valid_orphaId && !valid_phoId && (!hpotext || !hpotext.length)) {
                 // Can not empty at all of them
                 formError = true;
-                this.setFormErrors('orphanetid', 'Enter phenotype data');
-                this.setFormErrors('hpoid', 'Enter phenotype data');
-                this.setFormErrors('phenoterms', 'Enter phenotype data');
+                this.setFormErrors('orphanetid', 'Enter Orphanet ID(s) and/or');
+                this.setFormErrors('hpoid', 'Enter HPO ID(s) and/or');
+                this.setFormErrors('phenoterms', 'Enter phenotype free text');
             }
 
             // Check that all gene symbols have the proper format (will check for existence later)
