@@ -155,8 +155,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 <div>
                     <div className="curation-data-title">
                         <div className="container">
-                            <h1>{gene.symbol} – {disease.term}</h1>
-                            <h2>{mode}</h2>
+                            <a href={"/curation-central/?gdm=" + gdm.uuid}>
+                                <div>
+                                    <h1>{gene.symbol} – {disease.term}</h1>
+                                    <h2>{mode}</h2>
+                                </div>
+                            </a>
                             <div className="provisional-info-panel">
                                 <table border="1" style={{'width':'100%'}}>
                                     <tr>

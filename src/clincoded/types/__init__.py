@@ -490,6 +490,8 @@ class Group(Item):
         'associatedAnnotations',
         'associatedAnnotations.article',
         'associatedAnnotations.associatedGdm',
+        'associatedAnnotations.associatedGdm.disease',
+        'associatedAnnotations.associatedGdm.gene'
         #'control'
     ]
     rev = {
@@ -542,7 +544,9 @@ class Family(Item):
         'associatedGroups.associatedAnnotations.associatedGdm',
         'associatedAnnotations',
         'associatedAnnotations.article',
-        'associatedAnnotations.associatedGdm'
+        'associatedAnnotations.associatedGdm',
+        'associatedAnnotations.associatedGdm.disease',
+        'associatedAnnotations.associatedGdm.gene'
     ]
     rev = {
         'associatedGroups': ('group', 'familyIncluded'),
@@ -606,6 +610,8 @@ class Individual(Item):
         'associatedAnnotations',
         'associatedAnnotations.article',
         'associatedAnnotations.associatedGdm',
+        'associatedAnnotations.associatedGdm.disease',
+        'associatedAnnotations.associatedGdm.gene'
     ]
     rev = {
         'associatedGroups': ('group', 'individualIncluded'),
@@ -677,6 +683,8 @@ class Experimental(Item):
         'associatedAnnotations',
         'associatedAnnotations.article',
         'associatedAnnotations.associatedGdm',
+        'associatedAnnotations.associatedGdm.disease',
+        'associatedAnnotations.associatedGdm.gene',
         'assessments',
         'assessments.submitted_by'
     ]

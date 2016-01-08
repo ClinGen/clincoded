@@ -1717,8 +1717,21 @@ var FamilyViewer = React.createClass({
 
         // See if the segregation contains anything.
         var haveSegregation = segregationExists(segregation);
+        console.log(family);
 
         return (
+            <div>
+                <div className="curation-data-title">
+                    <div className="container">
+                        <a href={"/curation-central/?gdm=" + family.associatedAnnotations[0].associatedGdm[0].uuid}>
+                            <div>
+                                <h1>{family.associatedAnnotations[0].associatedGdm[0].gene.symbol} – {family.associatedAnnotations[0].associatedGdm[0].disease.term}</h1>
+                                <h2>{family.associatedAnnotations[0].associatedGdm[0].modeInheritance}</h2>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
             <div className="container">
                 <div className="row group-curation-content">
                     <div className="viewer-titles">
@@ -1902,6 +1915,8 @@ var FamilyViewer = React.createClass({
                         </dl>
                     </Panel>
                 </div>
+            </div>
+
             </div>
         );
     }
