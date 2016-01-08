@@ -1278,8 +1278,7 @@ var FamilyCommonDiseases = function() {
                 clickHandler={this.handleClick.bind(this, 'group', 'orphanetid')} />
             : null}
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-            curator.renderPhenotype(associatedGroups, 'Group')
-            : null
+                curator.renderPhenotype(associatedGroups, 'Group') : curator.renderPhenotype(null, null)
             }
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}

@@ -1051,12 +1051,11 @@ var IndividualCommonDiseases = function() {
                 clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'orphanet')} />
             : null}
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-            curator.renderPhenotype(associatedGroups, 'Group')
-            : null
-            }
-            {associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-            curator.renderPhenotype(associatedFamilies, 'Family')
-            : null
+                curator.renderPhenotype(associatedGroups, 'Group')
+                :
+                (associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
+                    curator.renderPhenotype(associatedFamilies, 'Family') : curator.renderPhenotype(null, null)
+                )
             }
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
