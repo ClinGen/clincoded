@@ -74,7 +74,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
     propTypes: {
         gdm: React.PropTypes.object, // GDM data to display
         omimId: React.PropTypes.string, // OMIM ID to display
-        updateOmimId: React.PropTypes.func // Function to call when OMIM ID changes
+        updateOmimId: React.PropTypes.func, // Function to call when OMIM ID changes
+        linkGdm: React.PropTypes.bool // whether or not to link GDM text back to GDM
     },
 
     render: function() {
@@ -155,12 +156,19 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 <div>
                     <div className="curation-data-title">
                         <div className="container">
-                            <a href={"/curation-central/?gdm=" + gdm.uuid}>
+                            {this.props.linkGdm ?
+                                <a href={"/curation-central/?gdm=" + gdm.uuid}>
+                                    <div>
+                                        <h1>{gene.symbol} – {disease.term}</h1>
+                                        <h2>{mode}</h2>
+                                    </div>
+                                </a>
+                            :
                                 <div>
                                     <h1>{gene.symbol} – {disease.term}</h1>
                                     <h2>{mode}</h2>
                                 </div>
-                            </a>
+                            }
                             <div className="provisional-info-panel">
                                 <table border="1" style={{'width':'100%'}}>
                                     <tr>

@@ -45,6 +45,11 @@
         font-weight: 300;
         font-style: italic;
     }
+
+    a {
+        color: #000;
+        text-decoration: underline;
+    }
 }
 
 .curation-data-gene,
@@ -304,7 +309,6 @@
 }
 
 .curation-content-viewer {
-    margin-top: 40px;
     padding-bottom: 40px;
 }
 

@@ -1075,7 +1075,7 @@ var FamilyCuration = React.createClass({
             <div>
                 {(!this.queryValues.familyUuid || this.state.family) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -1723,7 +1723,7 @@ var FamilyViewer = React.createClass({
             <div>
                 <ViewRecordHeader obj={family} />
                 <div className="container">
-                    <div className="row group-curation-content">
+                    <div className="row curation-content-viewer">
                         <div className="viewer-titles">
                             <h1>View Family: {family.label}</h1>
                             {groups && groups.length ?

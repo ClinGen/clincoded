@@ -466,7 +466,7 @@ var GroupCuration = React.createClass({
             <div>
                 {(!this.queryValues.groupUuid || this.state.group) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -770,7 +770,9 @@ var GroupViewer = React.createClass({
                 <ViewRecordHeader obj={context} />
                 <div className="container">
                     <div className="row curation-content-viewer">
-                        <h1>View Group: {context.label}</h1>
+                        <div className="viewer-titles">
+                            <h1>View Group: {context.label}</h1>
+                        </div>
                         <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>

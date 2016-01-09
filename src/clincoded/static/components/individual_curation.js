@@ -809,7 +809,7 @@ var IndividualCuration = React.createClass({
             <div>
                 {(!this.queryValues.individualUuid || individual) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -1341,7 +1341,7 @@ var IndividualViewer = React.createClass({
             <div>
                 <ViewRecordHeader obj={individual} />
                 <div className="container">
-                    <div className="row group-curation-content">
+                    <div className="row curation-content-viewer">
                         <div className="viewer-titles">
                             <h1>View Individual: {individual.label}{probandLabel}</h1>
                             <h2>

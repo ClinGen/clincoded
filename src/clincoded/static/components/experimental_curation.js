@@ -1194,7 +1194,7 @@ var ExperimentalCuration = React.createClass({
             <div>
                 {(!this.queryValues.experimentalUuid || this.state.experimental) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -2185,9 +2185,11 @@ var ExperimentalViewer = React.createClass({
                 <ViewRecordHeader obj={experimental} />
                 <div className="container">
                     <div className="row curation-content-viewer">
-                        <h1>View Experimental Data</h1>
-                        <h3>{experimental.evidenceType}</h3>
-                        <h4>{experimental.label}</h4>
+                        <div className="viewer-titles">
+                            <h1>View Experimental Data</h1>
+                            <h3>{experimental.evidenceType}</h3>
+                            <h4>{experimental.label}</h4>
+                        </div>
 
                         {experimental.evidenceType == 'Biochemical Function' ?
                         <Panel title="Biochemical Function" panelClassName="panel-data">
