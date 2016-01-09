@@ -228,6 +228,42 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
     }
 });
 
+// Curation data header for Gene:Disease
+var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
+    propTypes: {
+        obj: React.PropTypes.object
+    },
+    render: function() {
+        var tempGdm;
+        if (this.props.obj.associatedAnnotations && this.props.obj.associatedAnnotations.length > 0) {
+            tempGdm = this.props.obj.associatedAnnotations[0].associatedGdm[0];
+        } else if (this.props.obj.associatedGroups && this.props.obj.associatedGroups.length > 0) {
+            tempGdm = this.props.obj.associatedGroups[0].associatedAnnotations[0].associatedGdm[0];
+        } else if (this.props.obj.associatedFamilies && this.props.obj.associatedFamilies.length > 0) {
+            if (this.props.obj.associatedFamilies[0].associatedAnnotations && this.props.obj.associatedFamilies[0].associatedAnnotations.length > 0) {
+                tempGdm = this.props.obj.associatedFamilies[0].associatedAnnotations[0].associatedGdm[0];
+            } else if (this.props.obj.associatedFamilies[0].associatedGroups && this.props.obj.associatedFamilies[0].associatedGroups.length > 0) {
+                tempGdm = this.props.obj.associatedFamilies[0].associatedGroups[0].associatedAnnotations[0].associatedGdm[0];
+            }
+        }
+        return (
+            <div>
+            {tempGdm ?
+                <div className="curation-data-title">
+                    <div className="container">
+                        <a href={"/curation-central/?gdm=" + tempGdm.uuid}>
+                            <div>
+                                <h1>{tempGdm.gene.symbol} – {tempGdm.disease.term}</h1>
+                                <h2>{tempGdm.modeInheritance}</h2>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            : null}
+            </div>
+        );
+    }
+});
 
 // function to collect variants assessed support by login user
 var getUserPathogenicity = function(gdm, session) {

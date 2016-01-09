@@ -14,6 +14,7 @@ var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
+var ViewRecordHeader = curator.ViewRecordHeader;
 var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
@@ -765,191 +766,194 @@ var GroupViewer = React.createClass({
         var method = context.method;
 
         return (
-            <div className="container">
-                <div className="row curation-content-viewer">
-                    <h1>View Group: {context.label}</h1>
-                    <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Orphanet Common Diagnosis</dt>
-                                <dd>{context.commonDiagnosis && context.commonDiagnosis.map(function(disease, i) {
-                                    return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+            <div>
+                <ViewRecordHeader obj={context} />
+                <div className="container">
+                    <div className="row curation-content-viewer">
+                        <h1>View Group: {context.label}</h1>
+                        <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Orphanet Common Diagnosis</dt>
+                                    <dd>{context.commonDiagnosis && context.commonDiagnosis.map(function(disease, i) {
+                                        return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                    })}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>HPO IDs</dt>
+                                    <dd>{context.hpoIdInDiagnosis && context.hpoIdInDiagnosis.map(function(hpo, i) {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Phenotype Terms</dt>
+                                    <dd>{context.termsInDiagnosis}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>NOT HPO IDs</dt>
+                                    <dd>{context.hpoIdInElimination && context.hpoIdInElimination.map(function(hpo, i) {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>NOT phenotype terms</dt>
+                                    <dd>{context.termsInElimination}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title="Group — Demographics" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt># Males</dt>
+                                    <dd>{context.numberOfMale}</dd>
+                                </div>
+
+                                <div>
+                                    <dt># Females</dt>
+                                    <dd>{context.numberOfFemale}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Country of Origin</dt>
+                                    <dd>{context.countryOfOrigin}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Ethnicity</dt>
+                                    <dd>{context.ethnicity}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Race</dt>
+                                    <dd>{context.race}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range Type</dt>
+                                    <dd>{context.ageRangeType}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range</dt>
+                                    <dd>{context.ageRangeFrom || context.ageRangeTo ? <span>{context.ageRangeFrom + ' – ' + context.ageRangeTo}</span> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range Unit</dt>
+                                    <dd>{context.ageRangeUnit}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title="Group — Information" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Total number individuals in group</dt>
+                                    <dd>{context.totalNumberIndividuals}</dd>
+                                </div>
+
+                                <div>
+                                    <dt># individuals with family information</dt>
+                                    <dd>{context.numberOfIndividualsWithFamilyInformation}</dd>
+                                </div>
+
+                                <div>
+                                    <dt># individuals WITHOUT family information</dt>
+                                    <dd>{context.numberOfIndividualsWithoutFamilyInformation}</dd>
+                                </div>
+
+                                <div>
+                                    <dt># individuals with variant in gene being curated</dt>
+                                    <dd>{context.numberOfIndividualsWithVariantInCuratedGene}</dd>
+                                </div>ClinVarSearch
+
+                                <div>
+                                    <dt># individuals without variant in gene being curated</dt>
+                                    <dd>{context.numberOfIndividualsWithoutVariantInCuratedGene}</dd>
+                                </div>
+
+                                <div>
+                                    <dt># individuals with variant found in other gene</dt>
+                                    <dd>{context.numberOfIndividualsWithVariantInOtherGene}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Other genes found to have variants in them</dt>
+                                    <dd>{context.otherGenes && context.otherGenes.map(function(gene, i) {
+                                        return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
+                                    })}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title="Group — Methods" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Previous testing</dt>
+                                    <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of previous testing</dt>
+                                    <dd>{method && method.previousTestingDescription}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Genome-wide study</dt>
+                                    <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Genotyping methods</dt>
+                                    <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Entire gene sequenced</dt>
+                                    <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Copy number assessed</dt>
+                                    <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Specific mutations genotyped</dt>
+                                    <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of genotyping method</dt>
+                                    <dd>{method && method.specificMutationsGenotypedMethod}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Additional Information about Group Method</dt>
+                                    <dd>{method && method.additionalInformation}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title="Group — Additional Information" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Additional Information about Group</dt>
+                                    <dd>{context.additionalInformation}</dd>
+                                </div>
+
+                                <dt>Other PMID(s) that report evidence about this same group</dt>
+                                <dd>{context.otherPMIDs && context.otherPMIDs.map(function(article, i) {
+                                    return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
                                 })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>HPO IDs</dt>
-                                <dd>{context.hpoIdInDiagnosis && context.hpoIdInDiagnosis.map(function(hpo, i) {
-                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Phenotype Terms</dt>
-                                <dd>{context.termsInDiagnosis}</dd>
-                            </div>
-
-                            <div>
-                                <dt>NOT HPO IDs</dt>
-                                <dd>{context.hpoIdInElimination && context.hpoIdInElimination.map(function(hpo, i) {
-                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>NOT phenotype terms</dt>
-                                <dd>{context.termsInElimination}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Group — Demographics" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt># Males</dt>
-                                <dd>{context.numberOfMale}</dd>
-                            </div>
-
-                            <div>
-                                <dt># Females</dt>
-                                <dd>{context.numberOfFemale}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Country of Origin</dt>
-                                <dd>{context.countryOfOrigin}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Ethnicity</dt>
-                                <dd>{context.ethnicity}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Race</dt>
-                                <dd>{context.race}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range Type</dt>
-                                <dd>{context.ageRangeType}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range</dt>
-                                <dd>{context.ageRangeFrom || context.ageRangeTo ? <span>{context.ageRangeFrom + ' – ' + context.ageRangeTo}</span> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range Unit</dt>
-                                <dd>{context.ageRangeUnit}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Group — Information" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Total number individuals in group</dt>
-                                <dd>{context.totalNumberIndividuals}</dd>
-                            </div>
-
-                            <div>
-                                <dt># individuals with family information</dt>
-                                <dd>{context.numberOfIndividualsWithFamilyInformation}</dd>
-                            </div>
-
-                            <div>
-                                <dt># individuals WITHOUT family information</dt>
-                                <dd>{context.numberOfIndividualsWithoutFamilyInformation}</dd>
-                            </div>
-
-                            <div>
-                                <dt># individuals with variant in gene being curated</dt>
-                                <dd>{context.numberOfIndividualsWithVariantInCuratedGene}</dd>
-                            </div>ClinVarSearch
-
-                            <div>
-                                <dt># individuals without variant in gene being curated</dt>
-                                <dd>{context.numberOfIndividualsWithoutVariantInCuratedGene}</dd>
-                            </div>
-
-                            <div>
-                                <dt># individuals with variant found in other gene</dt>
-                                <dd>{context.numberOfIndividualsWithVariantInOtherGene}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Other genes found to have variants in them</dt>
-                                <dd>{context.otherGenes && context.otherGenes.map(function(gene, i) {
-                                    return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
-                                })}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Group — Methods" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Previous testing</dt>
-                                <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of previous testing</dt>
-                                <dd>{method && method.previousTestingDescription}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Genome-wide study</dt>
-                                <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Genotyping methods</dt>
-                                <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Entire gene sequenced</dt>
-                                <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Copy number assessed</dt>
-                                <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Specific mutations genotyped</dt>
-                                <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of genotyping method</dt>
-                                <dd>{method && method.specificMutationsGenotypedMethod}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Additional Information about Group Method</dt>
-                                <dd>{method && method.additionalInformation}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Group — Additional Information" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Additional Information about Group</dt>
-                                <dd>{context.additionalInformation}</dd>
-                            </div>
-
-                            <dt>Other PMID(s) that report evidence about this same group</dt>
-                            <dd>{context.otherPMIDs && context.otherPMIDs.map(function(article, i) {
-                                return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
-                            })}</dd>
-                        </dl>
-                    </Panel>
+                            </dl>
+                        </Panel>
+                    </div>
                 </div>
             </div>
         );

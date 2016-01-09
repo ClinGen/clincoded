@@ -19,6 +19,7 @@ var Modal = modal.Modal;
 var ModalMixin = modal.ModalMixin;
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
+var ViewRecordHeader = curator.ViewRecordHeader;
 var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
@@ -1717,206 +1718,194 @@ var FamilyViewer = React.createClass({
 
         // See if the segregation contains anything.
         var haveSegregation = segregationExists(segregation);
-        console.log(family);
 
         return (
             <div>
-                <div className="curation-data-title">
-                    <div className="container">
-                        <a href={"/curation-central/?gdm=" + family.associatedAnnotations[0].associatedGdm[0].uuid}>
-                            <div>
-                                <h1>{family.associatedAnnotations[0].associatedGdm[0].gene.symbol} – {family.associatedAnnotations[0].associatedGdm[0].disease.term}</h1>
-                                <h2>{family.associatedAnnotations[0].associatedGdm[0].modeInheritance}</h2>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-            <div className="container">
-                <div className="row group-curation-content">
-                    <div className="viewer-titles">
-                        <h1>View Family: {family.label}</h1>
-                        {groups && groups.length ?
-                            <h2>
-                                Group association:&nbsp;
-                                {groups.map(function(group, i) {
-                                    return <span key={i}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>;
-                                })}
-                            </h2>
-                        : null}
-                    </div>
-                    <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Orphanet Common Diagnosis</dt>
-                                <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
-                                    return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>HPO IDs</dt>
-                                <dd>{family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.map(function(hpo, i) {
-                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Phenotype Terms</dt>
-                                <dd>{family.termsInDiagnosis}</dd>
-                            </div>
-
-                            <div>
-                                <dt>NOT HPO IDs</dt>
-                                <dd>{family.hpoIdInElimination && family.hpoIdInElimination.map(function(hpo, i) {
-                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>NOT phenotype terms</dt>
-                                <dd>{family.termsInElimination}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Family — Demographics" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt># Males</dt>
-                                <dd>{family.numberOfMale}</dd>
-                            </div>
-
-                            <div>
-                                <dt># Females</dt>
-                                <dd>{family.numberOfFemale}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Country of Origin</dt>
-                                <dd>{family.countryOfOrigin}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Ethnicity</dt>
-                                <dd>{family.ethnicity}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Race</dt>
-                                <dd>{family.race}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range Type</dt>
-                                <dd>{family.ageRangeType}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range</dt>
-                                <dd>{family.ageRangeFrom || family.ageRangeTo ? <span>{family.ageRangeFrom + ' – ' + family.ageRangeTo}</span> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range Unit</dt>
-                                <dd>{family.ageRangeUnit}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Family — Methods" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Previous testing</dt>
-                                <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of previous testing</dt>
-                                <dd>{method && method.previousTestingDescription}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Genome-wide study</dt>
-                                <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Genotyping methods</dt>
-                                <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Entire gene sequenced</dt>
-                                <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Copy number assessed</dt>
-                                <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Specific mutations genotyped</dt>
-                                <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of genotyping method</dt>
-                                <dd>{method && method.specificMutationsGenotypedMethod}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Additional Information about Family Method</dt>
-                                <dd>{method && method.additionalInformation}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    {FamilySegregationViewer(segregation, assessments, true)}
-
-                    {this.cv.gdmUuid && (familyUserAssessed || userFamily) && haveSegregation ?
-                        <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
-                    : null}
-
-                    <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
-                        {variants.map(function(variant, i) {
-                            return (
-                                <div className="variant-view-panel" key={variant.uuid}>
-                                    <h5>Variant {i + 1}</h5>
-                                    <dl className="dl-horizontal">
-                                        <div>
-                                            <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>Other description</dt>
-                                            <dd>{variant.otherDescription}</dd>
-                                        </div>
-                                    </dl>
+                <ViewRecordHeader obj={family} />
+                <div className="container">
+                    <div className="row group-curation-content">
+                        <div className="viewer-titles">
+                            <h1>View Family: {family.label}</h1>
+                            {groups && groups.length ?
+                                <h2>
+                                    Group association:&nbsp;
+                                    {groups.map(function(group, i) {
+                                        return <span key={i}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>;
+                                    })}
+                                </h2>
+                            : null}
+                        </div>
+                        <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Orphanet Common Diagnosis</dt>
+                                    <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
+                                        return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                    })}</dd>
                                 </div>
-                            );
-                        })}
-                    </Panel>
 
-                    <Panel title="Family — Additional Information" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Additional Information about Family</dt>
-                                <dd>{family.additionalInformation}</dd>
-                            </div>
+                                <div>
+                                    <dt>HPO IDs</dt>
+                                    <dd>{family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.map(function(hpo, i) {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
+                                </div>
 
-                            <dt>Other PMID(s) that report evidence about this same Family</dt>
-                            <dd>{family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
-                                return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
-                            })}</dd>
-                        </dl>
-                    </Panel>
+                                <div>
+                                    <dt>Phenotype Terms</dt>
+                                    <dd>{family.termsInDiagnosis}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>NOT HPO IDs</dt>
+                                    <dd>{family.hpoIdInElimination && family.hpoIdInElimination.map(function(hpo, i) {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>NOT phenotype terms</dt>
+                                    <dd>{family.termsInElimination}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title="Family — Demographics" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt># Males</dt>
+                                    <dd>{family.numberOfMale}</dd>
+                                </div>
+
+                                <div>
+                                    <dt># Females</dt>
+                                    <dd>{family.numberOfFemale}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Country of Origin</dt>
+                                    <dd>{family.countryOfOrigin}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Ethnicity</dt>
+                                    <dd>{family.ethnicity}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Race</dt>
+                                    <dd>{family.race}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range Type</dt>
+                                    <dd>{family.ageRangeType}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range</dt>
+                                    <dd>{family.ageRangeFrom || family.ageRangeTo ? <span>{family.ageRangeFrom + ' – ' + family.ageRangeTo}</span> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range Unit</dt>
+                                    <dd>{family.ageRangeUnit}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title="Family — Methods" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Previous testing</dt>
+                                    <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of previous testing</dt>
+                                    <dd>{method && method.previousTestingDescription}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Genome-wide study</dt>
+                                    <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Genotyping methods</dt>
+                                    <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Entire gene sequenced</dt>
+                                    <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Copy number assessed</dt>
+                                    <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Specific mutations genotyped</dt>
+                                    <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of genotyping method</dt>
+                                    <dd>{method && method.specificMutationsGenotypedMethod}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Additional Information about Family Method</dt>
+                                    <dd>{method && method.additionalInformation}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        {FamilySegregationViewer(segregation, assessments, true)}
+
+                        {this.cv.gdmUuid && (familyUserAssessed || userFamily) && haveSegregation ?
+                            <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
+                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
+                        : null}
+
+                        <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
+                            {variants.map(function(variant, i) {
+                                return (
+                                    <div className="variant-view-panel" key={variant.uuid}>
+                                        <h5>Variant {i + 1}</h5>
+                                        <dl className="dl-horizontal">
+                                            <div>
+                                                <dt>ClinVar VariationID</dt>
+                                                <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
+                                            </div>
+
+                                            <div>
+                                                <dt>Other description</dt>
+                                                <dd>{variant.otherDescription}</dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                );
+                            })}
+                        </Panel>
+
+                        <Panel title="Family — Additional Information" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Additional Information about Family</dt>
+                                    <dd>{family.additionalInformation}</dd>
+                                </div>
+
+                                <dt>Other PMID(s) that report evidence about this same Family</dt>
+                                <dd>{family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
+                                    return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
+                                })}</dd>
+                            </dl>
+                        </Panel>
+                    </div>
                 </div>
-            </div>
-
             </div>
         );
     }

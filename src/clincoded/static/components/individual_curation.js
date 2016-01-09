@@ -14,6 +14,7 @@ var CuratorHistory = require('./curator_history');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
+var ViewRecordHeader = curator.ViewRecordHeader;
 var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
@@ -1337,179 +1338,182 @@ var IndividualViewer = React.createClass({
         groupRenders = groupRenders.concat(directGroupRenders);
 
         return (
-            <div className="container">
-                <div className="row group-curation-content">
-                    <div className="viewer-titles">
-                        <h1>View Individual: {individual.label}{probandLabel}</h1>
-                        <h2>
-                            {familyRenders.length ?
+            <div>
+                <ViewRecordHeader obj={individual} />
+                <div className="container">
+                    <div className="row group-curation-content">
+                        <div className="viewer-titles">
+                            <h1>View Individual: {individual.label}{probandLabel}</h1>
+                            <h2>
+                                {familyRenders.length ?
+                                    <div>
+                                        <span>Family association: </span>
+                                        {familyRenders}
+                                    </div>
+                                : null}
+                            </h2>
+                            <h2>
+                                {groupRenders.length ?
+                                    <div>
+                                        <span>Group association: </span>
+                                        {groupRenders}
+                                    </div>
+                                : null}
+                            </h2>
+                        </div>
+                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Disease & Phenotype(s)" />} panelClassName="panel-data">
+                            <dl className="dl-horizontal">
                                 <div>
-                                    <span>Family association: </span>
-                                    {familyRenders}
+                                    <dt>Orphanet Common Diagnosis</dt>
+                                    <dd>{individual.diagnosis && individual.diagnosis.map(function(disease, i) {
+                                        return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                    })}</dd>
                                 </div>
-                            : null}
-                        </h2>
-                        <h2>
-                            {groupRenders.length ?
+
                                 <div>
-                                    <span>Group association: </span>
-                                    {groupRenders}
+                                    <dt>HPO IDs</dt>
+                                    <dd>{individual.hpoIdInDiagnosis && individual.hpoIdInDiagnosis.map(function(hpo, i) {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
                                 </div>
-                            : null}
-                        </h2>
+
+                                <div>
+                                    <dt>Phenotype Terms</dt>
+                                    <dd>{individual.termsInDiagnosis}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>NOT HPO IDs</dt>
+                                    <dd>{individual.hpoIdInElimination && individual.hpoIdInElimination.map(function(hpo, i) {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>NOT phenotype terms</dt>
+                                    <dd>{individual.termsInElimination}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Demographics" />} panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Sex</dt>
+                                    <dd>{individual.sex}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Country of Origin</dt>
+                                    <dd>{individual.countryOfOrigin}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Ethnicity</dt>
+                                    <dd>{individual.ethnicity}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Race</dt>
+                                    <dd>{individual.race}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Type</dt>
+                                    <dd>{individual.ageType}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Value</dt>
+                                    <dd>{individual.ageValue}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Unit</dt>
+                                    <dd>{individual.ageUnit}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Methods" />} panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Previous testing</dt>
+                                    <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of previous testing</dt>
+                                    <dd>{method && method.previousTestingDescription}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Genome-wide study</dt>
+                                    <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Genotyping methods</dt>
+                                    <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Entire gene sequenced</dt>
+                                    <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Copy number assessed</dt>
+                                    <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Specific mutations genotyped</dt>
+                                    <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of genotyping method</dt>
+                                    <dd>{method && method.specificMutationsGenotypedMethod}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title={<LabelPanelTitleView individual={individual} variant />} panelClassName="panel-data">
+                            {variants.map(function(variant, i) {
+                                return (
+                                    <div key={i} className="variant-view-panel">
+                                        <h5>Variant {i + 1}</h5>
+                                        <dl className="dl-horizontal">
+                                            <div>
+                                                <dt>ClinVar VariationID</dt>
+                                                <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
+                                            </div>
+
+                                            <div>
+                                                <dt>Other description</dt>
+                                                <dd>{variant.otherDescription}</dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                );
+                            })}
+                        </Panel>
+
+                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Additional Information" />} panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Additional Information about Individual</dt>
+                                    <dd>{individual.additionalInformation}</dd>
+                                </div>
+
+                                <dt>Other PMID(s) that report evidence about this same Individual</dt>
+                                <dd>{individual.otherPMIDs && individual.otherPMIDs.map(function(article, i) {
+                                    return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
+                                })}</dd>
+                            </dl>
+                        </Panel>
                     </div>
-                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Disease & Phenotype(s)" />} panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Orphanet Common Diagnosis</dt>
-                                <dd>{individual.diagnosis && individual.diagnosis.map(function(disease, i) {
-                                    return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>HPO IDs</dt>
-                                <dd>{individual.hpoIdInDiagnosis && individual.hpoIdInDiagnosis.map(function(hpo, i) {
-                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Phenotype Terms</dt>
-                                <dd>{individual.termsInDiagnosis}</dd>
-                            </div>
-
-                            <div>
-                                <dt>NOT HPO IDs</dt>
-                                <dd>{individual.hpoIdInElimination && individual.hpoIdInElimination.map(function(hpo, i) {
-                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>NOT phenotype terms</dt>
-                                <dd>{individual.termsInElimination}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Demographics" />} panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Sex</dt>
-                                <dd>{individual.sex}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Country of Origin</dt>
-                                <dd>{individual.countryOfOrigin}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Ethnicity</dt>
-                                <dd>{individual.ethnicity}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Race</dt>
-                                <dd>{individual.race}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Type</dt>
-                                <dd>{individual.ageType}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Value</dt>
-                                <dd>{individual.ageValue}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Unit</dt>
-                                <dd>{individual.ageUnit}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Methods" />} panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Previous testing</dt>
-                                <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of previous testing</dt>
-                                <dd>{method && method.previousTestingDescription}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Genome-wide study</dt>
-                                <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Genotyping methods</dt>
-                                <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Entire gene sequenced</dt>
-                                <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Copy number assessed</dt>
-                                <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Specific mutations genotyped</dt>
-                                <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of genotyping method</dt>
-                                <dd>{method && method.specificMutationsGenotypedMethod}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title={<LabelPanelTitleView individual={individual} variant />} panelClassName="panel-data">
-                        {variants.map(function(variant, i) {
-                            return (
-                                <div key={i} className="variant-view-panel">
-                                    <h5>Variant {i + 1}</h5>
-                                    <dl className="dl-horizontal">
-                                        <div>
-                                            <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>Other description</dt>
-                                            <dd>{variant.otherDescription}</dd>
-                                        </div>
-                                    </dl>
-                                </div>
-                            );
-                        })}
-                    </Panel>
-
-                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Additional Information" />} panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Additional Information about Individual</dt>
-                                <dd>{individual.additionalInformation}</dd>
-                            </div>
-
-                            <dt>Other PMID(s) that report evidence about this same Individual</dt>
-                            <dd>{individual.otherPMIDs && individual.otherPMIDs.map(function(article, i) {
-                                return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
-                            })}</dd>
-                        </dl>
-                    </Panel>
                 </div>
             </div>
         );
