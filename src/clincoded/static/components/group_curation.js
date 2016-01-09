@@ -599,6 +599,9 @@ var GroupCommonDiseases = function() {
 
     return (
         <div className="row">
+            <div className="container" style={{'top':'-20px', 'display':'table-cell', 'align':'center'}}>
+                <span style={{'display':'table-cell', 'align':'center'}}>Please enter an Orphanet ID and/or Phenotype for this Group (required).</span>
+            </div>
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrMultiFormErrors.bind(null, ['orphanetid', 'hpoid', 'phenoterms'])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
