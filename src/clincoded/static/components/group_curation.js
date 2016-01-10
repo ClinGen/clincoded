@@ -388,18 +388,19 @@ var GroupCuration = React.createClass({
                 }).then(newGroup => {
                     savedGroup = newGroup;
                     if (!this.state.group) {
-                        // Get a flattened copy of the annotation and put our new group into it,
-                        // ready for writing.
-                        var annotation = curator.flatten(this.state.annotation);
-                        if (annotation.groups) {
+                        return this.getRestData('/evidence/' + this.state.annotation.uuid, null, true).then(freshAnnotation => {
+                            // Get a flattened copy of the fresh annotation object and put our new group into it,
+                            // ready for writing.
+                            var annotation = curator.flatten(freshAnnotation);
+                            if (!annotation.groups) {
+                                annotation.groups = [];
+                            }
                             annotation.groups.push(newGroup['@id']);
-                        } else {
-                            annotation.groups = [newGroup['@id']];
-                        }
 
-                        // Post the modified annotation to the DB, then go back to Curation Central
-                        return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                            return Promise.resolve({group: newGroup, annotation: data['@graph'][0]});
+                            // Post the modified annotation to the DB
+                            return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                                return Promise.resolve({group: newGroup, annotation: data['@graph'][0]});
+                            });
                         });
                     }
 
@@ -423,8 +424,7 @@ var GroupCuration = React.createClass({
                         this.recordHistory('modify', data.group);
                     }
 
-                    // Navigate back to Curation Central page.
-                    // FUTURE: Need to navigate to Group Submit page.
+                    // Navigate to Curation Central or Family Submit page, depending on previous page
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -1009,7 +1009,8 @@ var GroupDeleteHistory = React.createClass({
         var group = history.primary;
 
         // Prepare to display a note about associated families and individuals
-        var collateralObjects = !!(group.familyIncluded && group.familyIncluded.length) || !!(group.individualIncluded && group.individualIncluded.length);
+        // This data can now only be obtained from the history object's hadChildren field
+        var collateralObjects = history.hadChildren == 1 ? true : false;
 
         return (
             <div>

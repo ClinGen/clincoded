@@ -62,6 +62,14 @@ var CurationCentral = React.createClass({
         return this.getRestData('/gdm/' + uuid, null, true).then(gdm => {
             // The GDM object successfully retrieved; set the Curator Central component
             this.setState({currGdm: gdm, currOmimId: gdm.omimId});
+            // If a PMID isn't pre-selected from the URL and PMIDs exist, select the first one in the PMID list by default
+            if (pmid == undefined && gdm.annotations && gdm.annotations.length > 0) {
+                var annotations = _(gdm.annotations).sortBy(function(annotation) {
+                    // Sort list of articles by first author
+                    return annotation.article.authors[0];
+                });
+                pmid = annotations[0].article.pmid;
+            }
             this.currPmidChange(pmid);
             return gdm;
         }).catch(function(e) {
@@ -95,15 +103,17 @@ var CurationCentral = React.createClass({
             // objects; basically the object as it exists in the DB. We'll update that and write it back to the DB.
             return (data['@graph'][0]);
         }).then(newAnnotation => {
-            var gdmObj = curator.flatten(currGdm);
+            return this.getRestData('/gdm/' + currGdm.uuid, null, true).then(freshGdm => {
+                var gdmObj = curator.flatten(freshGdm);
+                // Add our new annotation reference to the array of annotations in the GDM.
+                if (!gdmObj.annotations) {
+                    gdmObj.annotations = [];
+                }
+                gdmObj.annotations.push(newAnnotation['@id']);
 
-            // Add our new annotation reference to the array of annotations in the GDM.
-            if (!gdmObj.annotations) {
-                gdmObj.annotations = [];
-            }
-            gdmObj.annotations.push(newAnnotation['@id']);
-            return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
-                return data['@graph'][0];
+                return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
+                    return data['@graph'][0];
+                });
             });
         }).then(gdm => {
             // Record history of adding a PMID to a GDM
