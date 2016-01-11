@@ -150,9 +150,9 @@ module.exports.Persona = {
     extractSessionCookie: function () {
         var cookie = require('cookie-monster');
         var session_cookie = cookie(document).get('session');
-        if (this.props.session_cookie !== session_cookie) {
-            this.setState({session_cookie: session_cookie});
+        if (this.state.session_cookie !== session_cookie) {
             this.setState({
+                session_cookie: session_cookie,
                 session: this.parseSessionCookie(session_cookie)
             });
         }
