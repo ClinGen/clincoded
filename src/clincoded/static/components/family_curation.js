@@ -2077,7 +2077,8 @@ var FamilyDeleteHistory = React.createClass({
         var family = history.primary;
 
         // Prepare to display a note about associated families and individuals
-        var collateralObjects = !!(family.individualIncluded && family.individualIncluded.length);
+        // This data can now only be obtained from the history object's hadChildren field
+        var collateralObjects = history.hadChildren == 1 ? true : false;
 
         return (
             <div>
