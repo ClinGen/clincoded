@@ -259,16 +259,23 @@ var Input = module.exports.Input = React.createClass({
         } else if (this.props.type === 'select') {
             this.resetSelectedOption();
         } else if (this.props.type === 'checkbox') {
-            this.props.checked = false;
+            this.resetSelectedCheckbox();
         }
     },
 
+    // Reset <select> to default option
     resetSelectedOption: function() {
         var selectNode = this.refs.input;
         var optionNodes = selectNode.getElementsByTagName('option');
         if (optionNodes && optionNodes.length) {
             selectNode.value = optionNodes[0].value;
         }
+    },
+
+    // Reset checkbox
+    resetSelectedCheckbox: function() {
+        var selectNode = this.refs.input;
+        selectNode.checked = false;
     },
 
     // Get the selected option from a <select> list
@@ -330,7 +337,7 @@ var Input = module.exports.Input = React.createClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <select className="form-control" ref="input" onChange={this.handleChange.bind(null, this.props.id)} defaultValue={this.props.hasOwnProperty('value') ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled}>
+                            <select className="form-control" ref="input" onChange={this.handleChange.bind(null, this.props.id)} value={this.props.value} defaultValue={this.props.hasOwnProperty('value') ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled}>
                                 {this.props.children}
                             </select>
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
@@ -376,15 +383,11 @@ var Input = module.exports.Input = React.createClass({
                 break;
 
             case 'checkbox':
-                var checkboxInput = (this.props.checked ?
-                    <input className={inputClasses} type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} checked />
-                    : <input className={inputClasses} type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} />
-                );
                 input = (
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            {checkboxInput}
+                            <input className={inputClasses} ref="input" type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} checked={this.props.checked} />
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                         </div>
                     </div>
