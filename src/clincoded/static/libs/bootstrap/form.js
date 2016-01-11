@@ -234,11 +234,9 @@ var Input = module.exports.Input = React.createClass({
     toggleValue: function() {
         if (this.props.type === 'checkbox') {
             if (this.props.checked === true) {
-                this.props.checked = false;
                 return false;
             }
             else {
-                this.props.checked = true;
                 return true;
             }
         }
