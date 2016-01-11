@@ -33,7 +33,7 @@ from contentbase import (
         (Allow, 'remoteuser.INDEXER', ['list', 'view']),
         (Allow, 'remoteuser.EMBED', ['list', 'view']),
         (Allow, Everyone, ['view']),
-        (Allow, 'group.curator', ['list', 'view']),
+        (Allow, 'group.curator', ['view']),
         (Deny, Everyone, ['list', 'view_details']),
     ])
 class User(Item):

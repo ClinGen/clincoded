@@ -1798,8 +1798,9 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
     );
 };
 
-// Mixin for delete button (and associated modal) of Group, Family, Individual, and Experimental
-// Data objects. This mixin only renderes the button; please see DeleteButtonModal for bulk of
+
+// Class for delete button (and associated modal) of Group, Family, Individual, and Experimental
+// Data objects. This class only renderes the button; please see DeleteButtonModal for bulk of
 // functionality
 var DeleteButton = module.exports.DeleteButton = React.createClass({
     mixins: [ModalMixin],
@@ -1866,61 +1867,175 @@ var DeleteButtonModal = React.createClass({
         };
     },
 
+    // main recursive function that finds any child items, and generates and returns either the promises
+    // for delete and history recording, the display strings, or the @ids of the items and its children,
+    // depending on the mode (delete, display, id, respectively). The depth specifies the 'depth' of the
+    // loop; should always be called at 0 when called outside of the function.
+    recurseItem: function(item, depth, mode) {
+        var returnPayload = [];
+        var hasChildren = false;
+
+        // check possible child objects
+        if (item.group) {
+            if (item.group.length > 0) {
+                hasChildren = true;
+            }
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.group, depth, mode, 'groups'));
+        }
+        if (item.family) {
+            if (item.family.length > 0) {
+                hasChildren = true;
+            }
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.family, depth, mode, 'families'));
+        }
+        if (item.individual) {
+            if (item.individual.length > 0) {
+                hasChildren = true;
+            }
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.individual, depth, mode, 'individuals'));
+        }
+        if (item.familyIncluded) {
+            if (item.familyIncluded.length > 0) {
+                hasChildren = true;
+            }
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.familyIncluded, depth, mode, 'families'));
+        }
+        if (item.individualIncluded) {
+            if (item.individualIncluded.length > 0) {
+                hasChildren = true;
+            }
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.individualIncluded, depth, mode, 'individuals'));
+        }
+        if (item.experimentalData) {
+            if (item.experimentalData.length > 0) {
+                hasChildren = true;
+            }
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.experimentalData, depth, mode, 'experimental datas'));
+        }
+
+        // if the mode is 'delete', get the items' parents' info if needed, flatten the current item, set it as deleted
+        // and inactive, and load the PUT and history record promises into the payload
+        if (mode == 'delete') {
+            var parentInfo;
+            // if this is the target item being deleted, get its parent item information to store in the history object
+            if (depth == 0) {
+                parentInfo = {};
+                if (item.associatedGdm && item.associatedGdm.length > 0) {
+                    parentInfo.id = item.associatedGdm[0]['@id'];
+                    parentInfo.name = item.associatedGdm[0].gdm_title;
+                } else if (item.associatedAnnotations && item.associatedAnnotations.length > 0) {
+                    parentInfo.id = item.associatedAnnotations[0]['@id'];
+                    parentInfo.name = item.associatedAnnotations[0].associatedGdm[0].gdm_title + ':' + item.associatedAnnotations[0].article.pmid;
+                } else if (item.associatedGroups && item.associatedGroups.length > 0) {
+                    parentInfo.id = item.associatedGroups[0]['@id'];
+                    parentInfo.name = item.associatedGroups[0].label;
+                } else if (item.associatedFamilies && item.associatedFamilies.length > 0) {
+                    parentInfo.id = item.associatedFamilies[0]['@id'];
+                    parentInfo.name = item.associatedFamilies[0].label;
+                }
+            }
+            // flatten the target item and set its status to deleted
+            var deletedItem = flatten(item);
+            deletedItem.status = 'deleted';
+            // define operationType and add flags as needed
+            var operationType = 'delete';
+            if (depth > 0) {
+                operationType += '-hide';
+            }
+            if (hasChildren) {
+                operationType += '-hadChildren';
+            }
+            // push promises to payload
+            returnPayload.push(this.putRestData(item['@id'] + '?render=false', deletedItem));
+            returnPayload.push(this.recordHistory(operationType, item, null, parentInfo));
+        }
+
+        // return the payload, whether it's promises, display texts, or @ids
+        return returnPayload;
+    },
+
+    // function for looping through a parent item's list of child items
+    // of a specific type
+    recurseItemLoop: function(tempSubItem, depth, mode, type) {
+        var tempDisplayString;
+        var returnPayload = [];
+        if (tempSubItem) {
+            if (tempSubItem.length > 0) {
+                for (var i = 0; i < tempSubItem.length; i++) {
+                    if (mode == 'display') {
+                        // if the mode is 'display', generate the display string
+                        tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem[i]['@id']} onClick={this.linkout}>{tempSubItem[i]['@type'][0]} {tempSubItem[i].label}</a></span>;
+                        returnPayload.push(tempDisplayString);
+                    } else if (mode == 'id') {
+                        // if the mode is 'id', grab the @ids of the child items
+                        returnPayload.push(tempSubItem[i]['@id']);
+                    }
+                    // call recurseItem on child item
+                    returnPayload = returnPayload.concat(this.recurseItem(tempSubItem[i], depth + 1, mode));
+                }
+            } else {
+                if (mode == 'display') {
+                    // if childspace is empty, add a display line indicating the fact
+                    tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; no associated {type}</span>;
+                    returnPayload.push(tempDisplayString);
+                }
+            }
+        }
+        return returnPayload;
+    },
+
+    // parent function when deleting an item. Re-grabs the latest versions of the target and parent items,
+    // finds and deletes all children of the target item, deletes the target item, removes the target item's
+    // entry from the parent item, and saves the updated target item. Forwards user to curation central
+    // upon completion.
     deleteItem: function(e) {
         e.preventDefault(); e.stopPropagation();
         this.setState({submitBusy: true});
-        var deletedItem;
-        var deletedParent;
-        this.getRestData(this.props.item['@id'], null, true).then(item => {
-            // get up-to-date target item and set its status to deleted
-            deletedItem = flatten(item);
-            deletedItem.status = 'deleted';
-            return Promise.resolve(item);
-        }).then(item => {
+        var itemUuid = this.props.item['@id'];
+        var parentUuid = this.props.parent['@id'];
+        var deletedItemType, deletedItem, deletedParent;
+
+        this.getRestData(itemUuid, null, true).then(item => {
+            // get up-to-date target object, then get the promises for deleting it and
+            // all its children, along with the promises for any related history items
+            deletedItemType = item['@type'][0];
+            var deletePromises = this.recurseItem(item, 0, 'delete');
+            return Promise.all(deletePromises); // wait for ALL promises to resolve
+        }).then(rawData => {
             // get up-to-date parent object; also bypass issue of certain certain embedded parent
             // items in edit pages being un-flattenable
-            return this.getRestData(this.props.parent['@id'], null, true).then(parent => {
-                return Promise.resolve(parent);
-            });
-        }).then(parent => {
-            // flatten parent object and remove link to deleted item as appropriate
-            deletedParent = flatten(parent);
-            if (parent['@type'][0] == 'annotation') {
-                if (this.props.item['@type'][0] == 'group') {
-                    deletedParent.groups = _.without(deletedParent.groups, this.props.item['@id']);
-                } else if (this.props.item['@type'][0] == 'family') {
-                    deletedParent.families = _.without(deletedParent.families, this.props.item['@id']);
-                } else if (this.props.item['@type'][0] == 'individual') {
-                    deletedParent.individuals = _.without(deletedParent.individuals, this.props.item['@id']);
-                } else if (this.props.item['@type'][0] == 'experimental') {
-                    deletedParent.experimentalData = _.without(deletedParent.experimentalData, this.props.item['@id']);
-                }
-            } else {
-                if (this.props.item['@type'][0] == 'family') {
-                    deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, this.props.item['@id']);
-                } else if (this.props.item['@type'][0] == 'individual') {
-                    deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, this.props.item['@id']);
-                    if (parent['@type'][0] == 'family') {
-                        // Empty variants of parent object if target item is individual and parent is family
-                        deletedParent.segregation.variants = [];
+            return this.getRestData(parentUuid, null, true).then(parent => {
+                // flatten parent object and remove link to deleted item as appropriate
+                deletedParent = flatten(parent);
+                if (parent['@type'][0] == 'annotation') {
+                    if (deletedItemType == 'group') {
+                        deletedParent.groups = _.without(deletedParent.groups, itemUuid);
+                    } else if (deletedItemType == 'family') {
+                        deletedParent.families = _.without(deletedParent.families, itemUuid);
+                    } else if (deletedItemType == 'individual') {
+                        deletedParent.individuals = _.without(deletedParent.individuals, itemUuid);
+                    } else if (deletedItemType == 'experimental') {
+                        deletedParent.experimentalData = _.without(deletedParent.experimentalData, itemUuid);
+                    }
+                } else {
+                    if (deletedItemType == 'family') {
+                        deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, itemUuid);
+                    } else if (deletedItemType == 'individual') {
+                        deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, itemUuid);
+                        if (parent['@type'][0] == 'family') {
+                            // Empty variants of parent object if target item is individual and parent is family
+                            deletedParent.segregation.variants = [];
+                        }
                     }
                 }
-            }
-            // PUT updated parent object w/ removed link to deleted item
-            return this.putRestData(this.props.parent['@id'], deletedParent).then(data => {
-                return Promise.resolve(data['@graph'][0]);
+                // PUT updated parent object w/ removed link to deleted item
+                return this.putRestData(parentUuid, deletedParent).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
             });
         }).then(data => {
-            // PUT deleted item w/ updated status
-            return this.putRestData(this.props.item['@id'], deletedItem).then(data => {
-                return Promise.resolve(data['@graph'][0]);
-            });
-        }).then(data => {
-            this.recordHistory('delete', this.props.item).then(() => {
-                // forward user to curation central w/ PMID selected after writing history
-                window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
-            });
-
+            // forward user to curation central
+            window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
         }).catch(function(e) {
             console.log('DELETE ERROR: %o', e);
         });
@@ -1939,18 +2054,37 @@ var DeleteButtonModal = React.createClass({
         }
     },
 
+    // Called when user clicks a link in the delete confirmation modal to view another object.
+    // Allows for scrolling in subsequent pages, as the initial modal rendering disabled scrolling.
+    linkout: function(e) {
+        this.props.closeModal();
+    },
+
     render: function() {
+        var tree;
         var message;
+        // generate custom messages and generate display tree for group and family delete confirm modals.
+        // generic message for everything else.
         if (this.props.item['@type'][0] == 'group') {
-            message = <p><strong>Warning</strong>: If there are any Families and/or Individuals associated with this Group, they will be deleted when the Group is deleted. Are you sure you would like to delete this item?</p>;
+            message = <p><strong>Warning</strong>: Deleting this Group will also delete any associated families and individuals (see any Families or Individuals associated with the Group under its name, bolded below).</p>;
+            tree = this.recurseItem(this.props.item, 0, 'display');
         } else if (this.props.item['@type'][0] == 'family') {
-            message = <p><strong>Warning</strong>: If there are any Individuals associated with this Family, they will be deleted when the Family is deleted. Are you sure you would like to delete this item?</p>;
-        } else if (this.props.item['@type'][0] == 'individual' || this.props.item['@type'][0] == 'experimental') {
-            message = <p>Are you sure you would like to delete this item?</p>;
+            message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
+            tree = this.recurseItem(this.props.item, 0, 'display');
         }
         return (
             <div>
-                <div className="modal-body">{message}</div>
+                <div className="modal-body">
+                    {message}
+                    <p>Are you sure you want to delete this item?</p>
+                    {tree ?
+                    <div><strong>{this.props.item['@type'][0]} {this.props.item.label}</strong><br />
+                    {tree.map(function(treeItem, i) {
+                        return <span key={i}>&nbsp;&nbsp;{treeItem}<br /></span>;
+                    })}
+                    <br /></div>
+                    : null}
+                    </div>
                 <div className="modal-footer">
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
                     <Input type="button" inputClassName="btn-danger btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
