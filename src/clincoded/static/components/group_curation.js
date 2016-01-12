@@ -172,9 +172,9 @@ var GroupCuration = React.createClass({
             if (!formError && !valid_orphaId && !valid_phoId && (!hpotext || !hpotext.length)) {
                 // Can not empty at all of them
                 formError = true;
-                this.setFormErrors('orphanetid', 'Enter Orphanet ID(s) and/or');
-                this.setFormErrors('hpoid', 'Enter HPO ID(s) and/or');
-                this.setFormErrors('phenoterms', 'Enter phenotype free text');
+                this.setFormErrors('orphanetid', 'Enter Orphanet ID(s) and/or HPO Id(s) and/ot Phenotype free text.');
+                this.setFormErrors('hpoid', 'Enter Orphanet ID(s) and/or HPO Id(s) and/ot Phenotype free text.');
+                this.setFormErrors('phenoterms', 'Enter Orphanet ID(s) and/or HPO Id(s) and/ot Phenotype free text.');
             }
 
             // Check that all gene symbols have the proper format (will check for existence later)
@@ -600,12 +600,11 @@ var GroupCommonDiseases = function() {
     return (
         <div className="row">
             <div className="col-sm-7 col-sm-offset-5">
-                <p className="alert alert-warning">Please enter an Orphanet ID and/or Phenotype for this Group (required).</p>
+                <p className="alert alert-warning">Please enter an Orphanet ID(s) and/or HPO ID(s) and/or Phenotype free text (required).</p>
             </div>
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrMultiFormErrors.bind(null, ['orphanetid', 'hpoid', 'phenoterms'])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            {curator.renderPhenotype(null, null)}
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrMultiFormErrors.bind(null, ['orphanetid', 'hpoid', 'phenoterms'])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />

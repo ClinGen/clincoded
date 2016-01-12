@@ -1755,10 +1755,10 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
     return (
         <div>
             <div className="col-sm-5">&nbsp;</div>
-            <div className="col-sm-7">
+            <div className="col-sm-7 alert alert-warning">
                 <p style={{'margin-bottom':'10px'}}>
                     Please enter the relevant phenotypic features using the Human Phenotype Ontology (HPO) terms&nbsp;
-                    wherever possible (e.g. HP:0010704, HP:0030300).  If no HPO code exists for a particular&nbsp;
+                    wherever possible (e.g. HP:0010704, HP:0030300). If no HPO code exists for a particular&nbsp;
                     feature, please describe it in the free text box instead.
                 </p>
             </div>
