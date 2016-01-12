@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "label": {
             "title": "Label",
@@ -185,9 +185,9 @@
                         "enum": [
                             "Exome sequencing",
                             "Genotyping",
-                            "HRM",
+                            "High resolution melting",
                             "PCR",
-                            "Sanger",
+                            "Sanger sequencing",
                             "Whole genome shotgun sequencing"
                         ]
                     }
