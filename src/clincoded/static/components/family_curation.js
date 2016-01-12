@@ -462,11 +462,11 @@ var FamilyCuration = React.createClass({
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
-            //if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
+            if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
                 // ORPHA list is bad
-            //    formError = true;
-            //    this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
-            //}
+                formError = true;
+                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+            }
 
             // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
             if (this.state.variantCount > 0 && !this.state.probandIndividual) {

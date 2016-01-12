@@ -154,7 +154,7 @@ var GroupCuration = React.createClass({
                 formError = true;
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
             }
-            else if (orphaIds && orphaIds.length) {
+            else if (orphaIds && orphaIds.length && !_(orphaIds).any(function(id) { return id === null; })) {
                 valid_orphaId = true;
             }
 
@@ -164,12 +164,12 @@ var GroupCuration = React.createClass({
                 formError = true;
                 this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
             }
-            else if (hpoids && hpoids.length) {
+            else if (hpoids && hpoids.length && !_(hpoids).any(function(id) { return id === null; })) {
                 valid_phoId = true;
             }
 
             // Check Orphanet ID, HPO ID and HPO text
-            if (!valid_orphaId && !valid_phoId && (!hpotext || !hpotext.length)) {
+            if (!formError && !valid_orphaId && !valid_phoId && (!hpotext || !hpotext.length)) {
                 // Can not empty at all of them
                 formError = true;
                 this.setFormErrors('orphanetid', 'Enter Orphanet ID(s) and/or');

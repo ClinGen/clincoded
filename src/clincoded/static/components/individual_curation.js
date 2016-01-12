@@ -357,6 +357,9 @@ var IndividualCuration = React.createClass({
                 // ORPHA list is bad
                 formError = true;
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+            } else if (!this.state.proband_selected && (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; }))) {
+                formError = true;
+                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
             }
 
             // Check that all gene symbols have the proper format (will check for existence later)

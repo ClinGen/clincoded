@@ -1758,7 +1758,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
             <div className="col-sm-7">
                 <p style={{'margin-bottom':'10px'}}>
                     Please enter the relevant phenotypic features using the Human Phenotype Ontology (HPO) terms&nbsp;
-                    wherever possible (e.g. HP_0010704, HP_0030300).  If no HPO code exists for a particular&nbsp;
+                    wherever possible (e.g. HP:0010704, HP:0030300).  If no HPO code exists for a particular&nbsp;
                     feature, please describe it in the free text box instead.
                 </p>
             </div>
