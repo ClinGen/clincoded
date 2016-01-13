@@ -156,19 +156,22 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 <div>
                     <div className="curation-data-title">
                         <div className="container">
-                            {this.props.linkGdm ?
-                                <a href={"/curation-central/?gdm=" + gdm.uuid}>
-                                    <div>
-                                        <h1>{gene.symbol} – {disease.term}</h1>
-                                        <h2>{mode}</h2>
-                                    </div>
-                                </a>
-                            :
-                                <div>
+                            <div className="headerContainer">
+                                <span>
                                     <h1>{gene.symbol} – {disease.term}</h1>
                                     <h2>{mode}</h2>
-                                </div>
-                            }
+                                </span>
+                                <span>
+                                    {this.props.linkGdm ?
+                                        <a href={"/curation-central/?gdm=" + gdm.uuid}>
+                                            <span className="icon-stack icon-lg">
+                                                <i className="icon icon-square-o icon-stack-21x"></i>
+                                                <i className="icon icon-link"></i>
+                                            </span>
+                                        </a>
+                                    : null}
+                                </span>
+                            </div>
                             <div className="provisional-info-panel">
                                 <table border="1" style={{'width':'100%'}}>
                                     <tr>
