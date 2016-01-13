@@ -1069,18 +1069,19 @@ var ExperimentalCuration = React.createClass({
                         }).then(newExperimental => {
                             savedExperimental = newExperimental.data;
                             if (!this.state.experimental) {
-                                // Get a flattened copy of the annotation and put our new group into it,
-                                // ready for writing.
-                                var annotation = curator.flatten(this.state.annotation);
-                                if (annotation.experimentalData) {
+                                return this.getRestData('/evidence/' + this.state.annotation.uuid, null, true).then(freshAnnotation => {
+                                    // Get a flattened copy of the fresh annotation object and put our new experimental data into it,
+                                    // ready for writing.
+                                    var annotation = curator.flatten(freshAnnotation);
+                                    if (!annotation.experimentalData) {
+                                        annotation.experimentalData = [];
+                                    }
                                     annotation.experimentalData.push(newExperimental.data['@id']);
-                                } else {
-                                    annotation.experimentalData = [newExperimental.data['@id']];
-                                }
 
-                                // Post the modified annotation to the DB, then go back to Curation Central
-                                return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                                    return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
+                                    // Post the modified annotation to the DB
+                                    return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
+                                        return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
+                                    });
                                 });
                             } else {
                                 return Promise.resolve({assessment: null, updatedAssessment: false, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
@@ -1466,7 +1467,7 @@ var TypeBiochemicalFunctionB = function() {
     }
     return (
         <div>
-            <p className="col-sm-7 col-sm-offset-5 hug-top">Either an HPO or free text Phenotype is required.</p>
+            {curator.renderPhenotype(null, null)}
             <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
@@ -1820,6 +1821,7 @@ var TypeModelSystems = function() {
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={modelSystems.descriptionOfGeneAlteration} inputDisabled={this.cv.othersAssessed} required />
+            {curator.renderPhenotype(null, null)}
             <Input type="text" ref="model.phenotypeHPOObserved" label={<LabelPhenotypeObserved />}
                 error={this.getFormError('model.phenotypeHPOObserved')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPOObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
@@ -1929,6 +1931,7 @@ var TypeRescue = function() {
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={rescue.descriptionOfGeneAlteration} inputDisabled={this.cv.othersAssessed} required />
+            {curator.renderPhenotype(null, null)}
             <Input type="text" ref="rescue.phenotypeHPO" label={<LabelPhenotypeRescue />}
                 error={this.getFormError('rescue.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
