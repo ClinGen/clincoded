@@ -1452,9 +1452,11 @@ function flattenGroup(group) {
     // First copy simple properties before fixing the special properties
     var flat = cloneSimpleProps(group, groupSimpleProps);
 
-    flat.commonDiagnosis = group.commonDiagnosis.map(function(disease) {
-        return disease['@id'];
-    });
+    if (group.commonDiagnosis && group.commonDiagnosis.length) {
+        flat.commonDiagnosis = group.commonDiagnosis.map(function(disease) {
+            return disease['@id'];
+        });
+    }
 
     if (group.otherGenes && group.otherGenes.length) {
         flat.otherGenes = group.otherGenes.map(function(gene) {
@@ -1723,7 +1725,7 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
                         return (
                             <div key={obj.uuid} className="form-group">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Orphanet Diseases Associated with {title}:</strong>
+                                    <strong className="pull-right">Orphanet Disease(s) Associated with {title}:</strong>
                                 </div>
                                 <div className="col-sm-7">
                                     { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
@@ -1747,6 +1749,55 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
         </div>
     );
 };
+
+// Given an array of group or families in 'objList', render a list of HPO IDs and/or Phenotype free text in those groups and familes.
+var renderPhenotype = module.exports.renderPhenotype = function(objList, title) {
+    return (
+        <div>
+            <div className="col-sm-5">&nbsp;</div>
+            <div className="col-sm-7 alert alert-warning">
+                <p style={{'margin-bottom':'10px'}}>
+                    Please enter the relevant phenotypic features using the Human Phenotype Ontology (HPO) terms&nbsp;
+                    wherever possible (e.g. HP:0010704, HP:0030300). If no HPO code exists for a particular&nbsp;
+                    feature, please describe it in the free text box instead.
+                </p>
+            </div>
+            {objList && objList.length ?
+                <div>
+                    {objList.map(function(obj) {
+                        return (
+                            <div key={obj.uuid} className="form-group">
+                                <div className="col-sm-5">
+                                    <strong className="pull-right">Phenotype(s) Associated with {title}:</strong>
+                                </div>
+                                <div className="col-sm-7">
+                                    { (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length > 0) ?
+                                        obj.hpoIdInDiagnosis.map(function(hpoid, i) {
+                                            return (
+                                                <span>
+                                                    {hpoid}
+                                                    {i < obj.hpoIdInDiagnosis.length-1 ? ', ' : ''}
+                                                    {i === obj.hpoIdInDiagnosis.length-1 && obj.termsInDiagnosis ? '; ' : null}
+                                                </span>
+                                            );
+                                        })
+                                        : null
+                                    }
+                                    { obj.termsInDiagnosis ?
+                                        <span>View <a href={obj['@id']} target='_blank'>{obj.label}</a> for phenotype free text.</span>
+                                        :
+                                        null
+                                    }
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            : null}
+        </div>
+    );
+};
+
 
 // Class for delete button (and associated modal) of Group, Family, Individual, and Experimental
 // Data objects. This class only renderes the button; please see DeleteButtonModal for bulk of

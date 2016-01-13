@@ -21,6 +21,7 @@
 }
 
 input[type=text],
+textarea.form-control,
 input[type=password],
 input[type=email],
 input[type=search] {
@@ -228,4 +229,9 @@ input[type=search] {
 
 .submit-spinner i {
     font-size: 15px;
+}
+
+.label-box-match-middle {
+    margin: 0 auto;
+    padding-top: 10px;
 }
