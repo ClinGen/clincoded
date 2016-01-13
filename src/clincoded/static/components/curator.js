@@ -161,12 +161,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                     <h1>{gene.symbol} – {disease.term}</h1>
                                     <h2>{mode}</h2>
                                 </span>
-                                <span>
+                                <span className="linkIcon">
                                     {this.props.linkGdm ?
                                         <a href={"/curation-central/?gdm=" + gdm.uuid}>
                                             <span className="icon-stack icon-lg">
                                                 <i className="icon icon-square-o icon-stack-21x"></i>
-                                                <i className="icon icon-link"></i>
+                                                <i className="icon icon-briefcase"></i>
                                             </span>
                                         </a>
                                     : null}
