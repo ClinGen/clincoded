@@ -160,7 +160,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
                                         {this.props.linkGdm ?
-                                        <span> <a href={"/curation-central/?gdm=" + gdm.uuid}>
+                                        <span> <a href={"/curation-central/?gdm=" + gdm.uuid + "&pmid=" + annotation.article.pmid}>
                                             <i className="icon icon-briefcase"></i>
                                         </a></span>
                                         : null}
@@ -241,16 +241,20 @@ var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
         obj: React.PropTypes.object
     },
     render: function() {
-        var tempGdm;
+        var tempGdm, tempPmid;
         if (this.props.obj.associatedAnnotations && this.props.obj.associatedAnnotations.length > 0) {
             tempGdm = this.props.obj.associatedAnnotations[0].associatedGdm[0];
+            tempPmid = this.props.obj.associatedAnnotations[0].article.pmid;
         } else if (this.props.obj.associatedGroups && this.props.obj.associatedGroups.length > 0) {
             tempGdm = this.props.obj.associatedGroups[0].associatedAnnotations[0].associatedGdm[0];
+            tempPmid = this.props.obj.associatedGroups[0].associatedAnnotations[0].article.pmid;
         } else if (this.props.obj.associatedFamilies && this.props.obj.associatedFamilies.length > 0) {
             if (this.props.obj.associatedFamilies[0].associatedAnnotations && this.props.obj.associatedFamilies[0].associatedAnnotations.length > 0) {
                 tempGdm = this.props.obj.associatedFamilies[0].associatedAnnotations[0].associatedGdm[0];
+                tempPmid = this.props.obj.associatedFamilies[0].associatedAnnotations[0].article.pmid;
             } else if (this.props.obj.associatedFamilies[0].associatedGroups && this.props.obj.associatedFamilies[0].associatedGroups.length > 0) {
                 tempGdm = this.props.obj.associatedFamilies[0].associatedGroups[0].associatedAnnotations[0].associatedGdm[0];
+                tempPmid = this.props.obj.associatedFamilies[0].associatedGroups[0].associatedAnnotations[0].article.pmid;
             }
         }
         return (
@@ -261,7 +265,7 @@ var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
                         <div>
                             <h1>{tempGdm.gene.symbol} – {tempGdm.disease.term}
                                 {tempGdm ?
-                                <span> <a href={"/curation-central/?gdm=" + tempGdm.uuid}>
+                                <span> <a href={"/curation-central/?gdm=" + tempGdm.uuid + "&pmid=" + tempPmid}>
                                     <i className="icon icon-briefcase"></i>
                                 </a></span>
                                 : null}
