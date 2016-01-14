@@ -1758,16 +1758,16 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
             { title === 'Experimental' ?
                 <div className="col-sm-7 alert alert-warning">
                     <p style={{'margin-bottom':'10px'}}>
-                        Please enter the relevant phenotypic features of the individual using the Human Phenotype Ontology (HPO)&nbsp;
-                        terms wherever possible (e.g. HP_0010704, HP_0030300) (<strong>required</strong>).&nbsp;
+                        Please enter the relevant phenotypic features <strong>(required)</strong> of the individual using
+                        the Human Phenotype Ontology (HPO) terms wherever possible (e.g. HP_0010704, HP_0030300).
                         If no HPO code exists for a particular feature, please describe it in the free text box instead.
                     </p>
                 </div>
             :
                 <div className="col-sm-7">
                     <p style={{'margin-bottom':'10px'}}>
-                        Please enter the relevant phenotypic features of the individual using the Human Phenotype Ontology (HPO)&nbsp;
-                        terms wherever possible (e.g. HP_0010704, HP_0030300).&nbsp;
+                        Please enter the relevant phenotypic features of the individual using the Human Phenotype Ontology (HPO)
+                        terms wherever possible (e.g. HP_0010704, HP_0030300).
                         If no HPO code exists for a particular feature, please describe it in the free text box instead.
                     </p>
                 </div>
