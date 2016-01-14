@@ -150,7 +150,7 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
                                     <div className="col-md-6">
                                         {gdm && annotation ?
                                             <div>
-                                                <a className="btn btn-default btn-individual-submit" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                                <a className="btn btn-default btn-individual-submit" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page <i className="icon icon-briefcase"></i></a>
                                                 <div className="submit-results-note">Return to Record Curation page if you would like to add or add or edit a group, family, or individual.</div>
                                             </div>
                                         : null}

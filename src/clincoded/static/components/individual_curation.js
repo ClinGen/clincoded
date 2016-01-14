@@ -818,17 +818,16 @@ var IndividualCuration = React.createClass({
                             : null}
                             <div className="viewer-titles">
                                 <h1>{individual ? 'Edit' : 'Curate'} Individual Information</h1>
-                                <h2>Individual: {this.state.individualName ? <span>{this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</h2>
-                                {familyTitles.length ?
-                                    <h2>
-                                        Family association: {familyTitles.map(function(family, i) { return <span>{i > 0 ? ', ' : ''}<a href={family['@id']}>{family.label}</a></span>; })}
-                                    </h2>
-                                : null}
-                                {groupTitles.length ?
-                                    <h2>
-                                        Group association: {groupTitles.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}
-                                    </h2>
-                                : null}
+                                <h2>
+                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}>{gdm.gene.symbol}–{gdm.disease.term}–{gdm.modeInheritance} <i className="icon icon-briefcase"></i></a> : null}
+                                    {groupTitles.length ?
+                                        <span> // Group {groupTitles.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                    : null}
+                                    {familyTitles.length ?
+                                        <span> // Family {familyTitles.map(function(family, i) { return <span>{i > 0 ? ', ' : ''}<a href={family['@id']}>{family.label}</a></span>; })}</span>
+                                    : null}
+                                    <span> // {this.state.individualName ? <span>Individual {this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</span>
+                                </h2>
                             </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
