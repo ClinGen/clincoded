@@ -1767,7 +1767,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
             { title === 'Family' ?
                 <div className="col-sm-7">
                     <p style={{'margin-bottom':'10px'}}>
-                        Please enter the relevant phenotypic features of the Family using the Human Phenotype Ontology (HPO)
+                        Please enter the relevant phenotypic feature(s) of the Family using the Human Phenotype Ontology (HPO)
                         terms wherever possible (e.g. HP_0010704, HP_0030300).
                         If no HPO code exists for a particular feature, please describe it in the free text box instead.
                     </p>
@@ -1776,7 +1776,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
             { title === 'Individual' ?
                 <div className="col-sm-7">
                     <p style={{'margin-bottom':'10px'}}>
-                        Please enter the relevant phenotypic features of the Individual using the Human Phenotype Ontology (HPO)
+                        Please enter the relevant phenotypic feature(s) of the Individual using the Human Phenotype Ontology (HPO)
                         terms wherever possible (e.g. HP_0010704, HP_0030300).
                         If no HPO code exists for a particular feature, please describe it in the free text box instead.
                     </p>
