@@ -796,17 +796,3 @@
         font-weight: normal;
     }
 }
-
-.headerContainer {
-    display: table;
-    margin: auto;
-
-    span {
-        display: table-cell;
-        vertical-align: middle;
-    }
-
-    span.linkIcon {
-        padding-left: 4px;
-    }
-}
