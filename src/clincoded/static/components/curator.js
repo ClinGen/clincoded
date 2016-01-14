@@ -160,9 +160,9 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
                                         {this.props.linkGdm ?
-                                        <a href={"/curation-central/?gdm=" + gdm.uuid}>
+                                        <span> <a href={"/curation-central/?gdm=" + gdm.uuid}>
                                             <i className="icon icon-briefcase"></i>
-                                        </a>
+                                        </a></span>
                                         : null}
                                     </h1>
                                     <h2>{mode}</h2>
@@ -258,12 +258,16 @@ var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
             {tempGdm ?
                 <div className="curation-data-title">
                     <div className="container">
-                        <a href={"/curation-central/?gdm=" + tempGdm.uuid}>
-                            <div>
-                                <h1>{tempGdm.gene.symbol} – {tempGdm.disease.term}</h1>
-                                <h2>{tempGdm.modeInheritance}</h2>
-                            </div>
-                        </a>
+                        <div>
+                            <h1>{tempGdm.gene.symbol} – {tempGdm.disease.term}
+                                {tempGdm ?
+                                <span> <a href={"/curation-central/?gdm=" + tempGdm.uuid}>
+                                    <i className="icon icon-briefcase"></i>
+                                </a></span>
+                                : null}
+                            </h1>
+                            <h2>{tempGdm.modeInheritance}</h2>
+                        </div>
                     </div>
                 </div>
             : null}
