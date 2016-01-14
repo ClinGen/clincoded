@@ -14,7 +14,7 @@
             "genomeWideStudy": false,
             "genotypingMethods": [
                 "PCR",
-                "HRM"
+                "High resolution melting"
             ],
             "entireGeneSequenced": false,
             "copyNumberAssessed": false,
@@ -73,7 +73,7 @@
             "genomeWideStudy": false,
             "genotypingMethods": [
                 "PCR",
-                "HRM"
+                "High resolution melting"
             ],
             "entireGeneSequenced": false,
             "copyNumberAssessed": false,
@@ -122,7 +122,7 @@
             "previousTestingDescription": "method here",
             "genomeWideStudy": true,
             "genotypingMethods": [
-                "Sanger"
+                "Sanger sequencing"
             ],
             "entireGeneSequenced": true,
             "copyNumberAssessed": true,
@@ -173,7 +173,7 @@
             "previousTestingDescription": "method here",
             "genomeWideStudy": true,
             "genotypingMethods": [
-                "Sanger"
+                "Sanger sequencing"
             ],
             "entireGeneSequenced": true,
             "copyNumberAssessed": true,
@@ -224,7 +224,7 @@
             "previousTestingDescription": "method here",
             "genomeWideStudy": true,
             "genotypingMethods": [
-                "Sanger"
+                "Sanger sequencing"
             ],
             "entireGeneSequenced": true,
             "copyNumberAssessed": true,

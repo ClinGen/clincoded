@@ -1467,7 +1467,7 @@ var TypeBiochemicalFunctionB = function() {
     }
     return (
         <div>
-            <p className="col-sm-7 col-sm-offset-5 hug-top">Either an HPO or free text Phenotype is required.</p>
+            {curator.renderPhenotype(null, 'Experimental')}
             <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
@@ -1821,6 +1821,7 @@ var TypeModelSystems = function() {
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={modelSystems.descriptionOfGeneAlteration} inputDisabled={this.cv.othersAssessed} required />
+            {curator.renderPhenotype(null, 'Experimental')}
             <Input type="text" ref="model.phenotypeHPOObserved" label={<LabelPhenotypeObserved />}
                 error={this.getFormError('model.phenotypeHPOObserved')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPOObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
@@ -1930,6 +1931,7 @@ var TypeRescue = function() {
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={rescue.descriptionOfGeneAlteration} inputDisabled={this.cv.othersAssessed} required />
+            {curator.renderPhenotype(null, 'Experimental')}
             <Input type="text" ref="rescue.phenotypeHPO" label={<LabelPhenotypeRescue />}
                 error={this.getFormError('rescue.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
