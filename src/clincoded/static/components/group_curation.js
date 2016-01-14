@@ -475,7 +475,10 @@ var GroupCuration = React.createClass({
                             : null}
                             <div className="viewer-titles">
                                 <h1>{(group ? 'Edit' : 'Curate') + ' Group Information'}</h1>
-                                <h2>Group: {this.state.groupName ? <span>{this.state.groupName}</span> : <span className="no-entry">No entry</span>}</h2>
+                                <h2>
+                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}>{gdm.gene.symbol}–{gdm.disease.term}–{gdm.modeInheritance} <i className="icon icon-briefcase"></i></a> : null}
+                                    <span> // {this.state.groupName ? <span> Group {this.state.groupName}</span> : <span className="no-entry">No entry</span>}</span>
+                                </h2>
                             </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
