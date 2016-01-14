@@ -9,7 +9,7 @@
   line-height: 2em;
   vertical-align: middle;
 }
-.#{$fa-css-prefix}-stack-1x, .#{$fa-css-prefix}-stack-2x, .#{$fa-css-prefix}-stack-21x {
+.#{$fa-css-prefix}-stack-1x, .#{$fa-css-prefix}-stack-2x {
   position: absolute;
   left: 0;
   width: 100%;
@@ -17,5 +17,4 @@
 }
 .#{$fa-css-prefix}-stack-1x { line-height: inherit; }
 .#{$fa-css-prefix}-stack-2x { font-size: 2em; }
-.#{$fa-css-prefix}-stack-21x { font-size: 2.1em;}
 .#{$fa-css-prefix}-inverse { color: $fa-inverse; }
