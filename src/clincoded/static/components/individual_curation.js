@@ -1055,7 +1055,7 @@ var IndividualCommonDiseases = function() {
                 curator.renderPhenotype(associatedGroups, 'Group')
                 :
                 (associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-                    curator.renderPhenotype(associatedFamilies, 'Family') : curator.renderPhenotype(null, null)
+                    curator.renderPhenotype(associatedFamilies, 'Family') : curator.renderPhenotype(null, 'Family')
                 )
             }
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
