@@ -134,7 +134,7 @@ var ExperimentalSubmit = React.createClass({
                                             </div>
                                             <div className="col-md-6">
                                                 <span className="family-submit-results-btn">
-                                                    <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                                    <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page <i className="icon icon-briefcase"></i></a>
                                                 </span>
                                             </div>
                                         </div>

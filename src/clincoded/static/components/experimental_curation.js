@@ -1203,8 +1203,10 @@ var ExperimentalCuration = React.createClass({
                             : null}
                             <div className="viewer-titles">
                                 <h1>{(experimental ? 'Edit' : 'Curate') + ' Experimental Data Information'}</h1>
-                                <h3>Experiment Type: {this.state.experimentalType && this.state.experimentalType != 'none' ? <span>{this.state.experimentalType}</span> : <span className="no-entry">None specified</span>}</h3>
-                                <h2>Experiment Name: {this.state.experimentalName ? <span>{this.state.experimentalName}</span> : <span className="no-entry">No entry</span>}</h2>
+                                <h2>
+                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}>{gdm.gene.symbol}–{gdm.disease.term}–{gdm.modeInheritance} <i className="icon icon-briefcase"></i></a> : null}
+                                    <span> // {this.state.experimentalName ? <span> Experiment {this.state.experimentalName}</span> : <span className="no-entry">No entry</span>} {this.state.experimentalType && this.state.experimentalType != 'none' ? <span>({this.state.experimentalType})</span> : null}</span>
+                                </h2>
                             </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
