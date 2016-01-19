@@ -183,7 +183,7 @@ var ProvisionalCuration = React.createClass({
         e.stopPropagation();
 
         // click Cancel button will go back to view - current
-        if (e.detail >= 1){
+        if (e.type == 'click'){
             window.history.go(-1);
         }
     },

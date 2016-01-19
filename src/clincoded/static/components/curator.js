@@ -917,7 +917,7 @@ var AddOmimIdModal = React.createClass({
         //only a mouse click on cancel button closes modal
         //(do not let the enter key [which evaluates to 0 mouse
         //clicks] be accepted to close modal)
-        if (e.detail >= 1){
+        if (e.type == 'click'){
             this.props.closeModal();
         }
     },
@@ -2049,7 +2049,7 @@ var DeleteButtonModal = React.createClass({
         //only a mouse click on cancel button closes modal
         //(do not let the enter key [which evaluates to 0 mouse
         //clicks] be accepted to close modal)
-        if (e.detail >= 1){
+        if (e.type == 'click'){
             this.props.closeModal();
         }
     },
