@@ -387,15 +387,15 @@ var VariantCuration = React.createClass({
                     : null}
                     <div className="viewer-titles">
                         <h1>{(pathogenicity ? 'Edit' : 'Curate') + ' Variant Information'}</h1>
+                        {curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null}
+                        <VariantAssociationsHeader gdm={gdm} variant={variant} />
                         {variant ?
                             <h2>
                                 {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}>{gdm.gene.symbol}–{gdm.disease.term}–{gdm.modeInheritance} <i className="icon icon-briefcase"></i></a> : null}
                                 {variant.clinvarVariantId ? <span> // Variant <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></span> : <span>{'Description: ' + variant.otherDescription}</span>}
                             </h2>
                         : null}
-                        {curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null}
                     </div>
-                    <VariantAssociationsHeader gdm={gdm} variant={variant} />
                     <div className="row group-curation-content">
                         <div className="col-sm-12">
                             {!this.queryValues.pathogenicityUuid || pathogenicity ?

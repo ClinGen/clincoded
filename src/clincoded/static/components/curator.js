@@ -410,7 +410,7 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                         return 1;
                     });
                     var render = (
-                        <div key={annotation.uuid}>
+                        <h2 key={annotation.uuid}>
                             <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> → </span>
                             {sortedAssociations.map(function(association, i) {
                                 var associationType = association['@type'][0];
@@ -426,7 +426,7 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                                     </span>
                                 );
                             })}
-                        </div>
+                        </h2>
                     );
                     annotationAssociations.push(render);
                 }
@@ -434,9 +434,9 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
         }
 
         return (
-            <div>
+            <h2>
                 {annotationAssociations}
-            </div>
+            </h2>
         );
     }
 });
