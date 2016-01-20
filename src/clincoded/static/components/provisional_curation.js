@@ -1159,11 +1159,6 @@ var NewCalculation = function() {
                                         </td>
                                     </tr>
                                 </table>
-                                <br />
-                                { userAssessments.segCntdct>0 || userAssessments.variantCntdct || userAssessments.expCntdct ?
-                                    <p style={{'color':'#f00'}}>One or more pieces of evidence in this record was assessed as "Contradicts".</p>
-                                 : null
-                                }
                             </div>
                             <br />
                             <br />
@@ -1177,6 +1172,15 @@ var NewCalculation = function() {
                                     {this.state.autoClassification}
                                 </div>
                             </div>
+                            { userAssessments.segCntdct>0 || userAssessments.variantCntdct || userAssessments.expCntdct ?
+                                <div className="row">
+                                    <div className="col-sm-5">&nbsp;</div>
+                                    <div className="col-sm-7">
+                                        <strong style={{'color':'#f00'}}>Note: One or more pieces of evidence in this record was assessed as "Contradicts".</strong>
+                                    </div>
+                                </div>
+                             : null
+                            }
                             <br />
                             <Input type="select" ref="alteredClassification"
                                 label={<strong>Select Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
