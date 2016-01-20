@@ -418,6 +418,10 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                                 return (
                                     <span key={association.uuid}>
                                         {i > 0 ? ', ' : ''}
+                                        {associationType === 'group' ? <span>Group </span> : null}
+                                        {associationType === 'family' ? <span>Family </span> : null}
+                                        {associationType === 'individual' ? <span>Individual </span> : null}
+                                        {associationType === 'experimental' ? <span>Experimental </span> : null}
                                         <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>{probandLabel}
                                     </span>
                                 );
