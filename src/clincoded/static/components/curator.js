@@ -1755,13 +1755,33 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
     return (
         <div>
             <div className="col-sm-5">&nbsp;</div>
-            <div className="col-sm-7 alert alert-warning">
-                <p style={{'margin-bottom':'10px'}}>
-                    Please enter the relevant phenotypic features using the Human Phenotype Ontology (HPO) terms&nbsp;
-                    wherever possible (e.g. HP:0010704, HP:0030300). If no HPO code exists for a particular&nbsp;
-                    feature, please describe it in the free text box instead.
-                </p>
-            </div>
+            { title === 'Experimental' ?
+                <div className="col-sm-7 alert alert-warning">
+                    <p style={{'margin-bottom':'10px'}}>
+                        Please enter the relevant phenotypic feature(s) <strong>(required)</strong> using the Human Phenotype Ontology (HPO)
+                        terms wherever possible (e.g. HP_0010704, HP_0030300). If no HPO code exists for a particular feature,
+                        please describe it in the free text box instead.
+                    </p>
+                </div>
+            : null }
+            { title === 'Family' ?
+                <div className="col-sm-7">
+                    <p style={{'margin-bottom':'10px'}}>
+                        Please enter the relevant phenotypic feature(s) of the Family using the Human Phenotype Ontology (HPO)
+                        terms wherever possible (e.g. HP_0010704, HP_0030300).
+                        If no HPO code exists for a particular feature, please describe it in the free text box instead.
+                    </p>
+                </div>
+            : null}
+            { title === 'Individual' ?
+                <div className="col-sm-7">
+                    <p style={{'margin-bottom':'10px'}}>
+                        Please enter the relevant phenotypic feature(s) of the Individual using the Human Phenotype Ontology (HPO)
+                        terms wherever possible (e.g. HP_0010704, HP_0030300).
+                        If no HPO code exists for a particular feature, please describe it in the free text box instead.
+                    </p>
+                </div>
+            : null}
             {objList && objList.length ?
                 <div>
                     {objList.map(function(obj) {

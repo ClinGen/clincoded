@@ -230,6 +230,9 @@ var FamilyCuration = React.createClass({
         } else if (fromTarget == 'family') {
             orphanetVal = this.refs['orphanetid'].getValue();
             this.refs['individualorphanetid'].setValue(orphanetVal);
+            var errors = this.state.formErrors;
+            errors['individualorphanetid'] = '';
+            this.setState({formErrors: errors});
         }
     },
 
@@ -1278,7 +1281,7 @@ var FamilyCommonDiseases = function() {
                 clickHandler={this.handleClick.bind(this, 'group', 'orphanetid')} />
             : null}
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                curator.renderPhenotype(associatedGroups, 'Group') : curator.renderPhenotype(null, null)
+                curator.renderPhenotype(associatedGroups, 'Family') : curator.renderPhenotype(null, 'Family')
             }
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
