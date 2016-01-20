@@ -1159,6 +1159,11 @@ var NewCalculation = function() {
                                         </td>
                                     </tr>
                                 </table>
+                                <br />
+                                { userAssessments.segCntdct>0 || userAssessments.variantCntdct || userAssessments.expCntdct ?
+                                    <p style={{'color':'#f00'}}>One or more pieces of evidence in this record was assessed as "Contradicts".</p>
+                                 : null
+                                }
                             </div>
                             <br />
                             <br />
