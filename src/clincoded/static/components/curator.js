@@ -91,6 +91,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+            var pmid = gdm.annotations[0].article.pmid;
 
 
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
@@ -160,7 +161,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
                                         {this.props.linkGdm ?
-                                        <span> <a href={"/curation-central/?gdm=" + gdm.uuid + "&pmid=" + annotation.article.pmid}>
+                                        <span> <a href={"/curation-central/?gdm=" + gdm.uuid + "&pmid=" + pmid}>
                                             <i className="icon icon-briefcase"></i>
                                         </a></span>
                                         : null}
