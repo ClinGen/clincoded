@@ -1000,7 +1000,7 @@ var NewCalculation = function() {
                                     </tr>
                                     <tr className="count-title-row">
                                         <td rowSpan="2" className="title area-bottom-cells most-left">Time (yrs)</td>
-                                        <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#10877; 2 pubs, then max score for time = 1)</td>
+                                        <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#8804; 2 pubs, then max score for time = 1)</td>
                                         <td>current yr</td>
                                         <td>1-3 yr</td>
                                         <td>&gt;3 yr</td>
