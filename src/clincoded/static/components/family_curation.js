@@ -102,6 +102,8 @@ var FamilyCuration = React.createClass({
             probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
             addVariantDisabled: false, // True if Add Another Variant button enabled
+            individualRequired: null, // Boolean for set up requirement of proband
+            variantRequired: null, // boolean for set up requirement of variant if proband individual data entered
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false // True while form is submitting
@@ -152,6 +154,19 @@ var FamilyCuration = React.createClass({
                 currVariantOption[refSuffix] = VAR_NONE;
             }
             this.setState({variantOption: currVariantOption});
+
+            // if variant data entered, must enter proband individual name and orphanet
+            var noVariantData = true;
+            _.range(this.state.variantCount).map(i => {
+                if (this.refs['VARclinvarid' + i].getValue() || this.refs['VARothervariant' + i].getValue()) {
+                    noVariantData = false;
+                }
+            });
+            if (!noVariantData) {
+                this.setState({individualRequired: true});
+            } else {
+                this.setState({individualRequired: false});
+            }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
             var value = this.refs[ref].getValue();
@@ -472,7 +487,7 @@ var FamilyCuration = React.createClass({
             }
 
             // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
-            if (this.state.variantCount > 0 && !this.state.probandIndividual) {
+            if (this.state.variantCount > 0 && !this.state.probandIndividual && this.state.individualRequired) {
                 if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
                     // Individual’s ORPHA list is bad
                     formError = true;
@@ -537,7 +552,7 @@ var FamilyCuration = React.createClass({
                     throw e;
                 }).then(diseases => {
                     // Check for individual orphanet IDs if we have variants and no existing proband
-                    if (this.state.variantCount && !this.state.probandIndividual) {
+                    if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
                         var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
 
                         // Verify given Orpha ID exists in DB
@@ -728,7 +743,7 @@ var FamilyCuration = React.createClass({
 
                     // Creating or editing a family, and the form has at least one variant. Create the starter individual and return a promise
                     // from its creation. Also remember we have new variants.
-                    if (this.state.variantCount) {
+                    if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
                         initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
@@ -1525,17 +1540,32 @@ var FamilyVariant = function() {
                             </div>
                         </div>
                         <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
-                            error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                                error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                         <p className="col-sm-7 col-sm-offset-5 input-note-below">
                             The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
                         </p>
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                     </div>
                 );
             })}
-            {this.state.variantCount && !this.state.probandIndividual ?
+            {this.state.variantCount < MAX_VARIANTS ?
+                <div className="row">
+                    <div className="col-sm-7 col-sm-offset-5 clearfix">
+                        {this.state.variantCount ?
+                            <p className="alert alert-warning">
+                                For a recessive condition, you must enter both variants believed to be causative for the disease in order that
+                                each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
+                                variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
+                            </p>
+                        : null}
+                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Individual" : "Add variant associated with Individual"}
+                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                    </div>
+                </div>
+            : null}
+            {this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired ?
                 <div className="variant-panel clearfix">
                     <Input type="text" ref="individualname" label="Individual Name"
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
@@ -1558,20 +1588,7 @@ var FamilyVariant = function() {
                         null
                     }
                 </div>
-            : null}
-            {this.state.variantCount < MAX_VARIANTS ?
-                <div className="col-sm-7 col-sm-offset-5">
-                    {this.state.variantCount ?
-                        <p className="alert alert-warning">
-                            For a recessive condition, you must enter both variants believed to be causative for the disease in order that
-                            each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
-                            variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
-                        </p>
-                    : null}
-                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Individual" : "Add variant associated with Individual"}
-                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
-                </div>
-            : null}
+            : null }
         </div>
     );
 };
