@@ -139,6 +139,7 @@
 .pmid-selection-list {
     max-height: 250px;
     overflow-y: auto;
+    background-color: #f9f9f9;
     border: 1px solid #e0e0e0;
 
     @media screen and (min-width: $screen-md-min) {
@@ -147,17 +148,30 @@
 }
 
 .pmid-selection-list-item {
+    margin: 10px;
     padding: 10px;
-    border-top: 1px solid #e0e0e0;
+    border: 1px solid #e0e0e0;
     cursor: pointer;
-    background-color: #f0f0f0;
+    background-color: #ffffff;
+    @include border-radius(3px);
+    box-shadow: 0 2px #e6e6e6;
+    opacity: 0.6;
+    transition: opacity .25s ease-in-out;
+    -moz-transition: opacity .25s ease-in-out;
+    -webkit-transition: opacity .25s ease-in-out;
 
     &:hover {
-        background-color: $color-hover;
+        box-shadow: 0 0 6px lighten($color-trim, 15%);
+        opacity: 1;
     }
 
     &.curr-pmid {
-        background-color: #fff;
+        box-shadow: 0 2px 0 1px lighten($color-trim, 25%);
+        border: 1px solid $color-trim;
+        opacity: 1;
+        //background-image: linear-gradient(to bottom, #f5fcff 0, #e1eff5 100%);
+        //background-repeat: repeat-x;
+        //background-color: #f5fcff;
     }
 }
 
@@ -167,6 +181,18 @@
 
 .pmid-selection-help {
     margin-top: 20px;
+}
+
+.curation-content .curr-pmid-overview {
+    .pmid-overview-abstract {
+        h4 {
+            border-bottom: 1px solid $color-trim;
+            color: $color-btn;
+            font-weight: 600;
+            font-size: 150%;
+            padding-bottom: 6px;
+        }
+    }
 }
 
 .panel-curator {
