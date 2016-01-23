@@ -166,6 +166,10 @@ var FamilyCuration = React.createClass({
                 this.setState({individualRequired: true});
             } else {
                 this.setState({individualRequired: false});
+                var errors = this.state.formErrors;
+                errors['individualname'] = '';
+                errors['individualorphanetid'] = '';
+                this.setState({formErrors: errors});
             }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
