@@ -335,14 +335,10 @@ var AddPmidModal = React.createClass({
     // Called when the modal form's cancel button is clicked. Just closes the modal like
     // nothing happened.
     cancelForm: function(e) {
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-
-        //only a mouse click on cancel button closes modal
-        //(do not let the enter key [which evaluates to 0 mouse
-        //clicks] be accepted to close modal)
-        if (e.type == 'click'){
-            this.props.closeModal();
-        }
+        // Changed modal cancel button from a form input to a html button
+        // as to avoid accepting enter/return key as a click event.
+        // Removed hack in this method.
+        this.props.closeModal();
     },
 
     render: function() {
@@ -354,7 +350,7 @@ var AddPmidModal = React.createClass({
                         labelClassName="control-label" groupClassName="form-group" required />
                 </div>
                 <div className='modal-footer'>
-                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="submit" inputClassName={this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ?
                         "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" />
                 </div>

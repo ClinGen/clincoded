@@ -178,14 +178,10 @@ var ProvisionalCuration = React.createClass({
     },
 
     cancelForm: function(e) {
-        // Don't run through HTML submit handler
-        e.preventDefault();
-        e.stopPropagation();
-
-        // click Cancel button will go back to view - current
-        if (e.type == 'click'){
-            window.history.go(-1);
-        }
+        // Changed modal cancel button from a form input to a html button
+        // as to avoid accepting enter/return key as a click event.
+        // Removed hack in this method.
+        window.history.go(-1);
     },
 
     render: function() {
@@ -533,7 +529,7 @@ var EditCurrent = function() {
                     </Panel>
                 </PanelGroup>
                 <div className='modal-footer'>
-                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                 </div>
             </Form>
@@ -1199,7 +1195,7 @@ var NewCalculation = function() {
                     </Panel>
                 </PanelGroup>
                 <div className='modal-footer'>
-                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                 </div>
             </Form>
