@@ -1000,7 +1000,7 @@ var NewCalculation = function() {
                                     </tr>
                                     <tr className="count-title-row">
                                         <td rowSpan="2" className="title area-bottom-cells most-left">Time (yrs)</td>
-                                        <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#10877; 2 pubs, then max score for time = 1)</td>
+                                        <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#8804; 2 pubs, then max score for time = 1)</td>
                                         <td>current yr</td>
                                         <td>1-3 yr</td>
                                         <td>&gt;3 yr</td>
@@ -1172,6 +1172,15 @@ var NewCalculation = function() {
                                     {this.state.autoClassification}
                                 </div>
                             </div>
+                            { userAssessments.segCntdct>0 || userAssessments.variantCntdct || userAssessments.expCntdct ?
+                                <div className="row">
+                                    <div className="col-sm-5">&nbsp;</div>
+                                    <div className="col-sm-7">
+                                        <strong style={{'color':'#f00'}}>Note: One or more pieces of evidence in this record was assessed as "Contradicts".</strong>
+                                    </div>
+                                </div>
+                             : null
+                            }
                             <br />
                             <Input type="select" ref="alteredClassification"
                                 label={<strong>Select Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}

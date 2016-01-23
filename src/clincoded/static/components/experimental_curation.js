@@ -2026,6 +2026,7 @@ var ExperimentalDataVariant = function() {
                         </p>
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                        {curator.renderMutalyzerLink()}
                     </div>
                 );
             })}
@@ -2047,7 +2048,7 @@ var LabelClinVarVariant = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when no ID available)</span>:</span>;
+        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar Variation ID is not available)</span>:</span>;
     }
 });
 

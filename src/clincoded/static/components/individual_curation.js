@@ -933,9 +933,12 @@ var IndividualName = function(displayNote) {
                 </p>
             </div>
             : null}
-            <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
-                error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <div className="clearfix">
+                <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
+                    error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field</p>
+            </div>
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one individual with IDENTICAL information, you can indicate this at the bottom of this form.</p>
             : null}
@@ -1258,6 +1261,7 @@ var IndividualVariantInfo = function() {
                                 </p>
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                {curator.renderMutalyzerLink()}
                                 {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
                                     <div className="col-sm-7 col-sm-offset-5">
                                         <p className="alert alert-warning">
@@ -1287,7 +1291,7 @@ var LabelClinVarVariant = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when no ID available)</span>:</span>;
+        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar Variation ID is not available)</span>:</span>;
     }
 });
 
