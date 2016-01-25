@@ -1818,7 +1818,6 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
     );
 };
 
-
 // Class for delete button (and associated modal) of Group, Family, Individual, and Experimental
 // Data objects. This class only renderes the button; please see DeleteButtonModal for bulk of
 // functionality
@@ -1863,7 +1862,7 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
                 </Modal></div>
                 }
                 {this.state.noticeVisible ? <span className="delete-notice pull-right">This item cannot be deleted because it has been assessed by another user.</span> : <span></span>}
-                </span>
+            </span>
         );
     }
 });
@@ -2114,3 +2113,191 @@ var DeleteButtonModal = React.createClass({
     }
 });
 
+// asdf
+var AddResourceId = module.exports.AddResourceId = React.createClass({
+    mixins: [ModalMixin],
+    propTypes: {
+        resourceType: React.PropTypes.string,
+        disabled: React.PropTypes.bool
+    },
+
+    getInitialState: function() {
+        return {
+            noticeVisible: false // True while form is submitting
+        };
+    },
+
+    showNotice: function() {
+        this.setState({noticeVisible: true});
+    },
+
+    hideNotice: function() {
+        this.setState({noticeVisible: false});
+    },
+
+    render: function() {
+        return (
+            <span>
+                <Modal title="Add Resource Id" modalClass="modal-info">
+                    <a className="btn btn-danger" modal={<AddResourceIdModal resourceType={this.props.resourceType} closeModal={this.closeModal} />}>
+                        Delete
+                    </a>
+                </Modal>
+            </span>
+        );
+    }
+});
+
+// asdf2
+var AddResourceIdModal = React.createClass({
+    mixins: [RestMixin, CuratorHistory],
+    propTypes: {
+        resourceType: React.PropTypes.string,
+        closeModal: React.PropTypes.func // Function to call to close the modal
+    },
+
+    getInitialState: function() {
+        return {
+            submitBusy: false // True while form is submitting
+        };
+    },
+
+    // function for looping through a parent item's list of child items
+    // of a specific type
+    recurseItemLoop: function(tempSubItem, depth, mode, type) {
+        var tempDisplayString;
+        var returnPayload = [];
+        if (tempSubItem) {
+            if (tempSubItem.length > 0) {
+                for (var i = 0; i < tempSubItem.length; i++) {
+                    if (mode == 'display') {
+                        // if the mode is 'display', generate the display string
+                        tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem[i]['@id']} onClick={this.linkout}>{tempSubItem[i]['@type'][0]} {tempSubItem[i].label}</a></span>;
+                        returnPayload.push(tempDisplayString);
+                    } else if (mode == 'id') {
+                        // if the mode is 'id', grab the @ids of the child items
+                        returnPayload.push(tempSubItem[i]['@id']);
+                    }
+                    // call recurseItem on child item
+                    returnPayload = returnPayload.concat(this.recurseItem(tempSubItem[i], depth + 1, mode));
+                }
+            } else {
+                if (mode == 'display') {
+                    // if childspace is empty, add a display line indicating the fact
+                    tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; no associated {type}</span>;
+                    returnPayload.push(tempDisplayString);
+                }
+            }
+        }
+        return returnPayload;
+    },
+
+    // parent function when deleting an item. Re-grabs the latest versions of the target and parent items,
+    // finds and deletes all children of the target item, deletes the target item, removes the target item's
+    // entry from the parent item, and saves the updated target item. Forwards user to curation central
+    // upon completion.
+    deleteItem: function(e) {
+        e.preventDefault(); e.stopPropagation();
+        this.setState({submitBusy: true});
+        var itemUuid = this.props.item['@id'];
+        var parentUuid = this.props.parent['@id'];
+        var deletedItemType, deletedItem, deletedParent;
+
+        this.getRestData(itemUuid, null, true).then(item => {
+            // get up-to-date target object, then get the promises for deleting it and
+            // all its children, along with the promises for any related history items
+            deletedItemType = item['@type'][0];
+            var deletePromises = this.recurseItem(item, 0, 'delete');
+            return Promise.all(deletePromises); // wait for ALL promises to resolve
+        }).then(rawData => {
+            // get up-to-date parent object; also bypass issue of certain certain embedded parent
+            // items in edit pages being un-flattenable
+            return this.getRestData(parentUuid, null, true).then(parent => {
+                // flatten parent object and remove link to deleted item as appropriate
+                deletedParent = flatten(parent);
+                if (parent['@type'][0] == 'annotation') {
+                    if (deletedItemType == 'group') {
+                        deletedParent.groups = _.without(deletedParent.groups, itemUuid);
+                    } else if (deletedItemType == 'family') {
+                        deletedParent.families = _.without(deletedParent.families, itemUuid);
+                    } else if (deletedItemType == 'individual') {
+                        deletedParent.individuals = _.without(deletedParent.individuals, itemUuid);
+                    } else if (deletedItemType == 'experimental') {
+                        deletedParent.experimentalData = _.without(deletedParent.experimentalData, itemUuid);
+                    }
+                } else {
+                    if (deletedItemType == 'family') {
+                        deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, itemUuid);
+                    } else if (deletedItemType == 'individual') {
+                        deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, itemUuid);
+                        if (parent['@type'][0] == 'family') {
+                            // Empty variants of parent object if target item is individual and parent is family
+                            deletedParent.segregation.variants = [];
+                        }
+                    }
+                }
+                // PUT updated parent object w/ removed link to deleted item
+                return this.putRestData(parentUuid, deletedParent).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
+            });
+        }).then(data => {
+            // forward user to curation central
+            window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
+        }).catch(function(e) {
+            console.log('DELETE ERROR: %o', e);
+        });
+    },
+
+    // Called when the modal form's cancel button is clicked. Just closes the modal like
+    // nothing happened.
+    cancelForm: function(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+
+        //only a mouse click on cancel button closes modal
+        //(do not let the enter key [which evaluates to 0 mouse
+        //clicks] be accepted to close modal)
+        if (e.detail >= 1){
+            this.props.closeModal();
+        }
+    },
+
+    // Called when user clicks a link in the delete confirmation modal to view another object.
+    // Allows for scrolling in subsequent pages, as the initial modal rendering disabled scrolling.
+    linkout: function(e) {
+        this.props.closeModal();
+    },
+
+    render: function() {
+        var tree;
+        var message;
+        // generate custom messages and generate display tree for group and family delete confirm modals.
+        // generic message for everything else.
+        if (this.props.item['@type'][0] == 'group') {
+            message = <p><strong>Warning</strong>: Deleting this Group will also delete any associated families and individuals (see any Families or Individuals associated with the Group under its name, bolded below).</p>;
+            tree = this.recurseItem(this.props.item, 0, 'display');
+        } else if (this.props.item['@type'][0] == 'family') {
+            message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
+            tree = this.recurseItem(this.props.item, 0, 'display');
+        }
+        return (
+            <div>
+                <div className="modal-body">
+                    {message}
+                    <p>Are you sure you want to delete this item?</p>
+                    {tree ?
+                    <div><strong>{this.props.item['@type'][0]} {this.props.item.label}</strong><br />
+                    {tree.map(function(treeItem, i) {
+                        return <span key={i}>&nbsp;&nbsp;{treeItem}<br /></span>;
+                    })}
+                    <br /></div>
+                    : null}
+                    </div>
+                <div className="modal-footer">
+                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-danger btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
+                </div>
+            </div>
+        );
+    }
+});
