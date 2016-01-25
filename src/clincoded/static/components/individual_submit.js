@@ -130,13 +130,13 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
             <div>
                 <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
                 <div className="container">
-                    {individual ?
-                        <h1>Individual Information: {individual.label} <a href={individual['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editIndividualLink} className="btn btn-info">Edit</a></h1>
-                    : null}
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
                             <PmidSummary article={annotation.article} displayJournal />
                         </div>
+                    : null}
+                    {individual ?
+                        <h1>Individual Information: {individual.label} <a href={individual['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editIndividualLink} className="btn btn-info">Edit</a></h1>
                     : null}
                     <div className="row">
                         <div className="col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
