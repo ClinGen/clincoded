@@ -131,19 +131,18 @@ var ExperimentalCuration = React.createClass({
 
     // Handle value changes in forms
     handleChange: function(ref, e) {
-        var clinvarid, othervariant;
+        var clinvarid, othervariant, user;
         if (ref === 'experimentalName' && this.refs[ref].getValue()) {
             this.setState({experimentalName: this.refs[ref].getValue()});
         } else if (ref === 'experimentalType') {
             var tempExperimentalType = this.refs[ref].getValue();
-            // set values for assessmentTracker
-            var user = this.props.session && this.props.session.user_properties;
-            var userAssessment;
-            if (this.state.experimental && this.state.experimental.assessments) {
-                userAssessment = Assessments.userAssessment(this.state.experimental.assessments, user && user.uuid);
+            // if assessmentTracker was set previously, reset its value
+            if (this.cv.assessmentTracker) {
+                // set values for assessmentTracker
+                user = this.props.session && this.props.session.user_properties;
+                this.cv.assessmentTracker.setCurrentVal(Assessments.DEFAULT_VALUE);
+                this.setAssessmentValue(this.cv.assessmentTracker, Assessments.DEFAULT_VALUE);
             }
-            // set assessmentTracker
-            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, tempExperimentalType);
             this.setState({
                 experimentalName: '',
                 experimentalType: tempExperimentalType,
@@ -171,6 +170,13 @@ var ExperimentalCuration = React.createClass({
         } else if (ref === 'experimentalSubtype') {
             var tempExperimentalSubtype = this.refs[ref].getValue();
             this.setState({experimentalSubtype: tempExperimentalSubtype});
+            // if assessmentTracker was set previously, reset its value
+            if (this.cv.assessmentTracker) {
+                // set values for assessmentTracker
+                user = this.props.session && this.props.session.user_properties;
+                this.cv.assessmentTracker.setCurrentVal(Assessments.DEFAULT_VALUE);
+                this.setAssessmentValue(this.cv.assessmentTracker, Assessments.DEFAULT_VALUE);
+            }
             // Reset values when changing between Subtypes
             if (this.refs['experimentalName']) {
                 this.refs['experimentalName'].resetValue();
