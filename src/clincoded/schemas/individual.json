@@ -237,6 +237,16 @@
                 "linkTo": "variant"
             }
         },
+        "genotype": {
+            "title": "Homozygous Recessive",
+            "type": "string",
+            "enum": [
+                "",
+                "Dominent",
+                "Homozygous Recessive",
+                "Heterozygous Recessive"
+            ]
+        },
         "proband": {
             "title": "Proband",
             "description": "Whether or not associated with a proband variant to a family",
