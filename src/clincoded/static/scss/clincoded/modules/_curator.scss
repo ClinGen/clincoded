@@ -129,7 +129,7 @@
     border-top: 1px solid #e0e0e0;
     border-right: 1px solid #e0e0e0;
     border-left: 1px solid #e0e0e0;
-    background-color: $color-neutral-bg;
+    background-color: #e0e0e0;
 }
 
 .pmid-selection-add-btn {
@@ -139,8 +139,8 @@
 .pmid-selection-list {
     max-height: 250px;
     overflow-y: auto;
-    background-color: #f9f9f9;
-    border: 1px solid #e0e0e0;
+    background-color: #f0f0f0;
+    border: 1px solid #dddddd;
 
     @media screen and (min-width: $screen-md-min) {
         max-height: 500px;
@@ -150,28 +150,27 @@
 .pmid-selection-list-item {
     margin: 10px;
     padding: 10px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid darken(#dddddd, 10%);
     cursor: pointer;
     background-color: #ffffff;
     @include border-radius(3px);
-    box-shadow: 0 2px #e6e6e6;
-    opacity: 0.6;
-    transition: opacity .25s ease-in-out;
-    -moz-transition: opacity .25s ease-in-out;
-    -webkit-transition: opacity .25s ease-in-out;
+    box-shadow: 0 2px #e0e0e0;
 
-    &:hover {
-        box-shadow: 0 0 6px lighten($color-trim, 15%);
-        opacity: 1;
+    div {
+        opacity: 0.5;
+        transition: opacity .25s ease-in-out;
+        -moz-transition: opacity .25s ease-in-out;
+        -webkit-transition: opacity .25s ease-in-out;
     }
 
     &.curr-pmid {
         box-shadow: 0 2px 0 1px lighten($color-trim, 25%);
         border: 1px solid $color-trim;
+    }
+
+    &:hover div,
+    &.curr-pmid div {
         opacity: 1;
-        //background-image: linear-gradient(to bottom, #f5fcff 0, #e1eff5 100%);
-        //background-repeat: repeat-x;
-        //background-color: #f5fcff;
     }
 }
 
@@ -183,15 +182,15 @@
     margin-top: 20px;
 }
 
-.curation-content .curr-pmid-overview {
-    .pmid-overview-abstract {
-        h4 {
-            border-bottom: 1px solid $color-trim;
-            color: $color-btn;
-            font-weight: 600;
-            font-size: 150%;
-            padding-bottom: 6px;
-        }
+.curation-content .col-md-6 {
+    padding: 0;
+
+    .curr-pmid-overview {
+        background-color: #ffffff;
+        border: 1px solid $color-trim;
+        box-shadow: 0 2px 0 1px lighten($color-trim, 25%);
+        @include border-radius(3px);
+        padding: 10px 15px;
     }
 }
 
