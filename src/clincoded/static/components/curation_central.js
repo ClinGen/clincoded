@@ -54,6 +54,13 @@ var CurationCentral = React.createClass({
             if (this.state.currGdm) {
                 window.history.replaceState(window.state, '', '/curation-central/?gdm=' + this.state.currGdm.uuid + '&pmid=' + pmid);
             }
+
+            // Focus the current PMID selection in left PMID column
+            var userPmidList = document.getElementById('user-pmid-list');
+            var selectedPmid = document.getElementById('selected-pmid');
+            if (selectedPmid && userPmidList.scrollHeight > userPmidList.clientHeight) {
+                userPmidList.scrollTop = userPmidList.scrollTop + selectedPmid.offsetTop - userPmidList.offsetTop - 10;
+            }
         }
     },
 
@@ -227,12 +234,13 @@ var PmidSelectionList = React.createClass({
                     </Modal>
                 </div>
                 {annotations ?
-                    <div className="pmid-selection-list">
+                    <div className="pmid-selection-list" id="user-pmid-list">
                         {annotations.map(annotation => {
                             var classList = 'pmid-selection-list-item' + (annotation.article.pmid === this.props.currPmid ? ' curr-pmid' : '');
+                            var elementId = (annotation.article.pmid === this.props.currPmid ? 'selected-pmid' : '');
 
                             return (
-                                <div key={annotation.article.pmid} className={classList} onClick={this.props.currPmidChange.bind(null, annotation.article.pmid)}>
+                                <div key={annotation.article.pmid} className={classList} id={elementId} onClick={this.props.currPmidChange.bind(null, annotation.article.pmid)}>
                                     <div className="pmid-selection-list-specs">
                                         <PmidSummary article={annotation.article} />
                                     </div>
