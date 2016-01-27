@@ -156,20 +156,22 @@ var FamilyCuration = React.createClass({
             this.setState({variantOption: currVariantOption});
 
             // if variant data entered, must enter proband individual name and orphanet
+            // First check if data entered in either ClinVar Variant ID or Other description at each variant
             var noVariantData = true;
             _.range(this.state.variantCount).map(i => {
                 if (this.refs['VARclinvarid' + i].getValue() || this.refs['VARothervariant' + i].getValue()) {
                     noVariantData = false;
                 }
             });
-            if (!noVariantData) {
-                this.setState({individualRequired: true});
-            } else {
+            // If not entered at all, proband individua is not required and must be no error messages at individual fields.
+            if (noVariantData) {
                 this.setState({individualRequired: false});
                 var errors = this.state.formErrors;
                 errors['individualname'] = '';
                 errors['individualorphanetid'] = '';
                 this.setState({formErrors: errors});
+            } else {
+                this.setState({individualRequired: true});
             }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
