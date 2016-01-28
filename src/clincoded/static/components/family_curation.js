@@ -113,8 +113,6 @@ var FamilyCuration = React.createClass({
     // Handle value changes in various form fields
     handleChange: function(ref, e) {
         var clinvarid, othervariant;
-        var vOption = this.state.variantOption;
-        var errors = this.state.formErrors;
 
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
             // Disable the Genotyping Method 2 if Genotyping Method 1 has no value
@@ -126,13 +124,36 @@ var FamilyCuration = React.createClass({
         } else if (ref === 'orphanetid') {
             this.setState({orpha: false});
         } else if (ref.substring(0, 3) === 'VAR') {
-            // get data entered field and set another field disabled
-            if (this.refs[ref].getValue()) {
-                vOption[parseInt(ref.substr(-1))] = ref.substr(3, 5); // 'clinv' or 'other'
-            } else {
-                vOption[parseInt(ref.substr(-1))] = 'none';
+            // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
+            // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
+            var lastVariantSuffix = (this.state.variantCount - 1) + '';
+            var refSuffix = ref.match(/\d+$/);
+            refSuffix = refSuffix && refSuffix[0];
+            if (refSuffix && (lastVariantSuffix === refSuffix)) {
+                // The changed item is in the last variant panel. If any fields in the last field have a value, disable
+                // the Add Another Variant button.
+                clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
+                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
+                this.setState({addVariantDisabled: !(clinvarid || othervariant)});
             }
-            this.setState({variantOption: vOption});
+
+            // Disable fields depending on what fields have values in them.
+            clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
+            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
+            var currVariantOption = this.state.variantOption;
+            if (othervariant) {
+                // Something entered in Other; clear the ClinVar ID and set the variantOption state to disable it.
+                this.refs['VARclinvarid' + refSuffix].resetValue();
+                currVariantOption[refSuffix] = VAR_OTHER;
+            } else if (clinvarid) {
+                // Something entered in ClinCar ID; clear the Other field and set the variantOption state to disable it.
+                this.refs['VARothervariant' + refSuffix].resetValue();
+                currVariantOption[refSuffix] = VAR_SPEC;
+            } else {
+                // Nothing entered anywhere; enable everything.
+                currVariantOption[refSuffix] = VAR_NONE;
+            }
+            this.setState({variantOption: currVariantOption});
 
             // if variant data entered, must enter proband individual name and orphanet
             // First check if data entered in either ClinVar Variant ID or Other description at each variant
@@ -145,7 +166,7 @@ var FamilyCuration = React.createClass({
             // If not entered at all, proband individua is not required and must be no error messages at individual fields.
             if (noVariantData) {
                 this.setState({individualRequired: false});
-                //errors = this.state.formErrors;
+                var errors = this.state.formErrors;
                 errors['individualname'] = '';
                 errors['individualorphanetid'] = '';
                 this.setState({formErrors: errors});
@@ -173,45 +194,6 @@ var FamilyCuration = React.createClass({
             if (this.state.segregationFilled !== filled) {
                 this.setState({segregationFilled: filled});
             }
-        } else if (ref === 'genotype') {
-            var vMax;
-
-            // get genotype value and set # of variant
-            if (this.refs[ref].getValue() === 'Compound Heterozygous') {
-                vMax = 2;
-            } else if (this.refs[ref].getValue() === 'Homozygous Recessive' || this.refs[ref].getValue() === 'Dominant') {
-                vMax = 1;
-            } else {
-                vMax = 0;
-            }
-
-            // set variant fields and clear error message
-            var diff = Math.abs(vOption.length - vMax);
-            _.range(diff).map(i => {
-                if (vMax < vOption.length) {
-                    // deleting
-                    errors['VARclinvarid' + (vOption.length-1).toString()] = '';
-                    errors['VARothervariant' + (vOption.length-1).toString()] = '';
-                    vOption.pop();
-                } else if (vMax > vOption.length) {
-                    // adding
-                    vOption.push('none');
-                }
-            });
-
-            // set proband fields and clear error message
-            var vDataEntered = false;
-            _.range(vOption.length).map(i => {
-                if (vOption[i] !== 'none') {
-                    vDataEntered = true;
-                }
-            });
-            if (!vDataEntered) {
-                errors['individualname'] = '';
-                errors['individualorphanetid'] = '';
-            }
-
-            this.setState({variantCount: vMax, variantOption: vOption, individualRequired: vDataEntered, formErrors: errors});
         }
     },
 
@@ -1530,15 +1512,7 @@ var FamilySegregation = function() {
 var FamilyVariant = function() {
     var family = this.state.family;
     var segregation = family && family.segregation ? family.segregation : null;
-    var variants = segregation && segregation.variants ? segregation.variants : [];
-    var genotype;
-    if (family && family.individualIncluded && family.individualIncluded.length) {
-        _.range(family.individualIncluded.length).map(i => {
-            if (family.individualIncluded[i].proband) {
-                genotype = family.individualIncluded[i].genotype;
-            }
-        });
-    }
+    var variants = segregation && segregation.variants;
 
     return (
         <div className="row">
@@ -1554,24 +1528,6 @@ var FamilyVariant = function() {
                     </p>
                 </div>
             : null}
-            <div className="variant-panel">
-                <div className="col-sm-7 col-sm-offset-5">
-                    <p className="alert alert-warning">
-                        Please select genotype condition. If select Heterozygous Recessive, you must enter 2 variants believed to be causative for the disease in order
-                        that each may be associated with the Individual and assessed. Additionally, each variant must be assessed as supports for the Individual to be counted.
-                    </p>
-                </div>
-                <div className="row">
-                    <Input type="select" ref="genotype" label="Genotype:" defaultValue="none" value={genotype ? genotype : 'none'}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
-                        <option value="none">No Selection</option>
-                        <option disabled="disabled"></option>
-                        <option>Dominant</option>
-                        <option>Homozygous Recessive</option>
-                        <option>Compound Heterozygous</option>
-                    </Input>
-                </div>
-            </div>
             {_.range(this.state.variantCount).map(i => {
                 var variant;
 
@@ -1589,27 +1545,14 @@ var FamilyVariant = function() {
                                 </p>
                             </div>
                         </div>
-                        {this.state.variantOption[i] !== 'other' ?
-                            <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId}
-                                placeholder="e.g. 177676" handleChange={this.handleChange} error={this.getFormError('VARclinvarid' + i)}
-                                clearError={this.clrMultiFormErrors.bind(null, ['VARclinvarid' + i, 'VARothervariant' + i])} labelClassName="col-sm-5 control-label"
-                                wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                        :
-                            <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId}
-                                placeholder="e.g. 177676" handleChange={this.handleChange} labelClassName="col-sm-5 control-label"
-                                wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" inputDisabled="disabled" />
-                        }
+                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" inputDisabled={this.state.variantOption[i] === VAR_OTHER}
+                            error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)} handleChange={this.handleChange}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                         <p className="col-sm-7 col-sm-offset-5 input-note-below">
                             The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
                         </p>
-                        {this.state.variantOption[i] !== 'clinv' ?
-                            <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange}
-                                error={this.getFormError('VARothervariant' + i)} clearError={this.clrMultiFormErrors.bind(null, ['VARclinvarid' + i, 'VARothervariant' + i])}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-                        :
-                            <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled="disabled" />
-                        }
+                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
+                            handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                         {curator.renderMutalyzerLink()}
                     </div>
                 );
@@ -1638,6 +1581,21 @@ var FamilyVariant = function() {
                     }
                 </div>
             : null }
+            {this.state.variantCount < MAX_VARIANTS ?
+                <div className="row">
+                    <div className="col-sm-7 col-sm-offset-5 clearfix">
+                        {this.state.variantCount ?
+                            <p className="alert alert-warning">
+                                For a recessive condition, you must enter both variants believed to be causative for the disease in order that
+                                each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
+                                variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
+                            </p>
+                        : null}
+                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Individual" : "Add variant associated with Individual"}
+                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                    </div>
+                </div>
+            : null}
         </div>
     );
 };
