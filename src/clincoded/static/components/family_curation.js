@@ -1658,7 +1658,6 @@ var FamilyViewer = React.createClass({
     // Handle the assessment submit button
     assessmentSubmit: function(e) {
         var updatedFamily;
-
         // GET the family object to have the most up-to-date version
         this.getRestData('/families/' + this.props.context.uuid).then(data => {
             this.setState({submitBusy: true});
@@ -1711,6 +1710,11 @@ var FamilyViewer = React.createClass({
 
             this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
+        }).then(data => {
+            var tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
+            var tempGdm = tempGdmPmid[0];
+            var tempPmid = tempGdmPmid[1];
+            window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
         }).catch(function(e) {
             console.log('FAMILY VIEW UPDATE ERROR=: %o', e);
         });
@@ -1782,7 +1786,7 @@ var FamilyViewer = React.createClass({
 
         return (
             <div>
-                <ViewRecordHeader obj={family} />
+                <ViewRecordHeader gdm={tempGdm} pmid={tempPmid} />
                 <div className="container">
                     <div className="row curation-content-viewer">
                         <div className="viewer-titles">

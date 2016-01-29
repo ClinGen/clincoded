@@ -819,7 +819,7 @@ var GroupViewer = React.createClass({
 
         return (
             <div>
-                <ViewRecordHeader obj={context} />
+                <ViewRecordHeader gdm={tempGdm} pmid={tempPmid} />
                 <div className="container">
                     <div className="row curation-content-viewer">
                         <div className="viewer-titles">

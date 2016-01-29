@@ -2127,6 +2127,11 @@ var ExperimentalViewer = React.createClass({
 
             this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
+        }).then(data => {
+            var tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
+            var tempGdm = tempGdmPmid[0];
+            var tempPmid = tempGdmPmid[1];
+            window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
         }).catch(function(e) {
             console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);
         });
@@ -2190,7 +2195,7 @@ var ExperimentalViewer = React.createClass({
 
         return (
             <div>
-                <ViewRecordHeader obj={experimental} />
+                <ViewRecordHeader gdm={tempGdm} pmid={tempPmid} />
                 <div className="container">
                     <div className="row curation-content-viewer">
                         <div className="viewer-titles">
