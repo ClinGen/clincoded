@@ -517,7 +517,7 @@ var GroupCuration = React.createClass({
                             <div className="viewer-titles">
                                 <h1>{(group ? 'Edit' : 'Curate') + ' Group Information'}</h1>
                                 <h2>
-                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}>{gdm.gene.symbol}–{gdm.disease.term}–{gdm.modeInheritance} <i className="icon icon-briefcase"></i></a> : null}
+                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     <span> // {this.state.groupName ? <span> Group {this.state.groupName}</span> : <span className="no-entry">No entry</span>}</span>
                                 </h2>
                             </div>
@@ -813,6 +813,10 @@ var GroupViewer = React.createClass({
         var context = this.props.context;
         var method = context.method;
 
+        var tempGdmPmid = curator.findGdmPmidFromObj(context);
+        var tempGdm = tempGdmPmid[0];
+        var tempPmid = tempGdmPmid[1];
+
         return (
             <div>
                 <ViewRecordHeader obj={context} />
@@ -820,6 +824,10 @@ var GroupViewer = React.createClass({
                     <div className="row curation-content-viewer">
                         <div className="viewer-titles">
                             <h1>View Group: {context.label}</h1>
+                            <h2>
+                                {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
+                                <span> // Group {context.label}</span>
+                            </h2>
                         </div>
                         <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
                             <dl className="dl-horizontal">

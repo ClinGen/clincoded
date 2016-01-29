@@ -116,7 +116,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                 <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
                 <div className="container">
                     {group ?
-                        <h1>Group Information: {group.label} <a href={group['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editGroupLink} className="btn btn-info">Edit</a></h1>
+                        <h1>Group Information: {group.label} <a href={editGroupLink} className="btn btn-info">Edit</a></h1>
                     : null}
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
