@@ -1263,7 +1263,7 @@ var FamilyCommonDiseases = function() {
     }
 
     // Make a list of diseases from the group, either from the given group,
-    // or the family if we're editing one that has associated groups.
+    // or the family if we're editing one that has associated groups.renderPhenotype
     if (group) {
         // We have a group, so get the disease array from it.
         associatedGroups = [group];
@@ -1291,7 +1291,7 @@ var FamilyCommonDiseases = function() {
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={family && family.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-            <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Group"
+            <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy all Phenotype(s) from Associated Group"
                 clickHandler={this.handleClick.bind(this, 'group', 'phenotype')} />
             : null
             }
@@ -1323,7 +1323,7 @@ var LabelHpoId = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                 <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                <span>(<span style={{fontWeight: 'normal'}}><a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s)</span>)</span>:
             </span>
         );
     }
