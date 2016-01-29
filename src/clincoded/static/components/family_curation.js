@@ -1123,7 +1123,7 @@ var FamilyCuration = React.createClass({
                             <div className="viewer-titles">
                                 <h1>{(family ? 'Edit' : 'Curate') + ' Family Information'}</h1>
                                 <h2>
-                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}>{gdm.gene.symbol}–{gdm.disease.term}–{gdm.modeInheritance} <i className="icon icon-briefcase"></i></a> : null}
+                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     {groups && groups.length ?
                                         <span> // Group {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
                                     : null}
@@ -1773,6 +1773,10 @@ var FamilyViewer = React.createClass({
         // See if the segregation contains anything.
         var haveSegregation = segregationExists(segregation);
 
+        var tempGdmPmid = curator.findGdmPmidFromObj(family);
+        var tempGdm = tempGdmPmid[0];
+        var tempPmid = tempGdmPmid[1];
+
         return (
             <div>
                 <ViewRecordHeader obj={family} />
@@ -1780,14 +1784,13 @@ var FamilyViewer = React.createClass({
                     <div className="row curation-content-viewer">
                         <div className="viewer-titles">
                             <h1>View Family: {family.label}</h1>
-                            {groups && groups.length ?
-                                <h2>
-                                    Group association:&nbsp;
-                                    {groups.map(function(group, i) {
-                                        return <span key={i}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>;
-                                    })}
-                                </h2>
-                            : null}
+                            <h2>
+                                {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
+                                {groups && groups.length ?
+                                    <span> // Group {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                : null}
+                                <span> // Family {family.label}</span>
+                            </h2>
                         </div>
                         <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
                             <dl className="dl-horizontal">

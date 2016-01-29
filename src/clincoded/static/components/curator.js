@@ -162,11 +162,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <div>
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
-                                        {this.props.linkGdm && pmid ?
-                                        <span> <a href={"/curation-central/?gdm=" + gdm.uuid + "&pmid=" + pmid}>
-                                            <i className="icon icon-briefcase"></i>
-                                        </a></span>
-                                        : null}
+                                        <span>&nbsp;
+                                            {this.props.linkGdm && pmid ?
+                                                <a href={"/curation-central/?gdm=" + gdm.uuid + "&pmid=" + pmid}><i className="icon icon-briefcase"></i></a>
+                                                : <i className="icon icon-briefcase"></i>
+                                            }
+                                        </span>
                                     </h1>
                                     <h2>{mode}</h2>
                                 </span>
@@ -241,39 +242,24 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 // Curation data header for Gene:Disease
 var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
     propTypes: {
-        obj: React.PropTypes.object
+        gdm: React.PropTypes.object,
+        pmid: React.PropTypes.string
     },
     render: function() {
-        var tempGdm, tempPmid;
-        if (this.props.obj.associatedAnnotations && this.props.obj.associatedAnnotations.length > 0) {
-            tempGdm = this.props.obj.associatedAnnotations[0].associatedGdm[0];
-            tempPmid = this.props.obj.associatedAnnotations[0].article.pmid;
-        } else if (this.props.obj.associatedGroups && this.props.obj.associatedGroups.length > 0) {
-            tempGdm = this.props.obj.associatedGroups[0].associatedAnnotations[0].associatedGdm[0];
-            tempPmid = this.props.obj.associatedGroups[0].associatedAnnotations[0].article.pmid;
-        } else if (this.props.obj.associatedFamilies && this.props.obj.associatedFamilies.length > 0) {
-            if (this.props.obj.associatedFamilies[0].associatedAnnotations && this.props.obj.associatedFamilies[0].associatedAnnotations.length > 0) {
-                tempGdm = this.props.obj.associatedFamilies[0].associatedAnnotations[0].associatedGdm[0];
-                tempPmid = this.props.obj.associatedFamilies[0].associatedAnnotations[0].article.pmid;
-            } else if (this.props.obj.associatedFamilies[0].associatedGroups && this.props.obj.associatedFamilies[0].associatedGroups.length > 0) {
-                tempGdm = this.props.obj.associatedFamilies[0].associatedGroups[0].associatedAnnotations[0].associatedGdm[0];
-                tempPmid = this.props.obj.associatedFamilies[0].associatedGroups[0].associatedAnnotations[0].article.pmid;
-            }
-        }
         return (
             <div>
-            {tempGdm ?
+            {this.props.gdm ?
                 <div className="curation-data-title">
                     <div className="container">
                         <div>
-                            <h1>{tempGdm.gene.symbol} – {tempGdm.disease.term}
-                                {tempGdm ?
-                                <span> <a href={"/curation-central/?gdm=" + tempGdm.uuid + "&pmid=" + tempPmid}>
+                            <h1>{this.props.gdm.gene.symbol} – {this.props.gdm.disease.term}
+                                {this.props.gdm ?
+                                <span> <a href={"/curation-central/?gdm=" + this.props.gdm.uuid + "&pmid=" + this.props.pmid}>
                                     <i className="icon icon-briefcase"></i>
                                 </a></span>
                                 : null}
                             </h1>
-                            <h2>{tempGdm.modeInheritance}</h2>
+                            <h2>{this.props.gdm.modeInheritance}</h2>
                         </div>
                     </div>
                 </div>
@@ -282,6 +268,26 @@ var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
         );
     }
 });
+
+var findGdmPmidFromObj = module.exports.findGdmPmidFromObj = function(obj) {
+    var tempGdm, tempPmid;
+    if (obj.associatedAnnotations && obj.associatedAnnotations.length > 0) {
+        tempGdm = obj.associatedAnnotations[0].associatedGdm[0];
+        tempPmid = obj.associatedAnnotations[0].article.pmid;
+    } else if (obj.associatedGroups && obj.associatedGroups.length > 0) {
+        tempGdm = obj.associatedGroups[0].associatedAnnotations[0].associatedGdm[0];
+        tempPmid = obj.associatedGroups[0].associatedAnnotations[0].article.pmid;
+    } else if (obj.associatedFamilies && obj.associatedFamilies.length > 0) {
+        if (obj.associatedFamilies[0].associatedAnnotations && obj.associatedFamilies[0].associatedAnnotations.length > 0) {
+            tempGdm = obj.associatedFamilies[0].associatedAnnotations[0].associatedGdm[0];
+            tempPmid = obj.associatedFamilies[0].associatedAnnotations[0].article.pmid;
+        } else if (obj.associatedFamilies[0].associatedGroups && obj.associatedFamilies[0].associatedGroups.length > 0) {
+            tempGdm = obj.associatedFamilies[0].associatedGroups[0].associatedAnnotations[0].associatedGdm[0];
+            tempPmid = obj.associatedFamilies[0].associatedGroups[0].associatedAnnotations[0].article.pmid;
+        }
+    }
+    return [tempGdm, tempPmid];
+};
 
 // function to collect variants assessed support by login user
 var getUserPathogenicity = function(gdm, session) {
@@ -615,7 +621,7 @@ var renderGroup = function(group, gdm, annotation, curatorMatch) {
                 : null}
                 <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            <a href={'/group/' + group.uuid} target="_blank" title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
+            <a href={'/group/' + group.uuid} title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
             {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
             {curatorMatch ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
         </div>
@@ -648,7 +654,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                         return (
                             <span key={i}>
                                 {i > 0 ? ', ' : ''}
-                                <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                                <a href={group['@id']} title="View group in a new tab">{group.label}</a>
                             </span>
                         );
                     })}
@@ -670,8 +676,8 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                 </div>
             : null}
             {familyAssessable ?
-                <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} target="_blank" title="View/Assess family in a new tab">View/Assess</a>
-                : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} target="_blank" title="View family in a new tab">View</a>}
+                <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View/Assess family in a new tab">View/Assess</a>
+                : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View family in a new tab">View</a>}
             {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
             {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
         </div>
@@ -698,7 +704,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                         return (
                             <span key={group.uuid}>
                                 {i++ > 0 ? ', ' : ''}
-                                <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                                <a href={group['@id']} title="View group in a new tab">{group.label}</a>
                             </span>
                         );
                     })}
@@ -709,13 +715,13 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                                     return (
                                         <span key={group.uuid}>
                                             {i++ > 0 ? ', ' : ''}
-                                            <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                                            <a href={group['@id']} title="View group in a new tab">{group.label}</a>
                                         </span>
                                     );
                                 })}
                                 <span key={family.uuid}>
                                     {i++ > 0 ? ', ' : ''}
-                                    <a href={family['@id'] + '?gdm=' + gdm.uuid} target="_blank" title="View family in a new tab">{family.label}</a>
+                                    <a href={family['@id'] + '?gdm=' + gdm.uuid} title="View family in a new tab">{family.label}</a>
                                 </span>
                             </span>
                         );
@@ -737,7 +743,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                     })}
                 </div>
             : null}
-            <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>
+            <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
         </div>
     );
@@ -785,7 +791,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                     })}
                 </div>
             : null}
-            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} target="_blank" title="View/Assess experimental data in a new tab">View/Assess</a>
+            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Assess</a>
             {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
         </div>
     );
@@ -828,7 +834,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
                         return (
                             <span key={i}>
                                 {i > 0 ? ', ' : ''}
-                                <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>
+                                <a href={association['@id']} title={'View ' + associationType + ' in a new tab'}>{association.label}</a>
                                 {probandIndividual ? <i className="icon icon-proband"></i> : null}
                             </span>
                         );

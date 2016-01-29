@@ -837,7 +837,7 @@ var IndividualCuration = React.createClass({
                             <div className="viewer-titles">
                                 <h1>{individual ? 'Edit' : 'Curate'} Individual Information</h1>
                                 <h2>
-                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}>{gdm.gene.symbol}–{gdm.disease.term}–{gdm.modeInheritance} <i className="icon icon-briefcase"></i></a> : null}
+                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     {groupTitles.length ?
                                         <span> // Group {groupTitles.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
                                     : null}
@@ -1369,28 +1369,26 @@ var IndividualViewer = React.createClass({
         });
         groupRenders = groupRenders.concat(directGroupRenders);
 
+        var tempGdmPmid = curator.findGdmPmidFromObj(individual);
+        var tempGdm = tempGdmPmid[0];
+        var tempPmid = tempGdmPmid[1];
+
         return (
             <div>
-                <ViewRecordHeader obj={individual} />
+                <ViewRecordHeader gdm={tempGdm} pmid={tempPmid} />
                 <div className="container">
                     <div className="row curation-content-viewer">
                         <div className="viewer-titles">
                             <h1>View Individual: {individual.label}{probandLabel}</h1>
                             <h2>
-                                {familyRenders.length ?
-                                    <div>
-                                        <span>Family association: </span>
-                                        {familyRenders}
-                                    </div>
-                                : null}
-                            </h2>
-                            <h2>
+                                {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempGdm : '')}><i className="icon icon-briefcase"></i></a> : null}
                                 {groupRenders.length ?
-                                    <div>
-                                        <span>Group association: </span>
-                                        {groupRenders}
-                                    </div>
+                                    <span> // Group {groupRenders}</span>
                                 : null}
+                                {familyRenders.length ?
+                                    <span> // Family {familyRenders}</span>
+                                : null}
+                                <span> // Individual {individual.label}</span>
                             </h2>
                         </div>
                         <Panel title={<LabelPanelTitleView individual={individual} labelText="Disease & Phenotype(s)" />} panelClassName="panel-data">

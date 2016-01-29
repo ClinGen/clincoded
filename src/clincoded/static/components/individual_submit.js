@@ -131,7 +131,7 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
                 <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
                 <div className="container">
                     {individual ?
-                        <h1>Individual Information: {individual.label} <a href={individual['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editIndividualLink} className="btn btn-info">Edit</a></h1>
+                        <h1>Individual Information: {individual.label} <a href={editIndividualLink} className="btn btn-info">Edit/Assess</a></h1>
                     : null}
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
