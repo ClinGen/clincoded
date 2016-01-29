@@ -2139,9 +2139,9 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
     render: function() {
         return (
             <span>
-                <Modal title="Add Resource Id" modalClass="modal-info">
-                    <a className="btn btn-danger" modal={<AddResourceIdModal resourceType={this.props.resourceType} closeModal={this.closeModal} />}>
-                        Delete
+                <Modal title="Add Resource Id" modalClass="modal-default">
+                    <a modal={<AddResourceIdModal resourceType={this.props.resourceType} closeModal={this.closeModal} />}>
+                        Add Resource ID
                     </a>
                 </Modal>
             </span>
@@ -2270,33 +2270,14 @@ var AddResourceIdModal = React.createClass({
     },
 
     render: function() {
-        var tree;
-        var message;
-        // generate custom messages and generate display tree for group and family delete confirm modals.
-        // generic message for everything else.
-        if (this.props.item['@type'][0] == 'group') {
-            message = <p><strong>Warning</strong>: Deleting this Group will also delete any associated families and individuals (see any Families or Individuals associated with the Group under its name, bolded below).</p>;
-            tree = this.recurseItem(this.props.item, 0, 'display');
-        } else if (this.props.item['@type'][0] == 'family') {
-            message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
-            tree = this.recurseItem(this.props.item, 0, 'display');
-        }
         return (
             <div>
                 <div className="modal-body">
-                    {message}
-                    <p>Are you sure you want to delete this item?</p>
-                    {tree ?
-                    <div><strong>{this.props.item['@type'][0]} {this.props.item.label}</strong><br />
-                    {tree.map(function(treeItem, i) {
-                        return <span key={i}>&nbsp;&nbsp;{treeItem}<br /></span>;
-                    })}
-                    <br /></div>
-                    : null}
+                    Add thing
                     </div>
                 <div className="modal-footer">
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                    <Input type="button" inputClassName="btn-danger btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
+                    <Input type="button" inputClassName="btn-primary btn-inline-spacer" clickHandler={this.deleteItem} title="Add Resource ID" submitBusy={this.state.submitBusy} />
                 </div>
             </div>
         );

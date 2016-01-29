@@ -27,6 +27,7 @@ var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
+var AddResourceId = curator.AddResourceId;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
@@ -1258,6 +1259,7 @@ var IndividualVariantInfo = function() {
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                                 <p className="col-sm-7 col-sm-offset-5 input-note-below">
                                     The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
+                                    <AddResourceId resourceType="clinvar" />
                                 </p>
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
