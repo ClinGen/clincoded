@@ -33,6 +33,11 @@
             "type": "string",
             "default": ""
         },
+        "clinvarVariantTitle": {
+            "title": "ClinVar Variant Title",
+            "description": "Title of ClinVar variant",
+            "type": "string"
+        },
         "hgvsNames": {
             "title": "HGVS Names",
             "description": "List of HGVS names of the variant",
