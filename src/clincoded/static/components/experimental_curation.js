@@ -1204,7 +1204,7 @@ var ExperimentalCuration = React.createClass({
                             <div className="viewer-titles">
                                 <h1>{(experimental ? 'Edit' : 'Curate') + ' Experimental Data Information'}</h1>
                                 <h2>
-                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}>{gdm.gene.symbol}–{gdm.disease.term}–{gdm.modeInheritance} <i className="icon icon-briefcase"></i></a> : null}
+                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     <span> // {this.state.experimentalName ? <span> Experiment {this.state.experimentalName}</span> : <span className="no-entry">No entry</span>} {this.state.experimentalType && this.state.experimentalType != 'none' ? <span>({this.state.experimentalType})</span> : null}</span>
                                 </h2>
                             </div>
@@ -2184,15 +2184,21 @@ var ExperimentalViewer = React.createClass({
             }
         }
 
+        var tempGdmPmid = curator.findGdmPmidFromObj(experimental);
+        var tempGdm = tempGdmPmid[0];
+        var tempPmid = tempGdmPmid[1];
+
         return (
             <div>
                 <ViewRecordHeader obj={experimental} />
                 <div className="container">
                     <div className="row curation-content-viewer">
                         <div className="viewer-titles">
-                            <h1>View Experimental Data</h1>
-                            <h3>{experimental.evidenceType}</h3>
-                            <h4>{experimental.label}</h4>
+                            <h1>View Experimental Data {experimental.label}</h1>
+                            <h2>
+                                {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
+                                <span> // Experimental Data {experimental.label} ({experimental.evidenceType})</span>
+                            </h2>
                         </div>
 
                         {experimental.evidenceType == 'Biochemical Function' ?

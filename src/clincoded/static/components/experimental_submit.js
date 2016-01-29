@@ -108,7 +108,7 @@ var ExperimentalSubmit = React.createClass({
                 <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
                 <div className="container">
                     {experimental ?
-                        <h1>{experimental.evidenceType}<br />Experimental Data Information: {experimental.label} <a href={experimental['@id'] + '?gdm=' + gdm.uuid} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editExperimentalLink} className="btn btn-info">Edit</a></h1>
+                        <h1>{experimental.evidenceType}<br />Experimental Data Information: {experimental.label} <a href={editExperimentalLink} className="btn btn-info">Edit/Assess</a></h1>
                     : null}
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
