@@ -1819,11 +1819,15 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
 };
 
 // Given an array of group or families in 'objList', render a list of HPO IDs and/or Phenotype free text in those groups and familes.
-var renderPhenotype = module.exports.renderPhenotype = function(objList, title) {
+var renderPhenotype = module.exports.renderPhenotype = function(objList, title, type) {
+    if (typeof type === 'undefined') {
+        type = '';
+    }
+
     return (
         <div>
-            <div className="col-sm-5">&nbsp;</div>
-            { title === 'Experimental' ?
+            { type === 'hpo' || type === '' ? <div className="col-sm-5">&nbsp;</div> : null}
+            { title === 'Experimental' && (type === 'hpo' || type === '') ?
                 <div className="col-sm-7 alert alert-warning">
                     <p style={{'margin-bottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) <strong>(required)</strong> using the Human Phenotype Ontology (HPO)
@@ -1832,7 +1836,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
                     </p>
                 </div>
             : null }
-            { title === 'Family' ?
+            { title === 'Family' && (type === 'hpo' || type === '') ?
                 <div className="col-sm-7">
                     <p style={{'margin-bottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) of the Family using the Human Phenotype Ontology (HPO)
@@ -1841,7 +1845,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
                     </p>
                 </div>
             : null}
-            { title === 'Individual' ?
+            { title === 'Individual' && (type === 'hpo' || type === '') ?
                 <div className="col-sm-7">
                     <p style={{'margin-bottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) of the Individual using the Human Phenotype Ontology (HPO)
@@ -1856,23 +1860,26 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
                         return (
                             <div key={obj.uuid} className="form-group">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Phenotype(s) Associated with {title}:</strong>
+                                    <strong className="pull-right">Phenotype(s) Associated with {title}
+                                    {type === 'hpo' ? <span style={{fontWeight: 'normal'}}> (<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span> : null}
+                                    {type === 'ft' ? <span style={{fontWeight: 'normal'}}> (free text)</span> : null}
+                                    :</strong>
                                 </div>
                                 <div className="col-sm-7">
-                                    { (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length > 0) ?
+                                    { (type === 'hpo' || type === '') && (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length > 0) ?
                                         obj.hpoIdInDiagnosis.map(function(hpoid, i) {
                                             return (
                                                 <span>
                                                     {hpoid}
                                                     {i < obj.hpoIdInDiagnosis.length-1 ? ', ' : ''}
-                                                    {i === obj.hpoIdInDiagnosis.length-1 && obj.termsInDiagnosis ? '; ' : null}
+                                                    {i === obj.hpoIdInDiagnosis.length-1 && obj.termsInDiagnosis && type === '' ? '; ' : null}
                                                 </span>
                                             );
                                         })
                                         : null
                                     }
-                                    { obj.termsInDiagnosis ?
-                                        <span>View <a href={obj['@id']} target='_blank'>{obj.label}</a> for phenotype free text.</span>
+                                    { type === 'ft' && obj.termsInDiagnosis ?
+                                        <span>{obj.termsInDiagnosis}</span>
                                         :
                                         null
                                     }
