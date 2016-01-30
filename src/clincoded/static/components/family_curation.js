@@ -112,7 +112,7 @@ var FamilyCuration = React.createClass({
 
     // Handle value changes in various form fields
     handleChange: function(ref, e) {
-        var clinvarid, othervariant;
+        var clinvarid, othervariant, noVariantData;
         var vOption = this.state.variantOption;
         var errors = this.state.formErrors;
 
@@ -134,24 +134,27 @@ var FamilyCuration = React.createClass({
             }
             this.setState({variantOption: vOption});
 
-            // if variant data entered, must enter proband individual name and orphanet
-            // First check if data entered in either ClinVar Variant ID or Other description at each variant
-            var noVariantData = true;
-            _.range(this.state.variantCount).map(i => {
-                if (this.refs['VARclinvarid' + i].getValue() || this.refs['VARothervariant' + i].getValue()) {
-                    noVariantData = false;
-                }
-            });
-            // If not entered at all, proband individua is not required and must be no error messages at individual fields.
-            if (noVariantData) {
-                this.setState({individualRequired: false});
-                //errors = this.state.formErrors;
-                errors['individualname'] = '';
-                errors['individualorphanetid'] = '';
-                this.setState({formErrors: errors});
+            // if data entered at each variant, display proband fields
+            noVariantData = false;
+            if (vOption.length === 0) {
+                noVariantData = true;
             } else {
-                this.setState({individualRequired: true});
+                vOption.forEach(option => {
+                    if (option === 'none') {
+                        noVariantData = true;
+                    }
+                });
             }
+            // no variant data entered, clear error message at proband fields if existing
+            if (noVariantData) {
+                if (errors['individualname'] !== '') {
+                    errors['individualname'] = '';
+                }
+                if (errors['individualorphanetid'] !== '') {
+                    errors['individualorphanetid'] = '';
+                }
+            }
+            this.setState({individualRequired: !noVariantData, formErrors: errors});
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
             var value = this.refs[ref].getValue();
@@ -185,37 +188,53 @@ var FamilyCuration = React.createClass({
                 vMax = 0;
             }
 
-            // set variant fields and clear error message
             var diff = vMax - vOption.length;
             _.range(Math.abs(diff)).map(i => {
+                // Case deleting variant
                 if (diff < 0) {
-                    // deleting
+                    // clean error messages
                     if (errors['VARclinvarid' + (vOption.length-1).toString()] !== '') {
                         errors['VARclinvarid' + (vOption.length-1).toString()] = '';
                     }
                     if (errors['VARothervariant' + (vOption.length-1).toString()] !== '') {
                         errors['VARothervariant' + (vOption.length-1).toString()] = '';
                     }
+                    // each time removing variant, alwasys remove the last one.
                     vOption.pop();
-                } else if (diff > 0) {
-                    // adding
-                    vOption.push('none');
+                }
+                // Case adding variant
+                else if (diff > 0) {
+                    var variants = this.state.family && this.state.family.segregation && this.state.family.segregation.variants ?
+                        this.state.family.segregation.variants : null;
+                    // set fields (enable or disable) for each new variant, based on existing data
+                    if (variants && variants[vOption.length] && variants[vOption.length].clinvarVariantId) {
+                        vOption.push('clinv');
+                    } else if (variants && variants[vOption.length] && variants[vOption.length].otherDescription) {
+                        vOption.push('other');
+                    } else {
+                        vOption.push('none');
+                    }
                 }
             });
-
-            // set proband fields and clear error message
-            var vDataEntered = false;
-            _.range(vOption.length).map(i => {
-                if (vOption[i] !== 'none') {
-                    vDataEntered = true;
-                }
-            });
-            if (!vDataEntered) {
-                errors['individualname'] = '';
-                errors['individualorphanetid'] = '';
+            noVariantData = false;
+            if (vOption.length === 0) {
+                noVariantData = true;
+            } else {
+                vOption.forEach(option => {
+                    if (option === 'none') {
+                        noVariantData = true;
+                    }
+                });
             }
-
-            this.setState({variantCount: vMax, variantOption: vOption, individualRequired: vDataEntered, formErrors: errors});
+            if (noVariantData) {
+                if (errors['individualname'] !== '') {
+                    errors['individualname'] = '';
+                }
+                if (errors['individualorphanetid'] !== '') {
+                    errors['individualorphanetid'] = '';
+                }
+            }
+            this.setState({variantCount: vMax, variantOption: vOption, individualRequired: !noVariantData, formErrors: errors});
         }
     },
 
@@ -755,6 +774,7 @@ var FamilyCuration = React.createClass({
                     return Promise.resolve(null);
                 }).then(data => {
                     var label, diseases;
+                    var genotype = this.getFormValue('genotype');
 
                     // If we're editing a family, see if we need to update it and its proband individual
                     if (currFamily) {
@@ -765,7 +785,7 @@ var FamilyCuration = React.createClass({
 
                         // If the family has a proband, update it to the current variant list, and then immediately on to creating a family.
                         if (this.state.probandIndividual) {
-                            return updateProbandVariants(this.state.probandIndividual, familyVariants, this).then(data => {
+                            return updateProbandVariants(this.state.probandIndividual, genotype, familyVariants, this).then(data => {
                                 return Promise.resolve(null);
                             });
                         }
@@ -777,7 +797,6 @@ var FamilyCuration = React.createClass({
                     if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
                         initvar = true;
                         label = this.getFormValue('individualname');
-                        var genotype = this.getFormValue('genotype');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
                         return makeStarterIndividual(label, diseases, genotype, familyVariants, this);
                     }
@@ -1246,7 +1265,6 @@ var FamilyCuration = React.createClass({
 
 globals.curator_page.register(FamilyCuration, 'curator_page', 'family-curation');
 
-
 // Family Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilyName = function(displayNote) {
@@ -1539,8 +1557,8 @@ var FamilyVariant = function() {
     var family = this.state.family;
     var segregation = family && family.segregation ? family.segregation : null;
     var variants = segregation && segregation.variants ? segregation.variants : [];
-    var genotype;
-    if (family && family.individualIncluded && family.individualIncluded.length) {
+    var genotype = 'none';
+    if (variants.length > 0) {
         _.range(family.individualIncluded.length).map(i => {
             if (family.individualIncluded[i].proband) {
                 genotype = family.individualIncluded[i].genotype;
@@ -1565,12 +1583,12 @@ var FamilyVariant = function() {
             <div className="variant-panel">
                 <div className="col-sm-7 col-sm-offset-5">
                     <p className="alert alert-warning">
-                        Please select genotype condition. If select Heterozygous Recessive, you must enter 2 variants believed to be causative for the disease in order
+                        Please select genotype condition. If select Compound Heterozygous, you must enter 2 variants believed to be causative for the disease in order
                         that each may be associated with the Individual and assessed. Additionally, each variant must be assessed as supports for the Individual to be counted.
                     </p>
                 </div>
                 <div className="row">
-                    <Input type="select" ref="genotype" label="Genotype:" defaultValue="none" value={genotype ? genotype : 'none'}
+                    <Input type="select" ref="genotype" label="Genotype:" defaultValue="none" value={genotype}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
@@ -1822,7 +1840,8 @@ var FamilyViewer = React.createClass({
         var groups = family.associatedGroups;
         var segregation = family.segregation;
         var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
-        var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
+        var variants = segregation && segregation.variants && segregation.variants.length ? segregation.variants : [];
+        //var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
         var genotype;
         if (variants.length) {
             _.range(family.individualIncluded.length).map(i => {
@@ -2003,31 +2022,42 @@ var FamilyViewer = React.createClass({
                     : null}
 
                     <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
+                        {variants.length > 0 ?
                             <div>
-                                <dt>Genotype</dt>
-                                <dd>{genotype ? genotype : ''}</dd>
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>Genotype</dt>
+                                        <dd>{genotype ? genotype : ''}</dd>
+                                    </div>
+                                </dl>
+                                {variants.map(function(variant, i) {
+                                    return (
+                                        <div className="variant-view-panel" key={variant.uuid}>
+                                            <h5>Variant {i + 1}</h5>
+                                            <dl className="dl-horizontal">
+                                                <div>
+                                                    <dt>ClinVar VariationID</dt>
+                                                    <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
+                                                </div>
+
+                                                <div>
+                                                    <dt>Other description</dt>
+                                                    <dd>{variant.otherDescription}</dd>
+                                                </div>
+                                            </dl>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        </dl>
-
-                        {variants.map(function(variant, i) {
-                            return (
-                                <div className="variant-view-panel" key={variant.uuid}>
-                                    <h5>Variant {i + 1}</h5>
-                                    <dl className="dl-horizontal">
-                                        <div>
-                                            <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>Other description</dt>
-                                            <dd>{variant.otherDescription}</dd>
-                                        </div>
-                                    </dl>
-                                </div>
-                            );
-                        })}
+                        :
+                            <div>
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>No variant associated</dt>
+                                    </div>
+                                </dl>
+                            </div>
+                        }
                     </Panel>
 
                     <Panel title="Family — Additional Information" panelClassName="panel-data">

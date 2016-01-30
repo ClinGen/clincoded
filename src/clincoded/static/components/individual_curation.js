@@ -1415,7 +1415,7 @@ var IndividualViewer = React.createClass({
     render: function() {
         var individual = this.props.context;
         var method = individual.method;
-        var variants = (individual.variants && individual.variants.length) ? individual.variants : [{}];
+        var variants = (individual.variants && individual.variants.length) ? individual.variants : [];
         var i = 0;
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
@@ -1592,30 +1592,42 @@ var IndividualViewer = React.createClass({
                     </Panel>
 
                     <Panel title={<LabelPanelTitleView individual={individual} variant />} panelClassName="panel-data">
-                        <dl className="dl-horizontal">
+                        {variants.length > 0 ?
                             <div>
-                                <dt>Genotype</dt>
-                                <dd>{individual.genotype ? individual.genotype : ''}</dd>
-                            </div>
-                        </dl>
-                        {variants.map(function(variant, i) {
-                            return (
-                                <div key={i} className="variant-view-panel">
-                                    <h5>Variant {i + 1}</h5>
-                                    <dl className="dl-horizontal">
-                                        <div>
-                                            <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
-                                        </div>
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>Genotype</dt>
+                                        <dd>{individual.genotype ? individual.genotype : ''}</dd>
+                                    </div>
+                                </dl>
+                                {variants.map(function(variant, i) {
+                                    return (
+                                        <div key={i} className="variant-view-panel">
+                                            <h5>Variant {i + 1}</h5>
+                                            <dl className="dl-horizontal">
+                                                <div>
+                                                    <dt>ClinVar VariationID</dt>
+                                                    <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
+                                                </div>
 
-                                        <div>
-                                            <dt>Other description</dt>
-                                            <dd>{variant.otherDescription}</dd>
+                                                <div>
+                                                    <dt>Other description</dt>
+                                                    <dd>{variant.otherDescription}</dd>
+                                                </div>
+                                            </dl>
                                         </div>
-                                    </dl>
-                                </div>
-                            );
-                        })}
+                                    );
+                                })}
+                            </div>
+                        :
+                            <div>
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>No variant associated</dt>
+                                    </div>
+                                </dl>
+                            </div>
+                        }
                     </Panel>
 
                     <Panel title={<LabelPanelTitleView individual={individual} labelText="Additional Information" />} panelClassName="panel-data">
@@ -1678,7 +1690,7 @@ var makeStarterIndividual = module.exports.makeStarterIndividual = function(labe
 
 
 // Update the individual with the variants, and write the updated individual to the DB.
-var updateProbandVariants = module.exports.updateProbandVariants = function(individual, variants, context) {
+var updateProbandVariants = module.exports.updateProbandVariants = function(individual, genotype, variants, context) {
     var updateNeeded = true;
 
     // Check whether the variants from the family are different from the variants in the individual
@@ -1688,9 +1700,13 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         var missing = _.difference(variants, individual.variants.map(function(variant) { return variant['@id']; }));
         updateNeeded = !!missing.length;
     }
+    if (!individual.genotype || individual.genotype !== genotype) {
+        updateNeeded = true;
+    }
 
     if (updateNeeded) {
         var writerIndividual = curator.flatten(individual);
+        writerIndividual.genotype = genotype;
         writerIndividual.variants = variants;
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
