@@ -242,9 +242,9 @@
             "type": "string",
             "enum": [
                 "",
-                "Dominent",
+                "Dominant",
                 "Homozygous Recessive",
-                "Heterozygous Recessive"
+                "Compound Heterozygous"
             ]
         },
         "proband": {

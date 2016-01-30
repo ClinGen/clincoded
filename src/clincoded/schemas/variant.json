@@ -24,14 +24,12 @@
         "dbSNPId": {
             "title": "dbSNP ID",
             "description": "dbSNP id of the variant",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "clinVarRCV": {
             "title": "ClinVar ID",
             "description": "ClinVar id for the variant",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "hgvsNames": {
             "title": "HGVS Names",
@@ -40,40 +38,18 @@
             "default": [],
             "items": {
                 "title": "HGVS Name",
-                "type": "string",
-                "default": ""
+                "type": "string"
             }
         },
         "otherDescription": {
             "title": "Other Description",
             "description": "List of other descriptions",
-            "type": "string",
-            "default": ""
+            "type": "string"
         }
     },
     "columns": {
         "uuid": {
             "title": "Variant",
-            "type": "string"
-        },
-        "clinvarVariantId": {
-            "title": "Variant ID",
-            "type": "string"
-        },
-        "dbSNPId": {
-            "title": "dbSNP ID",
-            "type": "string"
-        },
-        "clinVarRCV": {
-            "title": "ClinVar RCV",
-            "type": "string"
-        },
-        "hgvsNames": {
-            "title": "HGVS Name(s)",
-            "type": "array"
-        },
-        "otherDescription": {
-            "title": "Other Description",
             "type": "string"
         }
     }
