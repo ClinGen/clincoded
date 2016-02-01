@@ -430,7 +430,7 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                                         {associationType === 'family' ? <span>Family </span> : null}
                                         {associationType === 'individual' ? <span>Individual </span> : null}
                                         {associationType === 'experimental' ? <span>Experimental </span> : null}
-                                        <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>{probandLabel}
+                                        <a href={association['@id']} title={'View ' + associationType}>{association.label}</a>{probandLabel}
                                     </span>
                                 );
                             })}
