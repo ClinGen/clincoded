@@ -1,3 +1,4 @@
+
 {
     "title": "Variant",
     "id": "/profiles/variant.json",
@@ -20,6 +21,11 @@
             "title": "Variant ID",
             "description": "ClinVar Variant ID",
             "type": "string"
+        },
+        "clinvarVariantTitle": {
+            "title": "ClinVar Variant Title",
+            "type": "string",
+            "default": ""
         },
         "dbSNPId": {
             "title": "dbSNP ID",
@@ -50,6 +56,10 @@
     "columns": {
         "uuid": {
             "title": "Variant",
+            "type": "string"
+        },
+        "otherDescription": {
+            "title": "Other Description",
             "type": "string"
         }
     }
