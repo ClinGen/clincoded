@@ -314,10 +314,10 @@
 .variant-panel {
     padding-top: 40px;
     border-top: 1px solid #c0c0c0;
+    padding-bottom: 40px;
 
-    &:first-child {
-        padding-top: 0;
-        border-top: none;
+    .mutalyzer-link {
+        margin-top: -20px;
     }
 }
 
@@ -336,6 +336,14 @@
         }
     }
 }
+
+.variant-individual {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid #c0c0c0;
+}
+
+
 
 .viewer-titles {
     h1 {

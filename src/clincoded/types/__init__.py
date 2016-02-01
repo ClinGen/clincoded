@@ -281,7 +281,7 @@ class Gdm(Item):
         "title": "Number of Articles",
         "type": "string",
     })
-    def number_article(seft, annotations):
+    def number_article(self, annotations):
         if len(annotations) > 0:
             return str(len(annotations))
         return ""
@@ -290,7 +290,7 @@ class Gdm(Item):
         "title": "Number of Pathogenicity",
         "type": "string",
     })
-    def number_pathogenicity(seft, variantPathogenicity):
+    def number_pathogenicity(self, variantPathogenicity):
         if len(variantPathogenicity) > 0:
             return str(len(variantPathogenicity))
         return ""
@@ -299,7 +299,7 @@ class Gdm(Item):
         "title": "Number of Provisional",
         "type": "string",
     })
-    def number_provisional(seft, provisionalClassifications):
+    def number_provisional(self, provisionalClassifications):
         if len(provisionalClassifications) > 0:
             return str(len(provisionalClassifications))
         return ""
@@ -308,7 +308,7 @@ class Gdm(Item):
         "title": "GDM",
         "type": "string",
     })
-    def gdm_title(seft, gene, disease, modeCode):
+    def gdm_title(self, gene, disease, modeCode):
         gene_symbol = gene.replace('/genes/', '').replace('/', '')
         orpha_id = disease.replace('/diseases/', '').replace('/', '')
         return gene_symbol + '-' + orpha_id + '-' + modeCode
@@ -413,7 +413,7 @@ class Annotation(Item):
         "title": "Number of Group",
         "type": "string",
     })
-    def number_group(selft, groups):
+    def number_group(self, groups):
         if len(groups) > 0:
             return len(groups)
         return ""
@@ -422,7 +422,7 @@ class Annotation(Item):
         "title": "Number of Family",
         "type": "string",
     })
-    def number_family(selft, families):
+    def number_family(self, families):
         if len(families) > 0:
             return len(families)
         return ""
@@ -431,7 +431,7 @@ class Annotation(Item):
         "title": "Number of Provisioinal Individual",
         "type": "string",
     })
-    def number_individual(selft, individuals):
+    def number_individual(self, individuals):
         if len(individuals) > 0:
             return len(individuals)
         return ""

@@ -980,14 +980,10 @@ var AddOmimIdModal = React.createClass({
     // Called when the modal form's cancel button is clicked. Just closes the modal like
     // nothing happened.
     cancelForm: function(e) {
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-
-        //only a mouse click on cancel button closes modal
-        //(do not let the enter key [which evaluates to 0 mouse
-        //clicks] be accepted to close modal)
-        if (e.detail >= 1){
-            this.props.closeModal();
-        }
+        // Changed modal cancel button from a form input to a html button
+        // as to avoid accepting enter/return key as a click event.
+        // Removed hack in this method.
+        this.props.closeModal();
     },
 
     render: function() {
@@ -999,7 +995,7 @@ var AddOmimIdModal = React.createClass({
                         labelClassName="control-label" groupClassName="form-group" required />
                 </div>
                 <div className='modal-footer'>
-                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Add/Change OMIM ID" />
                 </div>
             </Form>
@@ -1893,6 +1889,14 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
     );
 };
 
+// A link to Mutalyzer to check HGVC terms
+var renderMutalyzerLink = module.exports.renderMutalyzerLink = function() {
+    return (
+        <p className="col-sm-7 col-sm-offset-5 mutalyzer-link">
+            (e.g. HGVS, RCV, refSNP (rs) ID)<br />For help in verifying, generating or converting to HGVS nomenclature, please visit <a href='https://mutalyzer.nl/' target='_blank'>Mutalyzer</a>.
+        </p>
+    );
+};
 
 // Class for delete button (and associated modal) of Group, Family, Individual, and Experimental
 // Data objects. This class only renderes the button; please see DeleteButtonModal for bulk of
@@ -2139,14 +2143,10 @@ var DeleteButtonModal = React.createClass({
     // Called when the modal form's cancel button is clicked. Just closes the modal like
     // nothing happened.
     cancelForm: function(e) {
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-
-        //only a mouse click on cancel button closes modal
-        //(do not let the enter key [which evaluates to 0 mouse
-        //clicks] be accepted to close modal)
-        if (e.detail >= 1){
-            this.props.closeModal();
-        }
+        // Changed modal cancel button from a form input to a html button
+        // as to avoid accepting enter/return key as a click event.
+        // Removed hack in this method.
+        this.props.closeModal();
     },
 
     // Called when user clicks a link in the delete confirmation modal to view another object.
@@ -2181,7 +2181,7 @@ var DeleteButtonModal = React.createClass({
                     : null}
                     </div>
                 <div className="modal-footer">
-                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="button" inputClassName="btn-danger btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
                 </div>
             </div>

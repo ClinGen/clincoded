@@ -1,3 +1,4 @@
+
 {
     "title": "Variant",
     "id": "/profiles/variant.json",
@@ -20,6 +21,11 @@
             "title": "Variant ID",
             "description": "ClinVar Variant ID",
             "type": "string"
+        },
+        "clinvarVariantTitle": {
+            "title": "ClinVar Variant Title",
+            "type": "string",
+            "default": ""
         },
         "dbSNPId": {
             "title": "dbSNP ID",
@@ -55,22 +61,6 @@
         "uuid": {
             "title": "Variant",
             "type": "string"
-        },
-        "clinvarVariantId": {
-            "title": "Variant ID",
-            "type": "string"
-        },
-        "dbSNPId": {
-            "title": "dbSNP ID",
-            "type": "string"
-        },
-        "clinVarRCV": {
-            "title": "ClinVar RCV",
-            "type": "string"
-        },
-        "hgvsNames": {
-            "title": "HGVS Name(s)",
-            "type": "array"
         },
         "otherDescription": {
             "title": "Other Description",
