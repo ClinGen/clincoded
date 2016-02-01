@@ -154,7 +154,6 @@
     cursor: pointer;
     background-color: #ffffff;
     @include border-radius(3px);
-    box-shadow: 0 2px #e0e0e0;
 
     div {
         opacity: 0.5;
@@ -164,8 +163,8 @@
     }
 
     &.curr-pmid {
-        box-shadow: 0 2px 0 1px lighten($color-trim, 25%);
-        border: 1px solid $color-trim;
+        border: 4px solid $color-trim;
+        @include border-radius(4px);
     }
 
     &:hover div,
@@ -187,9 +186,8 @@
 
     .curr-pmid-overview {
         background-color: #ffffff;
-        border: 1px solid $color-trim;
-        box-shadow: 0 2px 0 1px lighten($color-trim, 25%);
-        @include border-radius(3px);
+        border: 4px solid $color-trim;
+        @include border-radius(4px);
         padding: 10px 15px;
     }
 }
