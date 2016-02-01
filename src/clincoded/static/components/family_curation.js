@@ -2061,7 +2061,7 @@ var FamilyViewer = React.createClass({
                             <div>
                                 <dl className="dl-horizontal">
                                     <div>
-                                        <dt>No variant associated</dt>
+                                        <strong>No variant associated.</strong>
                                     </div>
                                 </dl>
                             </div>
