@@ -1451,6 +1451,11 @@ var IndividualViewer = React.createClass({
         });
         groupRenders = groupRenders.concat(directGroupRenders);
 
+        var genotype = '';
+        if (variants.length > 0) {
+            genotype = individual.genotype ? individual.genotype : (variants.length === 1 ? 'Dominant' : 'Compound Heterozygous');
+        }
+
         return (
             <div className="container">
                 <div className="row group-curation-content">
@@ -1597,7 +1602,7 @@ var IndividualViewer = React.createClass({
                                 <dl className="dl-horizontal">
                                     <div>
                                         <dt>Genotype</dt>
-                                        <dd>{individual.genotype ? individual.genotype : ''}</dd>
+                                        <dd>{genotype}</dd>
                                     </div>
                                 </dl>
                                 {variants.map(function(variant, i) {

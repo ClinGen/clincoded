@@ -1557,11 +1557,14 @@ var FamilyVariant = function() {
     var family = this.state.family;
     var segregation = family && family.segregation ? family.segregation : null;
     var variants = segregation && segregation.variants ? segregation.variants : [];
-    var genotype = 'none';
+    var genotype = 'none'; // initially set 'none' for curation
     if (variants.length > 0) {
         _.range(family.individualIncluded.length).map(i => {
+            // read genotype from proband individual for edit
+            // for proband created before R4, genotype value is set based on # variant associated
             if (family.individualIncluded[i].proband) {
-                genotype = family.individualIncluded[i].genotype;
+                genotype = family.individualIncluded[i].genotype ? family.individualIncluded[i].genotype
+                    : (variants.length === 1 ? 'Dominant' : 'Compound Heterozygous');
             }
         });
     }
@@ -1590,7 +1593,9 @@ var FamilyVariant = function() {
                 <div className="row">
                     <Input type="select" ref="genotype" label="Genotype:" defaultValue="none" value={genotype}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
-                        <option value="none">No Selection</option>
+                        {genotype === 'none' ?
+                            <option value="none">No Selection</option> : null
+                        }
                         <option disabled="disabled"></option>
                         <option>Dominant</option>
                         <option>Homozygous Recessive</option>
@@ -1843,10 +1848,13 @@ var FamilyViewer = React.createClass({
         var variants = segregation && segregation.variants && segregation.variants.length ? segregation.variants : [];
         //var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
         var genotype;
-        if (variants.length) {
+        if (variants.length > 0) {
             _.range(family.individualIncluded.length).map(i => {
+                // read genotype from proband individual for edit
+                // for proband created before R4, genotype value is set based on # variant associated
                 if (family.individualIncluded[i].proband) {
-                    genotype = family.individualIncluded[i].genotype;
+                    genotype = family.individualIncluded[i].genotype ? family.individualIncluded[i].genotype
+                        : (variants.length === 1 ? 'Dominant' : 'Compound Heterozygous');
                 }
             });
         }
