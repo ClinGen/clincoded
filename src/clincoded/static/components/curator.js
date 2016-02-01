@@ -2151,7 +2151,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
 
 // asdf2
 var AddResourceIdModal = React.createClass({
-    mixins: [RestMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin, CuratorHistory],
     propTypes: {
         resourceType: React.PropTypes.string,
         closeModal: React.PropTypes.func // Function to call to close the modal
@@ -2269,12 +2269,18 @@ var AddResourceIdModal = React.createClass({
         this.props.closeModal();
     },
 
+    handleChange: function(e) {
+        console.log('change');
+    },
+
     render: function() {
         return (
             <div>
                 <div className="modal-body">
-                    Add thing
-                    </div>
+                    <Input type="text" ref="resourceId" label="Resource Id:" handleChange={this.handleChange}
+                        error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                </div>
                 <div className="modal-footer">
                     <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
                     <Input type="button" inputClassName="btn-primary btn-inline-spacer" clickHandler={this.deleteItem} title="Add Resource ID" submitBusy={this.state.submitBusy} />
