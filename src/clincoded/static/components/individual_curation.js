@@ -929,21 +929,19 @@ var IndividualName = function(displayNote) {
             {family && !familyProbandExists ?
             <div className="col-sm-7 col-sm-offset-5">
                 <p className="alert alert-warning">
-                    This page is only for adding non-probands to the Family. To create a proband for this Family, please edit its Family page: <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + this.queryValues.familyUuid}>Edit {family.label}</a>
+                    This page is only for adding non-probands to the Family. To create a proband for this Family, please edit its Family page: <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + family.uuid}>Edit {family.label}</a>
                 </p>
             </div>
             : null}
-            <div className="clearfix">
-                <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
-                    error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-                <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field</p>
-            </div>
+            <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
+                error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field</p>
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one individual with IDENTICAL information, you can indicate this at the bottom of this form.</p>
             : null}
             {!family ?
-                <div className="clearfix">
+                <div>
                     <Input type="select" ref="proband" label="Is this Individual a proband:" value={individual && individual.proband ? "Yes" : (individual ? "No" : "none")}
                         error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')} handleChange={this.handleChange}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
