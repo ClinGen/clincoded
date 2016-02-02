@@ -9,6 +9,8 @@ var globals = require('./globals');
 var CuratorHistory = require('./curator_history');
 var parseAndLogError = require('./mixins').parseAndLogError;
 
+var parseClinvar = require('../libs/parse-resources').parseClinvar;
+
 var Panel = panel.Panel;
 var Modal = modal.Modal;
 var ModalMixin = modal.ModalMixin;
@@ -2138,154 +2140,101 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
 
     render: function() {
         return (
-            <span>
-                <Modal title="Add Resource Id" modalClass="modal-default">
-                    <a modal={<AddResourceIdModal resourceType={this.props.resourceType} closeModal={this.closeModal} />}>
-                        Add Resource ID
-                    </a>
-                </Modal>
-            </span>
+            <Modal title="Add Resource Id" modalClass="modal-default">
+                <a modal={<AddResourceIdModal protocol={this.props.protocol} resourceType={this.props.resourceType} closeModal={this.closeModal} />}>
+                    Add Resource ID
+                </a>
+            </Modal>
         );
     }
 });
 
 // asdf2
 var AddResourceIdModal = React.createClass({
-    mixins: [FormMixin, RestMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin],
+
     propTypes: {
-        resourceType: React.PropTypes.string,
-        closeModal: React.PropTypes.func // Function to call to close the modal
+        closeModal: React.PropTypes.func, // Function to call to close the modal
+        protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
+        updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
     },
 
-    getInitialState: function() {
-        return {
-            submitBusy: false // True while form is submitting
-        };
+    contextTypes: {
+        fetch: React.PropTypes.func // Function to perform a search
     },
 
-    // function for looping through a parent item's list of child items
-    // of a specific type
-    recurseItemLoop: function(tempSubItem, depth, mode, type) {
-        var tempDisplayString;
-        var returnPayload = [];
-        if (tempSubItem) {
-            if (tempSubItem.length > 0) {
-                for (var i = 0; i < tempSubItem.length; i++) {
-                    if (mode == 'display') {
-                        // if the mode is 'display', generate the display string
-                        tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem[i]['@id']} onClick={this.linkout}>{tempSubItem[i]['@type'][0]} {tempSubItem[i].label}</a></span>;
-                        returnPayload.push(tempDisplayString);
-                    } else if (mode == 'id') {
-                        // if the mode is 'id', grab the @ids of the child items
-                        returnPayload.push(tempSubItem[i]['@id']);
-                    }
-                    // call recurseItem on child item
-                    returnPayload = returnPayload.concat(this.recurseItem(tempSubItem[i], depth + 1, mode));
-                }
-            } else {
-                if (mode == 'display') {
-                    // if childspace is empty, add a display line indicating the fact
-                    tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; no associated {type}</span>;
-                    returnPayload.push(tempDisplayString);
+    // Form content validation
+    validateForm: function() {
+        // Start with default validation
+        var valid = this.validateDefault();
+        var formInput = this.getFormValue('pmid');
+
+        // valid if input isn't zero-filled
+        if (valid && formInput.match(/^0+$/)) {
+            valid = false;
+            this.setFormErrors('pmid', 'This PMID does not exist');
+        }
+        // valid if input isn't zero-leading
+        if (valid && formInput.match(/^0+/)) {
+            valid = false;
+            this.setFormErrors('pmid', 'Please re-enter PMID without any leading 0\'s');
+        }
+        // valid if the input only has numbers
+        if (valid && !formInput.match(/^[0-9]*$/)) {
+            valid = false;
+            this.setFormErrors('pmid', 'Only numbers allowed');
+        }
+        // valid if input isn't already associated with GDM
+        if (valid) {
+            for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
+                if (this.props.currGdm.annotations[i].article.pmid == formInput) {
+                    valid = false;
+                    this.setFormErrors('pmid', 'This article has already been associated with this Gene-Disease Record');
                 }
             }
         }
-        return returnPayload;
+
+        return valid;
     },
 
-    // parent function when deleting an item. Re-grabs the latest versions of the target and parent items,
-    // finds and deletes all children of the target item, deletes the target item, removes the target item's
-    // entry from the parent item, and saves the updated target item. Forwards user to curation central
-    // upon completion.
-    deleteItem: function(e) {
-        e.preventDefault(); e.stopPropagation();
-        this.setState({submitBusy: true});
-        var itemUuid = this.props.item['@id'];
-        var parentUuid = this.props.parent['@id'];
-        var deletedItemType, deletedItem, deletedParent;
-
-        this.getRestData(itemUuid, null, true).then(item => {
-            // get up-to-date target object, then get the promises for deleting it and
-            // all its children, along with the promises for any related history items
-            deletedItemType = item['@type'][0];
-            var deletePromises = this.recurseItem(item, 0, 'delete');
-            return Promise.all(deletePromises); // wait for ALL promises to resolve
-        }).then(rawData => {
-            // get up-to-date parent object; also bypass issue of certain certain embedded parent
-            // items in edit pages being un-flattenable
-            return this.getRestData(parentUuid, null, true).then(parent => {
-                // flatten parent object and remove link to deleted item as appropriate
-                deletedParent = flatten(parent);
-                if (parent['@type'][0] == 'annotation') {
-                    if (deletedItemType == 'group') {
-                        deletedParent.groups = _.without(deletedParent.groups, itemUuid);
-                    } else if (deletedItemType == 'family') {
-                        deletedParent.families = _.without(deletedParent.families, itemUuid);
-                    } else if (deletedItemType == 'individual') {
-                        deletedParent.individuals = _.without(deletedParent.individuals, itemUuid);
-                    } else if (deletedItemType == 'experimental') {
-                        deletedParent.experimentalData = _.without(deletedParent.experimentalData, itemUuid);
-                    }
-                } else {
-                    if (deletedItemType == 'family') {
-                        deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, itemUuid);
-                    } else if (deletedItemType == 'individual') {
-                        deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, itemUuid);
-                        if (parent['@type'][0] == 'family') {
-                            // Empty variants of parent object if target item is individual and parent is family
-                            deletedParent.segregation.variants = [];
-                        }
-                    }
-                }
-                // PUT updated parent object w/ removed link to deleted item
-                return this.putRestData(parentUuid, deletedParent).then(data => {
-                    return Promise.resolve(data['@graph'][0]);
-                });
-            });
-        }).then(data => {
-            // forward user to curation central
-            window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid + '&pmid=' + this.props.pmid;
-        }).catch(function(e) {
-            console.log('DELETE ERROR: %o', e);
+    // Called when the modal form’s submit button is clicked. Handles validation and triggering
+    // the process to add an article.
+    submitForm: function(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+        //var valid = this.validateDefault();
+        var resourceId = this.refs.pmid.getValue();
+        var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
+        this.getRestDataXml(url + resourceId).then(xml => {
+            console.log(xml);
+            var data = parseClinvar(xml);
+            console.log(data);
         });
     },
 
     // Called when the modal form's cancel button is clicked. Just closes the modal like
     // nothing happened.
     cancelForm: function(e) {
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-
-        //only a mouse click on cancel button closes modal
-        //(do not let the enter key [which evaluates to 0 mouse
-        //clicks] be accepted to close modal)
-        if (e.detail >= 1){
-            this.props.closeModal();
-        }
-    },
-
-    // Called when user clicks a link in the delete confirmation modal to view another object.
-    // Allows for scrolling in subsequent pages, as the initial modal rendering disabled scrolling.
-    linkout: function(e) {
+        // Changed modal cancel button from a form input to a html button
+        // as to avoid accepting enter/return key as a click event.
+        // Removed hack in this method.
         this.props.closeModal();
-    },
-
-    handleChange: function(e) {
-        console.log('change');
     },
 
     render: function() {
         return (
-            <div>
+            <Form formClassName="form-std">
                 <div className="modal-body">
-                    <Input type="text" ref="resourceId" label="Resource Id:" handleChange={this.handleChange}
-                        error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                    <Input type="text" ref="pmid" label="Enter a PMID"
+                        error={this.getFormError('pmid')} clearError={this.clrFormErrors.bind(null, 'pmid')}
+                        labelClassName="control-label" groupClassName="form-group" required />
+                    <Input type="button" title="Add Article" clickHandler={this.submitForm} />
                 </div>
-                <div className="modal-footer">
-                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
-                    <Input type="button" inputClassName="btn-primary btn-inline-spacer" clickHandler={this.deleteItem} title="Add Resource ID" submitBusy={this.state.submitBusy} />
+                <div className='modal-footer'>
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
+                    <Input type="button" inputClassName={this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ?
+                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" />
                 </div>
-            </div>
+            </Form>
         );
     }
 });
