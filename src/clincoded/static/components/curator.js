@@ -2163,33 +2163,40 @@ var AddResourceIdModal = React.createClass({
         fetch: React.PropTypes.func // Function to perform a search
     },
 
+    getInitialState: function() {
+        return {
+            submitBusy: false, // True while form is submitting
+            tempResource: {}
+        };
+    },
+
     // Form content validation
     validateForm: function() {
         // Start with default validation
         var valid = this.validateDefault();
-        var formInput = this.getFormValue('pmid');
+        var formInput = this.getFormValue('resourceId');
 
         // valid if input isn't zero-filled
         if (valid && formInput.match(/^0+$/)) {
             valid = false;
-            this.setFormErrors('pmid', 'This PMID does not exist');
+            this.setFormErrors('resourceId', 'This PMID does not exist');
         }
         // valid if input isn't zero-leading
         if (valid && formInput.match(/^0+/)) {
             valid = false;
-            this.setFormErrors('pmid', 'Please re-enter PMID without any leading 0\'s');
+            this.setFormErrors('resourceId', 'Please re-enter PMID without any leading 0\'s');
         }
         // valid if the input only has numbers
         if (valid && !formInput.match(/^[0-9]*$/)) {
             valid = false;
-            this.setFormErrors('pmid', 'Only numbers allowed');
+            this.setFormErrors('resourceId', 'Only numbers allowed');
         }
         // valid if input isn't already associated with GDM
         if (valid) {
             for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
                 if (this.props.currGdm.annotations[i].article.pmid == formInput) {
                     valid = false;
-                    this.setFormErrors('pmid', 'This article has already been associated with this Gene-Disease Record');
+                    this.setFormErrors('resourceId', 'This article has already been associated with this Gene-Disease Record');
                 }
             }
         }
@@ -2202,13 +2209,18 @@ var AddResourceIdModal = React.createClass({
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         //var valid = this.validateDefault();
-        var resourceId = this.refs.pmid.getValue();
+        this.setState({submitBusy: true});
+        var resourceId = this.refs.resourceId.getValue();
         var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
+        var data;
         this.getRestDataXml(url + resourceId).then(xml => {
-            console.log(xml);
-            var data = parseClinvar(xml);
-            console.log(data);
+            data = parseClinvar(xml);
+            this.setState({submitBusy: false, tempResource: data});
         });
+    },
+
+    submitResource: function(e) {
+        console.log(this.state.tempResource);
     },
 
     // Called when the modal form's cancel button is clicked. Just closes the modal like
@@ -2224,15 +2236,22 @@ var AddResourceIdModal = React.createClass({
         return (
             <Form formClassName="form-std">
                 <div className="modal-body">
-                    <Input type="text" ref="pmid" label="Enter a PMID"
-                        error={this.getFormError('pmid')} clearError={this.clrFormErrors.bind(null, 'pmid')}
+                    <Input type="text" ref="resourceId" label="Enter ResourceID"
+                        error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')}
                         labelClassName="control-label" groupClassName="form-group" required />
-                    <Input type="button" title="Add Article" clickHandler={this.submitForm} />
+                    <Input type="button" title="Add Resource" clickHandler={this.submitForm} submitBusy={this.state.submitBusy} />
+
+                    {this.state.tempResource ?
+                    <div className="row">
+                        <p>Is this what you meant?</p>
+                        {this.state.tempResource.clinvarVariantTitle}
+                    </div>
+                    : null}
                 </div>
                 <div className='modal-footer'>
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
-                    <Input type="button" inputClassName={this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ?
-                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" />
+                    <Input type="button" inputClassName={this.getFormError('resourceId') === null || this.getFormError('resourceId') === undefined || this.getFormError('resourceId') === '' ?
+                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" clickHandler={this.submitResource} />
                 </div>
             </Form>
         );
