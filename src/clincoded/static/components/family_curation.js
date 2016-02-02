@@ -106,7 +106,8 @@ var FamilyCuration = React.createClass({
             variantRequired: null, // boolean for set up requirement of variant if proband individual data entered
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            preR4Edit: false // True for adding genotype into proband, pre-R4 data only
         };
     },
 
@@ -398,10 +399,18 @@ var FamilyCuration = React.createClass({
                             }
                         }
                         stateObj.variantOption = currVariantOption;
-                    } else if (stateObj.probandIndividual) {
-                        // No variants in this family, but it does have a proband individual. Open one empty variant panel
-                        stateObj.variantCount = 1;
+
+                        // If it is pre-R4 data and in Edit page and have only 1 variant associated, neccessary to select Dominant or Homozygous Recessive
+                        if (stateObj.probandIndividual && !stateObj.probandIndividual.genotype && segregation.variants.length === 1) {
+                            stateObj.preR4Edit = true;
+                        } else {
+                            stateObj.preR4Edit = false;
+                        }
                     }
+                    //else if (stateObj.probandIndividual) {
+                        // No variants in this family, but it does have a proband individual. Open one empty variant panel
+                    //    stateObj.variantCount = 1;
+                    //}
 
                     // Find the current user's segregation assessment from the segregation's assessment list
                     if (segregation.assessments && segregation.assessments.length) {
@@ -1557,14 +1566,19 @@ var FamilyVariant = function() {
     var family = this.state.family;
     var segregation = family && family.segregation ? family.segregation : null;
     var variants = segregation && segregation.variants ? segregation.variants : [];
-    var genotype = 'none'; // initially set 'none' for curation
+    // initially set 'none' for creating a family
+    var genotype = 'none';
+    // For editing a family
     if (variants.length > 0) {
         _.range(family.individualIncluded.length).map(i => {
-            // read genotype from proband individual for edit
+            // read genotype from proband individual
             // for proband created before R4, genotype value is set based on # variant associated
             if (family.individualIncluded[i].proband) {
-                genotype = family.individualIncluded[i].genotype ? family.individualIncluded[i].genotype
-                    : (variants.length === 1 ? 'Dominant' : 'Compound Heterozygous');
+                if (family.individualIncluded[i].genotype) {
+                    genotype = family.individualIncluded[i].genotype;
+                } else if (variants.length === 2) {
+                    genotype = 'Compound Heterozygous';
+                }
             }
         });
     }
@@ -1593,13 +1607,11 @@ var FamilyVariant = function() {
                 <div className="row">
                     <Input type="select" ref="genotype" label="Genotype:" defaultValue="none" value={genotype}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
-                        {genotype === 'none' ?
-                            <option value="none">No Selection</option> : null
-                        }
+                        {this.state.preR4Edit ? <option value="none">Plesae select Dominant or Homozygous Recessive</option> : <option value="none">No Selection</option>}
                         <option disabled="disabled"></option>
                         <option>Dominant</option>
                         <option>Homozygous Recessive</option>
-                        <option>Compound Heterozygous</option>
+                        {!this.state.preR4Edit ? <option>Compound Heterozygous</option> : null}
                     </Input>
                 </div>
             </div>
@@ -1847,17 +1859,7 @@ var FamilyViewer = React.createClass({
         var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
         var variants = segregation && segregation.variants && segregation.variants.length ? segregation.variants : [];
         //var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
-        var genotype;
-        if (variants.length > 0) {
-            _.range(family.individualIncluded.length).map(i => {
-                // read genotype from proband individual for edit
-                // for proband created before R4, genotype value is set based on # variant associated
-                if (family.individualIncluded[i].proband) {
-                    genotype = family.individualIncluded[i].genotype ? family.individualIncluded[i].genotype
-                        : (variants.length === 1 ? 'Dominant' : 'Compound Heterozygous');
-                }
-            });
-        }
+
         var user = this.props.session && this.props.session.user_properties;
         var userFamily = user && family && family.submitted_by ? user.uuid === family.submitted_by.uuid : false;
         var familyUserAssessed = false; // TRUE if logged-in user doesn't own the family, but the family's owner assessed its segregation
@@ -1880,6 +1882,26 @@ var FamilyViewer = React.createClass({
         // See if the segregation contains anything.
         var haveSegregation = segregationExists(segregation);
 
+        var genotype;
+        if (variants.length > 0) {
+            _.range(family.individualIncluded.length).map(i => {
+                // read genotype from proband individual for edit
+                // for proband created before R4, genotype value is set based on # variant associated
+                if (family.individualIncluded[i].proband) {
+                    if (family.individualIncluded[i].genotype) {
+                        genotype = family.individualIncluded[i].genotype;
+                    } else if(variants.length === 2) {
+                        genotype = 'Compound Heterozygous';
+                    } else if (variants.length === 1) {
+                        if (user && user.uuid === family.submitted_by.uuid) {
+                            genotype = 'Please select Dominant or Homozygous Recessive at Edit page';
+                        } else {
+                            genotype = 'Waiting for creator adding a value.';
+                        }
+                    }
+                }
+            });
+        }
         return (
             <div className="container">
                 <div className="row group-curation-content">
@@ -2035,7 +2057,7 @@ var FamilyViewer = React.createClass({
                                 <dl className="dl-horizontal">
                                     <div>
                                         <dt>Genotype</dt>
-                                        <dd>{genotype ? genotype : ''}</dd>
+                                        <dd>{genotype ? genotype : null}</dd>
                                     </div>
                                 </dl>
                                 {variants.map(function(variant, i) {

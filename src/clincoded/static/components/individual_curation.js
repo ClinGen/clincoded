@@ -63,7 +63,8 @@ var IndividualCuration = React.createClass({
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             proband: null, // If we have an associated family that has a proband, this points at it
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            preR4Edit: false // True for adding genotype into proband, pre-R4 data only
         };
     },
 
@@ -257,6 +258,12 @@ var IndividualCuration = React.createClass({
                         }
                     }
                     stateObj.variantOption = currVariantOption;
+
+                    if (!stateObj.individual.genotype && stateObj.individual.variants.length === 1) {
+                        preR4Edit = true;
+                    } else {
+                        preR4Edit = false;
+                    }
                 }
             }
 
@@ -1413,6 +1420,7 @@ var LabelOtherPmids = React.createClass({
 
 var IndividualViewer = React.createClass({
     render: function() {
+        var user = this.props.session && this.props.session.user_properties;
         var individual = this.props.context;
         var method = individual.method;
         var variants = (individual.variants && individual.variants.length) ? individual.variants : [];
@@ -1453,7 +1461,15 @@ var IndividualViewer = React.createClass({
 
         var genotype = '';
         if (variants.length > 0) {
-            genotype = individual.genotype ? individual.genotype : (variants.length === 1 ? 'Dominant' : 'Compound Heterozygous');
+            if (individual.genotype) {
+                genotype = individual.genotype;
+            } else if (variants.length === 2) {
+                genotype = 'Compound Heterozygous';
+            } else if (user && user.uuid === individual.submitted_by.uuid) {
+                genotype = 'Please select Dominant or Homozygous Recessive at Edit page';
+            } else {
+                genotype = 'Waiting for creator editing data';
+            }
         }
 
         return (
@@ -1602,7 +1618,7 @@ var IndividualViewer = React.createClass({
                                 <dl className="dl-horizontal">
                                     <div>
                                         <dt>Genotype</dt>
-                                        <dd>{genotype}</dd>
+                                        <dd>{genotype ? genotype : null}</dd>
                                     </div>
                                 </dl>
                                 {variants.map(function(variant, i) {
