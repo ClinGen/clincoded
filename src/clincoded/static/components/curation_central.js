@@ -54,13 +54,6 @@ var CurationCentral = React.createClass({
             if (this.state.currGdm) {
                 window.history.replaceState(window.state, '', '/curation-central/?gdm=' + this.state.currGdm.uuid + '&pmid=' + pmid);
             }
-
-            // Focus the current PMID selection in left PMID column
-            var userPmidList = document.getElementById('user-pmid-list');
-            var selectedPmid = document.getElementById('selected-pmid');
-            if (selectedPmid && userPmidList.scrollHeight > userPmidList.clientHeight) {
-                userPmidList.scrollTop = userPmidList.scrollTop + selectedPmid.offsetTop - userPmidList.offsetTop - 10;
-            }
         }
     },
 
@@ -78,6 +71,15 @@ var CurationCentral = React.createClass({
                 pmid = annotations[0].article.pmid;
             }
             this.currPmidChange(pmid);
+
+            // Focus the current PMID selection in left PMID column
+            var userPmidList = document.getElementById('user-pmid-list');
+            var selectedPmid = document.getElementById('selected-pmid');
+            userPmidList.scrollTop = 0;
+            if (selectedPmid && userPmidList.scrollHeight > userPmidList.clientHeight) {
+                userPmidList.scrollTop += selectedPmid.offsetTop - 50;
+            }
+
             return gdm;
         }).catch(function(e) {
             console.log('GETGDM ERROR=: %o', e);
