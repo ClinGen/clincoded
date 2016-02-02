@@ -260,9 +260,9 @@ var IndividualCuration = React.createClass({
                     stateObj.variantOption = currVariantOption;
 
                     if (!stateObj.individual.genotype && stateObj.individual.variants.length === 1) {
-                        preR4Edit = true;
+                        stateObj.preR4Edit = true;
                     } else {
-                        preR4Edit = false;
+                        stateObj.preR4Edit = false;
                     }
                 }
             }
