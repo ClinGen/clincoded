@@ -91,29 +91,29 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
 
-
+            var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
             if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
-                for (var i in gdm.provisionalClassifications) {
-                    if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
+                gdm.provisionalClassifications.forEach(this_provisional => {
+                    if (userMatch(this_provisional.submitted_by, session)) {
                         provisionalExist = true;
-                        provisional = gdm.provisionalClassifications[i];
-                        break;
+                        provisional = this_provisional;
+                        //break;
                     }
-                }
+                });
             }
 
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
             var supportedVariants = getUserPathogenicity(gdm, session);
             if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && supportedVariants && supportedVariants.length > 0) {
-                for (var i in gdm.annotations) {
+                for (i in gdm.annotations) {
                     var annotation = gdm.annotations[i];
                     if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
                         summaryButton = true;
                         break;
                     }
                     if (!summaryButton && annotation.families && annotation.families.length > 0) {
-                        for (var j in annotation.families) {
+                        for (j in annotation.families) {
                             if (annotation.families[j].individualIncluded && annotation.families[j].individualIncluded.length > 0 &&
                                 searchProbandIndividual(annotation.families[j].individualIncluded, supportedVariants)) {
                                 summaryButton = true;
@@ -125,9 +125,9 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                         break;
                     }
                     else if (annotation.groups && annotation.groups.length > 0) {
-                        for (var j in annotation.groups) {
+                        for (j in annotation.groups) {
                             if (annotation.groups[j].familyIncluded && annotation.groups[j].familyIncluded.length > 0) {
-                                for (var k in annotation.groups[j].familyIncluded) {
+                                for (k in annotation.groups[j].familyIncluded) {
                                     if (annotation.groups[j].familyIncluded[k].individualIncluded && annotation.groups[j].familyIncluded[k].individualIncluded.length > 0 &&
                                         searchProbandIndividual(annotation.groups[j].familyIncluded[k].individualIncluded, supportedVariants)) {
                                         summaryButton = true;
@@ -258,11 +258,14 @@ var all_in = function(individualVariantList, allSupportedlist) {
 
 // function to find one proband individual with all variants assessed.
 var searchProbandIndividual = function(individualList, variantList) {
-    for (var i in individualList) {
-        if (individualList[i].proband && individualList[i].variants && individualList[i].variants.length > 0 && all_in(individualList[i].variants, variantList)) {
+    individualList.forEach(individual => {
+        if (individual.proband && individual.variants && individual.variants.length > 0 && all_in(individual.variants, variantList)) {
             return true;
         }
-    }
+    });
+    //for (var i in individualList) {
+
+    //}
     return false;
 };
 
@@ -289,7 +292,16 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                         <p>Click a variant to View, Curate, or Edit/Assess it. The icon indicates curation by one or more curators.</p>
                         {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
-                            var variantName = variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 20);
+                            var variantName = variant.clinvarVariantTitle ? variant.clinvarVariantTitle :
+                                (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
+                            var blueBarStyle = null;
+                            if (variantName.length > 50) {
+                                //variantName = variantName.substring(0, variantName.length/2) + ' ' + variantName.substring(variantName.length/2, variantName.length);
+                                //_.range(row_num).map(i => {
+
+                                //});
+                            }
+                            //var variantName = variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 20);
                             var userPathogenicity = null;
 
                             // See if the variant has a pathogenicity curated in the current GDM
@@ -311,11 +323,14 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             inCurrentGdm = userPathogenicity ? true : false;
 
                             return (
-                                <div className="col-sm-6 col-md-3 col-lg-2" key={variant.uuid}>
-                                    <a className="btn btn-primary btn-xs" href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}>
-                                        {inCurrentGdm ? <i className="icon icon-sticky-note"></i> : null}
-                                        {variantName}
-                                    </a>
+                                <div className="col-sm-4" key={variant.uuid}>
+                                        <div className="btn btn-primary btn-xs" style={{'color':'#fff', 'word-wrap':'normal'}}>
+                                            <span>{inCurrentGdm ? <i className="icon icon-sticky-note"></i> : null}</span>
+                                            <a style={{'color':'#fff', 'word-wrap':'normal'}}
+                                                href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}>
+                                                {variantName.length <= 50 ? variantName : <span>{variantName.substring(0, variantName.length/2)}<br />{variantName.substring(variantName.length/2, variantName.length)}</span>}
+                                            </a>
+                                        </div>
                                 </div>
                             );
                         })}
@@ -1178,15 +1193,17 @@ var collectAnnotationVariants = function(annotation) {
     if (annotation && Object.keys(annotation).length) {
         // Search unassociated individuals
         annotation.individuals.forEach(function(individual) {
-            individual.variants.forEach(function(variant) {
-                allVariants[variant['@id']] = variant;
-            });
+            if (individual.variants && individual.variants.length) {
+                individual.variants.forEach(function(variant) {
+                    allVariants[variant['@id']] = variant;
+                });
+            }
         });
 
         // Search unassociated families
         annotation.families.forEach(function(family) {
             // Collect variants in the family's segregation
-            if (family.segregation && family.segregation.variants) {
+            if (family.segregation && family.segregation.variants && family.segregation.variants.length) {
                 family.segregation.variants.forEach(function(variant) {
                     allVariants[variant['@id']] = variant;
                 });

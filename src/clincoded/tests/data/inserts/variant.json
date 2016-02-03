@@ -190,5 +190,17 @@
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-10-21T22:47:10.000000+00:00",
         "last_modified": "2015-10-22T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "31353737-0973-41ec-8985-8f7eccaaf5da",
+        "clinvarVariantId": "157591",
+        "dbSNPId": "",
+        "clinVarRCV": "RCV000144919",
+        "clinvarVariantTitle": "NC_000018.10:g.657646_657673CCGCGCCACTTGGCCTGCCTCCGTCCCG[2][3][4][7][8][9]",
+        "hgvsNames": [],
+        "otherDescription": "",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-10-21T22:47:10.000000+00:00",
+        "last_modified": "2015-10-22T22:59:10.000000+00:00"
     }
 ]
