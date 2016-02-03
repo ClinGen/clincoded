@@ -209,15 +209,17 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
-        if (nextProps.assessmentTracker.currentVal == DEFAULT_VALUE) {
-            this.refs['assessment'].resetValue();
+        if (this.refs.assessment && nextProps.assessmentTracker && nextProps.assessmentTracker.currentVal == DEFAULT_VALUE) {
+            this.refs.assessment.resetValue();
         }
     },
 
     // Called when the dropdown value changes
     handleChange: function(assessmentTracker, e) {
-        var value = this.refs['assessment'].getValue();
-        this.props.updateValue(assessmentTracker, value);
+        if (this.refs.assessment) {
+            var value = this.refs.assessment.getValue();
+            this.props.updateValue(assessmentTracker, value);
+        }
     },
 
     render: function() {
