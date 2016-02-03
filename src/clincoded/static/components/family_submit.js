@@ -127,17 +127,17 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
             <div>
                 <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
                 <div className="container">
+                    {annotation && annotation.article ?
+                        <div className="curation-pmid-summary">
+                            <PmidSummary article={annotation.article} displayJournal />
+                        </div>
+                    : null}
                     {family ?
                         <div className="viewer-titles">
                             <h1>Family Information: {family.label} <a href={family['@id'] + '?gdm=' + gdm.uuid} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editFamilyLink} className="btn btn-info">Edit</a></h1>
                             {group ?
                                 <h2>{'Group association: ' + group.label}</h2>
                             : null}
-                        </div>
-                    : null}
-                    {annotation && annotation.article ?
-                        <div className="curation-pmid-summary">
-                            <PmidSummary article={annotation.article} displayJournal />
                         </div>
                     : null}
                     <div className="row">
