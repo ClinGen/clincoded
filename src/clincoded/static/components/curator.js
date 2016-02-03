@@ -159,52 +159,54 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <h2>{mode}</h2>
                             <div className="provisional-info-panel">
                                 <table border="1" style={{'width':'100%'}}>
-                                    <tr>
-                                        <td>
-                                            <div className="provisional-title">
-                                                <strong>Last Saved Summary & Provisional Classification</strong>
-                                            </div>
-                                            {   provisionalExist ?
-                                                    <div>
-                                                        <div className="provisional-data-left">
-                                                            <span>
-                                                                Last Saved Summary<br />
-                                                                Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                            </span>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div className="provisional-title">
+                                                    <strong>Last Saved Summary & Provisional Classification</strong>
+                                                </div>
+                                                {   provisionalExist ?
+                                                        <div>
+                                                            <div className="provisional-data-left">
+                                                                <span>
+                                                                    Last Saved Summary<br />
+                                                                    Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                                </span>
+                                                            </div>
+                                                            <div className="provisional-data-center">
+                                                                <span>
+                                                                    Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                    Provisional Classification: {provisional.alteredClassification}
+                                                                    { summaryPage ?
+                                                                        null
+                                                                        :
+                                                                        <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
+                                                                    }
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                        <div className="provisional-data-center">
-                                                            <span>
-                                                                Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                Provisional Classification: {provisional.alteredClassification}
-                                                                { summaryPage ?
-                                                                    null
-                                                                    :
-                                                                    <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
-                                                                }
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                :
-                                                    <div className="provisional-data-left"><span>No Reported Evidence</span></div>
-                                            }
-                                        </td>
-                                        <td className="button-box" rowSpan="2">
-                                            { summaryButton ?
-                                                ( summaryPage ?
-                                                    <button type="button" className="btn btn-primary" disabled="disabled">
-                                                        Generate New Summary
-                                                    </button>
                                                     :
-                                                    <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                                        { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
-                                                    </a>
-                                                )
-                                                :
-                                                null
-                                            }
-                                        </td>
-                                    </tr>
-                                    <tr style={{height:'10px'}}></tr>
+                                                        <div className="provisional-data-left"><span>No Reported Evidence</span></div>
+                                                }
+                                            </td>
+                                            <td className="button-box" rowSpan="2">
+                                                { summaryButton ?
+                                                    ( summaryPage ?
+                                                        <button type="button" className="btn btn-primary" disabled="disabled">
+                                                            Generate New Summary
+                                                        </button>
+                                                        :
+                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                            { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
+                                                        </a>
+                                                    )
+                                                    :
+                                                    null
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr style={{height:'10px'}}></tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -1753,7 +1755,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
             <div className="col-sm-5">&nbsp;</div>
             { title === 'Experimental' ?
                 <div className="col-sm-7 alert alert-warning">
-                    <p style={{'margin-bottom':'10px'}}>
+                    <p style={{'marginBottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) <strong>(required)</strong> using the Human Phenotype Ontology (HPO)
                         terms wherever possible (e.g. HP_0010704, HP_0030300). If no HPO code exists for a particular feature,
                         please describe it in the free text box instead.
@@ -1762,7 +1764,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
             : null }
             { title === 'Family' ?
                 <div className="col-sm-7">
-                    <p style={{'margin-bottom':'10px'}}>
+                    <p style={{'marginBottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) of the Family using the Human Phenotype Ontology (HPO)
                         terms wherever possible (e.g. HP_0010704, HP_0030300).
                         If no HPO code exists for a particular feature, please describe it in the free text box instead.
@@ -1771,7 +1773,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
             : null}
             { title === 'Individual' ?
                 <div className="col-sm-7">
-                    <p style={{'margin-bottom':'10px'}}>
+                    <p style={{'marginBottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) of the Individual using the Human Phenotype Ontology (HPO)
                         terms wherever possible (e.g. HP_0010704, HP_0030300).
                         If no HPO code exists for a particular feature, please describe it in the free text box instead.
