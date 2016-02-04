@@ -91,10 +91,10 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
 
-            //var i, j, k;
+            var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
             if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
-                for (var i in gdm.provisionalClassifications) {
+                for (i in gdm.provisionalClassifications) {
                     if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
                         provisionalExist = true;
                         provisional = gdm.provisionalClassifications[i];
@@ -106,14 +106,14 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
             var supportedVariants = getUserPathogenicity(gdm, session);
             if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && supportedVariants && supportedVariants.length > 0) {
-                for (var i in gdm.annotations) {
+                for (i in gdm.annotations) {
                     var annotation = gdm.annotations[i];
                     if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
                         summaryButton = true;
                         break;
                     }
                     if (!summaryButton && annotation.families && annotation.families.length > 0) {
-                        for (var j in annotation.families) {
+                        for (j in annotation.families) {
                             if (annotation.families[j].individualIncluded && annotation.families[j].individualIncluded.length > 0 &&
                                 searchProbandIndividual(annotation.families[j].individualIncluded, supportedVariants)) {
                                 summaryButton = true;
@@ -125,9 +125,9 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                         break;
                     }
                     else if (annotation.groups && annotation.groups.length > 0) {
-                        for (var j in annotation.groups) {
+                        for (j in annotation.groups) {
                             if (annotation.groups[j].familyIncluded && annotation.groups[j].familyIncluded.length > 0) {
-                                for (var k in annotation.groups[j].familyIncluded) {
+                                for (k in annotation.groups[j].familyIncluded) {
                                     if (annotation.groups[j].familyIncluded[k].individualIncluded && annotation.groups[j].familyIncluded[k].individualIncluded.length > 0 &&
                                         searchProbandIndividual(annotation.groups[j].familyIncluded[k].individualIncluded, supportedVariants)) {
                                         summaryButton = true;
@@ -328,7 +328,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             inCurrentGdm = userPathogenicity ? true : false;
 
                             return (
-                                <div className="col-sm-4" key={variant.uuid}>
+                                <div className="col-sm-4 col-md-4 col-lg-4" key={variant.uuid}>
                                     <a className="btn btn-primary btn-xs"
                                         href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}
                                         title={variantName}>
