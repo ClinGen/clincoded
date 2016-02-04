@@ -301,7 +301,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             var char_in_line = 46;
                             var nameDisplay;
                             //var blueBarStyle = null;
-                            if (variant.clinvarVariantTitle && variantName.length <= char_in_line) {
+                            if (variantName.length <= char_in_line) {
                                 nameDisplay = variantName;
                             } else {
                                 nameDisplay = variantName.substr(0, char_in_line-4) + ' ...';
