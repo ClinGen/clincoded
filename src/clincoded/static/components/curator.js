@@ -2124,9 +2124,9 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         label: React.PropTypes.object,
         labelVisible: React.PropTypes.bool,
         buttonText: React.PropTypes.string,
-        initialResourceId: React.PropTypes.string,
+        initialFormValue: React.PropTypes.string,
         fieldNum: React.PropTypes.string,
-        updateResourceForm: React.PropTypes.func,
+        updateParentForm: React.PropTypes.func,
         disabled: React.PropTypes.bool
     },
 
@@ -2150,8 +2150,8 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
                 <span className="col-sm-5 control-label">{this.props.labelVisible ? <label>{this.props.label}</label> : null}</span>
                 <span className="col-sm-7">
                 <Modal title="Add Resource Id" className="input-inline" modalClass="modal-default">
-                    <a className={"btn btn-default" + (this.props.disabled ? " disabled" : "")} modal={<AddResourceIdModal resourceType={this.props.resourceType} initialResourceId={this.props.initialResourceId}
-                        fieldNum={this.props.fieldNum} updateResourceForm={this.props.updateResourceForm} protocol={this.props.protocol} closeModal={this.closeModal} />}>
+                    <a className={"btn btn-default" + (this.props.disabled ? " disabled" : "")} modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue}
+                        fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} />}>
                             {this.props.buttonText}
                     </a>
                 </Modal>
@@ -2167,11 +2167,11 @@ var AddResourceIdModal = React.createClass({
 
     propTypes: {
         resourceType: React.PropTypes.string,
-        initialResourceId: React.PropTypes.string,
+        initialFormValue: React.PropTypes.string,
         fieldNum: React.PropTypes.string,
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateResourceForm: React.PropTypes.func // Function to call when we have an article to add to the GDM
+        updateParentForm: React.PropTypes.func // Function to call when submitting and closing the modal
     },
 
     contextTypes: {
@@ -2180,7 +2180,8 @@ var AddResourceIdModal = React.createClass({
 
     getInitialState: function() {
         return {
-            inputLoaded: '',
+            inputValue: '',
+            loadResourceButtonDisabled: true,
             submitBusy: false, // True while form is submitting
             loadingIcon: false,
             resourceFetched: false,
@@ -2228,7 +2229,7 @@ var AddResourceIdModal = React.createClass({
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         //var valid = this.validateDefault();
         this.setState({submitBusy: true, loadingIcon: true, resourceFetched: false});
-        var resourceId = this.state.inputLoaded;
+        var resourceId = this.state.inputValue;
         var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
         var data;
         this.getRestDataXml(url + resourceId).then(xml => {
@@ -2243,29 +2244,36 @@ var AddResourceIdModal = React.createClass({
     },
 
     submitResource: function(e) {
+        e.preventDefault(); e.stopPropagation();
         if (this.state.tempResource.clinvarVariantId) {
             this.getRestData('/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId).then(check => {
                 if (check.total) {
                     console.log('exists');
-                    this.props.updateResourceForm(check, this.props.fieldNum);
+                    this.props.updateParentForm(check, this.props.fieldNum);
                 } else {
                     console.log('does not exist');
                     this.postRestData('/variants/', this.state.tempResource).then(result => {
-                        this.props.updateResourceForm(result, this.props.fieldNum);
+                        this.props.updateParentForm(result, this.props.fieldNum);
                         this.props.closeModal();
                         console.log('in loop');
                     });
                 }
             });
         } else {
-            this.props.updateResourceForm(null, this.props.fieldNum);
+            this.props.updateParentForm(null, this.props.fieldNum);
             this.props.closeModal();
         }
     },
 
     handleChange: function(e) {
         if (this.refs.resourceId) {
-            this.setState({inputLoaded: this.refs.resourceId.getValue()});
+            var tempResourceId = this.refs.resourceId.getValue();
+            this.setState({inputValue: tempResourceId});
+            if (this.refs.resourceId.getValue().length > 0 && this.props.initialFormValue != tempResourceId) {
+                this.setState({loadResourceButtonDisabled: false});
+            } else {
+                this.setState({loadResourceButtonDisabled: true});
+            }
         }
     },
 
@@ -2282,27 +2290,25 @@ var AddResourceIdModal = React.createClass({
         return (
             <Form submitHandler={this.submitResource} formClassName="form-std">
                 <div className="modal-body">
-                    <Input type="text" ref="resourceId" label="Enter ResourceID" handleChange={this.handleChange} value={this.props.initialResourceId}
+                    <Input type="text" ref="resourceId" label="Enter ResourceID" handleChange={this.handleChange} value={this.props.initialFormValue}
                         error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')}
                         labelClassName="control-label" groupClassName="resource-input" required />
-                    <Input type="button" title="Find Resource" className="btn-default pull-right" clickHandler={this.submitForm} submitBusy={this.state.submitBusy} inputDisabled={this.state.inputLoaded.length == 0}/>
-                    {this.state.loadingIcon ?
-                        <p>Loading <i className="icon icon-spin icon-cog"></i></p>
-                    : null}
+                    <Input type="button-button" title="Find Resource" inputClassName="btn-default pull-right" clickHandler={this.submitForm} submitBusy={this.state.submitBusy} inputDisabled={this.state.loadResourceButtonDisabled}/>
+                    <div className="row">&nbsp;</div>
                     {this.state.resourceFetched ?
                     <span>
-                        <p>Is this what you meant?</p>
+                        <p>Is this the correct?:</p>
                         {this.state.tempResource.clinvarVariantTitle}
                     </span>
                     : null}
                 </div>
                 <div className='modal-footer'>
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
-                    {this.props.initialResourceId ?
-                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.submitResource} title="Reset" />
+                    {this.props.initialFormValue ?
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.submitResource} title="Clear" />
                     : null}
-                    <Input type="button" inputClassName={this.getFormError('resourceId') === null || this.getFormError('resourceId') === undefined || this.getFormError('resourceId') === '' ?
-                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} />
+                    <Input type="button-button" inputClassName={this.getFormError('resourceId') === null || this.getFormError('resourceId') === undefined || this.getFormError('resourceId') === '' ?
+                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Save" clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} />
                 </div>
             </Form>
         );

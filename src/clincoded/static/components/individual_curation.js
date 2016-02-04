@@ -1303,8 +1303,8 @@ var IndividualVariantInfo = function() {
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                                 <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]}
                                     buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit/Clear ClinVar ID" : "Search/Add ClinVar ID" }
-                                    initialResourceId={variant && variant.clinvarVariantId} fieldNum={String(i)}
-                                    updateResourceForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
+                                    initialFormValue={variant && variant.clinvarVariantId} fieldNum={String(i)}
+                                    updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
                                 <p className="col-sm-7 col-sm-offset-5">
                                     The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
                                 </p>
