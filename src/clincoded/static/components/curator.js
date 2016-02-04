@@ -2248,14 +2248,12 @@ var AddResourceIdModal = React.createClass({
         if (this.state.tempResource.clinvarVariantId) {
             this.getRestData('/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId).then(check => {
                 if (check.total) {
-                    console.log('exists');
                     this.props.updateParentForm(check, this.props.fieldNum);
+                    this.props.closeModal();
                 } else {
-                    console.log('does not exist');
                     this.postRestData('/variants/', this.state.tempResource).then(result => {
                         this.props.updateParentForm(result, this.props.fieldNum);
                         this.props.closeModal();
-                        console.log('in loop');
                     });
                 }
             });
