@@ -2288,14 +2288,14 @@ var AddResourceIdModal = React.createClass({
         return (
             <Form submitHandler={this.submitResource} formClassName="form-std">
                 <div className="modal-body">
-                    <Input type="text" ref="resourceId" label="Enter ResourceID" handleChange={this.handleChange} value={this.props.initialFormValue}
+                    <Input type="text" ref="resourceId" label="Enter Clinvar ID" handleChange={this.handleChange} value={this.props.initialFormValue}
                         error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')}
                         labelClassName="control-label" groupClassName="resource-input" required />
                     <Input type="button-button" title="Find Resource" inputClassName="btn-default pull-right" clickHandler={this.submitForm} submitBusy={this.state.submitBusy} inputDisabled={this.state.loadResourceButtonDisabled}/>
                     <div className="row">&nbsp;</div>
                     {this.state.resourceFetched ?
                     <span>
-                        <p>Is this the correct?:</p>
+                        <p>Is this the correct Clinvar entry?:</p>
                         {this.state.tempResource.clinvarVariantTitle}
                     </span>
                     : null}
