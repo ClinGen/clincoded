@@ -747,6 +747,13 @@ var IndividualCuration = React.createClass({
         this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
     },
 
+    updateClinvarVariantId: function(data) {
+        console.log('hey');
+        console.log(data);
+        console.log(this.refs);
+        this.refs['VARclinvarid0'].setValue(data['@graph'][0].clinvarVariantId);
+    },
+
     // After the Family Curation page component mounts, grab the GDM, group, family, and annotation UUIDs (as many as given)
     // from the query string and retrieve the corresponding objects from the DB, if they exist. Note, we have to do this after
     // the component mounts because AJAX DB queries can't be done from unmounted components.
@@ -1254,12 +1261,15 @@ var IndividualVariantInfo = function() {
                                         </p>
                                     </div>
                                 </div>
-                                <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
-                                    error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                                <Input type="text-range" labelClassName="col-sm-5 control-label" label={<LabelClinVarVariant />} wrapperClassName="col-sm-7">
+                                    <Input type="text" ref={'VARclinvarid' + i} groupClassName="resource-input" inputDisabled={true}
+                                        error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)} value={variant && variant.clinvarVariantId} />
+                                    <AddResourceId resourceType="clinvar" updateResourceForm={this.updateClinvarVariantId} />
+                                </Input>
+
+
                                 <p className="col-sm-7 col-sm-offset-5 input-note-below">
                                     The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
-                                    <AddResourceId resourceType="clinvar" />
                                 </p>
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />

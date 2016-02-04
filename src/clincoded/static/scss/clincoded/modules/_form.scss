@@ -75,6 +75,15 @@ input[type=search] {
     color: #2a2;
 }
 
+.resource-input {
+    display: inline-block;
+    width: 60%;
+}
+
+.resource-input-button {
+    display: inline-block;
+}
+
 // Group and Family Submit Result page styles
 .submit-results-panel {
     margin: 40px 0;
