@@ -16,7 +16,8 @@ function parseClinvar(xml){
         if ($VariationReport) {
             variant.clinvarVariantId = $VariationReport.getAttribute('VariationID');
             variant.clinvarVariantTitle = $VariationReport.getAttribute('VariationName');
-
+            /*
+            // code snippet for grabbing dbSNP from ClinVar. Disable for now
             var $Allele = $VariationReport.getElementsByTagName('Allele')[0];
             if ($Allele) {
                 var $XRefList = $Allele.getElementsByTagName('XRefList')[0];
@@ -27,6 +28,7 @@ function parseClinvar(xml){
                     }
                 }
             }
+            */
         }
     }
 
