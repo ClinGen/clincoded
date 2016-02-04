@@ -193,14 +193,26 @@
     },
     {
         "uuid": "31353737-0973-41ec-8985-8f7eccaaf5da",
-        "clinvarVariantId": "157591",
+        "clinvarVariantId": "9492",
         "dbSNPId": "",
-        "clinVarRCV": "RCV000144919",
-        "clinvarVariantTitle": "NC_000018.10:g.657646_657673CCGCGCCACTTGGCCTGCCTCCGTCCCG[2][3][4][7][8][9]",
+        "clinVarRCV": "RCV000010100",
+        "clinvarVariantTitle": "NM_005502.3(ABCA1):c.1584_1597delTGAGAGGAAGTTCTinsCGGGCGTGGTGGCAGGAGCTGTAATCCCAGCTACTTGGGAGGCTGAGGCACGAGAATCACTTGAACTCAGGAGGCAGAGGTTGCAGTGAGCTGAGGTCACGCCACTGTAC (p.Glu529_Gly867delinsGlyArgGlyGlyArgSerCysAsnProSerTyrLeuGlyGlyTer)",
         "hgvsNames": [],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-10-21T22:47:10.000000+00:00",
         "last_modified": "2015-10-22T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "2bc9e95e-fba8-4b11-b16e-56514f5e6260",
+        "clinvarVariantId": "90973",
+        "dbSNPId": "",
+        "clinVarRCV": "RCV000076475",
+        "clinvarVariantTitle": "NM_000251.2(MSH2):c.243_273del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG (p.Lys82_Glu425delinsTer)",
+        "hgvsNames": [],
+        "otherDescription": "",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-02-02T22:47:10.000000+00:00",
+        "last_modified": "2015-02-02T22:59:10.000000+00:00"
     }
 ]

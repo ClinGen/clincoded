@@ -91,29 +91,29 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
 
-            var i, j, k;
+            //var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
             if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
-                gdm.provisionalClassifications.forEach(this_provisional => {
-                    if (userMatch(this_provisional.submitted_by, session)) {
+                for (var i in gdm.provisionalClassifications) {
+                    if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
                         provisionalExist = true;
-                        provisional = this_provisional;
-                        //break;
+                        provisional = gdm.provisionalClassifications[i];
+                        break;
                     }
-                });
+                }
             }
 
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
             var supportedVariants = getUserPathogenicity(gdm, session);
             if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && supportedVariants && supportedVariants.length > 0) {
-                for (i in gdm.annotations) {
+                for (var i in gdm.annotations) {
                     var annotation = gdm.annotations[i];
                     if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
                         summaryButton = true;
                         break;
                     }
                     if (!summaryButton && annotation.families && annotation.families.length > 0) {
-                        for (j in annotation.families) {
+                        for (var j in annotation.families) {
                             if (annotation.families[j].individualIncluded && annotation.families[j].individualIncluded.length > 0 &&
                                 searchProbandIndividual(annotation.families[j].individualIncluded, supportedVariants)) {
                                 summaryButton = true;
@@ -125,9 +125,9 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                         break;
                     }
                     else if (annotation.groups && annotation.groups.length > 0) {
-                        for (j in annotation.groups) {
+                        for (var j in annotation.groups) {
                             if (annotation.groups[j].familyIncluded && annotation.groups[j].familyIncluded.length > 0) {
-                                for (k in annotation.groups[j].familyIncluded) {
+                                for (var k in annotation.groups[j].familyIncluded) {
                                     if (annotation.groups[j].familyIncluded[k].individualIncluded && annotation.groups[j].familyIncluded[k].individualIncluded.length > 0 &&
                                         searchProbandIndividual(annotation.groups[j].familyIncluded[k].individualIncluded, supportedVariants)) {
                                         summaryButton = true;
@@ -258,14 +258,16 @@ var all_in = function(individualVariantList, allSupportedlist) {
 
 // function to find one proband individual with all variants assessed.
 var searchProbandIndividual = function(individualList, variantList) {
-    individualList.forEach(individual => {
-        if (individual.proband && individual.variants && individual.variants.length > 0 && all_in(individual.variants, variantList)) {
+    //individualList.forEach(individual => {
+    //    if (individual.proband && individual.variants && individual.variants.length > 0 && all_in(individual.variants, variantList)) {
+    //        return true;
+    //    }
+    //});
+    for (var i in individualList) {
+        if (individualList[i].proband && individualList[i].variants && individualList[i].variants.length > 0 && all_in(individualList[i].variants, variantList)) {
             return true;
         }
-    });
-    //for (var i in individualList) {
-
-    //}
+    }
     return false;
 };
 
@@ -294,14 +296,17 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             var variant = collectedVariants[variantId];
                             var variantName = variant.clinvarVariantTitle ? variant.clinvarVariantTitle :
                                 (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
-                            var blueBarStyle = null;
-                            if (variantName.length > 50) {
-                                //variantName = variantName.substring(0, variantName.length/2) + ' ' + variantName.substring(variantName.length/2, variantName.length);
-                                //_.range(row_num).map(i => {
-
-                                //});
+                            // shorten long title
+                            // 46 char max
+                            var char_in_line = 46;
+                            var nameDisplay;
+                            //var blueBarStyle = null;
+                            if (variant.clinvarVariantTitle && variantName.length <= char_in_line) {
+                                nameDisplay = variantName;
+                            } else {
+                                nameDisplay = variantName.substr(0, char_in_line-4) + ' ...';
                             }
-                            //var variantName = variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 20);
+
                             var userPathogenicity = null;
 
                             // See if the variant has a pathogenicity curated in the current GDM
@@ -324,13 +329,12 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
 
                             return (
                                 <div className="col-sm-4" key={variant.uuid}>
-                                        <div className="btn btn-primary btn-xs" style={{'color':'#fff', 'word-wrap':'normal'}}>
-                                            <span>{inCurrentGdm ? <i className="icon icon-sticky-note"></i> : null}</span>
-                                            <a style={{'color':'#fff', 'word-wrap':'normal'}}
-                                                href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}>
-                                                {variantName.length <= 50 ? variantName : <span>{variantName.substring(0, variantName.length/2)}<br />{variantName.substring(variantName.length/2, variantName.length)}</span>}
-                                            </a>
-                                        </div>
+                                    <a className="btn btn-primary btn-xs"
+                                        href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}
+                                        title={variantName}>
+                                        {nameDisplay}
+                                        {inCurrentGdm ? <i className="icon icon-sticky-note"></i> : null}
+                                    </a>
                                 </div>
                             );
                         })}
