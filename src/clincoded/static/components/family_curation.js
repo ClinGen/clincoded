@@ -578,7 +578,7 @@ var FamilyCuration = React.createClass({
             // family with proabnd can not delete all variant
             if (this.state.probandIndividual && this.getFormValue('genotype') === 'none') {
                 formError = true;
-                this.setFormErrors('genotype', 'A proband individual with variant(s) exists, please select Dominant, Homozygous Recessive or Compound Heterozygous.');
+                this.setFormErrors('genotype', 'A proband individual with variant(s) exists. Please select Dominant, Homozygous Recessive or Compound Heterozygous.');
             }
 
             if (!formError) {
