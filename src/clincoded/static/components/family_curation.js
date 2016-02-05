@@ -575,6 +575,12 @@ var FamilyCuration = React.createClass({
                 this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
             }
 
+            // family with proabnd can not delete all variant
+            if (this.state.probandIndividual && this.getFormValue('genotype') === 'none') {
+                formError = true;
+                this.setFormErrors('genotype', 'A proband individual with variant(s) exists, please select Dominant, Homozygous Recessive or Compound Heterozygous.');
+            }
+
             if (!formError) {
                 // Build search string from given ORPHA IDs, empty string if no Orphanet id entered.
                 var searchStr;
@@ -1600,18 +1606,18 @@ var FamilyVariant = function() {
             <div className="variant-panel">
                 <div className="col-sm-7 col-sm-offset-5">
                     <p className="alert alert-warning">
-                        Please select genotype condition. If select Compound Heterozygous, you must enter 2 variants believed to be causative for the disease in order
-                        that each may be associated with the Individual and assessed. Additionally, each variant must be assessed as supports for the Individual to be counted.
+                        Please select the inheritance mode for this segregation from the following pull-down. The number of variants that must be entered for each mode of inheritance is
+                        indicated next to the inheritance name. Note that <strong>each variant must be assessed as supports</strong> for the Individual to be counted.
                     </p>
                 </div>
                 <div className="row">
-                    <Input type="select" ref="genotype" label="Genotype:" defaultValue="none" value={genotype}
+                    <Input type="select" ref="genotype" label="Mode of Inheritance:" defaultValue="none" value={genotype} error={this.getFormError('genotype')} clearError={this.clrFormErrors.bind(null, 'genotype')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
                         {this.state.preR4Edit ? <option value="none">Plesae select Dominant or Homozygous Recessive</option> : <option value="none">No Selection</option>}
                         <option disabled="disabled"></option>
-                        <option>Dominant</option>
-                        <option>Homozygous Recessive</option>
-                        {!this.state.preR4Edit ? <option>Compound Heterozygous</option> : null}
+                        <option value="Dominant">Dominant (enter 1 variant)</option>
+                        <option value="Homozygous Recessive">Homozygous Recessive (enter 1 variant)</option>
+                        {!this.state.preR4Edit ? <option value="Compound Heterozygous">Compound Heterozygous (enter 2 variants)</option> : null}
                     </Input>
                 </div>
             </div>
@@ -2056,7 +2062,7 @@ var FamilyViewer = React.createClass({
                             <div>
                                 <dl className="dl-horizontal">
                                     <div>
-                                        <dt>Genotype</dt>
+                                        <dt>Mode of Inheritance</dt>
                                         <dd>{genotype ? genotype : null}</dd>
                                     </div>
                                 </dl>

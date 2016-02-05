@@ -1274,12 +1274,12 @@ var IndividualVariantInfo = function() {
             {individual && individual.proband && family ?
                 <div>
                     <p>
-                        Variant(s) for a proband associated with a Family can only be edited through the Family page:
+                        Variant(s) for a proband associated with a Family can only be edited through the Family page:&nbsp;
                         <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a>
                     </p>
                     <dl className="dl-horizontal">
                         <div>
-                            <dt>Genotype</dt>
+                            <dt>Mode of Inheritance</dt>
                             <dd>{individual.genotype ? individual.genotype : ''}</dd>
                         </div>
                     </dl>
@@ -1306,17 +1306,17 @@ var IndividualVariantInfo = function() {
             <div>
                 <div className="col-sm-7 col-sm-offset-5">
                     <p className="alert alert-warning">
-                        Please select genotype condition. If select Heterozygous Recessive, you must enter 2 variants believed to be causative for the disease in order
-                        that each may be associated with the Individual and assessed. Additionally, each variant must be assessed as supports for the Individual to be counted.
+                        Please select the inheritance mode for this segregation from the following pull-down. The number of variants that must be entered for each mode of inheritance is
+                        indicated next to the inheritance name. Note that <strong>each variant must be assessed as supports</strong> for the Individual to be counted.
                     </p>
                 </div>
-                <Input type="select" ref="genotype" label="Genotype:" defaultValue="none" value={individual && individual.genotype ? individual.genotype : 'none'}
+                <Input type="select" ref="genotype" label="Mode of Inheritance:" defaultValue="none" value={individual && individual.genotype ? individual.genotype : 'none'}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Dominant</option>
-                    <option>Homozygous Recessive</option>
-                    <option>Compound Heterozygous</option>
+                    <option value="Dominant">Dominant (enter 1 variant)</option>
+                    <option value="Homozygous Recessive">Homozygous Recessive (enter 1 variant)</option>
+                    <option value="Compound Heterozygous">Compound Heterozygous (enter 2 variants)</option>
                 </Input>
                 {_.range(this.state.variantCount).map(i => {
                     var variant;
@@ -1617,7 +1617,7 @@ var IndividualViewer = React.createClass({
                             <div>
                                 <dl className="dl-horizontal">
                                     <div>
-                                        <dt>Genotype</dt>
+                                        <dt>Mode of Inheritance</dt>
                                         <dd>{genotype ? genotype : null}</dd>
                                     </div>
                                 </dl>
