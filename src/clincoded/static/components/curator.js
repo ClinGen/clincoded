@@ -1755,7 +1755,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
                 <div className="col-sm-7 alert alert-warning">
                     <p style={{'margin-bottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) <strong>(required)</strong> using the Human Phenotype Ontology (HPO)
-                        terms wherever possible (e.g. HP_0010704, HP_0030300). If no HPO code exists for a particular feature,
+                        terms wherever possible (e.g. HP:0010704, HP:0030300). If no HPO code exists for a particular feature,
                         please describe it in the free text box instead.
                     </p>
                 </div>
@@ -1764,7 +1764,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
                 <div className="col-sm-7">
                     <p style={{'margin-bottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) of the Family using the Human Phenotype Ontology (HPO)
-                        terms wherever possible (e.g. HP_0010704, HP_0030300).
+                        terms wherever possible (e.g. HP:0010704, HP:0030300).
                         If no HPO code exists for a particular feature, please describe it in the free text box instead.
                     </p>
                 </div>
@@ -1773,7 +1773,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
                 <div className="col-sm-7">
                     <p style={{'margin-bottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) of the Individual using the Human Phenotype Ontology (HPO)
-                        terms wherever possible (e.g. HP_0010704, HP_0030300).
+                        terms wherever possible (e.g. HP:0010704, HP:0030300).
                         If no HPO code exists for a particular feature, please describe it in the free text box instead.
                     </p>
                 </div>
@@ -1820,6 +1820,13 @@ var renderMutalyzerLink = module.exports.renderMutalyzerLink = function() {
         <p className="col-sm-7 col-sm-offset-5 mutalyzer-link">
             (e.g. HGVS, RCV, refSNP (rs) ID)<br />For help in verifying, generating or converting to HGVS nomenclature, please visit <a href='https://mutalyzer.nl/' target='_blank'>Mutalyzer</a>.
         </p>
+    );
+};
+
+// A note underneath the Group/Family/Individual label input field
+var renderLabelNote = module.exports.renderLabelNote = function(label) {
+    return (
+        <span className="curation-label-note">Please enter a label to help you keep track of this {label} within the interface - if possible, please use the label described in the paper.</span>
     );
 };
 
