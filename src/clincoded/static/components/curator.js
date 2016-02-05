@@ -2137,7 +2137,7 @@ var DeleteButtonModal = React.createClass({
                     </div>
                 <div className="modal-footer">
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
-                    <Input type="button" inputClassName="btn-danger btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
+                    <Input type="button-button" inputClassName="btn-danger btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
                 </div>
             </div>
         );
@@ -2218,89 +2218,36 @@ var AddResourceIdModal = React.createClass({
     getInitialState: function() {
         return {
             inputValue: '',
-            loadResourceButtonDisabled: true,
-            submitBusy: false, // True while form is submitting
-            loadingIcon: false,
+            queryResourceDisabled: true,
+            queryResourceBusy: false, // True while form is submitting
             resourceFetched: false,
-            tempResource: {}
+            tempResource: {},
+            submitResourceBusy: false
         };
-    },
-
-    // Form content validation
-    validateForm: function() {
-        // Start with default validation
-        var valid = this.validateDefault();
-        var formInput = this.getFormValue('resourceId');
-
-        // valid if input isn't zero-filled
-        if (valid && formInput.match(/^0+$/)) {
-            valid = false;
-            this.setFormErrors('resourceId', 'This PMID does not exist');
-        }
-        // valid if input isn't zero-leading
-        if (valid && formInput.match(/^0+/)) {
-            valid = false;
-            this.setFormErrors('resourceId', 'Please re-enter PMID without any leading 0\'s');
-        }
-        // valid if the input only has numbers
-        if (valid && !formInput.match(/^[0-9]*$/)) {
-            valid = false;
-            this.setFormErrors('resourceId', 'Only numbers allowed');
-        }
-        // valid if input isn't already associated with GDM
-        if (valid) {
-            for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
-                if (this.props.currGdm.annotations[i].article.pmid == formInput) {
-                    valid = false;
-                    this.setFormErrors('resourceId', 'This article has already been associated with this Gene-Disease Record');
-                }
-            }
-        }
-
-        return valid;
     },
 
     // Called when the modal form’s submit button is clicked. Handles validation and triggering
     // the process to add an article.
-    submitForm: function(e) {
+    queryResource: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        //var valid = this.validateDefault();
-        this.setState({submitBusy: true, loadingIcon: true, resourceFetched: false});
-        var resourceId = this.state.inputValue;
-        var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
-        var data;
-        this.getRestDataXml(url + resourceId).then(xml => {
-            data = parseClinvar(xml);
-            if (data.clinvarVariantId) {
-                // Got results we want
-                this.setState({submitBusy: false, tempResource: data, resourceFetched: true, loadingIcon: false});
-            } else {
-                //this.setFormErrors('resourceId', 'ClinVar ID not found');
-                setErrorTest.apply(this, ['resourceId', 'ClinVar ID not found']);
-                this.setState({submitBusy: false, resourceFetched: false, loadingIcon: false});
-            }
-        });
+        this.setState({queryResourceBusy: true, resourceFetched: false});
+
+        // Apply queryResource logic depending on resourceType
+        switch(this.props.resourceType) {
+            case 'clinvar':
+                clinvarQueryResource.call(this);
+                break;
+        }
     },
 
     submitResource: function(e) {
         e.preventDefault(); e.stopPropagation();
-        if (this.state.tempResource.clinvarVariantId) {
-            this.getRestData('/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId).then(check => {
-                if (check.total) {
-                    this.getRestData(check['@graph'][0]['@id']).then(result => {
-                        this.props.updateParentForm(result, this.props.fieldNum);
-                        this.props.closeModal();
-                    });
-                } else {
-                    this.postRestData('/variants/', this.state.tempResource).then(result => {
-                        this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
-                        this.props.closeModal();
-                    });
-                }
-            });
-        } else {
-            this.props.updateParentForm(null, this.props.fieldNum);
-            this.props.closeModal();
+
+        // Apply submitResource logic depending on resourceType
+        switch(this.props.resourceType) {
+            case 'clinvar':
+                clinvarSubmitResource.call(this);
+                break;
         }
     },
 
@@ -2309,9 +2256,9 @@ var AddResourceIdModal = React.createClass({
             var tempResourceId = this.refs.resourceId.getValue();
             this.setState({inputValue: tempResourceId, resourceFetched: false, tempResource: {}});
             if (this.refs.resourceId.getValue().length > 0) {
-                this.setState({loadResourceButtonDisabled: false});
+                this.setState({queryResourceDisabled: false});
             } else {
-                this.setState({loadResourceButtonDisabled: true});
+                this.setState({queryResourceDisabled: true});
             }
         }
     },
@@ -2332,7 +2279,7 @@ var AddResourceIdModal = React.createClass({
                     <Input type="text" ref="resourceId" label="Enter Clinvar ID" handleChange={this.handleChange} value={this.props.initialFormValue}
                         error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')}
                         labelClassName="control-label" groupClassName="resource-input" required />
-                    <Input type="button-button" title="Find Resource" inputClassName={(this.state.loadResourceButtonDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.submitForm} submitBusy={this.state.submitBusy} inputDisabled={this.state.loadResourceButtonDisabled}/>
+                    <Input type="button-button" title="Find Resource" inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
                     <div className="row">&nbsp;</div>
                     {this.state.resourceFetched ?
                     <span>
@@ -2344,13 +2291,74 @@ var AddResourceIdModal = React.createClass({
                 <div className='modal-footer'>
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="button-button" inputClassName={this.getFormError('resourceId') === null || this.getFormError('resourceId') === undefined || this.getFormError('resourceId') === '' ?
-                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Save" clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} />
+                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Save" clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} submitBusy={this.state.submitResourceBusy} />
                 </div>
             </Form>
         );
     }
 });
 
-function setErrorTest(target, line) {
-    this.setFormErrors(target, line);
+// Logic for resource type 'clinvar' for AddResource modal
+function clinvarValidateForm() {
+    // Start with default validation
+    var valid = this.validateDefault();
+    var formInput = this.getFormValue('resourceId');
+
+    // valid if input isn't zero-filled
+    if (valid && formInput.match(/^0+$/)) {
+        valid = false;
+        this.setFormErrors('resourceId', 'Invalid ClinVar ID');
+    }
+    // valid if input isn't zero-leading
+    if (valid && formInput.match(/^0+/)) {
+        valid = false;
+        this.setFormErrors('resourceId', 'Please re-enter ClinVar ID without any leading 0\'s');
+
+    }
+    // valid if the input only has numbers
+    if (valid && !formInput.match(/^[0-9]*$/)) {
+        valid = false;
+        this.setFormErrors('resourceId', 'Only numbers allowed');
+    }
+    return valid;
+}
+function clinvarQueryResource() {
+    this.saveFormValue('resourceId', this.state.inputValue);
+    if (clinvarValidateForm.call(this)) {
+        var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
+        var data;
+        var id = this.state.inputValue;
+        this.getRestDataXml(url + id).then(xml => {
+            data = parseClinvar(xml);
+            if (data.clinvarVariantId) {
+                // Got results we want
+                this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+            } else {
+                this.setFormErrors('resourceId', 'ClinVar ID not found');
+                this.setState({queryResourceBusy: false, resourceFetched: false});
+            }
+        });
+    } else {
+        this.setState({queryResourceBusy: false});
+    }
+}
+function clinvarSubmitResource() {
+    this.setState({submitResourceBusy: true});
+    if (this.state.tempResource.clinvarVariantId) {
+        this.getRestData('/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId).then(check => {
+            if (check.total) {
+                this.getRestData(check['@graph'][0]['@id']).then(result => {
+                    this.props.updateParentForm(result, this.props.fieldNum);
+                    this.setState({submitResourceBusy: false});
+                    this.props.closeModal();
+                });
+            } else {
+                this.postRestData('/variants/', this.state.tempResource).then(result => {
+                    this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
+                    this.setState({submitResourceBusy: false});
+                    this.props.closeModal();
+                });
+            }
+        });
+    }
 }
