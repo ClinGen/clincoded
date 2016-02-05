@@ -1230,9 +1230,10 @@ var FamilyName = function(displayNote) {
 
     return (
         <div className="row">
-            <Input type="text" ref="familyname" label="Family Name:" value={family && family.label} handleChange={this.handleChange}
+            <Input type="text" ref="familyname" label="Family Label:" value={family && family.label} handleChange={this.handleChange}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote('Family')}</p>
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one family with IDENTICAL information, you can indicate this at the bottom of this form.</p>
             : null}
@@ -1525,7 +1526,7 @@ var FamilyVariant = function() {
                 <div className="row">
                     <p className="col-sm-7 col-sm-offset-5">
                         To create and have the option to count a proband associated with a variant(s) for this Family, you need to add variant information in this section.
-                        The proband (an Individual) will be created upon submission using the name you supply here. You will be able to add additional information about the proband
+                        The proband (an Individual) will be created upon submission using the label you supply here. You will be able to add additional information about the proband
                         following submission of Family information.
                     </p>
                     <p className="col-sm-7 col-sm-offset-5">
@@ -1564,7 +1565,7 @@ var FamilyVariant = function() {
             })}
             {this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired ?
                 <div className="variant-panel clearfix">
-                    <Input type="text" ref="individualname" label="Individual Name"
+                    <Input type="text" ref="individualname" label="Individual Label"
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
                     {this.state.orpha ?

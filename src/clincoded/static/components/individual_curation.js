@@ -933,10 +933,12 @@ var IndividualName = function(displayNote) {
                 </p>
             </div>
             : null}
-            <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
-                error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field</p>
+            <div className="clearfix">
+                <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
+                    error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
+            </div>
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one individual with IDENTICAL information, you can indicate this at the bottom of this form.</p>
             : null}
@@ -962,7 +964,7 @@ var IndividualName = function(displayNote) {
 // HTML labels for inputs follow.
 var LabelIndividualName = React.createClass({
     render: function() {
-        return <span>{this.props.probandLabel}Individual Name:</span>;
+        return <span>{this.props.probandLabel}Individual Label:</span>;
     }
 });
 
@@ -985,7 +987,7 @@ var IndividualCount = function() {
             </Input>
             {_.range(this.state.extraIndividualCount).map(i => {
                 return (
-                    <Input key={i} type="text" ref={'extraindividualname' + i} label={'Individual Name ' + (i + 2)}
+                    <Input key={i} type="text" ref={'extraindividualname' + i} label={'Individual Label ' + (i + 2)}
                         error={this.getFormError('extraindividualname' + i)} clearError={this.clrFormErrors.bind(null, 'extraindividualname' + i)}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
                 );
@@ -1390,7 +1392,7 @@ var IndividualViewer = React.createClass({
                         <div className="viewer-titles">
                             <h1>View Individual: {individual.label}{probandLabel}</h1>
                             <h2>
-                                {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempGdm : '')}><i className="icon icon-briefcase"></i></a> : null}
+                                {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                 {groupRenders.length ?
                                     <span> // Group {groupRenders}</span>
                                 : null}
