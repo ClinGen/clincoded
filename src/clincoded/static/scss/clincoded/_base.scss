@@ -38,7 +38,7 @@ textarea.form-control {
 }
 
 .btn-primary {
-    border: none;
+    border: $color-btn;
     background-color: $color-btn;
 
     &:hover {

@@ -2275,7 +2275,8 @@ var AddResourceIdModal = React.createClass({
                 // Got results we want
                 this.setState({submitBusy: false, tempResource: data, resourceFetched: true, loadingIcon: false});
             } else {
-                this.setFormErrors('resourceId', 'ClinVar ID not found');
+                //this.setFormErrors('resourceId', 'ClinVar ID not found');
+                setErrorTest.apply(this, ['resourceId', 'ClinVar ID not found']);
                 this.setState({submitBusy: false, resourceFetched: false, loadingIcon: false});
             }
         });
@@ -2306,8 +2307,8 @@ var AddResourceIdModal = React.createClass({
     handleChange: function(e) {
         if (this.refs.resourceId) {
             var tempResourceId = this.refs.resourceId.getValue();
-            this.setState({inputValue: tempResourceId});
-            if (this.refs.resourceId.getValue().length > 0 && this.props.initialFormValue != tempResourceId) {
+            this.setState({inputValue: tempResourceId, resourceFetched: false, tempResource: {}});
+            if (this.refs.resourceId.getValue().length > 0) {
                 this.setState({loadResourceButtonDisabled: false});
             } else {
                 this.setState({loadResourceButtonDisabled: true});
@@ -2331,12 +2332,12 @@ var AddResourceIdModal = React.createClass({
                     <Input type="text" ref="resourceId" label="Enter Clinvar ID" handleChange={this.handleChange} value={this.props.initialFormValue}
                         error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')}
                         labelClassName="control-label" groupClassName="resource-input" required />
-                    <Input type="button-button" title="Find Resource" inputClassName="btn-default pull-right" clickHandler={this.submitForm} submitBusy={this.state.submitBusy} inputDisabled={this.state.loadResourceButtonDisabled}/>
+                    <Input type="button-button" title="Find Resource" inputClassName={(this.state.loadResourceButtonDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.submitForm} submitBusy={this.state.submitBusy} inputDisabled={this.state.loadResourceButtonDisabled}/>
                     <div className="row">&nbsp;</div>
                     {this.state.resourceFetched ?
                     <span>
                         <p>Is this the correct Clinvar entry?:</p>
-                        {this.state.tempResource.clinvarVariantTitle}
+                        <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
                     </span>
                     : null}
                 </div>
@@ -2349,3 +2350,7 @@ var AddResourceIdModal = React.createClass({
         );
     }
 });
+
+function setErrorTest(target, line) {
+    this.setFormErrors(target, line);
+}
