@@ -2247,6 +2247,7 @@ var AddResourceIdModal = React.createClass({
                 // Got results we want
                 this.setState({submitBusy: false, tempResource: data, resourceFetched: true, loadingIcon: false});
             } else {
+                this.setFormErrors('resourceId', 'ClinVar ID not found');
                 this.setState({submitBusy: false, resourceFetched: false, loadingIcon: false});
             }
         });
