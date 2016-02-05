@@ -781,7 +781,6 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session, wi
 
     return (
         <div className="panel-evidence-group">
-            <span>{winWidth}</span>
             <h5><a href={vCurationURL} title={variantTitle}>{variantDisplay}</a></h5>
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
