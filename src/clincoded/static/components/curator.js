@@ -2160,16 +2160,16 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
 
     getInitialState: function() {
         return {
-            noticeVisible: false // True while form is submitting
+            txtModalTitle: ''
         };
     },
 
-    showNotice: function() {
-        this.setState({noticeVisible: true});
-    },
-
-    hideNotice: function() {
-        this.setState({noticeVisible: false});
+    componentDidMount: function() {
+        switch(this.props.resourceType) {
+            case 'clinvar':
+                this.setState({txtModalTitle: clinvarTxt('modalTitle')});
+                break;
+        }
     },
 
     resetForm: function(e) {
@@ -2178,11 +2178,11 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
 
     render: function() {
         return (
-            <div>
+            <div className="form-group">
                 <span className="col-sm-5 control-label">{this.props.labelVisible ? <label>{this.props.label}</label> : null}</span>
                 <span className="col-sm-7">
                 <div className="delete-button-wrapper">
-                    <Modal title="Add Resource Id" className="input-inline" modalClass="modal-default">
+                    <Modal title={this.state.txtModalTitle} className="input-inline" modalClass="modal-default">
                         <a className={"btn btn-default" + (this.props.disabled ? " disabled" : "")} modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue}
                             fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} />}>
                                 {this.props.buttonText}
@@ -2217,6 +2217,10 @@ var AddResourceIdModal = React.createClass({
 
     getInitialState: function() {
         return {
+            txtInputLabel: '',
+            txtInputButton: '',
+            txtHelpText: '',
+            txtResourceResponse: '',
             inputValue: '',
             queryResourceDisabled: true,
             queryResourceBusy: false, // True while form is submitting
@@ -2226,12 +2230,24 @@ var AddResourceIdModal = React.createClass({
         };
     },
 
+    componentDidMount: function() {
+        switch(this.props.resourceType) {
+            case 'clinvar':
+                this.setState({
+                    txtInputLabel: clinvarTxt('inputLabel'),
+                    txtInputButton: clinvarTxt('inputButton'),
+                    txtHelpText: clinvarTxt('helpText'),
+                    txtResourceResponse: clinvarTxt('resourceResponse')
+                });
+                break;
+        }
+    },
+
     // Called when the modal form’s submit button is clicked. Handles validation and triggering
     // the process to add an article.
     queryResource: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.setState({queryResourceBusy: true, resourceFetched: false});
-
         // Apply queryResource logic depending on resourceType
         switch(this.props.resourceType) {
             case 'clinvar':
@@ -2242,7 +2258,6 @@ var AddResourceIdModal = React.createClass({
 
     submitResource: function(e) {
         e.preventDefault(); e.stopPropagation();
-
         // Apply submitResource logic depending on resourceType
         switch(this.props.resourceType) {
             case 'clinvar':
@@ -2276,14 +2291,17 @@ var AddResourceIdModal = React.createClass({
         return (
             <Form submitHandler={this.submitResource} formClassName="form-std">
                 <div className="modal-body">
-                    <Input type="text" ref="resourceId" label="Enter Clinvar ID" handleChange={this.handleChange} value={this.props.initialFormValue}
+                    <Input type="text" ref="resourceId" label={this.state.txtInputLabel} handleChange={this.handleChange} value={this.props.initialFormValue}
                         error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')}
                         labelClassName="control-label" groupClassName="resource-input" required />
-                    <Input type="button-button" title="Find Resource" inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
-                    <div className="row">&nbsp;</div>
+                    <Input type="button-button" title={this.state.txtInputButton} inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
+                    <div className="row">&nbsp;<br />&nbsp;</div>
+                    <span>
+                    <p className="alert alert-info">{this.state.txtHelpText}</p>
+                    </span>
                     {this.state.resourceFetched ?
                     <span>
-                        <p>Is this the correct Clinvar entry?:</p>
+                        <p>{this.state.txtResourceResponse}</p>
                         <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
                     </span>
                     : null}
@@ -2298,7 +2316,28 @@ var AddResourceIdModal = React.createClass({
     }
 });
 
-// Logic for resource type 'clinvar' for AddResource modal
+// Logic and helper functions for resource type 'clinvar' for AddResource modal
+function clinvarTxt(field) {
+    var txt;
+    switch(field) {
+        case 'modalTitle':
+            txt = 'ClinVar Variant';
+            break;
+        case 'inputLabel':
+            txt = 'Enter ClinVar Variation ID';
+            break;
+        case 'inputButton':
+            txt = 'Retrieve from ClinVar';
+            break;
+        case 'helpText':
+            txt = <span>You must enter a ClinVar VariationID. The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).</span>
+            break;
+        case 'resourceResponse':
+            txt = "This is the ClinVar Preferred Title for the VariationID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
+            break;
+    }
+    return txt;
+}
 function clinvarValidateForm() {
     // Start with default validation
     var valid = this.validateDefault();

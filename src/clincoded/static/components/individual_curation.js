@@ -1302,12 +1302,9 @@ var IndividualVariantInfo = function() {
                                     error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                                 <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]}
-                                    buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit/Clear ClinVar ID" : "Search/Add ClinVar ID" }
+                                    buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" }
                                     initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                                     updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
-                                <p className="col-sm-7 col-sm-offset-5">
-                                    The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
-                                </p>
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                 {curator.renderMutalyzerLink()}
