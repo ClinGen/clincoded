@@ -763,8 +763,8 @@ var IndividualCuration = React.createClass({
             }
 
             // Update the form and display values with new data
-            this.refs['VARclinvarid' + fieldNum].setValue(data['@graph'][0].clinvarVariantId);
-            newVariantInfo[fieldNum] = {'clinvarVariantId': data['@graph'][0].clinvarVariantId, 'clinvarVariantTitle': data['@graph'][0].clinvarVariantTitle};
+            this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
+            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
             // Disable the 'Other description' textarea
             this.refs['VARothervariant' + fieldNum].resetValue();
             currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
@@ -1303,7 +1303,7 @@ var IndividualVariantInfo = function() {
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                                 <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]}
                                     buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit/Clear ClinVar ID" : "Search/Add ClinVar ID" }
-                                    initialFormValue={variant && variant.clinvarVariantId} fieldNum={String(i)}
+                                    initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                                     updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
                                 <p className="col-sm-7 col-sm-offset-5">
                                     The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
