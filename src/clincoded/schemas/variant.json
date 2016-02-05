@@ -46,8 +46,7 @@
             "default": [],
             "items": {
                 "title": "HGVS Name",
-                "type": "string",
-                "default": ""
+                "type": "string"
             }
         },
         "otherDescription": {

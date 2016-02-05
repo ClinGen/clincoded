@@ -1600,6 +1600,13 @@ function flattenIndividual(individual) {
         });
     }
 
+    if (individual.genotype) {
+        flat.genotype = individual.genotype;
+    } else {
+        // set genotype for product data before R4
+        flat.genotype = '';
+    }
+
     return flat;
 }
 

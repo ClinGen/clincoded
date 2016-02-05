@@ -57,19 +57,22 @@ var IndividualCuration = React.createClass({
             annotation: null, // Annotation object given in query string
             extraIndividualCount: 0, // Number of extra families to create
             extraIndividualNames: [], // Names of extra families to create
-            variantCount: 1, // Number of variants to display
-            variantOption: [VAR_NONE], // One variant panel, and nothing entered
+            variantCount: 0, // Number of variants to display
+            variantOption: [], // One variant panel, and nothing entered
             individualName: '', // Currently entered individual name
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             proband: null, // If we have an associated family that has a proband, this points at it
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            preR4Edit: false // True for adding genotype into proband, pre-R4 data only
         };
     },
 
     // Handle value changes in various form fields
     handleChange: function(ref, e) {
         var dbsnpid, clinvarid, hgvsterm, othervariant;
+        var vOption = this.state.variantOption;
+        var variants = (this.state.individual && this.state.individual.variants && this.state.individual.variants.length) ? this.state.individual.variants : null;
 
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
             // Disable the Genotyping Method 2 if Genotyping Method 1 has no value
@@ -77,37 +80,57 @@ var IndividualCuration = React.createClass({
         } else if (ref === 'individualname') {
             this.setState({individualName: this.refs[ref].getValue()});
         } else if (ref.substring(0, 3) === 'VAR') {
-            // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
-            // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
-            var lastVariantSuffix = (this.state.variantCount - 1) + '';
-            var refSuffix = ref.match(/\d+$/);
-            refSuffix = refSuffix && refSuffix[0];
-            if (refSuffix && (lastVariantSuffix === refSuffix)) {
-                // The changed item is in the last variant panel. If any fields in the last field have a value, disable
-                // the Add Another Variant button.
-                clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
-                this.setState({addVariantDisabled: !(clinvarid || othervariant)});
-            }
-
-            // Disable fields depending on what fields have values in them.
-            clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
-            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
-            var currVariantOption = this.state.variantOption;
-            if (othervariant) {
-                this.refs['VARclinvarid' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_OTHER;
-            } else if (dbsnpid || clinvarid || hgvsterm) {
-                this.refs['VARothervariant' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_SPEC;
+            // get data entered in one variant field and set another field disabled
+            if (this.refs[ref].getValue()) {
+                vOption[parseInt(ref.substr(-1))] = ref.substr(3, 5); // 'clinv' or 'other'
             } else {
-                currVariantOption[refSuffix] = VAR_NONE;
+                vOption[parseInt(ref.substr(-1))] = 'none';
             }
-            this.setState({variantOption: currVariantOption});
+            this.setState({variantOption: vOption});
         } else if (ref === 'proband' && this.refs[ref].getValue() === 'Yes') {
             this.setState({proband_selected: true});
         } else if (ref === 'proband') {
             this.setState({proband_selected: false});
+        } else if (ref === 'genotype') {
+            // select different value triggers to re-set variant fields
+            var vMax;
+            if (this.refs[ref].getValue() === 'Compound Heterozygous') {
+                // two variants
+                vMax = 2;
+            } else if (this.refs[ref].getValue() === 'Homozygous Recessive' || this.refs[ref].getValue() === 'Dominant') {
+                // one variant
+                vMax = 1;
+            } else {
+                vMax = 0;
+            }
+
+            var diff = vMax - vOption.length;
+            var errors = this.state.formErrors;
+            _.range(Math.abs(diff)).map(i => {
+                // in case of removing variant(s), alwasys remove the last one.
+                if (diff < 0) {
+                    // clean error messages
+                    if (errors['VARclinvarid' + (vOption.length-1).toString()] !== '') {
+                        errors['VARclinvarid' + (vOption.length-1).toString()] = '';
+                    }
+                    if (errors['VARothervariant' + (vOption.length-1).toString()] !== '') {
+                        errors['VARothervariant' + (vOption.length-1).toString()] = '';
+                    }
+                    // no longer to display fields of last variant
+                    vOption.pop();
+                } else if (diff > 0) {
+                    // in case of adding variant(s)
+                    // set fields (enable or disable) for each new variant, based on existing data
+                    if (variants && variants[vOption.length] && variants[vOption.length].clinvarVariantId) {
+                        vOption.push('clinv');
+                    } else if (variants && variants[vOption.length] && variants[vOption.length].otherDescription) {
+                        vOption.push('other');
+                    } else {
+                        vOption.push('none');
+                    }
+                }
+            });
+            this.setState({variantCount: vMax, variantOption: vOption, formErrors: errors});
         }
     },
 
@@ -223,15 +246,24 @@ var IndividualCuration = React.createClass({
                     // Go through each variant to determine how its form fields should be disabled.
                     var currVariantOption = [];
                     for (var i = 0; i < variants.length; i++) {
-                        if (variants[i].clinvarVariantId) {
-                            currVariantOption[i] = VAR_SPEC;
+                        if (variants[i].clinvarVariantId && variants[i].clinvarVariantId !== '') {
+                            currVariantOption[i] = 'clinv';
+                            //currVariantOption[i] = VAR_SPEC;
                         } else if (variants[i].otherDescription) {
-                            currVariantOption[i] = VAR_OTHER;
+                            currVariantOption[i] = 'other';
+                            //currVariantOption[i] = VAR_OTHER;
                         } else {
-                            currVariantOption[i] = VAR_NONE;
+                            currVariantOption[i] = 'none';
+                            //currVariantOption[i] = VAR_NONE;
                         }
                     }
                     stateObj.variantOption = currVariantOption;
+
+                    if (!stateObj.individual.genotype && stateObj.individual.variants.length === 1) {
+                        stateObj.preR4Edit = true;
+                    } else {
+                        stateObj.preR4Edit = false;
+                    }
                 }
             }
 
@@ -477,7 +509,8 @@ var IndividualCuration = React.createClass({
                     }
                 }).then(data => {
                     var newVariants = [];
-                    if (!currIndividual || !(currIndividual.proband && family)) {
+                    //if (!currIndividual || !(currIndividual.proband && family)) {
+                    if (!(currIndividual && currIndividual.proband && family)) {
                         // We're not editing a variant, or we're editing an individual that's not a proband in a family.
                         // Handle variants; start by making an array of search terms, one for each variant in the form.
                         // If this is a proband individual, its variants can only be edited from its associated family.
@@ -487,11 +520,14 @@ var IndividualCuration = React.createClass({
                         for (var i = 0; i < this.state.variantCount; i++) {
                             // Grab the values from the variant form panel
                             var clinvarId = this.getFormValue('VARclinvarid' + i);
+                            var otherdes = this.getFormValue('VARothervariant' + i);
 
                             // Build the search string depending on what the user entered
-                            if (clinvarId) {
+                            if (clinvarId && clinvarId !== '') {
                                 // Make a search string for these terms
                                 searchStrs.push('/search/?type=variant&clinvarVariantId=' + clinvarId);
+                            } else if (otherdes && otherdes !== '') {
+                                searchStrs.push('/search/?type=variant&otherDescription=' + otherdes);
                             }
                         }
 
@@ -503,20 +539,23 @@ var IndividualCuration = React.createClass({
                             ).then(results => {
                                 // 'result' is an array of search results, one per search string. There should only be one result per array element --
                                 // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
-                                results.forEach(function(result, i) {
+                                _.map(results, function(result) {
                                     if (result.total) {
                                         // Search got a result. Add a string for family.variants for this existing variant
                                         individualVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                     } else {
                                         // Search got no result; make a new variant and save it in an array so we can write them.
+                                        var newVariant = {};
                                         var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinvarVariantId'; });
                                         if (termResult) {
-                                            var newVariant = {};
                                             newVariant.clinvarVariantId = termResult.term;
-                                            newVariants.push(newVariant);
+                                        } else {
+                                            termResult = _(result.filters).find(function(filter) { return filter.field === 'otherDescription'; });
+                                            newVariant.otherDescription = termResult.term;
                                         }
+                                        newVariants.push(newVariant);
                                     }
-                                }, this);
+                                });
 
                                 // Pass new variant array to the next THEN to write them.
                                 return Promise.resolve(newVariants);
@@ -524,8 +563,9 @@ var IndividualCuration = React.createClass({
                         }
                     } else if (currIndividual && currIndividual.proband && family) {
                         // Editing a proband in a family. Just pass through existing variants
-                        newVariants = currIndividual.variants.map(function(variant) { return '/variants/' + variant.uuid + '/'; });
-                        Promise.resolve(newVariants);
+                        individualVariants = currIndividual.variants.map(function(variant) { return '/variants/' + variant.uuid + '/'; });
+                        //newVariants = currIndividual.variants.map(function(variant) { return '/variants/' + variant.uuid + '/'; });
+                        //Promise.resolve(newVariants);
                     }
 
                     // No variant search strings. Go to next THEN.
@@ -533,19 +573,20 @@ var IndividualCuration = React.createClass({
                 }).then(newVariants => {
                     // We're passed in a list of new clinVarRCV variant objects that need to be written to the DB.
                     // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
-                    if (!currIndividual || !(currIndividual.proband && family)) {
-                        for (var i = 0; i < this.state.variantCount; i++) {
-                            // Grab the values from the variant form panel
-                            var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
+                    //if (!currIndividual || !(currIndividual.proband && family)) {
+                    if (!(currIndividual && currIndividual.proband && family)) {
+                    //    for (var i = 0; i < this.state.variantCount; i++) {
+                    //       // Grab the values from the variant form panel
+                    //        var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
 
                             // Build the search string depending on what the user entered
-                            if (otherVariantText) {
+                    //        if (otherVariantText) {
                                 // Add this Other Description text to a new variant object
-                                var newVariant = {};
-                                newVariant.otherDescription = otherVariantText;
-                                newVariants.push(newVariant);
-                            }
-                        }
+                    //            var newVariant = {};
+                    //            newVariant.otherDescription = otherVariantText;
+                    //            newVariants.push(newVariant);
+                    //        }
+                    //    }
 
                         // Now write the new variants to the DB, and push their @ids to the family variant
                         if (newVariants && newVariants.length) {
@@ -558,11 +599,12 @@ var IndividualCuration = React.createClass({
                                         this.recordHistory('add', result['@graph'][0]);
                                     }, this);
 
-                                    // Add the newly written variants to the family
+                                    // Add the newly written variants to the individual
                                     results.forEach(result => {
                                         individualVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                     });
                                 }
+
                                 return Promise.resolve(results);
                             });
                         }
@@ -737,6 +779,12 @@ var IndividualCuration = React.createClass({
         // Set the proband boolean
         value = this.getFormValue('proband');
         if (value && value !== 'none') { newIndividual.proband = value === "Yes"; }
+
+        // get genotype value if selected
+        value = this.getFormValue('genotype');
+        if (value && value !== 'none') {
+            newIndividual.genotype = value;
+        }
 
         return newIndividual;
     },
@@ -915,22 +963,32 @@ var LabelPanelTitle = React.createClass({
 var IndividualName = function(displayNote) {
     var individual = this.state.individual;
     var family = this.state.family;
-    var familyProbandExists = false;
     var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
-    if (individual && individual.proband) familyProbandExists = individual.proband;
-    if (family && family.individualIncluded && family.individualIncluded.length && family.individualIncluded.length > 0) {
+
+    var familyProbandExists = false;
+    // Check if edited individual belongs to a family which has a proband or created
+    if (individual && individual.proband && individual.associatedFamilies && individual.associatedFamilies.length > 0) {
+        familyProbandExists = true;
+    // or adding a new non-proband to a family
+    } else if (family && family.individualIncluded && family.individualIncluded.length && family.individualIncluded.length > 0) {
         for (var i = 0; i < family.individualIncluded.length; i++) {
-            if (family.individualIncluded[i].proband === true) familyProbandExists = true;
+            if (family.individualIncluded[i].proband === true) {
+                familyProbandExists = true;
+                break;
+            }
         }
     }
 
     return (
         <div className="row">
             {family && !familyProbandExists ?
-            <div className="col-sm-7 col-sm-offset-5">
-                <p className="alert alert-warning">
-                    This page is only for adding non-probands to the Family. To create a proband for this Family, please edit its Family page: <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + this.queryValues.familyUuid}>Edit {family.label}</a>
-                </p>
+            <div className="row">
+                <div className="col-sm-7 col-sm-offset-5">
+                    <p className="alert alert-warning">
+                        This page is only for adding non-probands to the Family. To create a proband for this Family, please edit its Family page:
+                        <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + this.queryValues.familyUuid}>Edit {family.label}</a>
+                    </p>
+                </div>
             </div>
             : null}
             <div className="clearfix">
@@ -1209,15 +1267,25 @@ var IndividualVariantInfo = function() {
     var gdm = this.state.gdm;
     var annotation = this.state.annotation;
     var variants = individual && individual.variants;
+    //var vCount = variants && variants.length ? variants.length : this.state.variantCount;
 
     return (
         <div className="row">
             {individual && individual.proband && family ?
                 <div>
+                    <p>
+                        Variant(s) for a proband associated with a Family can only be edited through the Family page:&nbsp;
+                        <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a>
+                    </p>
+                    <dl className="dl-horizontal">
+                        <div>
+                            <dt>Mode of Inheritance</dt>
+                            <dd>{individual.genotype ? individual.genotype : ''}</dd>
+                        </div>
+                    </dl>
                     {variants.map(function(variant, i) {
                         return (
                             <div key={i} className="variant-view-panel variant-view-panel-edit">
-                                <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
                                 <h5>Variant {i + 1}</h5>
                                 <dl className="dl-horizontal">
                                     <div>
@@ -1235,48 +1303,65 @@ var IndividualVariantInfo = function() {
                     })}
                 </div>
             :
-                <div>
-                    {_.range(this.state.variantCount).map(i => {
-                        var variant;
-
-                        if (variants && variants.length) {
-                            variant = variants[i];
-                        }
-
-                        return (
-                            <div key={i} className="variant-panel">
-                                <div className="row">
-                                    <div className="col-sm-7 col-sm-offset-5">
-                                        <p className="alert alert-warning">
-                                            ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
-                                            the same variant, and ensures the accurate counting of probands.
-                                        </p>
-                                    </div>
-                                </div>
-                                <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
-                                    error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                                <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                                    The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
-                                </p>
-                                <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                                {curator.renderMutalyzerLink()}
-                                {(i === this.state.variantCount - 1 && this.state.variantCount < MAX_VARIANTS) ?
-                                    <div className="col-sm-7 col-sm-offset-5">
-                                        <p className="alert alert-warning">
-                                            For a recessive condition, you must enter both variants believed to be causative for the disease in order that
-                                            each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
-                                            variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
-                                        </p>
-                                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with Individual"
-                                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
-                                    </div>
-                                : null}
-                            </div>
-                        );
-                    })}
+            <div>
+                <div className="col-sm-7 col-sm-offset-5">
+                    <p className="alert alert-warning">
+                        Please select the inheritance mode for this segregation from the following pull-down. The number of variants that must be entered for each mode of inheritance is
+                        indicated next to the inheritance name. Note that <strong>each variant must be assessed as supports</strong> for the Individual to be counted.
+                    </p>
                 </div>
+                <Input type="select" ref="genotype" label="Mode of Inheritance:" defaultValue="none" value={individual && individual.genotype ? individual.genotype : 'none'}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
+                    <option value="none">No Selection</option>
+                    <option disabled="disabled"></option>
+                    <option value="Dominant">Dominant (enter 1 variant)</option>
+                    <option value="Homozygous Recessive">Homozygous Recessive (enter 1 variant)</option>
+                    <option value="Compound Heterozygous">Compound Heterozygous (enter 2 variants)</option>
+                </Input>
+                {_.range(this.state.variantCount).map(i => {
+                    var variant;
+
+                    if (variants && variants.length) {
+                        variant = variants[i];
+                    }
+
+                    return (
+                        <div key={i} className="variant-panel">
+                            <div className="row">
+                                <div className="col-sm-7 col-sm-offset-5">
+                                    <p className="alert alert-warning">
+                                        ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
+                                        the same variant, and ensures the accurate counting of probands.
+                                    </p>
+                                </div>
+                            </div>
+                            {this.state.variantOption[i] !== 'other' ?
+                                <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId}
+                                    placeholder="e.g. 177676" handleChange={this.handleChange} error={this.getFormError('VARclinvarid' + i)}
+                                    clearError={this.clrMultiFormErrors.bind(null, ['VARclinvarid' + i, 'VARothervariant' + i])} labelClassName="col-sm-5 control-label"
+                                    wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                            :
+                                <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />}
+                                    placeholder="e.g. 177676" handleChange={this.handleChange} labelClassName="col-sm-5 control-label"
+                                    wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" inputDisabled="disabled" />
+                            }
+                            <p className="col-sm-7 col-sm-offset-5 input-note-below">
+                                The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
+                            </p>
+                            {this.state.variantOption[i] !== 'clinv' ?
+                                <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" handleChange={this.handleChange}
+                                    error={this.getFormError('VARothervariant' + i)} clearError={this.clrMultiFormErrors.bind(null, ['VARclinvarid' + i, 'VARothervariant' + i])}
+                                    value={variant && variant.otherDescription}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                            :
+                                <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" handleChange={this.handleChange}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled="disabled" />
+                            }
+                            {curator.renderMutalyzerLink()}
+                        </div>
+                    );
+                })}
+            </div>
             }
         </div>
     );
@@ -1335,9 +1420,10 @@ var LabelOtherPmids = React.createClass({
 
 var IndividualViewer = React.createClass({
     render: function() {
+        var user = this.props.session && this.props.session.user_properties;
         var individual = this.props.context;
         var method = individual.method;
-        var variants = (individual.variants && individual.variants.length) ? individual.variants : [{}];
+        var variants = (individual.variants && individual.variants.length) ? individual.variants : [];
         var i = 0;
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
@@ -1372,6 +1458,19 @@ var IndividualViewer = React.createClass({
             );
         });
         groupRenders = groupRenders.concat(directGroupRenders);
+
+        var genotype = '';
+        if (variants.length > 0) {
+            if (individual.genotype) {
+                genotype = individual.genotype;
+            } else if (variants.length === 2) {
+                genotype = 'Compound Heterozygous';
+            } else if (user && user.uuid === individual.submitted_by.uuid) {
+                genotype = 'Please select Dominant or Homozygous Recessive at Edit page';
+            } else {
+                genotype = 'Waiting for creator editing data';
+            }
+        }
 
         return (
             <div className="container">
@@ -1514,24 +1613,42 @@ var IndividualViewer = React.createClass({
                     </Panel>
 
                     <Panel title={<LabelPanelTitleView individual={individual} variant />} panelClassName="panel-data">
-                        {variants.map(function(variant, i) {
-                            return (
-                                <div key={i} className="variant-view-panel">
-                                    <h5>Variant {i + 1}</h5>
-                                    <dl className="dl-horizontal">
-                                        <div>
-                                            <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
-                                        </div>
+                        {variants.length > 0 ?
+                            <div>
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>Mode of Inheritance</dt>
+                                        <dd>{genotype ? genotype : null}</dd>
+                                    </div>
+                                </dl>
+                                {variants.map(function(variant, i) {
+                                    return (
+                                        <div key={i} className="variant-view-panel">
+                                            <h5>Variant {i + 1}</h5>
+                                            <dl className="dl-horizontal">
+                                                <div>
+                                                    <dt>ClinVar VariationID</dt>
+                                                    <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
+                                                </div>
 
-                                        <div>
-                                            <dt>Other description</dt>
-                                            <dd>{variant.otherDescription}</dd>
+                                                <div>
+                                                    <dt>Other description</dt>
+                                                    <dd>{variant.otherDescription}</dd>
+                                                </div>
+                                            </dl>
                                         </div>
-                                    </dl>
-                                </div>
-                            );
-                        })}
+                                    );
+                                })}
+                            </div>
+                        :
+                            <div>
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <strong>No variant associated.</strong>
+                                    </div>
+                                </dl>
+                            </div>
+                        }
                     </Panel>
 
                     <Panel title={<LabelPanelTitleView individual={individual} labelText="Additional Information" />} panelClassName="panel-data">
@@ -1577,11 +1694,12 @@ var LabelPanelTitleView = React.createClass({
 // Make a starter individual from the family and write it to the DB; always called from
 // family curation. Pass an array of disease objects to add, as well as an array of variants.
 // Returns a promise once the Individual object is written.
-var makeStarterIndividual = module.exports.makeStarterIndividual = function(label, diseases, variants, context) {
+var makeStarterIndividual = module.exports.makeStarterIndividual = function(label, diseases, genotype, variants, context) {
     var newIndividual = {};
 
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
+    newIndividual.genotype = genotype;
     newIndividual.variants = variants;
     newIndividual.proband = true;
 
@@ -1593,7 +1711,7 @@ var makeStarterIndividual = module.exports.makeStarterIndividual = function(labe
 
 
 // Update the individual with the variants, and write the updated individual to the DB.
-var updateProbandVariants = module.exports.updateProbandVariants = function(individual, variants, context) {
+var updateProbandVariants = module.exports.updateProbandVariants = function(individual, genotype, variants, context) {
     var updateNeeded = true;
 
     // Check whether the variants from the family are different from the variants in the individual
@@ -1603,9 +1721,13 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         var missing = _.difference(variants, individual.variants.map(function(variant) { return variant['@id']; }));
         updateNeeded = !!missing.length;
     }
+    if (!individual.genotype || individual.genotype !== genotype) {
+        updateNeeded = true;
+    }
 
     if (updateNeeded) {
         var writerIndividual = curator.flatten(individual);
+        writerIndividual.genotype = genotype;
         writerIndividual.variants = variants;
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
