@@ -746,7 +746,9 @@ var IndividualCuration = React.createClass({
 
     // Add another variant section to the FamilyVariant panel
     handleAddVariant: function() {
-        this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
+        var currVariantOption = this.state.variantOption;
+        currVariantOption[currVariantOption.length] = VAR_NONE;
+        this.setState({variantOption: currVariantOption, variantCount: this.state.variantCount + 1, addVariantDisabled: true});
     },
 
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
