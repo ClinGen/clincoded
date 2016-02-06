@@ -1210,7 +1210,7 @@ var ExperimentalCuration = React.createClass({
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
     updateClinvarVariantId: function(data, fieldNum) {
         var newVariantInfo = _.clone(this.state.variantInfo);
-        var currVariantOption = _.clone(this.state.variantOption);
+        var currVariantOption = this.state.variantOption;
         var addVariantDisabled;
         if (data) {
             // Enable/Disable Add Variant button as needed
@@ -1224,7 +1224,7 @@ var ExperimentalCuration = React.createClass({
             newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
             // Disable the 'Other description' textarea
             this.refs['VARothervariant' + fieldNum].resetValue();
-            currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
+            currVariantOption[0] = VAR_SPEC;
         } else {
             // Reset the form and display values
             this.refs['VARclinvarid' + fieldNum].setValue('');
@@ -2078,7 +2078,7 @@ var ExperimentalDataVariant = function() {
                 }
 
                 return (
-                    <div key={i} className="variant-panel">
+                    <div key={'variant' + i} className="variant-panel">
                         <div className="row">
                             <div className="col-sm-7 col-sm-offset-5">
                                 <p className="alert alert-warning">
@@ -2106,11 +2106,9 @@ var ExperimentalDataVariant = function() {
                             buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" }
                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                             updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
-                        <p className="col-sm-7 col-sm-offset-5 input-note-below">
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                        {curator.renderMutalyzerLink()}
-                        </p>
+                        <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderMutalyzerLink()}</p>
                     </div>
                 );
             })}
