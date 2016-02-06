@@ -560,24 +560,6 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
     }
 });
 
-// Display variant(s) either associated to a evidence (group/family/individual/experiemental) or in a pmid
-var displayAssociatedVariant = function(variants, winWidth) {
-    // set length based on window width
-    var adjWidth = winWidth >= 1200 ? [18, 2] : (winWidth >= 992 ? [12, 4] : [65, 2]);
-    var showItem = [];
-    if (variants && variants.length) {
-        variants.forEach(variant => {
-            // try use preferred title first, then variation id, then other description
-            var sItem = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVarVariantId ? variant.clinvarVarVariantId : variant.otherDescription);
-            if (sItem.length > adjWidth[0]) {
-                // shorten if too long
-                sItem = sItem.substr(0, adjWidth[0]-adjWidth[1]) + ' ...';
-            }
-            showItem.push(sItem);
-        });
-    }
-    return showItem;
-};
 
 // Render a family in the curator palette.
 var renderGroup = function(group, gdm, annotation, curatorMatch) {
