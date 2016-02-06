@@ -2108,7 +2108,7 @@ var ExperimentalDataVariant = function() {
                             updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                        <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderMutalyzerLink()}</p>
+                        {curator.renderMutalyzerLink()}
                     </div>
                 );
             })}
