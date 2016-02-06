@@ -390,13 +390,13 @@ var VariantCuration = React.createClass({
                         {variant ?
                             <h2>{variant.clinvarVariantId ? (
                                 <div>
-+                                    <dl className="dl-horizontal">
-+                                        <dt style={{'font-weight':'normal'}}>VariationId</dt>
-+                                        <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
-+                                    </dl>
-+                                    <dl className="dl-horizontal">
-+                                        <dt style={{'font-weight':'normal'}}>ClinVar Preferred Title</dt>
-+                                        <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</dd>
+                                    <dl className="dl-horizontal">
+                                        <dt style={{'font-weight':'normal'}}>VariationId</dt>
+                                        <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                    </dl>
+                                    <dl className="dl-horizontal">
+                                        <dt style={{'font-weight':'normal'}}>ClinVar Preferred Title</dt>
+                                        <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</dd>
                                      </dl>
                                  </div>
                             )
