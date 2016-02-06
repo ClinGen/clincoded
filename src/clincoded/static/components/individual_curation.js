@@ -1515,20 +1515,34 @@ var IndividualViewer = React.createClass({
 
                     <Panel title={<LabelPanelTitleView individual={individual} variant />} panelClassName="panel-data">
                         {variants.map(function(variant, i) {
+
                             return (
                                 <div key={i} className="variant-view-panel">
                                     <h5>Variant {i + 1}</h5>
-                                    <dl className="dl-horizontal">
-                                        <div>
-                                            <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>Other description</dt>
-                                            <dd>{variant.otherDescription}</dd>
-                                        </div>
-                                    </dl>
+                                        {variant.clinvarVariantId ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinVar VariationID</dt>
+                                                    <dd style={{'padding-left':'22px'}}><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.clinvarVariantTitle ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinVar Preferred Title</dt>
+                                                    <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                                </dl>
+                                            </div>
+                                        : null}
+                                        {variant.otherDescription ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Other description</dt>
+                                                    <dd>{variant.otherDescription}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
                                 </div>
                             );
                         })}

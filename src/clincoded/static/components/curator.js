@@ -469,14 +469,14 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                             });
                             individualRenders = individualRenders.concat(individualFamilyRenders);
                         }
-                        return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch)}</div>;
+                        return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch, winWidth)}</div>;
                     });
                     familyRenders = familyRenders.concat(familyGroupRenders);
                 }
                 if (group.individualIncluded) {
                     // Collect up family renders that are associated with the group, and individuals that are associated with those families.
                     var individualGroupRenders = group.individualIncluded.map(individual => {
-                        return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
+                        return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch, winWidth)}</div>;
                     });
                     individualRenders = individualRenders.concat(individualGroupRenders);
                 }
@@ -491,11 +491,11 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                 if (family.individualIncluded) {
                     // Add to individual renders the individuals that are associated with this family
                     var individualFamilyRenders = family.individualIncluded.map(individual => {
-                        return <div key={individual.uuid}>{renderIndividual(individual, this.props.gdm, annotation, curatorMatch)}</div>;
+                        return <div key={individual.uuid}>{renderIndividual(individual, this.props.gdm, annotation, curatorMatch, winWidth)}</div>;
                     });
                     individualRenders = individualRenders.concat(individualFamilyRenders);
                 }
-                return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch)}</div>;
+                return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch, winWidth)}</div>;
             });
             familyRenders = familyRenders.concat(familyAnnotationRenders);
         }
@@ -503,7 +503,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         // Add to the array of individual renders the unassociated individuals.
         if (annotation && annotation.individuals) {
             var individualAnnotationRenders = annotation.individuals.map(individual => {
-                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
+                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch, winWidth)}</div>;
             });
             individualRenders = individualRenders.concat(individualAnnotationRenders);
         }
@@ -511,7 +511,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         // Add to the array of experiment renders.
         if (annotation && annotation.experimentalData) {
             var experimentalAnnotationRenders = annotation.experimentalData.map(experimental => {
-                return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch)}</div>;
+                return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch, winWidth)}</div>;
             });
             experimentalRenders = experimentalRenders.concat(experimentalAnnotationRenders);
         }
@@ -560,6 +560,25 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
     }
 });
 
+// Display variant(s) either associated to a evidence (group/family/individual/experiemental) or in a pmid
+var displayAssociatedVariant = function(variants, winWidth) {
+    // set length based on window width
+    var adjWidth = winWidth >= 1200 ? [18, 2] : (winWidth >= 992 ? [12, 4] : [65, 2]);
+    var showItem = [];
+    if (variants && variants.length) {
+        variants.forEach(variant => {
+            // try use preferred title first, then variation id, then other description
+            var sItem = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVarVariantId ? variant.clinvarVarVariantId : variant.otherDescription);
+            if (sItem.length > adjWidth[0]) {
+                // shorten if too long
+                sItem = sItem.substr(0, adjWidth[0]-adjWidth[1]) + ' ...';
+            }
+            showItem.push(sItem);
+        });
+    }
+    return showItem;
+};
+
 // Render a family in the curator palette.
 var renderGroup = function(group, gdm, annotation, curatorMatch) {
     var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
@@ -582,7 +601,7 @@ var renderGroup = function(group, gdm, annotation, curatorMatch) {
 };
 
 // Render a family in the curator palette.
-var renderFamily = function(family, gdm, annotation, curatorMatch) {
+var renderFamily = function(family, gdm, annotation, curatorMatch, winWidth) {
     var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
     // if any of these segregation values exist, the family is assessable
     var familyAssessable = (family && family.segregation && (family.segregation.pedigreeDescription || family.segregation.pedigreeSize
@@ -590,6 +609,17 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
         || family.segregation.deNovoType || family.segregation.numberOfParentsUnaffectedCarriers || family.segregation.numberOfAffectedAlleles
         || family.segregation.numberOfAffectedWithOneVariant || family.segregation.numberOfAffectedWithTwoVariants || family.segregation.numberOfUnaffectedCarriers
         || family.segregation.numberOfUnaffectedIndividuals || family.segregation.probandAssociatedWithBoth || family.segregation.additionalInformation)) ? true : false;
+
+    // Get associated variants ready to display
+    var showItem = '';
+    if (family.segregation.variants && family.segregation.variants.length) {
+        family.segregation.variants.forEach(variant => {
+            if (showItem !== '') {
+                showItem += '\t\n\n';
+            }
+            showItem += variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
+        });
+    }
 
     return (
         <div className="panel-evidence-group">
@@ -615,17 +645,9 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
             :
                 <div>No associations</div>
             }
-            {(family && family.segregation && family.segregation.variants && family.segregation.variants.length) ?
+            {showItem !== '' ?
                 <div>
-                    <span>Variants: </span>
-                    {family.segregation.variants.map(function(variant, j) {
-                        return (
-                            <span key={j}>
-                                {j > 0 ? ', ' : ''}
-                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
-                            </span>
-                        );
-                    })}
+                    <span>Variants: <a style={{'text-decoration':'underline', 'cursor':'pointer'}} title={showItem}>{family.segregation.variants.length}</a></span>
                 </div>
             : null}
             {familyAssessable ?
@@ -638,8 +660,18 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
 };
 
 // Render an individual in the curator palette.
-var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
+var renderIndividual = function(individual, gdm, annotation, curatorMatch, winWidth) {
     var i = 0;
+
+    var showItem = '';
+    if (individual.variants && individual.variants.length) {
+        individual.variants.forEach(variant => {
+            if (showItem !== '') {
+                showItem += '\t\n\n';
+            }
+            showItem += variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
+        });
+    }
 
     return (
         <div className="panel-evidence-group">
@@ -683,17 +715,9 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             :
                 <div>No associations</div>
             }
-            {(individual.variants && individual.variants.length) ?
+            {showItem !== '' ?
                 <div>
-                    <span>Variants: </span>
-                    {individual.variants.map(function(variant, j) {
-                        return (
-                            <span key={j}>
-                                {j > 0 ? ', ' : ''}
-                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
-                            </span>
-                        );
-                    })}
+                    <span>Variants: <a style={{'text-decoration':'underline', 'cursor':'pointer'}} title={showItem}>{individual.variants.length}</a></span>
                 </div>
             : null}
             <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>
@@ -703,7 +727,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
 };
 
 // Render an experimental data in the curator palette.
-var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
+var renderExperimental = function(experimental, gdm, annotation, curatorMatch, winWidth) {
     var i = 0;
     var subtype = '';
     // determine if the evidence type has a subtype, and determine the subtype
@@ -721,6 +745,16 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
         }
     }
 
+    var showItem = '';
+    if (experimental.variants && experimental.variants.length) {
+        experimental.variants.forEach(variant => {
+            if (showItem !== '') {
+                showItem += '\t\n\n';
+            }
+            showItem += variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
+        });
+    }
+
     return (
         <div className="panel-evidence-group" key={experimental.uuid}>
             <h5>{experimental.label}</h5>
@@ -731,19 +765,12 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                 : null}
                 <p>{moment(experimental.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            {(experimental.variants && experimental.variants.length) ?
+            {showItem !== '' ?
                 <div>
-                    <span>Variants: </span>
-                    {experimental.variants.map(function(variant, j) {
-                        return (
-                            <span key={j}>
-                                {j > 0 ? ', ' : ''}
-                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
-                            </span>
-                        );
-                    })}
+                    <span>Variants: <a style={{'text-decoration':'underline', 'cursor':'pointer'}} title={showItem}>{experimental.variants.length}</a></span>
                 </div>
-            : null}
+            : null }
+
             <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} target="_blank" title="View/Assess experimental data in a new tab">View/Assess</a>
             {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
         </div>

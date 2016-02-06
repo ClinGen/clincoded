@@ -78,12 +78,6 @@ var CurationCentral = React.createClass({
         });
     },
 
-    // check browser's width and save the value in state
-    componentWillMount: function() {
-        //var winWidth = window.innerWidth;
-        //this.setState({winWidth: winWidth});
-    },
-
     // After the Curator Central page component mounts, grab the uuid from the query string and
     // retrieve the corresponding GDM from the DB.
     componentDidMount: function() {
