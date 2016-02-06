@@ -1093,6 +1093,42 @@ var FamilyCuration = React.createClass({
         this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
     },
 
+    // Determine whether a Family is associated with a Group
+    // or
+    // whether an individual is associated with a Family or a Group
+    getAssociation: function(item) {
+        var associatedGroups, associatedFamilies;
+
+        if (this.state.group) {
+            associatedGroups = [this.state.group];
+        } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
+            associatedGroups = this.state.family.associatedGroups;
+        }
+
+        if (this.state.family) {
+            associatedFamilies = [this.state.family];
+        } else if (this.state.individual && this.state.individual.associatedFamilies && this.state.individual.associatedFamilies.length) {
+            associatedFamilies = this.state.individual.associatedFamilies;
+        }
+
+        switch(item) {
+            case 'individual':
+                return this.state.individual;
+
+            case 'family':
+                return this.state.family;
+
+            case 'associatedFamilies':
+                return associatedFamilies;
+
+            case 'associatedGroups':
+                return associatedGroups;
+
+            default:
+                break;
+        }
+    },
+
     // After the Family Curation page component mounts, grab the GDM, group, family, and annotation UUIDs (as many as given)
     // from the query string and retrieve the corresponding objects from the DB, if they exist. Note, we have to do this after
     // the component mounts because AJAX DB queries can't be done from unmounted components.
@@ -1228,6 +1264,9 @@ var FamilyName = function(displayNote) {
 
     return (
         <div className="row">
+            {!this.getAssociation('family') && !this.getAssociation('associatedGroups') ?
+                <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Family is a member of a Group, please curate the Group first and then add the Family to that Group.</p></div>
+            : null}
             <Input type="text" ref="familyname" label="Family Label:" value={family && family.label} handleChange={this.handleChange}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />

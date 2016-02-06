@@ -746,6 +746,42 @@ var IndividualCuration = React.createClass({
         this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
     },
 
+    // Determine whether a Family is associated with a Group
+    // or
+    // whether an individual is associated with a Family or a Group
+    getAssociation: function(item) {
+        var associatedGroups, associatedFamilies;
+
+        if (this.state.group) {
+            associatedGroups = [this.state.group];
+        } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
+            associatedGroups = this.state.family.associatedGroups;
+        }
+
+        if (this.state.family) {
+            associatedFamilies = [this.state.family];
+        } else if (this.state.individual && this.state.individual.associatedFamilies && this.state.individual.associatedFamilies.length) {
+            associatedFamilies = this.state.individual.associatedFamilies;
+        }
+
+        switch(item) {
+            case 'individual':
+                return this.state.individual;
+
+            case 'family':
+                return this.state.family;
+
+            case 'associatedFamilies':
+                return associatedFamilies;
+
+            case 'associatedGroups':
+                return associatedGroups;
+
+            default:
+                break;
+        }
+    },
+
     // After the Family Curation page component mounts, grab the GDM, group, family, and annotation UUIDs (as many as given)
     // from the query string and retrieve the corresponding objects from the DB, if they exist. Note, we have to do this after
     // the component mounts because AJAX DB queries can't be done from unmounted components.
@@ -933,17 +969,18 @@ var IndividualName = function(displayNote) {
                 </p>
             </div>
             : null}
-            <div className="clearfix">
-                <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
-                    error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-                <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
-            </div>
+            {!this.getAssociation('individual') && !this.getAssociation('associatedFamilies') && !this.getAssociation('associatedGroups') ?
+                <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Individual is part of a Family or a Group, please curate that Group or Family first and then add the Individual as a member.</p></div>
+            : null}
+            <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
+                error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one individual with IDENTICAL information, you can indicate this at the bottom of this form.</p>
             : null}
             {!family ?
-                <div className="clearfix">
+                <div>
                     <Input type="select" ref="proband" label="Is this Individual a proband:" value={individual && individual.proband ? "Yes" : (individual ? "No" : "none")}
                         error={this.getFormError('proband')} clearError={this.clrFormErrors.bind(null, 'proband')} handleChange={this.handleChange}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
