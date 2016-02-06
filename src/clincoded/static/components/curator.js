@@ -2330,7 +2330,7 @@ function clinvarTxt(field) {
             txt = 'Retrieve from ClinVar';
             break;
         case 'helpText':
-            txt = <span>You must enter a ClinVar VariationID. The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).</span>
+            txt = <span>You must enter a ClinVar VariationID. The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).</span>;
             break;
         case 'resourceResponse':
             txt = "This is the ClinVar Preferred Title for the VariationID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
