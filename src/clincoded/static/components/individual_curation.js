@@ -933,12 +933,10 @@ var IndividualName = function(displayNote) {
                 </p>
             </div>
             : null}
-            <div className="clearfix">
-                <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
-                    error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-                <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
-            </div>
+            <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
+                error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one individual with IDENTICAL information, you can indicate this at the bottom of this form.</p>
             : null}
