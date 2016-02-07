@@ -2233,8 +2233,14 @@ var AddResourceIdModal = React.createClass({
     componentDidMount: function() {
         switch(this.props.resourceType) {
             case 'clinvar':
+                var tempTxtLabel;
+                if (this.props.initialFormValue) {
+                    tempTxtLabel = clinvarTxt('editLabel');
+                } else {
+                    tempTxtLabel = clinvarTxt('inputLabel');
+                }
                 this.setState({
-                    txtInputLabel: clinvarTxt('inputLabel'),
+                    txtInputLabel: tempTxtLabel,
                     txtInputButton: clinvarTxt('inputButton'),
                     txtHelpText: clinvarTxt('helpText'),
                     txtResourceResponse: clinvarTxt('resourceResponse')
@@ -2296,15 +2302,12 @@ var AddResourceIdModal = React.createClass({
                         labelClassName="control-label" groupClassName="resource-input" required />
                     <Input type="button-button" title={this.state.txtInputButton} inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
                     <div className="row">&nbsp;<br />&nbsp;</div>
-                    <span>
-                    <p className="alert alert-info">{this.state.txtHelpText}</p>
-                    </span>
                     {this.state.resourceFetched ?
                     <span>
                         <p>{this.state.txtResourceResponse}</p>
                         <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
                     </span>
-                    : null}
+                    : <span><p className="alert alert-info">{this.state.txtHelpText}</p></span>}
                 </div>
                 <div className='modal-footer'>
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
@@ -2324,7 +2327,10 @@ function clinvarTxt(field) {
             txt = 'ClinVar Variant';
             break;
         case 'inputLabel':
-            txt = 'Enter ClinVar Variation ID';
+            txt = 'Enter ClinVar VariationID';
+            break;
+        case 'editLabel':
+            txt = 'Edit ClinVar VariationID';
             break;
         case 'inputButton':
             txt = 'Retrieve from ClinVar';
@@ -2333,7 +2339,7 @@ function clinvarTxt(field) {
             txt = <span>You must enter a ClinVar VariationID. The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).</span>;
             break;
         case 'resourceResponse':
-            txt = "This is the ClinVar Preferred Title for the VariationID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below is the ClinVar Preferred Title for the VariationID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
             break;
     }
     return txt;
