@@ -2304,7 +2304,7 @@ var AddResourceIdModal = React.createClass({
                     <div className="row">&nbsp;<br />&nbsp;</div>
                     {this.state.resourceFetched ?
                     <span>
-                        <p>{this.state.txtResourceResponse}</p>
+                        <p>&nbsp;<br />{this.state.txtResourceResponse}</p>
                         <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
                     </span>
                     : <span><p className="alert alert-info">{this.state.txtHelpText}</p></span>}

@@ -1122,6 +1122,26 @@ var FamilyCuration = React.createClass({
             // Reenable the 'Other description' textarea
             currVariantOption[parseInt(fieldNum)] = VAR_NONE;
         }
+
+        // if variant data entered, must enter proband individual name and orphanet
+        // First check if data entered in either ClinVar Variant ID or Other description at each variant
+        var noVariantData = true;
+        _.range(this.state.variantCount).map(i => {
+            if (this.refs['VARclinvarid' + i].getValue() || this.refs['VARothervariant' + i].getValue()) {
+                noVariantData = false;
+            }
+        });
+        // If not entered at all, proband individua is not required and must be no error messages at individual fields.
+        if (noVariantData) {
+            this.setState({individualRequired: false});
+            var errors = this.state.formErrors;
+            errors['individualname'] = '';
+            errors['individualorphanetid'] = '';
+            this.setState({formErrors: errors});
+        } else {
+            this.setState({individualRequired: true});
+        }
+
         // Set state
         this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
     },
