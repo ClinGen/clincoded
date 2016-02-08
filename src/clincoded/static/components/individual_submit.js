@@ -128,7 +128,7 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
+                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} linkGdm={true} />
                 <div className="container">
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
@@ -136,7 +136,7 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
                         </div>
                     : null}
                     {individual ?
-                        <h1>Individual Information: {individual.label} <a href={individual['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editIndividualLink} className="btn btn-info">Edit</a></h1>
+                        <h1>Individual Information: {individual.label} <a href={editIndividualLink} className="btn btn-info">Edit/Assess</a></h1>
                     : null}
                     <div className="row">
                         <div className="col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
@@ -150,7 +150,7 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
                                     <div className="col-md-6">
                                         {gdm && annotation ?
                                             <div>
-                                                <a className="btn btn-default btn-individual-submit" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                                <a className="btn btn-default btn-individual-submit" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page <i className="icon icon-briefcase"></i></a>
                                                 <div className="submit-results-note">Return to Record Curation page if you would like to add or add or edit a group, family, or individual.</div>
                                             </div>
                                         : null}

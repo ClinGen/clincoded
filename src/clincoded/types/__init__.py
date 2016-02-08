@@ -490,6 +490,8 @@ class Group(Item):
         'associatedAnnotations',
         'associatedAnnotations.article',
         'associatedAnnotations.associatedGdm',
+        'associatedAnnotations.associatedGdm.disease',
+        'associatedAnnotations.associatedGdm.gene'
         #'control'
     ]
     rev = {
@@ -541,9 +543,13 @@ class Family(Item):
         'associatedGroups.associatedAnnotations',
         'associatedGroups.associatedAnnotations.article',
         'associatedGroups.associatedAnnotations.associatedGdm',
+        'associatedGroups.associatedAnnotations.associatedGdm.disease',
+        'associatedGroups.associatedAnnotations.associatedGdm.gene',
         'associatedAnnotations',
         'associatedAnnotations.article',
-        'associatedAnnotations.associatedGdm'
+        'associatedAnnotations.associatedGdm',
+        'associatedAnnotations.associatedGdm.disease',
+        'associatedAnnotations.associatedGdm.gene'
     ]
     rev = {
         'associatedGroups': ('group', 'familyIncluded'),
@@ -596,17 +602,26 @@ class Individual(Item):
         'associatedGroups.associatedAnnotations',
         'associatedGroups.associatedAnnotations.article',
         'associatedGroups.associatedAnnotations.associatedGdm',
+        'associatedGroups.associatedAnnotations.associatedGdm.disease',
+        'associatedGroups.associatedAnnotations.associatedGdm.gene',
         'associatedFamilies',
         'associatedFamilies.associatedGroups',
         'associatedFamilies.associatedGroups.associatedAnnotations',
         'associatedFamilies.associatedGroups.associatedAnnotations.article',
+        'associatedFamilies.associatedGroups.associatedAnnotations.associatedGdm',
+        'associatedFamilies.associatedGroups.associatedAnnotations.associatedGdm.disease',
+        'associatedFamilies.associatedGroups.associatedAnnotations.associatedGdm.gene',
         'associatedFamilies.associatedAnnotations',
         'associatedFamilies.associatedAnnotations.article',
         'associatedFamilies.associatedAnnotations.associatedGdm',
+        'associatedFamilies.associatedAnnotations.associatedGdm.disease',
+        'associatedFamilies.associatedAnnotations.associatedGdm.gene',
         'associatedFamilies.commonDiagnosis',
         'associatedAnnotations',
         'associatedAnnotations.article',
         'associatedAnnotations.associatedGdm',
+        'associatedAnnotations.associatedGdm.disease',
+        'associatedAnnotations.associatedGdm.gene'
     ]
     rev = {
         'associatedGroups': ('group', 'individualIncluded'),
@@ -678,6 +693,8 @@ class Experimental(Item):
         'associatedAnnotations',
         'associatedAnnotations.article',
         'associatedAnnotations.associatedGdm',
+        'associatedAnnotations.associatedGdm.disease',
+        'associatedAnnotations.associatedGdm.gene',
         'assessments',
         'assessments.submitted_by'
     ]

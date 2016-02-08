@@ -202,7 +202,7 @@ var ProvisionalCuration = React.createClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true}/>
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true} />
                             <div className="container">
                                 {
                                     (provisional && edit === 'yes') ?
