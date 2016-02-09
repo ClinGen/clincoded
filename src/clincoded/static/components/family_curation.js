@@ -19,6 +19,7 @@ var Modal = modal.Modal;
 var ModalMixin = modal.ModalMixin;
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
+var ViewRecordHeader = curator.ViewRecordHeader;
 var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
@@ -1146,6 +1147,42 @@ var FamilyCuration = React.createClass({
         this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
     },
 
+    // Determine whether a Family is associated with a Group
+    // or
+    // whether an individual is associated with a Family or a Group
+    getAssociation: function(item) {
+        var associatedGroups, associatedFamilies;
+
+        if (this.state.group) {
+            associatedGroups = [this.state.group];
+        } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
+            associatedGroups = this.state.family.associatedGroups;
+        }
+
+        if (this.state.family) {
+            associatedFamilies = [this.state.family];
+        } else if (this.state.individual && this.state.individual.associatedFamilies && this.state.individual.associatedFamilies.length) {
+            associatedFamilies = this.state.individual.associatedFamilies;
+        }
+
+        switch(item) {
+            case 'individual':
+                return this.state.individual;
+
+            case 'family':
+                return this.state.family;
+
+            case 'associatedFamilies':
+                return associatedFamilies;
+
+            case 'associatedGroups':
+                return associatedGroups;
+
+            default:
+                break;
+        }
+    },
+
     // After the Family Curation page component mounts, grab the GDM, group, family, and annotation UUIDs (as many as given)
     // from the query string and retrieve the corresponding objects from the DB, if they exist. Note, we have to do this after
     // the component mounts because AJAX DB queries can't be done from unmounted components.
@@ -1186,7 +1223,7 @@ var FamilyCuration = React.createClass({
             <div>
                 {(!this.queryValues.familyUuid || this.state.family) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -1195,12 +1232,13 @@ var FamilyCuration = React.createClass({
                             : null}
                             <div className="viewer-titles">
                                 <h1>{(family ? 'Edit' : 'Curate') + ' Family Information'}</h1>
-                                <h2>Family: {this.state.familyName ? <span>{this.state.familyName}</span> : <span className="no-entry">No entry</span>}</h2>
-                                {groups && groups.length ?
-                                    <h2>
-                                        Groups association: {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}
-                                    </h2>
-                                : null}
+                                <h2>
+                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
+                                    {groups && groups.length ?
+                                        <span> // Group {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                    : null}
+                                    <span> // {this.state.familyName ? <span>Family {this.state.familyName}</span> : <span className="no-entry">No entry</span>}</span>
+                                </h2>
                             </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
@@ -1281,6 +1319,9 @@ var FamilyName = function(displayNote) {
 
     return (
         <div className="row">
+            {!this.getAssociation('family') && !this.getAssociation('associatedGroups') ?
+                <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Family is a member of a Group, please curate the Group first and then add the Family to that Group.</p></div>
+            : null}
             <Input type="text" ref="familyname" label="Family Label:" value={family && family.label} handleChange={this.handleChange}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
@@ -1336,7 +1377,7 @@ var FamilyCommonDiseases = function() {
     }
 
     // Make a list of diseases from the group, either from the given group,
-    // or the family if we're editing one that has associated groups.
+    // or the family if we're editing one that has associated groups.renderPhenotype
     if (group) {
         // We have a group, so get the disease array from it.
         associatedGroups = [group];
@@ -1356,15 +1397,18 @@ var FamilyCommonDiseases = function() {
                 clickHandler={this.handleClick.bind(this, 'group', 'orphanetid')} />
             : null}
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                curator.renderPhenotype(associatedGroups, 'Family') : curator.renderPhenotype(null, 'Family')
+                curator.renderPhenotype(associatedGroups, 'Family', 'hpo') : curator.renderPhenotype(null, 'Family', 'hpo')
             }
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
+                curator.renderPhenotype(associatedGroups, 'Family', 'ft') : curator.renderPhenotype(null, 'Family', 'ft')
+            }
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={family && family.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-            <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Group"
+            <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy all Phenotype(s) from Associated Group"
                 clickHandler={this.handleClick.bind(this, 'group', 'phenotype')} />
             : null
             }
@@ -1382,7 +1426,7 @@ var FamilyCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span>Disease(s) in Common (<span style={{fontWeight: 'normal'}}><a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term</span>):</span>;
+        return <span>Disease(s) in Common <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term)</span>:</span>;
     }
 });
 
@@ -1396,7 +1440,7 @@ var LabelHpoId = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                 <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
             </span>
         );
     }
@@ -1412,7 +1456,7 @@ var LabelPhenoTerms = React.createClass({
         return (
             <span>
                 {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                (<span style={{fontWeight: 'normal'}}>free text</span>):
+                <span style={{fontWeight: 'normal'}}>(free text)</span>:
             </span>
         );
     }
@@ -1750,7 +1794,6 @@ var FamilyViewer = React.createClass({
     // Handle the assessment submit button
     assessmentSubmit: function(e) {
         var updatedFamily;
-
         // GET the family object to have the most up-to-date version
         this.getRestData('/families/' + this.props.context.uuid).then(data => {
             this.setState({submitBusy: true});
@@ -1803,6 +1846,11 @@ var FamilyViewer = React.createClass({
 
             this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
+        }).then(data => {
+            var tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
+            var tempGdm = tempGdmPmid[0];
+            var tempPmid = tempGdmPmid[1];
+            window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
         }).catch(function(e) {
             console.log('FAMILY VIEW UPDATE ERROR=: %o', e);
         });
@@ -1868,189 +1916,195 @@ var FamilyViewer = React.createClass({
         // See if the segregation contains anything.
         var haveSegregation = segregationExists(segregation);
 
+        var tempGdmPmid = curator.findGdmPmidFromObj(family);
+        var tempGdm = tempGdmPmid[0];
+        var tempPmid = tempGdmPmid[1];
+
         return (
-            <div className="container">
-                <div className="row group-curation-content">
-                    <div className="viewer-titles">
-                        <h1>View Family: {family.label}</h1>
-                        {groups && groups.length ?
+            <div>
+                <ViewRecordHeader gdm={tempGdm} pmid={tempPmid} />
+                <div className="container">
+                    <div className="row curation-content-viewer">
+                        <div className="viewer-titles">
+                            <h1>View Family: {family.label}</h1>
                             <h2>
-                                Group association:&nbsp;
-                                {groups.map(function(group, i) {
-                                    return <span key={i}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>;
-                                })}
+                                {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
+                                {groups && groups.length ?
+                                    <span> // Group {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                : null}
+                                <span> // Family {family.label}</span>
                             </h2>
-                        : null}
-                    </div>
-                    <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Orphanet Common Diagnosis</dt>
-                                <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
-                                    return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>HPO IDs</dt>
-                                <dd>{family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.map(function(hpo, i) {
-                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Phenotype Terms</dt>
-                                <dd>{family.termsInDiagnosis}</dd>
-                            </div>
-
-                            <div>
-                                <dt>NOT HPO IDs</dt>
-                                <dd>{family.hpoIdInElimination && family.hpoIdInElimination.map(function(hpo, i) {
-                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>NOT phenotype terms</dt>
-                                <dd>{family.termsInElimination}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Family — Demographics" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt># Males</dt>
-                                <dd>{family.numberOfMale}</dd>
-                            </div>
-
-                            <div>
-                                <dt># Females</dt>
-                                <dd>{family.numberOfFemale}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Country of Origin</dt>
-                                <dd>{family.countryOfOrigin}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Ethnicity</dt>
-                                <dd>{family.ethnicity}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Race</dt>
-                                <dd>{family.race}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range Type</dt>
-                                <dd>{family.ageRangeType}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range</dt>
-                                <dd>{family.ageRangeFrom || family.ageRangeTo ? <span>{family.ageRangeFrom + ' – ' + family.ageRangeTo}</span> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range Unit</dt>
-                                <dd>{family.ageRangeUnit}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Family — Methods" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Previous testing</dt>
-                                <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of previous testing</dt>
-                                <dd>{method && method.previousTestingDescription}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Genome-wide study</dt>
-                                <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Genotyping methods</dt>
-                                <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Entire gene sequenced</dt>
-                                <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Copy number assessed</dt>
-                                <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Specific mutations genotyped</dt>
-                                <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of genotyping method</dt>
-                                <dd>{method && method.specificMutationsGenotypedMethod}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Additional Information about Family Method</dt>
-                                <dd>{method && method.additionalInformation}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    {FamilySegregationViewer(segregation, assessments, true)}
-
-                    {this.cv.gdmUuid && (familyUserAssessed || userFamily) && haveSegregation ?
-                        <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
-                    : null}
-
-                    <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
-                        {variants.map(function(variant, i) {
-                            return (
-                                <div className="variant-view-panel" key={variant.uuid}>
-                                    <h5>Variant {i + 1}</h5>
-                                    <dl className="dl-horizontal">
-                                        <div>
-                                            <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>Other description</dt>
-                                            <dd>{variant.otherDescription}</dd>
-                                        </div>
-                                    </dl>
+                        </div>
+                        <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Orphanet Common Diagnosis</dt>
+                                    <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
+                                        return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                    })}</dd>
                                 </div>
-                            );
-                        })}
-                    </Panel>
 
-                    <Panel title="Family — Additional Information" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Additional Information about Family</dt>
-                                <dd>{family.additionalInformation}</dd>
-                            </div>
+                                <div>
+                                    <dt>HPO IDs</dt>
+                                    <dd>{family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.map(function(hpo, i) {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
+                                </div>
 
-                            <dt>Other PMID(s) that report evidence about this same Family</dt>
-                            <dd>{family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
-                                return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
-                            })}</dd>
-                        </dl>
-                    </Panel>
+                                <div>
+                                    <dt>Phenotype Terms</dt>
+                                    <dd>{family.termsInDiagnosis}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>NOT HPO IDs</dt>
+                                    <dd>{family.hpoIdInElimination && family.hpoIdInElimination.map(function(hpo, i) {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>NOT phenotype terms</dt>
+                                    <dd>{family.termsInElimination}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title="Family — Demographics" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt># Males</dt>
+                                    <dd>{family.numberOfMale}</dd>
+                                </div>
+
+                                <div>
+                                    <dt># Females</dt>
+                                    <dd>{family.numberOfFemale}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Country of Origin</dt>
+                                    <dd>{family.countryOfOrigin}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Ethnicity</dt>
+                                    <dd>{family.ethnicity}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Race</dt>
+                                    <dd>{family.race}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range Type</dt>
+                                    <dd>{family.ageRangeType}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range</dt>
+                                    <dd>{family.ageRangeFrom || family.ageRangeTo ? <span>{family.ageRangeFrom + ' – ' + family.ageRangeTo}</span> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range Unit</dt>
+                                    <dd>{family.ageRangeUnit}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title="Family — Methods" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Previous testing</dt>
+                                    <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of previous testing</dt>
+                                    <dd>{method && method.previousTestingDescription}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Genome-wide study</dt>
+                                    <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Genotyping methods</dt>
+                                    <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Entire gene sequenced</dt>
+                                    <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Copy number assessed</dt>
+                                    <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Specific mutations genotyped</dt>
+                                    <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of genotyping method</dt>
+                                    <dd>{method && method.specificMutationsGenotypedMethod}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Additional Information about Family Method</dt>
+                                    <dd>{method && method.additionalInformation}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        {FamilySegregationViewer(segregation, assessments, true)}
+
+                        {this.cv.gdmUuid && (familyUserAssessed || userFamily) && haveSegregation ?
+                            <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
+                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
+                        : null}
+
+                        <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
+                            {variants.map(function(variant, i) {
+                                return (
+                                    <div className="variant-view-panel" key={variant.uuid}>
+                                        <h5>Variant {i + 1}</h5>
+                                        <dl className="dl-horizontal">
+                                            <div>
+                                                <dt>ClinVar VariationID</dt>
+                                                <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
+                                            </div>
+
+                                            <div>
+                                                <dt>Other description</dt>
+                                                <dd>{variant.otherDescription}</dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                );
+                            })}
+                        </Panel>
+
+                        <Panel title="Family — Additional Information" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Additional Information about Family</dt>
+                                    <dd>{family.additionalInformation}</dd>
+                                </div>
+
+                                <dt>Other PMID(s) that report evidence about this same Family</dt>
+                                <dd>{family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
+                                    return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
+                                })}</dd>
+                            </dl>
+                        </Panel>
+                    </div>
                 </div>
             </div>
         );

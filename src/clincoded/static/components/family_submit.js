@@ -125,7 +125,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
+                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} linkGdm={true} />
                 <div className="container">
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
@@ -134,7 +134,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                     : null}
                     {family ?
                         <div className="viewer-titles">
-                            <h1>Family Information: {family.label} <a href={family['@id'] + '?gdm=' + gdm.uuid} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editFamilyLink} className="btn btn-info">Edit</a></h1>
+                            <h1>Family Information: {family.label} <a href={editFamilyLink} className="btn btn-info">Edit/Assess</a></h1>
                             {group ?
                                 <h2>{'Group association: ' + group.label}</h2>
                             : null}
@@ -164,7 +164,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                         <div className="row">
                                             <div className="col-md-6 col-md-offset-3" >
                                                 <span className="family-submit-results-btn">
-                                                    <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                                    <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page <i className="icon icon-briefcase"></i></a>
                                                 </span>
                                             </div>
                                         </div>
@@ -215,7 +215,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                                         </div>
                                                         <div className="col-md-6">
                                                             <span className="family-submit-results-btn">
-                                                                <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                                                <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page <i className="icon icon-briefcase"></i></a>
                                                             </span>
                                                         </div>
                                                     </div>

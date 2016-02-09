@@ -76,7 +76,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
     propTypes: {
         gdm: React.PropTypes.object, // GDM data to display
         omimId: React.PropTypes.string, // OMIM ID to display
-        updateOmimId: React.PropTypes.func // Function to call when OMIM ID changes
+        updateOmimId: React.PropTypes.func, // Function to call when OMIM ID changes
+        linkGdm: React.PropTypes.bool // whether or not to link GDM text back to GDM
     },
 
     render: function() {
@@ -92,7 +93,10 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
-
+            var pmid;
+            if (gdm.annotations.length > 0) {
+                pmid = gdm.annotations[0].article.pmid;
+            }
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
             if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
@@ -157,8 +161,19 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 <div>
                     <div className="curation-data-title">
                         <div className="container">
-                            <h1>{gene.symbol} – {disease.term}</h1>
-                            <h2>{mode}</h2>
+                            <div>
+                                <span>
+                                    <h1>{gene.symbol} – {disease.term}
+                                        <span>&nbsp;
+                                            {this.props.linkGdm && pmid ?
+                                                <a href={"/curation-central/?gdm=" + gdm.uuid + "&pmid=" + pmid}><i className="icon icon-briefcase"></i></a>
+                                                : <i className="icon icon-briefcase"></i>
+                                            }
+                                        </span>
+                                    </h1>
+                                    <h2>{mode}</h2>
+                                </span>
+                            </div>
                             <div className="provisional-info-panel">
                                 <table border="1" style={{'width':'100%'}}>
                                     <tr>
@@ -226,6 +241,55 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
     }
 });
 
+// Curation data header for Gene:Disease
+var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
+    propTypes: {
+        gdm: React.PropTypes.object,
+        pmid: React.PropTypes.string
+    },
+    render: function() {
+        return (
+            <div>
+            {this.props.gdm ?
+                <div className="curation-data-title">
+                    <div className="container">
+                        <div>
+                            <h1>{this.props.gdm.gene.symbol} – {this.props.gdm.disease.term}
+                                {this.props.gdm ?
+                                <span> <a href={"/curation-central/?gdm=" + this.props.gdm.uuid + "&pmid=" + this.props.pmid}>
+                                    <i className="icon icon-briefcase"></i>
+                                </a></span>
+                                : null}
+                            </h1>
+                            <h2>{this.props.gdm.modeInheritance}</h2>
+                        </div>
+                    </div>
+                </div>
+            : null}
+            </div>
+        );
+    }
+});
+
+var findGdmPmidFromObj = module.exports.findGdmPmidFromObj = function(obj) {
+    var tempGdm, tempPmid;
+    if (obj.associatedAnnotations && obj.associatedAnnotations.length > 0) {
+        tempGdm = obj.associatedAnnotations[0].associatedGdm[0];
+        tempPmid = obj.associatedAnnotations[0].article.pmid;
+    } else if (obj.associatedGroups && obj.associatedGroups.length > 0) {
+        tempGdm = obj.associatedGroups[0].associatedAnnotations[0].associatedGdm[0];
+        tempPmid = obj.associatedGroups[0].associatedAnnotations[0].article.pmid;
+    } else if (obj.associatedFamilies && obj.associatedFamilies.length > 0) {
+        if (obj.associatedFamilies[0].associatedAnnotations && obj.associatedFamilies[0].associatedAnnotations.length > 0) {
+            tempGdm = obj.associatedFamilies[0].associatedAnnotations[0].associatedGdm[0];
+            tempPmid = obj.associatedFamilies[0].associatedAnnotations[0].article.pmid;
+        } else if (obj.associatedFamilies[0].associatedGroups && obj.associatedFamilies[0].associatedGroups.length > 0) {
+            tempGdm = obj.associatedFamilies[0].associatedGroups[0].associatedAnnotations[0].associatedGdm[0];
+            tempPmid = obj.associatedFamilies[0].associatedGroups[0].associatedAnnotations[0].article.pmid;
+        }
+    }
+    return [tempGdm, tempPmid];
+};
 
 // function to collect variants assessed support by login user
 var getUserPathogenicity = function(gdm, session) {
@@ -375,7 +439,7 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                         return 1;
                     });
                     var render = (
-                        <div key={annotation.uuid}>
+                        <h2 key={annotation.uuid}>
                             <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> → </span>
                             {sortedAssociations.map(function(association, i) {
                                 var associationType = association['@type'][0];
@@ -383,11 +447,15 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                                 return (
                                     <span key={association.uuid}>
                                         {i > 0 ? ', ' : ''}
-                                        <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>{probandLabel}
+                                        {associationType === 'group' ? <span>Group </span> : null}
+                                        {associationType === 'family' ? <span>Family </span> : null}
+                                        {associationType === 'individual' ? <span>Individual </span> : null}
+                                        {associationType === 'experimental' ? <span>Experimental </span> : null}
+                                        <a href={association['@id']} title={'View ' + associationType}>{association.label}</a>{probandLabel}
                                     </span>
                                 );
                             })}
-                        </div>
+                        </h2>
                     );
                     annotationAssociations.push(render);
                 }
@@ -395,9 +463,9 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
         }
 
         return (
-            <div>
+            <h2>
                 {annotationAssociations}
-            </div>
+            </h2>
         );
     }
 });
@@ -574,7 +642,7 @@ var renderGroup = function(group, gdm, annotation, curatorMatch) {
                 : null}
                 <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            <a href={'/group/' + group.uuid} target="_blank" title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
+            <a href={'/group/' + group.uuid} title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
             {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
             {curatorMatch ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
         </div>
@@ -607,7 +675,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                         return (
                             <span key={i}>
                                 {i > 0 ? ', ' : ''}
-                                <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                                <a href={group['@id']} title="View group in a new tab">{group.label}</a>
                             </span>
                         );
                     })}
@@ -629,8 +697,8 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                 </div>
             : null}
             {familyAssessable ?
-                <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} target="_blank" title="View/Assess family in a new tab">View/Assess</a>
-                : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} target="_blank" title="View family in a new tab">View</a>}
+                <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View/Assess family in a new tab">View/Assess</a>
+                : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View family in a new tab">View</a>}
             {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
             {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
         </div>
@@ -657,7 +725,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                         return (
                             <span key={group.uuid}>
                                 {i++ > 0 ? ', ' : ''}
-                                <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                                <a href={group['@id']} title="View group in a new tab">{group.label}</a>
                             </span>
                         );
                     })}
@@ -668,13 +736,13 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                                     return (
                                         <span key={group.uuid}>
                                             {i++ > 0 ? ', ' : ''}
-                                            <a href={group['@id']} target="_blank" title="View group in a new tab">{group.label}</a>
+                                            <a href={group['@id']} title="View group in a new tab">{group.label}</a>
                                         </span>
                                     );
                                 })}
                                 <span key={family.uuid}>
                                     {i++ > 0 ? ', ' : ''}
-                                    <a href={family['@id'] + '?gdm=' + gdm.uuid} target="_blank" title="View family in a new tab">{family.label}</a>
+                                    <a href={family['@id'] + '?gdm=' + gdm.uuid} title="View family in a new tab">{family.label}</a>
                                 </span>
                             </span>
                         );
@@ -696,7 +764,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                     })}
                 </div>
             : null}
-            <a href={'/individual/' + individual.uuid} target="_blank" title="View individual in a new tab">View</a>
+            <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
         </div>
     );
@@ -744,7 +812,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                     })}
                 </div>
             : null}
-            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} target="_blank" title="View/Assess experimental data in a new tab">View/Assess</a>
+            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Assess</a>
             {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
         </div>
     );
@@ -787,7 +855,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
                         return (
                             <span key={i}>
                                 {i > 0 ? ', ' : ''}
-                                <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} target="_blank">{association.label}</a>
+                                <a href={association['@id']} title={'View ' + associationType + ' in a new tab'}>{association.label}</a>
                                 {probandIndividual ? <i className="icon icon-proband"></i> : null}
                             </span>
                         );
@@ -1770,11 +1838,15 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
 };
 
 // Given an array of group or families in 'objList', render a list of HPO IDs and/or Phenotype free text in those groups and familes.
-var renderPhenotype = module.exports.renderPhenotype = function(objList, title) {
+var renderPhenotype = module.exports.renderPhenotype = function(objList, title, type) {
+    if (typeof type === 'undefined') {
+        type = '';
+    }
+
     return (
         <div>
-            <div className="col-sm-5">&nbsp;</div>
-            { title === 'Experimental' ?
+            { type === 'hpo' || type === '' ? <div className="col-sm-5">&nbsp;</div> : null}
+            { title === 'Experimental' && (type === 'hpo' || type === '') ?
                 <div className="col-sm-7 alert alert-warning">
                     <p style={{'margin-bottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) <strong>(required)</strong> using the Human Phenotype Ontology (HPO)
@@ -1783,7 +1855,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
                     </p>
                 </div>
             : null }
-            { title === 'Family' ?
+            { title === 'Family' && (type === 'hpo' || type === '') ?
                 <div className="col-sm-7">
                     <p style={{'margin-bottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) of the Family using the Human Phenotype Ontology (HPO)
@@ -1792,7 +1864,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
                     </p>
                 </div>
             : null}
-            { title === 'Individual' ?
+            { title === 'Individual' && (type === 'hpo' || type === '') ?
                 <div className="col-sm-7">
                     <p style={{'margin-bottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) of the Individual using the Human Phenotype Ontology (HPO)
@@ -1807,23 +1879,26 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title) 
                         return (
                             <div key={obj.uuid} className="form-group">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Phenotype(s) Associated with {title}:</strong>
+                                    <strong className="pull-right">Phenotype(s) Associated with {title}
+                                    {type === 'hpo' ? <span style={{fontWeight: 'normal'}}> (<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span> : null}
+                                    {type === 'ft' ? <span style={{fontWeight: 'normal'}}> (free text)</span> : null}
+                                    :</strong>
                                 </div>
                                 <div className="col-sm-7">
-                                    { (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length > 0) ?
+                                    { (type === 'hpo' || type === '') && (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length > 0) ?
                                         obj.hpoIdInDiagnosis.map(function(hpoid, i) {
                                             return (
                                                 <span>
                                                     {hpoid}
                                                     {i < obj.hpoIdInDiagnosis.length-1 ? ', ' : ''}
-                                                    {i === obj.hpoIdInDiagnosis.length-1 && obj.termsInDiagnosis ? '; ' : null}
+                                                    {i === obj.hpoIdInDiagnosis.length-1 && obj.termsInDiagnosis && type === '' ? '; ' : null}
                                                 </span>
                                             );
                                         })
                                         : null
                                     }
-                                    { obj.termsInDiagnosis ?
-                                        <span>View <a href={obj['@id']} target='_blank'>{obj.label}</a> for phenotype free text.</span>
+                                    { type === 'ft' && obj.termsInDiagnosis ?
+                                        <span>{obj.termsInDiagnosis}</span>
                                         :
                                         null
                                     }

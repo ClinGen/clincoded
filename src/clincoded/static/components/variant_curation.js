@@ -378,7 +378,7 @@ var VariantCuration = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
                 <div className="container">
                     {!this.queryValues.all && annotation && annotation.article ?
                         <div className="curation-pmid-summary">
@@ -387,10 +387,15 @@ var VariantCuration = React.createClass({
                     : null}
                     <div className="viewer-titles">
                         <h1>{(pathogenicity ? 'Edit' : 'Curate') + ' Variant Information'}</h1>
+                        {curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null}
+                        <VariantAssociationsHeader gdm={gdm} variant={variant} />
                         {variant ?
                             <h2>{variant.clinvarVariantId ? (
                                 <div className="row" style={{'padding-left':'15px'}}>
-                                    <span>VariationId: <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></span>
+                                    <span>
+                                        {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null}&nbsp;
+                                        // Variation <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a>
+                                    </span>
                                     <br />
                                     <dl>
                                         <dt style={{'width':'20%', 'font-weight':'normal', 'float':'left'}}>ClinVar Preferred Name:&nbsp;</dt>
@@ -398,11 +403,9 @@ var VariantCuration = React.createClass({
                                     </dl>
                                 </div>
                             )
-                            : <span>{'Description: ' + variant.otherDescription}</span>}</h2>
+                            : <span>{gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null} // {'Description: ' + variant.otherDescription}</span>}</h2>
                         : null}
-                        {curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null}
                     </div>
-                    <VariantAssociationsHeader gdm={gdm} variant={variant} />
                     <div className="row group-curation-content">
                         <div className="col-sm-12">
                             {!this.queryValues.pathogenicityUuid || pathogenicity ?
