@@ -392,7 +392,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             inCurrentGdm = userPathogenicity ? true : false;
 
                             return (
-                                <div className="col-sm-4 col-md-4 col-lg-4" key={variant.uuid}>
+                                <div className="col-sm-6 col-md-6 col-lg-4" key={variant.uuid}>
                                     <a className="btn btn-primary btn-xs"
                                         href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}
                                         title={variantName}>
@@ -506,6 +506,7 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
 
 var CurationPalette = module.exports.CurationPalette = React.createClass({
     propTypes: {
+        winWidth: React.PropTypes.number, // window width
         annotation: React.PropTypes.object.isRequired, // Current annotation that owns the article
         gdm: React.PropTypes.object.isRequired, // Current GDM that owns the given annotation
         session: React.PropTypes.object // Session object
@@ -515,6 +516,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var gdm = this.props.gdm;
         var annotation = this.props.annotation;
         var session = this.props.session;
+        var winWidth = this.props.winWidth;
         var curatorMatch = annotation && userMatch(annotation.submitted_by, session);
         var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
@@ -587,7 +589,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var allVariants = collectAnnotationVariants(annotation);
         if (Object.keys(allVariants).length) {
             variantRenders = Object.keys(allVariants).map(function(variantId) {
-                return <div key={variantId}>{renderVariant(allVariants[variantId], gdm, annotation, curatorMatch, session)}</div>;
+                return <div key={variantId}>{renderVariant(allVariants[variantId], gdm, annotation, curatorMatch, session, winWidth)}</div>;
             });
         }
 
@@ -625,6 +627,18 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         );
     }
 });
+
+// set preferred tile, shorten it wirh ellipses if too long
+var setPreferredTitle = function(variants) {
+    var showItem = '';
+    variants.forEach(variant => {
+        if (showItem !== '') {
+            showItem += '\t\n\n';
+        }
+        showItem += variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
+    });
+    return showItem;
+};
 
 // Render a family in the curator palette.
 var renderGroup = function(group, gdm, annotation, curatorMatch) {
@@ -683,15 +697,9 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
             }
             {(family && family.segregation && family.segregation.variants && family.segregation.variants.length) ?
                 <div>
-                    <span>Variants: </span>
-                    {family.segregation.variants.map(function(variant, j) {
-                        return (
-                            <span key={j}>
-                                {j > 0 ? ', ' : ''}
-                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
-                            </span>
-                        );
-                    })}
+                    <span>Variants:&nbsp;
+                        <a className="variant-preferred-title" title={setPreferredTitle(family.segregation.variants)}>{family.segregation.variants.length}</a>
+                    </span>
                 </div>
             : null}
             {familyAssessable ?
@@ -751,15 +759,9 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             }
             {(individual.variants && individual.variants.length) ?
                 <div>
-                    <span>Variants: </span>
-                    {individual.variants.map(function(variant, j) {
-                        return (
-                            <span key={j}>
-                                {j > 0 ? ', ' : ''}
-                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
-                            </span>
-                        );
-                    })}
+                    <span>Variants:&nbsp;
+                        <a className="variant-preferred-title" title={setPreferredTitle(individual.variants)}>{individual.variants.length}</a>
+                    </span>
                 </div>
             : null}
             <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View</a>
@@ -769,7 +771,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
 };
 
 // Render an experimental data in the curator palette.
-var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
+var renderExperimental = function(experimental, gdm, annotation, curatorMatch, winWidth) {
     var i = 0;
     var subtype = '';
     // determine if the evidence type has a subtype, and determine the subtype
@@ -799,15 +801,9 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
             </div>
             {(experimental.variants && experimental.variants.length) ?
                 <div>
-                    <span>Variants: </span>
-                    {experimental.variants.map(function(variant, j) {
-                        return (
-                            <span key={j}>
-                                {j > 0 ? ', ' : ''}
-                                {variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 15)}
-                            </span>
-                        );
-                    })}
+                    <span>Variants:&nbsp;
+                        <a className="variant-preferred-title" title={setPreferredTitle(experimental.variants)}>{experimental.variants.length}</a>
+                    </span>
                 </div>
             : null}
             <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Assess</a>
@@ -821,7 +817,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
 //   gdm: Currently viewed GDM
 //   annotation: Currently selected annotation (paper)
 //   curatorMatch: True if annotation owner matches currently logged-in user
-var renderVariant = function(variant, gdm, annotation, curatorMatch) {
+var renderVariant = function(variant, gdm, annotation, curatorMatch, session, winWidth) {
     var variantCurated = variant.associatedPathogenicities.length > 0;
 
     // Get the pathogenicity record with an owner that matches the annotation's owner.
@@ -835,9 +831,19 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch) {
         return (labelA < labelB) ? -1 : ((labelA > labelB ? 1 : 0));
     });
 
+    var variantTitle = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
+    var variantDisplay;
+    var adjWidth = winWidth >= 1200 ? [28, 2] : (winWidth >= 992 ? [22, 4] : [75, 2]);
+    if (variantTitle.length > adjWidth[0]) {
+        variantDisplay = variantTitle.substr(0, adjWidth[0]-adjWidth[1]) + ' ...';
+    } else {
+        variantDisplay = variantTitle;
+    }
+    var vCurationURL = '/variant-curation/?all&gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid + '&variant=' + variant.uuid + '&user=' + session.user_properties.uuid;
+
     return (
         <div className="panel-evidence-group">
-            <h5>{variant.clinvarVariantId ? <span>{'VariationId: ' + variant.clinvarVariantId}</span> : <span>{'Description: ' + variant.otherDescription}</span>}</h5>
+            <h5><a href={vCurationURL} title={variantTitle}>{variantDisplay}</a></h5>
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
                     <p className="evidence-curation-info">{variant.submitted_by.title}</p>
