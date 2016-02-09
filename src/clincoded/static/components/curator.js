@@ -2144,18 +2144,18 @@ var DeleteButtonModal = React.createClass({
     }
 });
 
-// asdf
+// Class for the add resource button. This class only renderes the button to add and clear the fields.
 var AddResourceId = module.exports.AddResourceId = React.createClass({
     mixins: [ModalMixin],
     propTypes: {
-        resourceType: React.PropTypes.string,
-        label: React.PropTypes.object,
-        labelVisible: React.PropTypes.bool,
-        buttonText: React.PropTypes.string,
-        initialFormValue: React.PropTypes.string,
-        fieldNum: React.PropTypes.string,
-        updateParentForm: React.PropTypes.func,
-        disabled: React.PropTypes.bool
+        resourceType: React.PropTypes.string, // specify what the resource you're trying to add is (passed to Modal)
+        label: React.PropTypes.object, // text for the button's label
+        labelVisible: React.PropTypes.bool, // specify whether or not the label is visible
+        buttonText: React.PropTypes.string, // text for the button
+        initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing (passed to Modal)
+        fieldNum: React.PropTypes.string, // specify which field on the main form this should edit (passed to Modal)
+        updateParentForm: React.PropTypes.func, // function to call upon pressing the Save button
+        disabled: React.PropTypes.bool // specify whether or not the button on the main form is disabled
     },
 
     getInitialState: function() {
@@ -2164,6 +2164,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         };
     },
 
+    // set the text of the modal title on load
     componentDidMount: function() {
         switch(this.props.resourceType) {
             case 'clinvar':
@@ -2172,6 +2173,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         }
     },
 
+    // called when the 'Clear' button is pressed on the main form
     resetForm: function(e) {
         this.props.updateParentForm(null, this.props.fieldNum);
     },
@@ -2198,14 +2200,14 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
     }
 });
 
-// asdf2
+// Class for the modal for adding external resource IDs
 var AddResourceIdModal = React.createClass({
-    mixins: [FormMixin, RestMixin],
+    mixins: [FormMixin, RestMixin, CuratorHistory],
 
     propTypes: {
-        resourceType: React.PropTypes.string,
-        initialFormValue: React.PropTypes.string,
-        fieldNum: React.PropTypes.string,
+        resourceType: React.PropTypes.string, // specify what the resource you're trying to add is
+        initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing
+        fieldNum: React.PropTypes.string, // specify which field on the main form this should edit
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
         updateParentForm: React.PropTypes.func // Function to call when submitting and closing the modal
@@ -2230,6 +2232,7 @@ var AddResourceIdModal = React.createClass({
         };
     },
 
+    // load text for different parts of the modal on load
     componentDidMount: function() {
         switch(this.props.resourceType) {
             case 'clinvar':
@@ -2249,8 +2252,7 @@ var AddResourceIdModal = React.createClass({
         }
     },
 
-    // Called when the modal form’s submit button is clicked. Handles validation and triggering
-    // the process to add an article.
+    // called when the button to ping the outside API is pressed
     queryResource: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.setState({queryResourceBusy: true, resourceFetched: false});
@@ -2262,6 +2264,7 @@ var AddResourceIdModal = React.createClass({
         }
     },
 
+    // called when the button to submit the resource to the main form is pressed
     submitResource: function(e) {
         e.preventDefault(); e.stopPropagation();
         // Apply submitResource logic depending on resourceType
@@ -2272,6 +2275,7 @@ var AddResourceIdModal = React.createClass({
         }
     },
 
+    // called when the value in the input field is changed
     handleChange: function(e) {
         if (this.refs.resourceId) {
             var tempResourceId = this.refs.resourceId.getValue();
@@ -2321,6 +2325,7 @@ var AddResourceIdModal = React.createClass({
 
 // Logic and helper functions for resource type 'clinvar' for AddResource modal
 function clinvarTxt(field) {
+    // Text to use for the resource type of 'clinvar'
     var txt;
     switch(field) {
         case 'modalTitle':
@@ -2345,7 +2350,7 @@ function clinvarTxt(field) {
     return txt;
 }
 function clinvarValidateForm() {
-    // Start with default validation
+    // validating the field for ClinVarIDs
     var valid = this.validateDefault();
     var formInput = this.getFormValue('resourceId');
 
@@ -2368,6 +2373,7 @@ function clinvarValidateForm() {
     return valid;
 }
 function clinvarQueryResource() {
+    // for pinging and parsing data from ClinVar
     this.saveFormValue('resourceId', this.state.inputValue);
     if (clinvarValidateForm.call(this)) {
         var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
@@ -2376,9 +2382,10 @@ function clinvarQueryResource() {
         this.getRestDataXml(url + id).then(xml => {
             data = parseClinvar(xml);
             if (data.clinvarVariantId) {
-                // Got results we want
+                // found the result we want
                 this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
             } else {
+                // no result from ClinVar
                 this.setFormErrors('resourceId', 'ClinVar ID not found');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
@@ -2388,20 +2395,26 @@ function clinvarQueryResource() {
     }
 }
 function clinvarSubmitResource() {
+    // for dealing with the main form
     this.setState({submitResourceBusy: true});
     if (this.state.tempResource.clinvarVariantId) {
         this.getRestData('/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId).then(check => {
             if (check.total) {
+                // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
                     this.props.updateParentForm(result, this.props.fieldNum);
                     this.setState({submitResourceBusy: false});
                     this.props.closeModal();
                 });
             } else {
+                // variation is new to our db
                 this.postRestData('/variants/', this.state.tempResource).then(result => {
-                    this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
-                    this.setState({submitResourceBusy: false});
-                    this.props.closeModal();
+                    // record the user adding a new variant entry
+                    this.recordHistory('add', result['@graph'][0]).then(history => {
+                        this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
+                        this.setState({submitResourceBusy: false});
+                        this.props.closeModal();
+                    });
                 });
             }
         });
