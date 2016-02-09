@@ -517,7 +517,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
     render: function() {
         var gdm = this.props.gdm;
         var annotation = this.props.annotation;
-        var session = this.props.session;
+        var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
         var winWidth = this.props.winWidth;
         var curatorMatch = annotation && userMatch(annotation.submitted_by, session);
         var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
@@ -773,7 +773,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
 };
 
 // Render an experimental data in the curator palette.
-var renderExperimental = function(experimental, gdm, annotation, curatorMatch, winWidth) {
+var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
     var i = 0;
     var subtype = '';
     // determine if the evidence type has a subtype, and determine the subtype
@@ -841,7 +841,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session, wi
     } else {
         variantDisplay = variantTitle;
     }
-    var vCurationURL = '/variant-curation/?all&gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid + '&variant=' + variant.uuid + '&user=' + session.user_properties.uuid;
+    var vCurationURL = '/variant-curation/?all&gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '');
 
     return (
         <div className="panel-evidence-group">
