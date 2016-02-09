@@ -1651,7 +1651,7 @@ var FamilyVariant = function() {
                                 </div>
                                 <div className="row">
                                     <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                    <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                    <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
                                 </div>
                             </div>
                         : null}

@@ -349,6 +349,11 @@
     .mutalyzer-link {
         margin-top: -20px;
     }
+
+    .clinvar-preferred-title {
+        word-break:break-all;
+        word-wrap: break-word;
+    }
 }
 
 .variant-view-panel {
