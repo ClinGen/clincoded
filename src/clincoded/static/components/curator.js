@@ -630,8 +630,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
             {(family && family.segregation && family.segregation.variants && family.segregation.variants.length) ?
                 <div>
                     <span>Variants:&nbsp;
-                        <a style={{'text-decoration':'underline', 'cursor':'pointer'}}
-                            title={setPreferredTitle(family.segregation.variants)}>{family.segregation.variants.length}</a>
+                        <a className="variant-preferred-title" title={setPreferredTitle(family.segregation.variants)}>{family.segregation.variants.length}</a>
                     </span>
                 </div>
             : null}
@@ -693,8 +692,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             {(individual.variants && individual.variants.length) ?
                 <div>
                     <span>Variants:&nbsp;
-                        <a style={{'text-decoration':'underline', 'cursor':'pointer'}}
-                            title={setPreferredTitle(individual.variants)}>{individual.variants.length}</a>
+                        <a className="variant-preferred-title" title={setPreferredTitle(individual.variants)}>{individual.variants.length}</a>
                     </span>
                 </div>
             : null}
@@ -736,8 +734,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch, w
             {(experimental.variants && experimental.variants.length) ?
                 <div>
                     <span>Variants:&nbsp;
-                        <a style={{'text-decoration':'underline', 'cursor':'pointer'}}
-                            title={setPreferredTitle(experimental.variants)}>{experimental.variants.length}</a>
+                        <a className="variant-preferred-title" title={setPreferredTitle(experimental.variants)}>{experimental.variants.length}</a>
                     </span>
                 </div>
             : null}
