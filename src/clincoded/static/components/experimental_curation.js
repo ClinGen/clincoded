@@ -2091,7 +2091,7 @@ var ExperimentalDataVariant = function() {
                             <div>
                                 <div className="row">
                                     <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
-                                    <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].clinvarVariantId}</span>
+                                    <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId}>{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                 </div>
                                 <div className="row">
                                    <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
