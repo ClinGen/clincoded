@@ -386,6 +386,19 @@ var Input = module.exports.Input = React.createClass({
                 );
                 break;
 
+            case 'button-button':
+                // Requires properties:
+                //   title: Label to put into button
+                //   clickHandler: Method to call when button is clicked
+                inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '') + (this.props.submitBusy ? ' submit-busy' : '');
+                input = (
+                    <span className={this.props.wrapperClassName}>
+                        <button className={inputClasses} onClick={this.props.clickHandler} disabled={this.props.inputDisabled || this.props.submitBusy}>
+                        {this.props.submitBusy ? <span className="submit-spinner"><i className="icon icon-spin icon-cog"></i></span> : null}{this.props.title}</button>
+                    </span>
+                );
+                break;
+
             case 'checkbox':
                 var checkboxInput = (this.props.checked ?
                     <input className={inputClasses} type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} checked />
