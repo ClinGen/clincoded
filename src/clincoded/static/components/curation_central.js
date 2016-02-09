@@ -271,10 +271,16 @@ var PmidSelectionList = React.createClass({
 var AddPmidModal = React.createClass({
     mixins: [FormMixin, RestMixin],
 
+    getInitialState: function() {
+        return {
+            submitBusy: false // Whether or not the 'Add Article' button is busy
+        };
+    },
+
     propTypes: {
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
+        updateGdmArticles: React.PropTypes.func, // Function to call when we have an article to add to the GDM
     },
 
     contextTypes: {
@@ -320,6 +326,7 @@ var AddPmidModal = React.createClass({
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.saveFormValue('pmid', this.refs.pmid.getValue());
+        this.setState({submitBusy: true});
         if (this.validateForm()) {
             // Form is valid -- we have a good PMID. Fetch the article with that PMID
             var enteredPmid = this.getFormValue('pmid');
@@ -338,11 +345,14 @@ var AddPmidModal = React.createClass({
                     });
                 });
             }).then(article => {
+                this.setState({submitBusy: false});
                 this.props.closeModal();
                 this.props.updateGdmArticles(article);
             }).catch(function(e) {
                 console.log('ERROR %o', e);
             });
+        } else {
+            this.setState({submitBusy: false});
         }
     },
 
@@ -366,7 +376,7 @@ var AddPmidModal = React.createClass({
                 <div className='modal-footer'>
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="submit" inputClassName={this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ?
-                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" />
+                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" submitBusy={this.state.submitBusy} />
                 </div>
             </Form>
         );
