@@ -38,10 +38,11 @@ textarea.form-control {
 }
 
 .btn-primary {
-    border: none;
+    border: 1px solid $color-btn;
     background-color: $color-btn;
 
     &:hover {
+        border: 1px solid $color-btn-hover !important;
         background-color: $color-btn-hover !important;
     }
 }

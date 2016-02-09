@@ -826,3 +826,11 @@
         font-weight: normal;
     }
 }
+
+.p-break {
+    display: block;
+    width: 95%;
+    margin: 10px auto 10px auto;
+    font-weight: bold;
+    word-wrap: break-word;
+}

@@ -31,6 +31,7 @@ var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
+var AddResourceId = curator.AddResourceId;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 5;
@@ -99,6 +100,7 @@ var ExperimentalCuration = React.createClass({
             rescuePRFT: false,
             variantCount: 0, // Number of variants to display
             variantOption: [], // One variant panel, and nothing entered
+            variantInfo: {}, // Extra holding info for variant display
             addVariantDisabled: false, // True if Add Another Variant button enabled
             submitBusy: false // True while form is submitting
         };
@@ -472,11 +474,13 @@ var ExperimentalCuration = React.createClass({
                         // We have variants
                         stateObj.variantCount = variants.length;
                         stateObj.addVariantDisabled = false;
+                        stateObj.variantInfo = {};
 
                         var currVariantOption = [];
                         for (var i = 0; i < variants.length; i++) {
                             if (variants[i].clinvarVariantId) {
                                 currVariantOption[i] = VAR_SPEC;
+                                stateObj.variantInfo[i] = {'clinvarVariantId': variants[i].clinvarVariantId, 'clinvarVariantTitle': variants[i].clinvarVariantTitle};
                             } else if (variants[i].otherDescription) {
                                 currVariantOption[i] = VAR_OTHER;
                             } else {
@@ -1202,6 +1206,35 @@ var ExperimentalCuration = React.createClass({
         }
 
         return !anyInvalid;
+    },
+
+    // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
+    updateClinvarVariantId: function(data, fieldNum) {
+        var newVariantInfo = _.clone(this.state.variantInfo);
+        var currVariantOption = this.state.variantOption;
+        var addVariantDisabled;
+        if (data) {
+            // Enable/Disable Add Variant button as needed
+            if (fieldNum == 0) {
+                addVariantDisabled = false;
+            } else {
+                addVariantDisabled = true;
+            }
+            // Update the form and display values with new data
+            this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
+            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
+            // Disable the 'Other description' textarea
+            this.refs['VARothervariant' + fieldNum].resetValue();
+            currVariantOption[0] = VAR_SPEC;
+        } else {
+            // Reset the form and display values
+            this.refs['VARclinvarid' + fieldNum].setValue('');
+            delete newVariantInfo[fieldNum];
+            // Reenable the 'Other description' textarea
+            currVariantOption[parseInt(fieldNum)] = VAR_NONE;
+        }
+        // Set state
+        this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
     },
 
     render: function() {
@@ -2048,7 +2081,7 @@ var ExperimentalDataVariant = function() {
                 }
 
                 return (
-                    <div key={i} className="variant-panel">
+                    <div key={'variant' + i} className="variant-panel">
                         <div className="row">
                             <div className="col-sm-7 col-sm-offset-5">
                                 <p className="alert alert-warning">
@@ -2057,12 +2090,25 @@ var ExperimentalDataVariant = function() {
                                 </p>
                             </div>
                         </div>
-                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER || this.cv.othersAssessed}
+                        {this.state.variantInfo[i] ?
+                            <div>
+                                <div className="row">
+                                    <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
+                                    <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
+                                </div>
+                                <div className="row">
+                                   <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
+                                    <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                </div>
+                            </div>
+                        : null}
+                        <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"/>
-                        <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSeach'] + '139214/'} target="_blank">example</a>: 139214).
-                        </p>
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
+                        <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]}
+                            buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" }
+                            initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                            updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                         {curator.renderMutalyzerLink()}
@@ -2082,6 +2128,12 @@ var ExperimentalDataVariant = function() {
 var LabelClinVarVariant = React.createClass({
     render: function() {
         return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+    }
+});
+
+var LabelClinVarVariantTitle = React.createClass({
+    render: function() {
+        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
     }
 });
 
