@@ -105,7 +105,7 @@ var NavItem = module.exports.NavItem = React.createClass({
 
     render: function() {
         var url = this.props.href ? this.props.href : '#';
-        var iconClass = this.props.icon ? this.props.icon + ' icon' : '';
+        var iconClass = this.props.icon ? this.props.icon + ' icon icon-alt' : '';
         var contentClass = iconClass ? 'sr-only' : '';
 
         return (

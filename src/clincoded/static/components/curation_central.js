@@ -33,6 +33,7 @@ var CurationCentral = React.createClass({
 
     getInitialState: function() {
         return {
+            winWidth: null, // window's width, used to ser # char of preferred tile shown in curator palette
             currPmid: queryKeyValue('pmid', this.props.href),
             currGdm: null
         };
@@ -71,6 +72,15 @@ var CurationCentral = React.createClass({
                 pmid = annotations[0].article.pmid;
             }
             this.currPmidChange(pmid);
+
+            // Focus the current PMID selection in left PMID column
+            var userPmidList = document.getElementById('user-pmid-list');
+            var selectedPmid = document.getElementById('selected-pmid');
+            userPmidList.scrollTop = 0;
+            if (selectedPmid && userPmidList.scrollHeight > userPmidList.clientHeight) {
+                userPmidList.scrollTop += selectedPmid.offsetTop - 50;
+            }
+
             return gdm;
         }).catch(function(e) {
             console.log('GETGDM ERROR=: %o', e);
@@ -80,6 +90,9 @@ var CurationCentral = React.createClass({
     // After the Curator Central page component mounts, grab the uuid from the query string and
     // retrieve the corresponding GDM from the DB.
     componentDidMount: function() {
+        var winWidth = window.innerWidth;
+        this.setState({winWidth: winWidth});
+        
         var gdmUuid = queryKeyValue('gdm', this.props.href);
         var pmid = queryKeyValue('pmid', this.props.href);
         if (gdmUuid) {
@@ -167,7 +180,7 @@ var CurationCentral = React.createClass({
                         </div>
                         {currArticle ?
                             <div className="col-md-3">
-                                <CurationPalette gdm={gdm} annotation={annotation} session={session} />
+                                <CurationPalette gdm={gdm} annotation={annotation} session={session} winWidth={this.state.winWidth} />
                             </div>
                         : null}
                     </div>
@@ -227,12 +240,13 @@ var PmidSelectionList = React.createClass({
                     </Modal>
                 </div>
                 {annotations ?
-                    <div className="pmid-selection-list">
+                    <div className="pmid-selection-list" id="user-pmid-list">
                         {annotations.map(annotation => {
                             var classList = 'pmid-selection-list-item' + (annotation.article.pmid === this.props.currPmid ? ' curr-pmid' : '');
+                            var elementId = (annotation.article.pmid === this.props.currPmid ? 'selected-pmid' : '');
 
                             return (
-                                <div key={annotation.article.pmid} className={classList} onClick={this.props.currPmidChange.bind(null, annotation.article.pmid)}>
+                                <div key={annotation.article.pmid} className={classList} id={elementId} onClick={this.props.currPmidChange.bind(null, annotation.article.pmid)}>
                                     <div className="pmid-selection-list-specs">
                                         <PmidSummary article={annotation.article} />
                                     </div>
@@ -257,10 +271,16 @@ var PmidSelectionList = React.createClass({
 var AddPmidModal = React.createClass({
     mixins: [FormMixin, RestMixin],
 
+    getInitialState: function() {
+        return {
+            submitBusy: false // Whether or not the 'Add Article' button is busy
+        };
+    },
+
     propTypes: {
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
+        updateGdmArticles: React.PropTypes.func, // Function to call when we have an article to add to the GDM
     },
 
     contextTypes: {
@@ -306,6 +326,7 @@ var AddPmidModal = React.createClass({
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.saveFormValue('pmid', this.refs.pmid.getValue());
+        this.setState({submitBusy: true});
         if (this.validateForm()) {
             // Form is valid -- we have a good PMID. Fetch the article with that PMID
             var enteredPmid = this.getFormValue('pmid');
@@ -324,11 +345,14 @@ var AddPmidModal = React.createClass({
                     });
                 });
             }).then(article => {
+                this.setState({submitBusy: false});
                 this.props.closeModal();
                 this.props.updateGdmArticles(article);
             }).catch(function(e) {
                 console.log('ERROR %o', e);
             });
+        } else {
+            this.setState({submitBusy: false});
         }
     },
 
@@ -352,7 +376,7 @@ var AddPmidModal = React.createClass({
                 <div className='modal-footer'>
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="submit" inputClassName={this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ?
-                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" />
+                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" submitBusy={this.state.submitBusy} />
                 </div>
             </Form>
         );

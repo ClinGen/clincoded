@@ -14,6 +14,7 @@ var CuratorHistory = require('./curator_history');
 
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
+var ViewRecordHeader = curator.ViewRecordHeader;
 var CurationPalette = curator.CurationPalette;
 var AssessmentTracker = Assessments.AssessmentTracker;
 var AssessmentPanel = Assessments.AssessmentPanel;
@@ -30,6 +31,7 @@ var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
+var AddResourceId = curator.AddResourceId;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 5;
@@ -98,6 +100,7 @@ var ExperimentalCuration = React.createClass({
             rescuePRFT: false,
             variantCount: 0, // Number of variants to display
             variantOption: [], // One variant panel, and nothing entered
+            variantInfo: {}, // Extra holding info for variant display
             addVariantDisabled: false, // True if Add Another Variant button enabled
             submitBusy: false // True while form is submitting
         };
@@ -471,11 +474,13 @@ var ExperimentalCuration = React.createClass({
                         // We have variants
                         stateObj.variantCount = variants.length;
                         stateObj.addVariantDisabled = false;
+                        stateObj.variantInfo = {};
 
                         var currVariantOption = [];
                         for (var i = 0; i < variants.length; i++) {
                             if (variants[i].clinvarVariantId) {
                                 currVariantOption[i] = VAR_SPEC;
+                                stateObj.variantInfo[i] = {'clinvarVariantId': variants[i].clinvarVariantId, 'clinvarVariantTitle': variants[i].clinvarVariantTitle};
                             } else if (variants[i].otherDescription) {
                                 currVariantOption[i] = VAR_OTHER;
                             } else {
@@ -528,6 +533,7 @@ var ExperimentalCuration = React.createClass({
     // Note, we have to do this after the component mounts because AJAX DB queries can't be
     // done from unmounted components.
     componentDidMount: function() {
+        this.cv.othersAssessed = false;
         this.loadData();
     },
 
@@ -1203,6 +1209,35 @@ var ExperimentalCuration = React.createClass({
         return !anyInvalid;
     },
 
+    // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
+    updateClinvarVariantId: function(data, fieldNum) {
+        var newVariantInfo = _.clone(this.state.variantInfo);
+        var currVariantOption = this.state.variantOption;
+        var addVariantDisabled;
+        if (data) {
+            // Enable/Disable Add Variant button as needed
+            if (fieldNum < MAX_VARIANTS - 1) {
+                addVariantDisabled = false;
+            } else {
+                addVariantDisabled = true;
+            }
+            // Update the form and display values with new data
+            this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
+            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
+            // Disable the 'Other description' textarea
+            this.refs['VARothervariant' + fieldNum].resetValue();
+            currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
+        } else {
+            // Reset the form and display values
+            this.refs['VARclinvarid' + fieldNum].setValue('');
+            delete newVariantInfo[fieldNum];
+            // Reenable the 'Other description' textarea
+            currVariantOption[parseInt(fieldNum)] = VAR_NONE;
+        }
+        // Set state
+        this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
+    },
+
     render: function() {
         var gdm = this.state.gdm;
         var annotation = this.state.annotation;
@@ -1229,7 +1264,7 @@ var ExperimentalCuration = React.createClass({
             <div>
                 {(!this.queryValues.experimentalUuid || this.state.experimental) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -1238,8 +1273,10 @@ var ExperimentalCuration = React.createClass({
                             : null}
                             <div className="viewer-titles">
                                 <h1>{(experimental ? 'Edit' : 'Curate') + ' Experimental Data Information'}</h1>
-                                <h3>Experiment Type: {this.state.experimentalType && this.state.experimentalType != 'none' ? <span>{this.state.experimentalType}</span> : <span className="no-entry">None specified</span>}</h3>
-                                <h2>Experiment Name: {this.state.experimentalName ? <span>{this.state.experimentalName}</span> : <span className="no-entry">No entry</span>}</h2>
+                                <h2>
+                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
+                                    <span> // {this.state.experimentalName ? <span> Experiment {this.state.experimentalName}</span> : <span className="no-entry">No entry</span>} {this.state.experimentalType && this.state.experimentalType != 'none' ? <span>({this.state.experimentalType})</span> : null}</span>
+                                </h2>
                             </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
@@ -2032,46 +2069,99 @@ var ExperimentalDataVariant = function() {
 
     return (
         <div className="row">
-            {!experimental || !experimental.variants || experimental.variants.length === 0 ?
-                <div className="row">
-                    <p className="col-sm-7 col-sm-offset-5">If your Experimental data is about one or more variants, please add these variant(s) below</p>
-                </div>
-            : null}
-            {_.range(this.state.variantCount).map(i => {
-                var variant;
-
-                if (variants && variants.length) {
-                    variant = variants[i];
-                }
-
-                return (
-                    <div key={i} className="variant-panel">
-                        <div className="row">
-                            <div className="col-sm-7 col-sm-offset-5">
-                                <p className="alert alert-warning">
-                                    ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
-                                    the same variant, and ensures the accurate counting of probands.
-                                </p>
-                            </div>
+        {this.cv.othersAssessed ?
+            <div>
+                {variants.map(function(variant, i) {
+                    return (
+                        <div key={i} className="variant-view-panel variant-view-panel-edit">
+                            <h5>Variant {i + 1}</h5>
+                            <dl className="dl-horizontal">
+                                {variant.clinvarVariantId ?
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>ClinVar VariationID</dt>
+                                            <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                        </dl>
+                                    </div>
+                                : null }
+                                {variant.clinvarVariantTitle ?
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>ClinVar Preferred Title</dt>
+                                            <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                        </dl>
+                                    </div>
+                                : null }
+                                {variant.otherDescription ?
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>Other description</dt>
+                                            <dd>{variant.otherDescription}</dd>
+                                        </dl>
+                                    </div>
+                                : null }
+                            </dl>
                         </div>
-                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER || this.cv.othersAssessed}
-                            error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"/>
-                        <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSeach'] + '139214/'} target="_blank">example</a>: 139214).
-                        </p>
-                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                        {curator.renderMutalyzerLink()}
+                    );
+                })}
+            </div>
+        :
+            <div>
+                {!experimental || !variants || variants.length === 0 ?
+                    <div className="row">
+                        <p className="col-sm-7 col-sm-offset-5">If your Experimental data is about one or more variants, please add these variant(s) below</p>
                     </div>
-                );
-            })}
-            {this.state.variantCount < MAX_VARIANTS ?
-                <div>
-                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Experimental data" : "Add variant associated with Experimental data"}
-                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled || this.cv.othersAssessed} />
-                </div>
-            : null}
+                : null}
+                {_.range(this.state.variantCount).map(i => {
+                    var variant;
+
+                    if (variants && variants.length) {
+                        variant = variants[i];
+                    }
+
+                    return (
+                        <div key={'variant' + i} className="variant-panel">
+                            <div className="row">
+                                <div className="col-sm-7 col-sm-offset-5">
+                                    <p className="alert alert-warning">
+                                        ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
+                                        the same variant, and ensures the accurate counting of probands.
+                                    </p>
+                                </div>
+                            </div>
+                            {this.state.variantInfo[i] ?
+                                <div>
+                                    <div className="row">
+                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
+                                        <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
+                                    </div>
+                                    <div className="row">
+                                       <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
+                                        <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                    </div>
+                                </div>
+                            : null}
+                            <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
+                                error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
+                            <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]}
+                                buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" }
+                                initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                                updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
+                            <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                            {curator.renderMutalyzerLink()}
+                        </div>
+                    );
+                })}
+                {this.state.variantCount < MAX_VARIANTS ?
+                    <div>
+                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Experimental data" : "Add variant associated with Experimental data"}
+                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled || this.cv.othersAssessed} />
+                    </div>
+                : null}
+            </div>
+        }
         </div>
     );
 };
@@ -2079,6 +2169,12 @@ var ExperimentalDataVariant = function() {
 var LabelClinVarVariant = React.createClass({
     render: function() {
         return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+    }
+});
+
+var LabelClinVarVariantTitle = React.createClass({
+    render: function() {
+        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
     }
 });
 
@@ -2161,6 +2257,11 @@ var ExperimentalViewer = React.createClass({
 
             this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
+        }).then(data => {
+            var tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
+            var tempGdm = tempGdmPmid[0];
+            var tempPmid = tempGdmPmid[1];
+            window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
         }).catch(function(e) {
             console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);
         });
@@ -2174,25 +2275,34 @@ var ExperimentalViewer = React.createClass({
         if (experimental && experimental.assessments && experimental.assessments.length) {
             this.setState({assessments: experimental.assessments});
         }
+
+        if (typeof this.props.session.user_properties !== undefined) {
+            var user = this.props.session && this.props.session.user_properties;
+            this.loadAssessmentTracker(user);
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
         if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
-            var experimental = this.props.context;
-            var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
             var user = nextProps.session && nextProps.session.user_properties;
+            this.loadAssessmentTracker(user);
+        }
+    },
 
-            // Make an assessment tracker object once we get the logged in user info
-            if (!this.cv.assessmentTracker && user) {
-                var userAssessment;
+    loadAssessmentTracker: function(user) {
+        var experimental = this.props.context;
+        var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
 
-                // Find if any assessments for the segregation are owned by the currently logged-in user
-                if (assessments && assessments.length) {
-                    // Find the assessment belonging to the logged-in curator, if any.
-                    userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
-                }
-                this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, experimental.evidenceType);
+        // Make an assessment tracker object once we get the logged in user info
+        if (!this.cv.assessmentTracker && user) {
+            var userAssessment;
+
+            // Find if any assessments for the segregation are owned by the currently logged-in user
+            if (assessments && assessments.length) {
+                // Find the assessment belonging to the logged-in curator, if any.
+                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
             }
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, experimental.evidenceType);
         }
     },
 
@@ -2218,381 +2328,405 @@ var ExperimentalViewer = React.createClass({
             }
         }
 
+        var tempGdmPmid = curator.findGdmPmidFromObj(experimental);
+        var tempGdm = tempGdmPmid[0];
+        var tempPmid = tempGdmPmid[1];
+
         return (
-            <div className="container">
-                <div className="row curation-content-viewer">
-                    <h1>View Experimental Data</h1>
-                    <h3>{experimental.evidenceType}</h3>
-                    <h4>{experimental.label}</h4>
+            <div>
+                <ViewRecordHeader gdm={tempGdm} pmid={tempPmid} />
+                <div className="container">
+                    <div className="row curation-content-viewer">
+                        <div className="viewer-titles">
+                            <h1>View Experimental Data {experimental.label}</h1>
+                            <h2>
+                                {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
+                                <span> // Experimental Data {experimental.label} ({experimental.evidenceType})</span>
+                            </h2>
+                        </div>
 
-                    {experimental.evidenceType == 'Biochemical Function' ?
-                    <Panel title="Biochemical Function" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Identified function of gene in this record</dt>
-                                <dd>{experimental.biochemicalFunction.identifiedFunction ? <a href={external_url_map['QuickGoSearch'] + experimental.biochemicalFunction.identifiedFunction} title={"GO entry for " + experimental.biochemicalFunction.identifiedFunction + " in new tab"} target="_blank">{experimental.biochemicalFunction.identifiedFunction}</a> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Evidence for above function</dt>
-                                <dd>{experimental.biochemicalFunction.evidenceForFunction}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Notes on where evidence found in paper</dt>
-                                <dd>{experimental.biochemicalFunction.evidenceForFunctionInPaper}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-                    : null}
-                    {experimental.evidenceType == 'Biochemical Function' && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction !== '' ?
-                    <Panel title="A. Gene(s) with same function implicated in same disease" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Other gene(s) with same function as gene in record</dt>
-                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(function(gene, i) {
-                                    return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Evidence that above gene(s) share same function with gene in record</dt>
-                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}</dd>
-                            </div>
-
-                            <div>
-                                <dt>This gene or genes have been implicated in the above disease</dt>
-                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease ? 'Yes' : 'No'}</dd>
-                            </div>
-
-                            <div>
-                                <dt>How has this other gene(s) been implicated in the above disease?</dt>
-                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Additional comments</dt>
-                                <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-                    : null}
-                    {experimental.evidenceType == 'Biochemical Function' && ((experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ') !== '') || (experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) ?
-                    <Panel title="B. Gene function consistent with phenotype" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>HPO ID(s)</dt>
-                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.map(function(hpo, i) {
-                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Phenotype</dt>
-                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Explanation of how phenotype is consistent with disease</dt>
-                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Notes on where evidence found in paper</dt>
-                                <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-                    : null}
-                    {experimental.evidenceType == 'Protein Interactions' ?
-                    <Panel title="Protein Interactions" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Interacting Gene(s)</dt>
-                                <dd>{experimental.proteinInteractions.interactingGenes && experimental.proteinInteractions.interactingGenes.map(function(gene, i) {
-                                    return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Interaction Type</dt>
-                                <dd>{experimental.proteinInteractions.interactionType}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Method by which interaction detected</dt>
-                                <dd>{experimental.proteinInteractions.experimentalInteractionDetection}</dd>
-                            </div>
-
-                            <div>
-                                <dt>This gene or genes have been implicated in the above disease</dt>
-                                <dd>{experimental.proteinInteractions.geneImplicatedInDisease ? 'Yes' : 'No'}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Explanation of relationship of other gene(s) to the disease</dt>
-                                <dd>{experimental.proteinInteractions.relationshipOfOtherGenesToDisese}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Information about where evidence can be found on paper</dt>
-                                <dd>{experimental.proteinInteractions.evidenceInPaper}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-                    : null}
-                    {experimental.evidenceType == 'Expression' ?
-                    <Panel title="Expression" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient</dt>
-                                <dd>{experimental.expression.organOfTissue ? <a href={external_url_map['UberonSearch'] + experimental.expression.organOfTissue} title={"Uberon entry for " + experimental.expression.organOfTissue + " in new tab"} target="_blank">{experimental.expression.organOfTissue}</a> : null}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-                    : null}
-                    {experimental.evidenceType == 'Expression' && experimental.expression.normalExpression.expressedInTissue && experimental.expression.normalExpression.expressedInTissue == true ?
-                    <Panel title="A. Gene normally expressed in tissue relevant to the disease" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>The gene is normally expressed in the above tissue</dt>
-                                <dd>{experimental.expression.normalExpression.expressedInTissue ? 'Yes' : 'No'}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Evidence for normal expression in disease tissue</dt>
-                                <dd>{experimental.expression.normalExpression.evidence}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Notes on where evidence found in paper</dt>
-                                <dd>{experimental.expression.normalExpression.evidenceInPaper}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-                    : null}
-                    {experimental.evidenceType == 'Expression' && experimental.expression.alteredExpression.expressedInPatients && experimental.expression.alteredExpression.expressedInPatients == true ?
-                    <Panel title="B. Altered expression in patients" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Expression is altered in patients who have the disease</dt>
-                                <dd>{experimental.expression.alteredExpression.expressedInPatients ? 'Yes' : 'No'}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Evidence for altered expression in patients</dt>
-                                <dd>{experimental.expression.alteredExpression.evidence}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Notes on where evidence found in paper</dt>
-                                <dd>{experimental.expression.alteredExpression.evidenceInPaper}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-                    : null}
-                    {experimental.evidenceType == 'Functional Alteration' ?
-                    <Panel title="Functional Alteration" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Patient cells with candidate mutation or engineered equivalent</dt>
-                                <dd>{experimental.functionalAlteration.cellMutationOrEngineeredEquivalent}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Patient cell type</dt>
-                                <dd>{experimental.functionalAlteration.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCellType} title={"CL entry for " + experimental.functionalAlteration.patientCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCellType}</a> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Engineered cell type</dt>
-                                <dd>{experimental.functionalAlteration.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.functionalAlteration.engineeredEquivalentCellType} title={"EFO entry for " + experimental.functionalAlteration.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.engineeredEquivalentCellType}</a> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of gene alteration</dt>
-                                <dd>{experimental.functionalAlteration.descriptionOfGeneAlteration}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Normal function of gene</dt>
-                                <dd>{experimental.functionalAlteration.normalFunctionOfGene ? <a href={external_url_map['QuickGoSearch'] + experimental.functionalAlteration.normalFunctionOfGene} title={"GO entry for " + experimental.functionalAlteration.normalFunctionOfGene + " in new tab"} target="_blank">{experimental.functionalAlteration.normalFunctionOfGene}</a> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Evidence for altered function</dt>
-                                <dd>{experimental.functionalAlteration.evidenceForNormalFunction}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Notes on where evidence found in paper</dt>
-                                <dd>{experimental.functionalAlteration.evidenceInPaper}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-                    : null}
-                    {experimental.evidenceType == 'Model Systems' ?
-                    <Panel title="Model Systems" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Non-human animal or cell-culture model?</dt>
-                                <dd>{experimental.modelSystems.animalOrCellCulture}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Animal model</dt>
-                                <dd>{experimental.modelSystems.animalModel}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Cell-culture type/line</dt>
-                                <dd>{experimental.modelSystems.cellCulture ? <a href={external_url_map['EFO'] + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of gene alteration</dt>
-                                <dd>{experimental.modelSystems.descriptionOfGeneAlteration}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Phenotype(s) observed in model system (HPO)</dt>
-                                <dd>{experimental.modelSystems.phenotypeHPOObserved ? <a href={external_url_map['HPO'] + experimental.modelSystems.phenotypeHPOObserved} title={"HPO Browser entry for " + experimental.modelSystems.phenotypeHPOObserved + " in new tab"} target="_blank">{experimental.modelSystems.phenotypeHPOObserved}</a> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Phenotype(s) observed in model system (free text)</dt>
-                                <dd>{experimental.modelSystems.phenotypeFreetextObserved}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Human phenotype(s) (HPO)</dt>
-                                <dd>{experimental.modelSystems.phenotypeHPO ? <a href={external_url_map['HPO'] + experimental.modelSystems.phenotypeHPO} title={"HPO Browser entry for " + experimental.modelSystems.phenotypeHPO + " in new tab"} target="_blank">{experimental.modelSystems.phenotypeHPO}</a> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Human phenotype(s) (free text)</dt>
-                                <dd>{experimental.modelSystems.phenotypeFreeText}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Explanation of how model system phenotype is similar to phenotype observed in humans</dt>
-                                <dd>{experimental.modelSystems.explanation}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Information about where evidence can be found on paper</dt>
-                                <dd>{experimental.modelSystems.evidenceInPaper}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-                    : null}
-                    {experimental.evidenceType == 'Rescue' ?
-                    <Panel title="Rescue" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Patient cells with or engineered equivalent?</dt>
-                                <dd>{experimental.rescue.patientCellOrEngineeredEquivalent}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Patient cell type</dt>
-                                <dd>{experimental.rescue.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCellType} title={"CL entry for " + experimental.rescue.patientCellType + " in new tab"} target="_blank">{experimental.rescue.patientCellType}</a> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Engineered equivalent cell type</dt>
-                                <dd>{experimental.rescue.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.rescue.engineeredEquivalentCellType} title={"EFO entry for " + experimental.rescue.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.rescue.engineeredEquivalentCellType}</a> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of gene alteration</dt>
-                                <dd>{experimental.rescue.descriptionOfGeneAlteration}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Phenotype to rescue</dt>
-                                <dd>{experimental.rescue.phenotypeHPO ? <a href={external_url_map['HPO'] + experimental.rescue.phenotypeHPO} title={"HPO Browser entry for " + experimental.rescue.phenotypeHPO + " in new tab"} target="_blank">{experimental.rescue.phenotypeHPO}</a> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Phenotype to rescue</dt>
-                                <dd>{experimental.rescue.phenotypeFreeText}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Method used to rescue</dt>
-                                <dd>{experimental.rescue.rescueMethod}</dd>
-                            </div>
-
-                            <div>
-                                <dt>The wild-type rescues the above phenotype</dt>
-                                <dd>{experimental.rescue.wildTypeRescuePhenotype ? 'Yes' : 'No'}</dd>
-                            </div>
-
-                            <div>
-                                <dt>The patient variant rescues</dt>
-                                <dd>{experimental.rescue.patientVariantRescue ? 'Yes' : 'No'}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Explanation of rescue of phenotype</dt>
-                                <dd>{experimental.rescue.explanation}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Information about where evidence can be found on paper</dt>
-                                <dd>{experimental.rescue.evidenceInPaper}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-                    : null}
-                    {experimental.variants && experimental.variants.length > 0 ?
-                    <Panel title="Associated Variants" panelClassName="panel-data">
-                        {experimental.variants.map(function(variant, i) {
-                            return (
-                                <div className="variant-view-panel">
-                                    <h5>Variant {i + 1}</h5>
-                                    <dl className="dl-horizontal">
-                                        <div>
-                                            <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>Other description</dt>
-                                            <dd>{variant.otherDescription}</dd>
-                                        </div>
-                                    </dl>
+                        {experimental.evidenceType == 'Biochemical Function' ?
+                        <Panel title="Biochemical Function" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Identified function of gene in this record</dt>
+                                    <dd>{experimental.biochemicalFunction.identifiedFunction ? <a href={external_url_map['QuickGoSearch'] + experimental.biochemicalFunction.identifiedFunction} title={"GO entry for " + experimental.biochemicalFunction.identifiedFunction + " in new tab"} target="_blank">{experimental.biochemicalFunction.identifiedFunction}</a> : null}</dd>
                                 </div>
-                            );
-                        })}
-                    </Panel>
-                    : null}
-                    {assessments && assessments.length ?
-                    <Panel panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Assessments</dt>
-                                <dd>
-                                    <div>
-                                        {assessments.map(function(assessment, i) {
-                                            return (
-                                                <span key={assessment.uuid}>
-                                                    {i > 0 ? <br /> : null}
-                                                    {assessment.value} ({assessment.submitted_by.title})
-                                                </span>
-                                            );
-                                        })}
+
+                                <div>
+                                    <dt>Evidence for above function</dt>
+                                    <dd>{experimental.biochemicalFunction.evidenceForFunction}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Notes on where evidence found in paper</dt>
+                                    <dd>{experimental.biochemicalFunction.evidenceForFunctionInPaper}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+                        : null}
+                        {experimental.evidenceType == 'Biochemical Function' && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction !== '' ?
+                        <Panel title="A. Gene(s) with same function implicated in same disease" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Other gene(s) with same function as gene in record</dt>
+                                    <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes && experimental.biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(function(gene, i) {
+                                        return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
+                                    })}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Evidence that above gene(s) share same function with gene in record</dt>
+                                    <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>This gene or genes have been implicated in the above disease</dt>
+                                    <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.geneImplicatedWithDisease ? 'Yes' : 'No'}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>How has this other gene(s) been implicated in the above disease?</dt>
+                                    <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Additional comments</dt>
+                                    <dd>{experimental.biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+                        : null}
+                        {experimental.evidenceType == 'Biochemical Function' && ((experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ') !== '') || (experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText !== '')) ?
+                        <Panel title="B. Gene function consistent with phenotype" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>HPO ID(s)</dt>
+                                    <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO && experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.map(function(hpo, i) {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Phenotype</dt>
+                                    <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Explanation of how phenotype is consistent with disease</dt>
+                                    <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Notes on where evidence found in paper</dt>
+                                    <dd>{experimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+                        : null}
+                        {experimental.evidenceType == 'Protein Interactions' ?
+                        <Panel title="Protein Interactions" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Interacting Gene(s)</dt>
+                                    <dd>{experimental.proteinInteractions.interactingGenes && experimental.proteinInteractions.interactingGenes.map(function(gene, i) {
+                                        return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
+                                    })}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Interaction Type</dt>
+                                    <dd>{experimental.proteinInteractions.interactionType}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Method by which interaction detected</dt>
+                                    <dd>{experimental.proteinInteractions.experimentalInteractionDetection}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>This gene or genes have been implicated in the above disease</dt>
+                                    <dd>{experimental.proteinInteractions.geneImplicatedInDisease ? 'Yes' : 'No'}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Explanation of relationship of other gene(s) to the disease</dt>
+                                    <dd>{experimental.proteinInteractions.relationshipOfOtherGenesToDisese}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Information about where evidence can be found on paper</dt>
+                                    <dd>{experimental.proteinInteractions.evidenceInPaper}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+                        : null}
+                        {experimental.evidenceType == 'Expression' ?
+                        <Panel title="Expression" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient</dt>
+                                    <dd>{experimental.expression.organOfTissue ? <a href={external_url_map['UberonSearch'] + experimental.expression.organOfTissue} title={"Uberon entry for " + experimental.expression.organOfTissue + " in new tab"} target="_blank">{experimental.expression.organOfTissue}</a> : null}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+                        : null}
+                        {experimental.evidenceType == 'Expression' && experimental.expression.normalExpression.expressedInTissue && experimental.expression.normalExpression.expressedInTissue == true ?
+                        <Panel title="A. Gene normally expressed in tissue relevant to the disease" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>The gene is normally expressed in the above tissue</dt>
+                                    <dd>{experimental.expression.normalExpression.expressedInTissue ? 'Yes' : 'No'}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Evidence for normal expression in disease tissue</dt>
+                                    <dd>{experimental.expression.normalExpression.evidence}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Notes on where evidence found in paper</dt>
+                                    <dd>{experimental.expression.normalExpression.evidenceInPaper}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+                        : null}
+                        {experimental.evidenceType == 'Expression' && experimental.expression.alteredExpression.expressedInPatients && experimental.expression.alteredExpression.expressedInPatients == true ?
+                        <Panel title="B. Altered expression in patients" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Expression is altered in patients who have the disease</dt>
+                                    <dd>{experimental.expression.alteredExpression.expressedInPatients ? 'Yes' : 'No'}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Evidence for altered expression in patients</dt>
+                                    <dd>{experimental.expression.alteredExpression.evidence}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Notes on where evidence found in paper</dt>
+                                    <dd>{experimental.expression.alteredExpression.evidenceInPaper}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+                        : null}
+                        {experimental.evidenceType == 'Functional Alteration' ?
+                        <Panel title="Functional Alteration" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Patient cells with candidate mutation or engineered equivalent</dt>
+                                    <dd>{experimental.functionalAlteration.cellMutationOrEngineeredEquivalent}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Patient cell type</dt>
+                                    <dd>{experimental.functionalAlteration.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCellType} title={"CL entry for " + experimental.functionalAlteration.patientCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCellType}</a> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Engineered cell type</dt>
+                                    <dd>{experimental.functionalAlteration.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.functionalAlteration.engineeredEquivalentCellType} title={"EFO entry for " + experimental.functionalAlteration.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.engineeredEquivalentCellType}</a> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of gene alteration</dt>
+                                    <dd>{experimental.functionalAlteration.descriptionOfGeneAlteration}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Normal function of gene</dt>
+                                    <dd>{experimental.functionalAlteration.normalFunctionOfGene ? <a href={external_url_map['QuickGoSearch'] + experimental.functionalAlteration.normalFunctionOfGene} title={"GO entry for " + experimental.functionalAlteration.normalFunctionOfGene + " in new tab"} target="_blank">{experimental.functionalAlteration.normalFunctionOfGene}</a> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Evidence for altered function</dt>
+                                    <dd>{experimental.functionalAlteration.evidenceForNormalFunction}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Notes on where evidence found in paper</dt>
+                                    <dd>{experimental.functionalAlteration.evidenceInPaper}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+                        : null}
+                        {experimental.evidenceType == 'Model Systems' ?
+                        <Panel title="Model Systems" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Non-human animal or cell-culture model?</dt>
+                                    <dd>{experimental.modelSystems.animalOrCellCulture}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Animal model</dt>
+                                    <dd>{experimental.modelSystems.animalModel}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Cell-culture type/line</dt>
+                                    <dd>{experimental.modelSystems.cellCulture ? <a href={external_url_map['EFO'] + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of gene alteration</dt>
+                                    <dd>{experimental.modelSystems.descriptionOfGeneAlteration}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Phenotype(s) observed in model system (HPO)</dt>
+                                    <dd>{experimental.modelSystems.phenotypeHPOObserved ? <a href={external_url_map['HPO'] + experimental.modelSystems.phenotypeHPOObserved} title={"HPO Browser entry for " + experimental.modelSystems.phenotypeHPOObserved + " in new tab"} target="_blank">{experimental.modelSystems.phenotypeHPOObserved}</a> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Phenotype(s) observed in model system (free text)</dt>
+                                    <dd>{experimental.modelSystems.phenotypeFreetextObserved}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Human phenotype(s) (HPO)</dt>
+                                    <dd>{experimental.modelSystems.phenotypeHPO ? <a href={external_url_map['HPO'] + experimental.modelSystems.phenotypeHPO} title={"HPO Browser entry for " + experimental.modelSystems.phenotypeHPO + " in new tab"} target="_blank">{experimental.modelSystems.phenotypeHPO}</a> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Human phenotype(s) (free text)</dt>
+                                    <dd>{experimental.modelSystems.phenotypeFreeText}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Explanation of how model system phenotype is similar to phenotype observed in humans</dt>
+                                    <dd>{experimental.modelSystems.explanation}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Information about where evidence can be found on paper</dt>
+                                    <dd>{experimental.modelSystems.evidenceInPaper}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+                        : null}
+                        {experimental.evidenceType == 'Rescue' ?
+                        <Panel title="Rescue" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Patient cells with or engineered equivalent?</dt>
+                                    <dd>{experimental.rescue.patientCellOrEngineeredEquivalent}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Patient cell type</dt>
+                                    <dd>{experimental.rescue.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCellType} title={"CL entry for " + experimental.rescue.patientCellType + " in new tab"} target="_blank">{experimental.rescue.patientCellType}</a> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Engineered equivalent cell type</dt>
+                                    <dd>{experimental.rescue.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.rescue.engineeredEquivalentCellType} title={"EFO entry for " + experimental.rescue.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.rescue.engineeredEquivalentCellType}</a> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of gene alteration</dt>
+                                    <dd>{experimental.rescue.descriptionOfGeneAlteration}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Phenotype to rescue</dt>
+                                    <dd>{experimental.rescue.phenotypeHPO ? <a href={external_url_map['HPO'] + experimental.rescue.phenotypeHPO} title={"HPO Browser entry for " + experimental.rescue.phenotypeHPO + " in new tab"} target="_blank">{experimental.rescue.phenotypeHPO}</a> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Phenotype to rescue</dt>
+                                    <dd>{experimental.rescue.phenotypeFreeText}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Method used to rescue</dt>
+                                    <dd>{experimental.rescue.rescueMethod}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>The wild-type rescues the above phenotype</dt>
+                                    <dd>{experimental.rescue.wildTypeRescuePhenotype ? 'Yes' : 'No'}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>The patient variant rescues</dt>
+                                    <dd>{experimental.rescue.patientVariantRescue ? 'Yes' : 'No'}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Explanation of rescue of phenotype</dt>
+                                    <dd>{experimental.rescue.explanation}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Information about where evidence can be found on paper</dt>
+                                    <dd>{experimental.rescue.evidenceInPaper}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+                        : null}
+                        {experimental.variants && experimental.variants.length > 0 ?
+                        <Panel title="Associated Variants" panelClassName="panel-data">
+                            {experimental.variants.map(function(variant, i) {
+                                return (
+                                    <div className="variant-view-panel">
+                                        <h5>Variant {i + 1}</h5>
+                                        {variant.clinvarVariantId ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinVar VariationID</dt>
+                                                    <dd style={{'paddingLeft':'22px'}}><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.clinvarVariantTitle ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinVar Preferred Title</dt>
+                                                    <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.otherDescription ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Other description</dt>
+                                                    <dd>{variant.otherDescription}</dd>
+                                                </dl>
+                                              </div>
+                                        : null }
                                     </div>
-                                </dd>
-                            </div>
-                        </dl>
-                    </Panel>
-                    : null}
-                    {this.cv.gdmUuid && (experimentalUserAssessed || userExperimental) ?
-                        <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
-                    : null}
+                                );
+                            })}
+                        </Panel>
+                        : null}
+                        {assessments && assessments.length ?
+                        <Panel panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Assessments</dt>
+                                    <dd>
+                                        <div>
+                                            {assessments.map(function(assessment, i) {
+                                                return (
+                                                    <span key={assessment.uuid}>
+                                                        {i > 0 ? <br /> : null}
+                                                        {assessment.value} ({assessment.submitted_by.title})
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                    </dd>
+                                </div>
+                            </dl>
+                        </Panel>
+                        : null}
+                        {this.cv.gdmUuid && (experimentalUserAssessed || userExperimental) ?
+                            <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
+                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
+                        : null}
+                    </div>
                 </div>
             </div>
         );
