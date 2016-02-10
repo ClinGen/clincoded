@@ -2234,6 +2234,24 @@ var ExperimentalViewer = React.createClass({
         if (experimental && experimental.assessments && experimental.assessments.length) {
             this.setState({assessments: experimental.assessments});
         }
+
+        if (typeof this.props.session.user_properties !== undefined) {
+            var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
+            var user = this.props.session && this.props.session.user_properties;
+
+            // Make an assessment tracker object once we get the logged in user info
+            if (!this.cv.assessmentTracker && user) {
+                var userAssessment;
+
+                // Find if any assessments for the segregation are owned by the currently logged-in user
+                if (assessments && assessments.length) {
+                    // Find the assessment belonging to the logged-in curator, if any.
+                    userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+                }
+                this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, experimental.evidenceType);
+            }
+        }
+
     },
 
     componentWillReceiveProps: function(nextProps) {
