@@ -232,6 +232,13 @@
 
 .panel-evidence-group {
     margin: 5px 0;
+
+    .variant-preferred-title {
+        border-bottom: 1px dotted #337ab7;
+        cursor: pointer;
+        font-weight: bold;
+        text-decoration: none;
+    }
 }
 
 .panel-evidence {
@@ -341,6 +348,11 @@
 
     .mutalyzer-link {
         margin-top: -20px;
+    }
+
+    .clinvar-preferred-title {
+        word-break:break-all;
+        word-wrap: break-word;
     }
 }
 
