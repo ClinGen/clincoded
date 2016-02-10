@@ -1215,7 +1215,7 @@ var ExperimentalCuration = React.createClass({
         var addVariantDisabled;
         if (data) {
             // Enable/Disable Add Variant button as needed
-            if (fieldNum == 0) {
+            if (fieldNum < MAX_VARIANTS - 1) {
                 addVariantDisabled = false;
             } else {
                 addVariantDisabled = true;
@@ -1225,7 +1225,7 @@ var ExperimentalCuration = React.createClass({
             newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
             // Disable the 'Other description' textarea
             this.refs['VARothervariant' + fieldNum].resetValue();
-            currVariantOption[0] = VAR_SPEC;
+            currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
         } else {
             // Reset the form and display values
             this.refs['VARclinvarid' + fieldNum].setValue('');
