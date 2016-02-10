@@ -533,6 +533,7 @@ var ExperimentalCuration = React.createClass({
     // Note, we have to do this after the component mounts because AJAX DB queries can't be
     // done from unmounted components.
     componentDidMount: function() {
+        this.cv.othersAssessed = false;
         this.loadData();
     },
 
