@@ -1216,7 +1216,7 @@ var ExperimentalCuration = React.createClass({
         var addVariantDisabled;
         if (data) {
             // Enable/Disable Add Variant button as needed
-            if (fieldNum == 0) {
+            if (fieldNum < MAX_VARIANTS - 1) {
                 addVariantDisabled = false;
             } else {
                 addVariantDisabled = true;
@@ -1226,7 +1226,7 @@ var ExperimentalCuration = React.createClass({
             newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
             // Disable the 'Other description' textarea
             this.refs['VARothervariant' + fieldNum].resetValue();
-            currVariantOption[0] = VAR_SPEC;
+            currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
         } else {
             // Reset the form and display values
             this.refs['VARclinvarid' + fieldNum].setValue('');
@@ -2069,59 +2069,99 @@ var ExperimentalDataVariant = function() {
 
     return (
         <div className="row">
-            {!experimental || !experimental.variants || experimental.variants.length === 0 ?
-                <div className="row">
-                    <p className="col-sm-7 col-sm-offset-5">If your Experimental data is about one or more variants, please add these variant(s) below</p>
-                </div>
-            : null}
-            {_.range(this.state.variantCount).map(i => {
-                var variant;
-
-                if (variants && variants.length) {
-                    variant = variants[i];
-                }
-
-                return (
-                    <div key={'variant' + i} className="variant-panel">
-                        <div className="row">
-                            <div className="col-sm-7 col-sm-offset-5">
-                                <p className="alert alert-warning">
-                                    ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
-                                    the same variant, and ensures the accurate counting of probands.
-                                </p>
-                            </div>
+        {this.cv.othersAssessed ?
+            <div>
+                {variants.map(function(variant, i) {
+                    return (
+                        <div key={i} className="variant-view-panel variant-view-panel-edit">
+                            <h5>Variant {i + 1}</h5>
+                            <dl className="dl-horizontal">
+                                {variant.clinvarVariantId ?
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>ClinVar VariationID</dt>
+                                            <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                        </dl>
+                                    </div>
+                                : null }
+                                {variant.clinvarVariantTitle ?
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>ClinVar Preferred Title</dt>
+                                            <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                        </dl>
+                                    </div>
+                                : null }
+                                {variant.otherDescription ?
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>Other description</dt>
+                                            <dd>{variant.otherDescription}</dd>
+                                        </dl>
+                                    </div>
+                                : null }
+                            </dl>
                         </div>
-                        {this.state.variantInfo[i] ?
-                            <div>
-                                <div className="row">
-                                    <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
-                                    <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
-                                </div>
-                                <div className="row">
-                                   <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                    <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                    );
+                })}
+            </div>
+        :
+            <div>
+                {!experimental || !variants || variants.length === 0 ?
+                    <div className="row">
+                        <p className="col-sm-7 col-sm-offset-5">If your Experimental data is about one or more variants, please add these variant(s) below</p>
+                    </div>
+                : null}
+                {_.range(this.state.variantCount).map(i => {
+                    var variant;
+
+                    if (variants && variants.length) {
+                        variant = variants[i];
+                    }
+
+                    return (
+                        <div key={'variant' + i} className="variant-panel">
+                            <div className="row">
+                                <div className="col-sm-7 col-sm-offset-5">
+                                    <p className="alert alert-warning">
+                                        ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
+                                        the same variant, and ensures the accurate counting of probands.
+                                    </p>
                                 </div>
                             </div>
-                        : null}
-                        <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
-                            error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
-                        <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]}
-                            buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" }
-                            initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                            updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
-                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                        {curator.renderMutalyzerLink()}
+                            {this.state.variantInfo[i] ?
+                                <div>
+                                    <div className="row">
+                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
+                                        <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
+                                    </div>
+                                    <div className="row">
+                                       <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
+                                        <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                    </div>
+                                </div>
+                            : null}
+                            <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
+                                error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
+                            <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]}
+                                buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" }
+                                initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                                updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
+                            <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                            {curator.renderMutalyzerLink()}
+                        </div>
+                    );
+                })}
+                {this.state.variantCount < MAX_VARIANTS ?
+                    <div>
+                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Experimental data" : "Add variant associated with Experimental data"}
+                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled || this.cv.othersAssessed} />
                     </div>
-                );
-            })}
-            {this.state.variantCount < MAX_VARIANTS ?
-                <div>
-                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Experimental data" : "Add variant associated with Experimental data"}
-                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled || this.cv.othersAssessed} />
-                </div>
-            : null}
+                : null}
+            </div>
+        }
         </div>
     );
 };
