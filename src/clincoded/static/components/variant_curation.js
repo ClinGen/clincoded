@@ -143,6 +143,7 @@ var VariantCuration = React.createClass({
     // Note, we have to do this after the component mounts because AJAX DB queries can't be
     // done from unmounted components.
     componentDidMount: function() {
+        this.cv.othersAssessed = false;
         this.loadData();
     },
 
@@ -247,35 +248,41 @@ var VariantCuration = React.createClass({
             promise.then(newAssessmentInfo => {
                 // If this pathogenicity was assessed, then there was no form, so don't write the pathogenicity.
                 if (!this.cv.assessmentTracker.isAssessed()) {
-                    // Convert form values to new flattened pathogenicity object.
-                    var newPathogenicity = this.formToPathogenicity(this.state.pathogenicity);
+                    // Get updated GDM object to make sure we don't create extra pathogenicity objects
+                    return this.getRestData('/gdm/' + this.state.gdm.uuid, null, true).then(freshGdm => {
+                        var freshPathogenicity = curator.getPathogenicityFromVariant(freshGdm, this.queryValues.session_user, this.queryValues.variantUuid);
+                        this.setState({'pathogenicity': freshPathogenicity});
 
-                    // If we made a new assessment, add it to the pathogenicity's assessments
-                    if (newAssessmentInfo.assessment && !newAssessmentInfo.update) {
-                        //if (!newPathogenicity.assessments) {
-                        //    newPathogenicity.assessments = [];
-                        //}
-                        //newPathogenicity.assessments.push(newAssessmentInfo.assessment['@id']);
-                        newPathogenicity.assessments = [newAssessmentInfo.assessment['@id']]; // only login user's assessment is allowed.
-                    }
+                        // Convert form values to new flattened pathogenicity object.
+                        var newPathogenicity = this.formToPathogenicity(this.state.pathogenicity);
 
-                    // Assign a link to the pathogenicity's variant if new
-                    if (!newPathogenicity.variant && this.state.variant) {
-                        newPathogenicity.variant = this.state.variant['@id'];
-                    }
+                        // If we made a new assessment, add it to the pathogenicity's assessments
+                        if (newAssessmentInfo.assessment && !newAssessmentInfo.update) {
+                            //if (!newPathogenicity.assessments) {
+                            //    newPathogenicity.assessments = [];
+                            //}
+                            //newPathogenicity.assessments.push(newAssessmentInfo.assessment['@id']);
+                            newPathogenicity.assessments = [newAssessmentInfo.assessment['@id']]; // only login user's assessment is allowed.
+                        }
 
-                    // Either update or create the pathogenicity object in the DB
-                    if (this.state.pathogenicity) {
-                        // We're editing a pathogenicity. PUT the new pathogenicity object to the DB to update the existing one.
-                        return this.putRestData('/pathogenicity/' + this.state.pathogenicity.uuid, newPathogenicity).then(data => {
-                            return Promise.resolve({pathogenicity: data['@graph'][0], assessment: newAssessmentInfo.assessment});
-                        });
-                    } else {
-                        // We created a pathogenicity; POST it to the DB
-                        return this.postRestData('/pathogenicity/', newPathogenicity).then(data => {
-                            return Promise.resolve({pathogenicity: data['@graph'][0], assessment: newAssessmentInfo.assessment});
-                        });
-                    }
+                        // Assign a link to the pathogenicity's variant if new
+                        if (!newPathogenicity.variant && this.state.variant) {
+                            newPathogenicity.variant = this.state.variant['@id'];
+                        }
+
+                        // Either update or create the pathogenicity object in the DB
+                        if (this.state.pathogenicity) {
+                            // We're editing a pathogenicity. PUT the new pathogenicity object to the DB to update the existing one.
+                            return this.putRestData('/pathogenicity/' + this.state.pathogenicity.uuid, newPathogenicity).then(data => {
+                                return Promise.resolve({pathogenicity: data['@graph'][0], assessment: newAssessmentInfo.assessment});
+                            });
+                        } else {
+                            // We created a pathogenicity; POST it to the DB
+                            return this.postRestData('/pathogenicity/', newPathogenicity).then(data => {
+                                return Promise.resolve({pathogenicity: data['@graph'][0], assessment: newAssessmentInfo.assessment});
+                            });
+                        }
+                    });
                 }
 
                 // No pathogenicity to write because the pathogenicity form is read-only (assessed).
@@ -284,17 +291,19 @@ var VariantCuration = React.createClass({
                 // Given pathogenicity has been saved (created or updated).
                 // Now update the GDM to include the pathogenicity if it's new
                 if (!this.state.pathogenicity && this.state.gdm && data.pathogenicity) {
-                    // New pathogenicity; add it to the GDM’s pathogenicity array.
-                    var newGdm = curator.flatten(this.state.gdm);
-                    if (newGdm.variantPathogenicity && newGdm.variantPathogenicity.length) {
-                        newGdm.variantPathogenicity.push(data.pathogenicity['@id']);
-                    } else {
-                        newGdm.variantPathogenicity = [data.pathogenicity['@id']];
-                    }
+                    return this.getRestData('/gdm/' + this.state.gdm.uuid, null, true).then(freshGdm => {
+                        // New pathogenicity; add it to the GDM’s pathogenicity array.
+                        var newGdm = curator.flatten(freshGdm);
+                        if (newGdm.variantPathogenicity && newGdm.variantPathogenicity.length) {
+                            newGdm.variantPathogenicity.push(data.pathogenicity['@id']);
+                        } else {
+                            newGdm.variantPathogenicity = [data.pathogenicity['@id']];
+                        }
 
-                    // Write the updated GDM
-                    return this.putRestData('/gdm/' + this.state.gdm.uuid, newGdm).then(() => {
-                        return Promise.resolve(_.extend(data, {modified: false}));
+                        // Write the updated GDM
+                        return this.putRestData('/gdm/' + this.state.gdm.uuid, newGdm).then(() => {
+                            return Promise.resolve(_.extend(data, {modified: false}));
+                        });
                     });
                 }
 
@@ -370,7 +379,7 @@ var VariantCuration = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
                 <div className="container">
                     {!this.queryValues.all && annotation && annotation.article ?
                         <div className="curation-pmid-summary">
@@ -379,12 +388,27 @@ var VariantCuration = React.createClass({
                     : null}
                     <div className="viewer-titles">
                         <h1>{(pathogenicity ? 'Edit' : 'Curate') + ' Variant Information'}</h1>
-                        {variant ?
-                            <h2>{variant.clinvarVariantId ? <span>VariationId: <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></span> : <span>{'Description: ' + variant.otherDescription}</span>}</h2>
-                        : null}
                         {curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null}
+                        <VariantAssociationsHeader gdm={gdm} variant={variant} />
+                        {variant ?
+                            <h2>{variant.clinvarVariantId ? (
+                                <div className="row" style={{'padding-left':'15px'}}>
+                                    <span>
+                                        {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null}&nbsp;
+                                    </span>
+                                    <dl className="dl-horizontal">
+                                        <dt style={{'font-weight':'normal'}}>VariationId</dt>
+                                        <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                    </dl>
+                                    <dl className="dl-horizontal">
+                                        <dt style={{'font-weight':'normal'}}>ClinVar Preferred Title</dt>
+                                        <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</dd>
+                                    </dl>
+                                </div>
+                            )
+                            : <span>{gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null}</span>}</h2>
+                        : null}
                     </div>
-                    <VariantAssociationsHeader gdm={gdm} variant={variant} />
                     <div className="row group-curation-content">
                         <div className="col-sm-12">
                             {!this.queryValues.pathogenicityUuid || pathogenicity ?

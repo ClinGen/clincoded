@@ -51,7 +51,7 @@ var ProvisionalCuration = React.createClass({
 
         // get gdm from db.
         var uris = _.compact([
-            gdmUuid ? '/gdm/' + gdmUuid : '', // search for entire data set of the gdm
+            gdmUuid ? '/gdm/' + gdmUuid : '' // search for entire data set of the gdm
         ]);
         this.getRestDatas(
             uris
@@ -178,14 +178,10 @@ var ProvisionalCuration = React.createClass({
     },
 
     cancelForm: function(e) {
-        // Don't run through HTML submit handler
-        e.preventDefault();
-        e.stopPropagation();
-
-        // click Cancel button will go back to view - current
-        if (e.detail >= 1){
-            window.history.go(-1);
-        }
+        // Changed modal cancel button from a form input to a html button
+        // as to avoid accepting enter/return key as a click event.
+        // Removed hack in this method.
+        window.history.go(-1);
     },
 
     render: function() {
@@ -206,7 +202,7 @@ var ProvisionalCuration = React.createClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true}/>
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true} />
                             <div className="container">
                                 {
                                     (provisional && edit === 'yes') ?
@@ -272,6 +268,7 @@ var ProvisionalCuration = React.createClass({
 
 globals.curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
 
+// Generate Classification Description page for url ../provisional-curation/?gdm=GDMId&classification=display
 var Classification = function() {
     return (
         <div className="container classification-cell">
@@ -404,6 +401,7 @@ var Classification = function() {
     );
 };
 
+// Description of 4 leves of classification in summary table
 var LimitedClassification = function() {
     return (
         <div>
@@ -469,6 +467,7 @@ var DefinitiveClassification = function() {
     );
 };
 
+// Edit page for url ../provisional-curation/?gdm=GDMId&edit=yes
 var EditCurrent = function() {
     var alteredClassification = this.state.provisional.alteredClassification ? this.state.provisional.alteredClassification : 'none';
     this.state.totalScore = this.state.provisional.totalScore;
@@ -530,7 +529,7 @@ var EditCurrent = function() {
                     </Panel>
                 </PanelGroup>
                 <div className='modal-footer'>
-                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                 </div>
             </Form>
@@ -538,9 +537,14 @@ var EditCurrent = function() {
     );
 };
 
+// Generate a new summary for url ../provisional-curation/?gdm=GDMId&calculate=yes
+// Calculation rules are defined by Small GCWG. See ClinGen_Interface_4_2015.pptx and Clinical Validity Classifications for detail
 var NewCalculation = function() {
     var gdm = this.state.gdm;
 
+    var h, i, j, k, l;
+
+    // initial values of assessments
     var userAssessments = {
         "variantSpt": 0,
         "variantReview": 0,
@@ -556,19 +560,19 @@ var NewCalculation = function() {
         "segNot": 0
     };
 
-    // Collect variants from pathogenicity
+    // Collect variants from user's pathogenicity
     var gdmPathoList = gdm.variantPathogenicity;
     var pathoVariantIdList = {
         "support": [],
         "review": [],
         "contradict": []
-    }
+    };
 
-    for (var i in gdmPathoList) {
+    for (i in gdmPathoList) {
         var variantUuid = gdmPathoList[i].variant.uuid;
         // Collect login user's variant assessments, separated as 3 different values.
         if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
-            for (var j in gdmPathoList[i].assessments) {
+            for (j in gdmPathoList[i].assessments) {
                 if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
                     pathoVariantIdList['support'].push(variantUuid);
                 }
@@ -593,7 +597,7 @@ var NewCalculation = function() {
         "Model Systems (Engineered equivalent)": 0,
         "Rescue (Patient cells)": 0,
         "Rescue (Engineered equivalent)": 0
-    }
+    };
     var individualsCollected = {
         "probandInd": [],
         "allVariants": [],
@@ -605,13 +609,13 @@ var NewCalculation = function() {
 
     // scan gdm
     var annotations = gdm.annotations ? gdm.annotations : [];
-    for (var i in annotations) {
-
+    for (i in annotations) {
+        var this_assessment;
         if (annotations[i].groups && annotations[i].groups.length > 0) {
             var groups = annotations[i].groups;
-            for (var j in groups) {
+            for (j in groups) {
                 if (groups[j].familyIncluded && groups[j].familyIncluded.length > 0) {
-                    for (var k in groups[j].familyIncluded) {
+                    for (k in groups[j].familyIncluded) {
 
                         // collect individuals
                         if (groups[j].familyIncluded[k].individualIncluded && groups[j].familyIncluded[k].individualIncluded.length > 0) {
@@ -623,8 +627,8 @@ var NewCalculation = function() {
                             userAssessments['segNot'] += 1;
 
                             if (groups[j].familyIncluded[k].segregation.assessments && groups[j].familyIncluded[k].segregation.assessments.length > 0) {
-                                for (var l in groups[j].familyIncluded[k].segregation.assessments) {
-                                    var this_assessment = groups[j].familyIncluded[k].segregation.assessments[l];
+                                for (l in groups[j].familyIncluded[k].segregation.assessments) {
+                                    this_assessment = groups[j].familyIncluded[k].segregation.assessments[l];
                                     if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
                                         userAssessments['segSpt'] += 1;
                                     }
@@ -645,7 +649,7 @@ var NewCalculation = function() {
             }
         }
         if (annotations[i].families && annotations[i].families.length > 0) {
-            for (var j in annotations[i].families) {
+            for (j in annotations[i].families) {
                 if (annotations[i].families[j].individualIncluded && annotations[i].families[j].individualIncluded.length > 0) {
                     individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, pathoVariantIdList);
                 }
@@ -654,8 +658,8 @@ var NewCalculation = function() {
                     userAssessments['segNot'] += 1;
 
                     if (annotations[i].families[j].segregation.assessments && annotations[i].families[j].segregation.assessments.length > 0) {
-                        for (var l in annotations[i].families[j].segregation.assessments) {
-                            var this_assessment = annotations[i].families[j].segregation.assessments[l];
+                        for (l in annotations[i].families[j].segregation.assessments) {
+                            this_assessment = annotations[i].families[j].segregation.assessments[l];
                             if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
                                 userAssessments['segSpt'] += 1;
                             }
@@ -676,14 +680,14 @@ var NewCalculation = function() {
 
         // collect experimental assessed support, check matrix
         if (annotations[i].experimentalData && annotations[i].experimentalData.length > 0) {
-            for (var j in annotations[i].experimentalData) {
-                var exp = annotations[i].experimentalData[j];
+            for (h in annotations[i].experimentalData) {
+                var exp = annotations[i].experimentalData[h];
                 var subTypeKey = exp.evidenceType;
 
                 userAssessments['expNot'] += 1;
 
                 if (exp.assessments && exp.assessments.length > 0) {
-                    for (var j in exp.assessments) {
+                    for (j in exp.assessments) {
                         if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Supports') {
                             if (exp.evidenceType === 'Expression') {
                                 expType[subTypeKey] += 1;
@@ -752,7 +756,7 @@ var NewCalculation = function() {
 
     // Compare designed max value at each score category and get the total experimental score
     var finalExperimentalScore = 0;
-    for (var i in exp_scores) {
+    for (i in exp_scores) {
         var max = 2; // set max value for each type
         if (i == 2) {
             max = 4;
@@ -765,7 +769,7 @@ var NewCalculation = function() {
     var articleCollected = [];
     var year = new Date();
     var earliest = year.getFullYear();
-    for (var i in individualsCollected['probandInd']) {
+    for (i in individualsCollected['probandInd']) {
         if (individualsCollected['probandInd'][i].pmid && individualsCollected['probandInd'][i].pmid != '') {
             proband += 1;
             if (!in_array(individualsCollected['probandInd'][i].pmid, articleCollected)) {
@@ -775,10 +779,10 @@ var NewCalculation = function() {
         }
     }
 
-    // get final scores
+    // calculate scores
     var currentYear = year.getFullYear();
     var time = currentYear.valueOf() - earliest.valueOf();
-    var timeScore = 0, probandScore = 0, pubScore = 0, expScore = 0;
+    var timeScore = 0, probandScore = 0, pubScore = 0, expScore = 0; // initialize scores to 0
     if (time >= 3) {
         timeScore = 2;
     }
@@ -814,7 +818,6 @@ var NewCalculation = function() {
         probandScore = 0;
     }
 
-    var expScore = 0;
     if (finalExperimentalScore >= 6) {
         expScore = 6;
     }
@@ -822,7 +825,6 @@ var NewCalculation = function() {
         expScore = finalExperimentalScore;
     }
 
-    var pubScore = 0;
     if (articleCollected.length >= 5) {
         pubScore = 5;
     }
@@ -834,6 +836,8 @@ var NewCalculation = function() {
     }
 
     var totalScore = probandScore + pubScore + timeScore + expScore;
+
+    // set calculated classification
     var autoClassification = 'No Reported Evidence';
     if (Math.floor(totalScore) >= 17){
         autoClassification = 'Definitive';
@@ -848,11 +852,13 @@ var NewCalculation = function() {
         autoClassification = 'Limited';
     }
 
+    // save total score and calculated classification to state
     this.state.totalScore = totalScore;
     this.state.autoClassification = autoClassification;
 
-    var probandRow = [], expRow = [], pubRow = [], timeRow = [];
-    for(var i=0; i<8; i++) {
+    // set score positons in html table
+    var probandRow = [], pubRow = [], timeRow = [];
+    for(i=0; i<8; i++) {
         if (i === probandScore) {
             probandRow.push(proband);
         }
@@ -990,7 +996,7 @@ var NewCalculation = function() {
                                     </tr>
                                     <tr className="count-title-row">
                                         <td rowSpan="2" className="title area-bottom-cells most-left">Time (yrs)</td>
-                                        <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#10877; 2 pubs, then max score for time = 1)</td>
+                                        <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#8804; 2 pubs, then max score for time = 1)</td>
                                         <td>current yr</td>
                                         <td>1-3 yr</td>
                                         <td>&gt;3 yr</td>
@@ -1030,7 +1036,7 @@ var NewCalculation = function() {
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td rowSpan="3" className="title" className="title exp-evidence-category-cells">Function</td>
+                                                    <td rowSpan="3" className="title exp-evidence-category-cells">Function</td>
                                                     <td className="title">Biochemical Function</td>
                                                     <td>0.5</td>
                                                     <td className={expType['Biochemical Function'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Biochemical Function'] > 0 ? expType['Biochemical Function'] : ''}</td>
@@ -1049,7 +1055,7 @@ var NewCalculation = function() {
                                                     <td className={expType['Expression'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Expression'] > 0 ? expType['Expression'] : ''}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td rowSpan="2" className="title" className="title exp-evidence-category-cells">Functional<br />Alteration</td>
+                                                    <td rowSpan="2" className="title exp-evidence-category-cells">Functional<br />Alteration</td>
                                                     <td className="title">Patient Cells</td>
                                                     <td>1</td>
                                                     <td className={expType['Functional Alteration (Patient cells)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Patient cells)'] > 0 ? expType['Functional Alteration (Patient cells)'] : ''}</td>
@@ -1062,7 +1068,7 @@ var NewCalculation = function() {
                                                     <td className={expType['Functional Alteration (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Engineered equivalent)'] > 0 ? expType['Functional Alteration (Engineered equivalent)'] : ''}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td rowSpan="4" className="title" className="title exp-evidence-category-cells">Models and<br />Rescue</td>
+                                                    <td rowSpan="4" className="title exp-evidence-category-cells">Models and<br />Rescue</td>
                                                     <td className="title">Animal Model</td>
                                                     <td>2</td>
                                                     <td className={expType['Model Systems (Animal model)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Model Systems (Animal model)'] > 0 ? expType['Model Systems (Animal model)'] : ''}</td>
@@ -1162,6 +1168,15 @@ var NewCalculation = function() {
                                     {this.state.autoClassification}
                                 </div>
                             </div>
+                            { userAssessments.segCntdct>0 || userAssessments.variantCntdct || userAssessments.expCntdct ?
+                                <div className="row">
+                                    <div className="col-sm-5">&nbsp;</div>
+                                    <div className="col-sm-7">
+                                        <strong style={{'color':'#f00'}}>Note: One or more pieces of evidence in this record was assessed as "Contradicts".</strong>
+                                    </div>
+                                </div>
+                             : null
+                            }
                             <br />
                             <Input type="select" ref="alteredClassification"
                                 label={<strong>Select Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
@@ -1189,7 +1204,7 @@ var NewCalculation = function() {
                     </Panel>
                 </PanelGroup>
                 <div className='modal-footer'>
-                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                 </div>
             </Form>
@@ -1197,6 +1212,7 @@ var NewCalculation = function() {
     );
 };
 
+// Function to check if an itme exists in an array(list)
 var in_array = function(item, list) {
     for(var i in list){
         if (list[i] == item) {
@@ -1206,6 +1222,7 @@ var in_array = function(item, list) {
     return false;
 };
 
+// Function to get earliest year of selected publications
 var get_earliest_year = function(earliest, dateStr) {
     var pattern = new RegExp(/^\d\d\d\d/);
     var theYear = pattern.exec(dateStr);
@@ -1215,9 +1232,19 @@ var get_earliest_year = function(earliest, dateStr) {
     return earliest;
 };
 
+// Funtion to separate proband individuals by assessment values
+// target: object containing separated proband individuals
+// branch: individual array in annotation/group/family
+// article: object containing publication info
+// idList: Assessment array
 var filter = function(target, branch, article, idList) {
-    var allVariants = target['allVariants'], sptVariants = target['sptVariants'], rvwVariants = target['rvwVariants'], cntdctVariants = target['cntdctVariants'];
-    var patho_spt = idList['support'], patho_rvw = idList['review'], patho_cntdct = idList['contradict'];
+    var allVariants = target['allVariants'],
+        sptVariants = target['sptVariants'],
+        rvwVariants = target['rvwVariants'],
+        cntdctVariants = target['cntdctVariants'],
+        patho_spt = idList['support'],
+        patho_rvw = idList['review'],
+        patho_cntdct = idList['contradict'];
 
     branch.forEach(function(obj) {
         if (obj.proband && obj.variants && obj.variants.length > 0) {

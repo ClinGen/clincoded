@@ -130,6 +130,16 @@ var FormMixin = module.exports.FormMixin = {
         this.setState({formErrors: errors});
     },
 
+    // Clear errors at multiple Inputs at the same time
+    // When data entered in one Input, error messages in all related Inputs will be cleared.
+    clrMultiFormErrors: function(refs) {
+        var errors = this.state.formErrors;
+        refs.forEach(function(ref){
+            errors[ref] = '';
+        });
+        this.setState({formErrors: errors});
+    },
+
     // Return true if the form's current state shows any Input errors. Return false if no
     // errors are indicated. This should be called in the render function so that the submit
     // form function will have had a chance to record any errors.
@@ -372,6 +382,19 @@ var Input = module.exports.Input = React.createClass({
                 input = (
                     <span className={this.props.wrapperClassName}>
                         <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} disabled={this.props.inputDisabled || this.props.submitBusy} />
+                    </span>
+                );
+                break;
+
+            case 'button-button':
+                // Requires properties:
+                //   title: Label to put into button
+                //   clickHandler: Method to call when button is clicked
+                inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '') + (this.props.submitBusy ? ' submit-busy' : '');
+                input = (
+                    <span className={this.props.wrapperClassName}>
+                        <button className={inputClasses} onClick={this.props.clickHandler} disabled={this.props.inputDisabled || this.props.submitBusy}>
+                        {this.props.submitBusy ? <span className="submit-spinner"><i className="icon icon-spin icon-cog"></i></span> : null}{this.props.title}</button>
                     </span>
                 );
                 break;

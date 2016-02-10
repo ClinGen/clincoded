@@ -113,15 +113,15 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
+                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} linkGdm={true} />
                 <div className="container">
-                    {group ?
-                        <h1>Group Information: {group.label} <a href={group['@id']} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editGroupLink} className="btn btn-info">Edit</a></h1>
-                    : null}
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
                             <PmidSummary article={annotation.article} displayJournal />
                         </div>
+                    : null}
+                    {group ?
+                        <h1>Group Information: {group.label} <a href={editGroupLink} className="btn btn-info">Edit</a></h1>
                     : null}
                     <div className="row">
                         <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
@@ -153,7 +153,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                                         </span>
                                         <span className="submit-results-choices-sep">OR</span>
                                         <span className="group-submit-results-btn">
-                                            <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                            <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page <i className="icon icon-briefcase"></i></a>
                                             <div className="submit-results-note">Note: To associate an existing Family with this Group, return to the Curation Central page.</div>
                                         </span>
                                     </div>
@@ -172,7 +172,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                                         </span>
                                         <span className="submit-results-choices-sep">OR</span>
                                         <span className="group-submit-results-btn">
-                                            <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                            <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page <i className="icon icon-briefcase"></i></a>
                                             <div className="submit-results-note">Note: To associate an existing Individual with this Group, return to the Record Curation page.</div>
                                         </span>
                                     </div>

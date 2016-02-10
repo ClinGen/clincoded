@@ -4,6 +4,7 @@
         "dbSNPId": "rs386833448",
         "clinvarVariantId": "55966",
         "clinVarRCV": "RCV000049375",
+        "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.1306C>T (p.Gln436Ter)",
         "hgvsNames": [
             "NM_000111.2:c.1306C>T",
             "NG_008046.1:g.25432C>T",
@@ -11,6 +12,7 @@
             "NC_000007.13:g.107423247G>A",
             "NP_000102.1:p.Gln436Ter"
         ],
+        "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-07-10T22:47:10.000000+00:00"
     },
@@ -19,6 +21,7 @@
         "dbSNPId": "rs386833446",
         "clinvarVariantId": "55964",
         "clinVarRCV": "RCV000049373",
+        "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.1136G>C (p.Gly379Ala)",
         "hgvsNames": [
             "NM_000111.2:c.1136G>C",
             "NG_008046.1:g.25157G>C",
@@ -26,6 +29,7 @@
             "NC_000007.13:g.107423522C>G",
             "NP_000102.1:p.Gly379Ala"
         ],
+        "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-07-26T22:47:10.000000+00:00"
     },
@@ -34,6 +38,7 @@
         "dbSNPId": "rs386833444",
         "clinvarVariantId": "55962",
         "clinVarRCV": "RCV000049371",
+        "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.1028G>A (p.Cys343Tyr)",
         "hgvsNames": [
             "NM_000111.2:c.1028G>A",
             "NG_008046.1:g.24938G>A",
@@ -41,6 +46,7 @@
             "NC_000007.13:g.107423741C>T",
             "NP_000102.1:p.Cys343Tyr"
         ],
+        "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-07-23T22:47:10.000000+00:00"
     },
@@ -49,6 +55,7 @@
         "dbSNPId": "rs387907373",
         "clinvarVariantId": "55874",
         "clinVarRCV": "RCV000049288",
+        "clinvarVariantTitle": "NM_000475.4(NR0B1):c.1274G>T (p.Arg425Ile)",
         "hgvsNames": [
             "NM_000475.4:c.1274G>T",
             "NG_009814.1:g.9661G>T",
@@ -56,6 +63,7 @@
             "NC_000023.10:g.30322835C>A",
             "NP_000466.2:p.Arg425Ile"
         ],
+        "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-07-28T22:47:10.000000+00:00"
     },
@@ -64,6 +72,7 @@
         "dbSNPId": "rs147674680",
         "clinvarVariantId": "55847",
         "clinVarRCV": "RCV000049262",
+        "clinvarVariantTitle": "NM_032682.5(FOXP1):c.1702C>T (p.Pro568Ser)",
         "hgvsNames": [
             "NM_032682.5:c.1702C>T",
             "NG_028243.1:g.618234C>T",
@@ -71,6 +80,7 @@
             "NC_000003.11:g.71019907G>A",
             "NP_116071.2:p.Pro568Ser"
         ],
+        "otherDescription": "",
         "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
         "date_created": "2015-08-01T22:47:10.000000+00:00"
     },
@@ -79,6 +89,7 @@
         "dbSNPId": "rs76262710",
         "clinvarVariantId": "38601",
         "clinVarRCV": "RCV000032040",
+        "clinvarVariantTitle": "NM_020975.4(RET):c.1852T>A (p.Cys618Ser)",
         "hgvsNames": [
             "NM_020975.4:c.1852T>A",
             "NM_020630.4:c.1852T>A",
@@ -88,6 +99,7 @@
             "NP_066124.1:p.Cys618Ser",
             "NP_065681.1:p.Cys618Ser"
         ],
+        "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-01-14T22:47:10.000000+00:00"
     },
@@ -96,6 +108,7 @@
         "dbSNPId": "rs2298771",
         "clinvarVariantId": "36753",
         "clinVarRCV": "RCV000030432",
+        "clinvarVariantTitle": "NM_006920.4(SCN1A):c.3166G>A (p.Ala1056Thr)",
         "hgvsNames": [
             "LRG_8t1:c.3166G>A",
             "NM_001165964.1:c.3115G>A",
@@ -111,6 +124,7 @@
             "NP_008851.3:p.Ala1056Thr",
             "NP_001159435.1:p.Ala1067Thr"
         ],
+        "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-06-14T22:47:10.000000+00:00"
     },
@@ -119,6 +133,7 @@
         "dbSNPId": "rs193922686",
         "clinvarVariantId": "36485",
         "clinVarRCV": "RCV000030157",
+        "clinvarVariantTitle": "NM_005912.2(MC4R):c.677T>C (p.Ile226Thr)",
         "hgvsNames": [
             "NM_005912.2:c.677T>C",
             "NG_016441.1:g.6096T>C",
@@ -126,6 +141,7 @@
             "NC_000018.9:g.58038906A>G",
             "NP_005903.2:p.Ile226Thr"
         ],
+        "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-03-14T22:47:10.000000+00:00"
     },
@@ -134,6 +150,7 @@
         "dbSNPId": "rs138281308",
         "clinvarVariantId": "36484",
         "clinVarRCV": "RCV000030156",
+        "clinvarVariantTitle": "NM_005912.2(MC4R):c.606C>A (p.Phe202Leu)",
         "hgvsNames": [
             "NM_005912.2:c.606C>A",
             "NG_016441.1:g.6025C>A",
@@ -141,6 +158,7 @@
             "NC_000018.9:g.58038977G>T",
             "NP_005903.2:p.Phe202Leu"
         ],
+        "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-04-14T22:47:10.000000+00:00"
     },
@@ -149,6 +167,7 @@
         "dbSNPId": "386833478",
         "clinvarVariantId": "55996",
         "clinVarRCV": "RCV000049405",
+        "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.344delT (p.Ile115Thrfs)",
         "hgvsNames": [
             "NM_000111.2:c.344delT",
             "NG_008046.1:g.16366delT",
@@ -156,8 +175,44 @@
             "NC_000007.13:g.107432313delA",
             "NP_000102.1:p.Ile115Thrfs"
         ],
+        "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-09-21T22:47:10.000000+00:00",
         "last_modified": "2015-09-22T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "ad310ea9-e215-498c-a001-a6c216105e4c",
+        "dbSNPId": "",
+        "clinVarRCV": "",
+        "clinvarVariantTitle": "",
+        "hgvsNames": [],
+        "otherDescription": "hgvs",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-10-21T22:47:10.000000+00:00",
+        "last_modified": "2015-10-22T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "30f092b3-e87c-4d85-aa3f-10479644953c",
+        "clinvarVariantId": "9492",
+        "dbSNPId": "",
+        "clinVarRCV": "RCV000010100",
+        "clinvarVariantTitle": "NM_005502.3(ABCA1):c.1584_1597delTGAGAGGAAGTTCTinsCGGGCGTGGTGGCAGGAGCTGTAATCCCAGCTACTTGGGAGGCTGAGGCACGAGAATCACTTGAACTCAGGAGGCAGAGGTTGCAGTGAGCTGAGGTCACGCCACTGTAC (p.Glu529_Gly867delinsGlyArgGlyGlyArgSerCysAsnProSerTyrLeuGlyGlyTer)",
+        "hgvsNames": [],
+        "otherDescription": "",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2015-10-21T22:47:10.000000+00:00",
+        "last_modified": "2015-10-22T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "e7c5ff6e-bc3a-4474-a07c-8538efe124e2",
+        "clinvarVariantId": "90973",
+        "dbSNPId": "",
+        "clinVarRCV": "RCV000076475",
+        "clinvarVariantTitle": "NM_000251.2(MSH2):c.243_273del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG (p.Lys82_Glu425delinsTer)",
+        "hgvsNames": [],
+        "otherDescription": "",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-02-02T22:47:10.000000+00:00",
+        "last_modified": "2015-02-02T22:59:10.000000+00:00"
     }
 ]

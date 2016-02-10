@@ -27,8 +27,9 @@ module.exports = {
                 </Input>
                 <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5" value={method.previousTestingDescription}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                <Input type="select" ref="genomewide" label="Genome-wide Study?:" defaultValue="none" value={curator.booleanToDropdown(method.genomeWideStudy)}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <Input type="select" ref="genomewide" label="Were genome-wide analysis methods used to identify the variant(s) described in this publication?:"
+                    defaultValue="none" value={curator.booleanToDropdown(method.genomeWideStudy)}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7 label-box-match-middle" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option>Yes</option>
@@ -41,9 +42,9 @@ module.exports = {
                     <option disabled="disabled"></option>
                     <option>Exome sequencing</option>
                     <option>Genotyping</option>
-                    <option>HRM</option>
+                    <option>High resolution melting</option>
                     <option>PCR</option>
-                    <option>Sanger</option>
+                    <option>Sanger sequencing</option>
                     <option>Whole genome shotgun sequencing</option>
                 </Input>
                 <Input type="select" ref="genotypingmethod2" label="Method 2:" defaultValue="none" value={method.genotypingMethods && method.genotypingMethods[1] ? method.genotypingMethods[1] : null}
@@ -52,9 +53,9 @@ module.exports = {
                     <option disabled="disabled"></option>
                     <option>Exome sequencing</option>
                     <option>Genotyping</option>
-                    <option>HRM</option>
+                    <option>High resolution melting</option>
                     <option>PCR</option>
-                    <option>Sanger</option>
+                    <option>Sanger sequencing</option>
                     <option>Whole genome shotgun sequencing</option>
                 </Input>
                 <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={curator.booleanToDropdown(method.entireGeneSequenced)}

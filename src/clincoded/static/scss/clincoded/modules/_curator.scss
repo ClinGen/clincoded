@@ -45,6 +45,10 @@
         font-weight: 300;
         font-style: italic;
     }
+
+    a i {
+        color: #245A88;
+    }
 }
 
 .curation-data-gene,
@@ -129,7 +133,7 @@
     border-top: 1px solid #e0e0e0;
     border-right: 1px solid #e0e0e0;
     border-left: 1px solid #e0e0e0;
-    background-color: $color-neutral-bg;
+    background-color: #e0e0e0;
 }
 
 .pmid-selection-add-btn {
@@ -139,7 +143,8 @@
 .pmid-selection-list {
     max-height: 250px;
     overflow-y: auto;
-    border: 1px solid #e0e0e0;
+    background-color: #f0f0f0;
+    border: 1px solid #dddddd;
 
     @media screen and (min-width: $screen-md-min) {
         max-height: 500px;
@@ -147,17 +152,28 @@
 }
 
 .pmid-selection-list-item {
+    margin: 10px;
     padding: 10px;
-    border-top: 1px solid #e0e0e0;
+    border: 1px solid darken(#dddddd, 10%);
     cursor: pointer;
-    background-color: #f0f0f0;
+    background-color: #ffffff;
+    @include border-radius(3px);
 
-    &:hover {
-        background-color: $color-hover;
+    div {
+        opacity: 0.5;
+        transition: opacity .25s ease-in-out;
+        -moz-transition: opacity .25s ease-in-out;
+        -webkit-transition: opacity .25s ease-in-out;
     }
 
     &.curr-pmid {
-        background-color: #fff;
+        border: 4px solid $color-trim;
+        @include border-radius(4px);
+    }
+
+    &:hover div,
+    &.curr-pmid div {
+        opacity: 1;
     }
 }
 
@@ -167,6 +183,17 @@
 
 .pmid-selection-help {
     margin-top: 20px;
+}
+
+.curation-content .col-md-6 {
+    padding: 0;
+
+    .curr-pmid-overview {
+        background-color: #ffffff;
+        border: 4px solid $color-trim;
+        @include border-radius(4px);
+        padding: 10px 15px;
+    }
 }
 
 .panel-curator {
@@ -205,6 +232,13 @@
 
 .panel-evidence-group {
     margin: 5px 0;
+
+    .variant-preferred-title {
+        border-bottom: 1px dotted #337ab7;
+        cursor: pointer;
+        font-weight: bold;
+        text-decoration: none;
+    }
 }
 
 .panel-evidence {
@@ -304,17 +338,21 @@
 }
 
 .curation-content-viewer {
-    margin-top: 40px;
     padding-bottom: 40px;
 }
 
 .variant-panel {
     padding-top: 40px;
     border-top: 1px solid #c0c0c0;
+    padding-bottom: 40px;
 
-    &:first-child {
-        padding-top: 0;
-        border-top: none;
+    .mutalyzer-link {
+        margin-top: -20px;
+    }
+
+    .clinvar-preferred-title {
+        word-break:break-all;
+        word-wrap: break-word;
     }
 }
 
@@ -333,6 +371,14 @@
         }
     }
 }
+
+.variant-individual {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid #c0c0c0;
+}
+
+
 
 .viewer-titles {
     h1 {
@@ -371,7 +417,7 @@
 }
 
 .orphanet-copy {
-    margin-top: -20px;
+    margin-top: -15px;
 
     input[type=button] {
         margin-left: -3px;
@@ -791,4 +837,12 @@
     .olContent {
         font-weight: normal;
     }
+}
+
+.p-break {
+    display: block;
+    width: 95%;
+    margin: 10px auto 10px auto;
+    font-weight: bold;
+    word-wrap: break-word;
 }

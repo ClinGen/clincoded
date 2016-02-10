@@ -208,10 +208,18 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         updateMsg: React.PropTypes.string // String to display by the Update button if desired
     },
 
+    componentWillReceiveProps: function(nextProps) {
+        if (this.refs.assessment && nextProps.assessmentTracker && nextProps.assessmentTracker.currentVal == DEFAULT_VALUE) {
+            this.refs.assessment.resetValue();
+        }
+    },
+
     // Called when the dropdown value changes
     handleChange: function(assessmentTracker, e) {
-        var value = this.refs['assessment'].getValue();
-        this.props.updateValue(assessmentTracker, value);
+        if (this.refs.assessment) {
+            var value = this.refs.assessment.getValue();
+            this.props.updateValue(assessmentTracker, value);
+        }
     },
 
     render: function() {

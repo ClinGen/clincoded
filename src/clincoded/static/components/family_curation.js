@@ -19,6 +19,7 @@ var Modal = modal.Modal;
 var ModalMixin = modal.ModalMixin;
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
+var ViewRecordHeader = curator.ViewRecordHeader;
 var CurationPalette = curator.CurationPalette;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
@@ -38,6 +39,7 @@ var updateProbandVariants = individual_curation.updateProbandVariants;
 var recordIndividualHistory = individual_curation.recordIndividualHistory;
 var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
+var AddResourceId = curator.AddResourceId;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
@@ -90,7 +92,7 @@ var FamilyCuration = React.createClass({
         this.cv.assessmentTracker = initialCv;
 
         return {
-            orpha: null, // string entered in Orphanet id input box
+            orpha: null, // boolean for entered in Orphanet id input box
             gdm: null, // GDM object given in query string
             group: null, // Group object given in query string
             family: null, // If we're editing a group, this gets the fleshed-out group object we're editing
@@ -99,9 +101,12 @@ var FamilyCuration = React.createClass({
             extraFamilyNames: [], // Names of extra families to create
             variantCount: 0, // Number of variants to display
             variantOption: [], // One variant panel, and nothing entered
+            variantInfo: {}, // Extra holding info for variant display
             probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
             addVariantDisabled: false, // True if Add Another Variant button enabled
+            individualRequired: null, // Boolean for set up requirement of proband
+            variantRequired: null, // boolean for set up requirement of variant if proband individual data entered
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false // True while form is submitting
@@ -152,6 +157,25 @@ var FamilyCuration = React.createClass({
                 currVariantOption[refSuffix] = VAR_NONE;
             }
             this.setState({variantOption: currVariantOption});
+
+            // if variant data entered, must enter proband individual name and orphanet
+            // First check if data entered in either ClinVar Variant ID or Other description at each variant
+            var noVariantData = true;
+            _.range(this.state.variantCount).map(i => {
+                if (this.refs['VARclinvarid' + i].getValue() || this.refs['VARothervariant' + i].getValue()) {
+                    noVariantData = false;
+                }
+            });
+            // If not entered at all, proband individua is not required and must be no error messages at individual fields.
+            if (noVariantData) {
+                this.setState({individualRequired: false});
+                var errors = this.state.formErrors;
+                errors['individualname'] = '';
+                errors['individualorphanetid'] = '';
+                this.setState({formErrors: errors});
+            } else {
+                this.setState({individualRequired: true});
+            }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
             var value = this.refs[ref].getValue();
@@ -176,12 +200,14 @@ var FamilyCuration = React.createClass({
         }
     },
 
-    // Handle a click on a copy orphanet button
-    handleClick: function(fromTarget, e) {
+    // Handle a click on a copy orphanet button or copy phenotype button
+    handleClick: function(fromTarget, item, e) {
         e.preventDefault(); e.stopPropagation();
         var associatedGroups;
-        var orphanetValTemp = [];
+        //var orphanetValTemp = [];
         var orphanetVal = '';
+        var hpoIds = '';
+        var hpoFreeText = '';
         if (fromTarget == 'group') {
             if (this.state.group) {
                 // We have a group, so get the disease array from it.
@@ -191,19 +217,46 @@ var FamilyCuration = React.createClass({
                 associatedGroups = this.state.family.associatedGroups;
             }
             if (associatedGroups && associatedGroups.length > 0) {
-                orphanetVal = associatedGroups.map(function(associatedGroup, i) {
-                    return (
-                        associatedGroup.commonDiagnosis.map(function(disease, i) {
-                            return ('ORPHA' + disease.orphaNumber);
-                        }).join(', ')
-                    );
-                });
+                if (item === 'orphanetid') {
+                    orphanetVal = associatedGroups.map(function(associatedGroup, i) {
+                        return (
+                            associatedGroup.commonDiagnosis.map(function(disease, i) {
+                                return ('ORPHA' + disease.orphaNumber);
+                            }).join(', ')
+                        );
+                    });
+                    this.refs['orphanetid'].setValue(orphanetVal.join(', '));
+                    this.setState({orpha: true});
+                }
+                else if (item === 'phenotype') {
+                    hpoIds = associatedGroups.map(function(associatedGroup, i) {
+                        if (associatedGroup.hpoIdInDiagnosis && associatedGroup.hpoIdInDiagnosis.length) {
+                            return (
+                                associatedGroup.hpoIdInDiagnosis.map(function(hpoid, i) {
+                                    return (hpoid);
+                                }).join(', ')
+                            );
+                        }
+                    });
+                    if (hpoIds.length) {
+                        this.refs['hpoid'].setValue(hpoIds.join(', '));
+                    }
+                    hpoFreeText = associatedGroups.map(function(associatedGroup, i) {
+                        if (associatedGroup.termsInDiagnosis) {
+                            return associatedGroup.termsInDiagnosis;
+                        }
+                    });
+                    if (hpoFreeText !== '') {
+                        this.refs['phenoterms'].setValue(hpoFreeText.join(', '));
+                    }
+                }
             }
-            this.refs['orphanetid'].setValue(orphanetVal.join(', '));
-            this.setState({orpha: true});
         } else if (fromTarget == 'family') {
             orphanetVal = this.refs['orphanetid'].getValue();
             this.refs['individualorphanetid'].setValue(orphanetVal);
+            var errors = this.state.formErrors;
+            errors['individualorphanetid'] = '';
+            this.setState({formErrors: errors});
         }
     },
 
@@ -291,12 +344,14 @@ var FamilyCuration = React.createClass({
                         // We have variants
                         stateObj.variantCount = segregation.variants.length;
                         stateObj.addVariantDisabled = false;
+                        stateObj.variantInfo = {};
 
                         // For each incoming variant, set the form value
                         var currVariantOption = [];
                         for (var i = 0; i < segregation.variants.length; i++) {
                             if (segregation.variants[i].clinvarVariantId) {
                                 currVariantOption[i] = VAR_SPEC;
+                                stateObj.variantInfo[i] = {'clinvarVariantId': segregation.variants[i].clinvarVariantId, 'clinvarVariantTitle': segregation.variants[i].clinvarVariantTitle};
                             } else if (segregation.variants[i].otherDescription) {
                                 currVariantOption[i] = VAR_OTHER;
                             } else {
@@ -436,14 +491,14 @@ var FamilyCuration = React.createClass({
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
-            //if (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; })) {
+            if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
                 // ORPHA list is bad
-            //    formError = true;
-            //    this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
-            //}
+                formError = true;
+                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+            }
 
             // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
-            if (this.state.variantCount > 0 && !this.state.probandIndividual) {
+            if (this.state.variantCount > 0 && !this.state.probandIndividual && this.state.individualRequired) {
                 if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
                     // Individual’s ORPHA list is bad
                     formError = true;
@@ -473,32 +528,33 @@ var FamilyCuration = React.createClass({
             }
 
             if (!formError) {
-                // Build search string from given ORPHA IDs
+                // Build search string from given ORPHA IDs, empty string if no Orphanet id entered.
                 var searchStr;
                 if (orphaIds && orphaIds.length > 0) {
                     searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
                 }
                 else {
-                    // a temp solution to match the callback function structure because we need to function the page in a short time.
-                    searchStr = '/gene/NGLY1';
+                    searchStr = '';
                 }
                 this.setState({submitBusy: true});
 
                 // Verify given Orpha ID exists in DB
                 this.getRestData(searchStr).then(diseases => {
-                    if (!orphaIds || orphaIds.length === 0) {
-                        // no Orpha id entered
-                        return Promise.resolve(null);
-                    } else if (diseases['@graph'].length === orphaIds.length) {
-                        // Successfully retrieved all diseases
-                        familyDiseases = diseases;
-                        return Promise.resolve(diseases);
+                    if (orphaIds && orphaIds.length) {
+                        if (diseases['@graph'].length === orphaIds.length) {
+                            // Successfully retrieved all diseases
+                            familyDiseases = diseases;
+                            return Promise.resolve(diseases);
+                        } else {
+                            // Get array of missing Orphanet IDs
+                            this.setState({submitBusy: false}); // submit error; re-enable submit button
+                            var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
+                            this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
+                            throw diseases;
+                        }
                     } else {
-                        // Get array of missing Orphanet IDs
-                        this.setState({submitBusy: false}); // submit error; re-enable submit button
-                        var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
-                        this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
-                        throw diseases;
+                        // if no Orphanet id entered.
+                        return Promise.resolve(null);
                     }
                 }, e => {
                     // The given orpha IDs couldn't be retrieved for some reason.
@@ -507,7 +563,7 @@ var FamilyCuration = React.createClass({
                     throw e;
                 }).then(diseases => {
                     // Check for individual orphanet IDs if we have variants and no existing proband
-                    if (this.state.variantCount && !this.state.probandIndividual) {
+                    if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
                         var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
 
                         // Verify given Orpha ID exists in DB
@@ -698,7 +754,7 @@ var FamilyCuration = React.createClass({
 
                     // Creating or editing a family, and the form has at least one variant. Create the starter individual and return a promise
                     // from its creation. Also remember we have new variants.
-                    if (this.state.variantCount) {
+                    if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
                         initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
@@ -774,33 +830,35 @@ var FamilyCuration = React.createClass({
                         // Adding a new family
                         if (this.state.group) {
                             // Add the newly saved families to the group
-                            var group = curator.flatten(this.state.group);
-                            if (!group.familyIncluded) {
-                                group.familyIncluded = [];
-                            }
+                            promise = this.getRestData('/groups/' + this.state.group.uuid, null, true).then(freshGroup => {
+                                var group = curator.flatten(freshGroup);
+                                if (!group.familyIncluded) {
+                                    group.familyIncluded = [];
+                                }
+                                group.familyIncluded.push(newFamily['@id']);
 
-                            // Merge existing families in the annotation with the new set of families.
-                            group.familyIncluded.push(newFamily['@id']);
-
-                            // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/groups/' + this.state.group.uuid, group).then(groupGraph => {
-                                // The next step needs the family, not the group it was written to
-                                return Promise.resolve(_.extend(data, {group: groupGraph['@graph'][0]}));
+                                // Post the modified group to the DB
+                                return this.putRestData('/groups/' + this.state.group.uuid, group).then(groupGraph => {
+                                    // The next step needs the family, not the group it was written to
+                                    return Promise.resolve(_.extend(data, {group: groupGraph['@graph'][0]}));
+                                });
                             });
                         } else {
                             // Not part of a group, so add the family to the annotation instead.
-                            var annotation = curator.flatten(this.state.annotation);
-                            if (!annotation.families) {
-                                annotation.families = [];
-                            }
+                            promise = this.getRestData('/evidence/' + this.state.annotation.uuid, null, true).then(freshAnnotation => {
+                                // Get a flattened copy of the fresh annotation object and put our new family into it,
+                                // ready for writing.
+                                var annotation = curator.flatten(freshAnnotation);
+                                if (!annotation.families) {
+                                    annotation.families = [];
+                                }
+                                annotation.families.push(newFamily['@id']);
 
-                            // Merge existing families in the annotation with the new set of families.
-                            annotation.families.push(newFamily['@id']);
-
-                            // Post the modified annotation to the DB, then go back to Curation Central
-                            promise = this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(annotation => {
-                                // The next step needs the family, not the group it was written to
-                                return Promise.resolve(_.extend(data, {annotation: annotation}));
+                                // Post the modified annotation to the DB
+                                return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(annotation => {
+                                    // The next step needs the family, not the group it was written to
+                                    return Promise.resolve(_.extend(data, {annotation: annotation}));
+                                });
                             });
                         }
                     } else {
@@ -853,8 +911,7 @@ var FamilyCuration = React.createClass({
                         return Promise.resolve(null);
                     });
 
-                    // Navigate back to Curation Central page.
-                    // FUTURE: Need to navigate to Family Submit page.
+                    // Navigate to Curation Central or Family Submit page, depending on previous page
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut && !initvar) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
@@ -964,7 +1021,7 @@ var FamilyCuration = React.createClass({
             newFamily.commonDiagnosis = familyDiseases['@graph'].map(function(disease) { return disease['@id']; });
         }
         else if (newFamily.commonDiagnosis && newFamily.commonDiagnosis.length > 0) {
-            // if no Orpha id entered when edit family
+            // allow to delete oephanet ids when editing family
             delete newFamily.commonDiagnosis;
         }
 
@@ -978,9 +1035,17 @@ var FamilyCuration = React.createClass({
         if (hpoTerms) {
             newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
         }
+        else if (newFamily.hpoIdInDiagnosis) {
+            // allow to delete HPO ids
+            delete newFamily.hpoIdInDiagnosis;
+        }
         var phenoterms = this.getFormValue('phenoterms');
         if (phenoterms) {
             newFamily.termsInDiagnosis = phenoterms;
+        }
+        else if (newFamily.termsInDiagnosis) {
+            // allow to delete phenotype free text
+            delete newFamily.termsInDiagnosis;
         }
         hpoTerms = this.getFormValue('nothpoid');
         if (hpoTerms) {
@@ -1033,10 +1098,96 @@ var FamilyCuration = React.createClass({
         this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
     },
 
+    // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
+    updateClinvarVariantId: function(data, fieldNum) {
+        var newVariantInfo = _.clone(this.state.variantInfo);
+        var currVariantOption = this.state.variantOption;
+        var addVariantDisabled;
+        if (data) {
+            // Enable/Disable Add Variant button as needed
+            if (fieldNum == 0) {
+                addVariantDisabled = false;
+            } else {
+                addVariantDisabled = true;
+            }
+            // Update the form and display values with new data
+            this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
+            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
+            // Disable the 'Other description' textarea
+            this.refs['VARothervariant' + fieldNum].resetValue();
+            currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
+        } else {
+            // Reset the form and display values
+            this.refs['VARclinvarid' + fieldNum].setValue('');
+            delete newVariantInfo[fieldNum];
+            // Reenable the 'Other description' textarea
+            currVariantOption[parseInt(fieldNum)] = VAR_NONE;
+        }
+
+        // if variant data entered, must enter proband individual name and orphanet
+        // First check if data entered in either ClinVar Variant ID or Other description at each variant
+        var noVariantData = true;
+        _.range(this.state.variantCount).map(i => {
+            if (this.refs['VARclinvarid' + i].getValue() || this.refs['VARothervariant' + i].getValue()) {
+                noVariantData = false;
+            }
+        });
+        // If not entered at all, proband individua is not required and must be no error messages at individual fields.
+        if (noVariantData) {
+            this.setState({individualRequired: false});
+            var errors = this.state.formErrors;
+            errors['individualname'] = '';
+            errors['individualorphanetid'] = '';
+            this.setState({formErrors: errors});
+        } else {
+            this.setState({individualRequired: true});
+        }
+
+        // Set state
+        this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
+    },
+
+    // Determine whether a Family is associated with a Group
+    // or
+    // whether an individual is associated with a Family or a Group
+    getAssociation: function(item) {
+        var associatedGroups, associatedFamilies;
+
+        if (this.state.group) {
+            associatedGroups = [this.state.group];
+        } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
+            associatedGroups = this.state.family.associatedGroups;
+        }
+
+        if (this.state.family) {
+            associatedFamilies = [this.state.family];
+        } else if (this.state.individual && this.state.individual.associatedFamilies && this.state.individual.associatedFamilies.length) {
+            associatedFamilies = this.state.individual.associatedFamilies;
+        }
+
+        switch(item) {
+            case 'individual':
+                return this.state.individual;
+
+            case 'family':
+                return this.state.family;
+
+            case 'associatedFamilies':
+                return associatedFamilies;
+
+            case 'associatedGroups':
+                return associatedGroups;
+
+            default:
+                break;
+        }
+    },
+
     // After the Family Curation page component mounts, grab the GDM, group, family, and annotation UUIDs (as many as given)
     // from the query string and retrieve the corresponding objects from the DB, if they exist. Note, we have to do this after
     // the component mounts because AJAX DB queries can't be done from unmounted components.
     componentDidMount: function() {
+        this.cv.othersAssessed = false;
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
         this.loadData();
     },
@@ -1073,7 +1224,7 @@ var FamilyCuration = React.createClass({
             <div>
                 {(!this.queryValues.familyUuid || this.state.family) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -1082,12 +1233,13 @@ var FamilyCuration = React.createClass({
                             : null}
                             <div className="viewer-titles">
                                 <h1>{(family ? 'Edit' : 'Curate') + ' Family Information'}</h1>
-                                <h2>Family: {this.state.familyName ? <span>{this.state.familyName}</span> : <span className="no-entry">No entry</span>}</h2>
-                                {groups && groups.length ?
-                                    <h2>
-                                        Groups association: {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}
-                                    </h2>
-                                : null}
+                                <h2>
+                                    {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
+                                    {groups && groups.length ?
+                                        <span> // Group {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                    : null}
+                                    <span> // {this.state.familyName ? <span>Family {this.state.familyName}</span> : <span className="no-entry">No entry</span>}</span>
+                                </h2>
                             </div>
                             <div className="row group-curation-content">
                                 <div className="col-sm-12">
@@ -1168,9 +1320,13 @@ var FamilyName = function(displayNote) {
 
     return (
         <div className="row">
-            <Input type="text" ref="familyname" label="Family Name:" value={family && family.label} handleChange={this.handleChange}
+            {!this.getAssociation('family') && !this.getAssociation('associatedGroups') ?
+                <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Family is a member of a Group, please curate the Group first and then add the Family to that Group.</p></div>
+            : null}
+            <Input type="text" ref="familyname" label="Family Label:" value={family && family.label} handleChange={this.handleChange}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote('Family')}</p>
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one family with IDENTICAL information, you can indicate this at the bottom of this form.</p>
             : null}
@@ -1222,7 +1378,7 @@ var FamilyCommonDiseases = function() {
     }
 
     // Make a list of diseases from the group, either from the given group,
-    // or the family if we're editing one that has associated groups.
+    // or the family if we're editing one that has associated groups.renderPhenotype
     if (group) {
         // We have a group, so get the disease array from it.
         associatedGroups = [group];
@@ -1233,19 +1389,30 @@ var FamilyCommonDiseases = function() {
 
     return (
         <div className="row">
-            {curator.renderOrphanets(associatedGroups, 'Group')}
+            {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ? curator.renderOrphanets(associatedGroups, 'Group') : null}
             <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            {associatedGroups ?
+            {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ?
             <Input type="button" ref="orphanetcopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
-                clickHandler={this.handleClick.bind(this, 'group')} />
+                clickHandler={this.handleClick.bind(this, 'group', 'orphanetid')} />
             : null}
+            {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
+                curator.renderPhenotype(associatedGroups, 'Family', 'hpo') : curator.renderPhenotype(null, 'Family', 'hpo')
+            }
             <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
+                curator.renderPhenotype(associatedGroups, 'Family', 'ft') : curator.renderPhenotype(null, 'Family', 'ft')
+            }
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={family && family.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
+            <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy all Phenotype(s) from Associated Group"
+                clickHandler={this.handleClick.bind(this, 'group', 'phenotype')} />
+            : null
+            }
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Family</em> if they are specifically noted in the paper.</p>
             <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
@@ -1260,7 +1427,7 @@ var FamilyCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> Common Disease(s) in Family:</span>;
+        return <span>Disease(s) in Common <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term)</span>:</span>;
     }
 });
 
@@ -1273,8 +1440,8 @@ var LabelHpoId = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+                <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
             </span>
         );
     }
@@ -1289,8 +1456,8 @@ var LabelPhenoTerms = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : <span>Shared </span>}
-                Phenotype(s) (<span style={{fontWeight: 'normal'}}>free text</span>):
+                {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+                <span style={{fontWeight: 'normal'}}>(free text)</span>:
             </span>
         );
     }
@@ -1452,7 +1619,7 @@ var FamilyVariant = function() {
                 <div className="row">
                     <p className="col-sm-7 col-sm-offset-5">
                         To create and have the option to count a proband associated with a variant(s) for this Family, you need to add variant information in this section.
-                        The proband (an Individual) will be created upon submission using the name you supply here. You will be able to add additional information about the proband
+                        The proband (an Individual) will be created upon submission using the label you supply here. You will be able to add additional information about the proband
                         following submission of Family information.
                     </p>
                     <p className="col-sm-7 col-sm-offset-5">
@@ -1477,45 +1644,68 @@ var FamilyVariant = function() {
                                 </p>
                             </div>
                         </div>
-                        <Input type="text" ref={'VARclinvarid' + i} label={<LabelClinVarVariant />} value={variant && variant.clinvarVariantId} placeholder="e.g. 177676" handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_OTHER}
+                        {this.state.variantInfo[i] ?
+                            <div>
+                                <div className="row">
+                                    <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
+                                    <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
+                                </div>
+                                <div className="row">
+                                    <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
+                                    <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                </div>
+                            </div>
+                        : null}
+                        <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                        <p className="col-sm-7 col-sm-offset-5 input-note-below">
-                            The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).
-                        </p>
-                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
+                        <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]}
+                            buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" }
+                            initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                            updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
+                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
+                            handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                        {curator.renderMutalyzerLink()}
                     </div>
                 );
             })}
-            {this.state.variantCount && !this.state.probandIndividual ?
+            {this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired ?
                 <div className="variant-panel clearfix">
-                    <Input type="text" ref="individualname" label="Individual Name"
+                    <Input type="text" ref="individualname" label="Individual Label"
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                    {this.state.orpha ?
+                        <div className="form-group">
+                            <div className="col-sm-5"><strong className="pull-right">Orphanet Disease(s) Associated with Family:</strong></div>
+                            <div className="col-sm-7">{this.refs['orphanetid'].getValue().toUpperCase()}</div>
+                        </div>
+                        : null
+                    }
                     <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15"
                         error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
                         buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
                     { this.state.orpha ?
                         <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
-                        clickHandler={this.handleClick.bind(this, 'family')} />
+                        clickHandler={this.handleClick.bind(this, 'family', 'orphanetid')} />
                         :
                         null
                     }
                 </div>
-            : null}
+            : null }
             {this.state.variantCount < MAX_VARIANTS ?
-                <div className="col-sm-7 col-sm-offset-5">
-                    {this.state.variantCount ?
-                        <p className="alert alert-warning">
-                            For a recessive condition, you must enter both variants believed to be causative for the disease in order that
-                            each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
-                            variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
-                        </p>
-                    : null}
-                    <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Individual" : "Add variant associated with Individual"}
-                        clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                <div className="row">
+                    <div className="col-sm-7 col-sm-offset-5 clearfix">
+                        {this.state.variantCount ?
+                            <p className="alert alert-warning">
+                                For a recessive condition, you must enter both variants believed to be causative for the disease in order that
+                                each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
+                                variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
+                            </p>
+                        : null}
+                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Individual" : "Add variant associated with Individual"}
+                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                    </div>
                 </div>
             : null}
         </div>
@@ -1528,9 +1718,15 @@ var LabelClinVarVariant = React.createClass({
     }
 });
 
+var LabelClinVarVariantTitle = React.createClass({
+    render: function() {
+        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
+    }
+});
+
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when no ID available)</span>:</span>;
+        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar Variation ID is not available):</span></span>;
     }
 });
 
@@ -1599,7 +1795,6 @@ var FamilyViewer = React.createClass({
     // Handle the assessment submit button
     assessmentSubmit: function(e) {
         var updatedFamily;
-
         // GET the family object to have the most up-to-date version
         this.getRestData('/families/' + this.props.context.uuid).then(data => {
             this.setState({submitBusy: true});
@@ -1652,6 +1847,11 @@ var FamilyViewer = React.createClass({
 
             this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
             return Promise.resolve(null);
+        }).then(data => {
+            var tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
+            var tempGdm = tempGdmPmid[0];
+            var tempPmid = tempGdmPmid[1];
+            window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
         }).catch(function(e) {
             console.log('FAMILY VIEW UPDATE ERROR=: %o', e);
         });
@@ -1665,26 +1865,35 @@ var FamilyViewer = React.createClass({
         if (family && family.segregation && family.segregation.assessments && family.segregation.assessments.length) {
             this.setState({assessments: family.segregation.assessments});
         }
+
+        if (typeof this.props.session.user_properties !== undefined) {
+            var user = this.props.session && this.props.session.user_properties;
+            this.loadAssessmentTracker(user);
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
         if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
-            var family = this.props.context;
-            var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
             var user = nextProps.session && nextProps.session.user_properties;
-            var segregation = family.segregation;
+            this.loadAssessmentTracker(user);
+        }
+    },
 
-            // Make an assessment tracker object once we get the logged in user info
-            if (!this.cv.assessmentTracker && user && segregation) {
-                var userAssessment;
+    loadAssessmentTracker: function(user) {
+        var family = this.props.context;
+        var segregation = family.segregation;
+        var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
 
-                // Find if any assessments for the segregation are owned by the currently logged-in user
-                if (assessments && assessments.length) {
-                    // Find the assessment belonging to the logged-in curator, if any.
-                    userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
-                }
-                this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
+        // Make an assessment tracker object once we get the logged in user info
+        if (!this.cv.assessmentTracker && user && segregation) {
+            var userAssessment;
+
+            // Find if any assessments for the segregation are owned by the currently logged-in user
+            if (assessments && assessments.length) {
+                // Find the assessment belonging to the logged-in curator, if any.
+                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
             }
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
         }
     },
 
@@ -1717,189 +1926,208 @@ var FamilyViewer = React.createClass({
         // See if the segregation contains anything.
         var haveSegregation = segregationExists(segregation);
 
+        var tempGdmPmid = curator.findGdmPmidFromObj(family);
+        var tempGdm = tempGdmPmid[0];
+        var tempPmid = tempGdmPmid[1];
+
         return (
-            <div className="container">
-                <div className="row group-curation-content">
-                    <div className="viewer-titles">
-                        <h1>View Family: {family.label}</h1>
-                        {groups && groups.length ?
+            <div>
+                <ViewRecordHeader gdm={tempGdm} pmid={tempPmid} />
+                <div className="container">
+                    <div className="row curation-content-viewer">
+                        <div className="viewer-titles">
+                            <h1>View Family: {family.label}</h1>
                             <h2>
-                                Group association:&nbsp;
-                                {groups.map(function(group, i) {
-                                    return <span key={i}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>;
-                                })}
+                                {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
+                                {groups && groups.length ?
+                                    <span> // Group {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                : null}
+                                <span> // Family {family.label}</span>
                             </h2>
-                        : null}
-                    </div>
-                    <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Orphanet Common Diagnosis</dt>
-                                <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
-                                    return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>HPO IDs</dt>
-                                <dd>{family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.map(function(hpo, i) {
-                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Phenotype Terms</dt>
-                                <dd>{family.termsInDiagnosis}</dd>
-                            </div>
-
-                            <div>
-                                <dt>NOT HPO IDs</dt>
-                                <dd>{family.hpoIdInElimination && family.hpoIdInElimination.map(function(hpo, i) {
-                                    return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                })}</dd>
-                            </div>
-
-                            <div>
-                                <dt>NOT phenotype terms</dt>
-                                <dd>{family.termsInElimination}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Family — Demographics" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt># Males</dt>
-                                <dd>{family.numberOfMale}</dd>
-                            </div>
-
-                            <div>
-                                <dt># Females</dt>
-                                <dd>{family.numberOfFemale}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Country of Origin</dt>
-                                <dd>{family.countryOfOrigin}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Ethnicity</dt>
-                                <dd>{family.ethnicity}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Race</dt>
-                                <dd>{family.race}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range Type</dt>
-                                <dd>{family.ageRangeType}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range</dt>
-                                <dd>{family.ageRangeFrom || family.ageRangeTo ? <span>{family.ageRangeFrom + ' – ' + family.ageRangeTo}</span> : null}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Age Range Unit</dt>
-                                <dd>{family.ageRangeUnit}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    <Panel title="Family — Methods" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Previous testing</dt>
-                                <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of previous testing</dt>
-                                <dd>{method && method.previousTestingDescription}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Genome-wide study</dt>
-                                <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Genotyping methods</dt>
-                                <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Entire gene sequenced</dt>
-                                <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Copy number assessed</dt>
-                                <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Specific mutations genotyped</dt>
-                                <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Description of genotyping method</dt>
-                                <dd>{method && method.specificMutationsGenotypedMethod}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Additional Information about Family Method</dt>
-                                <dd>{method && method.additionalInformation}</dd>
-                            </div>
-                        </dl>
-                    </Panel>
-
-                    {FamilySegregationViewer(segregation, assessments, true)}
-
-                    {this.cv.gdmUuid && (familyUserAssessed || userFamily) && haveSegregation ?
-                        <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
-                    : null}
-
-                    <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
-                        {variants.map(function(variant, i) {
-                            return (
-                                <div className="variant-view-panel" key={variant.uuid}>
-                                    <h5>Variant {i + 1}</h5>
-                                    <dl className="dl-horizontal">
-                                        <div>
-                                            <dt>ClinVar VariationID</dt>
-                                            <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>Other description</dt>
-                                            <dd>{variant.otherDescription}</dd>
-                                        </div>
-                                    </dl>
+                        </div>
+                        <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Orphanet Common Diagnosis</dt>
+                                    <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
+                                        return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                    })}</dd>
                                 </div>
-                            );
-                        })}
-                    </Panel>
 
-                    <Panel title="Family — Additional Information" panelClassName="panel-data">
-                        <dl className="dl-horizontal">
-                            <div>
-                                <dt>Additional Information about Family</dt>
-                                <dd>{family.additionalInformation}</dd>
-                            </div>
+                                <div>
+                                    <dt>HPO IDs</dt>
+                                    <dd>{family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.map(function(hpo, i) {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
+                                </div>
 
-                            <dt>Other PMID(s) that report evidence about this same Family</dt>
-                            <dd>{family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
-                                return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
-                            })}</dd>
-                        </dl>
-                    </Panel>
+                                <div>
+                                    <dt>Phenotype Terms</dt>
+                                    <dd>{family.termsInDiagnosis}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>NOT HPO IDs</dt>
+                                    <dd>{family.hpoIdInElimination && family.hpoIdInElimination.map(function(hpo, i) {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>NOT phenotype terms</dt>
+                                    <dd>{family.termsInElimination}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title="Family — Demographics" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt># Males</dt>
+                                    <dd>{family.numberOfMale}</dd>
+                                </div>
+
+                                <div>
+                                    <dt># Females</dt>
+                                    <dd>{family.numberOfFemale}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Country of Origin</dt>
+                                    <dd>{family.countryOfOrigin}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Ethnicity</dt>
+                                    <dd>{family.ethnicity}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Race</dt>
+                                    <dd>{family.race}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range Type</dt>
+                                    <dd>{family.ageRangeType}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range</dt>
+                                    <dd>{family.ageRangeFrom || family.ageRangeTo ? <span>{family.ageRangeFrom + ' – ' + family.ageRangeTo}</span> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Age Range Unit</dt>
+                                    <dd>{family.ageRangeUnit}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        <Panel title="Family — Methods" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Previous testing</dt>
+                                    <dd>{method ? (method.previousTesting === true ? 'Yes' : (method.previousTesting === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of previous testing</dt>
+                                    <dd>{method && method.previousTestingDescription}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Genome-wide study</dt>
+                                    <dd>{method ? (method.genomeWideStudy === true ? 'Yes' : (method.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Genotyping methods</dt>
+                                    <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Entire gene sequenced</dt>
+                                    <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Copy number assessed</dt>
+                                    <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Specific mutations genotyped</dt>
+                                    <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Description of genotyping method</dt>
+                                    <dd>{method && method.specificMutationsGenotypedMethod}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Additional Information about Family Method</dt>
+                                    <dd>{method && method.additionalInformation}</dd>
+                                </div>
+                            </dl>
+                        </Panel>
+
+                        {FamilySegregationViewer(segregation, assessments, true)}
+
+                        {this.cv.gdmUuid && (familyUserAssessed || userFamily) && haveSegregation ?
+                            <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
+                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
+                        : null}
+
+                        <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
+                            {variants.map(function(variant, i) {
+                                return (
+                                    <div className="variant-view-panel" key={variant.uuid}>
+                                        <h5>Variant {i + 1}</h5>
+                                        {variant.clinvarVariantId ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinVar VariationID</dt>
+                                                    <dd style={{'paddingLeft':'22px'}}><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.clinvarVariantTitle ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinVar Preferred Title</dt>
+                                                    <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.otherDescription ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Other description</dt>
+                                                    <dd>{variant.otherDescription}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                    </div>
+                                );
+                            })}
+                        </Panel>
+
+                        <Panel title="Family — Additional Information" panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Additional Information about Family</dt>
+                                    <dd>{family.additionalInformation}</dd>
+                                </div>
+
+                                <dt>Other PMID(s) that report evidence about this same Family</dt>
+                                <dd>{family.otherPMIDs && family.otherPMIDs.map(function(article, i) {
+                                    return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
+                                })}</dd>
+                            </dl>
+                        </Panel>
+                    </div>
                 </div>
             </div>
         );
@@ -2072,7 +2300,8 @@ var FamilyDeleteHistory = React.createClass({
         var family = history.primary;
 
         // Prepare to display a note about associated families and individuals
-        var collateralObjects = !!(family.individualIncluded && family.individualIncluded.length);
+        // This data can now only be obtained from the history object's hadChildren field
+        var collateralObjects = history.hadChildren == 1 ? true : false;
 
         return (
             <div>

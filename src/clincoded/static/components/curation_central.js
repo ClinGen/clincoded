@@ -33,6 +33,7 @@ var CurationCentral = React.createClass({
 
     getInitialState: function() {
         return {
+            winWidth: null, // window's width, used to ser # char of preferred tile shown in curator palette
             currPmid: queryKeyValue('pmid', this.props.href),
             currGdm: null
         };
@@ -62,7 +63,24 @@ var CurationCentral = React.createClass({
         return this.getRestData('/gdm/' + uuid, null, true).then(gdm => {
             // The GDM object successfully retrieved; set the Curator Central component
             this.setState({currGdm: gdm, currOmimId: gdm.omimId});
+            // If a PMID isn't pre-selected from the URL and PMIDs exist, select the first one in the PMID list by default
+            if (pmid == undefined && gdm.annotations && gdm.annotations.length > 0) {
+                var annotations = _(gdm.annotations).sortBy(function(annotation) {
+                    // Sort list of articles by first author
+                    return annotation.article.authors[0];
+                });
+                pmid = annotations[0].article.pmid;
+            }
             this.currPmidChange(pmid);
+
+            // Focus the current PMID selection in left PMID column
+            var userPmidList = document.getElementById('user-pmid-list');
+            var selectedPmid = document.getElementById('selected-pmid');
+            userPmidList.scrollTop = 0;
+            if (selectedPmid && userPmidList.scrollHeight > userPmidList.clientHeight) {
+                userPmidList.scrollTop += selectedPmid.offsetTop - 50;
+            }
+
             return gdm;
         }).catch(function(e) {
             console.log('GETGDM ERROR=: %o', e);
@@ -72,6 +90,9 @@ var CurationCentral = React.createClass({
     // After the Curator Central page component mounts, grab the uuid from the query string and
     // retrieve the corresponding GDM from the DB.
     componentDidMount: function() {
+        var winWidth = window.innerWidth;
+        this.setState({winWidth: winWidth});
+        
         var gdmUuid = queryKeyValue('gdm', this.props.href);
         var pmid = queryKeyValue('pmid', this.props.href);
         if (gdmUuid) {
@@ -95,15 +116,17 @@ var CurationCentral = React.createClass({
             // objects; basically the object as it exists in the DB. We'll update that and write it back to the DB.
             return (data['@graph'][0]);
         }).then(newAnnotation => {
-            var gdmObj = curator.flatten(currGdm);
+            return this.getRestData('/gdm/' + currGdm.uuid, null, true).then(freshGdm => {
+                var gdmObj = curator.flatten(freshGdm);
+                // Add our new annotation reference to the array of annotations in the GDM.
+                if (!gdmObj.annotations) {
+                    gdmObj.annotations = [];
+                }
+                gdmObj.annotations.push(newAnnotation['@id']);
 
-            // Add our new annotation reference to the array of annotations in the GDM.
-            if (!gdmObj.annotations) {
-                gdmObj.annotations = [];
-            }
-            gdmObj.annotations.push(newAnnotation['@id']);
-            return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
-                return data['@graph'][0];
+                return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
+                    return data['@graph'][0];
+                });
             });
         }).then(gdm => {
             // Record history of adding a PMID to a GDM
@@ -157,7 +180,7 @@ var CurationCentral = React.createClass({
                         </div>
                         {currArticle ?
                             <div className="col-md-3">
-                                <CurationPalette gdm={gdm} annotation={annotation} session={session} />
+                                <CurationPalette gdm={gdm} annotation={annotation} session={session} winWidth={this.state.winWidth} />
                             </div>
                         : null}
                     </div>
@@ -217,12 +240,13 @@ var PmidSelectionList = React.createClass({
                     </Modal>
                 </div>
                 {annotations ?
-                    <div className="pmid-selection-list">
+                    <div className="pmid-selection-list" id="user-pmid-list">
                         {annotations.map(annotation => {
                             var classList = 'pmid-selection-list-item' + (annotation.article.pmid === this.props.currPmid ? ' curr-pmid' : '');
+                            var elementId = (annotation.article.pmid === this.props.currPmid ? 'selected-pmid' : '');
 
                             return (
-                                <div key={annotation.article.pmid} className={classList} onClick={this.props.currPmidChange.bind(null, annotation.article.pmid)}>
+                                <div key={annotation.article.pmid} className={classList} id={elementId} onClick={this.props.currPmidChange.bind(null, annotation.article.pmid)}>
                                     <div className="pmid-selection-list-specs">
                                         <PmidSummary article={annotation.article} />
                                     </div>
@@ -247,10 +271,16 @@ var PmidSelectionList = React.createClass({
 var AddPmidModal = React.createClass({
     mixins: [FormMixin, RestMixin],
 
+    getInitialState: function() {
+        return {
+            submitBusy: false // Whether or not the 'Add Article' button is busy
+        };
+    },
+
     propTypes: {
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
+        updateGdmArticles: React.PropTypes.func, // Function to call when we have an article to add to the GDM
     },
 
     contextTypes: {
@@ -296,6 +326,7 @@ var AddPmidModal = React.createClass({
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.saveFormValue('pmid', this.refs.pmid.getValue());
+        this.setState({submitBusy: true});
         if (this.validateForm()) {
             // Form is valid -- we have a good PMID. Fetch the article with that PMID
             var enteredPmid = this.getFormValue('pmid');
@@ -314,25 +345,24 @@ var AddPmidModal = React.createClass({
                     });
                 });
             }).then(article => {
+                this.setState({submitBusy: false});
                 this.props.closeModal();
                 this.props.updateGdmArticles(article);
             }).catch(function(e) {
                 console.log('ERROR %o', e);
             });
+        } else {
+            this.setState({submitBusy: false});
         }
     },
 
     // Called when the modal form's cancel button is clicked. Just closes the modal like
     // nothing happened.
     cancelForm: function(e) {
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-
-        //only a mouse click on cancel button closes modal
-        //(do not let the enter key [which evaluates to 0 mouse
-        //clicks] be accepted to close modal)
-        if (e.detail >= 1){
-            this.props.closeModal();
-        }
+        // Changed modal cancel button from a form input to a html button
+        // as to avoid accepting enter/return key as a click event.
+        // Removed hack in this method.
+        this.props.closeModal();
     },
 
     render: function() {
@@ -344,9 +374,9 @@ var AddPmidModal = React.createClass({
                         labelClassName="control-label" groupClassName="form-group" required />
                 </div>
                 <div className='modal-footer'>
-                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="submit" inputClassName={this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ?
-                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" />
+                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" submitBusy={this.state.submitBusy} />
                 </div>
             </Form>
         );
