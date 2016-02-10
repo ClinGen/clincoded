@@ -1864,26 +1864,35 @@ var FamilyViewer = React.createClass({
         if (family && family.segregation && family.segregation.assessments && family.segregation.assessments.length) {
             this.setState({assessments: family.segregation.assessments});
         }
+
+        if (typeof this.props.session.user_properties !== undefined) {
+            var user = this.props.session && this.props.session.user_properties;
+            this.loadAssessmentTracker(user);
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
         if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
-            var family = this.props.context;
-            var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
             var user = nextProps.session && nextProps.session.user_properties;
-            var segregation = family.segregation;
+            this.loadAssessmentTracker(user);
+        }
+    },
 
-            // Make an assessment tracker object once we get the logged in user info
-            if (!this.cv.assessmentTracker && user && segregation) {
-                var userAssessment;
+    loadAssessmentTracker: function(user) {
+        var family = this.props.context;
+        var segregation = family.segregation;
+        var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
 
-                // Find if any assessments for the segregation are owned by the currently logged-in user
-                if (assessments && assessments.length) {
-                    // Find the assessment belonging to the logged-in curator, if any.
-                    userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
-                }
-                this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
+        // Make an assessment tracker object once we get the logged in user info
+        if (!this.cv.assessmentTracker && user && segregation) {
+            var userAssessment;
+
+            // Find if any assessments for the segregation are owned by the currently logged-in user
+            if (assessments && assessments.length) {
+                // Find the assessment belonging to the logged-in curator, if any.
+                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
             }
+            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, 'Segregation');
         }
     },
 
