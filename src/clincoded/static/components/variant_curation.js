@@ -394,16 +394,18 @@ var VariantCuration = React.createClass({
                                 <div className="row" style={{'padding-left':'15px'}}>
                                     <span>
                                         {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null}&nbsp;
-                                        // Variation <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a>
                                     </span>
-                                    <br />
-                                    <dl>
-                                        <dt style={{'width':'20%', 'font-weight':'normal', 'float':'left'}}>ClinVar Preferred Name:&nbsp;</dt>
-                                        <dd style={{'width':'75%', 'word-wrap':'break-word', 'float':'left'}}>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</dd>
+                                    <dl className="dl-horizontal">
+                                        <dt style={{'font-weight':'normal'}}>VariationId</dt>
+                                        <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                    </dl>
+                                    <dl className="dl-horizontal">
+                                        <dt style={{'font-weight':'normal'}}>ClinVar Preferred Title</dt>
+                                        <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</dd>
                                     </dl>
                                 </div>
                             )
-                            : <span>{gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null} // {'Description: ' + variant.otherDescription}</span>}</h2>
+                            : <span>{gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null}</span>}</h2>
                         : null}
                     </div>
                     <div className="row group-curation-content">

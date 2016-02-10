@@ -1338,7 +1338,7 @@ var IndividualVariantInfo = function() {
                                         </div>
                                         <div className="row">
                                             <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                            <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                            <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
                                         </div>
                                     </div>
                                 : null}
@@ -1614,17 +1614,30 @@ var IndividualViewer = React.createClass({
                                 return (
                                     <div key={i} className="variant-view-panel">
                                         <h5>Variant {i + 1}</h5>
-                                        <dl className="dl-horizontal">
+                                        {variant.clinvarVariantId ?
                                             <div>
-                                                <dt>ClinVar VariationID</dt>
-                                                <dd>{variant.clinvarVariantId ? <a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a> : null}</dd>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinVar VariationID</dt>
+                                                    <dd style={{'paddingLeft':'22px'}}><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                </dl>
                                             </div>
-
+                                        : null }
+                                        {variant.clinvarVariantTitle ?
                                             <div>
-                                                <dt>Other description</dt>
-                                                <dd>{variant.otherDescription}</dd>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinVar Preferred Title</dt>
+                                                    <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                                </dl>
                                             </div>
-                                        </dl>
+                                        : null}
+                                        {variant.otherDescription ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Other description</dt>
+                                                    <dd>{variant.otherDescription}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
                                     </div>
                                 );
                             })}
