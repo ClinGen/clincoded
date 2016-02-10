@@ -92,7 +92,7 @@ var CurationCentral = React.createClass({
     componentDidMount: function() {
         var winWidth = window.innerWidth;
         this.setState({winWidth: winWidth});
-        
+
         var gdmUuid = queryKeyValue('gdm', this.props.href);
         var pmid = queryKeyValue('pmid', this.props.href);
         if (gdmUuid) {
@@ -297,16 +297,19 @@ var AddPmidModal = React.createClass({
         if (valid && formInput.match(/^0+$/)) {
             valid = false;
             this.setFormErrors('pmid', 'This PMID does not exist');
+            this.setState({submitBusy: false});
         }
         // valid if input isn't zero-leading
         if (valid && formInput.match(/^0+/)) {
             valid = false;
             this.setFormErrors('pmid', 'Please re-enter PMID without any leading 0\'s');
+            this.setState({submitBusy: false});
         }
         // valid if the input only has numbers
         if (valid && !formInput.match(/^[0-9]*$/)) {
             valid = false;
             this.setFormErrors('pmid', 'Only numbers allowed');
+            this.setState({submitBusy: false});
         }
         // valid if input isn't already associated with GDM
         if (valid) {
@@ -314,6 +317,7 @@ var AddPmidModal = React.createClass({
                 if (this.props.currGdm.annotations[i].article.pmid == formInput) {
                     valid = false;
                     this.setFormErrors('pmid', 'This article has already been associated with this Gene-Disease Record');
+                    this.setState({submitBusy: false});
                 }
             }
         }
@@ -339,7 +343,10 @@ var AddPmidModal = React.createClass({
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
                     var newArticle = parsePubmed(xml);
                     // if the PubMed article for this PMID doesn't exist, display an error
-                    if (!('pmid' in newArticle)) this.setFormErrors('pmid', 'This PMID does not exist');
+                    if (!('pmid' in newArticle)) {
+                        this.setFormErrors('pmid', 'This PMID does not exist');
+                        this.setState({submitBusy: false});
+                    }
                     return this.postRestData('/articles/', newArticle).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });
