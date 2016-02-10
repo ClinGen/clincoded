@@ -105,15 +105,15 @@ var ExperimentalSubmit = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} />
+                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} linkGdm={true} />
                 <div className="container">
-                    {experimental ?
-                        <h1>{experimental.evidenceType}<br />Experimental Data Information: {experimental.label} <a href={experimental['@id'] + '?gdm=' + gdm.uuid} className="btn btn-info" target="_blank">View</a>&nbsp;<a href={editExperimentalLink} className="btn btn-info">Edit</a></h1>
-                    : null}
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
                             <PmidSummary article={annotation.article} displayJournal />
                         </div>
+                    : null}
+                    {experimental ?
+                        <h1>{experimental.evidenceType}<br />Experimental Data Information: {experimental.label} <a href={editExperimentalLink} className="btn btn-info">Edit/Assess</a></h1>
                     : null}
                     <div className="row">
                         <div className="col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
@@ -134,7 +134,7 @@ var ExperimentalSubmit = React.createClass({
                                             </div>
                                             <div className="col-md-6">
                                                 <span className="family-submit-results-btn">
-                                                    <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page</a>
+                                                    <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page <i className="icon icon-briefcase"></i></a>
                                                 </span>
                                             </div>
                                         </div>

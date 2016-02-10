@@ -178,14 +178,10 @@ var ProvisionalCuration = React.createClass({
     },
 
     cancelForm: function(e) {
-        // Don't run through HTML submit handler
-        e.preventDefault();
-        e.stopPropagation();
-
-        // click Cancel button will go back to view - current
-        if (e.detail >= 1){
-            window.history.go(-1);
-        }
+        // Changed modal cancel button from a form input to a html button
+        // as to avoid accepting enter/return key as a click event.
+        // Removed hack in this method.
+        window.history.go(-1);
     },
 
     render: function() {
@@ -206,7 +202,7 @@ var ProvisionalCuration = React.createClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true}/>
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true} />
                             <div className="container">
                                 {
                                     (provisional && edit === 'yes') ?
@@ -533,7 +529,7 @@ var EditCurrent = function() {
                     </Panel>
                 </PanelGroup>
                 <div className='modal-footer'>
-                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                 </div>
             </Form>
@@ -1000,7 +996,7 @@ var NewCalculation = function() {
                                     </tr>
                                     <tr className="count-title-row">
                                         <td rowSpan="2" className="title area-bottom-cells most-left">Time (yrs)</td>
-                                        <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#10877; 2 pubs, then max score for time = 1)</td>
+                                        <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#8804; 2 pubs, then max score for time = 1)</td>
                                         <td>current yr</td>
                                         <td>1-3 yr</td>
                                         <td>&gt;3 yr</td>
@@ -1172,6 +1168,15 @@ var NewCalculation = function() {
                                     {this.state.autoClassification}
                                 </div>
                             </div>
+                            { userAssessments.segCntdct>0 || userAssessments.variantCntdct || userAssessments.expCntdct ?
+                                <div className="row">
+                                    <div className="col-sm-5">&nbsp;</div>
+                                    <div className="col-sm-7">
+                                        <strong style={{'color':'#f00'}}>Note: One or more pieces of evidence in this record was assessed as "Contradicts".</strong>
+                                    </div>
+                                </div>
+                             : null
+                            }
                             <br />
                             <Input type="select" ref="alteredClassification"
                                 label={<strong>Select Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
@@ -1199,7 +1204,7 @@ var NewCalculation = function() {
                     </Panel>
                 </PanelGroup>
                 <div className='modal-footer'>
-                    <Input type="cancel" inputClassName="btn-default btn-inline-spacer" cancelHandler={this.cancelForm} />
+                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                 </div>
             </Form>
