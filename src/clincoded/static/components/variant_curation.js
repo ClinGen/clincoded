@@ -379,7 +379,7 @@ var VariantCuration = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} variant={variant} />
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} pmid={this.queryValues.pmid} />
                 <div className="container">
                     {!this.queryValues.all && annotation && annotation.article ?
                         <div className="curation-pmid-summary">
