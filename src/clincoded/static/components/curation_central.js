@@ -280,7 +280,7 @@ var AddPmidModal = React.createClass({
     propTypes: {
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateGdmArticles: React.PropTypes.func, // Function to call when we have an article to add to the GDM
+        updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
     },
 
     contextTypes: {
