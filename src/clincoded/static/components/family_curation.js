@@ -1224,7 +1224,7 @@ var FamilyCuration = React.createClass({
             <div>
                 {(!this.queryValues.familyUuid || this.state.family) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} pmid={pmid} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -1674,6 +1674,7 @@ var FamilyVariant = function() {
                     <Input type="text" ref="individualname" label="Individual Label"
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+                    <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
                     {this.state.orpha ?
                         <div className="form-group">
                             <div className="col-sm-5"><strong className="pull-right">Orphanet Disease(s) Associated with Family:</strong></div>
