@@ -77,7 +77,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         gdm: React.PropTypes.object, // GDM data to display
         omimId: React.PropTypes.string, // OMIM ID to display
         updateOmimId: React.PropTypes.func, // Function to call when OMIM ID changes
-        linkGdm: React.PropTypes.bool // whether or not to link GDM text back to GDM
+        linkGdm: React.PropTypes.bool, // whether or not to link GDM text back to GDM
+        pmid: React.PropTypes.string
     },
 
     render: function() {
@@ -88,15 +89,14 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         var provisional;
         var provisionalExist = false;
         var summaryButton = false;
+        var variant = this.props.variant;
+        var annotations = gdm && gdm.annotations;
 
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
-            var pmid;
-            if (gdm.annotations.length > 0) {
-                pmid = gdm.annotations[0].article.pmid;
-            }
+            var pmid = this.props.pmid;
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
             if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
@@ -275,6 +275,7 @@ var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
 
 var findGdmPmidFromObj = module.exports.findGdmPmidFromObj = function(obj) {
     var tempGdm, tempPmid;
+    console.log(obj);
     if (obj.associatedAnnotations && obj.associatedAnnotations.length > 0) {
         tempGdm = obj.associatedAnnotations[0].associatedGdm[0];
         tempPmid = obj.associatedAnnotations[0].article.pmid;
