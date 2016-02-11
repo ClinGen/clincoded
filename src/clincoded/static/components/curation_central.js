@@ -92,7 +92,7 @@ var CurationCentral = React.createClass({
     componentDidMount: function() {
         var winWidth = window.innerWidth;
         this.setState({winWidth: winWidth});
-        
+
         var gdmUuid = queryKeyValue('gdm', this.props.href);
         var pmid = queryKeyValue('pmid', this.props.href);
         if (gdmUuid) {
@@ -280,7 +280,7 @@ var AddPmidModal = React.createClass({
     propTypes: {
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateGdmArticles: React.PropTypes.func, // Function to call when we have an article to add to the GDM
+        updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
     },
 
     contextTypes: {

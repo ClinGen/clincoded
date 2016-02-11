@@ -379,7 +379,7 @@ var VariantCuration = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} variant={variant} />
                 <div className="container">
                     {!this.queryValues.all && annotation && annotation.article ?
                         <div className="curation-pmid-summary">
@@ -393,9 +393,6 @@ var VariantCuration = React.createClass({
                         {variant ?
                             <h2>{variant.clinvarVariantId ? (
                                 <div className="row" style={{'padding-left':'15px'}}>
-                                    <span>
-                                        {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null}&nbsp;
-                                    </span>
                                     <dl className="dl-horizontal">
                                         <dt style={{'font-weight':'normal'}}>VariationId</dt>
                                         <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>

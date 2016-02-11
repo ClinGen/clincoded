@@ -77,7 +77,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         gdm: React.PropTypes.object, // GDM data to display
         omimId: React.PropTypes.string, // OMIM ID to display
         updateOmimId: React.PropTypes.func, // Function to call when OMIM ID changes
-        linkGdm: React.PropTypes.bool // whether or not to link GDM text back to GDM
+        linkGdm: React.PropTypes.bool, // whether or not to link GDM text back to GDM
+        variant: React.PropTypes.object // Variant object, for the variant curation page
     },
 
     render: function() {
@@ -88,14 +89,32 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         var provisional;
         var provisionalExist = false;
         var summaryButton = false;
+        var variant = this.props.variant;
+        var annotations = gdm && gdm.annotations;
 
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
             var pmid;
+            var pmidCount = 0;
             if (gdm.annotations.length > 0) {
-                pmid = gdm.annotations[0].article.pmid;
+                if (annotations && variant) {
+                    // Search all annotations in the GDM for all associations for the given variant
+                    annotations.forEach(function(annotation) {
+                        // Get all associations (families, individuals) for this annotation and variant
+                        var associations = collectVariantAssociations(annotation, variant);
+                        if (associations && associations.length == 1) {
+                            pmidCount++;
+                            pmid = annotation.article.pmid;
+                        }
+                    });
+                    if (pmidCount > 1) {
+                        this.props.linkGdm = false;
+                    }
+                } else {
+                    pmid = gdm.annotations[0].article.pmid;
+                }
             }
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
@@ -273,6 +292,7 @@ var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
 
 var findGdmPmidFromObj = module.exports.findGdmPmidFromObj = function(obj) {
     var tempGdm, tempPmid;
+    console.log(obj);
     if (obj.associatedAnnotations && obj.associatedAnnotations.length > 0) {
         tempGdm = obj.associatedAnnotations[0].associatedGdm[0];
         tempPmid = obj.associatedAnnotations[0].article.pmid;
@@ -440,7 +460,7 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                     });
                     var render = (
                         <h2 key={annotation.uuid}>
-                            <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> → </span>
+                            <span>{gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}><i className="icon icon-briefcase"></i></a> : null} // PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> → </span>
                             {sortedAssociations.map(function(association, i) {
                                 var associationType = association['@type'][0];
                                 var probandLabel = (associationType === 'individual' && association.proband) ? <i className="icon icon-proband"></i> : null;
