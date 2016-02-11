@@ -26,7 +26,7 @@ var ExperimentalSubmit = React.createClass({
         return {
             gdm: null, // GDM object given in query string
             experimental: null, // Experimental object given in query string
-            annotation: null, // Annotation object given in query string
+            annotation: null // Annotation object given in query string
         };
     },
 
