@@ -392,14 +392,14 @@ var VariantCuration = React.createClass({
                         <VariantAssociationsHeader gdm={gdm} variant={variant} />
                         {variant ?
                             <h2>{variant.clinvarVariantId ? (
-                                <div className="row" style={{'padding-left':'15px'}}>
+                                <div className="row variant-association-header">
                                     <dl className="dl-horizontal">
-                                        <dt style={{'font-weight':'normal'}}>{gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}><i className="icon icon-briefcase"></i></a> : null} // VariationId</dt>
+                                        <dt>{gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}><i className="icon icon-briefcase"></i></a> : null} &#x2F;&#x2F; VariationId</dt>
                                         <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
                                     </dl>
                                     <dl className="dl-horizontal">
-                                        <dt style={{'font-weight':'normal'}}>ClinVar Preferred Title</dt>
-                                        <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</dd>
+                                        <dt>ClinVar Preferred Title</dt>
+                                        <dd>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</dd>
                                     </dl>
                                 </div>
                             )
