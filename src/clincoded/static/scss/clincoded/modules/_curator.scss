@@ -389,6 +389,20 @@
         margin-top: 0;
         font-size: 1.3rem;
     }
+
+    .variant-association-header {
+        padding-left: 15px;
+
+        dt {
+            font-weight: normal;
+            padding-right: 5px;
+        }
+
+        dd {
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+    }
 }
 
 .curation-submit {
