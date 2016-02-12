@@ -1897,7 +1897,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                                     { (type === 'hpo' || type === '') && (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length > 0) ?
                                         obj.hpoIdInDiagnosis.map(function(hpoid, i) {
                                             return (
-                                                <span>
+                                                <span key={i}>
                                                     {hpoid}
                                                     {i < obj.hpoIdInDiagnosis.length-1 ? ', ' : ''}
                                                     {i === obj.hpoIdInDiagnosis.length-1 && obj.termsInDiagnosis && type === '' ? '; ' : null}

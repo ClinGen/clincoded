@@ -908,12 +908,12 @@ var IndividualCuration = React.createClass({
                                 <h2>
                                     {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     {groupTitles.length ?
-                                        <span> // Group {groupTitles.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                        <span> &#47;&#47; Group {groupTitles.map(function(group, i) { return <span key={i}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
                                     : null}
                                     {familyTitles.length ?
-                                        <span> // Family {familyTitles.map(function(family, i) { return <span>{i > 0 ? ', ' : ''}<a href={family['@id']}>{family.label}</a></span>; })}</span>
+                                        <span> &#47;&#47; Family {familyTitles.map(function(family, i) { return <span key={i}>{i > 0 ? ', ' : ''}<a href={family['@id']}>{family.label}</a></span>; })}</span>
                                     : null}
-                                    <span> // {this.state.individualName ? <span>Individual {this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</span>
+                                    <span> &#47;&#47; {this.state.individualName ? <span>Individual {this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</span>
                                 </h2>
                             </div>
                             <div className="row group-curation-content">
