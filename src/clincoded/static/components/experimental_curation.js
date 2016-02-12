@@ -1275,7 +1275,7 @@ var ExperimentalCuration = React.createClass({
                                 <h1>{(experimental ? 'Edit' : 'Curate') + ' Experimental Data Information'}</h1>
                                 <h2>
                                     {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
-                                    <span> // {this.state.experimentalName ? <span> Experiment {this.state.experimentalName}</span> : <span className="no-entry">No entry</span>} {this.state.experimentalType && this.state.experimentalType != 'none' ? <span>({this.state.experimentalType})</span> : null}</span>
+                                    <span> &#x2F;&#x2F; {this.state.experimentalName ? <span> Experiment {this.state.experimentalName}</span> : <span className="no-entry">No entry</span>} {this.state.experimentalType && this.state.experimentalType != 'none' ? <span>({this.state.experimentalType})</span> : null}</span>
                                 </h2>
                             </div>
                             <div className="row group-curation-content">
@@ -2341,7 +2341,7 @@ var ExperimentalViewer = React.createClass({
                             <h1>View Experimental Data {experimental.label}</h1>
                             <h2>
                                 {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
-                                <span> // Experimental Data {experimental.label} ({experimental.evidenceType})</span>
+                                <span> &#x2F;&#x2F; Experimental Data {experimental.label} ({experimental.evidenceType})</span>
                             </h2>
                         </div>
 
@@ -2670,7 +2670,7 @@ var ExperimentalViewer = React.createClass({
                         <Panel title="Associated Variants" panelClassName="panel-data">
                             {experimental.variants.map(function(variant, i) {
                                 return (
-                                    <div className="variant-view-panel">
+                                    <div key={'variant' + i} className="variant-view-panel">
                                         <h5>Variant {i + 1}</h5>
                                         {variant.clinvarVariantId ?
                                             <div>
