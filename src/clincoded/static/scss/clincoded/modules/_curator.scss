@@ -390,6 +390,10 @@
         font-size: 1.3rem;
     }
 
+    .pmid-association-header {
+        padding: 2px 0;
+    }
+
     .variant-association-header {
         padding-left: 15px;
 
@@ -859,4 +863,15 @@
     margin: 10px auto 10px auto;
     font-weight: bold;
     word-wrap: break-word;
+}
+
+.form-group {
+    .control-label {
+        .normal {
+            font-weight: normal;
+        }
+        .emphasis {
+            color: red;
+        }
+    }
 }
