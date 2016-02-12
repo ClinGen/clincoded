@@ -113,7 +113,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} linkGdm={true} />
+                <RecordHeader gdm={gdm} omimId={gdm && gdm.omimId} session={session} linkGdm={true} pmid={annotation ? annotation.article.pmid : null} />
                 <div className="container">
                     {annotation && annotation.article ?
                         <div className="curation-pmid-summary">
