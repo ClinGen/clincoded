@@ -442,8 +442,8 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                         return 1;
                     });
                     var render = (
-                        <h2 key={annotation.uuid}>
-                            <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> → </span>
+                        <span key={annotation.uuid}>
+                            <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> &#x2192; </span>
                             {sortedAssociations.map(function(association, i) {
                                 var associationType = association['@type'][0];
                                 var probandLabel = (associationType === 'individual' && association.proband) ? <i className="icon icon-proband"></i> : null;
@@ -458,7 +458,7 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                                     </span>
                                 );
                             })}
-                        </h2>
+                        </span>
                     );
                     annotationAssociations.push(render);
                 }
@@ -1897,7 +1897,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                                     { (type === 'hpo' || type === '') && (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length > 0) ?
                                         obj.hpoIdInDiagnosis.map(function(hpoid, i) {
                                             return (
-                                                <span key={i}>
+                                                <span key={hpoid}>
                                                     {hpoid}
                                                     {i < obj.hpoIdInDiagnosis.length-1 ? ', ' : ''}
                                                     {i === obj.hpoIdInDiagnosis.length-1 && obj.termsInDiagnosis && type === '' ? '; ' : null}
