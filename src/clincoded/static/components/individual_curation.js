@@ -908,12 +908,12 @@ var IndividualCuration = React.createClass({
                                 <h2>
                                     {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     {groupTitles.length ?
-                                        <span> &#47;&#47; Group {groupTitles.map(function(group, i) { return <span key={i}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                        <span> &#x2F;&#x2F; Group {groupTitles.map(function(group, i) { return <span key={group['@id']}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
                                     : null}
                                     {familyTitles.length ?
-                                        <span> &#47;&#47; Family {familyTitles.map(function(family, i) { return <span key={i}>{i > 0 ? ', ' : ''}<a href={family['@id']}>{family.label}</a></span>; })}</span>
+                                        <span> &#x2F;&#x2F; Family {familyTitles.map(function(family, i) { return <span key={family['@id']}>{i > 0 ? ', ' : ''}<a href={family['@id']}>{family.label}</a></span>; })}</span>
                                     : null}
-                                    <span> &#47;&#47; {this.state.individualName ? <span>Individual {this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</span>
+                                    <span> &#x2F;&#x2F; {this.state.individualName ? <span>Individual {this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</span>
                                 </h2>
                             </div>
                             <div className="row group-curation-content">
@@ -1179,8 +1179,8 @@ var LabelHpoId = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : ''}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                {this.props.not ? <span className="emphasis">NOT </span> : ''}
+                Phenotype(s) <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
             </span>
         );
     }
@@ -1195,8 +1195,8 @@ var LabelPhenoTerms = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : ''}
-                Phenotype(s) (<span style={{fontWeight: 'normal'}}>free text</span>):
+                {this.props.not ? <span className="emphasis">NOT </span> : ''}
+                Phenotype(s) (<span className="normal">free text</span>):
             </span>
         );
     }
@@ -1387,7 +1387,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar Variation ID is not available)</span>:</span>;
+        return <span>Other description <span className="normal">(only when ClinVar Variation ID is not available)</span>:</span>;
     }
 });
 
@@ -1483,12 +1483,12 @@ var IndividualViewer = React.createClass({
                             <h2>
                                 {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                 {groupRenders.length ?
-                                    <span> // Group {groupRenders}</span>
+                                    <span> &#x2F;&#x2F; Group {groupRenders}</span>
                                 : null}
                                 {familyRenders.length ?
-                                    <span> // Family {familyRenders}</span>
+                                    <span> &#x2F;&#x2F; Family {familyRenders}</span>
                                 : null}
-                                <span> // Individual {individual.label}</span>
+                                <span> &#x2F;&#x2F; Individual {individual.label}</span>
                             </h2>
                         </div>
                         <Panel title={<LabelPanelTitleView individual={individual} labelText="Disease & Phenotype(s)" />} panelClassName="panel-data">
@@ -1618,7 +1618,7 @@ var IndividualViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar VariationID</dt>
-                                                    <dd style={{'paddingLeft':'22px'}}><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                    <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -1626,7 +1626,7 @@ var IndividualViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar Preferred Title</dt>
-                                                    <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                                    <dd>{variant.clinvarVariantTitle}</dd>
                                                 </dl>
                                             </div>
                                         : null}
