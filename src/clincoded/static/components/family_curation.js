@@ -1236,9 +1236,9 @@ var FamilyCuration = React.createClass({
                                 <h2>
                                     {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     {groups && groups.length ?
-                                        <span> // Group {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                        <span> &#x2F;&#x2F; Group {groups.map(function(group, i) { return <span key={group['@id']}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
                                     : null}
-                                    <span> // {this.state.familyName ? <span>Family {this.state.familyName}</span> : <span className="no-entry">No entry</span>}</span>
+                                    <span> &#x2F;&#x2F; {this.state.familyName ? <span>Family {this.state.familyName}</span> : <span className="no-entry">No entry</span>}</span>
                                 </h2>
                             </div>
                             <div className="row group-curation-content">
@@ -1427,7 +1427,7 @@ var FamilyCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span>Disease(s) in Common <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term)</span>:</span>;
+        return <span>Disease(s) in Common <span className="normal">(<a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term)</span>:</span>;
     }
 });
 
@@ -1440,8 +1440,8 @@ var LabelHpoId = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                {this.props.not ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+                <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
             </span>
         );
     }
@@ -1456,8 +1456,8 @@ var LabelPhenoTerms = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                <span style={{fontWeight: 'normal'}}>(free text)</span>:
+                {this.props.not ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+                <span className="normal">(free text)</span>:
             </span>
         );
     }
@@ -1727,7 +1727,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar Variation ID is not available):</span></span>;
+        return <span>Other description <span className="normal">(only when ClinVar Variation ID is not available):</span></span>;
     }
 });
 
@@ -1941,9 +1941,9 @@ var FamilyViewer = React.createClass({
                             <h2>
                                 {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                 {groups && groups.length ?
-                                    <span> // Group {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                    <span> &#x2F;&#x2F; Group {groups.map(function(group, i) { return <span key={group['@id']}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
                                 : null}
-                                <span> // Family {family.label}</span>
+                                <span> &#x2F;&#x2F; Family {family.label}</span>
                             </h2>
                         </div>
                         <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
@@ -2090,7 +2090,7 @@ var FamilyViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar VariationID</dt>
-                                                    <dd style={{'paddingLeft':'22px'}}><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                    <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2098,7 +2098,7 @@ var FamilyViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar Preferred Title</dt>
-                                                    <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                                    <dd>{variant.clinvarVariantTitle}</dd>
                                                 </dl>
                                             </div>
                                         : null }
