@@ -875,3 +875,17 @@
         }
     }
 }
+
+.panel-data {
+    .variant-view-panel {
+        dt {
+            text-align: left;
+            width: 172px;
+        }
+
+        dd {
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+    }
+}
