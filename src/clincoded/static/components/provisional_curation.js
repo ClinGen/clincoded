@@ -409,13 +409,11 @@ var LimitedClassification = function() {
         <div>
             <p className="title underline-text title-p">LIMITED CLASSIFICATION</p>
             <p>There is <strong>limited</strong> evidence to support a causal role for this gene in this disease, such as:</p>
-            <p>
-                <ul>
-                    <li>Fewer than three observations of variants that provide convincing evidence for disease causality&sup1;</li>
-                    <li>Multiple variants reported in unrelated probands but <i>without</i> sufficient evidence that the variants alter function</li>
-                    <li>Limited experimental data&sup2; supporting the gene-disease association</li>
-                </ul>
-            </p>
+            <ul>
+                <li>Fewer than three observations of variants that provide convincing evidence for disease causality&sup1;</li>
+                <li>Multiple variants reported in unrelated probands but <i>without</i> sufficient evidence that the variants alter function</li>
+                <li>Limited experimental data&sup2; supporting the gene-disease association</li>
+            </ul>
             <p>The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged that contradicts the role of the gene in the noted disease.</p>
         </div>
     );
@@ -426,12 +424,10 @@ var ModerateClassification = function() {
         <div>
             <p className="title underline-text title-p">MODERATE CLASSIFICATION</p>
             <p>There is <strong>moderate</strong> evidence to support a causal role for this gene in this diseaese, such as:</p>
-            <p>
-                <ul>
-                    <li>At least 3 unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
-                    <li>Moderate experimental data&sup2; supporting the gene-disease association</li>
-                </ul>
-            </p>
+            <ul>
+                <li>At least 3 unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
+                <li>Moderate experimental data&sup2; supporting the gene-disease association</li>
+            </ul>
             <p>The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged that contradicts the role of the gene in the noded disease.</p>
         </div>
     );
@@ -445,12 +441,10 @@ var StrongClassification = function() {
                 The role of this gene in disease has been independently demonstrated in at least two separate studies providing&nbsp;
                 <strong>strong</strong> supporting evidence for this gene&#39;s role in disease, such as the following types of evidence:
             </p>
-            <p>
-                <ul>
-                    <li>Strong variant-level evidence demonstrating numerous unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
-                    <li>Compelling gene-level evidence from different types of supporting experimental data&sup2;.</li>
-                </ul>
-            </p>
+            <ul>
+                <li>Strong variant-level evidence demonstrating numerous unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
+                <li>Compelling gene-level evidence from different types of supporting experimental data&sup2;.</li>
+            </ul>
             <p>In addition, no convincing evidence has emerged that contradicts the role of the gene in the noted disease.</p>
         </div>
     );
@@ -976,7 +970,7 @@ var NewCalculation = function() {
                                         <tr className="dark-row">
                                             {probandRow.map(function(item, i) {
                                                 return (
-                                                    <td className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
+                                                    <td key={'item' + i} className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
                                                 );
                                             })}
                                         </tr>
@@ -995,7 +989,7 @@ var NewCalculation = function() {
                                         <tr className="dark-row">
                                             {pubRow.map(function(item, i) {
                                                 return (
-                                                    <td className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
+                                                    <td key={'item' + i} className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
                                                 );
                                             })}
                                         </tr>
@@ -1011,7 +1005,7 @@ var NewCalculation = function() {
                                         <tr className="dark-row area-bottom-cells">
                                             {timeRow.map(function(item, i) {
                                                 return (
-                                                    <td className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
+                                                    <td key={'item' + i} className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
                                                 );
                                             })}
                                         </tr>
