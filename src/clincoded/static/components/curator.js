@@ -273,7 +273,6 @@ var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
 
 var findGdmPmidFromObj = module.exports.findGdmPmidFromObj = function(obj) {
     var tempGdm, tempPmid;
-    console.log(obj);
     if (obj.associatedAnnotations && obj.associatedAnnotations.length > 0) {
         tempGdm = obj.associatedAnnotations[0].associatedGdm[0];
         tempPmid = obj.associatedAnnotations[0].article.pmid;
@@ -1923,7 +1922,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
 var renderMutalyzerLink = module.exports.renderMutalyzerLink = function() {
     return (
         <p className="col-sm-7 col-sm-offset-5 mutalyzer-link">
-            (e.g. HGVS, RCV, refSNP (rs) ID)<br />For help in verifying, generating or converting to HGVS nomenclature, please visit <a href='https://mutalyzer.nl/' target='_blank'>Mutalyzer</a>.
+            (e.g. HGVS, RCV, rs ID)<br />For help in verifying, generating or converting to HGVS nomenclature, please visit <a href='https://mutalyzer.nl/' target='_blank'>Mutalyzer</a>.
         </p>
     );
 };
