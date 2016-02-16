@@ -109,7 +109,8 @@ var FamilyCuration = React.createClass({
             variantRequired: null, // boolean for set up requirement of variant if proband individual data entered
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            existedOrphanetId: null // user-supplied value in Orphanet id input field
         };
     },
 
@@ -124,6 +125,7 @@ var FamilyCuration = React.createClass({
             this.setState({familyName: this.refs[ref].getValue()});
         } else if (ref === 'orphanetid' && this.refs[ref].getValue()) {
             this.setState({orpha: true});
+            this.setState({existedOrphanetId: this.refs[ref].getValue().toUpperCase()});
         } else if (ref === 'orphanetid') {
             this.setState({orpha: false});
         } else if (ref.substring(0, 3) === 'VAR') {
@@ -1678,7 +1680,7 @@ var FamilyVariant = function() {
                     {this.state.orpha ?
                         <div className="form-group">
                             <div className="col-sm-5"><strong className="pull-right">Orphanet Disease(s) Associated with Family:</strong></div>
-                            <div className="col-sm-7">{this.refs['orphanetid'].getValue().toUpperCase()}</div>
+                            <div className="col-sm-7">{this.state.existedOrphanetId}</div>
                         </div>
                         : null
                     }
