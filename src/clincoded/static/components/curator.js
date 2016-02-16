@@ -2383,10 +2383,10 @@ var AddResourceIdModal = React.createClass({
 
     render: function() {
         return (
-            <Form submitHandler={this.submitResource} formClassName="form-std">
+            <div className="form-std">
                 <div className="modal-body">
                     <Input type="text" ref="resourceId" label={this.state.txtInputLabel} handleChange={this.handleChange} value={this.props.initialFormValue}
-                        error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')}
+                        error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')} submitHandler={this.submitResource}
                         labelClassName="control-label" groupClassName="resource-input" required />
                     <Input type="button-button" title={this.state.txtInputButton} inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
                     <div className="row">&nbsp;<br />&nbsp;</div>
@@ -2402,7 +2402,7 @@ var AddResourceIdModal = React.createClass({
                     <Input type="button-button" inputClassName={this.getFormError('resourceId') === null || this.getFormError('resourceId') === undefined || this.getFormError('resourceId') === '' ?
                         "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Save" clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} submitBusy={this.state.submitResourceBusy} />
                 </div>
-            </Form>
+            </div>
         );
     }
 });
