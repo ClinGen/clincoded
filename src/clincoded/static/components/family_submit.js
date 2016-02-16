@@ -145,7 +145,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                             {hasVariants || hadVariants ?
                                 <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
                                     <div className="submit-results-panel-info">
-                                        <p>An Individual entry named <strong>{probandIndividual.label}</strong> for the proband and its associated variant(s) has been created. You can add additional information about the proband, create an entry for a non-proband in this Family, or return to the Record Curation page.</p>
+                                        <p>An Individual entry for the proband <strong>{probandIndividual.label}</strong> and its associated variant(s) has been created. You can add additional information for this proband, create an entry for a non-proband in this Family, or return to the Record Curation page.</p>
                                         <p><em><strong>Note</strong>: Individual information includes associated variant(s), phenotypes, sex, etc. For a proband, variant information can only be added or edited on the Family page as it is associated with segregation information.</em></p>
                                     </div>
                                     <div className="submit-results-buttons">
@@ -175,7 +175,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                     <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
                                         <Form formClassName="form-horizontal form-std">
                                             <Input type="select" ref="haveindividual" defaultValue={this.state.haveIndividual}
-                                                label="No segregating variant information has been associated with the proband in this Family. Would you like to do this?"
+                                                label="No segregating variant information has been associated with this Family. Would you like add it?"
                                                 handleChange={this.handleChange} labelClassName="family-submit-results-label" wrapperClassName="family-submit-results-switch" groupClassName="submit-results-wrapper">
                                                 <option value="" disabled="disabled">No Selection</option>
                                                 <option disabled="disabled"></option>
