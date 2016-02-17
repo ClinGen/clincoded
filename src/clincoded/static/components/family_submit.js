@@ -175,7 +175,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                     <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
                                         <Form formClassName="form-horizontal form-std">
                                             <Input type="select" ref="haveindividual" defaultValue={this.state.haveIndividual}
-                                                label="No segregating variant information has been associated with this Family. Would you like add it?"
+                                                label="No segregating variant information has been associated with this Family. Would you like to add it?"
                                                 handleChange={this.handleChange} labelClassName="family-submit-results-label" wrapperClassName="family-submit-results-switch" groupClassName="submit-results-wrapper">
                                                 <option value="" disabled="disabled">No Selection</option>
                                                 <option disabled="disabled"></option>

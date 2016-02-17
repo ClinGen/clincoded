@@ -18,6 +18,7 @@ var ViewRecordHeader = curator.ViewRecordHeader;
 var CurationPalette = curator.CurationPalette;
 var AssessmentTracker = Assessments.AssessmentTracker;
 var AssessmentPanel = Assessments.AssessmentPanel;
+var AssessmentPanelDisabled = Assessments.AssessmentPanelDisabled;
 var AssessmentMixin = Assessments.AssessmentMixin;
 var PmidSummary = curator.PmidSummary;
 var PanelGroup = panel.PanelGroup;
@@ -2725,7 +2726,9 @@ var ExperimentalViewer = React.createClass({
                         {this.cv.gdmUuid && (experimentalUserAssessed || userExperimental) ?
                             <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
                                 assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
-                        : null}
+                        :
+                            <AssessmentPanelDisabled panelTitle="Experimental Data Assessment" />
+                        }
                     </div>
                 </div>
             </div>

@@ -261,6 +261,26 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     }
 });
 
+var AssessmentPanelDisabled = module.exports.AssessmentPanelDisabled = React.createClass({
+    propTypes: {
+        panelTitle: React.PropTypes.string // Title of Assessment panel; 'Assessment' default
+    },
+
+    render: function() {
+        var panelTitle = this.props.panelTitle ? this.props.panelTitle : 'Assessment';
+        return (
+            <div>
+                <Panel title={panelTitle} accordion={false} open={true}>
+                    <div className="row">
+                        <p className="alert alert-info">
+                            The option to assess this evidence does not currently exist since the curator who created it has not yet assessed on it.
+                        </p>
+                    </div>
+                </Panel>
+            </div>
+        );
+    }
+});
 
 // Display a history item for adding or or modifying an assessment
 var AssessmentAddModHistory = React.createClass({
