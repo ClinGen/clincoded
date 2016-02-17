@@ -208,6 +208,10 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         updateMsg: React.PropTypes.string // String to display by the Update button if desired
     },
 
+    componentDidMount: function() {
+        this.refs.assessment.value = this.props.assessmentTracker.currentVal;
+    },
+
     componentWillReceiveProps: function(nextProps) {
         if (this.refs.assessment && nextProps.assessmentTracker && nextProps.assessmentTracker.currentVal == DEFAULT_VALUE) {
             this.refs.assessment.resetValue();
@@ -236,11 +240,11 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                         <div className="row">
                             <Input type="select" ref="assessment" label={label + ':'} value={value} handleChange={this.handleChange.bind(null, this.props.assessmentTracker)}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={disabled}>
-                                <option disabled={this.props.disableDefault}>Not Assessed</option>
+                                <option value={DEFAULT_VALUE} disabled={this.props.disableDefault}>Not Assessed</option>
                                 <option disabled="disabled"></option>
-                                <option>Supports</option>
-                                <option>Review</option>
-                                <option>Contradicts</option>
+                                <option value="Supports">Supports</option>
+                                <option value="Review">Review</option>
+                                <option value="Contradicts">Contradicts</option>
                             </Input>
                             {this.props.note ?
                                 <p className="col-sm-7 col-sm-offset-5">{this.props.note}</p>
