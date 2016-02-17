@@ -209,7 +209,9 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     },
 
     componentDidMount: function() {
-        this.refs.assessment.value = this.props.assessmentTracker.currentVal;
+        if (this.props.assessmentTracker && this.props.assessmentTracker.currentVal) {
+            this.refs.assessment.value = this.props.assessmentTracker.currentVal;
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
