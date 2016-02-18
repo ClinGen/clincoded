@@ -166,8 +166,8 @@ input[type=search] {
         top: 5px;
         display: table-cell;
         width: 10%;
-        padding: 0 15px;
-        vertical-align: top;
+        padding: 12px 15px;
+        vertical-align: bottom;
     }
 }
 
@@ -192,7 +192,7 @@ input[type=search] {
     @media screen and (min-width: $screen-md-min) {
         display: table-cell;
         width: 45%;
-        vertical-align: top;
+        vertical-align: bottom;
     }
 
     a {
