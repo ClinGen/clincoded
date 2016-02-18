@@ -1194,6 +1194,16 @@ var FamilyCuration = React.createClass({
         this.loadData();
     },
 
+    componentWillUnmount: function() {
+        // Flush family-specific segregation data
+        if (this.cv.segregationAssessed && this.cv.segregationAssessed != false) {
+            this.cv.segregationAssessed = false;
+        }
+        if (this.cv.filledSegregations && Object.keys(this.cv.filledSegregations).length > 0) {
+            this.cv.filledSegregations = {};
+        }
+    },
+
     render: function() {
         var gdm = this.state.gdm;
         var family = this.state.family;
