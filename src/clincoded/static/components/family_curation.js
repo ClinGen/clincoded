@@ -1189,7 +1189,6 @@ var FamilyCuration = React.createClass({
     // from the query string and retrieve the corresponding objects from the DB, if they exist. Note, we have to do this after
     // the component mounts because AJAX DB queries can't be done from unmounted components.
     componentDidMount: function() {
-        this.cv.othersAssessed = false;
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
         this.loadData();
     },
@@ -1201,6 +1200,9 @@ var FamilyCuration = React.createClass({
         }
         if (this.cv.filledSegregations && Object.keys(this.cv.filledSegregations).length > 0) {
             this.cv.filledSegregations = {};
+        }
+        if (this.cv.othersAssessed && this.cv.othersAssessed != false) {
+            this.cv.othersAssessed = false;
         }
     },
 
