@@ -1903,7 +1903,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
 var renderMutalyzerLink = module.exports.renderMutalyzerLink = function() {
     return (
         <p className="col-sm-7 col-sm-offset-5 mutalyzer-link">
-            (e.g. HGVS, RCV, refSNP (rs) ID)<br />For help in verifying, generating or converting to HGVS nomenclature, please visit <a href='https://mutalyzer.nl/' target='_blank'>Mutalyzer</a>.
+            (e.g. HGVS, RCV, rs ID)<br />For help in verifying, generating or converting to HGVS nomenclature, please visit <a href='https://mutalyzer.nl/' target='_blank'>Mutalyzer</a>.
         </p>
     );
 };
