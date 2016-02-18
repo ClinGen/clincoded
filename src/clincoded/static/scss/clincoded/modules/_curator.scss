@@ -226,13 +226,6 @@
             font-weight: bold;
             margin: 0;
         }
-
-        .variant-title-ellipsis {
-            overflow: hidden;
-            display: block;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
     }
 }
 
@@ -396,6 +389,13 @@
         margin-top: 0;
         font-size: 1.3rem;
     }
+}
+
+.variant-title-ellipsis {
+    overflow: hidden;
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .curation-submit {

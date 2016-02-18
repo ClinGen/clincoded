@@ -363,17 +363,6 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             var variant = collectedVariants[variantId];
                             var variantName = variant.clinvarVariantTitle ? variant.clinvarVariantTitle :
                                 (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
-                            // shorten long title
-                            // 46 char max
-                            var char_in_line = 46;
-                            var nameDisplay;
-                            //var blueBarStyle = null;
-                            if (variantName.length <= char_in_line) {
-                                nameDisplay = variantName;
-                            } else {
-                                nameDisplay = variantName.substr(0, char_in_line-4) + ' ...';
-                            }
-
                             var userPathogenicity = null;
 
                             // See if the variant has a pathogenicity curated in the current GDM
@@ -396,10 +385,10 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
 
                             return (
                                 <div className="col-sm-6 col-md-6 col-lg-4" key={variant.uuid}>
-                                    <a className="btn btn-primary btn-xs"
+                                    <a className="btn btn-primary btn-xs variant-title-ellipsis"
                                         href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}
                                         title={variantName}>
-                                        {nameDisplay}
+                                        {variantName}
                                         {inCurrentGdm ? <i className="icon icon-sticky-note"></i> : null}
                                     </a>
                                 </div>
