@@ -385,7 +385,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
 
                             return (
                                 <div className="col-sm-6 col-md-6 col-lg-4" key={variant.uuid}>
-                                    <a className="btn btn-primary btn-xs variant-title-ellipsis"
+                                    <a className={"btn btn-primary btn-xs variant-title-ellipsis" + (inCurrentGdm ? ' assessed' : '')}
                                         href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}
                                         title={variantName}>
                                         {variantName}
