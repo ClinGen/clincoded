@@ -226,6 +226,13 @@
             font-weight: bold;
             margin: 0;
         }
+
+        .variant-title-ellipsis {
+            overflow: hidden;
+            display: block;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
     }
 }
 

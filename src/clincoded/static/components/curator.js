@@ -835,18 +835,11 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session, wi
     });
 
     var variantTitle = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
-    var variantDisplay;
-    var adjWidth = winWidth >= 1200 ? [28, 2] : (winWidth >= 992 ? [22, 4] : [75, 2]);
-    if (variantTitle.length > adjWidth[0]) {
-        variantDisplay = variantTitle.substr(0, adjWidth[0]-adjWidth[1]) + ' ...';
-    } else {
-        variantDisplay = variantTitle;
-    }
     var vCurationURL = '/variant-curation/?all&gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '');
 
     return (
         <div className="panel-evidence-group">
-            <h5><a href={vCurationURL} title={variantTitle}>{variantDisplay}</a></h5>
+            <h5 className="variant-title-ellipsis"><a href={vCurationURL} title={variantTitle}>{variantTitle}</a></h5>
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
                     <p className="evidence-curation-info">{variant.submitted_by.title}</p>
