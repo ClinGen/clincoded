@@ -1285,7 +1285,7 @@ var FamilyCuration = React.createClass({
                                             </PanelGroup>
                                         :
                                             <div>
-                                                {family.segregation ?
+                                                {family && family.segregation ?
                                                     <PanelGroup accordion>
                                                         {FamilySegregationViewer(family.segregation, null, true)}
                                                     </PanelGroup>

@@ -409,6 +409,13 @@
     }
 }
 
+.variant-title-ellipsis {
+    overflow: hidden;
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .curation-submit {
     margin-bottom: 20px;
 
@@ -492,6 +499,10 @@
             right: 3px;
             font-size: 1rem;
         }
+    }
+
+    .assessed {
+        padding-right: 15px;
     }
 }
 

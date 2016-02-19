@@ -2180,7 +2180,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar Variation ID is not available)</span>:</span>;
+        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar VariationID is not available)</span>:</span>;
     }
 });
 
