@@ -143,13 +143,11 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                             {(this.state.haveFamily === 'y' && gdm && annotation && group) ?
                                 <Panel panelClassName="submit-results-panel submit-results-response">
                                     <p>
-                                        <em>Any variant associated with a proband in a Family is captured at the Family level. To associate segregation, variant,
-                                        or any other information for a family, click <strong>Add New Family for this Group</strong>. If you have previously
-                                        created an entry for this Family, return to the Gene-Disease record page to add this Family to the newly created Group.</em>
+                                        <em>Any variant associated with a proband in a Family is captured at the Family level.</em>
                                     </p>
                                     <div className="group-submit-results-choices">
                                         <span className="group-submit-results-btn">
-                                            <div className="submit-results-note">To associate segregation, variant, or any other information for a family, click <strong>Add New Family for this Group</strong>.</div>
+                                            <div className="submit-results-note">To associate segregation, variant, or any other information for a family, <strong>Add New Family for this Group</strong>.</div>
                                             <a className="btn btn-default" href={'/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Add New Family for this Group</a>
                                         </span>
                                         <span className="submit-results-choices-sep">OR</span>
@@ -162,14 +160,11 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                             : ((this.state.haveFamily === 'n' && gdm && annotation && group) ?
                                 <Panel panelClassName="submit-results-panel submit-results-response">
                                     <p>
-                                        <em>Any variant associated with an individual that is a member of a Group but not part of a Family is captured at the
-                                        Individual level. To associate a variant and/or information such as age, race, etc. with an individual in the Group,
-                                        click <strong>Add New Individuals for this Group</strong>. If you have previously created an entry for this Individual,
-                                        return to the Gene-Disease record page to add this Individual to the newly created Group.</em>
+                                        <em>Any variant associated with an individual that is a member of a Group but not part of a Family is captured at the Individual level.</em>
                                     </p>
                                     <div className="group-submit-results-choices">
                                         <span className="group-submit-results-btn">
-                                            <div className="submit-results-note">To associate a variant and/or information such as age, race, etc. with an individual in the Group, click <strong>Add New Individuals for this Group</strong>.</div>
+                                            <div className="submit-results-note">To associate a variant and/or information such as age, race, etc. with an individual in the Group, <strong>Add New Individuals for this Group</strong>.</div>
                                             <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid}>Add New Individuals for this Group</a>
                                         </span>
                                         <span className="submit-results-choices-sep">OR</span>
