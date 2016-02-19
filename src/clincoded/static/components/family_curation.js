@@ -229,6 +229,7 @@ var FamilyCuration = React.createClass({
                     });
                     this.refs['orphanetid'].setValue(orphanetVal.join(', '));
                     this.setState({orpha: true});
+                    this.setState({existedOrphanetId: orphanetVal.join(', ').toUpperCase()});
                 }
                 else if (item === 'phenotype') {
                     hpoIds = associatedGroups.map(function(associatedGroup, i) {
@@ -1684,7 +1685,7 @@ var FamilyVariant = function() {
                 );
             })}
             {this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired ?
-                <div className="variant-panel clearfix">
+                <div className="variant-panel">
                     <Input type="text" ref="individualname" label="Individual Label"
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
