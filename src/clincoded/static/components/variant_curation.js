@@ -338,6 +338,7 @@ var VariantCuration = React.createClass({
         var variant = this.state.variant;
         var pathogenicity = this.state.pathogenicity;
         var otherPathogenicityList = [];
+        var allPathogenicityList = [];
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         var curatorName = this.props.session && this.props.session.user_properties ? this.props.session.user_properties.title : '';
@@ -362,8 +363,11 @@ var VariantCuration = React.createClass({
         if (this.queryValues.all && variant && gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
             for (var i in gdm.variantPathogenicity) {
                 var pathoVariant = gdm.variantPathogenicity[i].variant;
-                if (pathoVariant.uuid === variant.uuid && gdm.variantPathogenicity[i].submitted_by.uuid !== user) {
-                    otherPathogenicityList.push(gdm.variantPathogenicity[i]);
+                if (pathoVariant.uuid === variant.uuid) {
+                    allPathogenicityList.push(gdm.variantPathogenicity[i]);
+                    if (gdm.variantPathogenicity[i].submitted_by.uuid !== user) {
+                        otherPathogenicityList.push(gdm.variantPathogenicity[i]);
+                    }
                 }
             }
         }
@@ -477,6 +481,35 @@ var VariantCuration = React.createClass({
                                                 </Panel>
                                             </PanelGroup>
                                         : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} note="Note: To Edit the pathogenicity evaluation, first change your assessment to “Not assessed” and click Save, then Edit the Variant again."/> : null) }
+                                        {allPathogenicityList && allPathogenicityList.length > 0 ?
+                                                    <Panel panelClassName="panel-data">
+                                                        <dl className="dl-horizontal">
+                                                            <div>
+                                                                <dt>Assessments</dt>
+                                                                <dd>
+                                                                    <div>
+                                                                        {allPathogenicityList.map(function(pathogenicity, i) {
+                                                                            var assessments = pathogenicity.assessments && pathogenicity.assessments.length ? pathogenicity.assessments : [];
+                                                                            return (
+                                                                                <span key={i}>
+                                                                                    {i > 0 ? <br /> : null}
+                                                                                    {assessments.map(function(assessment, j) {
+                                                                                        return (
+                                                                                            <span key={assessment.uuid}>
+                                                                                                {j > 0 ? <br /> : null}
+                                                                                                {assessment.value} ({assessment.submitted_by.title})
+                                                                                            </span>
+                                                                                        );
+                                                                                    })}
+                                                                                </span>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                </dd>
+                                                            </div>
+                                                        </dl>
+                                                    </Panel>
+                                                : null}
                                         <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue} accordion open />
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
@@ -571,20 +604,6 @@ var VariantCurationView = React.createClass({
                             <div>
                                 <dt>Variant comments</dt>
                                 <dd>{pathogenicity.comment}</dd>
-                            </div>
-
-                            <div>
-                                <dt>Assessments</dt>
-                                <dd>
-                                    {assessments.map(function(assessment, i) {
-                                        return (
-                                            <span key={assessment.uuid}>
-                                                {i > 0 ? <br /> : null}
-                                                {assessment.value} ({assessment.submitted_by.title})
-                                            </span>
-                                        );
-                                    })}
-                                </dd>
                             </div>
                         </dl>
                     </Panel>
