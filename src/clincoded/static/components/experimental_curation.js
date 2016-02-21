@@ -2701,27 +2701,27 @@ var ExperimentalViewer = React.createClass({
                             })}
                         </Panel>
                         : null}
-                        {assessments && assessments.length ?
                         <Panel panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
                                     <dt>Assessments</dt>
                                     <dd>
-                                        <div>
-                                            {assessments.map(function(assessment, i) {
-                                                return (
-                                                    <span key={assessment.uuid}>
-                                                        {i > 0 ? <br /> : null}
-                                                        {assessment.value} ({assessment.submitted_by.title})
-                                                    </span>
-                                                );
-                                            })}
-                                        </div>
+                                        {assessments && assessments.length ?
+                                            <div>
+                                                {assessments.map(function(assessment, i) {
+                                                    return (
+                                                        <span key={assessment.uuid}>
+                                                            {i > 0 ? <br /> : null}
+                                                            {assessment.value} ({assessment.submitted_by.title})
+                                                        </span>
+                                                    );
+                                                })}
+                                            </div>
+                                        : <div>None</div>}
                                     </dd>
                                 </div>
                             </dl>
                         </Panel>
-                        : null}
                         {this.cv.gdmUuid ?
                             <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
                                 assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}

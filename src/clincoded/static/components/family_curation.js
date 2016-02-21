@@ -2076,22 +2076,24 @@ var FamilyViewer = React.createClass({
 
                         {FamilySegregationViewer(segregation, assessments, true)}
 
-                        {assessments && assessments.length ?
+                        {this.cv.gdmUuid && haveSegregation ?
                             <Panel panelClassName="panel-data">
                                 <dl className="dl-horizontal">
                                     <div>
                                         <dt>Assessments</dt>
                                         <dd>
-                                            <div>
-                                                {assessments.map(function(assessment, i) {
-                                                    return (
-                                                        <span key={assessment.uuid}>
-                                                            {i > 0 ? <br /> : null}
-                                                            {assessment.value} ({assessment.submitted_by.title})
-                                                        </span>
-                                                    );
-                                                })}
-                                            </div>
+                                            {assessments && assessments.length ?
+                                                <div>
+                                                    {assessments.map(function(assessment, i) {
+                                                        return (
+                                                            <span key={assessment.uuid}>
+                                                                {i > 0 ? <br /> : null}
+                                                                {assessment.value} ({assessment.submitted_by.title})
+                                                            </span>
+                                                        );
+                                                    })}
+                                                </div>
+                                            : <div>None</div>}
                                         </dd>
                                     </div>
                                 </dl>

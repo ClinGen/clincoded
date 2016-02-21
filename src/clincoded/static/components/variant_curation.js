@@ -482,34 +482,34 @@ var VariantCuration = React.createClass({
                                             </PanelGroup>
                                         : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} note="Note: To Edit the pathogenicity evaluation, first change your assessment to “Not assessed” and click Save, then Edit the Variant again."/> : null) }
                                         {allPathogenicityList && allPathogenicityList.length > 0 ?
-                                                    <Panel panelClassName="panel-data">
-                                                        <dl className="dl-horizontal">
+                                            <Panel panelClassName="panel-data">
+                                                <dl className="dl-horizontal">
+                                                    <div>
+                                                        <dt>Assessments</dt>
+                                                        <dd>
                                                             <div>
-                                                                <dt>Assessments</dt>
-                                                                <dd>
-                                                                    <div>
-                                                                        {allPathogenicityList.map(function(pathogenicity, i) {
-                                                                            var assessments = pathogenicity.assessments && pathogenicity.assessments.length ? pathogenicity.assessments : [];
-                                                                            return (
-                                                                                <span key={i}>
-                                                                                    {i > 0 ? <br /> : null}
-                                                                                    {assessments.map(function(assessment, j) {
-                                                                                        return (
-                                                                                            <span key={assessment.uuid}>
-                                                                                                {j > 0 ? <br /> : null}
-                                                                                                {assessment.value} ({assessment.submitted_by.title})
-                                                                                            </span>
-                                                                                        );
-                                                                                    })}
-                                                                                </span>
-                                                                            );
-                                                                        })}
-                                                                    </div>
-                                                                </dd>
+                                                                {allPathogenicityList.map(function(pathogenicity, i) {
+                                                                    var assessments = pathogenicity.assessments && pathogenicity.assessments.length ? pathogenicity.assessments : [];
+                                                                    return (
+                                                                        <span key={i}>
+                                                                            {i > 0 ? <br /> : null}
+                                                                            {assessments.map(function(assessment, j) {
+                                                                                return (
+                                                                                    <span key={assessment.uuid}>
+                                                                                        {j > 0 ? <br /> : null}
+                                                                                        {assessment.value} ({assessment.submitted_by.title})
+                                                                                    </span>
+                                                                                );
+                                                                            })}
+                                                                        </span>
+                                                                    );
+                                                                })}
                                                             </div>
-                                                        </dl>
-                                                    </Panel>
-                                                : null}
+                                                        </dd>
+                                                    </div>
+                                                </dl>
+                                            </Panel>
+                                        : null}
                                         <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue} accordion open />
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
