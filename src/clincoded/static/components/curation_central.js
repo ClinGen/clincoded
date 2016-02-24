@@ -33,7 +33,6 @@ var CurationCentral = React.createClass({
 
     getInitialState: function() {
         return {
-            winWidth: null, // window's width, used to ser # char of preferred tile shown in curator palette
             currPmid: queryKeyValue('pmid', this.props.href),
             currGdm: null
         };
@@ -90,9 +89,6 @@ var CurationCentral = React.createClass({
     // After the Curator Central page component mounts, grab the uuid from the query string and
     // retrieve the corresponding GDM from the DB.
     componentDidMount: function() {
-        var winWidth = window.innerWidth;
-        this.setState({winWidth: winWidth});
-
         var gdmUuid = queryKeyValue('gdm', this.props.href);
         var pmid = queryKeyValue('pmid', this.props.href);
         if (gdmUuid) {
@@ -180,7 +176,7 @@ var CurationCentral = React.createClass({
                         </div>
                         {currArticle ?
                             <div className="col-md-3">
-                                <CurationPalette gdm={gdm} annotation={annotation} session={session} winWidth={this.state.winWidth} />
+                                <CurationPalette gdm={gdm} annotation={annotation} session={session} />
                             </div>
                         : null}
                     </div>
