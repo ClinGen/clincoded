@@ -275,7 +275,6 @@ var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
 
 var findGdmPmidFromObj = module.exports.findGdmPmidFromObj = function(obj) {
     var tempGdm, tempPmid;
-    console.log(obj);
     if (obj.associatedAnnotations && obj.associatedAnnotations.length > 0) {
         tempGdm = obj.associatedAnnotations[0].associatedGdm[0];
         tempPmid = obj.associatedAnnotations[0].article.pmid;
