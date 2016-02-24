@@ -533,8 +533,11 @@ var ExperimentalCuration = React.createClass({
     // Note, we have to do this after the component mounts because AJAX DB queries can't be
     // done from unmounted components.
     componentDidMount: function() {
-        this.cv.othersAssessed = false;
         this.loadData();
+    },
+
+    componentWillUnmount: function() {
+        this.cv.othersAssessed = false;
     },
 
     // When the user changes the assessment value, this gets called
@@ -1368,12 +1371,12 @@ var ExperimentalNameType = function() {
                 inputDisabled={this.state.experimental!=null || this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Biochemical Function</option>
-                <option>Protein Interactions</option>
-                <option>Expression</option>
-                <option>Functional Alteration</option>
-                <option>Model Systems</option>
-                <option>Rescue</option>
+                <option value="Biochemical Function">Biochemical Function</option>
+                <option value="Protein Interactions">Protein Interactions</option>
+                <option value="Expression">Expression</option>
+                <option value="Functional Alteration">Functional Alteration</option>
+                <option value="Model Systems">Model Systems</option>
+                <option value="Rescue">Rescue</option>
             </Input>
             {!this.state.experimentalType || this.state.experimentalType == 'none' ?
                 <div className="col-sm-7 col-sm-offset-5">
@@ -1401,8 +1404,8 @@ var ExperimentalNameType = function() {
                     inputDisabled={this.state.experimental!=null || this.cv.othersAssessed} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>A. Gene(s) with same function implicated in same disease</option>
-                    <option>B. Gene function consistent with phenotype(s)</option>
+                    <option value="A. Gene(s) with same function implicated in same disease">A. Gene(s) with same function implicated in same disease</option>
+                    <option value="B. Gene function consistent with phenotype(s)">B. Gene function consistent with phenotype(s)</option>
                 </Input>
             : null}
             {this.state.experimentalType && this.state.experimentalType == 'Expression' ?
@@ -1412,8 +1415,8 @@ var ExperimentalNameType = function() {
                     inputDisabled={this.state.experimental!=null || this.cv.othersAssessed} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>A. Gene normally expressed in tissue relevant to the disease</option>
-                    <option>B. Altered expression in Patients</option>
+                    <option value="A. Gene normally expressed in tissue relevant to the disease">A. Gene normally expressed in tissue relevant to the disease</option>
+                    <option value="B. Altered expression in Patients">B. Altered expression in Patients</option>
                 </Input>
             : null}
             {this.state.experimentalNameVisible ?
@@ -1601,10 +1604,10 @@ var TypeProteinInteractions = function() {
                 value={proteinInteractions.interactionType} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>physical association (MI:0915)</option>
-                <option>genetic interaction (MI:0208)</option>
-                <option>negative genetic interaction (MI:0933)</option>
-                <option>positive genetic interaction (MI:0935)</option>
+                <option value="physical association (MI:0915)">physical association (MI:0915)</option>
+                <option value="genetic interaction (MI:0208)">genetic interaction (MI:0208)</option>
+                <option value="negative genetic interaction (MI:0933)">negative genetic interaction (MI:0933)</option>
+                <option value="positive genetic interaction (MI:0935)">positive genetic interaction (MI:0935)</option>
             </Input>
             <Input type="select" ref="experimentalInteractionDetection" label="Method by which interaction detected:"
                 error={this.getFormError('experimentalInteractionDetection')} clearError={this.clrFormErrors.bind(null, 'experimentalInteractionDetection')}
@@ -1613,15 +1616,15 @@ var TypeProteinInteractions = function() {
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>affinity chromatography technology (MI:0004)</option>,
-                <option>coimmunoprecipitation (MI:0019)</option>,
-                <option>comigration in gel electrophoresis (MI:0807)</option>,
-                <option>electron microscopy (MI:0040)</option>,
-                <option>protein cross-linking with a bifunctional reagent (MI:0031)</option>,
-                <option>pull down (MI:0096)</option>,
-                <option>synthetic genetic analysis (MI:0441)</option>,
-                <option>two hybrid (MI:0018)</option>,
-                <option>x-ray crystallography (MI:0114)</option>
+                <option value="affinity chromatography technology (MI:0004)">affinity chromatography technology (MI:0004)</option>
+                <option value="coimmunoprecipitation (MI:0019)">coimmunoprecipitation (MI:0019)</option>
+                <option value="comigration in gel electrophoresis (MI:0807)">comigration in gel electrophoresis (MI:0807)</option>
+                <option value="electron microscopy (MI:0040)">electron microscopy (MI:0040)</option>
+                <option value="protein cross-linking with a bifunctional reagent (MI:0031)">protein cross-linking with a bifunctional reagent (MI:0031)</option>
+                <option value="pull down (MI:0096)">pull down (MI:0096)</option>
+                <option value="synthetic genetic analysis (MI:0441)">synthetic genetic analysis (MI:0441)</option>
+                <option value="two hybrid (MI:0018)">two hybrid (MI:0018)</option>
+                <option value="x-ray crystallography (MI:0114)">x-ray crystallography (MI:0114)</option>
             </Input>
             <Input type="checkbox" ref="geneImplicatedInDisease" label="Has this gene or genes been implicated in the above disease?:"
                 error={this.getFormError('geneImplicatedInDisease')} clearError={this.clrFormErrors.bind(null, 'geneImplicatedInDisease')}
@@ -1761,8 +1764,8 @@ var TypeFunctionalAlteration = function() {
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Patient cells</option>
-                <option>Engineered equivalent</option>
+                <option value="Patient cells">Patient cells</option>
+                <option value="Engineered equivalent">Engineered equivalent</option>
             </Input>
             {this.state.functionalAlterationPCEE == 'Patient cells' ?
             <div>
@@ -1848,8 +1851,8 @@ var TypeModelSystems = function() {
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Animal model</option>
-                <option>Engineered equivalent</option>
+                <option value="Animal model">Animal model</option>
+                <option value="Engineered equivalent">Engineered equivalent</option>
             </Input>
             {this.state.modelSystemsNHACCM == 'Animal model' ?
             <div>
@@ -1860,24 +1863,24 @@ var TypeModelSystems = function() {
                     inputDisabled={this.cv.othersAssessed} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Cat (Felis catus) 9685</option>
-                    <option>Chicken (Gallus gallus) 9031</option>
-                    <option>Chimpanzee (Pan troglodytes) 9598</option>
-                    <option>Cow (Bos taurus) 9913</option>
-                    <option>Dog (Canis lupus familaris) 9615</option>
-                    <option>Frog (Xenopus) 262014</option>
-                    <option>Fruit fly (Drosophila) 7215</option>
-                    <option>Gerbil (Gerbilinae) 10045</option>
-                    <option>Guinea pig (Cavia porcellus) 10141</option>
-                    <option>Hamster (Cricetinae) 10026</option>
-                    <option>Macaque (Macaca) 9539</option>
-                    <option>Mouse (Mus musculus) 10090</option>
-                    <option>Pig (Sus scrofa) 9823</option>
-                    <option>Rabbit (Oryctolagus crunicu) 9986</option>
-                    <option>Rat (Rattus norvegicus) 10116</option>
-                    <option>Round worm (Carnorhabditis elegans) 6239</option>
-                    <option>Sheep (Ovis aries) 9940</option>
-                    <option>Zebrafish (Daanio rerio) 7955</option>
+                    <option value="Cat (Felis catus) 9685">Cat (Felis catus) 9685</option>
+                    <option value="Chicken (Gallus gallus) 9031">Chicken (Gallus gallus) 9031</option>
+                    <option value="Chimpanzee (Pan troglodytes) 9598">Chimpanzee (Pan troglodytes) 9598</option>
+                    <option value="Cow (Bos taurus) 9913">Cow (Bos taurus) 9913</option>
+                    <option value="Dog (Canis lupus familaris) 9615">Dog (Canis lupus familaris) 9615</option>
+                    <option value="Frog (Xenopus) 262014">Frog (Xenopus) 262014</option>
+                    <option value="Fruit fly (Drosophila) 7215">Fruit fly (Drosophila) 7215</option>
+                    <option value="Gerbil (Gerbilinae) 10045">Gerbil (Gerbilinae) 10045</option>
+                    <option value="Guinea pig (Cavia porcellus) 10141">Guinea pig (Cavia porcellus) 10141</option>
+                    <option value="Hamster (Cricetinae) 10026">Hamster (Cricetinae) 10026</option>
+                    <option value="Macaque (Macaca) 9539">Macaque (Macaca) 9539</option>
+                    <option value="Mouse (Mus musculus) 10090">Mouse (Mus musculus) 10090</option>
+                    <option value="Pig (Sus scrofa) 9823">Pig (Sus scrofa) 9823</option>
+                    <option value="Rabbit (Oryctolagus crunicu) 9986">Rabbit (Oryctolagus crunicu) 9986</option>
+                    <option value="Rat (Rattus norvegicus) 10116">Rat (Rattus norvegicus) 10116</option>
+                    <option value="Round worm (Carnorhabditis elegans) 6239">Round worm (Carnorhabditis elegans) 6239</option>
+                    <option value="Sheep (Ovis aries) 9940">Sheep (Ovis aries) 9940</option>
+                    <option value="Zebrafish (Daanio rerio) 7955">Zebrafish (Daanio rerio) 7955</option>
                 </Input>
             </div>
             : null}
@@ -1979,8 +1982,8 @@ var TypeRescue = function() {
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Patient cells</option>
-                <option>Engineered equivalent</option>
+                <option value="Patient cells">Patient cells</option>
+                <option value="Engineered equivalent">Engineered equivalent</option>
             </Input>
             {this.state.rescuePCEE == 'Patient cells' ?
             <div>

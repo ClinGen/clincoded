@@ -1019,8 +1019,8 @@ var IndividualName = function(displayNote) {
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
-                        <option>Yes</option>
-                        <option>No</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
                     </Input>
                     <p className="col-sm-7 col-sm-offset-5 input-note-below">
                         Note: Probands are indicated by the following icon: <i className="icon icon-proband"></i>
@@ -1213,14 +1213,14 @@ var IndividualDemographics = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Intersex</option>
-                <option>MTF/Transwoman/Transgender Female</option>
-                <option>FTM/Transman/Transgender Male</option>
-                <option>Ambiguous</option>
-                <option>Unknown</option>
-                <option>Other</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Intersex">Intersex</option>
+                <option value="MTF/Transwoman/Transgender Female">MTF/Transwoman/Transgender Female</option>
+                <option value="FTM/Transman/Transgender Male">FTM/Transman/Transgender Male</option>
+                <option value="Ambiguous">Ambiguous</option>
+                <option value="Unknown">Unknown</option>
+                <option value="Other">Other</option>
             </Input>
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={individual && individual.countryOfOrigin}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1234,21 +1234,21 @@ var IndividualDemographics = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Hispanic or Latino</option>
-                <option>Not Hispanic or Latino</option>
-                <option>Unknown</option>
+                <option value="Hispanic or Latino">Hispanic or Latino</option>
+                <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
+                <option value="Unknown">Unknown</option>
             </Input>
             <Input type="select" ref="race" label="Race:" defaultValue="none" value={individual && individual.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>American Indian or Alaska Native</option>
-                <option>Asian</option>
-                <option>Black</option>
-                <option>Native Hawaiian or Other Pacific Islander</option>
-                <option>White</option>
-                <option>Mixed</option>
-                <option>Unknown</option>
+                <option value="American Indian or Alaska Native">American Indian or Alaska Native</option>
+                <option value="Asian">Asian</option>
+                <option value="Black">Black</option>
+                <option value="Native Hawaiian or Other Pacific Islander">Native Hawaiian or Other Pacific Islander</option>
+                <option value="White">White</option>
+                <option value="Mixed">Mixed</option>
+                <option value="Unknown">Unknown</option>
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age</h4>
             <div className="demographics-age-range">
@@ -1256,10 +1256,10 @@ var IndividualDemographics = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Onset</option>
-                    <option>Report</option>
-                    <option>Diagnosis</option>
-                    <option>Death</option>
+                    <option value="Onset">Onset</option>
+                    <option value="Report">Report</option>
+                    <option value="Diagnosis">Diagnosis</option>
+                    <option value="Death">Death</option>
                 </Input>
                 <Input type="number" ref="agevalue" label="Value:" value={individual && individual.ageValue} maxVal={150}
                     error={this.getFormError('agevalue')} clearError={this.clrFormErrors.bind(null, 'agevalue')}
@@ -1268,10 +1268,10 @@ var IndividualDemographics = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Days</option>
-                    <option>Weeks</option>
-                    <option>Months</option>
-                    <option>Years</option>
+                    <option value="Days">Days</option>
+                    <option value="Weeks">Weeks</option>
+                    <option value="Months">Months</option>
+                    <option value="Years">Years</option>
                 </Input>
             </div>
         </div>
