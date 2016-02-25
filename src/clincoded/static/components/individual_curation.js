@@ -908,12 +908,12 @@ var IndividualCuration = React.createClass({
                                 <h2>
                                     {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     {groupTitles.length ?
-                                        <span> // Group {groupTitles.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                        <span> &#x2F;&#x2F; Group {groupTitles.map(function(group, i) { return <span key={group['@id']}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
                                     : null}
                                     {familyTitles.length ?
-                                        <span> // Family {familyTitles.map(function(family, i) { return <span>{i > 0 ? ', ' : ''}<a href={family['@id']}>{family.label}</a></span>; })}</span>
+                                        <span> &#x2F;&#x2F; Family {familyTitles.map(function(family, i) { return <span key={family['@id']}>{i > 0 ? ', ' : ''}<a href={family['@id']}>{family.label}</a></span>; })}</span>
                                     : null}
-                                    <span> // {this.state.individualName ? <span>Individual {this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</span>
+                                    <span> &#x2F;&#x2F; {this.state.individualName ? <span>Individual {this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</span>
                                 </h2>
                             </div>
                             <div className="row group-curation-content">
@@ -1019,8 +1019,8 @@ var IndividualName = function(displayNote) {
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
-                        <option>Yes</option>
-                        <option>No</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
                     </Input>
                     <p className="col-sm-7 col-sm-offset-5 input-note-below">
                         Note: Probands are indicated by the following icon: <i className="icon icon-proband"></i>
@@ -1179,8 +1179,8 @@ var LabelHpoId = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : ''}
-                Phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                {this.props.not ? <span className="emphasis">NOT </span> : ''}
+                Phenotype(s) <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
             </span>
         );
     }
@@ -1195,8 +1195,8 @@ var LabelPhenoTerms = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT </span> : ''}
-                Phenotype(s) (<span style={{fontWeight: 'normal'}}>free text</span>):
+                {this.props.not ? <span className="emphasis">NOT </span> : ''}
+                Phenotype(s) (<span className="normal">free text</span>):
             </span>
         );
     }
@@ -1213,14 +1213,14 @@ var IndividualDemographics = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Intersex</option>
-                <option>MTF/Transwoman/Transgender Female</option>
-                <option>FTM/Transman/Transgender Male</option>
-                <option>Ambiguous</option>
-                <option>Unknown</option>
-                <option>Other</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Intersex">Intersex</option>
+                <option value="MTF/Transwoman/Transgender Female">MTF/Transwoman/Transgender Female</option>
+                <option value="FTM/Transman/Transgender Male">FTM/Transman/Transgender Male</option>
+                <option value="Ambiguous">Ambiguous</option>
+                <option value="Unknown">Unknown</option>
+                <option value="Other">Other</option>
             </Input>
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={individual && individual.countryOfOrigin}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1234,21 +1234,21 @@ var IndividualDemographics = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Hispanic or Latino</option>
-                <option>Not Hispanic or Latino</option>
-                <option>Unknown</option>
+                <option value="Hispanic or Latino">Hispanic or Latino</option>
+                <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
+                <option value="Unknown">Unknown</option>
             </Input>
             <Input type="select" ref="race" label="Race:" defaultValue="none" value={individual && individual.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>American Indian or Alaska Native</option>
-                <option>Asian</option>
-                <option>Black</option>
-                <option>Native Hawaiian or Other Pacific Islander</option>
-                <option>White</option>
-                <option>Mixed</option>
-                <option>Unknown</option>
+                <option value="American Indian or Alaska Native">American Indian or Alaska Native</option>
+                <option value="Asian">Asian</option>
+                <option value="Black">Black</option>
+                <option value="Native Hawaiian or Other Pacific Islander">Native Hawaiian or Other Pacific Islander</option>
+                <option value="White">White</option>
+                <option value="Mixed">Mixed</option>
+                <option value="Unknown">Unknown</option>
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age</h4>
             <div className="demographics-age-range">
@@ -1256,10 +1256,10 @@ var IndividualDemographics = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Onset</option>
-                    <option>Report</option>
-                    <option>Diagnosis</option>
-                    <option>Death</option>
+                    <option value="Onset">Onset</option>
+                    <option value="Report">Report</option>
+                    <option value="Diagnosis">Diagnosis</option>
+                    <option value="Death">Death</option>
                 </Input>
                 <Input type="number" ref="agevalue" label="Value:" value={individual && individual.ageValue} maxVal={150}
                     error={this.getFormError('agevalue')} clearError={this.clrFormErrors.bind(null, 'agevalue')}
@@ -1268,10 +1268,10 @@ var IndividualDemographics = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Days</option>
-                    <option>Weeks</option>
-                    <option>Months</option>
-                    <option>Years</option>
+                    <option value="Days">Days</option>
+                    <option value="Weeks">Weeks</option>
+                    <option value="Months">Months</option>
+                    <option value="Years">Years</option>
                 </Input>
             </div>
         </div>
@@ -1387,7 +1387,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar VariationID is not available)</span>:</span>;
+        return <span>Other description <span className="normal">(only when ClinVar VariationID is not available)</span>:</span>;
     }
 });
 
@@ -1483,12 +1483,12 @@ var IndividualViewer = React.createClass({
                             <h2>
                                 {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                 {groupRenders.length ?
-                                    <span> // Group {groupRenders}</span>
+                                    <span> &#x2F;&#x2F; Group {groupRenders}</span>
                                 : null}
                                 {familyRenders.length ?
-                                    <span> // Family {familyRenders}</span>
+                                    <span> &#x2F;&#x2F; Family {familyRenders}</span>
                                 : null}
-                                <span> // Individual {individual.label}</span>
+                                <span> &#x2F;&#x2F; Individual {individual.label}</span>
                             </h2>
                         </div>
                         <Panel title={<LabelPanelTitleView individual={individual} labelText="Disease & Phenotype(s)" />} panelClassName="panel-data">
@@ -1618,7 +1618,7 @@ var IndividualViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar VariationID</dt>
-                                                    <dd style={{'paddingLeft':'22px'}}><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                    <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -1626,7 +1626,7 @@ var IndividualViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar Preferred Title</dt>
-                                                    <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                                    <dd>{variant.clinvarVariantTitle}</dd>
                                                 </dl>
                                             </div>
                                         : null}

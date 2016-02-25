@@ -378,8 +378,6 @@
     border-top: 1px solid #c0c0c0;
 }
 
-
-
 .viewer-titles {
     h1 {
         margin-bottom: 10px;
@@ -388,6 +386,24 @@
     h2 {
         margin-top: 0;
         font-size: 1.3rem;
+    }
+
+    .pmid-association-header {
+        padding: 2px 0;
+    }
+
+    .variant-association-header {
+        padding-left: 15px;
+
+        dt {
+            font-weight: normal;
+            padding-right: 5px;
+        }
+
+        dd {
+            word-break: break-all;
+            word-wrap: break-word;
+        }
     }
 }
 
@@ -450,7 +466,6 @@
 .palette-not-curated {
     color: #909090;
 }
-
 
 // Variant Header Styles
 .variant-header {
@@ -856,4 +871,29 @@
     margin: 10px auto 10px auto;
     font-weight: bold;
     word-wrap: break-word;
+}
+
+.form-group {
+    .control-label {
+        .normal {
+            font-weight: normal;
+        }
+        .emphasis {
+            color: red;
+        }
+    }
+}
+
+.panel-data {
+    .variant-view-panel {
+        dt {
+            text-align: left;
+            width: 172px;
+        }
+
+        dd {
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+    }
 }

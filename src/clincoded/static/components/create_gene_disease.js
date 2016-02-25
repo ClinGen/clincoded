@@ -20,7 +20,7 @@ var Panel = panel.Panel;
 
 
 var hpoValues = [
-    {value: '', text: 'Select', disabled: true},
+    {value: 'select', text: 'Select', disabled: true},
     {value: '', text: '', disabled: true},
     {text: 'Autosomal dominant inheritance (HP:0000006)'},
     {text: 'Autosomal dominant inheritance with maternal imprinting (HP:0012275)'},
