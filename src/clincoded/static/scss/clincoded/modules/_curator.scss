@@ -344,15 +344,25 @@
 .variant-panel {
     padding-top: 40px;
     border-top: 1px solid #c0c0c0;
-    padding-bottom: 40px;
+    padding-bottom: 15px;
 
     .mutalyzer-link {
-        margin-top: -20px;
+        float: none;
+        margin-bottom: 0;
+    }
+
+    .other-variant-desc {
+        margin-bottom: 0;
     }
 
     .clinvar-preferred-title {
         word-break:break-all;
         word-wrap: break-word;
+    }
+
+    &:first-child {
+        padding-top: 0;
+        border-top: none;
     }
 }
 
