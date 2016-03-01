@@ -2465,13 +2465,18 @@ function clinvarSubmitResource() {
             if (check.total) {
                 // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
+                    if (result['clinvarVariantTitle'].length < 1) {
+                        this.postRestData('/variants/', this.state.tempResource);
+                    }
+                    return result;
+                }).then(result => {
                     this.props.updateParentForm(result, this.props.fieldNum);
                     this.setState({submitResourceBusy: false});
                     this.props.closeModal();
                 });
             } else {
                 // variation is new to our db
-                this.postRestData('/variants/', this.state.tempResource).then(result => {
+                this.putRestData('/variants/', this.state.tempResource).then(result => {
                     // record the user adding a new variant entry
                     this.recordHistory('add', result['@graph'][0]).then(history => {
                         this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
