@@ -194,6 +194,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     mixins: [FormMixin],
 
     propTypes: {
+        owner: React.PropTypes.bool, // true if login user is the owner of evidence assessed to
         assessmentTracker: React.PropTypes.object, // Current value of assessment
         disabled: React.PropTypes.bool, // TRUE to make assessment dropdown disabled; FALSE to enable it (default)
         panelTitle: React.PropTypes.string, // Title of Assessment panel; 'Assessment' default
@@ -232,14 +233,16 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         var panelTitle = this.props.panelTitle ? this.props.panelTitle : 'Assessment';
         var label = this.props.label ? this.props.label : 'Assessment';
         var value = this.props.assessmentTracker && this.props.assessmentTracker.currentVal;
-        var disabled = (this.props.disabled === true || this.props.disabled === false) ? this.props.disabled : false;
+        //var disabled = (this.props.disabled === true || this.props.disabled === false) ? this.props.disabled : false;
+        var disabled = this.props.disabled;
+        var owner = this.props.owner;
         var submitErrClass = 'submit-info pull-right';
 
         return (
             <div>
                 {this.props.assessmentTracker ?
                     <Panel title={panelTitle} accordion={this.props.accordion} open={this.props.open}>
-                        {disabled ?
+                        {disabled && !owner ?
                             <div className="row">
                                 <p className="alert alert-info">
                                     The option to assess this evidence does not currently exist since the curator who created it has not yet assessed on it.

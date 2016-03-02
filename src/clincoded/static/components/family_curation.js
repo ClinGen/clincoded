@@ -1217,6 +1217,7 @@ var FamilyCuration = React.createClass({
         var method = (family && family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        var is_owner = session && family && (session.user_properties.uuid === family.submitted_by.uuid) ? true : false;
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
@@ -1293,7 +1294,7 @@ var FamilyCuration = React.createClass({
                                             </div>
                                         }
                                         <PanelGroup accordion>
-                                            <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled}
+                                            <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled} owner={is_owner}
                                                 updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
                                         </PanelGroup>
                                         <PanelGroup accordion>
