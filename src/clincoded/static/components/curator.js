@@ -176,52 +176,54 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             </div>
                             <div className="provisional-info-panel">
                                 <table border="1" style={{'width':'100%'}}>
-                                    <tr>
-                                        <td>
-                                            <div className="provisional-title">
-                                                <strong>Last Saved Summary & Provisional Classification</strong>
-                                            </div>
-                                            {   provisionalExist ?
-                                                    <div>
-                                                        <div className="provisional-data-left">
-                                                            <span>
-                                                                Last Saved Summary<br />
-                                                                Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                            </span>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div className="provisional-title">
+                                                    <strong>Last Saved Summary & Provisional Classification</strong>
+                                                </div>
+                                                {   provisionalExist ?
+                                                        <div>
+                                                            <div className="provisional-data-left">
+                                                                <span>
+                                                                    Last Saved Summary<br />
+                                                                    Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                                </span>
+                                                            </div>
+                                                            <div className="provisional-data-center">
+                                                                <span>
+                                                                    Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                    Provisional Classification: {provisional.alteredClassification}
+                                                                    { summaryPage ?
+                                                                        null
+                                                                        :
+                                                                        <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
+                                                                    }
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                        <div className="provisional-data-center">
-                                                            <span>
-                                                                Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                Provisional Classification: {provisional.alteredClassification}
-                                                                { summaryPage ?
-                                                                    null
-                                                                    :
-                                                                    <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
-                                                                }
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                :
-                                                    <div className="provisional-data-left"><span>No Reported Evidence</span></div>
-                                            }
-                                        </td>
-                                        <td className="button-box" rowSpan="2">
-                                            { summaryButton ?
-                                                ( summaryPage ?
-                                                    <button type="button" className="btn btn-primary" disabled="disabled">
-                                                        Generate New Summary
-                                                    </button>
                                                     :
-                                                    <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                                        { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
-                                                    </a>
-                                                )
-                                                :
-                                                null
-                                            }
-                                        </td>
-                                    </tr>
-                                    <tr style={{height:'10px'}}></tr>
+                                                        <div className="provisional-data-left"><span>No Reported Evidence</span></div>
+                                                }
+                                            </td>
+                                            <td className="button-box" rowSpan="2">
+                                                { summaryButton ?
+                                                    ( summaryPage ?
+                                                        <button type="button" className="btn btn-primary" disabled="disabled">
+                                                            Generate New Summary
+                                                        </button>
+                                                        :
+                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                            { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
+                                                        </a>
+                                                    )
+                                                    :
+                                                    null
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr style={{height:'10px'}}></tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -362,17 +364,6 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                             var variant = collectedVariants[variantId];
                             var variantName = variant.clinvarVariantTitle ? variant.clinvarVariantTitle :
                                 (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
-                            // shorten long title
-                            // 46 char max
-                            var char_in_line = 46;
-                            var nameDisplay;
-                            //var blueBarStyle = null;
-                            if (variantName.length <= char_in_line) {
-                                nameDisplay = variantName;
-                            } else {
-                                nameDisplay = variantName.substr(0, char_in_line-4) + ' ...';
-                            }
-
                             var userPathogenicity = null;
 
                             // See if the variant has a pathogenicity curated in the current GDM
@@ -395,10 +386,10 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
 
                             return (
                                 <div className="col-sm-6 col-md-6 col-lg-4" key={variant.uuid}>
-                                    <a className="btn btn-primary btn-xs"
+                                    <a className={"btn btn-primary btn-xs variant-title-ellipsis" + (inCurrentGdm ? ' assessed' : '')}
                                         href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}
                                         title={variantName}>
-                                        {nameDisplay}
+                                        {variantName}
                                         {inCurrentGdm ? <i className="icon icon-sticky-note"></i> : null}
                                     </a>
                                 </div>
@@ -439,8 +430,8 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                         return 1;
                     });
                     var render = (
-                        <h2 key={annotation.uuid}>
-                            <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> → </span>
+                        <div key={annotation.uuid} className="pmid-association-header">
+                            <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> &#x2192; </span>
                             {sortedAssociations.map(function(association, i) {
                                 var associationType = association['@type'][0];
                                 var probandLabel = (associationType === 'individual' && association.proband) ? <i className="icon icon-proband"></i> : null;
@@ -455,7 +446,7 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                                     </span>
                                 );
                             })}
-                        </h2>
+                        </div>
                     );
                     annotationAssociations.push(render);
                 }
@@ -508,7 +499,6 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
 
 var CurationPalette = module.exports.CurationPalette = React.createClass({
     propTypes: {
-        winWidth: React.PropTypes.number, // window width
         annotation: React.PropTypes.object.isRequired, // Current annotation that owns the article
         gdm: React.PropTypes.object.isRequired, // Current GDM that owns the given annotation
         session: React.PropTypes.object // Session object
@@ -518,7 +508,6 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var gdm = this.props.gdm;
         var annotation = this.props.annotation;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
-        var winWidth = this.props.winWidth;
         var curatorMatch = annotation && userMatch(annotation.submitted_by, session);
         var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
@@ -591,7 +580,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var allVariants = collectAnnotationVariants(annotation);
         if (Object.keys(allVariants).length) {
             variantRenders = Object.keys(allVariants).map(function(variantId) {
-                return <div key={variantId}>{renderVariant(allVariants[variantId], gdm, annotation, curatorMatch, session, winWidth)}</div>;
+                return <div key={variantId}>{renderVariant(allVariants[variantId], gdm, annotation, curatorMatch, session)}</div>;
             });
         }
 
@@ -819,7 +808,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
 //   gdm: Currently viewed GDM
 //   annotation: Currently selected annotation (paper)
 //   curatorMatch: True if annotation owner matches currently logged-in user
-var renderVariant = function(variant, gdm, annotation, curatorMatch, session, winWidth) {
+var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
     var variantCurated = variant.associatedPathogenicities.length > 0;
 
     // Get the pathogenicity record with an owner that matches the annotation's owner.
@@ -834,18 +823,11 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session, wi
     });
 
     var variantTitle = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
-    var variantDisplay;
-    var adjWidth = winWidth >= 1200 ? [28, 2] : (winWidth >= 992 ? [22, 4] : [75, 2]);
-    if (variantTitle.length > adjWidth[0]) {
-        variantDisplay = variantTitle.substr(0, adjWidth[0]-adjWidth[1]) + ' ...';
-    } else {
-        variantDisplay = variantTitle;
-    }
     var vCurationURL = '/variant-curation/?all&gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '');
 
     return (
         <div className="panel-evidence-group">
-            <h5><a href={vCurationURL} title={variantTitle}>{variantDisplay}</a></h5>
+            <h5 className="variant-title-ellipsis"><a href={vCurationURL} title={variantTitle}>{variantTitle}</a></h5>
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
                     <p className="evidence-curation-info">{variant.submitted_by.title}</p>
@@ -1854,7 +1836,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
             { type === 'hpo' || type === '' ? <div className="col-sm-5">&nbsp;</div> : null}
             { title === 'Experimental' && (type === 'hpo' || type === '') ?
                 <div className="col-sm-7 alert alert-warning">
-                    <p style={{'margin-bottom':'10px'}}>
+                    <p style={{'marginBottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) <strong>(required)</strong> using the Human Phenotype Ontology (HPO)
                         terms wherever possible (e.g. HP:0010704, HP:0030300). If no HPO code exists for a particular feature,
                         please describe it in the free text box instead.
@@ -1863,7 +1845,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
             : null }
             { title === 'Family' && (type === 'hpo' || type === '') ?
                 <div className="col-sm-7">
-                    <p style={{'margin-bottom':'10px'}}>
+                    <p style={{'marginBottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) of the Family using the Human Phenotype Ontology (HPO)
                         terms wherever possible (e.g. HP:0010704, HP:0030300).
                         If no HPO code exists for a particular feature, please describe it in the free text box instead.
@@ -1872,7 +1854,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
             : null}
             { title === 'Individual' && (type === 'hpo' || type === '') ?
                 <div className="col-sm-7">
-                    <p style={{'margin-bottom':'10px'}}>
+                    <p style={{'marginBottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) of the Individual using the Human Phenotype Ontology (HPO)
                         terms wherever possible (e.g. HP:0010704, HP:0030300).
                         If no HPO code exists for a particular feature, please describe it in the free text box instead.
@@ -1894,7 +1876,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                                     { (type === 'hpo' || type === '') && (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length > 0) ?
                                         obj.hpoIdInDiagnosis.map(function(hpoid, i) {
                                             return (
-                                                <span>
+                                                <span key={hpoid}>
                                                     {hpoid}
                                                     {i < obj.hpoIdInDiagnosis.length-1 ? ', ' : ''}
                                                     {i === obj.hpoIdInDiagnosis.length-1 && obj.termsInDiagnosis && type === '' ? '; ' : null}
@@ -2380,10 +2362,10 @@ var AddResourceIdModal = React.createClass({
 
     render: function() {
         return (
-            <Form submitHandler={this.submitResource} formClassName="form-std">
+            <div className="form-std">
                 <div className="modal-body">
                     <Input type="text" ref="resourceId" label={this.state.txtInputLabel} handleChange={this.handleChange} value={this.props.initialFormValue}
-                        error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')}
+                        error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')} submitHandler={this.submitResource}
                         labelClassName="control-label" groupClassName="resource-input" required />
                     <Input type="button-button" title={this.state.txtInputButton} inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
                     <div className="row">&nbsp;<br />&nbsp;</div>
@@ -2399,7 +2381,7 @@ var AddResourceIdModal = React.createClass({
                     <Input type="button-button" inputClassName={this.getFormError('resourceId') === null || this.getFormError('resourceId') === undefined || this.getFormError('resourceId') === '' ?
                         "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Save" clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} submitBusy={this.state.submitResourceBusy} />
                 </div>
-            </Form>
+            </div>
         );
     }
 });

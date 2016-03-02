@@ -1,7 +1,6 @@
 'use strict';
 var React = require('react');
 var cloneWithProps = require('react/lib/cloneWithProps');
-var cx = require('react/lib/cx');
 var url = require('url');
 var _ = require('underscore');
 var globals = require('./globals');
@@ -107,7 +106,7 @@ var AuditMixin = audit.AuditMixin;
             var whiteSpace = 'nowrap';
             var resultBounds = document.getElementById('result-table').getBoundingClientRect();
             var resultWidth = resultBounds.right - resultBounds.left;
-            var tipBounds = _.clone(getNextElementSibling(this.refs.indicator.getDOMNode()).getBoundingClientRect());
+            var tipBounds = _.clone(getNextElementSibling(this.refs.indicator).getBoundingClientRect());
             var tipWidth = tipBounds.right - tipBounds.left;
             var width = tipWidth;
             if (tipWidth > resultWidth) {
@@ -137,12 +136,12 @@ var AuditMixin = audit.AuditMixin;
         },
 
         render: function() {
-            var classes = {tooltipopen: this.state.tipOpen};
+            var classes = this.state.tipOpen ? 'tooltipopen' : '';
 
             return (
                 <span className="tooltip-trigger">
                     <i className={globals.statusClass(this.props.status, 'indicator icon icon-circle')} ref="indicator" onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}></i>
-                    <div className={"tooltip sentence-case " + cx(classes)} style={this.state.tipStyles}>
+                    <div className={"tooltip sentence-case " + classes} style={this.state.tipStyles}>
                         {this.props.status}<br /><span>{this.props.terms.join(', ')}</span>
                     </div>
                 </span>
@@ -535,10 +534,10 @@ var AuditMixin = audit.AuditMixin;
                 href = this.props.searchBase + field + '=' + term;
             }
             return (
-                <li id={selected ? "selected" : null} key={term}>
+                <li id={selected ? "selected" : ""} key={term}>
                     {selected ? '' : <span className="bar" style={barStyle}></span>}
                     {field === 'lot_reviews.status' ? <span className={globals.statusClass(term, 'indicator pull-left facet-term-key icon icon-circle')}></span> : null}
-                    <a id={selected ? "selected" : null} href={href} onClick={href ? this.props.onFilter : null}>
+                    <a id={selected ? "selected" : ""} href={href} onClick={href ? this.props.onFilter : null}>
                         <span className="pull-right">{count} {selected && this.props.canDeselect ? <i className="icon icon-times-circle-o"></i> : ''}</span>
                         <span className="facet-item">
                             {em ? <em>{title}</em> : <span>{title}</span>}
@@ -555,7 +554,7 @@ var AuditMixin = audit.AuditMixin;
             var filters = this.props.filters;
             var title;
             try {
-                title = types[term];
+                title = types[term].title;
             } catch (e) {
                 title = term;
             }
