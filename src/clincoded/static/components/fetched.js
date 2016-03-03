@@ -101,8 +101,8 @@ var FetchedData = module.exports.FetchedData = React.createClass({
         var children = [];
         if (this.props.children) {
             React.Children.forEach(this.props.children, function(child) {
-                if (child.type === Param.type) {
-                    params.push(cloneWithProps(child, {
+                if (child.type.displayName === Param.displayName) {
+                    params.push(React.cloneElement(child, {
                         key: child.props.name,
                         handleFetch: this.handleFetch,
                         handleFetchStart: this.handleFetchStart,
@@ -149,7 +149,7 @@ var FetchedData = module.exports.FetchedData = React.createClass({
 
         return (
             <div className="done">
-                {children.map((child, i) => cloneWithProps(child, _.extend({key: i}, this.props, this.state)))}
+                {children.map((child, i) => React.cloneElement(child, _.extend({key: i}, this.props, this.state)))}
                 {params}
             </div>
         );
