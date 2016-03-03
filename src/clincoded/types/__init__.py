@@ -17,7 +17,8 @@ import json
 def includeme(config):
     config.scan()
 
-### new collections added for handling curation data, 06/19/2015
+
+# new collections added for handling curation data, 06/19/2015
 @collection(
     name='genes',
     unique_key='gene:symbol',
@@ -29,6 +30,7 @@ class Gene(Item):
     item_type = 'gene'
     schema = load_schema('clincoded:schemas/gene.json')
     name_key = 'symbol'
+
 
 @collection(
     name='diseases',
@@ -83,6 +85,7 @@ class ControlGroup(Item):
     schema = load_schema('clincoded:schemas/controlGroup.json')
     name_key = 'uuid'
 '''
+
 
 @collection(
     name='articles',
@@ -168,8 +171,8 @@ class Gdm(Item):
         'annotations.groups.otherGenes',
         'annotations.groups.otherPMIDs',
         'annotations.groups.otherPMIDs.submitted_by',
-        #'annotations.groups.statistic',
-        #'annotations.groups.statistic.variants',
+        # 'annotations.groups.statistic',
+        # 'annotations.groups.statistic.variants',
         'annotations.groups.familyIncluded',
         'annotations.groups.familyIncluded.associatedGroups',
         'annotations.groups.familyIncluded.commonDiagnosis',
@@ -207,7 +210,7 @@ class Gdm(Item):
         'annotations.groups.individualIncluded.variants.associatedPathogenicities.submitted_by',
         'annotations.groups.individualIncluded.otherPMIDs',
         'annotations.groups.individualIncluded.otherPMIDs.submitted_by',
-        #'annotations.groups.control',
+        # 'annotations.groups.control',
         'annotations.families',
         'annotations.families.associatedGroups',
         'annotations.families.commonDiagnosis',
@@ -357,7 +360,7 @@ class Annotation(Item):
         'groups.individualIncluded.variants.submitted_by',
         'groups.individualIncluded.otherPMIDs',
         'groups.individualIncluded.otherPMIDs.submitted_by',
-        #'groups.control',
+        # 'groups.control',
         'families',
         'families.associatedGroups',
         'families.commonDiagnosis',
@@ -831,8 +834,8 @@ class Provisional(Item):
     name='labs',
     unique_key='lab:name',
     properties={
-        'title': 'Labs',
-        'description': 'Listing of ENCODE DCC labs',
+        'title': 'Groups',
+        'description': 'Listing of ClinGen Curation Groups',
     })
 class Lab(Item):
     item_type = 'lab'
@@ -872,7 +875,7 @@ class Organism(Item):
     unique_key='source:name',
     properties={
         'title': 'Sources',
-        'description': 'Listing of sources and vendors for ENCODE material',
+        'description': 'Listing of sources and vendors for ClinGen Curation',
     })
 class Source(Item):
     item_type = 'source'
