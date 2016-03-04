@@ -2302,6 +2302,8 @@ var AddResourceIdModal = React.createClass({
                 var tempTxtLabel;
                 if (this.props.initialFormValue) {
                     tempTxtLabel = clinvarTxt('editLabel');
+                    this.setState({queryResourceDisabled: false});
+                    this.setState({inputValue: this.props.initialFormValue});
                 } else {
                     tempTxtLabel = clinvarTxt('inputLabel');
                 }
