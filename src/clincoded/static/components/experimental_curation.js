@@ -1246,6 +1246,7 @@ var ExperimentalCuration = React.createClass({
         var annotation = this.state.annotation;
         var pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
         var experimental = this.state.experimental;
+        var assessments = experimental && experimental.assessments && experimental.assessments.length ? experimental.assessments : [];
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
@@ -1323,10 +1324,34 @@ var ExperimentalCuration = React.createClass({
                                             </Panel></PanelGroup>
                                         : null}
                                         {this.state.experimentalNameVisible ?
-                                            <PanelGroup accordion>
-                                                <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker}
-                                                    updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
-                                            </PanelGroup>
+                                            <div>
+                                                <Panel panelClassName="panel-data">
+                                                    <dl className="dl-horizontal">
+                                                        <div>
+                                                            <dt>Assessments</dt>
+                                                            <dd>
+                                                                {assessments.length ?
+                                                                    <div>
+                                                                        {assessments.map(function(assessment, i) {
+                                                                            return (
+                                                                                <span key={assessment.uuid}>
+                                                                                    {i > 0 ? <br /> : null}
+                                                                                    {assessment.value} ({assessment.submitted_by.title})
+                                                                                </span>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                : <div>None</div>}
+                                                            </dd>
+                                                        </div>
+                                                    </dl>
+                                                </Panel>
+
+                                                <PanelGroup accordion>
+                                                    <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker}
+                                                        updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
+                                                </PanelGroup>
+                                            </div>
                                         : null}
                                         <div className="curation-submit clearfix">
                                             {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?

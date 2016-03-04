@@ -225,7 +225,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     // Called when the dropdown value changes
     handleChange: function(assessmentTracker, e) {
         if (this.refs.assessment) {
-            var value = this.props.noSeg ? DEFAULT_VALUE : this.refs.assessment.getValue();
+            var value = this.refs.assessment.getValue();
             this.props.updateValue(assessmentTracker, value);
         }
     },
