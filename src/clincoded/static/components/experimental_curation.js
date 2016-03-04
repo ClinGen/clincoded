@@ -2091,7 +2091,7 @@ var ExperimentalDataVariant = function() {
                                     <div>
                                         <dl className="dl-horizontal">
                                             <dt>ClinVar Preferred Title</dt>
-                                            <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                            <dd>{variant.clinvarVariantTitle}</dd>
                                         </dl>
                                     </div>
                                 : null }
@@ -2679,7 +2679,7 @@ var ExperimentalViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar VariationID</dt>
-                                                    <dd style={{'paddingLeft':'22px'}}><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                    <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2687,7 +2687,7 @@ var ExperimentalViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar Preferred Title</dt>
-                                                    <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                                    <dd>{variant.clinvarVariantTitle}</dd>
                                                 </dl>
                                             </div>
                                         : null }
