@@ -236,7 +236,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         //var disabled = (this.props.disabled === true || this.props.disabled === false) ? this.props.disabled : false;
         //var disabled = this.props.disabled;
         var noSeg = this.props.noSeg;
-        var value = noSeg ? DEFAULT_VALUE : this.props.assessmentTracker && this.props.assessmentTracker.currentVal;
+        var value = this.props.assessmentTracker && this.props.assessmentTracker.currentVal;
         var ownerNotAssessed = this.props.ownerNotAssessed;
         var submitErrClass = 'submit-info pull-right';
 
@@ -249,27 +249,34 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                 {this.props.assessmentTracker ?
                     <Panel title={panelTitle} accordion={this.props.accordion} open={this.props.open}>
                         <div className="row">
-                            { noSeg ?
-                                <p className="alert alert-info">
-                                    The option to assess segregation is not available until some segregation data has been entered.
-                                </p>
-                            : ( ownerNotAssessed ?
+                            { ownerNotAssessed ?
                                 <p className="alert alert-info">
                                     The option to assess this evidence does not currently exist since the curator who created it has not yet assessed on it.
+                                </p>
+                            : ( noSeg ?
+                                <p className="alert alert-info">
+                                    The option to assess segregation is not available until some segregation data has been entered.
                                 </p>
                                 : null)
                             }
                         </div>
 
                         <div className="row">
-                            <Input type="select" ref="assessment" label={label + ':'} value={value} handleChange={this.handleChange.bind(null, this.props.assessmentTracker)}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={noSeg || ownerNotAssessed ? true : false}>
-                                <option value={DEFAULT_VALUE} disabled={this.props.disableDefault}>Not Assessed</option>
-                                <option disabled="disabled"></option>
-                                <option value="Supports">Supports</option>
-                                <option value="Review">Review</option>
-                                <option value="Contradicts">Contradicts</option>
-                            </Input>
+                            {noSeg ?
+                                <Input type="select" ref="assessment" label={label + ':'} value={DEFAULT_VALUE} defaultValue={DEFAULT_VALUE}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={true}>
+                                    <option value={DEFAULT_VALUE}>Not Assessed</option>
+                                </Input>
+                                :
+                                <Input type="select" ref="assessment" label={label + ':'} value={value} handleChange={this.handleChange.bind(null, this.props.assessmentTracker)}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={ownerNotAssessed ? true : false}>
+                                    <option value={DEFAULT_VALUE} disabled={this.props.disableDefault}>Not Assessed</option>
+                                    <option disabled="disabled"></option>
+                                    <option value="Supports">Supports</option>
+                                    <option value="Review">Review</option>
+                                    <option value="Contradicts">Contradicts</option>
+                                </Input>
+                            }
                             {this.props.note ?
                                 <p className="col-sm-7 col-sm-offset-5">{this.props.note}</p>
                             : null}
