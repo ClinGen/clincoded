@@ -88,6 +88,7 @@ var EditForm = module.exports.EditForm = React.createClass({
         var editor = ace.edit(this.refs.editor);
         var session = editor.getSession();
         session.setMode('ace/mode/json');
+        editor.$blockScrolling = Infinity;
         editor.setValue(value);
         editor.setOptions({
             maxLines: 1000,
