@@ -62,7 +62,7 @@ var App = module.exports = React.createClass({
     },
 
     currentAction: function() {
-        var href_url = url.parse(this.props.href);
+        var href_url = url.parse(this.state.href);
         var hash = href_url.hash || '';
         var name;
         if (hash.slice(0, 2) === '#!') {
