@@ -195,6 +195,7 @@ var FamilyCuration = React.createClass({
             }
 
             // Now change the state of the assessment dropdown if needed
+            // Also force assessment value goes back to Not Assessed when deleting all segregation data
             var filled = Object.keys(this.cv.filledSegregations).length > 0;
             if (this.state.segregationFilled !== filled) {
                 this.setState({segregationFilled: filled});
@@ -1210,6 +1211,10 @@ var FamilyCuration = React.createClass({
     render: function() {
         var gdm = this.state.gdm;
         var family = this.state.family;
+        var assessments = [];
+        if (family && family.segregation && family.segregation.assessments && family.segregation.assessments.length) {
+            assessments = family.segregation.assessments;
+        }
         var groups = (family && family.associatedGroups) ? family.associatedGroups :
             (this.state.group ? [this.state.group] : null);
         var annotation = this.state.annotation;
@@ -1217,7 +1222,7 @@ var FamilyCuration = React.createClass({
         var method = (family && family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
-        var is_owner = session && family && (session.user_properties.uuid === family.submitted_by.uuid) ? true : false;
+        //var is_owner = session && family && (session.user_properties.uuid === family.submitted_by.uuid) ? true : false;
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
@@ -1278,6 +1283,7 @@ var FamilyCuration = React.createClass({
                                                 {methods.render.call(this, method, true)}
                                             </Panel>
                                         </PanelGroup>
+
                                         {!this.cv.segregationAssessed ?
                                             <PanelGroup accordion>
                                                 <Panel title="Family — Segregation" open>
@@ -1293,9 +1299,28 @@ var FamilyCuration = React.createClass({
                                                 : null}
                                             </div>
                                         }
+
+                                        <Panel panelClassName="panel-data">
+                                            <dl className="dl-horizontal">
+                                                <dt>Assessments</dt>
+                                                <dd>
+                                                    {assessments.length ? assessments.map(function(assessment, i) {
+                                                        return (
+                                                            <span key={assessment.uuid}>
+                                                                {assessment.value} ({assessment.submitted_by.title})
+                                                                {i < assessments.length-1 ? <br /> : null}
+                                                            </span>
+                                                        );})
+                                                    :
+                                                    <div>None</div>
+                                                    }
+                                                </dd>
+                                            </dl>
+                                        </Panel>
+
                                         <PanelGroup accordion>
-                                            <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled} owner={is_owner}
-                                                updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
+                                            <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} noSeg={this.state.segregationFilled ? false : true}
+                                                updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} ownerNotAssessed={false} accordion open />
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Family — Variant(s) Segregating with Proband" open>
@@ -2116,11 +2141,9 @@ var FamilyViewer = React.createClass({
                             </Panel>
                         : null}
 
-                        {this.cv.gdmUuid && haveSegregation ?
-                            <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
-                                disabled={!(familyUserAssessed || userFamily)} />
-                        : null}
+                        <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
+                            disabled={!(familyUserAssessed || userFamily)} noSeg={haveSegregation ? false : true} ownerNotAssessed={!(familyUserAssessed || userFamily)} />
 
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                             {variants.map(function(variant, i) {

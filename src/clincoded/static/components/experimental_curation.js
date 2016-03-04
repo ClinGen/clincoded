@@ -2728,7 +2728,7 @@ var ExperimentalViewer = React.createClass({
                         {this.cv.gdmUuid ?
                             <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
                                 assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
-                                disabled={!(experimentalUserAssessed || userExperimental)} />
+                                ownerNotAssessed={!(experimentalUserAssessed || userExperimental)} noSeg={false} />
                         : null}
                     </div>
                 </div>

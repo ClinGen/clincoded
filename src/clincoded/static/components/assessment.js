@@ -194,9 +194,10 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     mixins: [FormMixin],
 
     propTypes: {
-        owner: React.PropTypes.bool, // true if login user is the owner of evidence assessed to
+        ownerNotAssessed: React.PropTypes.bool, // true if evidence assessed already by its creator
+        noSeg: React.PropTypes.bool, // true if evidence is family and there is no segregation data exist.
         assessmentTracker: React.PropTypes.object, // Current value of assessment
-        disabled: React.PropTypes.bool, // TRUE to make assessment dropdown disabled; FALSE to enable it (default)
+        //disabled: React.PropTypes.bool, // TRUE to make assessment dropdown disabled; FALSE to enable it (default)
         panelTitle: React.PropTypes.string, // Title of Assessment panel; 'Assessment' default
         label: React.PropTypes.string, // Label for dropdown; 'Assessment' default
         note: React.PropTypes.string, // Note to display below the dropdown
@@ -224,7 +225,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     // Called when the dropdown value changes
     handleChange: function(assessmentTracker, e) {
         if (this.refs.assessment) {
-            var value = this.refs.assessment.getValue();
+            var value = this.props.noSeg ? DEFAULT_VALUE : this.refs.assessment.getValue();
             this.props.updateValue(assessmentTracker, value);
         }
     },
@@ -232,26 +233,37 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
     render: function() {
         var panelTitle = this.props.panelTitle ? this.props.panelTitle : 'Assessment';
         var label = this.props.label ? this.props.label : 'Assessment';
-        var value = this.props.assessmentTracker && this.props.assessmentTracker.currentVal;
         //var disabled = (this.props.disabled === true || this.props.disabled === false) ? this.props.disabled : false;
-        var disabled = this.props.disabled;
-        var owner = this.props.owner;
+        //var disabled = this.props.disabled;
+        var noSeg = this.props.noSeg;
+        var value = noSeg ? DEFAULT_VALUE : this.props.assessmentTracker && this.props.assessmentTracker.currentVal;
+        var ownerNotAssessed = this.props.ownerNotAssessed;
         var submitErrClass = 'submit-info pull-right';
+
+        //var disable_note_base = 'The option to assess this evidence is not available since ';
+        //var disable_note_noseg = 'the curator who created it has not yet assessed on it';
+        //var disbale_note_owner = 'no segregation data entered';
 
         return (
             <div>
                 {this.props.assessmentTracker ?
                     <Panel title={panelTitle} accordion={this.props.accordion} open={this.props.open}>
-                        {disabled && !owner ?
-                            <div className="row">
+                        <div className="row">
+                            { noSeg ?
+                                <p className="alert alert-info">
+                                    The option to assess segregation is not available until some segregation data has been entered.
+                                </p>
+                            : ( ownerNotAssessed ?
                                 <p className="alert alert-info">
                                     The option to assess this evidence does not currently exist since the curator who created it has not yet assessed on it.
                                 </p>
-                            </div>
-                        : null}
+                                : null)
+                            }
+                        </div>
+
                         <div className="row">
                             <Input type="select" ref="assessment" label={label + ':'} value={value} handleChange={this.handleChange.bind(null, this.props.assessmentTracker)}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={disabled}>
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={noSeg || ownerNotAssessed ? true : false}>
                                 <option value={DEFAULT_VALUE} disabled={this.props.disableDefault}>Not Assessed</option>
                                 <option disabled="disabled"></option>
                                 <option value="Supports">Supports</option>
@@ -264,7 +276,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                         </div>
                         {this.props.assessmentSubmit ?
                             <div className="curation-submit clearfix">
-                                <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.assessmentSubmit} title="Update" submitBusy={this.props.submitBusy} inputDisabled={disabled} />
+                                <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.assessmentSubmit} title="Update" submitBusy={this.props.submitBusy} inputDisabled={noSeg || ownerNotAssessed ? true : false} />
                                 {this.props.updateMsg ?
                                     <div className="submit-info pull-right">{this.props.updateMsg}</div>
                                 : null}
