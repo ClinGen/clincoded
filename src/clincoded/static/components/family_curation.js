@@ -2091,9 +2091,34 @@ var FamilyViewer = React.createClass({
 
                         {FamilySegregationViewer(segregation, assessments, true)}
 
-                        {this.cv.gdmUuid && (familyUserAssessed || userFamily) && haveSegregation ?
+                        {this.cv.gdmUuid && haveSegregation ?
+                            <Panel panelClassName="panel-data">
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>Assessments</dt>
+                                        <dd>
+                                            {assessments && assessments.length ?
+                                                <div>
+                                                    {assessments.map(function(assessment, i) {
+                                                        return (
+                                                            <span key={assessment.uuid}>
+                                                                {i > 0 ? <br /> : null}
+                                                                {assessment.value} ({assessment.submitted_by.title})
+                                                            </span>
+                                                        );
+                                                    })}
+                                                </div>
+                                            : <div>None</div>}
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </Panel>
+                        : null}
+
+                        {this.cv.gdmUuid && haveSegregation ?
                             <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
+                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
+                                disabled={!(familyUserAssessed || userFamily)} />
                         : null}
 
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
@@ -2233,26 +2258,6 @@ var FamilySegregationViewer = function(segregation, assessments, open) {
                 <div>
                     <dt>Additional Segregation information</dt>
                     <dd>{segregation && segregation.additionalInformation}</dd>
-                </div>
-
-                <div>
-                    <dt>Assessments</dt>
-                    <dd>
-                        {assessments && assessments.length ?
-                            <div>
-                                {assessments.map(function(assessment, i) {
-                                    return (
-                                        <span key={assessment.uuid}>
-                                            {i > 0 ? <br /> : null}
-                                            {assessment.value} ({assessment.submitted_by.title})
-                                        </span>
-                                    );
-                                })}
-                            </div>
-                        :
-                            <span>None</span>
-                        }
-                    </dd>
                 </div>
             </dl>
         </Panel>

@@ -239,6 +239,13 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
             <div>
                 {this.props.assessmentTracker ?
                     <Panel title={panelTitle} accordion={this.props.accordion} open={this.props.open}>
+                        {disabled ?
+                            <div className="row">
+                                <p className="alert alert-info">
+                                    The option to assess this evidence does not currently exist since the curator who created it has not yet assessed on it.
+                                </p>
+                            </div>
+                        : null}
                         <div className="row">
                             <Input type="select" ref="assessment" label={label + ':'} value={value} handleChange={this.handleChange.bind(null, this.props.assessmentTracker)}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={disabled}>
@@ -254,7 +261,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                         </div>
                         {this.props.assessmentSubmit ?
                             <div className="curation-submit clearfix">
-                                <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.assessmentSubmit} title="Update" submitBusy={this.props.submitBusy} />
+                                <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.assessmentSubmit} title="Update" submitBusy={this.props.submitBusy} inputDisabled={disabled} />
                                 {this.props.updateMsg ?
                                     <div className="submit-info pull-right">{this.props.updateMsg}</div>
                                 : null}
@@ -266,7 +273,6 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         );
     }
 });
-
 
 // Display a history item for adding or or modifying an assessment
 var AssessmentAddModHistory = React.createClass({
