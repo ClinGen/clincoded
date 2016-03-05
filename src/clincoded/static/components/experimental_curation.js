@@ -540,6 +540,15 @@ var ExperimentalCuration = React.createClass({
         this.cv.othersAssessed = false;
     },
 
+    // Clear error state when either experimentalType or experimentalSubtype selection is changed
+    componentDidUpdate: function(prevProps, prevState) {
+        if (typeof prevState.experimentalType !== undefined && prevState.experimentalType !== this.state.experimentalType) {
+            this.setState({formErrors: []});
+        } else if (typeof prevState.experimentalSubtype !== undefined && prevState.experimentalSubtype !== this.state.experimentalSubtype) {
+            this.setState({formErrors: []});
+        }
+    },
+
     // When the user changes the assessment value, this gets called
     updateAssessment: function(value) {
         var assessment = this.state.assessment;
