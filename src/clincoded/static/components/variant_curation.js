@@ -360,7 +360,8 @@ var VariantCuration = React.createClass({
         // If we're editing a pathogenicity, get a list of all the variant's pathogenicities, except for the one
         // we're editing. This is to display the list of past curations.
         // Edited by Kang Liu, 10/14/2015
-        var assessed = false;
+        //var assessed = false;
+        var validAssessments = []; // filter out those with value Not Assessed
         if (this.queryValues.all && variant && gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
             for (var i in gdm.variantPathogenicity) {
                 var pathoVariant = gdm.variantPathogenicity[i].variant;
@@ -371,8 +372,9 @@ var VariantCuration = React.createClass({
                     }
                 }
 
-                if (gdm.variantPathogenicity[i].assessments && gdm.variantPathogenicity[i].assessments.length) {
-                    assessed = true;
+                if (gdm.variantPathogenicity[i].assessments && gdm.variantPathogenicity[i].assessments.length && gdm.variantPathogenicity[i].assessments[0].value !== 'Not Assessed') {
+                    //assessed = true;
+                    validAssessments.push(gdm.variantPathogenicity[i].assessments[0]);
                 }
             }
         }
@@ -492,20 +494,13 @@ var VariantCuration = React.createClass({
                                                     <div>
                                                         <dt>Assessments</dt>
                                                         <dd>
-                                                            {assessed ?
+                                                            {validAssessments.length ?
                                                                 <div>
-                                                                    {allPathogenicityList.map(function(pathogenicity, i) {
-                                                                        var assessments = pathogenicity.assessments && pathogenicity.assessments.length ? pathogenicity.assessments : [];
+                                                                    {validAssessments.map(function(assessment, i) {
                                                                         return (
-                                                                            <span key={i}>
-                                                                                {assessments.map(function(assessment, j) {
-                                                                                    return (
-                                                                                        <span key={assessment.uuid}>
-                                                                                            {assessment.value} ({assessment.submitted_by.title})
-                                                                                        </span>
-                                                                                    );
-                                                                                })}
-                                                                                {i < allPathogenicityList.length-1 ? <br /> : null}
+                                                                            <span key={assessment.uuid}>
+                                                                                {assessment.value} ({assessment.submitted_by.title})
+                                                                                {i < validAssessments.length-1 ? <br /> : null}
                                                                             </span>
                                                                         );
                                                                     })}

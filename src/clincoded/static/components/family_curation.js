@@ -1213,7 +1213,11 @@ var FamilyCuration = React.createClass({
         var family = this.state.family;
         var assessments = [];
         if (family && family.segregation && family.segregation.assessments && family.segregation.assessments.length) {
-            assessments = family.segregation.assessments;
+            for (var i in family.segregation.assessments) {
+                if (family.segregation.assessments[i].value !== 'Not Assessed') {
+                    assessments.push(family.segregation.assessments[i]);
+                }
+            }
         }
         var groups = (family && family.associatedGroups) ? family.associatedGroups :
             (this.state.group ? [this.state.group] : null);
@@ -1945,6 +1949,14 @@ var FamilyViewer = React.createClass({
         var groups = family.associatedGroups;
         var segregation = family.segregation;
         var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
+        var is_assessed = false; // filter out Not Assessed in assessments
+        for(var i=0; i< assessments.length; i++) {
+            if (assessments[i].value !== 'Not Assessed') {
+                is_assessed = true;
+                break;
+            }
+        }
+
         var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
         var user = this.props.session && this.props.session.user_properties;
         var userFamily = user && family && family.submitted_by ? user.uuid === family.submitted_by.uuid : false;
@@ -2123,13 +2135,13 @@ var FamilyViewer = React.createClass({
                                     <div>
                                         <dt>Assessments</dt>
                                         <dd>
-                                            {assessments && assessments.length ?
+                                            {is_assessed ?
                                                 <div>
                                                     {assessments.map(function(assessment, i) {
                                                         return (
                                                             <span key={assessment.uuid}>
                                                                 {i > 0 ? <br /> : null}
-                                                                {assessment.value} ({assessment.submitted_by.title})
+                                                                {assessment.value !== 'Not Assessed' ? assessment.value+' ('+assessment.submitted_by.title+')' : null}
                                                             </span>
                                                         );
                                                     })}
@@ -2143,7 +2155,7 @@ var FamilyViewer = React.createClass({
 
                         <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
                             assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
-                            disabled={!(familyUserAssessed || userFamily)} noSeg={haveSegregation ? false : true} ownerNotAssessed={!(familyUserAssessed || userFamily)} />
+                            noSeg={!haveSegregation} ownerNotAssessed={userFamily ? false : !familyUserAssessed} />
 
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                             {variants.map(function(variant, i) {
