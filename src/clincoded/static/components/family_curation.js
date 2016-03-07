@@ -2129,7 +2129,7 @@ var FamilyViewer = React.createClass({
 
                         {FamilySegregationViewer(segregation, assessments, true)}
 
-                        {this.cv.gdmUuid && haveSegregation ?
+                        {this.cv.gdmUuid ?
                             <Panel panelClassName="panel-data">
                                 <dl className="dl-horizontal">
                                     <div>
