@@ -426,6 +426,14 @@
     display: block;
     white-space: nowrap;
     text-overflow: ellipsis;
+
+    a {
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: none;
+        }
+    }
 }
 
 .curation-submit {
