@@ -2467,14 +2467,17 @@ function clinvarSubmitResource() {
             if (check.total) {
                 // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
-                    if (result['clinvarVariantTitle'].length < 1) {
-                        this.postRestData('/variants/', this.state.tempResource);
+                    // if no variant title in db, or db's variant title not matching the retrieved title,
+                    // then update db and fetch result again
+                    if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle']) {
+                        this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
+                            return this.getRestData(result['@graph'][0]['@id']).then(result => {
+                                this.props.updateParentForm(result, this.props.fieldNum);
+                            });
+                        });
+                    } else {
+                        this.props.updateParentForm(result, this.props.fieldNum);
                     }
-                    return result;
-                }).then(result => {
-                    this.props.updateParentForm(result, this.props.fieldNum);
-                    this.setState({submitResourceBusy: false});
-                    this.props.closeModal();
                 });
             } else {
                 // variation is new to our db
@@ -2482,11 +2485,11 @@ function clinvarSubmitResource() {
                     // record the user adding a new variant entry
                     this.recordHistory('add', result['@graph'][0]).then(history => {
                         this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
-                        this.setState({submitResourceBusy: false});
-                        this.props.closeModal();
                     });
                 });
             }
+            this.setState({submitResourceBusy: false});
+            this.props.closeModal();
         });
     }
 }
