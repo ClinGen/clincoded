@@ -76,13 +76,9 @@ var ProvisionalCuration = React.createClass({
 
             // search for provisional owned by login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
-                for (var i in stateObj.gdm.provisionalClassifications) {
-                    var owner = stateObj.gdm.provisionalClassifications[i].submitted_by;
-                    if (owner.uuid === stateObj.user) { // find
-                        stateObj.provisional = stateObj.gdm.provisionalClassifications[i];
-                        break;
-                    }
-                }
+                stateObj.provisional = _.find(stateObj.gdm.provisionalClassifications, function(provisional) {
+                    return provisional.submitted_by.uuid === stateObj.user;
+                });
             }
 
             stateObj.previousUrl = url;
@@ -537,8 +533,7 @@ var EditCurrent = function() {
 // Calculation rules are defined by Small GCWG. See ClinGen_Interface_4_2015.pptx and Clinical Validity Classifications for detail
 var NewCalculation = function() {
     var gdm = this.state.gdm;
-
-    var h, i, j, k, l;
+    var user = this.state.user;
 
     // initial values of assessments
     var userAssessments = {
@@ -556,7 +551,7 @@ var NewCalculation = function() {
         "segNot": 0
     };
 
-    // Collect variants from user's pathogenicity
+    // Collect variants from user's pathogenicity and separate them to 3 assessment-value groups
     var gdmPathoList = gdm.variantPathogenicity;
     var pathoVariantIdList = {
         "support": [],
@@ -564,23 +559,21 @@ var NewCalculation = function() {
         "contradict": []
     };
 
-    for (i in gdmPathoList) {
-        var variantUuid = gdmPathoList[i].variant.uuid;
-        // Collect login user's variant assessments, separated as 3 different values.
-        if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
-            for (j in gdmPathoList[i].assessments) {
-                if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
-                    pathoVariantIdList['support'].push(variantUuid);
-                }
-                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Review') {
-                    pathoVariantIdList['review'].push(variantUuid);
-                }
-                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Contradicts') {
-                    pathoVariantIdList['contradict'].push(variantUuid);
-                }
-            }
-        }
-    }
+    var userAssessedPathoList = _.filter(gdm.variantPathogenicity, function(patho) {
+        return patho.assessments && patho.assessments.length && _.find(patho.assessments, function(assessment) {
+            return assessment.submitted_by.uuid === user;
+        });
+    });
+    _.filter(userAssessedPathoList, patho => {
+        return _.filter(patho.assessments, assessment => { return assessment.value === 'Supports'; });
+    }).forEach(patho => { pathoVariantIdList['support'].push(patho.variant.uuid); });
+    _.filter(userAssessedPathoList, patho => {
+        return _.filter(patho.assessments, assessment => { return assessment.value === 'Review'; });
+    }).forEach(patho => { pathoVariantIdList['review'].push(patho.variant.uuid); });
+    _.filter(userAssessedPathoList, patho => {
+        return _.filter(patho.assessments, assessment => { return assessment.value === 'Contradicts'; });
+    }).forEach(patho => { pathoVariantIdList['contradict'].push(patho.variant.uuid); });
+
 
     var exp_scores = [0, 0, 0];
     var expType = {
@@ -603,88 +596,80 @@ var NewCalculation = function() {
     };
     var proband_variants = [];
 
-    // scan gdm
-    var annotations = gdm.annotations ? gdm.annotations : [];
-    for (i in annotations) {
+    // scan gdm, collect proband individuals, group assessments, score experimental
+    _.map(gdm.annotations, annotation => {
         var this_assessment;
-        if (annotations[i].groups && annotations[i].groups.length > 0) {
-            var groups = annotations[i].groups;
-            for (j in groups) {
-                if (groups[j].familyIncluded && groups[j].familyIncluded.length > 0) {
-                    for (k in groups[j].familyIncluded) {
-
+        if (annotation.groups && annotation.groups.length > 0) {
+            _.map(annotation.groups, group => {
+                if (group.familyIncluded && group.familyIncluded.length > 0) {
+                    _.map(group.familyIncluded, family => {
                         // collect individuals
-                        if (groups[j].familyIncluded[k].individualIncluded && groups[j].familyIncluded[k].individualIncluded.length > 0) {
-                            individualsCollected = filter(individualsCollected, groups[j].familyIncluded[k].individualIncluded, annotations[i].article, pathoVariantIdList);
+                        if (family.individualIncluded && family.individualIncluded.length > 0) {
+                            individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
                         }
 
                         // collection segregation assessments
-                        if (groups[j].familyIncluded[k].segregation) {
+                        if (family.segregation) {
                             userAssessments['segNot'] += 1;
 
-                            if (groups[j].familyIncluded[k].segregation.assessments && groups[j].familyIncluded[k].segregation.assessments.length > 0) {
-                                for (l in groups[j].familyIncluded[k].segregation.assessments) {
-                                    this_assessment = groups[j].familyIncluded[k].segregation.assessments[l];
-                                    if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
+                            if (family.segregation.assessments && family.segregation.assessments.length > 0) {
+                                _.map(family.segregation.assessments, assessment => {
+                                    if (assessment.submitted_by.uuid === user && assessment.value === 'Supports') {
                                         userAssessments['segSpt'] += 1;
                                     }
-                                    else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Review') {
+                                    else if (assessment.submitted_by.uuid === user && assessment.value === 'Review') {
                                         userAssessments['segReview'] += 1;
                                     }
-                                    else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Contradicts') {
+                                    else if (assessment.submitted_by.uuid === user && assessment.value === 'Contradicts') {
                                         userAssessments['segCntdct'] += 1;
                                     }
-                                }
+                                });
                             }
                         }
-                    }
+                    });
                 }
-                if (groups[j].individualIncluded && groups[j].individualIncluded.length > 0) {
-                    individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, pathoVariantIdList);
+                if (group.individualIncluded && group.individualIncluded.length > 0) {
+                    individualsCollected = filter(individualsCollected, group.individualIncluded, annotation.article, pathoVariantIdList);
                 }
-            }
+            });
         }
-        if (annotations[i].families && annotations[i].families.length > 0) {
-            for (j in annotations[i].families) {
-                if (annotations[i].families[j].individualIncluded && annotations[i].families[j].individualIncluded.length > 0) {
-                    individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, pathoVariantIdList);
+        if (annotation.families && annotation.families.length > 0) {
+            _.map(annotation.families, family => {
+                if (family.individualIncluded && family.individualIncluded.length > 0) {
+                    individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
                 }
-
-                if (annotations[i].families[j].segregation) {
+                if (family.segregation) {
                     userAssessments['segNot'] += 1;
-
-                    if (annotations[i].families[j].segregation.assessments && annotations[i].families[j].segregation.assessments.length > 0) {
-                        for (l in annotations[i].families[j].segregation.assessments) {
-                            this_assessment = annotations[i].families[j].segregation.assessments[l];
-                            if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
+                    if (family.segregation.assessments && family.segregation.assessments.length > 0) {
+                        _.map(family.segregation.assessments, assessment => {
+                            if (assessment.submitted_by.uuid === user && assessment.value === 'Supports') {
                                 userAssessments['segSpt'] += 1;
                             }
-                            else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Review') {
+                            else if (assessment.submitted_by.uuid === user && assessment.value === 'Review') {
                                 userAssessments['segReview'] += 1;
                             }
-                            else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Contradicts') {
+                            else if (assessment.submitted_by.uuid === user && assessment.value === 'Contradicts') {
                                 userAssessments['segCntdct'] += 1;
                             }
-                        }
+                        });
                     }
                 }
-            }
+            });
         }
-        if (annotations[i].individuals && annotations[i].individuals.length > 0) {
-            individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, pathoVariantIdList);
+        if (annotation.individuals && annotation.individuals.length > 0) {
+            individualsCollected = filter(individualsCollected, annotation.individuals, annotation.article, pathoVariantIdList);
         }
 
         // collect experimental assessed support, check matrix
-        if (annotations[i].experimentalData && annotations[i].experimentalData.length > 0) {
-            for (h in annotations[i].experimentalData) {
-                var exp = annotations[i].experimentalData[h];
+        if (annotation.experimentalData && annotation.experimentalData.length > 0) {
+            _.map(annotation.experimentalData, exp => {
                 var subTypeKey = exp.evidenceType;
 
                 userAssessments['expNot'] += 1;
 
                 if (exp.assessments && exp.assessments.length > 0) {
-                    for (j in exp.assessments) {
-                        if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Supports') {
+                    _.map(exp.assessments, assessment => {
+                        if (assessment.submitted_by.uuid === user && assessment.value === 'Supports') {
                             if (exp.evidenceType === 'Expression') {
                                 expType[subTypeKey] += 1;
                                 exp_scores[0] += 0.5;
@@ -731,17 +716,18 @@ var NewCalculation = function() {
 
                             userAssessments['expSpt'] += 1;
                         }
-                        else if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Review') {
+                        else if (assessment.submitted_by.uuid === user && assessment.value === 'Review') {
                             userAssessments['expReview'] += 1;
                         }
-                        else if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Contradicts') {
+                        else if (assessment.submitted_by.uuid === user && assessment.value === 'Contradicts') {
                             userAssessments['expCntdct'] += 1;
                         }
-                    }
+                    });
                 }
-            }
+            });
         }
-    }
+    });
+
 
     userAssessments['variantSpt'] = individualsCollected['sptVariants'].length;
     userAssessments['variantReview'] = individualsCollected['rvwVariants'].length;
@@ -751,29 +737,24 @@ var NewCalculation = function() {
     userAssessments['segNot'] = userAssessments['segNot'] - userAssessments['segSpt'] - userAssessments['segReview'] - userAssessments['segCntdct'];
 
     // Compare designed max value at each score category and get the total experimental score
-    var finalExperimentalScore = 0;
-    for (i in exp_scores) {
-        var max = 2; // set max value for each type
-        if (i == 2) {
-            max = 4;
-        }
-        finalExperimentalScore += (exp_scores[i] <= max) ? exp_scores[i] : max; // not more than the max
-    }
+    var max_values = [2, 2, 4];
+    var finalExperimentalScore = _.map(exp_scores, function(value, index) { return value > max_values[index] ? max_values[index] : value; })
+        .reduce(function(memo, value) { return memo + value; });
 
     // Collect articles and find the earliest publication year
-    var proband = 0;
+    var probandUniq = _.filter(individualsCollected['probandInd'], prob => {
+        return prob.pmid && prob.pmid !== '';
+    });
+    var proband = _.size(probandUniq);
     var articleCollected = [];
     var year = new Date();
     var earliest = year.getFullYear();
-    for (i in individualsCollected['probandInd']) {
-        if (individualsCollected['probandInd'][i].pmid && individualsCollected['probandInd'][i].pmid != '') {
-            proband += 1;
-            if (!in_array(individualsCollected['probandInd'][i].pmid, articleCollected)) {
-                articleCollected.push(individualsCollected['probandInd'][i].pmid);
-                earliest = get_earliest_year(earliest, individualsCollected['probandInd'][i].date);
-            }
-        }
-    }
+    probandUniq.forEach(prob => {
+        articleCollected.push(prob.pmid);
+        earliest = get_earliest_year(earliest, prob.date);
+    });
+    articleCollected = _.uniq(articleCollected);
+
 
     // calculate scores
     var currentYear = year.getFullYear();
@@ -854,7 +835,7 @@ var NewCalculation = function() {
 
     // set score positons in html table
     var probandRow = [], pubRow = [], timeRow = [];
-    for(i=0; i<8; i++) {
+    _.range(8).map(i => {
         if (i === probandScore) {
             probandRow.push(proband);
         }
@@ -875,7 +856,7 @@ var NewCalculation = function() {
         else if (i < 3) {
             timeRow.push('');
         }
-    }
+    });
 
     return (
         <div>
@@ -1216,16 +1197,6 @@ var NewCalculation = function() {
     );
 };
 
-// Function to check if an itme exists in an array(list)
-var in_array = function(item, list) {
-    for(var i in list){
-        if (list[i] == item) {
-            return true;
-        }
-    }
-    return false;
-};
-
 // Function to get earliest year of selected publications
 var get_earliest_year = function(earliest, dateStr) {
     var pattern = new RegExp(/^\d\d\d\d/);
@@ -1250,33 +1221,33 @@ var filter = function(target, branch, article, idList) {
         patho_rvw = idList['review'],
         patho_cntdct = idList['contradict'];
 
-    branch.forEach(function(obj) {
+    branch.forEach(obj => {
         if (obj.proband && obj.variants && obj.variants.length > 0) {
             // counting at probands only
             var allSupported = true;
-            for (var j in obj.variants) {
+            _.map(obj.variants, variant => {
                 // collect all distinct variants from proband individuals
-                if (!in_array(obj.variants[j].uuid, allVariants)) {
-                    allVariants.push(obj.variants[j].uuid);
+                if (!_.contains(allVariants, variant.uuid)) {
+                    allVariants.push(variant.uuid);
                 }
 
-                // collect variant assessments, separated by 3 different values.
-                if (!in_array(obj.variants[j].uuid, patho_spt)) {
+                // c/ollect variant assessments, separated by 3 different values.
+                if (!_.contains(patho_spt, variant.uuid)) {
                     allSupported = false;
 
-                    if (in_array(obj.variants[j].uuid, patho_rvw) && !in_array(obj.variants[j].uuid, rvwVariants)) {
-                        rvwVariants.push(obj.variants[j].uuid);
+                    if (_.contains(patho_rvw, variant.uuid) && !_.contains(rvwVariants, variant.uuid)) {
+                        rvwVariants.push(variant.uuid);
                     }
-                    else if (in_array(obj.variants[j].uuid, patho_cntdct) && !in_array(obj.variants[j].uuid, cntdctVariants)) {
-                        cntdctVariants.push(obj.variants[j].uuid);
+                    else if (_.contains(patho_cntdct, variant.uuid) && !_.contains(cntdctVariants, variant.uuid)) {
+                        cntdctVariants.push(variant.uuid);
                     }
                 }
                 else {
-                    if (!in_array(obj.variants[j].uuid, sptVariants)) {
-                        sptVariants.push(obj.variants[j].uuid);
+                    if (!_.contains(sptVariants, variant.uuid)) {
+                        sptVariants.push(variant.uuid);
                     }
                 }
-            }
+            });
 
             if (allSupported) {
                 target["probandInd"].push(
