@@ -66,8 +66,7 @@ var IndividualCuration = React.createClass({
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             proband: null, // If we have an associated family that has a proband, this points at it
-            submitBusy: false, // True while form is submitting
-            clinVarTitleNoteVisible: false // warning of different variant title detected
+            submitBusy: false // True while form is submitting
         };
     },
 
@@ -763,12 +762,6 @@ var IndividualCuration = React.createClass({
             } else {
                 addVariantDisabled = true;
             }
-            // Display a note if the retrieved ClinVar Variant title differs from the existing one
-            if (newVariantInfo[fieldNum] !== undefined) {
-                if (data.clinvarVariantId === newVariantInfo[fieldNum]['clinvarVariantId'] && data.clinvarVariantTitle !== newVariantInfo[fieldNum]['clinvarVariantTitle']) {
-                    this.setState({clinVarTitleNoteVisible: true});
-                }
-            }
             // Update the form and display values with new data
             this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
             newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
@@ -1345,9 +1338,6 @@ var IndividualVariantInfo = function() {
                                         <div className="row">
                                             <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
                                             <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                            {this.state.clinVarTitleNoteVisible ?
-                                                <p className="col-sm-7 col-sm-offset-5 clinvar-preferred-title-note">(Please submit the form to save this new title.)</p>
-                                            : null}
                                         </div>
                                     </div>
                                 : null}
