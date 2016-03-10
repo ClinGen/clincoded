@@ -559,20 +559,23 @@ var NewCalculation = function() {
         "contradict": []
     };
 
-    var userAssessedPathoList = _.filter(gdm.variantPathogenicity, function(patho) {
-        return patho.assessments && patho.assessments.length && _.find(patho.assessments, function(assessment) {
-            return assessment.submitted_by.uuid === user;
-        });
-    });
-    _.filter(userAssessedPathoList, patho => {
-        return _.filter(patho.assessments, assessment => { return assessment.value === 'Supports'; });
-    }).forEach(patho => { pathoVariantIdList['support'].push(patho.variant.uuid); });
-    _.filter(userAssessedPathoList, patho => {
-        return _.filter(patho.assessments, assessment => { return assessment.value === 'Review'; });
-    }).forEach(patho => { pathoVariantIdList['review'].push(patho.variant.uuid); });
-    _.filter(userAssessedPathoList, patho => {
-        return _.filter(patho.assessments, assessment => { return assessment.value === 'Contradicts'; });
-    }).forEach(patho => { pathoVariantIdList['contradict'].push(patho.variant.uuid); });
+    for (var i in gdmPathoList) {
+        var variantUuid = gdmPathoList[i].variant.uuid;
+        // Collect login user's variant assessments, separated as 3 different values.
+        if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
+            for (var j in gdmPathoList[i].assessments) {
+                if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
+                    pathoVariantIdList['support'].push(variantUuid);
+                }
+                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Review') {
+                    pathoVariantIdList['review'].push(variantUuid);
+                }
+                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Contradicts') {
+                    pathoVariantIdList['contradict'].push(variantUuid);
+                }
+            }
+        }
+    }
 
 
     var exp_scores = [0, 0, 0];
@@ -1207,11 +1210,11 @@ var get_earliest_year = function(earliest, dateStr) {
     return earliest;
 };
 
-// Funtion to separate proband individuals by assessment values
-// target: object containing separated proband individuals
+// Funtion to separate proband individuals and variants by assessment values
+// target: returned object containing separated data
 // branch: individual array in annotation/group/family
 // article: object containing publication info
-// idList: Assessment array
+// idList: Assessment array of gdm pathogenicity list
 var filter = function(target, branch, article, idList) {
     var allVariants = target['allVariants'],
         sptVariants = target['sptVariants'],
@@ -1225,14 +1228,17 @@ var filter = function(target, branch, article, idList) {
         if (obj.proband && obj.variants && obj.variants.length > 0) {
             // counting at probands only
             var allSupported = true;
+            // run through each individual (obj)
             _.map(obj.variants, variant => {
                 // collect all distinct variants from proband individuals
                 if (!_.contains(allVariants, variant.uuid)) {
                     allVariants.push(variant.uuid);
                 }
 
-                // c/ollect variant assessments, separated by 3 different values.
+                // collect variant assessments, separated by 3 different values.
                 if (!_.contains(patho_spt, variant.uuid)) {
+                    // not all associated variants are assessed as Supports
+                    // collect Review and Contradicts
                     allSupported = false;
 
                     if (_.contains(patho_rvw, variant.uuid) && !_.contains(rvwVariants, variant.uuid)) {
@@ -1242,6 +1248,8 @@ var filter = function(target, branch, article, idList) {
                         cntdctVariants.push(variant.uuid);
                     }
                 }
+                // all variants supported
+                // collect Supports
                 else {
                     if (!_.contains(sptVariants, variant.uuid)) {
                         sptVariants.push(variant.uuid);
@@ -1249,6 +1257,7 @@ var filter = function(target, branch, article, idList) {
                 }
             });
 
+            // collect supported proband only when all associated variants supported
             if (allSupported) {
                 target["probandInd"].push(
                     {
@@ -1259,6 +1268,7 @@ var filter = function(target, branch, article, idList) {
                 );
             }
 
+            // set object with all collected data for return
             target["allVariants"] = allVariants;
             target["sptVariants"] = sptVariants;
             target["rvwVariants"] = rvwVariants;

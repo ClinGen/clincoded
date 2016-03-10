@@ -87,7 +87,6 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         var summaryPage = this.props.summaryPage ? true : false;
 
         var provisional = null;
-        //var provisionalExist = false;
         var summaryButton;
         var variant = this.props.variant;
         var annotations = gdm && gdm.annotations;
@@ -99,13 +98,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var pmid = this.props.pmid;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
             if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
-                provisional = _.find(gdm.provisionalClassifications, function(provisional) {
-                    return userMatch(provisional.submitted_by, session);
+                provisional = _.find(gdm.provisionalClassifications, this_provisional => {
+                    return userMatch(this_provisional.submitted_by, session);
                 });
             }
 
-
-            // go through all annotations, groups, families and individuals to find one proband individual with all variants assessed.
+            // go through all annotations, groups, families and individuals to find one proband individual with all variants assessed as Supports.
             var supportedVariants = getUserPathogenicity(gdm, session);
             if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && supportedVariants && supportedVariants.length > 0) {
                 _.map(gdm.annotations, annotation => {
@@ -283,50 +281,36 @@ var findGdmPmidFromObj = module.exports.findGdmPmidFromObj = function(obj) {
 var getUserPathogenicity = function(gdm, session) {
     var supportedVariants = [];
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
-        for (var i in gdm.variantPathogenicity) {
-            var this_patho = gdm.variantPathogenicity[i];
+        _.map(gdm.variantPathogenicity, this_patho => {
             if (userMatch(this_patho.submitted_by, session) && this_patho.assessments && this_patho.assessments.length > 0 && this_patho.assessments[0].value === 'Supports') {
                 supportedVariants.push(this_patho.variant.uuid);
             }
-        }
+        });
     }
     return supportedVariants;
 };
 
 // Function to check if all associated variants are assessed as Supports
 var all_in = function(individualVariantList, allSupportedlist) {
-    for(var i in individualVariantList) {
-        var this_in = false;
-        for (var j in allSupportedlist) {
-            if (individualVariantList[i].uuid === allSupportedlist[j]) {
-                this_in = true;
-                break;
-            }
-        }
-
-        if (!this_in) {
-            return false;
-        }
-    }
-    return true;
-};
-
-// function to find one proband individual with all variants assessed.
-var searchProbandIndividual = function(individualList, variantList) {
-    var probandInd = false;
-    _.map(individualList, individual => {
-        if (individual.proband && individual.variants && individual.variants.length > 0 && all_in(individual.variants, variantList)) {
-            probandInd = true;
+    var all_sup = true;
+    _.map(individualVariantList, ind_v => {
+        if (!_.contains(allSupportedlist, ind_v.uuid)) {
+            all_sup = false;
             return;
         }
     });
-    return probandInd;
-    //for (var i in individualList) {
-    //    if (individualList[i].proband && individualList[i].variants && individualList[i].variants.length > 0 && all_in(individualList[i].variants, variantList)) {
-    //        return true;
-    //    }
-    //}
-    //return false;
+    return all_sup;
+};
+
+// function to find one proband individual with all variants supported.
+var searchProbandIndividual = function(individualList, variantList) {
+    var probandInd = _.find(individualList, individual => {
+        return individual.proband && individual.variants && individual.variants.length > 0 && all_in(individual.variants, variantList);
+    });
+    if (!probandInd) {
+        return false;
+    }
+    return true;
 };
 
 
