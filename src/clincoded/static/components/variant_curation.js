@@ -525,7 +525,7 @@ var VariantCurationView = React.createClass({
                 {pathogenicity && variant ?
                     <Panel title={title} panelClassName="panel-data">
                         {this.props.note ?
-                            <p>{this.props.note}</p>
+                            <p className="alert alert-info">{this.props.note}</p>
                         : null}
                         <dl className="dl-horizontal">
                             <div>

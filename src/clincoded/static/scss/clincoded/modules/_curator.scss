@@ -422,6 +422,16 @@
     display: block;
     white-space: nowrap;
     text-overflow: ellipsis;
+    padding-bottom: 3px;
+
+    a {
+        border-bottom: 1px dotted #337ab7;
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: none;
+        }
+    }
 }
 
 .curation-submit {
