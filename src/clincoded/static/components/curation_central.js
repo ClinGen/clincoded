@@ -33,7 +33,6 @@ var CurationCentral = React.createClass({
 
     getInitialState: function() {
         return {
-            winWidth: null, // window's width, used to ser # char of preferred tile shown in curator palette
             currPmid: queryKeyValue('pmid', this.props.href),
             currGdm: null
         };
@@ -90,9 +89,6 @@ var CurationCentral = React.createClass({
     // After the Curator Central page component mounts, grab the uuid from the query string and
     // retrieve the corresponding GDM from the DB.
     componentDidMount: function() {
-        var winWidth = window.innerWidth;
-        this.setState({winWidth: winWidth});
-        
         var gdmUuid = queryKeyValue('gdm', this.props.href);
         var pmid = queryKeyValue('pmid', this.props.href);
         if (gdmUuid) {
@@ -180,7 +176,7 @@ var CurationCentral = React.createClass({
                         </div>
                         {currArticle ?
                             <div className="col-md-3">
-                                <CurationPalette gdm={gdm} annotation={annotation} session={session} winWidth={this.state.winWidth} />
+                                <CurationPalette gdm={gdm} annotation={annotation} session={session} />
                             </div>
                         : null}
                     </div>
@@ -280,7 +276,7 @@ var AddPmidModal = React.createClass({
     propTypes: {
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateGdmArticles: React.PropTypes.func, // Function to call when we have an article to add to the GDM
+        updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
     },
 
     contextTypes: {
@@ -297,16 +293,19 @@ var AddPmidModal = React.createClass({
         if (valid && formInput.match(/^0+$/)) {
             valid = false;
             this.setFormErrors('pmid', 'This PMID does not exist');
+            this.setState({submitBusy: false});
         }
         // valid if input isn't zero-leading
         if (valid && formInput.match(/^0+/)) {
             valid = false;
             this.setFormErrors('pmid', 'Please re-enter PMID without any leading 0\'s');
+            this.setState({submitBusy: false});
         }
         // valid if the input only has numbers
         if (valid && !formInput.match(/^[0-9]*$/)) {
             valid = false;
             this.setFormErrors('pmid', 'Only numbers allowed');
+            this.setState({submitBusy: false});
         }
         // valid if input isn't already associated with GDM
         if (valid) {
@@ -314,6 +313,7 @@ var AddPmidModal = React.createClass({
                 if (this.props.currGdm.annotations[i].article.pmid == formInput) {
                     valid = false;
                     this.setFormErrors('pmid', 'This article has already been associated with this Gene-Disease Record');
+                    this.setState({submitBusy: false});
                 }
             }
         }
@@ -339,7 +339,10 @@ var AddPmidModal = React.createClass({
                 return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
                     var newArticle = parsePubmed(xml);
                     // if the PubMed article for this PMID doesn't exist, display an error
-                    if (!('pmid' in newArticle)) this.setFormErrors('pmid', 'This PMID does not exist');
+                    if (!('pmid' in newArticle)) {
+                        this.setFormErrors('pmid', 'This PMID does not exist');
+                        this.setState({submitBusy: false});
+                    }
                     return this.postRestData('/articles/', newArticle).then(data => {
                         return Promise.resolve(data['@graph'][0]);
                     });

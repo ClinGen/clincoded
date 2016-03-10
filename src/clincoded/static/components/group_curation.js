@@ -507,7 +507,7 @@ var GroupCuration = React.createClass({
             <div>
                 {(!this.queryValues.groupUuid || this.state.group) ?
                     <div>
-                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} />
+                        <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} pmid={pmid} />
                         <div className="container">
                             {annotation && annotation.article ?
                                 <div className="curation-pmid-summary">
@@ -518,7 +518,7 @@ var GroupCuration = React.createClass({
                                 <h1>{(group ? 'Edit' : 'Curate') + ' Group Information'}</h1>
                                 <h2>
                                     {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
-                                    <span> // {this.state.groupName ? <span> Group {this.state.groupName}</span> : <span className="no-entry">No entry</span>}</span>
+                                    <span> &#x2F;&#x2F; {this.state.groupName ? <span> Group {this.state.groupName}</span> : <span className="no-entry">No entry</span>}</span>
                                 </h2>
                             </div>
                             <div className="row group-curation-content">
@@ -630,7 +630,7 @@ var GroupCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span>Disease(s) in Common (<span style={{fontWeight: 'normal'}}><a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term</span>):</span>;
+        return <span>Disease(s) in Common (<span className="normal"><a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term</span>):</span>;
     }
 });
 
@@ -643,8 +643,8 @@ var LabelHpoId = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                {this.props.not ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+                <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
             </span>
         );
     }
@@ -659,8 +659,8 @@ var LabelPhenoTerms = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                (<span style={{fontWeight: 'normal'}}>free text</span>):
+                {this.props.not ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+                (<span className="normal">free text</span>):
             </span>
         );
     }
@@ -691,21 +691,21 @@ var GroupDemographics = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Hispanic or Latino</option>
-                <option>Not Hispanic or Latino</option>
-                <option>Unknown</option>
+                <option value="Hispanic or Latino">Hispanic or Latino</option>
+                <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
+                <option value="Unknown">Unknown</option>
             </Input>
             <Input type="select" ref="race" label="Race:" defaultValue="none" value={group && group.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>American Indian or Alaska Native</option>
-                <option>Asian</option>
-                <option>Black</option>
-                <option>Native Hawaiian or Other Pacific Islander</option>
-                <option>White</option>
-                <option>Mixed</option>
-                <option>Unknown</option>
+                <option value="American Indian or Alaska Native">American Indian or Alaska Native</option>
+                <option value="Asian">Asian</option>
+                <option value="Black">Black</option>
+                <option value="Native Hawaiian or Other Pacific Islander">Native Hawaiian or Other Pacific Islander</option>
+                <option value="White">White</option>
+                <option value="Mixed">Mixed</option>
+                <option value="Unknown">Unknown</option>
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
             <div className="demographics-age-range">
@@ -713,10 +713,10 @@ var GroupDemographics = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Onset</option>
-                    <option>Report</option>
-                    <option>Diagnosis</option>
-                    <option>Death</option>
+                    <option value="Onset">Onset</option>
+                    <option value="Report">Report</option>
+                    <option value="Diagnosis">Diagnosis</option>
+                    <option value="Death">Death</option>
                 </Input>
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
                     <Input type="number" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input"
@@ -729,10 +729,10 @@ var GroupDemographics = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Days</option>
-                    <option>Weeks</option>
-                    <option>Months</option>
-                    <option>Years</option>
+                    <option value="Days">Days</option>
+                    <option value="Weeks">Weeks</option>
+                    <option value="Months">Months</option>
+                    <option value="Years">Years</option>
                 </Input>
             </div>
         </div>
