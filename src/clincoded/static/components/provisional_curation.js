@@ -559,24 +559,23 @@ var NewCalculation = function() {
         "contradict": []
     };
 
-    for (var i in gdmPathoList) {
-        var variantUuid = gdmPathoList[i].variant.uuid;
+    _.map(gdmPathoList, patho => {
+        var variantUuid = patho.variant.uuid;
         // Collect login user's variant assessments, separated as 3 different values.
-        if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
-            for (var j in gdmPathoList[i].assessments) {
-                if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
+        if (patho.assessments && patho.assessments.length) {
+            _.map(patho.assessments, assessment => {
+                if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
                     pathoVariantIdList['support'].push(variantUuid);
                 }
-                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Review') {
+                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
                     pathoVariantIdList['review'].push(variantUuid);
                 }
-                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Contradicts') {
+                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
                     pathoVariantIdList['contradict'].push(variantUuid);
                 }
-            }
+            });
         }
-    }
-
+    });
 
     var exp_scores = [0, 0, 0];
     var expType = {
