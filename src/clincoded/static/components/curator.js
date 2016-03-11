@@ -823,11 +823,10 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
     });
 
     var variantTitle = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
-    var vCurationURL = '/variant-curation/?all&gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '');
 
     return (
         <div className="panel-evidence-group">
-            <h5 className="variant-title-ellipsis"><a href={vCurationURL} title={variantTitle}>{variantTitle}</a></h5>
+            <h5 className="variant-title-ellipsis"><a title={variantTitle}>{variantTitle}</a></h5>
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
                     <p className="evidence-curation-info">{variant.submitted_by.title}</p>
@@ -2302,6 +2301,8 @@ var AddResourceIdModal = React.createClass({
                 var tempTxtLabel;
                 if (this.props.initialFormValue) {
                     tempTxtLabel = clinvarTxt('editLabel');
+                    this.setState({queryResourceDisabled: false});
+                    this.setState({inputValue: this.props.initialFormValue});
                 } else {
                     tempTxtLabel = clinvarTxt('inputLabel');
                 }
@@ -2465,9 +2466,17 @@ function clinvarSubmitResource() {
             if (check.total) {
                 // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
-                    this.props.updateParentForm(result, this.props.fieldNum);
-                    this.setState({submitResourceBusy: false});
-                    this.props.closeModal();
+                    // if no variant title in db, or db's variant title not matching the retrieved title,
+                    // then update db and fetch result again
+                    if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle']) {
+                        this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
+                            return this.getRestData(result['@graph'][0]['@id']).then(result => {
+                                this.props.updateParentForm(result, this.props.fieldNum);
+                            });
+                        });
+                    } else {
+                        this.props.updateParentForm(result, this.props.fieldNum);
+                    }
                 });
             } else {
                 // variation is new to our db
@@ -2475,11 +2484,11 @@ function clinvarSubmitResource() {
                     // record the user adding a new variant entry
                     this.recordHistory('add', result['@graph'][0]).then(history => {
                         this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
-                        this.setState({submitResourceBusy: false});
-                        this.props.closeModal();
                     });
                 });
             }
+            this.setState({submitResourceBusy: false});
+            this.props.closeModal();
         });
     }
 }

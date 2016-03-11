@@ -762,7 +762,6 @@ var IndividualCuration = React.createClass({
             } else {
                 addVariantDisabled = true;
             }
-
             // Update the form and display values with new data
             this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
             newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
