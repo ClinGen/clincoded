@@ -100,6 +100,7 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
     // GDM (use the existing one), the evidence object, and the assessment object to write with the new evidence ID.
     saveAssessment: function(assessmentTracker, gdmUuid, evidenceUuid, assessment, historyLabel) {
         // Flatten the original assessment if any; will modify with updated values
+        //var newAssessment = assessment ? curator.flatten(assessment) : (assessmentTracker.original ? curator.flatten(assessmentTracker.original, 'assessment') : {});
         var newAssessment = assessment ? curator.flatten(assessment) : (assessmentTracker.original ? curator.flatten(assessmentTracker.original, 'assessment') : {});
         newAssessment.value = assessmentTracker.currentVal;
         if (evidenceUuid) {
@@ -117,7 +118,7 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
         return new Promise((resolve, reject) => {
             var assessmentPromise;
 
-            if (assessment || (assessmentTracker.original && (newAssessment.value !== assessmentTracker.original.value))) {
+            if ((assessment && assessment.value !== 'Not Assessed') || (assessmentTracker.original && (newAssessment.value !== assessmentTracker.original.value) && (newAssessment.value !== 'Not Assessed'))) {
                 var assessmentUuid = assessment ? assessment.uuid : assessmentTracker.original.uuid;
 
                 // Updating an existing assessment, and the value of the assessment has changed
@@ -210,9 +211,13 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         updateMsg: React.PropTypes.string // String to display by the Update button if desired
     },
 
-    componentDidMount: function() {
-        if (this.props.assessmentTracker && this.props.assessmentTracker.currentVal) {
+    componentDidMount: function(assessmentTracker) {
+        if (this.props.assessmentTracker && this.props.assessmentTracker.currentVal && !this.props.noSeg) {
             this.refs.assessment.value = this.props.assessmentTracker.currentVal;
+        }
+        else if (!this.props.noSeg) {
+            this.props.updateValue(assessmentTracker, DEFAULT_VALUE);
+            this.refs.assessment.value = DEFAULT_VALUE;
         }
     },
 
@@ -263,7 +268,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
 
                         <div className="row">
                             {noSeg ?
-                                <Input type="select" ref="assessment" label={label + ':'} value={DEFAULT_VALUE} defaultValue={DEFAULT_VALUE}
+                                <Input type="select" ref="assessment" label={label + ':'} value={value} defaultValue={DEFAULT_VALUE}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={true}>
                                     <option value={DEFAULT_VALUE}>Not Assessed</option>
                                 </Input>

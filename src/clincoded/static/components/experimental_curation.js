@@ -1256,13 +1256,19 @@ var ExperimentalCuration = React.createClass({
         var pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
         var experimental = this.state.experimental;
         var assessments = experimental && experimental.assessments && experimental.assessments.length ? experimental.assessments : [];
-        var is_assessed =false; // filter out Not Assessed
-        for (var i in assessments) {
-            if (assessments[i].value !== 'Not Assessed') {
-                is_assessed = true;
-                break;
+        //var is_assessed =false; // filter out Not Assessed
+        var validAssessments = [];
+        _.map(assessments, assessment => {
+            if (assessment.value !== 'Not Assessed') {
+                validAssessments.push(assessment);
             }
-        }
+        });
+        //for (var i in assessments) {
+        //    if (assessments[i].value !== 'Not Assessed') {
+        //        is_assessed = true;
+        //        break;
+        //    }
+        //}
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
@@ -1346,13 +1352,13 @@ var ExperimentalCuration = React.createClass({
                                                         <div>
                                                             <dt>Assessments</dt>
                                                             <dd>
-                                                                {is_assessed ?
+                                                                {validAssessments.length ?
                                                                     <div>
-                                                                        {assessments.map(function(assessment, i) {
+                                                                        {validAssessments.map(function(assessment, i) {
                                                                             return (
                                                                                 <span key={assessment.uuid}>
                                                                                     {i > 0 ? <br /> : null}
-                                                                                    {assessment.value !== 'Not Assessed' ? assessment.value+' ('+assessment.submitted_by.title+')' : null}
+                                                                                    {assessment.value+' ('+assessment.submitted_by.title+')'}
                                                                                 </span>
                                                                             );
                                                                         })}
@@ -2353,13 +2359,19 @@ var ExperimentalViewer = React.createClass({
     render: function() {
         var experimental = this.props.context;
         var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
-        var is_assessed = false;
-        for (var i in assessments) {
-            if (assessments[i].value !== 'Not Assessed') {
-                is_assessed = true;
-                break;
+        //var is_assessed = false;
+        var validAssessments = [];
+        _.map(assessments, assessment => {
+            if (assessment.value !== 'Not Assessed') {
+                validAssessments.push(assessment);
             }
-        }
+        });
+        //for (var i in assessments) {
+        //    if (assessments[i].value !== 'Not Assessed') {
+        //        is_assessed = true;
+        //        break;
+        //    }
+        //}
         var user = this.props.session && this.props.session.user_properties;
         var userExperimental = user && experimental && experimental.submitted_by ? user.uuid === experimental.submitted_by.uuid : false;
         var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the experimental data, but the experimental data's owner assessed it
@@ -2757,13 +2769,13 @@ var ExperimentalViewer = React.createClass({
                                 <div>
                                     <dt>Assessments</dt>
                                     <dd>
-                                        {is_assessed ?
+                                        {validAssessments.length ?
                                             <div>
-                                                {assessments.map(function(assessment, i) {
+                                                {validAssessments.map(function(assessment, i) {
                                                     return (
                                                         <span key={assessment.uuid}>
                                                             {i > 0 ? <br /> : null}
-                                                            {assessment.value !== 'Not Assessed' ? assessment.value+' ('+assessment.submitted_by.title+')' : null}
+                                                            {assessment.value + ' (' + assessment.submitted_by.title + ')'}
                                                         </span>
                                                     );
                                                 })}

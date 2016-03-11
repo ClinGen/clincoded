@@ -363,20 +363,34 @@ var VariantCuration = React.createClass({
         //var assessed = false;
         var validAssessments = []; // filter out those with value Not Assessed
         if (this.queryValues.all && variant && gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
-            for (var i in gdm.variantPathogenicity) {
-                var pathoVariant = gdm.variantPathogenicity[i].variant;
+            _.map(gdm.variantPathogenicity, patho => {
+                var pathoVariant = patho.variant;
                 if (pathoVariant.uuid === variant.uuid) {
-                    allPathogenicityList.push(gdm.variantPathogenicity[i]);
-                    if (gdm.variantPathogenicity[i].submitted_by.uuid !== user) {
-                        otherPathogenicityList.push(gdm.variantPathogenicity[i]);
+                    allPathogenicityList.push(patho);
+                    if (patho.submitted_by.uuid !== user) {
+                        otherPathogenicityList.push(patho);
                     }
                 }
 
-                if (gdm.variantPathogenicity[i].assessments && gdm.variantPathogenicity[i].assessments.length && gdm.variantPathogenicity[i].assessments[0].value !== 'Not Assessed') {
+                if (patho.assessments && patho.assessments.length && patho.assessments[0].value !== 'Not Assessed') {
                     //assessed = true;
-                    validAssessments.push(gdm.variantPathogenicity[i].assessments[0]);
+                    validAssessments.push(patho.assessments[0]);
                 }
-            }
+            });
+            //for (var i in gdm.variantPathogenicity) {
+            //    var pathoVariant = gdm.variantPathogenicity[i].variant;
+             //   if (pathoVariant.uuid === variant.uuid) {
+            //        allPathogenicityList.push(gdm.variantPathogenicity[i]);
+            //        if (gdm.variantPathogenicity[i].submitted_by.uuid !== user) {
+            //            otherPathogenicityList.push(gdm.variantPathogenicity[i]);
+            //        }
+            //    }
+
+            //    if (gdm.variantPathogenicity[i].assessments && gdm.variantPathogenicity[i].assessments.length && gdm.variantPathogenicity[i].assessments[0].value !== 'Not Assessed') {
+            //        //assessed = true;
+            //        validAssessments.push(gdm.variantPathogenicity[i].assessments[0]);
+            //    }
+            //}
         }
         //if (this.queryValues.all && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length) {
         //    otherPathogenicityList = _(variant.associatedPathogenicities).filter(function(fp) {

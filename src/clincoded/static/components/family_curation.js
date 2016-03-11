@@ -1213,11 +1213,11 @@ var FamilyCuration = React.createClass({
         var family = this.state.family;
         var assessments = [];
         if (family && family.segregation && family.segregation.assessments && family.segregation.assessments.length) {
-            for (var i in family.segregation.assessments) {
-                if (family.segregation.assessments[i].value !== 'Not Assessed') {
-                    assessments.push(family.segregation.assessments[i]);
+            _.map(family.segregation.assessments, assessment => {
+                if (assessment.value !== 'Not Assessed') {
+                    assessments.push(assessment);
                 }
-            }
+            });
         }
         var groups = (family && family.associatedGroups) ? family.associatedGroups :
             (this.state.group ? [this.state.group] : null);
@@ -1243,6 +1243,10 @@ var FamilyCuration = React.createClass({
             cancelUrl = (!this.queryValues.familyUuid || this.queryValues.editShortcut) ?
                 '/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')
                 : '/family-submit/?gdm=' + gdm.uuid + (family ? '&family=' + family.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
+        }
+
+        if (!this.state.segregationFilled) {
+            this.cv.assessmentTracker.currentVal = 'Not Assessed';
         }
 
         return (
@@ -1949,13 +1953,19 @@ var FamilyViewer = React.createClass({
         var groups = family.associatedGroups;
         var segregation = family.segregation;
         var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
-        var is_assessed = false; // filter out Not Assessed in assessments
-        for(var i=0; i< assessments.length; i++) {
-            if (assessments[i].value !== 'Not Assessed') {
-                is_assessed = true;
-                break;
+        var validAssessments = [];
+        _.map(assessments, assessment => {
+            if (assessment.value !== 'Not Assessed') {
+                validAssessments.push(assessment);
             }
-        }
+        });
+        //var is_assessed = false; // filter out Not Assessed in assessments
+        //for(var i=0; i< assessments.length; i++) {
+        //    if (assessments[i].value !== 'Not Assessed') {
+        //        is_assessed = true;
+        //        break;
+        //    }
+        //}
 
         var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
         var user = this.props.session && this.props.session.user_properties;
@@ -2135,13 +2145,13 @@ var FamilyViewer = React.createClass({
                                     <div>
                                         <dt>Assessments</dt>
                                         <dd>
-                                            {is_assessed ?
+                                            {validAssessments.length ?
                                                 <div>
-                                                    {assessments.map(function(assessment, i) {
+                                                    {validAssessments.map(function(assessment, i) {
                                                         return (
                                                             <span key={assessment.uuid}>
                                                                 {i > 0 ? <br /> : null}
-                                                                {assessment.value !== 'Not Assessed' ? assessment.value+' ('+assessment.submitted_by.title+')' : null}
+                                                                {assessment.value+' ('+assessment.submitted_by.title+')'}
                                                             </span>
                                                         );
                                                     })}
