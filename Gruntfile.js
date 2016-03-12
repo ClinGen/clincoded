@@ -1,6 +1,10 @@
 'use strict';
 var reactify = require('./reactify');
 
+if (process.env.NODE_ENV == 'production'){
+    console.log("\n****** PRODUCTION ENVIRONMENT ******\n");
+}
+
 //eslint directive to ignore "undefined" global variables 
 /* global __dirname process */
 
@@ -157,17 +161,20 @@ module.exports = function(grunt) {
                     patterns: [
                         {
                             match: 'bundleJsFile',
-                            replacement: '<%= grunt.filerev.summary["src/clincoded/static/build/bundle.js"] %>'
+                            replacement: function () {
+                                return grunt.filerev.summary["src/clincoded/static/build/bundle.js"].replace(new RegExp('src/clincoded'), '');
+                            }
                         },
                         {
                             match: 'cssFile',
-                            replacement: '<%= grunt.filerev.summary["src/clincoded/static/css/style.css"] %>'
+                            replacement: function () {
+                                return grunt.filerev.summary["src/clincoded/static/css/style.css"].replace(new RegExp('src/clincoded'), '');
+                            }
                         }
                     ]
                 },
                 files: [
-                    {src: ['./src/clincoded/static/build/bundle.js'], dest: './src/clincoded/static/build/bundle.js'},
-                    {src: ['./src/clincoded/static/build/renderer.js'], dest: './src/clincoded/static/build/renderer.js'}
+                    {expand: true, flatten: true, src: ['src/clincoded/static/build/*.js'], dest: 'src/clincoded/static/build/'}
                 ]
             }
         }
@@ -268,10 +275,6 @@ module.exports = function(grunt) {
 
     grunt.registerTask('default', ['browserify', 'copy', 'filerev', 'replace']);
     grunt.registerTask('watch', ['browserify:*:watch', 'wait']);
-
-    if(grunt){
-        console.log("grunt: " + grunt);
-    }
 
 };
 
