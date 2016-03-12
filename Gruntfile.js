@@ -142,28 +142,35 @@ module.exports = function(grunt) {
                 algorithm: 'md5',
                 length: 8
             },
-            images: {
-                src: ['./src/clincoded/static/build/bundle.js', './src/clincoded/static/css/style.css'],
-                dest: './src/clincoded/static/build/tmp'
+            css: {
+                src: ['./src/clincoded/static/css/style.css'],
+                dest: './src/clincoded/static/css'
+            },
+            js: {
+                src: ['./src/clincoded/static/build/bundle.js'],
+                dest: './src/clincoded/static/build/'
+            }
+        },
+        replace: {
+            dist: {
+                options: {
+                    patterns: [
+                        {
+                            match: 'bundleJsFile',
+                            replacement: '<%= grunt.filerev.summary["src/clincoded/static/build/bundle.js"] %>'
+                        },
+                        {
+                            match: 'cssFile',
+                            replacement: '<%= grunt.filerev.summary["src/clincoded/static/css/style.css"] %>'
+                        }
+                    ]
+                },
+                files: [
+                    {src: ['./src/clincoded/static/build/bundle.js'], dest: './src/clincoded/static/build/bundle.js'},
+                    {src: ['./src/clincoded/static/build/renderer.js'], dest: './src/clincoded/static/build/renderer.js'}
+                ]
             }
         }
-        // ,useminPrepare: {
-        //     js: './src/clincoded/static/build/tmp/bundle.js',
-        //     options: {
-        //         dest: './src/clincoded/static/build/tmp/dist'
-        //     }
-        // },
-        // usemin: {
-        //     js: './src/clincoded/static/build/tmp/bundle.*.js',
-        //     options: {
-        //         assetsDirs: 'images',
-        //         patterns: {
-        //             js: [
-        //                 [/(\/static\/build\/bundle.js)/, 'Replacing reference to image.png']
-        //             ]
-        //         }
-        //     }
-        // }
     });
 
     grunt.registerMultiTask('browserify', function (watch) {
@@ -257,11 +264,14 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-filerev');
-    //grunt.loadNpmTasks('grunt-usemin');
+    grunt.loadNpmTasks('grunt-replace');
 
-    //grunt.registerTask('default', ['browserify', 'copy']);
-    //grunt.registerTask('default', ['browserify', 'copy', 'useminPrepare', 'filerev', 'usemin']);
-    grunt.registerTask('default', ['browserify', 'copy', 'filerev']);
+    grunt.registerTask('default', ['browserify', 'copy', 'filerev', 'replace']);
     grunt.registerTask('watch', ['browserify:*:watch', 'wait']);
 
+    if(grunt){
+        console.log("grunt: " + grunt);
+    }
+
 };
+
