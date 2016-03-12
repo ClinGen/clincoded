@@ -146,7 +146,7 @@ output:
 runcmd:
 # Ideally this would build as a different user so clincoded only has read
 # permissions
-- set -e
+- set -ex
 - echo "America/Los_Angeles" | sudo tee /etc/timezone
 - sudo dpkg-reconfigure --frontend noninteractive tzdata
 - sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
@@ -161,6 +161,8 @@ runcmd:
 - then
 -   echo "standby_mode = off" >> /etc/postgresql/9.4/main/recovery.conf
 -   echo "include 'demo.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
+- else
+-   sudo -u clincoded export NODE_ENV=production
 - fi
 - sudo -u postgres createuser clincoded
 - sudo -u postgres createdb --owner=clincoded clincoded
