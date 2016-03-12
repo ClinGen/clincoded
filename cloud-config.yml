@@ -161,8 +161,6 @@ runcmd:
 - then
 -   echo "standby_mode = off" >> /etc/postgresql/9.4/main/recovery.conf
 -   echo "include 'demo.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
-- else
--   export NODE_ENV=production
 - fi
 - sudo -u postgres createuser clincoded
 - sudo -u postgres createdb --owner=clincoded clincoded
