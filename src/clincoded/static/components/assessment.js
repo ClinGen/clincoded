@@ -118,7 +118,7 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
         return new Promise((resolve, reject) => {
             var assessmentPromise;
 
-            if ((assessment && assessment.value !== 'Not Assessed') || (assessmentTracker.original && (newAssessment.value !== assessmentTracker.original.value) && (newAssessment.value !== 'Not Assessed'))) {
+            if (assessment || (assessmentTracker.original && (newAssessment.value !== assessmentTracker.original.value))) {
                 var assessmentUuid = assessment ? assessment.uuid : assessmentTracker.original.uuid;
 
                 // Updating an existing assessment, and the value of the assessment has changed
@@ -211,13 +211,9 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         updateMsg: React.PropTypes.string // String to display by the Update button if desired
     },
 
-    componentDidMount: function(assessmentTracker) {
-        if (this.props.assessmentTracker && this.props.assessmentTracker.currentVal && !this.props.noSeg) {
+    componentDidMount: function() {
+        if (this.props.assessmentTracker && this.props.assessmentTracker.currentVal) {
             this.refs.assessment.value = this.props.assessmentTracker.currentVal;
-        }
-        else if (!this.props.noSeg) {
-            this.props.updateValue(assessmentTracker, DEFAULT_VALUE);
-            this.refs.assessment.value = DEFAULT_VALUE;
         }
     },
 
@@ -241,7 +237,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         //var disabled = (this.props.disabled === true || this.props.disabled === false) ? this.props.disabled : false;
         //var disabled = this.props.disabled;
         var noSeg = this.props.noSeg;
-        var value = this.props.assessmentTracker && this.props.assessmentTracker.currentVal;
+        var value = this.props.assessmentTracker.currentVal;
         var ownerNotAssessed = this.props.ownerNotAssessed;
         var submitErrClass = 'submit-info pull-right';
 
@@ -273,7 +269,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                                     <option value={DEFAULT_VALUE}>Not Assessed</option>
                                 </Input>
                                 :
-                                <Input type="select" ref="assessment" label={label + ':'} value={value} handleChange={this.handleChange.bind(null, this.props.assessmentTracker)}
+                                <Input type="select" ref="assessment" label={label + ':'} value={value} defaultValue={value} handleChange={this.handleChange.bind(null, this.props.assessmentTracker)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={ownerNotAssessed ? true : false}>
                                     <option value={DEFAULT_VALUE} disabled={this.props.disableDefault}>Not Assessed</option>
                                     <option disabled="disabled"></option>

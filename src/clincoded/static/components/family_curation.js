@@ -199,6 +199,8 @@ var FamilyCuration = React.createClass({
             var filled = Object.keys(this.cv.filledSegregations).length > 0;
             if (this.state.segregationFilled !== filled) {
                 this.setState({segregationFilled: filled});
+                this.cv.assessmentTracker.currentVal = 'Not Assessed';
+                this.updateAssessmentValue(this.cv.assessmentTracker, 'Not Assessed');
             }
         }
     },
@@ -1211,14 +1213,6 @@ var FamilyCuration = React.createClass({
     render: function() {
         var gdm = this.state.gdm;
         var family = this.state.family;
-        var assessments = [];
-        if (family && family.segregation && family.segregation.assessments && family.segregation.assessments.length) {
-            _.map(family.segregation.assessments, assessment => {
-                if (assessment.value !== 'Not Assessed') {
-                    assessments.push(assessment);
-                }
-            });
-        }
         var groups = (family && family.associatedGroups) ? family.associatedGroups :
             (this.state.group ? [this.state.group] : null);
         var annotation = this.state.annotation;
@@ -1226,6 +1220,18 @@ var FamilyCuration = React.createClass({
         var method = (family && family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        var assessments = [];
+        var userAssessmentValue = null;
+        if (family && family.segregation && family.segregation.assessments && family.segregation.assessments.length) {
+            _.map(family.segregation.assessments, assessment => {
+                if (assessment.value !== 'Not Assessed') {
+                    assessments.push(assessment);
+                    if (assessment.submitted_by.uuid === session.user_properties.uuid) {
+                        userAssessmentValue = assessment.value;
+                    }
+                }
+            });
+        }
         //var is_owner = session && family && (session.user_properties.uuid === family.submitted_by.uuid) ? true : false;
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
@@ -1245,9 +1251,11 @@ var FamilyCuration = React.createClass({
                 : '/family-submit/?gdm=' + gdm.uuid + (family ? '&family=' + family.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
         }
 
-        if (!this.state.segregationFilled) {
-            this.cv.assessmentTracker.currentVal = 'Not Assessed';
-        }
+        //if (!this.state.segregationFilled && (this.cv.assessmentTracker.currentVal !== 'Not Assessed' || !userAssessmentValue)) {
+        //    this.cv.assessmentTracker.currentVal = 'Not Assessed';
+        //} else if (userAssessmentValue) {
+        //    this.cv.assessmentTracker.currentVal = userAssessmentValue;
+        //}
 
         return (
             <div>
@@ -1330,6 +1338,7 @@ var FamilyCuration = React.createClass({
                                             <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} noSeg={this.state.segregationFilled ? false : true}
                                                 updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} ownerNotAssessed={false} accordion open />
                                         </PanelGroup>
+
                                         <PanelGroup accordion>
                                             <Panel title="Family — Variant(s) Segregating with Proband" open>
                                                 {FamilyVariant.call(this)}
