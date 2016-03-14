@@ -107,7 +107,7 @@ def main():
         '--wale-s3-prefix', default='s3://clincoded-backups/production')
     parser.add_argument(
         '--candidate', action='store_const',
-        default='buildout', const='candidate', dest='role',
+        default='demo', const='candidate', dest='role',
         help="Deploy candidate instance")
     parser.add_argument(
         '--test', action='store_const',
