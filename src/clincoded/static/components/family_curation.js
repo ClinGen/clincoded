@@ -195,9 +195,12 @@ var FamilyCuration = React.createClass({
             }
 
             // Now change the state of the assessment dropdown if needed
+            // Also force assessment value goes back to Not Assessed when deleting all segregation data
             var filled = Object.keys(this.cv.filledSegregations).length > 0;
             if (this.state.segregationFilled !== filled) {
                 this.setState({segregationFilled: filled});
+                this.cv.assessmentTracker.currentVal = 'Not Assessed';
+                this.updateAssessmentValue(this.cv.assessmentTracker, 'Not Assessed');
             }
         }
     },
@@ -1217,6 +1220,19 @@ var FamilyCuration = React.createClass({
         var method = (family && family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        var assessments = [];
+        var userAssessmentValue = null;
+        if (family && family.segregation && family.segregation.assessments && family.segregation.assessments.length) {
+            _.map(family.segregation.assessments, assessment => {
+                if (assessment.value !== 'Not Assessed') {
+                    assessments.push(assessment);
+                    if (assessment.submitted_by.uuid === session.user_properties.uuid) {
+                        userAssessmentValue = assessment.value;
+                    }
+                }
+            });
+        }
+        //var is_owner = session && family && (session.user_properties.uuid === family.submitted_by.uuid) ? true : false;
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
@@ -1234,6 +1250,12 @@ var FamilyCuration = React.createClass({
                 '/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')
                 : '/family-submit/?gdm=' + gdm.uuid + (family ? '&family=' + family.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
         }
+
+        //if (!this.state.segregationFilled && (this.cv.assessmentTracker.currentVal !== 'Not Assessed' || !userAssessmentValue)) {
+        //    this.cv.assessmentTracker.currentVal = 'Not Assessed';
+        //} else if (userAssessmentValue) {
+        //    this.cv.assessmentTracker.currentVal = userAssessmentValue;
+        //}
 
         return (
             <div>
@@ -1277,6 +1299,7 @@ var FamilyCuration = React.createClass({
                                                 {methods.render.call(this, method, true)}
                                             </Panel>
                                         </PanelGroup>
+
                                         {!this.cv.segregationAssessed ?
                                             <PanelGroup accordion>
                                                 <Panel title="Family — Segregation" open>
@@ -1292,10 +1315,30 @@ var FamilyCuration = React.createClass({
                                                 : null}
                                             </div>
                                         }
+
+                                        <Panel panelClassName="panel-data">
+                                            <dl className="dl-horizontal">
+                                                <dt>Assessments</dt>
+                                                <dd>
+                                                    {assessments.length ? assessments.map(function(assessment, i) {
+                                                        return (
+                                                            <span key={assessment.uuid}>
+                                                                {assessment.value} ({assessment.submitted_by.title})
+                                                                {i < assessments.length-1 ? <br /> : null}
+                                                            </span>
+                                                        );})
+                                                    :
+                                                    <div>None</div>
+                                                    }
+                                                </dd>
+                                            </dl>
+                                        </Panel>
+
                                         <PanelGroup accordion>
-                                            <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled}
-                                                updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
+                                            <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} noSeg={this.state.segregationFilled ? false : true}
+                                                updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} ownerNotAssessed={false} accordion open />
                                         </PanelGroup>
+
                                         <PanelGroup accordion>
                                             <Panel title="Family — Variant(s) Segregating with Proband" open>
                                                 {FamilyVariant.call(this)}
@@ -1919,6 +1962,20 @@ var FamilyViewer = React.createClass({
         var groups = family.associatedGroups;
         var segregation = family.segregation;
         var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
+        var validAssessments = [];
+        _.map(assessments, assessment => {
+            if (assessment.value !== 'Not Assessed') {
+                validAssessments.push(assessment);
+            }
+        });
+        //var is_assessed = false; // filter out Not Assessed in assessments
+        //for(var i=0; i< assessments.length; i++) {
+        //    if (assessments[i].value !== 'Not Assessed') {
+        //        is_assessed = true;
+        //        break;
+        //    }
+        //}
+
         var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
         var user = this.props.session && this.props.session.user_properties;
         var userFamily = user && family && family.submitted_by ? user.uuid === family.submitted_by.uuid : false;
@@ -2091,10 +2148,33 @@ var FamilyViewer = React.createClass({
 
                         {FamilySegregationViewer(segregation, assessments, true)}
 
-                        {this.cv.gdmUuid && (familyUserAssessed || userFamily) && haveSegregation ?
-                            <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
+                        {this.cv.gdmUuid ?
+                            <Panel panelClassName="panel-data">
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>Assessments</dt>
+                                        <dd>
+                                            {validAssessments.length ?
+                                                <div>
+                                                    {validAssessments.map(function(assessment, i) {
+                                                        return (
+                                                            <span key={assessment.uuid}>
+                                                                {i > 0 ? <br /> : null}
+                                                                {assessment.value+' ('+assessment.submitted_by.title+')'}
+                                                            </span>
+                                                        );
+                                                    })}
+                                                </div>
+                                            : <div>None</div>}
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </Panel>
                         : null}
+
+                        <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
+                            noSeg={!haveSegregation} ownerNotAssessed={userFamily ? false : !familyUserAssessed} />
 
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                             {variants.map(function(variant, i) {
@@ -2233,26 +2313,6 @@ var FamilySegregationViewer = function(segregation, assessments, open) {
                 <div>
                     <dt>Additional Segregation information</dt>
                     <dd>{segregation && segregation.additionalInformation}</dd>
-                </div>
-
-                <div>
-                    <dt>Assessments</dt>
-                    <dd>
-                        {assessments && assessments.length ?
-                            <div>
-                                {assessments.map(function(assessment, i) {
-                                    return (
-                                        <span key={assessment.uuid}>
-                                            {i > 0 ? <br /> : null}
-                                            {assessment.value} ({assessment.submitted_by.title})
-                                        </span>
-                                    );
-                                })}
-                            </div>
-                        :
-                            <span>None</span>
-                        }
-                    </dd>
                 </div>
             </dl>
         </Panel>
