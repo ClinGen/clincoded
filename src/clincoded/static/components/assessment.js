@@ -237,7 +237,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         //var disabled = (this.props.disabled === true || this.props.disabled === false) ? this.props.disabled : false;
         //var disabled = this.props.disabled;
         var noSeg = this.props.noSeg;
-        var value = this.props.assessmentTracker.currentVal;
+        var value = this.props.assessmentTracker && this.props.assessmentTracker.currentVal ? this.props.assessmentTracker.currentVal : DEFAULT_VALUE;
         var ownerNotAssessed = this.props.ownerNotAssessed;
         var submitErrClass = 'submit-info pull-right';
 

@@ -359,7 +359,6 @@ var VariantCuration = React.createClass({
 
         // If we're editing a pathogenicity, get a list of all the variant's pathogenicities, except for the one
         // we're editing. This is to display the list of past curations.
-        // Edited by Kang Liu, 10/14/2015
         //var assessed = false;
         var validAssessments = []; // filter out those with value Not Assessed
         if (this.queryValues.all && variant && gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
@@ -370,27 +369,14 @@ var VariantCuration = React.createClass({
                     if (patho.submitted_by.uuid !== user) {
                         otherPathogenicityList.push(patho);
                     }
-                }
 
-                if (patho.assessments && patho.assessments.length && patho.assessments[0].value !== 'Not Assessed') {
-                    //assessed = true;
-                    validAssessments.push(patho.assessments[0]);
+                    // collect assessments to the variant from different users
+                    if (patho.assessments && patho.assessments.length && patho.assessments[0].value !== 'Not Assessed') {
+                        //assessed = true;
+                        validAssessments.push(patho.assessments[0]);
+                    }
                 }
             });
-            //for (var i in gdm.variantPathogenicity) {
-            //    var pathoVariant = gdm.variantPathogenicity[i].variant;
-             //   if (pathoVariant.uuid === variant.uuid) {
-            //        allPathogenicityList.push(gdm.variantPathogenicity[i]);
-            //        if (gdm.variantPathogenicity[i].submitted_by.uuid !== user) {
-            //            otherPathogenicityList.push(gdm.variantPathogenicity[i]);
-            //        }
-            //    }
-
-            //    if (gdm.variantPathogenicity[i].assessments && gdm.variantPathogenicity[i].assessments.length && gdm.variantPathogenicity[i].assessments[0].value !== 'Not Assessed') {
-            //        //assessed = true;
-            //        validAssessments.push(gdm.variantPathogenicity[i].assessments[0]);
-            //    }
-            //}
         }
         //if (this.queryValues.all && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length) {
         //    otherPathogenicityList = _(variant.associatedPathogenicities).filter(function(fp) {
