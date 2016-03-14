@@ -214,5 +214,52 @@
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2016-02-02T22:47:10.000000+00:00",
         "last_modified": "2015-02-02T22:59:10.000000+00:00"
-    }
+    },
+    {
+        "uuid": "4857e74c-b9d6-46e1-8ad4-e19486ff7216",
+        "clinvarVariantId": "1234",
+        "dbSNPId": "",
+        "clinVarRCV": "",
+        "clinvarVariantTitle": "TEST",
+        "hgvsNames": [],
+        "otherDescription": "",
+        "submitted_by": "c0a70214-08a8-48a0-ba8d-521bed321d4a",
+        "date_created": "2015-10-21T22:47:10.000000+00:00",
+        "last_modified": "2015-10-22T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "2a03cb7f-34d9-4de5-88ee-80ee38fedb92",
+        "clinvarVariantId": "5678",
+        "dbSNPId": "",
+        "clinVarRCV": "",
+        "clinvarVariantTitle": "TEST",
+        "hgvsNames": [],
+        "otherDescription": "",
+        "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
+        "date_created": "2015-10-21T22:47:10.000000+00:00",
+        "last_modified": "2015-10-21T22:59:10.000000+00:00"
+    },
+    {
+
+        "uuid": "6c14674f-2660-4dd4-92de-b5b848392491",
+        "clinvarVariantId": "2345",
+        "dbSNPId": "",
+        "clinVarRCV": "",
+        "hgvsNames": [],
+        "otherDescription": "",
+        "submitted_by": "c0a70214-08a8-48a0-ba8d-521bed321d4a",
+        "date_created": "2015-10-21T22:47:10.000000+00:00",
+        "last_modified": "2015-10-22T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "cd5d759c-4d78-4774-85f5-661dccc3d3d5",
+        "clinvarVariantId": "6789",
+        "dbSNPId": "",
+        "clinVarRCV": "",
+        "hgvsNames": [],
+        "otherDescription": "",
+        "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
+        "date_created": "2015-10-21T22:47:10.000000+00:00",
+        "last_modified": "2015-10-21T22:59:10.000000+00:00"
+    },
 ]
