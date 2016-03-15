@@ -1255,6 +1255,20 @@ var ExperimentalCuration = React.createClass({
         var annotation = this.state.annotation;
         var pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
         var experimental = this.state.experimental;
+        var assessments = experimental && experimental.assessments && experimental.assessments.length ? experimental.assessments : [];
+        //var is_assessed =false; // filter out Not Assessed
+        var validAssessments = [];
+        _.map(assessments, assessment => {
+            if (assessment.value !== 'Not Assessed') {
+                validAssessments.push(assessment);
+            }
+        });
+        //for (var i in assessments) {
+        //    if (assessments[i].value !== 'Not Assessed') {
+        //        is_assessed = true;
+        //        break;
+        //    }
+        //}
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
@@ -1332,10 +1346,34 @@ var ExperimentalCuration = React.createClass({
                                             </Panel></PanelGroup>
                                         : null}
                                         {this.state.experimentalNameVisible ?
-                                            <PanelGroup accordion>
-                                                <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker}
-                                                    updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
-                                            </PanelGroup>
+                                            <div>
+                                                <Panel panelClassName="panel-data">
+                                                    <dl className="dl-horizontal">
+                                                        <div>
+                                                            <dt>Assessments</dt>
+                                                            <dd>
+                                                                {validAssessments.length ?
+                                                                    <div>
+                                                                        {validAssessments.map(function(assessment, i) {
+                                                                            return (
+                                                                                <span key={assessment.uuid}>
+                                                                                    {i > 0 ? <br /> : null}
+                                                                                    {assessment.value+' ('+assessment.submitted_by.title+')'}
+                                                                                </span>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                : <div>None</div>}
+                                                            </dd>
+                                                        </div>
+                                                    </dl>
+                                                </Panel>
+
+                                                <PanelGroup accordion>
+                                                    <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker}
+                                                        updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
+                                                </PanelGroup>
+                                            </div>
                                         : null}
                                         <div className="curation-submit clearfix">
                                             {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
@@ -2321,6 +2359,19 @@ var ExperimentalViewer = React.createClass({
     render: function() {
         var experimental = this.props.context;
         var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
+        //var is_assessed = false;
+        var validAssessments = [];
+        _.map(assessments, assessment => {
+            if (assessment.value !== 'Not Assessed') {
+                validAssessments.push(assessment);
+            }
+        });
+        //for (var i in assessments) {
+        //    if (assessments[i].value !== 'Not Assessed') {
+        //        is_assessed = true;
+        //        break;
+        //    }
+        //}
         var user = this.props.session && this.props.session.user_properties;
         var userExperimental = user && experimental && experimental.submitted_by ? user.uuid === experimental.submitted_by.uuid : false;
         var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the experimental data, but the experimental data's owner assessed it
@@ -2713,30 +2764,31 @@ var ExperimentalViewer = React.createClass({
                             })}
                         </Panel>
                         : null}
-                        {assessments && assessments.length ?
                         <Panel panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
                                     <dt>Assessments</dt>
                                     <dd>
-                                        <div>
-                                            {assessments.map(function(assessment, i) {
-                                                return (
-                                                    <span key={assessment.uuid}>
-                                                        {i > 0 ? <br /> : null}
-                                                        {assessment.value} ({assessment.submitted_by.title})
-                                                    </span>
-                                                );
-                                            })}
-                                        </div>
+                                        {validAssessments.length ?
+                                            <div>
+                                                {validAssessments.map(function(assessment, i) {
+                                                    return (
+                                                        <span key={assessment.uuid}>
+                                                            {i > 0 ? <br /> : null}
+                                                            {assessment.value + ' (' + assessment.submitted_by.title + ')'}
+                                                        </span>
+                                                    );
+                                                })}
+                                            </div>
+                                        : <div>None</div>}
                                     </dd>
                                 </div>
                             </dl>
                         </Panel>
-                        : null}
-                        {this.cv.gdmUuid && (experimentalUserAssessed || userExperimental) ?
+                        {this.cv.gdmUuid ?
                             <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
+                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
+                                ownerNotAssessed={!(experimentalUserAssessed || userExperimental)} noSeg={false} />
                         : null}
                     </div>
                 </div>
