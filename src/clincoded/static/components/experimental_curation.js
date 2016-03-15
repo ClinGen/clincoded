@@ -533,8 +533,20 @@ var ExperimentalCuration = React.createClass({
     // Note, we have to do this after the component mounts because AJAX DB queries can't be
     // done from unmounted components.
     componentDidMount: function() {
-        this.cv.othersAssessed = false;
         this.loadData();
+    },
+
+    componentWillUnmount: function() {
+        this.cv.othersAssessed = false;
+    },
+
+    // Clear error state when either experimentalType or experimentalSubtype selection is changed
+    componentDidUpdate: function(prevProps, prevState) {
+        if (typeof prevState.experimentalType !== undefined && prevState.experimentalType !== this.state.experimentalType) {
+            this.setState({formErrors: []});
+        } else if (typeof prevState.experimentalSubtype !== undefined && prevState.experimentalSubtype !== this.state.experimentalSubtype) {
+            this.setState({formErrors: []});
+        }
     },
 
     // When the user changes the assessment value, this gets called
@@ -1243,6 +1255,20 @@ var ExperimentalCuration = React.createClass({
         var annotation = this.state.annotation;
         var pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
         var experimental = this.state.experimental;
+        var assessments = experimental && experimental.assessments && experimental.assessments.length ? experimental.assessments : [];
+        //var is_assessed =false; // filter out Not Assessed
+        var validAssessments = [];
+        _.map(assessments, assessment => {
+            if (assessment.value !== 'Not Assessed') {
+                validAssessments.push(assessment);
+            }
+        });
+        //for (var i in assessments) {
+        //    if (assessments[i].value !== 'Not Assessed') {
+        //        is_assessed = true;
+        //        break;
+        //    }
+        //}
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
@@ -1275,7 +1301,7 @@ var ExperimentalCuration = React.createClass({
                                 <h1>{(experimental ? 'Edit' : 'Curate') + ' Experimental Data Information'}</h1>
                                 <h2>
                                     {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
-                                    <span> // {this.state.experimentalName ? <span> Experiment {this.state.experimentalName}</span> : <span className="no-entry">No entry</span>} {this.state.experimentalType && this.state.experimentalType != 'none' ? <span>({this.state.experimentalType})</span> : null}</span>
+                                    <span> &#x2F;&#x2F; {this.state.experimentalName ? <span> Experiment {this.state.experimentalName}</span> : <span className="no-entry">No entry</span>} {this.state.experimentalType && this.state.experimentalType != 'none' ? <span>({this.state.experimentalType})</span> : null}</span>
                                 </h2>
                             </div>
                             <div className="row group-curation-content">
@@ -1320,10 +1346,34 @@ var ExperimentalCuration = React.createClass({
                                             </Panel></PanelGroup>
                                         : null}
                                         {this.state.experimentalNameVisible ?
-                                            <PanelGroup accordion>
-                                                <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker}
-                                                    updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
-                                            </PanelGroup>
+                                            <div>
+                                                <Panel panelClassName="panel-data">
+                                                    <dl className="dl-horizontal">
+                                                        <div>
+                                                            <dt>Assessments</dt>
+                                                            <dd>
+                                                                {validAssessments.length ?
+                                                                    <div>
+                                                                        {validAssessments.map(function(assessment, i) {
+                                                                            return (
+                                                                                <span key={assessment.uuid}>
+                                                                                    {i > 0 ? <br /> : null}
+                                                                                    {assessment.value+' ('+assessment.submitted_by.title+')'}
+                                                                                </span>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                : <div>None</div>}
+                                                            </dd>
+                                                        </div>
+                                                    </dl>
+                                                </Panel>
+
+                                                <PanelGroup accordion>
+                                                    <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker}
+                                                        updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
+                                                </PanelGroup>
+                                            </div>
                                         : null}
                                         <div className="curation-submit clearfix">
                                             {this.state.experimentalType != '' && this.state.experimentalType != 'none' && this.state.experimentalNameVisible ?
@@ -1368,12 +1418,12 @@ var ExperimentalNameType = function() {
                 inputDisabled={this.state.experimental!=null || this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Biochemical Function</option>
-                <option>Protein Interactions</option>
-                <option>Expression</option>
-                <option>Functional Alteration</option>
-                <option>Model Systems</option>
-                <option>Rescue</option>
+                <option value="Biochemical Function">Biochemical Function</option>
+                <option value="Protein Interactions">Protein Interactions</option>
+                <option value="Expression">Expression</option>
+                <option value="Functional Alteration">Functional Alteration</option>
+                <option value="Model Systems">Model Systems</option>
+                <option value="Rescue">Rescue</option>
             </Input>
             {!this.state.experimentalType || this.state.experimentalType == 'none' ?
                 <div className="col-sm-7 col-sm-offset-5">
@@ -1401,8 +1451,8 @@ var ExperimentalNameType = function() {
                     inputDisabled={this.state.experimental!=null || this.cv.othersAssessed} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>A. Gene(s) with same function implicated in same disease</option>
-                    <option>B. Gene function consistent with phenotype(s)</option>
+                    <option value="A. Gene(s) with same function implicated in same disease">A. Gene(s) with same function implicated in same disease</option>
+                    <option value="B. Gene function consistent with phenotype(s)">B. Gene function consistent with phenotype(s)</option>
                 </Input>
             : null}
             {this.state.experimentalType && this.state.experimentalType == 'Expression' ?
@@ -1412,8 +1462,8 @@ var ExperimentalNameType = function() {
                     inputDisabled={this.state.experimental!=null || this.cv.othersAssessed} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>A. Gene normally expressed in tissue relevant to the disease</option>
-                    <option>B. Altered expression in Patients</option>
+                    <option value="A. Gene normally expressed in tissue relevant to the disease">A. Gene normally expressed in tissue relevant to the disease</option>
+                    <option value="B. Altered expression in Patients">B. Altered expression in Patients</option>
                 </Input>
             : null}
             {this.state.experimentalNameVisible ?
@@ -1601,10 +1651,10 @@ var TypeProteinInteractions = function() {
                 value={proteinInteractions.interactionType} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>physical association (MI:0915)</option>
-                <option>genetic interaction (MI:0208)</option>
-                <option>negative genetic interaction (MI:0933)</option>
-                <option>positive genetic interaction (MI:0935)</option>
+                <option value="physical association (MI:0915)">physical association (MI:0915)</option>
+                <option value="genetic interaction (MI:0208)">genetic interaction (MI:0208)</option>
+                <option value="negative genetic interaction (MI:0933)">negative genetic interaction (MI:0933)</option>
+                <option value="positive genetic interaction (MI:0935)">positive genetic interaction (MI:0935)</option>
             </Input>
             <Input type="select" ref="experimentalInteractionDetection" label="Method by which interaction detected:"
                 error={this.getFormError('experimentalInteractionDetection')} clearError={this.clrFormErrors.bind(null, 'experimentalInteractionDetection')}
@@ -1613,15 +1663,15 @@ var TypeProteinInteractions = function() {
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>affinity chromatography technology (MI:0004)</option>,
-                <option>coimmunoprecipitation (MI:0019)</option>,
-                <option>comigration in gel electrophoresis (MI:0807)</option>,
-                <option>electron microscopy (MI:0040)</option>,
-                <option>protein cross-linking with a bifunctional reagent (MI:0031)</option>,
-                <option>pull down (MI:0096)</option>,
-                <option>synthetic genetic analysis (MI:0441)</option>,
-                <option>two hybrid (MI:0018)</option>,
-                <option>x-ray crystallography (MI:0114)</option>
+                <option value="affinity chromatography technology (MI:0004)">affinity chromatography technology (MI:0004)</option>
+                <option value="coimmunoprecipitation (MI:0019)">coimmunoprecipitation (MI:0019)</option>
+                <option value="comigration in gel electrophoresis (MI:0807)">comigration in gel electrophoresis (MI:0807)</option>
+                <option value="electron microscopy (MI:0040)">electron microscopy (MI:0040)</option>
+                <option value="protein cross-linking with a bifunctional reagent (MI:0031)">protein cross-linking with a bifunctional reagent (MI:0031)</option>
+                <option value="pull down (MI:0096)">pull down (MI:0096)</option>
+                <option value="synthetic genetic analysis (MI:0441)">synthetic genetic analysis (MI:0441)</option>
+                <option value="two hybrid (MI:0018)">two hybrid (MI:0018)</option>
+                <option value="x-ray crystallography (MI:0114)">x-ray crystallography (MI:0114)</option>
             </Input>
             <Input type="checkbox" ref="geneImplicatedInDisease" label="Has this gene or genes been implicated in the above disease?:"
                 error={this.getFormError('geneImplicatedInDisease')} clearError={this.clrFormErrors.bind(null, 'geneImplicatedInDisease')}
@@ -1761,8 +1811,8 @@ var TypeFunctionalAlteration = function() {
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Patient cells</option>
-                <option>Engineered equivalent</option>
+                <option value="Patient cells">Patient cells</option>
+                <option value="Engineered equivalent">Engineered equivalent</option>
             </Input>
             {this.state.functionalAlterationPCEE == 'Patient cells' ?
             <div>
@@ -1848,8 +1898,8 @@ var TypeModelSystems = function() {
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Animal model</option>
-                <option>Engineered equivalent</option>
+                <option value="Animal model">Animal model</option>
+                <option value="Engineered equivalent">Engineered equivalent</option>
             </Input>
             {this.state.modelSystemsNHACCM == 'Animal model' ?
             <div>
@@ -1860,24 +1910,24 @@ var TypeModelSystems = function() {
                     inputDisabled={this.cv.othersAssessed} required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Cat (Felis catus) 9685</option>
-                    <option>Chicken (Gallus gallus) 9031</option>
-                    <option>Chimpanzee (Pan troglodytes) 9598</option>
-                    <option>Cow (Bos taurus) 9913</option>
-                    <option>Dog (Canis lupus familaris) 9615</option>
-                    <option>Frog (Xenopus) 262014</option>
-                    <option>Fruit fly (Drosophila) 7215</option>
-                    <option>Gerbil (Gerbilinae) 10045</option>
-                    <option>Guinea pig (Cavia porcellus) 10141</option>
-                    <option>Hamster (Cricetinae) 10026</option>
-                    <option>Macaque (Macaca) 9539</option>
-                    <option>Mouse (Mus musculus) 10090</option>
-                    <option>Pig (Sus scrofa) 9823</option>
-                    <option>Rabbit (Oryctolagus crunicu) 9986</option>
-                    <option>Rat (Rattus norvegicus) 10116</option>
-                    <option>Round worm (Carnorhabditis elegans) 6239</option>
-                    <option>Sheep (Ovis aries) 9940</option>
-                    <option>Zebrafish (Daanio rerio) 7955</option>
+                    <option value="Cat (Felis catus) 9685">Cat (Felis catus) 9685</option>
+                    <option value="Chicken (Gallus gallus) 9031">Chicken (Gallus gallus) 9031</option>
+                    <option value="Chimpanzee (Pan troglodytes) 9598">Chimpanzee (Pan troglodytes) 9598</option>
+                    <option value="Cow (Bos taurus) 9913">Cow (Bos taurus) 9913</option>
+                    <option value="Dog (Canis lupus familaris) 9615">Dog (Canis lupus familaris) 9615</option>
+                    <option value="Frog (Xenopus) 262014">Frog (Xenopus) 262014</option>
+                    <option value="Fruit fly (Drosophila) 7215">Fruit fly (Drosophila) 7215</option>
+                    <option value="Gerbil (Gerbilinae) 10045">Gerbil (Gerbilinae) 10045</option>
+                    <option value="Guinea pig (Cavia porcellus) 10141">Guinea pig (Cavia porcellus) 10141</option>
+                    <option value="Hamster (Cricetinae) 10026">Hamster (Cricetinae) 10026</option>
+                    <option value="Macaque (Macaca) 9539">Macaque (Macaca) 9539</option>
+                    <option value="Mouse (Mus musculus) 10090">Mouse (Mus musculus) 10090</option>
+                    <option value="Pig (Sus scrofa) 9823">Pig (Sus scrofa) 9823</option>
+                    <option value="Rabbit (Oryctolagus crunicu) 9986">Rabbit (Oryctolagus crunicu) 9986</option>
+                    <option value="Rat (Rattus norvegicus) 10116">Rat (Rattus norvegicus) 10116</option>
+                    <option value="Round worm (Carnorhabditis elegans) 6239">Round worm (Carnorhabditis elegans) 6239</option>
+                    <option value="Sheep (Ovis aries) 9940">Sheep (Ovis aries) 9940</option>
+                    <option value="Zebrafish (Daanio rerio) 7955">Zebrafish (Daanio rerio) 7955</option>
                 </Input>
             </div>
             : null}
@@ -1979,8 +2029,8 @@ var TypeRescue = function() {
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Patient cells</option>
-                <option>Engineered equivalent</option>
+                <option value="Patient cells">Patient cells</option>
+                <option value="Engineered equivalent">Engineered equivalent</option>
             </Input>
             {this.state.rescuePCEE == 'Patient cells' ?
             <div>
@@ -2088,7 +2138,7 @@ var ExperimentalDataVariant = function() {
                                     <div>
                                         <dl className="dl-horizontal">
                                             <dt>ClinVar Preferred Title</dt>
-                                            <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                            <dd>{variant.clinvarVariantTitle}</dd>
                                         </dl>
                                     </div>
                                 : null }
@@ -2180,7 +2230,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar Variation ID is not available)</span>:</span>;
+        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar VariationID is not available)</span>:</span>;
     }
 });
 
@@ -2309,6 +2359,19 @@ var ExperimentalViewer = React.createClass({
     render: function() {
         var experimental = this.props.context;
         var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
+        //var is_assessed = false;
+        var validAssessments = [];
+        _.map(assessments, assessment => {
+            if (assessment.value !== 'Not Assessed') {
+                validAssessments.push(assessment);
+            }
+        });
+        //for (var i in assessments) {
+        //    if (assessments[i].value !== 'Not Assessed') {
+        //        is_assessed = true;
+        //        break;
+        //    }
+        //}
         var user = this.props.session && this.props.session.user_properties;
         var userExperimental = user && experimental && experimental.submitted_by ? user.uuid === experimental.submitted_by.uuid : false;
         var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the experimental data, but the experimental data's owner assessed it
@@ -2341,7 +2404,7 @@ var ExperimentalViewer = React.createClass({
                             <h1>View Experimental Data {experimental.label}</h1>
                             <h2>
                                 {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
-                                <span> // Experimental Data {experimental.label} ({experimental.evidenceType})</span>
+                                <span> &#x2F;&#x2F; Experimental Data {experimental.label} ({experimental.evidenceType})</span>
                             </h2>
                         </div>
 
@@ -2670,13 +2733,13 @@ var ExperimentalViewer = React.createClass({
                         <Panel title="Associated Variants" panelClassName="panel-data">
                             {experimental.variants.map(function(variant, i) {
                                 return (
-                                    <div className="variant-view-panel">
+                                    <div key={'variant' + i} className="variant-view-panel">
                                         <h5>Variant {i + 1}</h5>
                                         {variant.clinvarVariantId ?
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar VariationID</dt>
-                                                    <dd style={{'paddingLeft':'22px'}}><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                    <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2684,7 +2747,7 @@ var ExperimentalViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar Preferred Title</dt>
-                                                    <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                                    <dd>{variant.clinvarVariantTitle}</dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2701,30 +2764,31 @@ var ExperimentalViewer = React.createClass({
                             })}
                         </Panel>
                         : null}
-                        {assessments && assessments.length ?
                         <Panel panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
                                     <dt>Assessments</dt>
                                     <dd>
-                                        <div>
-                                            {assessments.map(function(assessment, i) {
-                                                return (
-                                                    <span key={assessment.uuid}>
-                                                        {i > 0 ? <br /> : null}
-                                                        {assessment.value} ({assessment.submitted_by.title})
-                                                    </span>
-                                                );
-                                            })}
-                                        </div>
+                                        {validAssessments.length ?
+                                            <div>
+                                                {validAssessments.map(function(assessment, i) {
+                                                    return (
+                                                        <span key={assessment.uuid}>
+                                                            {i > 0 ? <br /> : null}
+                                                            {assessment.value + ' (' + assessment.submitted_by.title + ')'}
+                                                        </span>
+                                                    );
+                                                })}
+                                            </div>
+                                        : <div>None</div>}
                                     </dd>
                                 </div>
                             </dl>
                         </Panel>
-                        : null}
-                        {this.cv.gdmUuid && (experimentalUserAssessed || userExperimental) ?
+                        {this.cv.gdmUuid ?
                             <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
+                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
+                                ownerNotAssessed={!(experimentalUserAssessed || userExperimental)} noSeg={false} />
                         : null}
                     </div>
                 </div>

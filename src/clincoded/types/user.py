@@ -23,8 +23,8 @@ from contentbase import (
     name='users',
     unique_key='user:email',
     properties={
-        'title': 'DCC Users',
-        'description': 'Listing of current ENCODE DCC users',
+        'title': 'ClinGen Curation Users',
+        'description': 'Listing of current ClinGen Curation users',
     },
     acl=[
         (Allow, 'group.admin', ['list', 'view_details']),

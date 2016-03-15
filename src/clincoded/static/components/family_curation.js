@@ -109,7 +109,8 @@ var FamilyCuration = React.createClass({
             variantRequired: null, // boolean for set up requirement of variant if proband individual data entered
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            existedOrphanetId: null // user-supplied value in Orphanet id input field
         };
     },
 
@@ -124,6 +125,7 @@ var FamilyCuration = React.createClass({
             this.setState({familyName: this.refs[ref].getValue()});
         } else if (ref === 'orphanetid' && this.refs[ref].getValue()) {
             this.setState({orpha: true});
+            this.setState({existedOrphanetId: this.refs[ref].getValue().toUpperCase()});
         } else if (ref === 'orphanetid') {
             this.setState({orpha: false});
         } else if (ref.substring(0, 3) === 'VAR') {
@@ -193,9 +195,12 @@ var FamilyCuration = React.createClass({
             }
 
             // Now change the state of the assessment dropdown if needed
+            // Also force assessment value goes back to Not Assessed when deleting all segregation data
             var filled = Object.keys(this.cv.filledSegregations).length > 0;
             if (this.state.segregationFilled !== filled) {
                 this.setState({segregationFilled: filled});
+                this.cv.assessmentTracker.currentVal = 'Not Assessed';
+                this.updateAssessmentValue(this.cv.assessmentTracker, 'Not Assessed');
             }
         }
     },
@@ -227,6 +232,7 @@ var FamilyCuration = React.createClass({
                     });
                     this.refs['orphanetid'].setValue(orphanetVal.join(', '));
                     this.setState({orpha: true});
+                    this.setState({existedOrphanetId: orphanetVal.join(', ').toUpperCase()});
                 }
                 else if (item === 'phenotype') {
                     hpoIds = associatedGroups.map(function(associatedGroup, i) {
@@ -1187,9 +1193,21 @@ var FamilyCuration = React.createClass({
     // from the query string and retrieve the corresponding objects from the DB, if they exist. Note, we have to do this after
     // the component mounts because AJAX DB queries can't be done from unmounted components.
     componentDidMount: function() {
-        this.cv.othersAssessed = false;
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
         this.loadData();
+    },
+
+    componentWillUnmount: function() {
+        // Flush family-specific segregation data
+        if (this.cv.segregationAssessed && this.cv.segregationAssessed != false) {
+            this.cv.segregationAssessed = false;
+        }
+        if (this.cv.filledSegregations && Object.keys(this.cv.filledSegregations).length > 0) {
+            this.cv.filledSegregations = {};
+        }
+        if (this.cv.othersAssessed && this.cv.othersAssessed != false) {
+            this.cv.othersAssessed = false;
+        }
     },
 
     render: function() {
@@ -1202,6 +1220,19 @@ var FamilyCuration = React.createClass({
         var method = (family && family.method && Object.keys(family.method).length) ? family.method : {};
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        var assessments = [];
+        var userAssessmentValue = null;
+        if (family && family.segregation && family.segregation.assessments && family.segregation.assessments.length) {
+            _.map(family.segregation.assessments, assessment => {
+                if (assessment.value !== 'Not Assessed') {
+                    assessments.push(assessment);
+                    if (assessment.submitted_by.uuid === session.user_properties.uuid) {
+                        userAssessmentValue = assessment.value;
+                    }
+                }
+            });
+        }
+        //var is_owner = session && family && (session.user_properties.uuid === family.submitted_by.uuid) ? true : false;
 
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
@@ -1220,6 +1251,12 @@ var FamilyCuration = React.createClass({
                 : '/family-submit/?gdm=' + gdm.uuid + (family ? '&family=' + family.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
         }
 
+        //if (!this.state.segregationFilled && (this.cv.assessmentTracker.currentVal !== 'Not Assessed' || !userAssessmentValue)) {
+        //    this.cv.assessmentTracker.currentVal = 'Not Assessed';
+        //} else if (userAssessmentValue) {
+        //    this.cv.assessmentTracker.currentVal = userAssessmentValue;
+        //}
+
         return (
             <div>
                 {(!this.queryValues.familyUuid || this.state.family) ?
@@ -1236,9 +1273,9 @@ var FamilyCuration = React.createClass({
                                 <h2>
                                     {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     {groups && groups.length ?
-                                        <span> // Group {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                        <span> &#x2F;&#x2F; Group {groups.map(function(group, i) { return <span key={group['@id']}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
                                     : null}
-                                    <span> // {this.state.familyName ? <span>Family {this.state.familyName}</span> : <span className="no-entry">No entry</span>}</span>
+                                    <span> &#x2F;&#x2F; {this.state.familyName ? <span>Family {this.state.familyName}</span> : <span className="no-entry">No entry</span>}</span>
                                 </h2>
                             </div>
                             <div className="row group-curation-content">
@@ -1262,6 +1299,7 @@ var FamilyCuration = React.createClass({
                                                 {methods.render.call(this, method, true)}
                                             </Panel>
                                         </PanelGroup>
+
                                         {!this.cv.segregationAssessed ?
                                             <PanelGroup accordion>
                                                 <Panel title="Family — Segregation" open>
@@ -1277,10 +1315,30 @@ var FamilyCuration = React.createClass({
                                                 : null}
                                             </div>
                                         }
+
+                                        <Panel panelClassName="panel-data">
+                                            <dl className="dl-horizontal">
+                                                <dt>Assessments</dt>
+                                                <dd>
+                                                    {assessments.length ? assessments.map(function(assessment, i) {
+                                                        return (
+                                                            <span key={assessment.uuid}>
+                                                                {assessment.value} ({assessment.submitted_by.title})
+                                                                {i < assessments.length-1 ? <br /> : null}
+                                                            </span>
+                                                        );})
+                                                    :
+                                                    <div>None</div>
+                                                    }
+                                                </dd>
+                                            </dl>
+                                        </Panel>
+
                                         <PanelGroup accordion>
-                                            <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} disabled={!this.state.segregationFilled}
-                                                updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
+                                            <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} noSeg={this.state.segregationFilled ? false : true}
+                                                updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} ownerNotAssessed={false} accordion open />
                                         </PanelGroup>
+
                                         <PanelGroup accordion>
                                             <Panel title="Family — Variant(s) Segregating with Proband" open>
                                                 {FamilyVariant.call(this)}
@@ -1427,7 +1485,7 @@ var FamilyCommonDiseases = function() {
 // HTML labels for inputs follow.
 var LabelOrphanetId = React.createClass({
     render: function() {
-        return <span>Disease(s) in Common <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term)</span>:</span>;
+        return <span>Disease(s) in Common <span className="normal">(<a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term)</span>:</span>;
     }
 });
 
@@ -1440,8 +1498,8 @@ var LabelHpoId = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                {this.props.not ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+                <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
             </span>
         );
     }
@@ -1456,8 +1514,8 @@ var LabelPhenoTerms = React.createClass({
     render: function() {
         return (
             <span>
-                {this.props.not ? <span style={{color: 'red'}}>NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                <span style={{fontWeight: 'normal'}}>(free text)</span>:
+                {this.props.not ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+                <span className="normal">(free text)</span>:
             </span>
         );
     }
@@ -1488,21 +1546,21 @@ var FamilyDemographics = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Hispanic or Latino</option>
-                <option>Not Hispanic or Latino</option>
-                <option>Unknown</option>
+                <option value="Hispanic or Latino">Hispanic or Latino</option>
+                <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
+                <option value="Unknown">Unknown</option>
             </Input>
             <Input type="select" ref="race" label="Race:" defaultValue="none" value={family && family.race}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>American Indian or Alaska Native</option>
-                <option>Asian</option>
-                <option>Black</option>
-                <option>Native Hawaiian or Other Pacific Islander</option>
-                <option>White</option>
-                <option>Mixed</option>
-                <option>Unknown</option>
+                <option value="American Indian or Alaska Native">American Indian or Alaska Native</option>
+                <option value="Asian">Asian</option>
+                <option value="Black">Black</option>
+                <option value="Native Hawaiian or Other Pacific Islander">Native Hawaiian or Other Pacific Islander</option>
+                <option value="White">White</option>
+                <option value="Mixed">Mixed</option>
+                <option value="Unknown">Unknown</option>
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
             <div className="demographics-age-range">
@@ -1510,10 +1568,10 @@ var FamilyDemographics = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Onset</option>
-                    <option>Report</option>
-                    <option>Diagnosis</option>
-                    <option>Death</option>
+                    <option value="Onset">Onset</option>
+                    <option value="Report">Report</option>
+                    <option value="Diagnosis">Diagnosis</option>
+                    <option value="Death">Death</option>
                 </Input>
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
                     <Input type="number" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" maxVal={150}
@@ -1526,10 +1584,10 @@ var FamilyDemographics = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Days</option>
-                    <option>Weeks</option>
-                    <option>Months</option>
-                    <option>Years</option>
+                    <option value="Days">Days</option>
+                    <option value="Weeks">Weeks</option>
+                    <option value="Months">Months</option>
+                    <option value="Years">Years</option>
                 </Input>
             </div>
         </div>
@@ -1557,8 +1615,8 @@ var FamilySegregation = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
             </Input>
             <Input type="number" ref="SEGnocases" label="# cases (phenotype positive):" value={segregation.numberOfCases} minVal={1} handleChange={this.handleChange}
                 error={this.getFormError('SEGnocases')} clearError={this.clrFormErrors.bind(null, 'SEGnocases')}
@@ -1567,16 +1625,16 @@ var FamilySegregation = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Inferred</option>
-                <option>Confirmed</option>
+                <option value="Inferred">Inferred</option>
+                <option value="Confirmed">Confirmed</option>
             </Input>
             <Input type="select" ref="SEGunaffectedcarriers" label="# parents who are unaffected carriers" defaultValue="none" value={segregation.numberOfParentsUnaffectedCarriers} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>0</option>
-                <option>1</option>
-                <option>2</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
             </Input>
             <Input type="number" ref="SEGnoaffected" label="# affected individuals:" value={segregation.numberOfAffectedAlleles} handleChange={this.handleChange}
                 error={this.getFormError('SEGnoaffected')} clearError={this.clrFormErrors.bind(null, 'SEGnoaffected')}
@@ -1597,8 +1655,8 @@ var FamilySegregation = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option>Yes</option>
-                <option>No</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
             </Input>
             <Input type="textarea" ref="SEGaddedsegregationinfo" label="Additional Segregation Information:" rows="5" value={segregation.additionalInformation} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1664,7 +1722,7 @@ var FamilyVariant = function() {
                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                             updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
-                            handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                            handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group other-variant-desc" />
                         {curator.renderMutalyzerLink()}
                     </div>
                 );
@@ -1678,7 +1736,7 @@ var FamilyVariant = function() {
                     {this.state.orpha ?
                         <div className="form-group">
                             <div className="col-sm-5"><strong className="pull-right">Orphanet Disease(s) Associated with Family:</strong></div>
-                            <div className="col-sm-7">{this.refs['orphanetid'].getValue().toUpperCase()}</div>
+                            <div className="col-sm-7">{this.state.existedOrphanetId}</div>
                         </div>
                         : null
                     }
@@ -1727,7 +1785,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar Variation ID is not available):</span></span>;
+        return <span>Other description <span className="normal">(only when ClinVar VariationID is not available):</span></span>;
     }
 });
 
@@ -1904,6 +1962,20 @@ var FamilyViewer = React.createClass({
         var groups = family.associatedGroups;
         var segregation = family.segregation;
         var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
+        var validAssessments = [];
+        _.map(assessments, assessment => {
+            if (assessment.value !== 'Not Assessed') {
+                validAssessments.push(assessment);
+            }
+        });
+        //var is_assessed = false; // filter out Not Assessed in assessments
+        //for(var i=0; i< assessments.length; i++) {
+        //    if (assessments[i].value !== 'Not Assessed') {
+        //        is_assessed = true;
+        //        break;
+        //    }
+        //}
+
         var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
         var user = this.props.session && this.props.session.user_properties;
         var userFamily = user && family && family.submitted_by ? user.uuid === family.submitted_by.uuid : false;
@@ -1941,9 +2013,9 @@ var FamilyViewer = React.createClass({
                             <h2>
                                 {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                 {groups && groups.length ?
-                                    <span> // Group {groups.map(function(group, i) { return <span>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
+                                    <span> &#x2F;&#x2F; Group {groups.map(function(group, i) { return <span key={group['@id']}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
                                 : null}
-                                <span> // Family {family.label}</span>
+                                <span> &#x2F;&#x2F; Family {family.label}</span>
                             </h2>
                         </div>
                         <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
@@ -2076,10 +2148,33 @@ var FamilyViewer = React.createClass({
 
                         {FamilySegregationViewer(segregation, assessments, true)}
 
-                        {this.cv.gdmUuid && (familyUserAssessed || userFamily) && haveSegregation ?
-                            <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg} />
+                        {this.cv.gdmUuid ?
+                            <Panel panelClassName="panel-data">
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>Assessments</dt>
+                                        <dd>
+                                            {validAssessments.length ?
+                                                <div>
+                                                    {validAssessments.map(function(assessment, i) {
+                                                        return (
+                                                            <span key={assessment.uuid}>
+                                                                {i > 0 ? <br /> : null}
+                                                                {assessment.value+' ('+assessment.submitted_by.title+')'}
+                                                            </span>
+                                                        );
+                                                    })}
+                                                </div>
+                                            : <div>None</div>}
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </Panel>
                         : null}
+
+                        <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
+                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
+                            noSeg={!haveSegregation} ownerNotAssessed={userFamily ? false : !familyUserAssessed} />
 
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                             {variants.map(function(variant, i) {
@@ -2090,7 +2185,7 @@ var FamilyViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar VariationID</dt>
-                                                    <dd style={{'paddingLeft':'22px'}}><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                    <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2098,7 +2193,7 @@ var FamilyViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar Preferred Title</dt>
-                                                    <dd style={{'word-wrap':'break-word', 'word-break':'break-all'}}>{variant.clinvarVariantTitle}</dd>
+                                                    <dd>{variant.clinvarVariantTitle}</dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2218,26 +2313,6 @@ var FamilySegregationViewer = function(segregation, assessments, open) {
                 <div>
                     <dt>Additional Segregation information</dt>
                     <dd>{segregation && segregation.additionalInformation}</dd>
-                </div>
-
-                <div>
-                    <dt>Assessments</dt>
-                    <dd>
-                        {assessments && assessments.length ?
-                            <div>
-                                {assessments.map(function(assessment, i) {
-                                    return (
-                                        <span key={assessment.uuid}>
-                                            {i > 0 ? <br /> : null}
-                                            {assessment.value} ({assessment.submitted_by.title})
-                                        </span>
-                                    );
-                                })}
-                            </div>
-                        :
-                            <span>None</span>
-                        }
-                    </dd>
                 </div>
             </dl>
         </Panel>

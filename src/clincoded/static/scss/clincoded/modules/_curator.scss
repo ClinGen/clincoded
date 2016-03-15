@@ -344,15 +344,25 @@
 .variant-panel {
     padding-top: 40px;
     border-top: 1px solid #c0c0c0;
-    padding-bottom: 40px;
+    padding-bottom: 15px;
 
     .mutalyzer-link {
-        margin-top: -20px;
+        float: none;
+        margin-bottom: 0;
+    }
+
+    .other-variant-desc {
+        margin-bottom: 0;
     }
 
     .clinvar-preferred-title {
         word-break:break-all;
         word-wrap: break-word;
+    }
+
+    &:first-child {
+        padding-top: 0;
+        border-top: none;
     }
 }
 
@@ -378,8 +388,6 @@
     border-top: 1px solid #c0c0c0;
 }
 
-
-
 .viewer-titles {
     h1 {
         margin-bottom: 10px;
@@ -388,6 +396,41 @@
     h2 {
         margin-top: 0;
         font-size: 1.3rem;
+    }
+
+    .pmid-association-header {
+        padding: 2px 0;
+    }
+
+    .variant-association-header {
+        padding-left: 15px;
+
+        dt {
+            font-weight: normal;
+            padding-right: 5px;
+        }
+
+        dd {
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+    }
+}
+
+.variant-title-ellipsis {
+    overflow: hidden;
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding-bottom: 3px;
+
+    a {
+        border-bottom: 1px dotted #337ab7;
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: none;
+        }
     }
 }
 
@@ -444,7 +487,6 @@
     color: #909090;
 }
 
-
 // Variant Header Styles
 .variant-header {
     margin-top: 2px;
@@ -474,6 +516,10 @@
             right: 3px;
             font-size: 1rem;
         }
+    }
+
+    .assessed {
+        padding-right: 15px;
     }
 }
 
@@ -845,4 +891,29 @@
     margin: 10px auto 10px auto;
     font-weight: bold;
     word-wrap: break-word;
+}
+
+.form-group {
+    .control-label {
+        .normal {
+            font-weight: normal;
+        }
+        .emphasis {
+            color: red;
+        }
+    }
+}
+
+.panel-data {
+    .variant-view-panel {
+        dt {
+            text-align: left;
+            width: 172px;
+        }
+
+        dd {
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+    }
 }

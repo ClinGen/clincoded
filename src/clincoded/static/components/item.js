@@ -8,7 +8,6 @@ var FileInput = require('./inputs').FileInput;
 var audit = require('./audit');
 var _ = require('underscore');
 
-var cx = require('react/lib/cx');
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
