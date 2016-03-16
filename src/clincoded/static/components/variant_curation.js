@@ -402,7 +402,7 @@ var VariantCuration = React.createClass({
                         {curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null}
                         <VariantAssociationsHeader gdm={gdm} variant={variant} />
                         {variant ?
-                            <h2>{variant.clinvarVariantId ? (
+                            <h2>{variant.clinvarVariantId ?
                                 <div className="row variant-association-header">
                                     <dl className="dl-horizontal">
                                         <dt>{gdm && annotation ? <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}><i className="icon icon-briefcase"></i></a> : null} &#x2F;&#x2F; VariationID</dt>
@@ -413,8 +413,14 @@ var VariantCuration = React.createClass({
                                         <dd>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</dd>
                                     </dl>
                                 </div>
-                            )
-                            : <span>{gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null}</span>}</h2>
+                            :
+                                <div className="row variant-association-header">
+                                    <dl className="dl-horizontal">
+                                        <dt>{gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null} &#x2F;&#x2F; Variant Description</dt>
+                                        <dd>{variant.otherDescription ? variant.otherDescription : null}</dd>
+                                    </dl>
+                                </div>
+                            }</h2>
                         : null}
                     </div>
                     <div className="row group-curation-content">
