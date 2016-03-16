@@ -137,13 +137,13 @@ module.exports.Persona = {
         }
         var request = fetch(url, options);
         request.xhr_begin = 1 * new Date();
-        request.then(response => {
+        request.then(function(response) {
             request.xhr_end = 1 * new Date();
             var stats_header = response.headers.get('X-Stats') || '';
             request.server_stats = require('querystring').parse(stats_header);
             request.etag = response.headers.get('ETag');
             this.extractSessionCookie();
-        });
+        }.bind(this));
         return request;
     },
 

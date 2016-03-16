@@ -1,7 +1,5 @@
 'use strict';
-jest.mock('scriptjs');
-jest.dontMock('es6-promise');
-global.Promise = require('es6-promise').Promise;
+require('jest-runtime').mock('scriptjs');
 
 if (window.DOMParser === undefined) {
     // jsdom
