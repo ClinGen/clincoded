@@ -386,7 +386,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
 
                             return (
                                 <div className="col-sm-6 col-md-6 col-lg-4" key={variant.uuid}>
-                                    <a className={"btn btn-primary btn-xs variant-title-ellipsis" + (inCurrentGdm ? ' assessed' : '')}
+                                    <a className={"btn btn-primary btn-xs title-ellipsis" + (inCurrentGdm ? ' assessed' : '')}
                                         href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}
                                         title={variantName}>
                                         {variantName}
@@ -638,7 +638,7 @@ var renderGroup = function(group, gdm, annotation, curatorMatch) {
 
     return (
         <div className="panel-evidence-group">
-            <h5>{group.label}</h5>
+            <h5><span className="title-ellipsis dotted" title={group.label}>{group.label}</span></h5>
             <div className="evidence-curation-info">
                 {group.submitted_by ?
                     <p className="evidence-curation-info">{group.submitted_by.title}</p>
@@ -664,7 +664,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
 
     return (
         <div className="panel-evidence-group">
-            <h5>{family.label}</h5>
+            <h5><span className="title-ellipsis dotted" title={family.label}>{family.label}</span></h5>
             <div className="evidence-curation-info">
                 {family.submitted_by ?
                     <p className="evidence-curation-info">{family.submitted_by.title}</p>
@@ -678,7 +678,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                         return (
                             <span key={i}>
                                 {i > 0 ? ', ' : ''}
-                                <a href={group['@id']} title="View group in a new tab">{group.label}</a>
+                                <a href={group['@id']} title="View group in a new tab" className="title-ellipsis title-ellipsis-short">{group.label}</a>
                             </span>
                         );
                     })}
@@ -708,7 +708,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
 
     return (
         <div className="panel-evidence-group">
-            <h5>{individual.label}{individual.proband ? <i className="icon icon-proband"></i> : null}</h5>
+            <h5><span className="title-ellipsis title-ellipsis-short dotted" title={individual.label}>{individual.label}</span>{individual.proband ? <i className="icon icon-proband"></i> : null}</h5>
             <div className="evidence-curation-info">
                 {individual.submitted_by ?
                     <p className="evidence-curation-info">{individual.submitted_by.title}</p>
@@ -722,7 +722,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                         return (
                             <span key={group.uuid}>
                                 {i++ > 0 ? ', ' : ''}
-                                <a href={group['@id']} title="View group in a new tab">{group.label}</a>
+                                <a href={group['@id']} title="View group in a new tab" className="title-ellipsis title-ellipsis-short">{group.label}</a>
                             </span>
                         );
                     })}
@@ -733,13 +733,13 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                                     return (
                                         <span key={group.uuid}>
                                             {i++ > 0 ? ', ' : ''}
-                                            <a href={group['@id']} title="View group in a new tab">{group.label}</a>
+                                            <a href={group['@id']} title="View group in a new tab" className="title-ellipsis title-ellipsis-short">{group.label}</a>
                                         </span>
                                     );
                                 })}
                                 <span key={family.uuid}>
                                     {i++ > 0 ? ', ' : ''}
-                                    <a href={family['@id'] + '?gdm=' + gdm.uuid} title="View family in a new tab">{family.label}</a>
+                                    <a href={family['@id'] + '?gdm=' + gdm.uuid} title="View family in a new tab" className="title-ellipsis title-ellipsis-short">{family.label}</a>
                                 </span>
                             </span>
                         );
@@ -782,7 +782,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
 
     return (
         <div className="panel-evidence-group" key={experimental.uuid}>
-            <h5>{experimental.label}</h5>
+            <h5><span className="title-ellipsis dotted" title={experimental.label}>{experimental.label}</span></h5>
             {experimental.evidenceType}{subtype}
             <div className="evidence-curation-info">
                 {experimental.submitted_by ?
@@ -826,7 +826,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
 
     return (
         <div className="panel-evidence-group">
-            <h5 className="variant-title-ellipsis"><a title={variantTitle}>{variantTitle}</a></h5>
+            <h5><span className="title-ellipsis dotted" title={variantTitle}>{variantTitle}</span></h5>
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
                     <p className="evidence-curation-info">{variant.submitted_by.title}</p>
@@ -842,7 +842,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
                         return (
                             <span key={i}>
                                 {i > 0 ? ', ' : ''}
-                                <a href={association['@id']} title={'View ' + associationType + ' in a new tab'}>{association.label}</a>
+                                <a href={association['@id']} title={'View ' + associationType + ' in a new tab'} className="title-ellipsis title-ellipsis-short">{association.label}</a>
                                 {probandIndividual ? <i className="icon icon-proband"></i> : null}
                             </span>
                         );
