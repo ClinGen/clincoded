@@ -416,7 +416,10 @@ var VariantCuration = React.createClass({
                             :
                                 <div className="row variant-association-header">
                                     <dl className="dl-horizontal">
-                                        <dt>{gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null} &#x2F;&#x2F; Variant Description</dt>
+                                        {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
+                                    </dl>
+                                    <dl className="dl-horizontal">
+                                        <dt>Other Description</dt>
                                         <dd>{variant.otherDescription ? variant.otherDescription : null}</dd>
                                     </dl>
                                 </div>
