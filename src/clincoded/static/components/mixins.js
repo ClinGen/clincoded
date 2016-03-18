@@ -116,6 +116,7 @@ module.exports.Persona = {
     },
 
     fetch: function (url, options) {
+        var context = this;
         options = _.extend({credentials: 'same-origin'}, options);
         var http_method = options.method || 'GET';
         if (!(http_method === 'GET' || http_method === 'HEAD')) {
@@ -137,13 +138,13 @@ module.exports.Persona = {
         }
         var request = fetch(url, options);
         request.xhr_begin = 1 * new Date();
-        request.then(function(response) {
+        request.then(response => {
             request.xhr_end = 1 * new Date();
             var stats_header = response.headers.get('X-Stats') || '';
             request.server_stats = require('querystring').parse(stats_header);
             request.etag = response.headers.get('ETag');
-            this.extractSessionCookie();
-        }.bind(this));
+            context.extractSessionCookie();
+        });
         return request;
     },
 
