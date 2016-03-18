@@ -146,11 +146,11 @@ output:
 runcmd:
 # Ideally this would build as a different user so clincoded only has read
 # permissions
-- set -e
+- set -ex
 - echo "America/Los_Angeles" | sudo tee /etc/timezone
 - sudo dpkg-reconfigure --frontend noninteractive tzdata
 - sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
-- wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - 
+- wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 - sudo apt-get update
 - sudo apt-get -y install postgresql-9.4
 - update-rc.d elasticsearch defaults
@@ -176,7 +176,7 @@ runcmd:
 # Restore DB
 # (load data from s3)
 - if test "%(BACKUPDB)s" = "s3_data"
-- then 
+- then
 -   echo "====== restoring data from backup"
 -   /etc/init.d/postgresql stop
 -   sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-fetch /var/lib/postgresql/9.4/main LATEST
@@ -209,16 +209,14 @@ runcmd:
 - a2dissite 000-default
 - a2enconf logging
 - a2disconf charset
-- a2disconf javascript-common
+# - a2disconf javascript-common
 - a2disconf localized-error-pages
 - a2disconf other-vhosts-access-log
 - a2disconf serve-cgi-bin
-#TEMP for inital tests --commented out
-# - if test "%(ROLE)s" = "demo"
-# - then
-# -   sudo -u clincoded bin/batchupgrade production.ini --app-name app
-# - fi
-#/TEMP
+- if test "%(ROLE)s" = "demo"
+- then
+-   sudo -u clincoded bin/batchupgrade production.ini --app-name app
+- fi
 # - sleep 10
 # - sudo -u postgres echo "include 'master.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
 # - pg_ctlcluster 9.4 main reload

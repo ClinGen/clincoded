@@ -1293,7 +1293,7 @@
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
-        "last_name": "Dalton",
+        "last_name": "Dalton2",
         "submits_for": [
             "/labs/curator/"
         ],
@@ -1681,6 +1681,36 @@
         "first_name": "Jimmy",
         "last_name": "Zhen",
         "uuid": "11db89f3-79b3-43a6-ad38-cd29a5349422",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "amilosav@bcm.edu",
+        "first_name": "Aleksandar",
+        "last_name": "Milosavljevic",
+        "uuid": "55400018-3a9f-4378-b9eb-a2028341c4fa",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "catherinefletcher@nhs.net",
+        "first_name": "Katie",
+        "last_name": "Francis",
+        "uuid": "5a91e695-d92d-414b-8b44-fd184e6b923d",
         "groups": [
             "curator"
         ],

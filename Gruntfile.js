@@ -1,5 +1,12 @@
 'use strict';
 
+if (process.env.NODE_ENV == 'production'){
+    console.log("\n****** PRODUCTION ENVIRONMENT ******\n");
+}
+
+//eslint directive to ignore "undefined" global variables 
+/* global __dirname process */
+
 module.exports = function(grunt) {
     var path = require('path');
 
@@ -23,7 +30,7 @@ module.exports = function(grunt) {
                 require: [
                     'brace',
                     'brace/mode/json',
-                    'brace/theme/solarized_light',
+                    'brace/theme/solarized_light'
                 ],
                 plugin: [
                     ['minifyify', {
@@ -31,23 +38,23 @@ module.exports = function(grunt) {
                         map: 'brace.js.map',
                         output: './src/clincoded/static/build/brace.js.map',
                         compressPath: compressPath,
-                        uglify: {mangle: process.env.NODE_ENV == 'production'},
-                    }],
-                ],
+                        uglify: {mangle: process.env.NODE_ENV == 'production'}
+                    }]
+                ]
             },
             inline: {
                 dest: './src/clincoded/static/build/inline.js',
                 src: [
-                    './src/clincoded/static/inline.js',
+                    './src/clincoded/static/inline.js'
                 ],
                 require: [
                     'scriptjs',
-                    'google-analytics',
+                    'google-analytics'
                 ],
                 transform: [
                     ['babelify', {sourceMaps: true, babelrc: true}],
                     'brfs',
-                    'envify',
+                    'envify'
                 ],
                 plugin: [
                     ['minifyify', {
@@ -55,9 +62,9 @@ module.exports = function(grunt) {
                         map: '/static/build/inline.js.map',
                         output: './src/clincoded/static/build/inline.js.map',
                         compressPath: compressPath,
-                        uglify: {mangle: process.env.NODE_ENV == 'production'},
-                    }],
-                ],
+                        uglify: {mangle: process.env.NODE_ENV == 'production'}
+                    }]
+                ]
             },
             browser: {
                 dest: './src/clincoded/static/build/bundle.js',
@@ -69,19 +76,19 @@ module.exports = function(grunt) {
                     './src/clincoded/static/libs/compat.js', // The shims should execute first
                     './src/clincoded/static/libs/sticky_header.js',
                     './src/clincoded/static/libs/respond.js',
-                    './src/clincoded/static/browser.js',
+                    './src/clincoded/static/browser.js'
                 ],
                 external: [
                     'brace',
                     'brace/mode/json',
                     'brace/theme/solarized_light',
                     'scriptjs',
-                    'google-analytics',
+                    'google-analytics'
                 ],
                 transform: [
                     ['babelify', {sourceMaps: true, babelrc: true}],
                     'brfs',
-                    'envify',
+                    'envify'
                 ],
                 plugin: [
                     ['minifyify', {
@@ -89,21 +96,21 @@ module.exports = function(grunt) {
                         map: 'bundle.js.map',
                         output: './src/clincoded/static/build/bundle.js.map',
                         compressPath: compressPath,
-                        uglify: {mangle: process.env.NODE_ENV == 'production'},
-                    }],
-                ],
+                        uglify: {mangle: process.env.NODE_ENV == 'production'}
+                    }]
+                ]
             },
             server: {
                 dest: './src/clincoded/static/build/renderer.js',
                 src: ['./src/clincoded/static/server.js'],
                 options: {
                     builtins: false,
-                    detectGlobals: false,
+                    detectGlobals: false
                 },
                 transform: [
                     ['babelify', {sourceMaps: true, babelrc: true}],
                     'brfs',
-                    'envify',
+                    'envify'
                 ],
                 plugin: [
                     ['minifyify', {
@@ -111,32 +118,69 @@ module.exports = function(grunt) {
                         map:'renderer.js.map',
                         output: './src/clincoded/static/build/renderer.js.map',
                         compressPath: compressPath,
-                        uglify: {mangle: process.env.NODE_ENV == 'production'},
-                    }],
+                        uglify: {mangle: process.env.NODE_ENV == 'production'}
+                    }]
                 ],
                 external: [
                     'assert',
                     'brace',
                     'brace/mode/json',
                     'brace/theme/solarized_light',
-                    'source-map-support',
+                    'source-map-support'
                 ],
                 ignore: [
                     'jquery',
                     'scriptjs',
                     'google-analytics',
-                    'ckeditor',
-                ],
-            },
+                    'ckeditor'
+                ]
+            }
         },
         copy: {
             ckeditor: {
                 expand: true,
                 cwd: 'node_modules/node-ckeditor',
                 src: 'ckeditor/**',
-                dest: 'src/clincoded/static/build/',
+                dest: 'src/clincoded/static/build/'
             }
         },
+        filerev: {
+            options: {
+                algorithm: 'md5',
+                length: 8
+            },
+            css: {
+                src: ['./src/clincoded/static/css/style.css'],
+                dest: './src/clincoded/static/css'
+            },
+            js: {
+                src: ['./src/clincoded/static/build/bundle.js'],
+                dest: './src/clincoded/static/build/'
+            }
+        },
+        replace: {
+            dist: {
+                options: {
+                    patterns: [
+                        {
+                            match: 'bundleJsFile',
+                            replacement: function () {
+                                return grunt.filerev.summary["src/clincoded/static/build/bundle.js"].replace(new RegExp('src/clincoded'), '');
+                            }
+                        },
+                        {
+                            match: 'cssFile',
+                            replacement: function () {
+                                return grunt.filerev.summary["src/clincoded/static/css/style.css"].replace(new RegExp('src/clincoded'), '');
+                            }
+                        }
+                    ]
+                },
+                files: [
+                    {expand: true, flatten: true, src: ['src/clincoded/static/build/*.js'], dest: 'src/clincoded/static/build/'}
+                ]
+            }
+        }
     });
 
     grunt.registerMultiTask('browserify', function (watch) {
@@ -145,6 +189,7 @@ module.exports = function(grunt) {
         var _ = grunt.util._;
         var path = require('path');
         var fs = require('fs');
+        var exorcist   = require('exorcist');
         var data = this.data;
         var options = _.extend({
             debug: true,
@@ -200,10 +245,18 @@ module.exports = function(grunt) {
 
         var dest = data.dest;
         grunt.file.mkdir(path.dirname(dest));
+        var mapFilePath = dest + '.map';
 
         var bundle = function(done) {
             var out = fs.createWriteStream(dest);
-            b.bundle().pipe(out);
+            if (!minifyEnabled) {
+                console.log("write map files in dev " + mapFilePath );
+                b.bundle({ debug: true })
+                    .pipe(exorcist(mapFilePath))
+                    .pipe(out);
+            } else {
+                b.bundle().pipe(out);
+            }
             out.on('close', function() {
                 grunt.log.write('Wrote ' + dest + '\n');
                 if (done !== undefined) done();
@@ -220,7 +273,11 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-filerev');
+    grunt.loadNpmTasks('grunt-replace');
 
-    grunt.registerTask('default', ['browserify', 'copy']);
+    grunt.registerTask('default', ['browserify', 'copy', 'filerev', 'replace']);
     grunt.registerTask('watch', ['browserify:*:watch', 'wait']);
+
 };
+
