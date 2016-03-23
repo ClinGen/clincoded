@@ -5,8 +5,7 @@ var jestPreset = require('babel-preset-jest');
 
 var ignored = {
     'underscore.js': true,
-    'moment.js': true,
-    'immutable.js': true
+    'moment.js': true
 };
 
 module.exports = {
@@ -14,8 +13,6 @@ module.exports = {
         if (path.slice(-5) === '.node') return '';
         if (path.slice(-3) !== '.js') return src;
         if (ignored[path.split('/').slice(-1)[0]]) return src;
-        //var stage = process.env.BABEL_JEST_STAGE || 'es2015';
-
         if (babel.util.canCompile(path)) {
             return babel.transform(src, {
                 filename: path,
@@ -24,7 +21,6 @@ module.exports = {
                 auxiliaryCommentBefore: "istanbul ignore next"
             }).code;
         }
-
         return src;
     }
 };
