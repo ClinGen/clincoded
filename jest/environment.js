@@ -1,4 +1,5 @@
 'use strict';
+jest.mock('scriptjs');
 
 if (window.DOMParser === undefined) {
     // jsdom
