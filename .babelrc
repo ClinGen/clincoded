@@ -4,13 +4,6 @@
 		"es2015"
 	],
 	"plugins": [
-		"transform-runtime",
-		"transform-react-jsx"
-	],
-	"compact": [
-		false
-	],
-	"highlightCode": [
-		true
+		"transform-runtime"
 	]
 }
