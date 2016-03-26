@@ -1539,7 +1539,7 @@ var FamilyDemographics = function() {
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 {country_codes.map(function(country_code) {
-                    return <option key={country_code.code}>{country_code.name}</option>;
+                    return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
             <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family && family.ethnicity}

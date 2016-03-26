@@ -22,8 +22,8 @@ module.exports = {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Yes</option>
-                    <option>No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
                 </Input>
                 <Input type="textarea" ref="prevtestingdesc" label="Description of Previous Testing:" rows="5" value={method.previousTestingDescription}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -32,52 +32,52 @@ module.exports = {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7 label-box-match-middle" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Yes</option>
-                    <option>No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
                 </Input>
                 <h4 className="col-sm-7 col-sm-offset-5">Genotyping Method</h4>
                 <Input type="select" ref="genotypingmethod1" label="Method 1:" handleChange={this.handleChange} defaultValue="none" value={method.genotypingMethods && method.genotypingMethods[0] ? method.genotypingMethods[0] : null}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Exome sequencing</option>
-                    <option>Genotyping</option>
-                    <option>High resolution melting</option>
-                    <option>PCR</option>
-                    <option>Sanger sequencing</option>
-                    <option>Whole genome shotgun sequencing</option>
+                    <option value="Exome sequencing">Exome sequencing</option>
+                    <option value="Genotyping">Genotyping</option>
+                    <option value="High resolution melting">High resolution melting</option>
+                    <option value="PCR">PCR</option>
+                    <option value="Sanger sequencing">Sanger sequencing</option>
+                    <option value="Whole genome shotgun sequencing">Whole genome shotgun sequencing</option>
                 </Input>
                 <Input type="select" ref="genotypingmethod2" label="Method 2:" defaultValue="none" value={method.genotypingMethods && method.genotypingMethods[1] ? method.genotypingMethods[1] : null}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.genotyping2Disabled}>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Exome sequencing</option>
-                    <option>Genotyping</option>
-                    <option>High resolution melting</option>
-                    <option>PCR</option>
-                    <option>Sanger sequencing</option>
-                    <option>Whole genome shotgun sequencing</option>
+                    <option value="Exome sequencing">Exome sequencing</option>
+                    <option value="Genotyping">Genotyping</option>
+                    <option value="High resolution melting">High resolution melting</option>
+                    <option value="PCR">PCR</option>
+                    <option value="Sanger sequencing">Sanger sequencing</option>
+                    <option value="Whole genome shotgun sequencing">Whole genome shotgun sequencing</option>
                 </Input>
                 <Input type="select" ref="entiregene" label="Entire gene sequenced?:" defaultValue="none" value={curator.booleanToDropdown(method.entireGeneSequenced)}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Yes</option>
-                    <option>No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
                 </Input>
                 <Input type="select" ref="copyassessed" label="Copy number assessed?:" defaultValue="none" value={curator.booleanToDropdown(method.copyNumberAssessed)}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Yes</option>
-                    <option>No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
                 </Input>
                 <Input type="select" ref="mutationsgenotyped" label="Specific mutations genotyped?:" defaultValue="none" value={curator.booleanToDropdown(method.specificMutationsGenotyped)}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
-                    <option>Yes</option>
-                    <option>No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
                 </Input>
                 <Input type="textarea" ref="specificmutation" label="Description of genotyping method:" rows="5" value={method.specificMutationsGenotypedMethod}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
