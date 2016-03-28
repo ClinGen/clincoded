@@ -66,7 +66,7 @@ var CurationCentral = React.createClass({
             if (pmid == undefined && gdm.annotations && gdm.annotations.length > 0) {
                 var annotations = _(gdm.annotations).sortBy(function(annotation) {
                     // Sort list of articles by first author
-                    return annotation.article.authors[0];
+                    return annotation.article.authors[0].toLowerCase();
                 });
                 pmid = annotations[0].article.pmid;
             }
@@ -223,7 +223,7 @@ var PmidSelectionList = React.createClass({
     render: function() {
         var annotations = _(this.props.annotations).sortBy(function(annotation) {
             // Sort list of articles by first author
-            return annotation.article.authors[0].toLowerCase;
+            return annotation.article.authors[0].toLowerCase();
         });
 
         return (
