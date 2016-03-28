@@ -396,11 +396,16 @@
 .viewer-titles {
     h1 {
         margin-bottom: 10px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
     h2 {
         margin-top: 0;
         font-size: 1.3rem;
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
     .pmid-association-header {
