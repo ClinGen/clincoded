@@ -23,6 +23,8 @@ h6, .h6 { font-size: $font-size-h6; }
 
 p {
     line-height: 1.6;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 input[type=text],

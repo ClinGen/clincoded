@@ -152,7 +152,7 @@ var ExperimentalCuration = React.createClass({
                 experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType)
             });
             if (this.state.experimentalNameVisible) {
-                this.refs['experimentalName'].resetValue();
+                this.refs['experimentalName'].setValue('');
             }
             if (tempExperimentalType == 'none') {
                 // reset form
@@ -182,7 +182,7 @@ var ExperimentalCuration = React.createClass({
             }
             // Reset values when changing between Subtypes
             if (this.refs['experimentalName']) {
-                this.refs['experimentalName'].resetValue();
+                this.refs['experimentalName'].setValue('');
                 this.setState({experimentalName: ''});
             }
             if (this.refs['identifiedFunction']) {
@@ -1467,10 +1467,9 @@ var ExperimentalNameType = function() {
                 </Input>
             : null}
             {this.state.experimentalNameVisible ?
-                <Input type="textarea" ref="experimentalName" label="Experiment name:"
+                <Input type="text" ref="experimentalName" label="Experiment name:"
                     error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="no-resize"
-                    rows='1' value={experimental && experimental.label} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required />
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" value={experimental && experimental.label} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required />
             : null}
         </div>
     );

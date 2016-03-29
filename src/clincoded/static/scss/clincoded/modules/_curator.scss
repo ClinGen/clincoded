@@ -233,6 +233,10 @@
 .panel-evidence-group {
     margin: 5px 0;
 
+    h5 {
+        display: block;
+    }
+
     .variant-preferred-title {
         border-bottom: 1px dotted #337ab7;
         cursor: pointer;
@@ -300,6 +304,7 @@
             padding: 8px 20px 8px 25px;
             border-top: 1px solid #ddd;
             list-style: none;
+            word-wrap: break-word;
         }
 
         li:nth-last-child(1) {
@@ -391,11 +396,16 @@
 .viewer-titles {
     h1 {
         margin-bottom: 10px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
     h2 {
         margin-top: 0;
         font-size: 1.3rem;
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
     .pmid-association-header {
@@ -417,12 +427,12 @@
     }
 }
 
-.variant-title-ellipsis {
+.title-ellipsis {
     overflow: hidden;
-    display: block;
+    display: inline-block;
     white-space: nowrap;
     text-overflow: ellipsis;
-    padding-bottom: 3px;
+    max-width: 100%;
 
     a {
         border-bottom: 1px dotted #337ab7;
@@ -432,6 +442,18 @@
             text-decoration: none;
         }
     }
+}
+
+.title-ellipsis-short {
+    max-width: 91%;
+
+    @media screen and (min-width: $screen-sm-min) {
+        max-width: 89%;
+    }
+}
+
+.dotted {
+    border-bottom: 1px dotted #000;
 }
 
 .curation-submit {
