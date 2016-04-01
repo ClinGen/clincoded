@@ -5,5 +5,13 @@
 	],
 	"plugins": [
 		"transform-runtime"
-	]
+	],
+	"env": {
+       "production": {
+           "compact": "auto"
+       },
+       "development": {
+           "compact": "false"
+       }
+   }
 }
