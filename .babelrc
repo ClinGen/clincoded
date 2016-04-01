@@ -1,17 +1,17 @@
 {
-	"presets": [
-		"react",
-		"es2015"
-	],
-	"plugins": [
-		"transform-runtime"
-	],
-	"env": {
-       "production": {
-           "compact": "auto"
-       },
-       "development": {
-           "compact": "false"
-       }
-   }
+    "presets": [
+	"react",
+	"es2015"
+    ],
+    "plugins": [
+	"transform-runtime"
+    ],
+    "env": {
+	"production": {
+	    "compact": "auto"
+	},
+	"development": {
+            "compact": "false"
+	}
+    }
 }
