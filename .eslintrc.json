@@ -1,5 +1,4 @@
 {
-    "parser": "babel-eslint",
     "rules": {
         "indent": [2, 4, {"SwitchCase": 1}],
         "linebreak-style": [2, "unix"],
@@ -10,7 +9,6 @@
     "env": {
         "es6": true,
         "browser": true,
-        "node": true,
         "commonjs": true
     },
     "extends": "eslint:recommended",
