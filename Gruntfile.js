@@ -1,5 +1,4 @@
 'use strict';
-var reactify = require('./reactify');
 
 if (process.env.NODE_ENV == 'production'){
     console.log("\n****** PRODUCTION ENVIRONMENT ******\n");
@@ -53,7 +52,7 @@ module.exports = function(grunt) {
                     'google-analytics'
                 ],
                 transform: [
-                    [{harmony: true, sourceMap: true, target: 'es3'}, reactify],
+                    ['babelify', {sourceMaps: true, babelrc: true}],
                     'brfs',
                     'envify'
                 ],
@@ -70,6 +69,10 @@ module.exports = function(grunt) {
             browser: {
                 dest: './src/clincoded/static/build/bundle.js',
                 src: [
+                    'es5-shims',
+                    'es5-shim/es5-sham',
+                    'babel-polyfill',
+                    'html5shiv/dist/html5shiv',
                     './src/clincoded/static/libs/compat.js', // The shims should execute first
                     './src/clincoded/static/libs/sticky_header.js',
                     './src/clincoded/static/libs/respond.js',
@@ -83,7 +86,7 @@ module.exports = function(grunt) {
                     'google-analytics'
                 ],
                 transform: [
-                    [{harmony: true, sourceMap: true, target: 'es3'}, reactify],
+                    ['babelify', {sourceMaps: true, babelrc: true}],
                     'brfs',
                     'envify'
                 ],
@@ -105,7 +108,7 @@ module.exports = function(grunt) {
                     detectGlobals: false
                 },
                 transform: [
-                    [{harmony: true, sourceMap: true}, reactify],
+                    ['babelify', {sourceMaps: true, babelrc: true}],
                     'brfs',
                     'envify'
                 ],
