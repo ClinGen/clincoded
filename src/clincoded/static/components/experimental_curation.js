@@ -1468,7 +1468,7 @@ var ExperimentalNameType = function() {
             : null}
             {this.state.experimentalNameVisible ?
                 <Input type="text" ref="experimentalName" label="Experiment name:"
-                    error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
+                    error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')} maxLength="60"
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" value={experimental && experimental.label} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required />
             : null}
         </div>

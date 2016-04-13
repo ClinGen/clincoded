@@ -395,10 +395,12 @@
 
 .viewer-titles {
     h1 {
+        display: inline-block;
         margin-bottom: 10px;
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        max-width: 90%;
     }
 
     h2 {
@@ -406,6 +408,13 @@
         font-size: 1.3rem;
         text-overflow: ellipsis;
         overflow: hidden;
+    }
+
+    a {
+        margin-top: -10px;
+        @media screen and (min-width: $screen-lg-min) {
+            margin-top: -55px;
+        }
     }
 
     .pmid-association-header {
