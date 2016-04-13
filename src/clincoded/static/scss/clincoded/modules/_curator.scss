@@ -394,6 +394,7 @@
 }
 
 .viewer-titles {
+    margin-bottom: -40px;
     h1 {
         display: inline-block;
         margin-bottom: 10px;
@@ -411,10 +412,7 @@
     }
 
     a {
-        margin-top: -10px;
-        @media screen and (min-width: $screen-lg-min) {
-            margin-top: -55px;
-        }
+        margin: 0 0 55px 10px;
     }
 
     .pmid-association-header {
