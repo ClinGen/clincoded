@@ -257,3 +257,26 @@ input[type=search] {
 .hidden {
     display: none;
 }
+
+.lookup-autocomplete {
+    position: absolute;
+    z-index: 10;
+    right: 15px;
+    left: 15px;
+    padding: 0;
+    /* max-height: 300px;
+    overflow-y: scroll; */
+    background-color: #fff;
+    border: 1px solid #c0c0c0;
+    list-style: none;
+    -moz-box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+    -webkit-box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+}
+
+.lookup-autocomplete li {
+    margin: 0;
+    padding: 5px 15px;
+    font-size: 13px;
+    cursor: pointer;
+}
