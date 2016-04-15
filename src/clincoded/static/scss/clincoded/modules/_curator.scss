@@ -394,15 +394,13 @@
 }
 
 .viewer-titles {
-    margin-bottom: -40px;
-
     h1 {
         display: inline-block;
         margin-bottom: 10px;
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
-        max-width: 90%;
+        max-width: 100%;
     }
 
     h2 {
@@ -410,10 +408,6 @@
         font-size: 1.3rem;
         text-overflow: ellipsis;
         overflow: hidden;
-    }
-
-    a {
-        margin: 0 0 55px 10px;
     }
 
     .pmid-association-header {
@@ -432,6 +426,18 @@
             word-break: break-all;
             word-wrap: break-word;
         }
+    }
+}
+
+.submit-titles {
+    margin-bottom: -40px;
+
+    h1 {
+        max-width: 90%;
+    }
+
+    a {
+        margin: 0 0 55px 10px;
     }
 }
 

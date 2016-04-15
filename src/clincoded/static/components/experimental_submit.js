@@ -113,7 +113,7 @@ var ExperimentalSubmit = React.createClass({
                         </div>
                     : null}
                     {experimental ?
-                        <div className="viewer-titles">
+                        <div className="viewer-titles submit-titles">
                             <h1>{experimental.evidenceType}<br />Experimental Data Information: {experimental.label}</h1> <a href={editExperimentalLink} className="btn btn-info">Edit/Assess</a>
                         </div>
                     : null}

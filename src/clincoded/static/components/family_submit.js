@@ -133,7 +133,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                         </div>
                     : null}
                     {family ?
-                        <div className="viewer-titles">
+                        <div className="viewer-titles submit-titles">
                             <h1>Family Information: {family.label}</h1> <a href={editFamilyLink} className="btn btn-info">Edit/Assess</a>
                             {group ?
                                 <h2>{'Group association: ' + group.label}</h2>
