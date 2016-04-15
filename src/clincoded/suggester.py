@@ -1,15 +1,6 @@
 from pyramid.view import view_config
-from contentbase import TYPES
 from contentbase.elasticsearch import ELASTIC_SEARCH
-from pyramid.response import Response
-from pyramid.security import effective_principals
 from urllib.parse import urlencode
-from collections import OrderedDict
-from .search import (
-    set_filters,
-    get_filtered_query
-)
-import requests
 import logging
 
 
