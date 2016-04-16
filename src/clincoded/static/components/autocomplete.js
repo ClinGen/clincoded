@@ -14,9 +14,9 @@ var FetchedData = fetched.FetchedData;
 var Param = fetched.Param;
 
 
-const SuggestionBox = React.createClass({
+const AutoCompleteBox = React.createClass({
     render: function() {
-        var terms = this.props.autocomplete_param['@graph']; // List of matching terms from server
+        var terms = this.props.search_param['@graph']; // List of matching terms from server
         var userTerm = this.props.userTerm && this.props.userTerm.toLowerCase(); // Term user entered
 
         if (!this.props.hide && userTerm && userTerm.length && terms && terms.length) {
@@ -45,45 +45,25 @@ const SuggestionBox = React.createClass({
         }
     }
 });
-/*
-const contextTypes = {
-    fetch: React.PropTypes.func,
-    autocompleteTermChosen: React.PropTypes.bool,
-    autocompleteHidden: React.PropTypes.bool,
-    onAutocompleteHiddenChange: React.PropTypes.func,
-    location_href: React.PropTypes.string
-};
 
-const propTypes = {
-    inputRef: React.PropTypes.string, // <input> ref
-    inputName: React.PropTypes.string, // <input> name
-    inputId: React.PropTypes.string, // <input> id
-    inputClassName: React.PropTypes.string, // CSS classes to add to input elements themselves
-    defaultValue: React.PropTypes.string, // <input> default value
-    placeholder: React.PropTypes.string, // <input> placeholder text
-    validationPattern: React.PropTypes.string, //<input> value validation pattern, e.g. [a-zA-Z0-9]+
-};
-
-const defaultProps = {
-    inputType: 'text',
-    autocompleteAttribute: 'off',
-};
-*/
-const AutoCompleteModule = module.exports.AutoCompleteModule = React.createClass({
+const AutoComplete = module.exports.AutoComplete = React.createClass({
     propTypes: {
-        inputRef: React.PropTypes.string, // <input> ref
-        inputName: React.PropTypes.string, // <input> name
-        inputId: React.PropTypes.string, // <input> id
+        name: React.PropTypes.string, // <input> name
+        id: React.PropTypes.string, // <input> id
         inputClassName: React.PropTypes.string, // CSS classes to add to input elements themselves
         defaultValue: React.PropTypes.string, // <input> default value
         placeholder: React.PropTypes.string, // <input> placeholder text
         validationPattern: React.PropTypes.string, //<input> value validation pattern, e.g. [a-zA-Z0-9]+
-        inputLabel: React.PropTypes.object,
-        inputLabelClassName: React.PropTypes.string,
-        inputWrapperClassName: React.PropTypes.string,
-        inputGroupClassName: React.PropTypes.string,
-        inputError: React.PropTypes.string,
-        inputClearError: React.PropTypes.func
+        label: React.PropTypes.oneOfType([ // <label> for input; string or another React component
+            React.PropTypes.string,
+            React.PropTypes.object
+        ]),
+        labelClassName: React.PropTypes.string, // CSS classes to add to labels
+        wrapperClassName: React.PropTypes.string, // CSS classes to add to wrapper div around inputs
+        groupClassName: React.PropTypes.string, // CSS classes to add to control groups (label/input wrapper div)
+        error: React.PropTypes.string, // Error message to display below input
+        clearError: React.PropTypes.func, // called to clear error message
+        required: React.PropTypes.bool // <input> required attribute
     },
 
     contextTypes: {
@@ -94,13 +74,6 @@ const AutoCompleteModule = module.exports.AutoCompleteModule = React.createClass
         location_href: React.PropTypes.string
     },
 
-    getDefaultProps: function() {
-        return {
-            inputType: 'text',
-            autocompleteAttribute: 'off'
-        };
-    },
-
     getInitialState: function() {
         return {
             showAutoSuggest: false,
@@ -108,17 +81,7 @@ const AutoCompleteModule = module.exports.AutoCompleteModule = React.createClass
             terms: {}
         };
     },
-    /*
-    constructor(props) {
-        super(props);
-        this.state = {
-            showAutoSuggest: false,
-            searchTerm: '',
-            terms: {}
-        };
-        this.handleChange = this.handleChange.bind(this);
-    },
-    */
+
     //*** Start: Lifecycle methods ***//
     componentDidMount: function() {
         // Use timer to limit to one request per second
@@ -130,22 +93,25 @@ const AutoCompleteModule = module.exports.AutoCompleteModule = React.createClass
     },
     //*** End: Lifecycle methods ***//
 
-    handleChange: function(ref, e) {
+    // Called when any input's value changes from user input
+    handleChange: function(e) {
         this.setState({showAutoSuggest: true});
-        this.newSearchTerm = this.refs[this.props.inputRef].getValue();
-        console.log("this.newSearchTerm is === " + this.newSearchTerm);
+        this.newSearchTerm = e.target.value;
+        if (this.props.clearError) {
+            this.props.clearError();
+        }
     },
 
+    // Called when user clicks on any suggetsed value <AutoCompleteBox>
     handleAutocompleteClick: function(term, id, name) {
         var newTerms = {};
-        var inputNode = this.refs[this.props.inputRef];
+        var inputNode = this.refs['lookup-input'];
         inputNode.value = this.newSearchTerm = term;
         newTerms[name] = id;
         this.setState({terms: newTerms});
         this.setState({showAutoSuggest: false});
-        //inputNode.focus();
+        inputNode.focus();
         // Now let the timer update the terms state when it gets around to it.
-        console.log("inputNode.value is === " + inputNode.value);
     },
 
     tick: function() {
@@ -157,38 +123,46 @@ const AutoCompleteModule = module.exports.AutoCompleteModule = React.createClass
     render: function() {
         var context = this.props.context;
         var id = url.parse(this.context.location_href, true);
-        var region = id.query['region'] || '';
-        return (
-            <div className="autocomplete-searchterm-input">
+        //var region = id.query['region'] || '';
+
+        var input;
+        var inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
+        var groupClassName = 'autocomplete-group' + (this.props.groupClassName ? ' ' + this.props.groupClassName : '');
+
+        var innerInput = (
+            <span className="autocomplete-suggester">
                 <input type="hidden" name="clinicalgenome" value="hgncgene" />
                 {Object.keys(this.state.terms).map(function(key) {
                     return <input type="hidden" name={key} value={this.state.terms[key]} key={key} />;
                 }, this)}
-                <Input
-                    type={this.props.inputType}
-                    ref={this.props.inputRef}
-                    name={this.props.inputName}
-                    id={this.props.inputId}
-                    inputClassName={this.props.inputClassName}
+                <input
+                    type="text"
+                    ref="lookup-input"
+                    name={this.props.name}
+                    id={this.props.id}
+                    className={inputClasses}
                     defaultValue={this.props.defaultValue}
                     placeholder={this.props.placeholder}
                     pattern={this.props.validationPattern}
-                    handleChange={this.handleChange}
-                    label={this.props.inputLabel}
-                    labelClassName={this.props.inputLabelClassName}
-                    wrapperClassName={this.props.inputWrapperClassName}
-                    groupClassName={this.props.inputGroupClassName}
-                    error={this.props.inputError}
-                    clearError={this.props.inputClearError}
-                    required
-                    autoComplete={(this.state.showAutoSuggest && this.state.searchTerm) ? <FetchedData loadingComplete={true}><Param name="autocomplete_param" url={'/suggest/?q=' + this.state.searchTerm} /><SuggestionBox name="autocomplete_suggestionbox" userTerm={this.state.searchTerm} handleClick={this.handleAutocompleteClick} /></FetchedData> : null}
-                />
+                    onChange={this.handleChange}
+                    autoComplete="off" />
+                {(this.state.showAutoSuggest && this.state.searchTerm) ?
+                    <FetchedData loadingComplete={true}>
+                        <Param name="search_param" url={'/suggest/?q=' + this.state.searchTerm} />
+                        <AutoCompleteBox name="lookup_terms" userTerm={this.state.searchTerm} handleClick={this.handleAutocompleteClick} />
+                    </FetchedData>
+                : null}
+                <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
+            </span>
+        );
+
+        input = (
+            <div className={groupClassName}>
+                {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
+                {this.props.wrapperClassName ? <div className={this.props.wrapperClassName}>{innerInput}</div> : <span>{innerInput}</span>}
             </div>
         );
+
+        return <span>{input}</span>;
     }
 });
-
-//Autocomplete.propTypes = propTypes;
-//Autocomplete.defaultProps = defaultProps;
-
-//export default Autocomplete;

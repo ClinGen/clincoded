@@ -10,7 +10,7 @@ var panel = require('../libs/bootstrap/panel');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
 var CuratorHistory = require('./curator_history');
-var AutoComplete = require('./autocomplete').AutoCompleteModule;
+var AutoComplete = require('./autocomplete').AutoComplete;
 
 var Form = form.Form;
 var FormMixin = form.FormMixin;
@@ -88,7 +88,7 @@ var CreateGeneDisease = React.createClass({
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
         // Get values from form and validate them
-        this.saveFormValue('hgncgene', this.refs.hgncgene.getValue().toUpperCase());
+        this.saveFormValue('hgncgene', document.getElementById('hgncgene').value.toUpperCase());
         this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
         this.saveFormValue('hpo', this.refs.hpo.getValue());
         if (this.validateForm()) {
@@ -159,21 +159,18 @@ var CreateGeneDisease = React.createClass({
                         <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                             <div className="row">
                                 <AutoComplete
-                                    inputRef="gene-symbol-lookup"
-                                    inputId="gene-symbol"
-                                    inputName="gene-symbol"
+                                    ref="hgncgene"
+                                    id="hgncgene"
+                                    name="hgncgene"
                                     inputClassName="uppercase-input"
-                                    placeholder="Enter HGNC Gene Symbol (e.g. DICER1)"
-                                    inputLabel={<LabelHgncGene />}
-                                    inputLabelClassName="col-sm-5 control-label"
-                                    inputWrapperClassName="col-sm-7"
-                                    inputGroupClassName="form-group"
-                                    inputError={this.getFormError('gene-symbol-lookup')}
-                                    inputClearError={this.clrFormErrors.bind(null, 'gene-symbol-lookup')}
-                                />
-                                <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1"
-                                    error={this.getFormError('hgncgene')} clearError={this.clrFormErrors.bind(null, 'hgncgene')}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                                    placeholder="e.g. DICER1"
+                                    label={<LabelHgncGene />}
+                                    labelClassName="col-sm-5 control-label"
+                                    wrapperClassName="col-sm-7"
+                                    groupClassName="form-group"
+                                    error={this.getFormError('hgncgene')}
+                                    clearError={this.clrFormErrors.bind(null, 'hgncgene')}
+                                    required />
                                 <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15"
                                     error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
