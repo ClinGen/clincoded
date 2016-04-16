@@ -221,8 +221,7 @@ var Input = module.exports.Input = React.createClass({
         cancelHandler: React.PropTypes.func, // Called to handle cancel button click
         submitBusy: React.PropTypes.bool, //
         minVal: React.PropTypes.number, // Minimum value for a number formatted input
-        maxVal: React.PropTypes.number, // Maximum value for a number formatted input
-        autoComplete: React.PropTypes.object
+        maxVal: React.PropTypes.number // Maximum value for a number formatted input
     },
 
     getInitialState: function() {
@@ -332,8 +331,7 @@ var Input = module.exports.Input = React.createClass({
                 var innerInput = (
                     <span>
                         <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} />
-                        <div className="auto-completion-box">{this.props.autoComplete ? this.props.autoComplete : ''}</div>
-                      <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
+                        <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                     </span>
                 );
                 input = (
