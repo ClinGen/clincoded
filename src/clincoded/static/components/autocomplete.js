@@ -13,7 +13,6 @@ var Input = form.Input;
 var FetchedData = fetched.FetchedData;
 var Param = fetched.Param;
 
-
 const AutoCompleteBox = React.createClass({
     render: function() {
         var terms = this.props.search_param['@graph']; // List of matching terms from server
