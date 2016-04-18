@@ -192,6 +192,7 @@ def main(global_config, **local_config):
     config.include('.root')
     config.include('.batch_download')
     config.include('.visualization')
+    config.include('.backend_processes')
 
     if 'elasticsearch.server' in config.registry.settings:
         config.include('contentbase.elasticsearch')

@@ -698,6 +698,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                 : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View family in a new tab">View</a>}
             {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
             {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
+            <ReassociateButton gdm={gdm} item={family} pmid={annotation.pmid} disabled={false} />
         </div>
     );
 };
@@ -2210,7 +2211,7 @@ var DeleteButtonModal = React.createClass({
 // Class for delete button (and associated modal) of Group, Family, Individual, and Experimental
 // Data objects. This class only renderes the button; please see DeleteButtonModal for bulk of
 // functionality
-var ReassociateButton = module.exports.ReassociateButton = React.createClass({
+var ReassociateButton = React.createClass({
     mixins: [ModalMixin],
     propTypes: {
         gdm: React.PropTypes.object,
@@ -2218,7 +2219,7 @@ var ReassociateButton = module.exports.ReassociateButton = React.createClass({
         pmid: React.PropTypes.string,
         disabled: React.PropTypes.bool
     },
-
+    /*
     render: function() {
         return (
             <span>
@@ -2230,6 +2231,22 @@ var ReassociateButton = module.exports.ReassociateButton = React.createClass({
                         Reassociate
                     </a>
                 </Modal></span>
+                }
+            </span>
+        );
+    }
+    */
+    render: function() {
+        return (
+            <span>
+                {this.props.disabled ?
+                    <span>Reassociate</span>
+                :
+                <span>
+                    <a href={"/traverse/" + this.props.gdm.uuid}>
+                        Reassociate
+                    </a>
+                </span>
                 }
             </span>
         );
@@ -2455,7 +2472,6 @@ var ReassociateButtonModal = React.createClass({
             tree = this.recurseItem(this.props.item, 0, 'display');
         }
         return (
-            <span>Reassociate</span>
             <div>
                 <div className="modal-body">
                     {message}
