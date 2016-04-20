@@ -20,7 +20,8 @@
         "label": {
             "title": "Label",
             "description": "An user entered label for individual",
-            "type": "string"
+            "type": "string",
+            "maxLength": 60
         },
         "diagnosis": {
             "title": "Diagnosis",
