@@ -447,6 +447,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     max-width: 100%;
+    vertical-align: bottom;
 
     a {
         border-bottom: 1px dotted #337ab7;
@@ -460,7 +461,6 @@
 
 .title-ellipsis-short {
     max-width: 91%;
-    display: inline;
 
     @media screen and (min-width: $screen-sm-min) {
         max-width: 89%;
