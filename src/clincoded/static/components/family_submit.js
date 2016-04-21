@@ -133,8 +133,8 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                         </div>
                     : null}
                     {family ?
-                        <div className="viewer-titles">
-                            <h1>Family Information: {family.label} <a href={editFamilyLink} className="btn btn-info">Edit/Assess</a></h1>
+                        <div className="viewer-titles submit-titles">
+                            <h1>Family Information: {family.label}</h1> <a href={editFamilyLink} className="btn btn-info">Edit/Assess</a>
                             {group ?
                                 <h2>{'Group association: ' + group.label}</h2>
                             : null}
@@ -209,12 +209,12 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                                         </p>
                                                     </div>
                                                     <div className="submit-results-buttons">
-                                                        <div className="col-md-6">
+                                                        <div className="col-lg-6">
                                                             <span className="family-submit-results-btn">
                                                                 <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid}>Add non-proband Individual</a>
                                                             </span>
                                                         </div>
-                                                        <div className="col-md-6">
+                                                        <div className="col-lg-6">
                                                             <span className="family-submit-results-btn">
                                                                 <a className="btn btn-default" href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}>Return to Record Curation page <i className="icon icon-briefcase"></i></a>
                                                             </span>

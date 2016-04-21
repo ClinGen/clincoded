@@ -1382,7 +1382,7 @@ var FamilyName = function(displayNote) {
                 <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Family is a member of a Group, please curate the Group first and then add the Family to that Group.</p></div>
             : null}
             <Input type="text" ref="familyname" label="Family Label:" value={family && family.label} handleChange={this.handleChange}
-                error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
+                error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')} maxLength="60"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote('Family')}</p>
             {displayNote ?
