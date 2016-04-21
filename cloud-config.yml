@@ -248,6 +248,7 @@ write_files:
         "${distro_id} ${distro_codename}-security";
     };
     Unattended-Upgrade::Automatic-Reboot "true";
+    Unattended-Upgrade::Automatic-Reboot-Time "01:00";
 
 - path: /etc/cron.d/cloudwatchmon
   content: |
