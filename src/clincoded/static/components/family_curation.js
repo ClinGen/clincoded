@@ -1730,7 +1730,7 @@ var FamilyVariant = function() {
             {this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired ?
                 <div className="variant-panel">
                     <Input type="text" ref="individualname" label="Individual Label"
-                        error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
+                        error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
                     <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
                     {this.state.orpha ?
