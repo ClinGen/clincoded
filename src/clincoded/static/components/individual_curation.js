@@ -1005,7 +1005,7 @@ var IndividualName = function(displayNote) {
                 <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Individual is part of a Family or a Group, please curate that Group or Family first and then add the Individual as a member.</p></div>
             : null}
             <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
-                error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')}
+                error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
             {displayNote ?
@@ -1226,7 +1226,7 @@ var IndividualDemographics = function() {
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 {country_codes.map(function(country_code) {
-                    return <option key={country_code.code}>{country_code.name}</option>;
+                    return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
             <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={individual && individual.ethnicity}

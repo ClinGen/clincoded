@@ -581,7 +581,7 @@ var GroupName = function() {
 
     return (
         <div className="row">
-            <Input type="text" ref="groupname" label="Group Label:" value={group && group.label} handleChange={this.handleChange}
+            <Input type="text" ref="groupname" label="Group Label:" value={group && group.label} maxLength="60" handleChange={this.handleChange}
                 error={this.getFormError('groupname')} clearError={this.clrFormErrors.bind(null, 'groupname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote('Group')}</p>
@@ -684,7 +684,7 @@ var GroupDemographics = function() {
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 {country_codes.map(function(country_code) {
-                    return <option key={country_code.code}>{country_code.name}</option>;
+                    return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
             <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={group && group.ethnicity}

@@ -1382,7 +1382,7 @@ var FamilyName = function(displayNote) {
                 <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Family is a member of a Group, please curate the Group first and then add the Family to that Group.</p></div>
             : null}
             <Input type="text" ref="familyname" label="Family Label:" value={family && family.label} handleChange={this.handleChange}
-                error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')}
+                error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')} maxLength="60"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote('Family')}</p>
             {displayNote ?
@@ -1539,7 +1539,7 @@ var FamilyDemographics = function() {
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 {country_codes.map(function(country_code) {
-                    return <option key={country_code.code}>{country_code.name}</option>;
+                    return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
             <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family && family.ethnicity}

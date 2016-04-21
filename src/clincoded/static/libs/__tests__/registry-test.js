@@ -1,7 +1,8 @@
 'use strict';
 
-jest.dontMock('../registry');
-jest.dontMock('underscore');
+jest.autoMockOff();
+
+jest.unmock('../registry');
 var Registry = require('../registry');
 
 var test_obj = {'@type': ['test', 'item']};

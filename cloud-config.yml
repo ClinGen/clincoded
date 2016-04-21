@@ -169,6 +169,10 @@ runcmd:
 - cd /srv/clincoded
 - sudo -u clincoded git clone --no-checkout https://github.com/ClinGen/clincoded.git .
 - sudo -u clincoded git checkout %(COMMIT)s
+- mkdir /opt/cloudwatchmon
+- chown build:build /opt/cloudwatchmon
+- sudo -u build virtualenv --python=python2.7 /opt/cloudwatchmon
+- sudo -u build /opt/cloudwatchmon/bin/pip install -r cloudwatchmon-requirements.txt
 - mkdir /opt/wal-e
 - chown postgres:postgres /opt/wal-e
 - sudo -u postgres virtualenv --python=python2.7 /opt/wal-e
@@ -217,18 +221,13 @@ runcmd:
 - then
 -   sudo -u clincoded bin/batchupgrade production.ini --app-name app
 - fi
-# - sleep 10
-# - sudo -u postgres echo "include 'master.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
-# - pg_ctlcluster 9.4 main reload
-# - pg_ctlcluster 9.4 main promote
-# - sudo -u clincoded bin/update-keys-links production.ini --app-name app
-# - sudo -u clincoded bin/upgrade production.ini --app-name app
-# - sudo -i -u postgres /opt/wal-e/bin/wal-e --aws-profile default --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-push /var/lib/postgresql/9.4/main
-# - sleep 60
-# - sudo -i -u clincoded PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH" bin/test -m "not bdd" > tests.out
 
 users:
 - default
+- name: build
+  gecos: Build user
+  inactive: true
+  system: true
 - name: clincoded
   gecos: ClinGen Gene Curation Database daemon user
   inactive: true
@@ -249,6 +248,11 @@ write_files:
         "${distro_id} ${distro_codename}-security";
     };
     Unattended-Upgrade::Automatic-Reboot "true";
+    Unattended-Upgrade::Automatic-Reboot-Time "01:00";
+
+- path: /etc/cron.d/cloudwatchmon
+  content: |
+    */5 * * * * nobody /opt/cloudwatchmon/bin/mon-put-instance-stats.py --mem-util --swap-util --disk-space-util --disk-path=/ --from-cron
 
 - path: /etc/default/elasticsearch
   content: |

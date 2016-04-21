@@ -136,7 +136,9 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
                         </div>
                     : null}
                     {individual ?
-                        <h1>Individual Information: {individual.label} <a href={editIndividualLink} className="btn btn-info">Edit/Assess</a></h1>
+                        <div className="viewer-titles submit-titles">
+                            <h1>Individual Information: {individual.label}</h1> <a href={editIndividualLink} className="btn btn-info">Edit/Assess</a>
+                        </div>
                     : null}
                     <div className="row">
                         <div className="col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">

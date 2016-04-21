@@ -152,7 +152,7 @@ var ExperimentalCuration = React.createClass({
                 experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType)
             });
             if (this.state.experimentalNameVisible) {
-                this.refs['experimentalName'].resetValue();
+                this.refs['experimentalName'].setValue('');
             }
             if (tempExperimentalType == 'none') {
                 // reset form
@@ -182,7 +182,7 @@ var ExperimentalCuration = React.createClass({
             }
             // Reset values when changing between Subtypes
             if (this.refs['experimentalName']) {
-                this.refs['experimentalName'].resetValue();
+                this.refs['experimentalName'].setValue('');
                 this.setState({experimentalName: ''});
             }
             if (this.refs['identifiedFunction']) {
@@ -1467,10 +1467,9 @@ var ExperimentalNameType = function() {
                 </Input>
             : null}
             {this.state.experimentalNameVisible ?
-                <Input type="textarea" ref="experimentalName" label="Experiment name:"
-                    error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="no-resize"
-                    rows='1' value={experimental && experimental.label} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required />
+                <Input type="text" ref="experimentalName" label="Experiment name:"
+                    error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')} maxLength="60"
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" value={experimental && experimental.label} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required />
             : null}
         </div>
     );
@@ -2582,15 +2581,17 @@ var ExperimentalViewer = React.createClass({
                                     <dd>{experimental.functionalAlteration.cellMutationOrEngineeredEquivalent}</dd>
                                 </div>
 
-                                <div>
-                                    <dt>Patient cell type</dt>
-                                    <dd>{experimental.functionalAlteration.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCellType} title={"CL entry for " + experimental.functionalAlteration.patientCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCellType}</a> : null}</dd>
-                                </div>
-
-                                <div>
-                                    <dt>Engineered cell type</dt>
-                                    <dd>{experimental.functionalAlteration.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.functionalAlteration.engineeredEquivalentCellType} title={"EFO entry for " + experimental.functionalAlteration.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.engineeredEquivalentCellType}</a> : null}</dd>
-                                </div>
+                                {experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells' ?
+                                    <div>
+                                        <dt>Patient cell type</dt>
+                                        <dd>{experimental.functionalAlteration.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCellType} title={"CL entry for " + experimental.functionalAlteration.patientCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCellType}</a> : null}</dd>
+                                    </div>
+                                :
+                                    <div>
+                                        <dt>Engineered cell type</dt>
+                                        <dd>{experimental.functionalAlteration.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.functionalAlteration.engineeredEquivalentCellType} title={"EFO entry for " + experimental.functionalAlteration.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.engineeredEquivalentCellType}</a> : null}</dd>
+                                    </div>
+                                }
 
                                 <div>
                                     <dt>Description of gene alteration</dt>
@@ -2622,15 +2623,17 @@ var ExperimentalViewer = React.createClass({
                                     <dd>{experimental.modelSystems.animalOrCellCulture}</dd>
                                 </div>
 
-                                <div>
-                                    <dt>Animal model</dt>
-                                    <dd>{experimental.modelSystems.animalModel}</dd>
-                                </div>
-
-                                <div>
-                                    <dt>Cell-culture type/line</dt>
-                                    <dd>{experimental.modelSystems.cellCulture ? <a href={external_url_map['EFO'] + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
-                                </div>
+                                {experimental.modelSystems.animalOrCellCulture === 'Animal model' ?
+                                    <div>
+                                        <dt>Animal model</dt>
+                                        <dd>{experimental.modelSystems.animalModel}</dd>
+                                    </div>
+                                :
+                                    <div>
+                                        <dt>Cell-culture type/line</dt>
+                                        <dd>{experimental.modelSystems.cellCulture ? <a href={external_url_map['EFO'] + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
+                                    </div>
+                                }
 
                                 <div>
                                     <dt>Description of gene alteration</dt>
@@ -2677,15 +2680,17 @@ var ExperimentalViewer = React.createClass({
                                     <dd>{experimental.rescue.patientCellOrEngineeredEquivalent}</dd>
                                 </div>
 
-                                <div>
-                                    <dt>Patient cell type</dt>
-                                    <dd>{experimental.rescue.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCellType} title={"CL entry for " + experimental.rescue.patientCellType + " in new tab"} target="_blank">{experimental.rescue.patientCellType}</a> : null}</dd>
-                                </div>
-
-                                <div>
-                                    <dt>Engineered equivalent cell type</dt>
-                                    <dd>{experimental.rescue.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.rescue.engineeredEquivalentCellType} title={"EFO entry for " + experimental.rescue.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.rescue.engineeredEquivalentCellType}</a> : null}</dd>
-                                </div>
+                                {experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells' ?
+                                    <div>
+                                        <dt>Patient cell type</dt>
+                                        <dd>{experimental.rescue.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCellType} title={"CL entry for " + experimental.rescue.patientCellType + " in new tab"} target="_blank">{experimental.rescue.patientCellType}</a> : null}</dd>
+                                    </div>
+                                :
+                                    <div>
+                                        <dt>Engineered equivalent cell type</dt>
+                                        <dd>{experimental.rescue.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.rescue.engineeredEquivalentCellType} title={"EFO entry for " + experimental.rescue.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.rescue.engineeredEquivalentCellType}</a> : null}</dd>
+                                    </div>
+                                }
 
                                 <div>
                                     <dt>Description of gene alteration</dt>

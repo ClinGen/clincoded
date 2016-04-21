@@ -19,7 +19,8 @@
         "label": {
             "title": "Label",
             "description": "A user entered label for the experiment",
-            "type": "string"
+            "type": "string",
+            "maxLength": 60
         },
         "active": {
             "title": "Active",

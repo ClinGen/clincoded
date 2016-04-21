@@ -121,7 +121,9 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                         </div>
                     : null}
                     {group ?
-                        <h1>Group Information: {group.label} <a href={editGroupLink} className="btn btn-info">Edit</a></h1>
+                        <div className="viewer-titles submit-titles">
+                            <h1>Group Information: {group.label}</h1> <a href={editGroupLink} className="btn btn-info">Edit</a>
+                        </div>
                     : null}
                     <div className="row">
                         <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
