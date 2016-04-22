@@ -86,6 +86,37 @@
     }
 }
 
+.nav-gsignin {
+    padding: 0 5px 0 5px;
+    color: #fff;
+    background-color: $color-trim;
+
+    div {
+        background-color: transparent;
+        color: #fff;
+        box-shadow: none;
+
+        div {
+            .abcRioButtonIcon {
+                height: 30px;
+                background-color: #fff;
+
+                div {
+                    background-color: #fff;
+                }
+            }
+        }
+    }
+
+    &:hover {
+        background-color: darken($color-trim, 10%)
+    }
+}
+
+.nav-gsignin-hidden {
+    display: none;
+}
+
 .nav-user {
     display: table-row;
 
