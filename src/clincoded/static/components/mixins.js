@@ -76,8 +76,7 @@ class Timeout {
     }
 }
 
-
-module.exports.Persona = {
+module.exports.GoogleAuth = {
     childContextTypes: {
         fetch: React.PropTypes.func
     },
@@ -88,17 +87,45 @@ module.exports.Persona = {
         };
     },
 
-    getInitialState: function () {
+    getInitialState: function() {
         return {
             loadingComplete: false,
             session: {}
         };
     },
 
-    componentDidMount: function () {
-        // Login / logout actions must be deferred until persona is ready.
-        this.extractSessionCookie();
-        $script.ready('persona', this.configurePersona);
+    componentDidMount: function() {
+        /* Load triggerLogin() into global namespace so Google Auth can see it */
+        window[this.triggerLogin] = this.triggerLogin;
+        if (window.gapi !== undefined) {
+            window.gapi.load('auth2', function() {
+                // set the app key (this needs to change)
+                window.gapi.auth2.init({
+                    client_id: '789621077193-bop2e2s2ga14e98pbgth49uqucmmm5i4.apps.googleusercontent.com'
+                });
+            });
+            // specify custom login button + triggers
+            window.gapi.signin2.render('g-signin2', {
+                'scope': 'email',
+                'width': 160,
+                'height': 30,
+                'longtitle': true,
+                'theme': 'light',
+                'onsuccess': this.triggerLogin,
+                'onfailure': this.triggerLoginFail
+            });
+            this.extractSessionCookie();
+        } else {
+            let gapi_not_found = {};
+            //gapi_not_found['@type'] = ['GAPINotFound', 'error'];
+            gapi_not_found = {
+                "@id": "/",
+                "@type": ["portal"],
+                "portal_title": "ClinGen",
+                "title": "Home"
+            };
+            this.setState({context: gapi_not_found, loadingComplete: true});
+        }
     },
 
     ajaxPrefilter: function (options, original, xhr) {
@@ -115,17 +142,122 @@ module.exports.Persona = {
         }
     },
 
+    triggerLogin: function(googleUser, retrying) {
+        var profile = googleUser.getBasicProfile();
+        if (!googleUser) return;
+        this.fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({email: profile.getEmail()})
+        })
+        .then(response => {
+            if (!response.ok) throw response;
+            return response.json();
+        })
+        .then(session => {
+            var next_url = window.location.href;
+            if (window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/') {
+                next_url = window.location.origin + '/dashboard/';
+            }
+            this.navigate(next_url, {replace: true}).then(() => {
+                this.setState({loadingComplete: true});
+            });
+        }, err => {
+            parseError(err).then(data => {
+                if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
+                    if (!retrying) {
+                        window.setTimeout(this.triggerLogin.bind(this, googleUser));
+                        return;
+                    }
+                }
+                // If there is an error, show the error messages
+                var auth2 = window.gapi.auth2.getAuthInstance();
+                auth2.signOut();
+                this.setState({context: data, loadingComplete: true});
+            });
+        });
+
+    },
+
+    triggerLoginFail: function() {
+        console.log('Failed login.');
+    },
+
+    componentDidUpdate: function(prevProps, prevState) {
+        if (prevState.session['auth.userid'] && !this.state.session['auth.userid']) {
+            // Session expired
+            var auth2 = window.gapi.auth2.getAuthInstance();
+            auth2.signOut();
+        }
+    },
+
+    triggerLogout: function() {
+        var session = this.state.session;
+        if (!(session && session['auth.userid'])) return;
+
+        var auth2 = window.gapi.auth2.getAuthInstance();
+
+        this.fetch('/logout?redirect=false', {
+            headers: {'Accept': 'application/json'}
+        })
+        .then(response => {
+            if (!response.ok) throw response;
+            return response.json();
+        })
+        .then(auth2.signOut())
+        .then(data => {
+            this.DISABLE_POPSTATE = true;
+            var old_path = window.location.pathname + window.location.search;
+            window.location.assign('/#logged-out');
+            if (old_path == '/') {
+                window.location.reload();
+            }
+        }, err => {
+            parseError(err).then(data => {
+                data.title = 'Logout failure: ' + data.title;
+                this.setState({context: data});
+            });
+        });
+
+    },
+
+    extractSessionCookie: function () {
+        var cookie = require('cookie-monster');
+        var session_cookie = cookie(document).get('session');
+        if (this.state.session_cookie !== session_cookie) {
+            this.setState({
+                session_cookie: session_cookie,
+                session: this.parseSessionCookie(session_cookie)
+            });
+        }
+
+    },
+
+    parseSessionCookie: function (session_cookie) {
+        var Buffer = require('buffer').Buffer;
+        var session;
+        if (session_cookie) {
+            // URL-safe base64
+            session_cookie = session_cookie.replace(/\-/g, '+').replace(/\_/g, '/');
+            // First 64 chars is the sha-512 server signature
+            // Payload is [accessed, created, data]
+            try {
+                session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
+            } catch (e) {
+            }
+        }
+        return session || {};
+    },
+
     fetch: function (url, options) {
         options = _.extend({credentials: 'same-origin'}, options);
         var http_method = options.method || 'GET';
         if (!(http_method === 'GET' || http_method === 'HEAD')) {
             var headers = options.headers = _.extend({}, options.headers);
             var session = this.state.session;
-            //var userid = session['auth.userid'];
-            //if (userid) {
-            //    // Server uses this to check user is logged in
-            //    headers['X-If-Match-User'] = userid;
-            //}
             if (session._csrft_) {
                 headers['X-CSRF-Token'] = session._csrft_;
             }
@@ -145,144 +277,9 @@ module.exports.Persona = {
             this.extractSessionCookie();
         });
         return request;
-    },
-
-    extractSessionCookie: function () {
-        var cookie = require('cookie-monster');
-        var session_cookie = cookie(document).get('session');
-        if (this.state.session_cookie !== session_cookie) {
-            this.setState({
-                session_cookie: session_cookie,
-                session: this.parseSessionCookie(session_cookie)
-            });
-        }
-    },
-
-    componentDidUpdate: function (prevProps, prevState) {
-        if (prevState.session['auth.userid'] && !this.state.session['auth.userid']) {
-            // Session expired.
-            $script.ready('persona', function () {
-                navigator.id.logout();
-            });
-        }
-    },
-
-    parseSessionCookie: function (session_cookie) {
-        var Buffer = require('buffer').Buffer;
-        var session;
-        if (session_cookie) {
-            // URL-safe base64
-            session_cookie = session_cookie.replace(/\-/g, '+').replace(/\_/g, '/');
-            // First 64 chars is the sha-512 server signature
-            // Payload is [accessed, created, data]
-            try {
-                session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
-            } catch (e) {
-            }
-        }
-        return session || {};
-    },
-
-    configurePersona: function () {
-        this._persona_watched = false;
-        navigator.id.watch({
-            loggedInUser: this.state.session['auth.userid'] || null,
-            onlogin: this.handlePersonaLogin,
-            onlogout: this.handlePersonaLogout,
-            onmatch: this.handlePersonaMatch,
-            onready: this.handlePersonaReady
-        });
-    },
-
-    handlePersonaLogin: function (assertion, retrying) {
-        this._persona_watched = true;
-        if (!assertion) return;
-        this.fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({assertion: assertion})
-        })
-        .then(response => {
-            if (!response.ok) throw response;
-            return response.json();
-        })
-        .then(session => {
-            var next_url = window.location.href;
-            if (window.location.hash == '#logged-out') {
-                next_url = window.location.pathname + window.location.search;
-            }
-            this.navigate(next_url, {replace: true}).then(() => {
-                this.setState({loadingComplete: true});
-            });
-        }, err => {
-            parseError(err).then(data => {
-                if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
-                    if (!retrying) {
-                        window.setTimeout(this.handlePersonaLogin.bind(this, assertion, true));
-                        return;
-                    }
-                }
-                // If there is an error, show the error messages
-                navigator.id.logout();
-                this.setState({context: data, loadingComplete: true});
-            });
-        });
-    },
-
-    handlePersonaLogout: function () {
-        this._persona_watched = true;
-        console.log("Persona thinks we need to log out");
-        var session = this.state.session;
-        if (!(session && session['auth.userid'])) return;
-        this.fetch('/logout?redirect=false', {
-            headers: {'Accept': 'application/json'}
-        })
-        .then(response => {
-            if (!response.ok) throw response;
-            return response.json();
-        })
-        .then(data => {
-            this.DISABLE_POPSTATE = true;
-            var old_path = window.location.pathname + window.location.search;
-            window.location.assign('/#logged-out');
-            if (old_path == '/') {
-                window.location.reload();
-            }
-        }, err => {
-            parseError(err).then(data => {
-                data.title = 'Logout failure: ' + data.title;
-                this.setState({context: data});
-            });
-        });
-    },
-
-    handlePersonaMatch: function () {
-        this._persona_watched = true;
-        this.setState({loadingComplete: true});
-    },
-
-    handlePersonaReady: function () {
-        console.log('persona ready');
-        // Handle Safari https://github.com/mozilla/persona/issues/3905
-        if (!this._persona_watched) {
-            this.setState({loadingComplete: true});
-        }
-    },
-
-    triggerLogin: function (event) {
-        var request_params = {}; // could be site name
-        console.log('Logging in (persona) ');
-        navigator.id.request(request_params);
-    },
-
-    triggerLogout: function (event) {
-        console.log('Logging out (persona)');
-        navigator.id.logout();
     }
 };
+
 
 class UnsavedChangesToken {
     constructor(manager) {
