@@ -527,9 +527,11 @@ var IndividualCuration = React.createClass({
                             });
                         }
                     } else if (currIndividual && currIndividual.proband && family) {
-                        // Editing a proband in a family. Just pass through existing variants
-                        newVariants = currIndividual.variants.map(function(variant) { return '/variants/' + variant.uuid + '/'; });
-                        Promise.resolve(newVariants);
+                        // Editing a proband in a family. Get updated variants list from the target individual since it is changed from the Family edit page
+                        return this.getRestData('/individuals/' + currIndividual.uuid).then(updatedIndiv => {
+                            newVariants = updatedIndiv.variants.map(function(variant) { return '/variants/' + variant.uuid + '/'; });
+                            return Promise.resolve(newVariants);
+                        });
                     }
 
                     // No variant search strings. Go to next THEN.
@@ -570,6 +572,8 @@ var IndividualCuration = React.createClass({
                                 return Promise.resolve(results);
                             });
                         }
+                    } else if (currIndividual && currIndividual.proband && family) {
+                        individualVariants = newVariants;
                     }
 
                     // No variant search strings. Go to next THEN indicating no new named variants
@@ -731,11 +735,8 @@ var IndividualCuration = React.createClass({
             newIndividual.otherPMIDs = individualArticles['@graph'].map(function(article) { return article['@id']; });
         }
 
-        // Assign the given variant array if we're not editing an individual proband in a family
-        if (!currIndividual || !(currIndividual.proband && family)) {
-            if (individualVariants) {
-                newIndividual.variants = individualVariants;
-            }
+        if (individualVariants) {
+            newIndividual.variants = individualVariants;
         }
 
         // Set the proband boolean
