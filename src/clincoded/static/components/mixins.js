@@ -198,8 +198,10 @@ module.exports.GoogleAuth = {
     },
 
     triggerLoginFail: function() {
-        // Login failed (?)
-        console.log('Failed login.');
+        // Login failed (not sure when this ever happens)
+        let login_failure = {};
+        login_failure['@type'] = ['LoginDenied', 'error'];
+        this.setState({context: login_failure, loadingComplete: true});
     },
 
     componentDidUpdate: function(prevProps, prevState) {
