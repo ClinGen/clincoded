@@ -77,6 +77,7 @@ class Timeout {
 }
 
 module.exports.GoogleAuth = {
+    // Mixin for providing Google Authentication functionality. Call in app.js
     childContextTypes: {
         fetch: React.PropTypes.func
     },
@@ -88,6 +89,7 @@ module.exports.GoogleAuth = {
     },
 
     getInitialState: function() {
+        // Define loadingComplete and session here so they are available to mixin, as well as main app
         return {
             loadingComplete: false,
             session: {}
@@ -95,16 +97,18 @@ module.exports.GoogleAuth = {
     },
 
     componentDidMount: function() {
-        /* Load triggerLogin() into global namespace so Google Auth can see it */
+        // Load triggerLogin() into global namespace so Google Auth can see it
         window[this.triggerLogin] = this.triggerLogin;
+        // Check for gapi (defined by platform.js from google - external js file)
         if (window.gapi !== undefined) {
+            // gapi is defined, so we can proceed with google-specific functions
             window.gapi.load('auth2', function() {
                 // set the app key (this needs to change)
                 window.gapi.auth2.init({
                     client_id: '789621077193-bop2e2s2ga14e98pbgth49uqucmmm5i4.apps.googleusercontent.com'
                 });
             });
-            // specify custom login button + triggers
+            // Specify custom login button + triggers
             window.gapi.signin2.render('g-signin2', {
                 'scope': 'email',
                 'width': 160,
@@ -116,8 +120,12 @@ module.exports.GoogleAuth = {
             });
             this.extractSessionCookie();
         } else {
+            // gapi is not defined, so it either did not load, was blocked by the user, or jest testing is occuring.
+            // A custom error cannot be set, otherwise jest tests will fail due to the error page returning
+            // instead of the normal home page as jest expects. The following is a workaround to mimic the normal
+            // home page despite gapi not being found.
             let gapi_not_found = {};
-            //gapi_not_found['@type'] = ['GAPINotFound', 'error'];
+            // gapi_not_found['@type'] = ['GAPINotFound', 'error'];
             gapi_not_found = {
                 "@id": "/",
                 "@type": ["portal"],
@@ -129,12 +137,12 @@ module.exports.GoogleAuth = {
     },
 
     ajaxPrefilter: function (options, original, xhr) {
+        // Function to specify request headers of all ajax requests
         var http_method = options.type;
         if (http_method === 'GET' || http_method === 'HEAD') return;
         var session = this.state.session;
         var userid = session['auth.userid'];
         if (userid) {
-            // XXX Server should use this to check user is logged in
             xhr.setRequestHeader('X-Session-Userid', userid);
         }
         if (session._csrft_) {
@@ -143,8 +151,12 @@ module.exports.GoogleAuth = {
     },
 
     triggerLogin: function(googleUser, retrying) {
+        // Function called after the user has logged into google via the popup
+        if (!googleUser) {
+            return;
+        }
         var profile = googleUser.getBasicProfile();
-        if (!googleUser) return;
+        // We got a valid googleUser profile, so send the relevant data (email) to pyramid's login route to login to the site itself
         this.fetch('/login', {
             method: 'POST',
             headers: {
@@ -158,6 +170,7 @@ module.exports.GoogleAuth = {
             return response.json();
         })
         .then(session => {
+            // Login was successful, so forward user to dashboard or target URI as necessary
             var next_url = window.location.href;
             if (window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/') {
                 next_url = window.location.origin + '/dashboard/';
@@ -168,12 +181,14 @@ module.exports.GoogleAuth = {
         }, err => {
             parseError(err).then(data => {
                 if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
+                    // On first page-load, the CSRF token might not be properly set, incurring a Bad Request error.
+                    // This logic is to silently refresh the page so that the request is re-done with the new CSRF token.
                     if (!retrying) {
                         window.setTimeout(this.triggerLogin.bind(this, googleUser));
                         return;
                     }
                 }
-                // If there is an error, show the error messages
+                // If there is an error, show the error messages, and sign the user out of that Google account automatically
                 var auth2 = window.gapi.auth2.getAuthInstance();
                 auth2.signOut();
                 this.setState({context: data, loadingComplete: true});
@@ -183,10 +198,12 @@ module.exports.GoogleAuth = {
     },
 
     triggerLoginFail: function() {
+        // Login failed (?)
         console.log('Failed login.');
     },
 
     componentDidUpdate: function(prevProps, prevState) {
+        // Check session on updates
         if (prevState.session['auth.userid'] && !this.state.session['auth.userid']) {
             // Session expired
             var auth2 = window.gapi.auth2.getAuthInstance();
@@ -195,8 +212,11 @@ module.exports.GoogleAuth = {
     },
 
     triggerLogout: function() {
+        // Called when the user presses the logout button. Log the user out of Google and forward them to the proper page
         var session = this.state.session;
-        if (!(session && session['auth.userid'])) return;
+        if (!(session && session['auth.userid'])) {
+            return;
+        }
 
         var auth2 = window.gapi.auth2.getAuthInstance();
 
@@ -225,6 +245,7 @@ module.exports.GoogleAuth = {
     },
 
     extractSessionCookie: function () {
+        // Function for extracting data out of the session cookie and save the info to the reactjs state
         var cookie = require('cookie-monster');
         var session_cookie = cookie(document).get('session');
         if (this.state.session_cookie !== session_cookie) {
@@ -237,6 +258,7 @@ module.exports.GoogleAuth = {
     },
 
     parseSessionCookie: function (session_cookie) {
+        // Helper function for extractSessionCookie()
         var Buffer = require('buffer').Buffer;
         var session;
         if (session_cookie) {
@@ -247,6 +269,7 @@ module.exports.GoogleAuth = {
             try {
                 session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
             } catch (e) {
+                // error'ed
             }
         }
         return session || {};
