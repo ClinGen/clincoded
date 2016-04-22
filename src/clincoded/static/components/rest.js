@@ -19,7 +19,7 @@ var addQueryKey = globals.addQueryKey;
 // this.postRestData(uri,obj): POST given object to the given URI. Returns written data as a promise.
 
 var RestMixin = module.exports.RestMixin = {
-    // Borrow 'fetch' function from Google mixin used by App component
+    // Borrow 'fetch' function from GoogleAuth mixin used by App component
     contextTypes: {
         fetch: React.PropTypes.func
     },
