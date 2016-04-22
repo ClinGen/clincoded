@@ -166,9 +166,6 @@ def main(global_config, **local_config):
     hostname_command = settings.get('hostname_command', '').strip()
     if hostname_command:
         hostname = subprocess.check_output(hostname_command, shell=True).strip()
-        settings.setdefault('persona.audiences', '')
-        settings['persona.audiences'] += '\nhttp://%s' % hostname
-        settings['persona.audiences'] += '\nhttp://%s:6543' % hostname
 
     config = Configurator(settings=settings)
     config.registry['app_factory'] = main  # used by mp_indexer
@@ -178,7 +175,7 @@ def main(global_config, **local_config):
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
     config.include(session)
-    config.include('.persona')
+    config.include('.google')
 
     configure_engine(settings)
     config.include('contentbase')
