@@ -581,7 +581,7 @@ var GroupName = function() {
 
     return (
         <div className="row">
-            <Input type="text" ref="groupname" label="Group Label:" value={group && group.label} handleChange={this.handleChange}
+            <Input type="text" ref="groupname" label="Group Label:" value={group && group.label} maxLength="60" handleChange={this.handleChange}
                 error={this.getFormError('groupname')} clearError={this.clrFormErrors.bind(null, 'groupname')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote('Group')}</p>

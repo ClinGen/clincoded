@@ -20,7 +20,8 @@
         "label": {
             "title": "Label",
             "description": "An user entered label for the family",
-            "type": "string"
+            "type": "string",
+            "maxLength": 60
         },
         "commonDiagnosis": {
             "title": "Common Diagnosis",

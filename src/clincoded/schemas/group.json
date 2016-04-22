@@ -24,7 +24,8 @@
             "title": "Label",
             "description": "Label of group",
             "type": "string",
-            "default": ""
+            "default": "",
+            "maxLength": 60
         },
         "commonDiagnosis": {
             "title": "Common Diagnosis",
