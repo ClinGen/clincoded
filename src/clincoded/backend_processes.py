@@ -11,7 +11,7 @@ from json import dumps
 
 
 def includeme(config):
-    config.add_route('traverse', '/traverse/{gdm}')
+    config.add_route('traverse', '/traverse/{obj_type}/{uuid}')
     config.scan(__name__)
 
 
@@ -60,13 +60,26 @@ def traverse_action(request, obj, depth):
     return payload
 
 
+def reassociate_action(request, obj, old_parent, new_parent):
+    obj_type = obj['@type'][0]
+    obj_uuid = obj['uuid']
+    old_parent_obj = request.embed(old_parent, as_user=True)
+    if obj_type == 'group':
+        if 'families' in obj:
+            for i, family in enumerate(obj['families']):
+                if family.uuid = obj_uuid:
+                    del obj['families'][i]
+    new_parent_obj = request.embed(new_parent, as_user=True)
+
+
 @view_config(route_name='traverse', request_method='GET', permission='view')
 def traverse(context, request):
     #param_list = parse_qs(request.matchdict['gdm'].replace(',,', '&'))
-    gdm = request.matchdict['gdm']
-    root = request.embed('/gdm/%s' % gdm, as_user=True)
+    obj_type = request.matchdict['obj_type']
+    uuid = request.matchdict['uuid']
+    obj = request.embed('/%s/%s' % (obj_type, uuid), as_user=True)
     print("\n****************************************\n")
-    payload = traverse_action(request, root, depth=0)
+    payload = traverse_action(request, obj, depth=0)
     print("\n****************************************\n")
     print(payload)
     print("\n****************************************\n")

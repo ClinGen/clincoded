@@ -2461,7 +2461,7 @@ var ReassociateButtonModal = React.createClass({
     },
 
     componentDidMount: function() {
-        this.getRestData('/traverse/' + this.props.gdm.uuid).then(data => {
+        this.getRestData('/traverse/' + this.props.gdm['@id']).then(data => {
             this.setState({data: data});
         });
     },
@@ -2484,8 +2484,7 @@ var ReassociateButtonModal = React.createClass({
             <div>
                 <div className="modal-body">
                     {this.state.data.map(function(item, idx) {
-                        var temp = <span key={idx}>{Array.apply(null, Array(item.depth)).map(function(e, i) { return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; {item.id}<br /></span>;
-                        return temp;
+                        return <span key={idx}>{Array.apply(null, Array(item.depth)).map(function(e, i) { return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; {item.id}<br /></span>;
                     })}
                 </div>
                 <div className="modal-footer">
