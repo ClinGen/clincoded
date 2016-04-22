@@ -23,18 +23,18 @@ var portal = {
     navUser: [
         {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
         //{id: 'account', title: 'Account', url: '/account/'},
-        {id: 'loginout', title: 'Login'}
+        {id: 'login', title: 'Login'},
+        {id: 'logout', title: 'Logout'}
     ]
 };
 
 
 // Renders HTML common to all pages.
 var App = module.exports = React.createClass({
-    mixins: [mixins.Persona, mixins.HistoryAndTriggers],
+    mixins: [mixins.GoogleAuth, mixins.HistoryAndTriggers],
 
     triggers: {
-        login: 'triggerLogin',
-        logout: 'triggerLogout'
+        'logout': 'triggerLogout'
     },
 
     // Note on context. state.context set from initial props. Navigating to other pages sets this state.
@@ -57,7 +57,8 @@ var App = module.exports = React.createClass({
             errors: [],
             portal: portal,
             demoWarning: demoWarning,
-            productionWarning: productionWarning
+            productionWarning: productionWarning,
+            mode: this.props.mode
         };
     },
 
@@ -120,10 +121,11 @@ var App = module.exports = React.createClass({
                     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                     <title>ClinGen</title>
                     <link rel="canonical" href={canonical} />
+                    <script src='https://apis.google.com/js/platform.js'></script>
                     <script async src='//www.google-analytics.com/analytics.js'></script>
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="@@cssFile" />
-                    <script src="@@bundleJsFile" async defer></script>
+                    <script src="@@bundleJsFile"></script>
                 </head>
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit} className={this.state.demoWarning ? "demo-background" : ""}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
@@ -242,18 +244,18 @@ var NavbarUser = React.createClass({
                             return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title}>{menu.title}</NavItem>;
                         }
                     } else {
-                        // Trigger menu item; set <a> data attribute to login or logout
                         var attrs = {};
-
-                        // Item with trigger; e.g. login/logout
-                        if (!(session && session['auth.userid'])) {
-                            // Logged out; render signin trigger
-                            attrs['data-trigger'] = 'login';
-                            return <NavItem {...attrs} key={menu.id}>{menu.title}</NavItem>;
-                        } else {
-                            var fullname = (session.user_properties && session.user_properties.title) || 'unknown';
-                            attrs['data-trigger'] = 'logout';
-                            return <NavItem {...attrs} key={menu.id}>{'Logout ' + fullname}</NavItem>;
+                        if (menu.id == 'login') {
+                            // Special handling for login button (google button)
+                            return <div key='g-signin2' id='g-signin2' className={!(session && session['auth.userid']) ? 'nav-gsignin' : 'nav-gsignin-hidden'}></div>;
+                        }
+                        else if (menu.id == 'logout') {
+                            // Special handling for logout button (remove google button, replace with custom logout button)
+                            if ((session && session['auth.userid'])) {
+                                var fullname = (session.user_properties && session.user_properties.title) || 'unknown';
+                                attrs['data-trigger'] = 'logout';
+                                return <NavItem {...attrs} key={menu.id}>{'Logout ' + fullname}</NavItem>;
+                            }
                         }
                     }
                 })}
