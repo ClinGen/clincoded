@@ -11,7 +11,7 @@ var SignIn = module.exports.SignIn = React.createClass({
                 <h4>Data Providers</h4>
                 <a href="" disabled={disabled} data-trigger="login" className="signin-button btn btn-large btn-success">Sign In</a>
                 <p>No access? <a href='mailto:clingen-helpdesk@lists.stanford.edu'>Request an account</a>.</p>
-                <p>Authentication by <a href="http://www.mozilla.org/en-US/persona/" target="_blank">Mozilla Persona</a>.</p>
+                <p>Authentication by <a href="https://accounts.google.com/" target="_blank">Google</a>.</p>
             </div>
         );
     }
