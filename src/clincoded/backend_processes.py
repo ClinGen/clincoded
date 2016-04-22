@@ -15,7 +15,7 @@ def includeme(config):
     config.scan(__name__)
 
 
-def traverse_action(request, obj):
+def traverse_action(request, obj, depth):
     payload = []
     aid = obj['@id']
     if 'label' in obj:
@@ -23,37 +23,39 @@ def traverse_action(request, obj):
         print('%s : %s' % (aid, label))
         payload += [{
             'label': obj['label'],
-            'id': aid
+            'id': aid,
+            'depth': depth
         }]
     else:
         print('%s' % aid)
         payload += [{
-            'id': aid
+            'id': aid,
+            'depth': depth
         }]
 
     root = request.embed('%s' % aid, as_user=True)
     # print(root)
     if 'annotations' in root:
         for annotation in root['annotations']:
-            payload += traverse_action(request, annotation)
+            payload += traverse_action(request, annotation, depth=depth + 1)
     if 'groups' in root:
         for group in root['groups']:
-            payload += traverse_action(request, group)
+            payload += traverse_action(request, group, depth=depth + 1)
     if 'families' in root:
         for family in root['families']:
-            payload += traverse_action(request, family)
+            payload += traverse_action(request, family, depth=depth + 1)
     if 'individuals' in root:
         for individual in root['individuals']:
-            payload += traverse_action(request, individual)
+            payload += traverse_action(request, individual, depth=depth + 1)
     if 'familyIncluded' in root:
         for family in root['familyIncluded']:
-            payload += traverse_action(request, family)
+            payload += traverse_action(request, family, depth=depth + 1)
     if 'individualIncluded' in root:
         for individual in root['individualIncluded']:
-            payload += traverse_action(request, individual)
+            payload += traverse_action(request, individual, depth=depth + 1)
     if 'experimentalData' in root:
         for experimentalDatum in root['experimentalData']:
-            payload += traverse_action(request, experimentalDatum)
+            payload += traverse_action(request, experimentalDatum, depth=depth + 1)
 
     return payload
 
@@ -64,7 +66,7 @@ def traverse(context, request):
     gdm = request.matchdict['gdm']
     root = request.embed('/gdm/%s' % gdm, as_user=True)
     print("\n****************************************\n")
-    payload = traverse_action(request, root)
+    payload = traverse_action(request, root, depth=0)
     print("\n****************************************\n")
     print(payload)
     print("\n****************************************\n")
