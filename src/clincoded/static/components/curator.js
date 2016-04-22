@@ -2242,11 +2242,11 @@ var ReassociateButton = React.createClass({
                 {this.props.disabled ?
                     <span>Reassociate</span>
                 :
-                <span>
-                    <a href={"/traverse/" + this.props.gdm.uuid}>
+                <span><Modal title="Reassociate Item" modalClass="modal-info">
+                    <a modal={<ReassociateButtonModal gdm={this.props.gdm} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
                         Reassociate
                     </a>
-                </span>
+                </Modal></span>
                 }
             </span>
         );
@@ -2266,6 +2266,7 @@ var ReassociateButtonModal = React.createClass({
 
     getInitialState: function() {
         return {
+            data: [],
             submitBusy: false // True while form is submitting
         };
     },
@@ -2459,11 +2460,18 @@ var ReassociateButtonModal = React.createClass({
         this.props.closeModal();
     },
 
+    componentDidMount: function() {
+        this.getRestData('/traverse/' + this.props.gdm.uuid).then(data => {
+            this.setState({data: data});
+        });
+    },
+
     render: function() {
         var tree;
         var message;
         // generate custom messages and generate display tree for group and family delete confirm modals.
         // generic message for everything else.
+        /*
         if (this.props.item['@type'][0] == 'group') {
             message = <p><strong>Warning</strong>: Deleting this Group will also delete any associated families and individuals (see any Families or Individuals associated with the Group under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
@@ -2471,22 +2479,17 @@ var ReassociateButtonModal = React.createClass({
             message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
         }
+        */
         return (
             <div>
                 <div className="modal-body">
-                    {message}
-                    <p>Are you sure you want to delete this item?</p>
-                    {tree ?
-                    <div><strong>{this.props.item['@type'][0]} {this.props.item.label}</strong><br />
-                    {tree.map(function(treeItem, i) {
-                        return <span key={i}>&nbsp;&nbsp;{treeItem}<br /></span>;
+                    {this.state.data.map(function(item, idx) {
+                        var temp = <span key={idx}>{Array.apply(null, Array(item.depth)).map(function(e, i) { return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; {item.id}<br /></span>;
+                        return temp;
                     })}
-                    <br /></div>
-                    : null}
-                    </div>
+                </div>
                 <div className="modal-footer">
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
-                    <Input type="button-button" inputClassName="btn-danger btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
                 </div>
             </div>
         );
