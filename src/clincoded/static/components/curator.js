@@ -2461,7 +2461,7 @@ var ReassociateButtonModal = React.createClass({
     },
 
     componentDidMount: function() {
-        this.getRestData('/traverse/' + this.props.gdm['@id']).then(data => {
+        this.getRestData('/traverse' + this.props.gdm['@id']).then(data => {
             this.setState({data: data});
         });
     },
