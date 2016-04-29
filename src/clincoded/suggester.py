@@ -27,22 +27,39 @@ def suggest(context, request):
         return []
     es = request.registry[ELASTIC_SEARCH]
     query = {
-        "suggester": {
+        "suggest_symbol": {
             "text": search_term,
             "completion": {
                 "field": "symbol",
                 "size": 10
             }
+        },
+        "suggest_synonyms": {
+            "text": search_term,
+            "completion": {
+                "field": "synonyms",
+                "size": 10
+            }
+        },
+        "suggest_prevSymbols": {
+            "text": search_term,
+            "completion": {
+                "field": "previousSymbols",
+                "size": 10
+            }
         }
     }
     try:
-        results = es.suggest(index='gene_symbol_index', body=query)
+        results = es.suggest(index='suggester_index', body=query)
     except:
         return {}
     else:
         result['@id'] = '/suggest/?' + urlencode({'q': search_term})
         result['@graph'] = []
-        for item in results['suggester'][0]['options']:
-            if not any(x in item['text'] for x in ['(C. elegans)', '(mus musculus)']):
-                result['@graph'].append(item)
+        for item in results['suggest_symbol'][0]['options']:
+            result['@graph'].append(item)
+        for item in results['suggest_synonyms'][0]['options']:
+            result['@graph'].append(item)
+        for item in results['suggest_prevSymbols'][0]['options']:
+            result['@graph'].append(item)
         return result
