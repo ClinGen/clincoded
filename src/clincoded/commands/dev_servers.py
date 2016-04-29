@@ -39,6 +39,7 @@ def main():
 
     from clincoded.tests import elasticsearch_fixture, postgresql_fixture
     from contentbase.elasticsearch import create_mapping
+    from contentbase.elasticsearch import suggester_mapping
     datadir = os.path.abspath(args.datadir)
     pgdata = os.path.join(datadir, 'pgdata')
     esdata = os.path.join(datadir, 'esdata')
@@ -69,6 +70,7 @@ def main():
     if args.init:
         app = get_app(args.config_uri, args.app_name)
         create_mapping.run(app)
+        suggester_mapping.run(app)
 
     if args.load:
         from webtest import TestApp
