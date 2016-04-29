@@ -71,6 +71,7 @@ setup(
         [console_scripts]
         batchupgrade = contentbase.batchupgrade:main
         create-mapping = contentbase.elasticsearch.create_mapping:main
+        suggester-mapping = contentbase.elasticsearch.suggester_mapping:main
 
         add-date-created = clincoded.commands.add_date_created:main
         check-files = clincoded.commands.check_files:main
