@@ -86,9 +86,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
         var summaryPage = this.props.summaryPage ? true : false;
 
-        var provisional;
-        var provisionalExist = false;
-        var summaryButton = false;
+        var provisional = null;
+        var summaryButton;
         var variant = this.props.variant;
         var annotations = gdm && gdm.annotations;
 
@@ -97,64 +96,49 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
             var pmid = this.props.pmid;
-            var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
             if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
-                for (i in gdm.provisionalClassifications) {
-                    if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
-                        provisionalExist = true;
-                        provisional = gdm.provisionalClassifications[i];
-                        break;
-                    }
-                }
+                provisional = _.find(gdm.provisionalClassifications, this_provisional => {
+                    return userMatch(this_provisional.submitted_by, session);
+                });
             }
 
-            // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
+            // go through all annotations, groups, families and individuals to find one proband individual with all variants assessed as Supports.
             var supportedVariants = getUserPathogenicity(gdm, session);
             if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && supportedVariants && supportedVariants.length > 0) {
-                for (i in gdm.annotations) {
-                    var annotation = gdm.annotations[i];
-                    if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
+                _.map(gdm.annotations, annotation => {
+                    if (annotation.individuals && annotation.individuals.length && searchProbandIndividual(annotation.individuals, supportedVariants)) {
                         summaryButton = true;
-                        break;
+                        return;
                     }
-                    if (!summaryButton && annotation.families && annotation.families.length > 0) {
-                        for (j in annotation.families) {
-                            if (annotation.families[j].individualIncluded && annotation.families[j].individualIncluded.length > 0 &&
-                                searchProbandIndividual(annotation.families[j].individualIncluded, supportedVariants)) {
-                                summaryButton = true;
-                                break;
+
+                    if (!summaryButton && annotation.families && annotation.families.length) {
+                        _.map(annotation.families, family => {
+                            if (family.individualIncluded && family.individualIncluded.length && searchProbandIndividual(family.individualIncluded, supportedVariants)) {
+                                summaryButton =  true;
+                                return;
                             }
-                        }
+                        });
                     }
-                    if (summaryButton) {
-                        break;
-                    }
-                    else if (annotation.groups && annotation.groups.length > 0) {
-                        for (j in annotation.groups) {
-                            if (annotation.groups[j].familyIncluded && annotation.groups[j].familyIncluded.length > 0) {
-                                for (k in annotation.groups[j].familyIncluded) {
-                                    if (annotation.groups[j].familyIncluded[k].individualIncluded && annotation.groups[j].familyIncluded[k].individualIncluded.length > 0 &&
-                                        searchProbandIndividual(annotation.groups[j].familyIncluded[k].individualIncluded, supportedVariants)) {
+
+                    if (!summaryButton && annotation.groups && annotation.groups.length) {
+                        _.map(annotation.groups, group => {
+                            if (group.individualIncluded && group.individualIncluded.length && searchProbandIndividual(group.individualIncluded, supportedVariants)) {
+                                summaryButton = true;
+                                return;
+                            }
+
+                            if (!summaryButton && group.familyIncluded && group.familyIncluded.length) {
+                                _.map(group.familyIncluded, family => {
+                                    if (family.individualIncluded && family.individualIncluded.length && searchProbandIndividual(family.individualIncluded, supportedVariants)) {
                                         summaryButton = true;
-                                        break;
+                                        return;
                                     }
-                                }
+                                });
                             }
-                            if (summaryButton) {
-                                break;
-                            }
-                            else if (annotation.groups[j].individualIncluded && annotation.groups[j].individualIncluded.length > 0 &&
-                                searchProbandIndividual(annotation.groups[j].individualIncluded, supportedVariants)) {
-                                summaryButton = true;
-                                break;
-                            }
-                        }
+                        });
                     }
-                    if (summaryButton) {
-                        break;
-                    }
-                }
+                });
             }
 
             return (
@@ -182,7 +166,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                 <div className="provisional-title">
                                                     <strong>Last Saved Summary & Provisional Classification</strong>
                                                 </div>
-                                                {   provisionalExist ?
+                                                {   provisional ?
                                                         <div>
                                                             <div className="provisional-data-left">
                                                                 <span>
@@ -214,7 +198,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                         </button>
                                                         :
                                                         <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                                            { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
+                                                            { provisional ? 'Generate New Summary' : 'Generate Summary' }
                                                         </a>
                                                     )
                                                     :
@@ -297,46 +281,36 @@ var findGdmPmidFromObj = module.exports.findGdmPmidFromObj = function(obj) {
 var getUserPathogenicity = function(gdm, session) {
     var supportedVariants = [];
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
-        for (var i in gdm.variantPathogenicity) {
-            var this_patho = gdm.variantPathogenicity[i];
+        _.map(gdm.variantPathogenicity, this_patho => {
             if (userMatch(this_patho.submitted_by, session) && this_patho.assessments && this_patho.assessments.length > 0 && this_patho.assessments[0].value === 'Supports') {
                 supportedVariants.push(this_patho.variant.uuid);
             }
-        }
+        });
     }
     return supportedVariants;
 };
 
+// Function to check if all associated variants are assessed as Supports
 var all_in = function(individualVariantList, allSupportedlist) {
-    for(var i in individualVariantList) {
-        var this_in = false;
-        for (var j in allSupportedlist) {
-            if (individualVariantList[i].uuid === allSupportedlist[j]) {
-                this_in = true;
-                break;
-            }
+    var all_sup = true;
+    _.map(individualVariantList, ind_v => {
+        if (!_.contains(allSupportedlist, ind_v.uuid)) {
+            all_sup = false;
+            return;
         }
-
-        if (!this_in) {
-            return false;
-        }
-    }
-    return true;
+    });
+    return all_sup;
 };
 
-// function to find one proband individual with all variants assessed.
+// function to find one proband individual with all variants supported.
 var searchProbandIndividual = function(individualList, variantList) {
-    //individualList.forEach(individual => {
-    //    if (individual.proband && individual.variants && individual.variants.length > 0 && all_in(individual.variants, variantList)) {
-    //        return true;
-    //    }
-    //});
-    for (var i in individualList) {
-        if (individualList[i].proband && individualList[i].variants && individualList[i].variants.length > 0 && all_in(individualList[i].variants, variantList)) {
-            return true;
-        }
+    var probandInd = _.find(individualList, individual => {
+        return individual.proband && individual.variants && individual.variants.length > 0 && all_in(individual.variants, variantList);
+    });
+    if (!probandInd) {
+        return false;
     }
-    return false;
+    return true;
 };
 
 
