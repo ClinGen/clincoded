@@ -1720,5 +1720,20 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "srgoehringer@geisinger.edu",
+        "first_name": "Scott",
+        "last_name": "Goehringer",
+        "uuid": "b0328a7c-62d0-47c5-a289-62750a483f73",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
