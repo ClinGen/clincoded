@@ -1,4 +1,6 @@
 from pyramid.response import Response
+from pyramid.request import Request
+import urllib
 from pyramid.view import view_config
 from contentbase import Item
 from collections import OrderedDict
@@ -7,7 +9,7 @@ from urllib.parse import (
     parse_qs,
     urlencode,
 )
-from json import dumps
+from json import dumps, loads
 
 
 def includeme(config):
@@ -17,6 +19,8 @@ def includeme(config):
 
 
 def traverse_action(request, obj, depth):
+    # for traversing through the object's children. Similar to the traverse action
+    # in the js mixin but more broad in scope
     payload = []
     aid = obj['@id']
     if 'label' in obj:
@@ -61,40 +65,82 @@ def traverse_action(request, obj, depth):
     return payload
 
 
+def put_object(request, uri, payload):
+    # this still has an issue where if the subreq.body is set, it will
+    # throw a Permission Denied in the browser. The second put_object() call
+    # specified in reassociate_action() also does not fire. Maybe figure out
+    # how to discard the response rendering??
+    kwargs = {
+        "cookies": request.cookies,
+        "host": request.host,
+        "authorization": request.authorization
+    }
+    # subreq = Request.blank(uri, **kwargs)
+    subreq = request.copy()
+    subreq.path_info = uri
+    subreq.method = 'PUT'
+    subreq.headers = {'Content-Type': 'application/json; charset=utf-8'}
+    subreq.body = dumps(payload).encode('utf-8')
+    print(subreq)
+    response = request.invoke_subrequest(subreq)
+    print(response.status_code)
+    return response
+
+
 def reassociate_action(request, obj_type, obj_uuid, old_parent_type, old_parent_uuid, new_parent_type, new_parent_uuid):
     obj_id = '/%s/%s/' % (obj_type, obj_uuid)
-    old_parent_obj = request.embed('/%s/%s/?frame=object' % (old_parent_type, old_parent_uuid), as_user=True)
-    old_parent_obj_type = old_parent_obj['@type'][0]
-    new_parent_obj = request.embed('/%s/%s/?frame=object' % (new_parent_type, new_parent_uuid), as_user=True)
-    new_parent_obj_type = new_parent_obj['@type'][0]
+    obj_id = obj_uuid
+    old_parent_obj = request.embed('/%s/%s/?frame=raw' % (old_parent_type, old_parent_uuid), as_user=True)
+    # old_parent_obj_type = old_parent_obj['@type'][0]
+    new_parent_obj = request.embed('/%s/%s/?frame=raw' % (new_parent_type, new_parent_uuid), as_user=True)
+    # new_parent_obj_type = new_parent_obj['@type'][0]
+    payload_old, payload_new = None, None
     if obj_type == 'groups':
-        if old_parent_obj_type == 'annotation':
+        if old_parent_type == 'evidence':
             old_parent_obj['groups'].remove(obj_id)
-        if new_parent_obj_type == 'annotation':
+            payload_old = old_parent_obj['groups']
+        if new_parent_type == 'evidence':
             new_parent_obj['groups'].append(obj_id)
+            payload_new = new_parent_obj['groups']
     elif obj_type == 'families':
-        if old_parent_obj_type == 'annotation':
+        if old_parent_type == 'evidence':
             old_parent_obj['families'].remove(obj_id)
-        elif old_parent_obj_type == 'group':
+            payload_old = old_parent_obj['families']
+        elif old_parent_type == 'groups':
             old_parent_obj['familyIncluded'].remove(obj_id)
-        if new_parent_obj_type == 'annotation':
+            payload_old = old_parent_obj['familyIncluded']
+        if new_parent_type == 'evidence':
             new_parent_obj['families'].append(obj_id)
-        elif new_parent_obj_type == 'group':
-            new_parent_obj['families'].append(obj_id)
+            payload_new = new_parent_obj['families']
+        elif new_parent_type == 'groups':
+            new_parent_obj['familyIncluded'].append(obj_id)
+            payload_new = new_parent_obj['familyIncluded']
     elif obj_type == 'individuals':
-        if old_parent_obj_type == 'annotation':
+        if old_parent_type == 'evidence':
             old_parent_obj['individuals'].remove(obj_id)
-        elif old_parent_obj_type == 'group' or old_parent_obj_type == 'family':
+            payload_old = old_parent_obj['individuals']
+        elif old_parent_type == 'groups' or old_parent_type == 'families':
             old_parent_obj['individualIncluded'].remove(obj_id)
-        if new_parent_obj_type == 'annotation':
+            payload_old = old_parent_obj['individualIncluded']
+        if new_parent_type == 'evidence':
             new_parent_obj['individuals'].append(obj_id)
-        elif new_parent_obj_type == 'group' or new_parent_obj_type == 'family':
+            payload_new = new_parent_obj['individuals']
+        elif new_parent_type == 'groups' or new_parent_type == 'families':
             new_parent_obj['individualIncluded'].append(obj_id)
+            payload_new = new_parent_obj['individualIncluded']
     elif obj_type == 'experimental':
-        if old_parent_obj_type == 'annotation':
+        if old_parent_type == 'evidence':
             old_parent_obj['experimentalData'].remove(obj_id)
-        if new_parent_obj_type == 'annotation':
+            payload_old = old_parent_obj['experimentalData']
+        if new_parent_type == 'evidence':
             new_parent_obj['experimentalData'].append(obj_id)
+            payload_new = new_parent_obj['experimentalData']
+    print("\n****************************************\n")
+    put_object(request, '/%s/%s/' % (old_parent_type, old_parent_uuid), old_parent_obj)
+    print("\n****************************************\n")
+    put_object(request, '/%s/%s/' % (new_parent_type, new_parent_uuid), new_parent_obj)
+    print("\n****************************************\n")
+    return Response(dumps([0]), content_type='text/plain')
 
 
 @view_config(route_name='traverse', request_method='GET', permission='view')
