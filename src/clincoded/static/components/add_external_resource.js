@@ -34,7 +34,9 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing (passed to Modal)
         fieldNum: React.PropTypes.string, // specify which field on the main form this should edit (passed to Modal)
         updateParentForm: React.PropTypes.func, // function to call upon pressing the Save button
-        disabled: React.PropTypes.bool // specify whether or not the button on the main form is disabled
+        disabled: React.PropTypes.bool, // specify whether or not the button on the main form is disabled
+        buttonClasses: React.PropTypes.string, // specify any special css classes for the button
+        buttonOnly: React.PropTypes.bool // specify whether or not only the button should be rendered (no form-group)
     },
 
     getInitialState: function() {
@@ -57,25 +59,38 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         this.props.updateParentForm(null, this.props.fieldNum);
     },
 
-    render: function() {
+    buttonRender: function() {
         return (
-            <div className="form-group">
-                <span className="col-sm-5 control-label">{this.props.labelVisible ? <label>{this.props.label}</label> : null}</span>
-                <span className="col-sm-7">
-                <div className="delete-button-wrapper">
-                    <Modal title={this.state.txtModalTitle} className="input-inline" modalClass="modal-default">
-                        <a className={"btn btn-default" + (this.props.disabled ? " disabled" : "")} modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue}
-                            fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} />}>
-                                {this.props.buttonText}
-                        </a>
-                    </Modal>
-                </div>
-                {this.props.initialFormValue ?
-                    <Input type="button" title="Clear" inputClassName="btn-default" clickHandler={this.resetForm} />
-                : null}
-                </span>
+            <div className="delete-button-wrapper">
+                <Modal title={this.state.txtModalTitle} className="input-inline" modalClass="modal-default">
+                    <a className={"btn btn-default" + (this.props.buttonClasses ? " " + this.props.buttonClasses : "") + (this.props.disabled ? " disabled" : "")}
+                        modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue}
+                        fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} />}>
+                            {this.props.buttonText}
+                    </a>
+                </Modal>
             </div>
         );
+    },
+
+    render: function() {
+        if (this.props.buttonOnly) {
+            return (
+                this.buttonRender()
+            );
+        } else {
+            return (
+                <div className="form-group">
+                    <span className="col-sm-5 control-label">{this.props.labelVisible ? <label>{this.props.label}</label> : null}</span>
+                    <span className="col-sm-7">
+                    {this.buttonRender()}
+                    {this.props.initialFormValue ?
+                        <Input type="button" title="Clear" inputClassName="btn-default" clickHandler={this.resetForm} />
+                    : null}
+                    </span>
+                </div>
+            );
+        }
     }
 });
 
