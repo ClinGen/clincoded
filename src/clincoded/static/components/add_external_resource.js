@@ -55,6 +55,9 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
             case 'clinvar':
                 this.setState({txtModalTitle: clinvarTxt('modalTitle')});
                 break;
+            case 'car':
+                this.setState({txtModalTitle: carTxt('modalTitle')});
+                break;
         }
     },
 
@@ -145,9 +148,9 @@ var AddResourceIdModal = React.createClass({
 
     // load text for different parts of the modal on load
     componentDidMount: function() {
+        var tempTxtLabel;
         switch(this.props.resourceType) {
             case 'clinvar':
-                var tempTxtLabel;
                 if (this.props.initialFormValue) {
                     tempTxtLabel = clinvarTxt('editLabel');
                     this.setState({queryResourceDisabled: false});
@@ -162,6 +165,21 @@ var AddResourceIdModal = React.createClass({
                     txtResourceResponse: clinvarTxt('resourceResponse')
                 });
                 break;
+            case 'car':
+                if (this.props.initialFormValue) {
+                    tempTxtLabel = carTxt('editLabel');
+                    this.setState({queryResourceDisabled: false});
+                    this.setState({inputValue: this.props.initialFormValue});
+                } else {
+                    tempTxtLabel = carTxt('inputLabel');
+                }
+                this.setState({
+                    txtInputLabel: tempTxtLabel,
+                    txtInputButton: carTxt('inputButton'),
+                    txtHelpText: carTxt('helpText'),
+                    txtResourceResponse: carTxt('resourceResponse')
+                });
+                break;
         }
     },
 
@@ -174,6 +192,9 @@ var AddResourceIdModal = React.createClass({
             case 'clinvar':
                 clinvarQueryResource.call(this);
                 break;
+            case 'car':
+                carQueryResource.call(this);
+                break;
         }
     },
 
@@ -184,6 +205,9 @@ var AddResourceIdModal = React.createClass({
         switch(this.props.resourceType) {
             case 'clinvar':
                 clinvarSubmitResource.call(this);
+                break;
+            case 'car':
+                carSubmitResource.call(this);
                 break;
         }
     },
@@ -347,4 +371,111 @@ function clinvarSubmitResource() {
             this.props.closeModal();
         });
     }
+}
+
+// Logic and helper functions for resource type 'car' for AddResource modal
+function carTxt(field) {
+    // Text to use for the resource type of 'clinvar'
+    var txt;
+    switch(field) {
+        case 'modalTitle':
+            txt = 'ClinGen Allele Registry';
+            break;
+        case 'inputLabel':
+            txt = 'Enter CAR ID';
+            break;
+        case 'editLabel':
+            txt = 'Edit CAR ID';
+            break;
+        case 'inputButton':
+            txt = 'Retrieve from CAR';
+            break;
+        case 'helpText':
+            txt = <span>You must enter a ClinGen Allele Registry ID. The CAR ID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).</span>;
+            break;
+        case 'resourceResponse':
+            txt = "Below is the CAR Preferred Title for the CAR ID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
+            break;
+    }
+    return txt;
+}
+function carValidateForm() {
+    // validating the field for ClinVarIDs
+    var valid = this.validateDefault();
+    var formInput = this.getFormValue('resourceId');
+
+    // valid if the input only has numbers
+    if (valid && !formInput.match(/^CA[0-9]{6}$/)) {
+        valid = false;
+        this.setFormErrors('resourceId', 'Invalid CAR ID');
+    }
+    return valid;
+}
+function carQueryResource() {
+    // for pinging and parsing data from ClinVar
+    this.saveFormValue('resourceId', this.state.inputValue);
+    if (carValidateForm.call(this)) {
+        var url = 'http://reg.genome.network/allele/';
+        var data;
+        var id = this.state.inputValue;
+        this.getRestData(url + id).then(json => {
+            data = json;
+            console.log(data);
+            /*
+            if (data.clinvarVariantId) {
+                // found the result we want
+                this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+            } else {
+                // no result from ClinVar
+                this.setFormErrors('resourceId', 'ClinVar ID not found');
+                this.setState({queryResourceBusy: false, resourceFetched: false});
+            }
+            */
+        });
+    } else {
+        this.setState({queryResourceBusy: false});
+    }
+}
+function carSubmitResource() {
+    // for dealing with the main form
+    /*
+    this.setState({submitResourceBusy: true});
+    if (this.state.tempResource.clinvarVariantId) {
+        this.getRestData('/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId).then(check => {
+            if (check.total) {
+                // variation already exists in our db
+                this.getRestData(check['@graph'][0]['@id']).then(result => {
+                    // if no variant title in db, or db's variant title not matching the retrieved title,
+                    // then update db and fetch result again
+                    if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle']) {
+                        this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
+                            return this.getRestData(result['@graph'][0]['@id']).then(result => {
+                                result.extraData = this.state.tempResource.extraData;
+                                this.props.updateParentForm(result, this.props.fieldNum);
+                            });
+                        });``
+                    } else {
+                        result.extraData = this.state.tempResource.extraData;
+                        this.props.updateParentForm(result, this.props.fieldNum);
+                    }
+                });
+            } else {
+                // variation is new to our db
+                let cleanedResource = this.state.tempResource;
+                var tempExtraData = this.state.tempResource.extraData;
+                delete cleanedResource['extraData'];
+                this.postRestData('/variants/', cleanedResource).then(result_raw => {
+                    // record the user adding a new variant entry
+                    this.recordHistory('add', result_raw['@graph'][0]).then(history => {
+                        let result = result_raw['@graph'][0];
+                        result.extraData = tempExtraData;
+                        this.props.updateParentForm(result, this.props.fieldNum);
+                    });
+                });
+            }
+            this.setState({submitResourceBusy: false});
+            this.props.closeModal();
+        });
+    }
+    */
 }

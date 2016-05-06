@@ -41,69 +41,6 @@ var SelectVariant = React.createClass({
     // When the form is submitted...
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        /*
-        // Get values from form and validate them
-        this.saveFormValue('hgncgene', this.refs.hgncgene.getValue().toUpperCase());
-        this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
-        this.saveFormValue('hpo', this.refs.hpo.getValue());
-        if (this.validateForm()) {
-            // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
-            var orphaId = this.getFormValue('orphanetid').match(/^ORPHA([0-9]{1,6})$/i)[1];
-            var geneId = this.getFormValue('hgncgene');
-            var mode = this.getFormValue('hpo');
-
-            // Get the disease and gene objects corresponding to the given Orphanet and Gene IDs in parallel.
-            // If either error out, set the form error fields
-            this.getRestDatas([
-                '/diseases/' + orphaId,
-                '/genes/' + geneId
-            ], [
-                function() { this.setFormErrors('orphanetid', 'Orphanet ID not found'); }.bind(this),
-                function() { this.setFormErrors('hgncgene', 'HGNC gene symbol not found'); }.bind(this)
-            ]).then(data => {
-                // Load GDM if one with matching gene/disease/mode already exists
-                return this.getRestData(
-                    '/search/?type=gdm&disease.orphaNumber=' + orphaId + '&gene.symbol=' + geneId + '&modeInheritance=' + mode
-                ).then(gdmSearch => {
-                    if (gdmSearch.total === 0) {
-                        // Matching GDM not found. Create a new GDM
-                        var newGdm = {
-                            gene: geneId,
-                            disease: orphaId,
-                            modeInheritance: mode
-                        };
-
-                        // Post the new GDM to the DB. Once promise returns, go to /curation-central page with the UUID
-                        // of the new GDM in the query string.
-                        return this.postRestData('/gdm/', newGdm).then(data => {
-                            var newGdm = data['@graph'][0];
-
-                            // Record history of adding a GDM
-                            var meta = {
-                                gdm: {
-                                    operation: 'add',
-                                    gene: newGdm.gene,
-                                    disease: newGdm.disease
-                                }
-                            };
-                            this.recordHistory('add', newGdm, meta);
-
-                            // Navigate to Record Curation
-                            var uuid = data['@graph'][0].uuid;
-                            this.context.navigate('/curation-central/?gdm=' + uuid);
-                        });
-                    } else {
-                        // Found matching GDM. See of the user wants to curate it.
-                        this.setState({gdm: gdmSearch['@graph'][0]});
-                        this.openAlert('confirm-edit-gdm');
-                    }
-                });
-            }).catch(e => {
-                // Some unexpected error happened
-                parseAndLogError.bind(undefined, 'fetchedRequest');
-            });
-        }
-        */
     },
 
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
@@ -185,7 +122,14 @@ var SelectVariant = React.createClass({
                             <div className="row">
                                 <AddResourceId resourceType="clinvar" label="ClinVar" wrapperClass="modal-buttons-wrapper" buttonWrapperClass="modal-button-align-reset"
                                     buttonText={this.state.variantData ? "Edit ClinVar ID" : "Add ClinVar ID" } initialFormValue={this.state.variantData && this.state.variantData.clinvarVariantId}
-                                    clearButtonText="Clear Variation ID" updateParentForm={this.updateClinvarVariantId} buttonOnly={true} />
+                                    clearButtonText="Cancel Variant Selection" updateParentForm={this.updateClinvarVariantId} buttonOnly={true} />
+                            </div>
+                            : null}
+                            {this.state.variantIdType == "ClinGen Allele Registry ID" ?
+                            <div className="row">
+                                <AddResourceId resourceType="car" label="ClinGen Allele Registry" wrapperClass="modal-buttons-wrapper" buttonWrapperClass="modal-button-align-reset"
+                                    buttonText={this.state.variantData ? "Edit CAR ID" : "Add CAR ID" } initialFormValue={this.state.variantData && this.state.variantData.carVariantId}
+                                    clearButtonText="Cancel Variant Selection" updateParentForm={this.updateCarVariantId} buttonOnly={true} />
                             </div>
                             : null}
                             {this.state.variantIdType && this.state.variantIdType != "none" ?
