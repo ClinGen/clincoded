@@ -8,14 +8,33 @@ module.exports.parseClinvar = parseClinvar;
 
 function parseClinvar(xml){
     var variant = {};
+    variant.extraData = {};
     var doc = new DOMParser().parseFromString(xml, 'text/xml');
 
     var $ClinVarResult = doc.getElementsByTagName('ClinVarResult-Set')[0];
-    if($ClinVarResult) {
+    if ($ClinVarResult) {
         var $VariationReport = $ClinVarResult.getElementsByTagName('VariationReport')[0];
         if ($VariationReport) {
+            // Get the ID (just in case) and Preferred Title
             variant.clinvarVariantId = $VariationReport.getAttribute('VariationID');
             variant.clinvarVariantTitle = $VariationReport.getAttribute('VariationName');
+            var $Allele = $VariationReport.getElementsByTagName('Allele')[0];
+            if ($Allele) {
+                var $HGVSlist_raw = $Allele.getElementsByTagName('HGVSlist')[0];
+                if ($HGVSlist_raw) {
+                    // get the HGVS entries
+                    var $HGVSlist = $HGVSlist_raw.getElementsByTagName('HGVS');
+                    variant.extraData.hgvs = [];
+                    _.map($HGVSlist, $HGVS => {
+                        let temp_hgvs = $HGVS.textContent;
+                        let assembly = $HGVS.getAttribute('Assembly');
+                        if (assembly) {
+                            temp_hgvs = temp_hgvs + ' (' + assembly + ')';
+                        }
+                        variant.extraData.hgvs.push(temp_hgvs);
+                    });
+                }
+            }
             /*
             // code snippet for grabbing dbSNP from ClinVar. Disable for now
             var $Allele = $VariationReport.getElementsByTagName('Allele')[0];

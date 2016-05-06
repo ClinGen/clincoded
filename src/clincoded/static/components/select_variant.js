@@ -32,7 +32,7 @@ var SelectVariant = React.createClass({
 
     getInitialState: function() {
         return {
-            variantIdType: null,
+            variantIdType: 'none',
             variantLoaded: false,
             clinvarVariantId: null,
             clinvarVariantTitle: null
@@ -117,7 +117,7 @@ var SelectVariant = React.createClass({
             this.setState({variantLoaded: true});
             this.setState({clinvarVariantId: data.clinvarVariantId, clinvarVariantTitle: data.clinvarVariantTitle});
         } else {
-            this.setState({variantLoaded: false});
+            this.setState({variantLoaded: false, variantIdType: 'none'});
             this.setState({clinvarVariantId: null, clinvarVariantTitle: null});
         }
     },
@@ -149,12 +149,13 @@ var SelectVariant = React.createClass({
                             </div>
                             <div className="row">
                                 <Input type="select" ref="variantIdType" label="Select Variant by ID type"
-                                    labelClassName="col-sm-5 control-label" value="none" wrapperClassName="col-sm-7" groupClassName="form-group"
+                                    labelClassName="col-sm-5 control-label" value={this.state.variantIdType} wrapperClassName="col-sm-7" groupClassName="form-group"
                                     defaultValue="none" handleChange={this.handleChange} inputDisabled={this.state.variantLoaded}>
-                                    <option value="none" disabled></option>
+                                    <option value="none"></option>
                                     <option value="ClinVar Variation ID">ClinVar Variation ID</option>
                                     <option value="ClinGen Allele Registry ID">ClinGen Allele Registry ID</option>
                                 </Input>
+                                <p className="col-sm-7 col-sm-offset-5 input-note-below"><strong>Note:</strong> Select ID type based on above instructions. Use the ClinVar VariationID whenever possible.</p>
                             </div>
                             {this.state.clinvarVariantId ?
                             <div className="row">

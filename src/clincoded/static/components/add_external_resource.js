@@ -28,7 +28,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
     mixins: [ModalMixin],
     propTypes: {
         resourceType: React.PropTypes.string, // specify what the resource you're trying to add is (passed to Modal)
-        label: React.PropTypes.object, // text for the button's label
+        label: React.PropTypes.string, // text for the button's label
         labelVisible: React.PropTypes.bool, // specify whether or not the label is visible
         buttonText: React.PropTypes.string, // text for the button
         clearButtonText: React.PropTypes.string, // text for clear button
@@ -329,7 +329,9 @@ function clinvarSubmitResource() {
                 });
             } else {
                 // variation is new to our db
-                this.postRestData('/variants/', this.state.tempResource).then(result => {
+                let cleanedResource = this.state.tempResource;
+                delete cleanedResource['extraData'];
+                this.postRestData('/variants/', cleanedResource).then(result => {
                     // record the user adding a new variant entry
                     this.recordHistory('add', result['@graph'][0]).then(history => {
                         this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
