@@ -1944,13 +1944,13 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
         return (
             <span>
                 {this.props.disabled ?
-                <div className="delete-button-wrapper pull-right" onMouseEnter={this.showNotice} onMouseLeave={this.hideNotice}>
+                <div className="inline-button-wrapper delete-button-push pull-right" onMouseEnter={this.showNotice} onMouseLeave={this.hideNotice}>
                     <a className="btn btn-danger" disabled="disabled">
                         Delete
                     </a>
                 </div>
                 :
-                <div className="delete-button-wrapper pull-right"><Modal title="Delete Item" modalClass="modal-danger">
+                <div className="inline-button-wrapper delete-button-push pull-right"><Modal title="Delete Item" modalClass="modal-danger">
                     <a className="btn btn-danger" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
                         Delete
                     </a>

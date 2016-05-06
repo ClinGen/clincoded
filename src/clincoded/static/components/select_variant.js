@@ -138,24 +138,23 @@ var SelectVariant = React.createClass({
                                     <option value="ClinVar Variation ID">ClinVar Variation ID</option>
                                     <option value="ClinGen Allele Registry ID">ClinGen Allele Registry ID</option>
                                 </Input>
-                                {this.state.clinvarVariantId ?
-                                <div>
-                                    <div className="row">
-                                        <h4 className="clinvar-preferred-title">{this.state.clinvarVariantTitle}</h4>
-                                    </div>
-                                    <div className="row">
-                                        <span className="col-sm-5 col-md-4 control-label"><label>ClinVar Variation ID</label></span>
-                                        <span className="col-sm-7 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.clinvarVariantId} target="_blank">{this.state.clinvarVariantId}</a></span>
-                                    </div>
+                            </div>
+                            {this.state.clinvarVariantId ?
+                            <div className="row">
+                                <h4 className="clinvar-preferred-title">{this.state.clinvarVariantTitle}</h4>
+                                <div className="row">
+                                    <span className="col-sm-5 col-md-4 control-label"><label>ClinVar Variation ID</label></span>
+                                    <span className="col-sm-7 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.clinvarVariantId} target="_blank">{this.state.clinvarVariantId}</a></span>
                                 </div>
-                                : null}
-                                {this.state.variantIdType == "ClinVar Variation ID" ?
+                            </div>
+                            : null}
+                            {this.state.variantIdType == "ClinVar Variation ID" ?
+                            <div className="row">
                                 <AddResourceId resourceType="clinvar" label="ClinVar" buttonClasses="wide-button"
                                     buttonText={this.state.clinvarVariantId ? "Edit ClinVar ID" : "Add ClinVar ID" }
                                     updateParentForm={this.updateClinvarVariantId} buttonOnly={true} />
-
-                                : null}
                             </div>
+                            : null}
                             {this.state.variantIdType && this.state.variantIdType != "none" ?
                             <div className="row">
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" inputDisabled={!this.state.variantLoaded} />

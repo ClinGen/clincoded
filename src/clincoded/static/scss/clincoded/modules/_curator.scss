@@ -645,8 +645,11 @@
     }
 }
 
-.delete-button-wrapper {
+.inline-button-wrapper {
     display: inline-block;
+}
+
+.delete-button-push {
     margin-right: 20px;
 }
 
@@ -656,6 +659,10 @@
     font-weight: bold;
     line-height: 2.5;
     padding-right: 10px;
+}
+
+.button-push {
+    margin-right: 15px;
 }
 
 .summary-matrix {
