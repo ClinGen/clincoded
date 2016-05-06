@@ -31,6 +31,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         label: React.PropTypes.object, // text for the button's label
         labelVisible: React.PropTypes.bool, // specify whether or not the label is visible
         buttonText: React.PropTypes.string, // text for the button
+        clearButtonText: React.PropTypes.string, // text for clear button
         initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing (passed to Modal)
         fieldNum: React.PropTypes.string, // specify which field on the main form this should edit (passed to Modal)
         updateParentForm: React.PropTypes.func, // function to call upon pressing the Save button
@@ -78,7 +79,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
 
     clearButtonRender: function() {
         return (
-            <Input type="button" title="Clear" inputClassName={"btn-default" + (this.props.clearButtonClass ? " " + this.props.clearButtonClass : "")} clickHandler={this.resetForm} />
+            <Input type="button" title={this.props.clearButtonText ? this.props.clearButtonText : "Clear"} inputClassName={"btn-default" + (this.props.clearButtonClass ? " " + this.props.clearButtonClass : "")} clickHandler={this.resetForm} />
         );
     },
 

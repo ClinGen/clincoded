@@ -169,12 +169,12 @@ var SelectVariant = React.createClass({
                             <div className="row">
                                 <AddResourceId resourceType="clinvar" label="ClinVar" wrapperClass="modal-buttons-wrapper" buttonWrapperClass="modal-button-align-reset"
                                     buttonText={this.state.clinvarVariantId ? "Edit ClinVar ID" : "Add ClinVar ID" } initialFormValue={this.state.clinvarVariantId}
-                                    updateParentForm={this.updateClinvarVariantId} buttonOnly={true} />
+                                    clearButtonText="Clear Variation ID" updateParentForm={this.updateClinvarVariantId} buttonOnly={true} />
                             </div>
                             : null}
                             {this.state.variantIdType && this.state.variantIdType != "none" ?
                             <div className="row">
-                                <Input type="submit" inputClassName="btn-default pull-right" id="submit" inputDisabled={!this.state.variantLoaded} />
+                                <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="View Variant" inputDisabled={!this.state.variantLoaded} />
                             </div>
                             : null}
                         </Form>
