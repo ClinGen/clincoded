@@ -131,7 +131,19 @@ var SelectVariant = React.createClass({
                     <Panel panelClassName="panel-select-variant">
                         <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                             <div className="row">
-                                <Input type="select" ref="variantIdType" label="Select Variant ID type"
+                                <div className="alert alert-info">
+                                    Instructions (please follow this order to determine correct ID for variant)<br /><br />
+                                    <ol>
+                                        <li>Search <a href="">ClinVar</a> for variant.</li>
+                                        <li>If found in ClinVar, select “ClinVar VariationID” from the pull-down to enter it.</li>
+                                        <li>If not found in ClinVar, search the <a href="">ClinGen Allele Registry</a> with a valid HGVS term for that variant.</li>
+                                        <li>If <a href="">ClinGen Allele Registry</a> returns a ClinVar ID, select “ClinVar VariationID” from the pull-down to enter it.</li>
+                                        <li>If <a href="">ClinGen Allele Registry</a> does not find a ClinVar ID, register the variant to return a CA ID and then select “ClinGen Allele Registry ID (CA ID)” from the pull-down to enter it.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <Input type="select" ref="variantIdType" label="Select Variant by ID type"
                                     labelClassName="col-sm-5 control-label" value="none" wrapperClassName="col-sm-7" groupClassName="form-group"
                                     defaultValue="none" handleChange={this.handleChange} inputDisabled={this.state.variantLoaded}>
                                     <option value="none" disabled></option>
