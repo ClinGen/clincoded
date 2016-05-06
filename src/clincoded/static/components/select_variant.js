@@ -34,8 +34,7 @@ var SelectVariant = React.createClass({
         return {
             variantIdType: 'none',
             variantLoaded: false,
-            clinvarVariantId: null,
-            clinvarVariantTitle: null
+            variantData: null
         };
     },
 
@@ -115,10 +114,11 @@ var SelectVariant = React.createClass({
         if (data) {
             // Set state
             this.setState({variantLoaded: true});
-            this.setState({clinvarVariantId: data.clinvarVariantId, clinvarVariantTitle: data.clinvarVariantTitle});
+            this.setState({variantData: data});
         } else {
+            this.refs['variantIdType'].resetValue();
             this.setState({variantLoaded: false, variantIdType: 'none'});
-            this.setState({clinvarVariantId: null, clinvarVariantTitle: null});
+            this.setState({variantData: null});
         }
     },
 
@@ -151,25 +151,40 @@ var SelectVariant = React.createClass({
                                 <Input type="select" ref="variantIdType" label="Select Variant by ID type"
                                     labelClassName="col-sm-5 control-label" value={this.state.variantIdType} wrapperClassName="col-sm-7" groupClassName="form-group"
                                     defaultValue="none" handleChange={this.handleChange} inputDisabled={this.state.variantLoaded}>
-                                    <option value="none"></option>
+                                    <option value="none" disabled></option>
                                     <option value="ClinVar Variation ID">ClinVar Variation ID</option>
                                     <option value="ClinGen Allele Registry ID">ClinGen Allele Registry ID</option>
                                 </Input>
                                 <p className="col-sm-7 col-sm-offset-5 input-note-below"><strong>Note:</strong> Select ID type based on above instructions. Use the ClinVar VariationID whenever possible.</p>
                             </div>
-                            {this.state.clinvarVariantId ?
+                            {this.state.variantData && this.state.variantData.clinvarVariantId ?
                             <div className="row">
-                                <h4 className="clinvar-preferred-title">{this.state.clinvarVariantTitle}</h4>
+                                <h4 className="clinvar-preferred-title">{this.state.variantData.clinvarVariantTitle}</h4>
                                 <div className="row">
                                     <span className="col-sm-5 col-md-4 control-label"><label>ClinVar Variation ID</label></span>
-                                    <span className="col-sm-7 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.clinvarVariantId} target="_blank">{this.state.clinvarVariantId}</a></span>
+                                    <span className="col-sm-7 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantData.clinvarVariantId} target="_blank">{this.state.variantData.clinvarVariantId}</a></span>
                                 </div>
+                            </div>
+                            : null}
+                            {this.state.variantData && this.state.variantData.extraData ?
+                            <div className="row">
+                                {this.state.variantData.extraData.hgvs && this.state.variantData.extraData.hgvs.length > 0 ?
+                                    <div className="row">
+                                        <span className="col-sm-5 col-md-4 control-label"><label>HGVS terms</label></span>
+                                        <span className="col-sm-7 col-md-8 text-no-input">
+                                            {this.state.variantData.extraData.hgvs.map(function(hgvs, i) {
+                                                return <span key={hgvs}>{hgvs}<br /></span>;
+                                            })}
+                                        </span>
+                                    </div>
+                                : null}
+
                             </div>
                             : null}
                             {this.state.variantIdType == "ClinVar Variation ID" ?
                             <div className="row">
                                 <AddResourceId resourceType="clinvar" label="ClinVar" wrapperClass="modal-buttons-wrapper" buttonWrapperClass="modal-button-align-reset"
-                                    buttonText={this.state.clinvarVariantId ? "Edit ClinVar ID" : "Add ClinVar ID" } initialFormValue={this.state.clinvarVariantId}
+                                    buttonText={this.state.variantData ? "Edit ClinVar ID" : "Add ClinVar ID" } initialFormValue={this.state.variantData && this.state.variantData.clinvarVariantId}
                                     clearButtonText="Clear Variation ID" updateParentForm={this.updateClinvarVariantId} buttonOnly={true} />
                             </div>
                             : null}

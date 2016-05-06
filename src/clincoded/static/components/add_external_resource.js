@@ -320,21 +320,26 @@ function clinvarSubmitResource() {
                     if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle']) {
                         this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
                             return this.getRestData(result['@graph'][0]['@id']).then(result => {
+                                result.extraData = this.state.tempResource.extraData;
                                 this.props.updateParentForm(result, this.props.fieldNum);
                             });
                         });
                     } else {
+                        result.extraData = this.state.tempResource.extraData;
                         this.props.updateParentForm(result, this.props.fieldNum);
                     }
                 });
             } else {
                 // variation is new to our db
                 let cleanedResource = this.state.tempResource;
+                var tempExtraData = this.state.tempResource.extraData;
                 delete cleanedResource['extraData'];
-                this.postRestData('/variants/', cleanedResource).then(result => {
+                this.postRestData('/variants/', cleanedResource).then(result_raw => {
                     // record the user adding a new variant entry
-                    this.recordHistory('add', result['@graph'][0]).then(history => {
-                        this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
+                    this.recordHistory('add', result_raw['@graph'][0]).then(history => {
+                        let result = result_raw['@graph'][0];
+                        result.extraData = tempExtraData;
+                        this.props.updateParentForm(result, this.props.fieldNum);
                     });
                 });
             }
