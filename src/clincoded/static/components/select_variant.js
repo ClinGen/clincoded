@@ -112,9 +112,14 @@ var SelectVariant = React.createClass({
         var newVariantInfo = _.clone(this.state.variantInfo);
         var currVariantOption = this.state.variantOption;
         var addVariantDisabled;
-        // Set state
-        this.setState({variantLoaded: true});
-        this.setState({clinvarVariantId: data.clinvarVariantId, clinvarVariantTitle: data.clinvarVariantTitle});
+        if (data) {
+            // Set state
+            this.setState({variantLoaded: true});
+            this.setState({clinvarVariantId: data.clinvarVariantId, clinvarVariantTitle: data.clinvarVariantTitle});
+        } else {
+            this.setState({variantLoaded: false});
+            this.setState({clinvarVariantId: null, clinvarVariantTitle: null});
+        }
     },
 
     handleChange: function(ref, e) {
@@ -162,8 +167,8 @@ var SelectVariant = React.createClass({
                             : null}
                             {this.state.variantIdType == "ClinVar Variation ID" ?
                             <div className="row">
-                                <AddResourceId resourceType="clinvar" label="ClinVar" buttonClasses="wide-button"
-                                    buttonText={this.state.clinvarVariantId ? "Edit ClinVar ID" : "Add ClinVar ID" }
+                                <AddResourceId resourceType="clinvar" label="ClinVar" wrapperClass="modal-buttons-wrapper" buttonWrapperClass="modal-button-align-reset"
+                                    buttonText={this.state.clinvarVariantId ? "Edit ClinVar ID" : "Add ClinVar ID" } initialFormValue={this.state.clinvarVariantId}
                                     updateParentForm={this.updateClinvarVariantId} buttonOnly={true} />
                             </div>
                             : null}

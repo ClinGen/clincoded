@@ -17,6 +17,15 @@
 .form-variant-select {
     margin-top: 50px;
     margin-bottom: 50px;
+
+    .modal-buttons-wrapper {
+        display: block;
+        text-align: center;
+    }
+
+    .modal-button-align-reset {
+        text-align: left;
+    }
 }
 
 .form-error {
