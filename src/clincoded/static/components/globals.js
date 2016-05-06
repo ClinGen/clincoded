@@ -157,7 +157,8 @@ module.exports.external_url_map = {
     'QuickGoSearch': 'http://www.ebi.ac.uk/QuickGO/GTerm?id=',
     'CL': 'http://www.ontobee.org/browser/index.php?o=CL',
     'CLSearch': 'http://www.ontobee.org/browser/rdf.php?o=CL&iri=http://purl.obolibrary.org/obo/',
-    'EFO': 'http://www.ebi.ac.uk/efo/'
+    'EFO': 'http://www.ebi.ac.uk/efo/',
+    'dbSNP':'http://www.ncbi.nlm.nih.gov/snp/'
 };
 
 
