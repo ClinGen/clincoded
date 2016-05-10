@@ -13,11 +13,6 @@
                 "NM_000111.2:c.1306C>T",
                 "NG_008046.1:g.25432C>T",
                 "NP_000102.1:p.Gln436Ter"
-            ],
-            "mafs": [
-                {"source": "ExAC", "population": "European", "value": 0.003},
-                {"source": "1000Genomes", "population": "global", "value": 0.007},
-                {"sournce": "ESP", "population": "African", "value": 0.002}
             ]
         },
         "otherDescription": "",
