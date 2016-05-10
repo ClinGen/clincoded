@@ -20,35 +20,57 @@
         "clinvarVariantId": {
             "title": "Variant ID",
             "description": "ClinVar Variant ID",
-            "type": "string"
+            "type": "string",
+            "default": ""
+        },
+        "carId": {
+            "title": "CAR ID",
+            "description": "Canonical Allele Registration ID from Baylor's Allele Registration",
+            "type": "string",
+            "default": ""
         },
         "clinvarVariantTitle": {
             "title": "ClinVar Variant Title",
             "type": "string",
             "default": ""
         },
-        "dbSNPId": {
-            "title": "dbSNP ID",
-            "description": "dbSNP id of the variant",
-            "type": "string",
-            "default": ""
+        "clinVarRCVs": {
+            "title": "ClinVar RCV Accession",
+            "description": "List of ClinVar RCV ids associated to the variant",
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "string"
+            }
         },
-        "clinVarRCV": {
-            "title": "ClinVar ID",
-            "description": "ClinVar id for the variant",
+        "clinVarSCVs": {
+            "title": "ClinVar SCV Accession",
+            "description": "List of ClinVar SCV ids associated to the variant",
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "string"
+            }
+        },
+        "dbSNPIds": {
+            "title": "dbSNP ID",
+            "description": "List of dbSNP ids related of the variant",
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "string"
+            }
+        },        "hgvsGRCh37": {
+            "title": "HGVS GRCh37",
+            "description": "HGVS term referenced with GRCh37",
             "type": "string",
             "default": ""
         },
         "hgvsNames": {
-            "title": "HGVS Names",
-            "description": "List of HGVS names of the variant",
-            "type": "array",
-            "default": [],
-            "items": {
-                "title": "HGVS Name",
-                "type": "string",
-                "default": ""
-            }
+            "title": "Other HGVS Terms",
+            "description": "List of other HGVS terms",
+            "type": "object",
+            "default": {}
         },
         "otherDescription": {
             "title": "Other Description",
@@ -60,6 +82,18 @@
     "columns": {
         "uuid": {
             "title": "Variant",
+            "type": "string"
+        },
+        "clinvarVariantId": {
+            "title": "ClinVar Variation ID",
+            "type": "string"
+        },
+        "clinvarVariantTitle": {
+            "title": "ClinVar Prefered Name",
+            "type": "string"
+        },
+        "carId": {
+            "title": "CAR ID",
             "type": "string"
         },
         "otherDescription": {
