@@ -52,11 +52,12 @@ var SelectVariant = React.createClass({
             // Set state
             this.setState({variantLoaded: true});
             this.setState({variantData: data});
-        } else {
-            this.refs['variantIdType'].resetValue();
-            this.setState({variantLoaded: false, variantIdType: 'none'});
-            this.setState({variantData: null});
         }
+    },
+
+    cancelVariantSelection: function() {
+        this.setState({variantLoaded: false, variantIdType: 'none'});
+        this.setState({variantData: null});
     },
 
     handleChange: function(ref, e) {
@@ -72,28 +73,32 @@ var SelectVariant = React.createClass({
                 <div className="col-md-8 col-md-offset-2 col-sm-9 col-sm-offset-1 form-variant-select">
                     <Panel panelClassName="panel-select-variant">
                         <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                            <div className="row">
-                                <div className="alert alert-info">
-                                    Instructions (please follow this order to determine correct ID for variant)<br /><br />
-                                    <ol>
-                                        <li>Search <a href="">ClinVar</a> for variant.</li>
-                                        <li>If found in ClinVar, select “ClinVar VariationID” from the pull-down to enter it.</li>
-                                        <li>If not found in ClinVar, search the <a href="">ClinGen Allele Registry</a> with a valid HGVS term for that variant.</li>
-                                        <li>If <a href="">ClinGen Allele Registry</a> returns a ClinVar ID, select “ClinVar VariationID” from the pull-down to enter it.</li>
-                                        <li>If <a href="">ClinGen Allele Registry</a> does not find a ClinVar ID, register the variant to return a CA ID and then select “ClinGen Allele Registry ID (CA ID)” from the pull-down to enter it.</li>
-                                    </ol>
+                            {!this.state.variantLoaded ?
+                            <div>
+                                <div className="row">
+                                    <div className="alert alert-info">
+                                        Instructions (please follow this order to determine correct ID for variant)<br /><br />
+                                        <ol>
+                                            <li>Search <a href="">ClinVar</a> for variant.</li>
+                                            <li>If found in ClinVar, select “ClinVar VariationID” from the pull-down to enter it.</li>
+                                            <li>If not found in ClinVar, search the <a href="">ClinGen Allele Registry</a> with a valid HGVS term for that variant.</li>
+                                            <li>If <a href="">ClinGen Allele Registry</a> returns a ClinVar ID, select “ClinVar VariationID” from the pull-down to enter it.</li>
+                                            <li>If <a href="">ClinGen Allele Registry</a> does not find a ClinVar ID, register the variant to return a CA ID and then select “ClinGen Allele Registry ID (CA ID)” from the pull-down to enter it.</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <Input type="select" ref="variantIdType" label="Select Variant by ID type"
+                                        labelClassName="col-sm-5 control-label" value={this.state.variantIdType} wrapperClassName="col-sm-7" groupClassName="form-group"
+                                        defaultValue="none" handleChange={this.handleChange} inputDisabled={this.state.variantLoaded}>
+                                        <option value="none" disabled></option>
+                                        <option value="ClinVar Variation ID">ClinVar Variation ID</option>
+                                        <option value="ClinGen Allele Registry ID">ClinGen Allele Registry ID</option>
+                                    </Input>
+                                    <p className="col-sm-7 col-sm-offset-5 input-note-below"><strong>Note:</strong> Select ID type based on above instructions. Use the ClinVar VariationID whenever possible.</p>
                                 </div>
                             </div>
-                            <div className="row">
-                                <Input type="select" ref="variantIdType" label="Select Variant by ID type"
-                                    labelClassName="col-sm-5 control-label" value={this.state.variantIdType} wrapperClassName="col-sm-7" groupClassName="form-group"
-                                    defaultValue="none" handleChange={this.handleChange} inputDisabled={this.state.variantLoaded}>
-                                    <option value="none" disabled></option>
-                                    <option value="ClinVar Variation ID">ClinVar Variation ID</option>
-                                    <option value="ClinGen Allele Registry ID">ClinGen Allele Registry ID</option>
-                                </Input>
-                                <p className="col-sm-7 col-sm-offset-5 input-note-below"><strong>Note:</strong> Select ID type based on above instructions. Use the ClinVar VariationID whenever possible.</p>
-                            </div>
+                            : null}
                             {this.state.variantData && this.state.variantData.clinvarVariantId ?
                             <div className="row">
                                 <h4 className="clinvar-preferred-title">{this.state.variantData.clinvarVariantTitle}</h4>
@@ -129,12 +134,13 @@ var SelectVariant = React.createClass({
                             <div className="row">
                                 <AddResourceId resourceType="car" label="ClinGen Allele Registry" wrapperClass="modal-buttons-wrapper" buttonWrapperClass="modal-button-align-reset"
                                     buttonText={this.state.variantData ? "Edit CAR ID" : "Add CAR ID" } initialFormValue={this.state.variantData && this.state.variantData.carVariantId}
-                                    clearButtonText="Cancel Variant Selection" updateParentForm={this.updateCarVariantId} buttonOnly={true} />
+                                    clearButtonText="Cancel Variant Selection" updateParentForm={this.updateCarVariantId} buttonOnly={true} clearButtonRender={false} />
                             </div>
                             : null}
-                            {this.state.variantIdType && this.state.variantIdType != "none" ?
+                            {this.state.variantData ?
                             <div className="row">
-                                <Input type="submit" inputClassName="btn-primary pull-right" id="submit" title="View Variant" inputDisabled={!this.state.variantLoaded} />
+                                <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="View Variant" inputDisabled={!this.state.variantLoaded} />
+                                <Input type="button" inputClassName="btn-default btn-inline-spacer pull-right" title="Cancel Variant Selection" clickHandler={this.cancelVariantSelection} />
                             </div>
                             : null}
                         </Form>

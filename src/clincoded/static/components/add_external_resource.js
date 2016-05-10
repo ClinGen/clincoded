@@ -40,7 +40,8 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         buttonWrapperClass: React.PropTypes.string, // specify any special css classes for the button
         buttonClass: React.PropTypes.string, // specify any special css classes for the button
         clearButtonClass: React.PropTypes.string, // specify any special css classes for the button
-        buttonOnly: React.PropTypes.bool // specify whether or not only the button should be rendered (no form-group)
+        buttonOnly: React.PropTypes.bool, // specify whether or not only the button should be rendered (no form-group)
+        clearButtonRender: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -91,7 +92,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
             return (
                 <div className={"inline-button-wrapper" + (this.props.wrapperClass ? " " + this.props.wrapperClass : "")}>
                     {this.buttonRender()}
-                    {this.props.initialFormValue ?
+                    {this.props.clearButtonRender && this.props.initialFormValue ?
                         this.clearButtonRender()
                     : null}
                 </div>
@@ -103,7 +104,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
                     <span className="col-sm-7">
                         <div className={"inline-button-wrapper button-push" + (this.props.wrapperClass ? " " + this.props.wrapperClass : "")}>
                             {this.buttonRender()}
-                            {this.props.initialFormValue ?
+                            {this.props.clearButtonRender && this.props.initialFormValue ?
                                 this.clearButtonRender()
                             : null}
                         </div>
