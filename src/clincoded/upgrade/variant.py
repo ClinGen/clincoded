@@ -81,4 +81,26 @@ def variant_1_2(value, system):
 
 @upgrade_step('variant', '2', '3')
 def variant_2_3(value, system):
-    pass
+    if 'carId' not in value:
+        value['carId'] = ''
+
+    if 'dbSNPId' in value:
+        value['dbSNPIds'] = [value['dbSNPId']]
+        value.pop('dbSNPId', None)
+
+    if 'dbSNPIds' not in value:
+        value['dbSNPIds'] = []
+
+    if 'clinVarRCV' in value:
+        value['clinVarRCVs'] = [value['clinVarRCV']]
+        value.pop('clinVarRCV', None)
+
+    if 'clinVarRCVs' not in value:
+        value['clinVarRCVs'] = []
+
+    if 'clinVarSCVs' not in value:
+        value['clinVarRCVs'] = []
+
+    if 'hgvsNames' in value and value['hgvsNames'] == []:
+        value['clinVarRCVs'] = {}
+
