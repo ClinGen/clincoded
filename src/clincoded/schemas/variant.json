@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "clinvarVariantId": {
             "title": "Variant ID",
@@ -60,15 +60,10 @@
             "items": {
                 "type": "string"
             }
-        },        "hgvsGRCh37": {
-            "title": "HGVS GRCh37",
-            "description": "HGVS term referenced with GRCh37",
-            "type": "string",
-            "default": ""
         },
         "hgvsNames": {
-            "title": "Other HGVS Terms",
-            "description": "List of other HGVS terms",
+            "title": "HGVS Terms",
+            "description": "Object containing HGVS terms. Separated to GRCh37, GRCh38 and others",
             "type": "object",
             "default": {}
         },

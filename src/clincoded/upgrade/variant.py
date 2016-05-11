@@ -78,3 +78,7 @@ def variant_1_2(value, system):
 
         else:
             value['clinvarVariantTitle'] = ''
+
+@upgrade_step('variant', '2', '3')
+def variant_2_3(value, system):
+    pass
