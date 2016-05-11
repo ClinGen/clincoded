@@ -102,5 +102,5 @@ def variant_2_3(value, system):
         value['clinVarRCVs'] = []
 
     if 'hgvsNames' in value and value['hgvsNames'] == []:
-        value['clinVarRCVs'] = {}
+        value['hgvsNames'] = {}
 
