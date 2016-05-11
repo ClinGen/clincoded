@@ -23,7 +23,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
                         <Title data={variant} />
                     </div>
                 </div>
-                <div className="container curation-data">
+                <div className="container curation-data curation-variant">
                     <div className="row equal-height">
                         <CurationRecordVariant data={variant} />
                         <CurationRecordGeneDisease data={variant} />
