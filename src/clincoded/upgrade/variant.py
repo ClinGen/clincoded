@@ -81,6 +81,7 @@ def variant_1_2(value, system):
 
 @upgrade_step('variant', '2', '3')
 def variant_2_3(value, system):
+    # Related to ticket #676 (https://github.com/ClinGen/clincoded/issues/676#issuecomment-218564765)
     if 'carId' not in value:
         value['carId'] = ''
 
