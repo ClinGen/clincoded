@@ -10,8 +10,15 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         data: React.PropTypes.object // ClinVar data payload
     },
 
+    getDefaultProps: function() {
+        return {
+            recordHeader: 'Evidence History'
+        };
+    },
+
     render: function() {
         var variant = this.props.data;
+        var recordHeader = this.props.recordHeader;
         if (variant) {
             var status = (variant.status) ? variant.status : 'Unknown';
             var creator = (variant.submitted_by.title) ? variant.submitted_by.title : 'Unknown';
@@ -23,8 +30,9 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         }
 
         return (
-            <div className="col-xs-12 col-sm-6 gutter-exc">
+            <div className="col-xs-12 col-sm-4 gutter-exc">
                 <div className="curation-data-curator">
+                    <h4>{recordHeader}</h4>
                     {variant ?
                         <dl className="inline-dl clearfix">
                             <dt>Status: </dt><dd>{status}</dd>
