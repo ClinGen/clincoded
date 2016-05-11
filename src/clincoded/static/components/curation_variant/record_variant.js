@@ -17,8 +17,15 @@ var CurationRecordVariant = module.exports.CurationRecordVariant = React.createC
         updateInterpretationTranscript: React.PropTypes.func
     },
 
+    getDefaultProps: function() {
+        return {
+            recordHeader: 'Variant Information'
+        };
+    },
+
     render: function() {
         var variant = this.props.data;
+        var recordHeader = this.props.recordHeader;
         if (variant) {
             var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
             var caId = (variant.canonicalAlleleId) ? variant.canonicalAlleleId : 'Unknown';
@@ -27,8 +34,9 @@ var CurationRecordVariant = module.exports.CurationRecordVariant = React.createC
         var addEdit = this.props.interpretationTranscript ? 'Edit' : 'Add';
 
         return (
-            <div className="col-xs-12 col-sm-3 gutter-exc">
+            <div className="col-xs-12 col-sm-4 gutter-exc">
                 <div className="curation-data-gene">
+                    <h4>{recordHeader}</h4>
                     {variant ?
                         <dl className="inline-dl clearfix">
                             <dt>ClinVar VariationID: </dt><dd><a href={external_url_map['ClinVar'] + clinVarId} target="_blank" title={'ClinVar page for ' + clinVarId + ' in a new window'}>{clinVarId}</a></dd>
