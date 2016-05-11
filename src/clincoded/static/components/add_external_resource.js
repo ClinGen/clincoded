@@ -10,6 +10,7 @@ var CuratorHistory = require('./curator_history');
 var parseAndLogError = require('./mixins').parseAndLogError;
 
 var parseClinvar = require('../libs/parse-resources').parseClinvar;
+var parseCAR = require('../libs/parse-resources').parseCAR;
 
 var Panel = panel.Panel;
 var Modal = modal.Modal;
@@ -421,7 +422,11 @@ function carQueryResource() {
         var id = this.state.inputValue;
         this.getRestData(url + id).then(json => {
             data = json;
+            console.log('------------json-----------');
             console.log(data);
+            console.log('------------json-----------');
+            parseCAR(data);
+
             /*
             if (data.clinvarVariantId) {
                 // found the result we want

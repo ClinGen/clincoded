@@ -53,3 +53,38 @@ function parseClinvar(xml){
 
     return variant;
 }
+
+module.exports.parseCAR = parseCAR;
+
+function parseCAR(json) {
+    var data = {};
+    data.carId = json['@id'].substring(json['@id'].indexOf('CA'));
+    console.log(json);
+    if (json.externalRecords) {
+        if (json.externalRecords.ClinVar && json.externalRecords.ClinVar.length > 0) {
+            data.clinvarVariantId = json.externalRecords.ClinVar[0].variationId;
+            data.clinvarVariantTitle = json.externalRecords.ClinVar[0].preferredName;
+        }
+    }
+    data.hgvs = [];
+    if (json.genomicAlleles && json.genomicAlleles.length > 0) {
+        json.genomicAlleles.map(function(genomicAllele, i) {
+            if (genomicAllele.hgvs && genomicAllele.hgvs.length > 0) {
+                genomicAllele.hgvs.map(function(hgvs_temp, j) {
+                    data.hgvs.push(hgvs_temp);
+                });
+            }
+        });
+    }
+    if (json.transcriptAlleles && json.transcriptAlleles.length > 0) {
+        json.transcriptAlleles.map(function(transcriptAllele, i) {
+            if (transcriptAllele.hgvs && transcriptAllele.hgvs.length > 0) {
+                transcriptAllele.hgvs.map(function(hgvs_temp, j) {
+                    data.hgvs.push(hgvs_temp);
+                });
+            }
+        });
+    }
+    console.log(data);
+    return data;
+}
