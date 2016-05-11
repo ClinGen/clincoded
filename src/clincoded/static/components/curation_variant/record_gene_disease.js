@@ -12,8 +12,15 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
         data: React.PropTypes.object // ClinVar data payload
     },
 
+    getDefaultProps: function() {
+        return {
+            recordHeader: 'Associated Gene Information'
+        };
+    },
+
     render: function() {
         var variant = this.props.data;
+        var recordHeader = this.props.recordHeader;
         if (variant) {
             var geneSymbol = (variant.symbol) ? variant.symbol : 'Unknown';
             var uniprotId = (variant.uniprotId) ? variant.uniprotId : 'Unknown';
@@ -22,8 +29,9 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
         }
 
         return (
-            <div className="col-xs-12 col-sm-3 gutter-exc">
+            <div className="col-xs-12 col-sm-4 gutter-exc">
                 <div className="curation-data-disease">
+                    <h4>{recordHeader}</h4>
                     {variant ?
                         <dl className="inline-dl clearfix">
                             <dt>Associated gene: </dt><dd><a href={external_url_map['HGNC'] + geneSymbol} target="_blank" title={'HGNC page for ' + geneSymbol + ' in a new window'}>{geneSymbol}</a></dd>
