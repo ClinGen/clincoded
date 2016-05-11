@@ -86,15 +86,21 @@ def variant_2_3(value, system):
         value['carId'] = ''
 
     if 'dbSNPId' in value:
-        value['dbSNPIds'] = [value['dbSNPId']]
+        if value['dbSNPId'] != '':
+            value['dbSNPIds'] = [value['dbSNPId']]
+        else:
+            value['dbSNPIds'] = []
         value.pop('dbSNPId', None)
-    elif 'dbSNPIds' not in value:
+    if 'dbSNPIds' not in value and 'dbSNPId' not in value:
         value['dbSNPIds'] = []
 
     if 'clinVarRCV' in value:
-        value['clinVarRCVs'] = [value['clinVarRCV']]
+        if value['clinVarRCV'] != '':
+            value['clinVarRCVs'] = [value['clinVarRCV']]
+        else:
+            value['clinVarRCVs'] = []
         value.pop('clinVarRCV', None)
-    elif 'clinVarRCVs' not in value:
+    if 'clinVarRCVs' not in value and 'clinVarRCV' not in value:
         value['clinVarRCVs'] = []
 
     if 'clinVarSCVs' not in value:
