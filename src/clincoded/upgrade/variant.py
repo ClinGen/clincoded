@@ -78,3 +78,34 @@ def variant_1_2(value, system):
 
         else:
             value['clinvarVariantTitle'] = ''
+
+@upgrade_step('variant', '2', '3')
+def variant_2_3(value, system):
+    # Related to ticket #676 (https://github.com/ClinGen/clincoded/issues/676#issuecomment-218564765)
+    if 'carId' not in value:
+        value['carId'] = ''
+
+    if 'dbSNPId' in value:
+        if value['dbSNPId'] != '':
+            value['dbSNPIds'] = [value['dbSNPId']]
+        else:
+            value['dbSNPIds'] = []
+        value.pop('dbSNPId', None)
+    if 'dbSNPIds' not in value and 'dbSNPId' not in value:
+        value['dbSNPIds'] = []
+
+    if 'clinVarRCV' in value:
+        if value['clinVarRCV'] != '':
+            value['clinVarRCVs'] = [value['clinVarRCV']]
+        else:
+            value['clinVarRCVs'] = []
+        value.pop('clinVarRCV', None)
+    if 'clinVarRCVs' not in value and 'clinVarRCV' not in value:
+        value['clinVarRCVs'] = []
+
+    if 'clinVarSCVs' not in value:
+        value['clinVarSCVs'] = []
+
+    if 'hgvsNames' in value and value['hgvsNames'] == []:
+        value['hgvsNames'] = {}
+
