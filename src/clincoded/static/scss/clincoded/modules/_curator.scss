@@ -1055,3 +1055,9 @@ div.react-tabs .ReactTabs__TabPanel--selected {
 .react-tabs .tab-panel .basic-info ul:nth-child(even) {
     background: #fff;
 }
+
+/* FIXME - temp styles for placeholders */
+.react-tabs .tab-panel .population li>div {
+    background: rgba(0, 128, 128, 0.2);
+    margin: 0 15px 10px 0;
+}
