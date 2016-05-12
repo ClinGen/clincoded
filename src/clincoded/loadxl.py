@@ -23,6 +23,8 @@ ORDER = [
     'article',
     'assessment',
     'variant',
+    'protein',
+    'transcript',
     'individual',
     'family',
     #'statistic',
@@ -33,6 +35,9 @@ ORDER = [
     'pathogenicity',
     'provisionalClassification',
     'gdm',
+    #'population',
+    #'evaluation',
+    'interpretation',
     'curatorHistory',
     'curator_page', # keep at bottom so it can load other type data
 ]
