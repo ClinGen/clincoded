@@ -5,12 +5,13 @@ var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var parseString = require('xml2js').parseString;
+var LocalStorageMixin = require('react-localstorage');
 
 var external_url_map = globals.external_url_map;
 
 // Display the curator data of the curation data
 var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasicInfo = React.createClass({
-    mixins: [RestMixin],
+    mixins: [RestMixin, LocalStorageMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
@@ -70,6 +71,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     render: function() {
+        var clinvar_id = this.state.clinvar_id;
+        var dbSNP_id = this.state.dbSNP_id;
+        var variant_type = this.state.variant_type;
+        var gene_symbol = this.state.gene_symbol;
+
         return (
             <div className="variant-interpretation basic-info">
                 <ul className="clearfix">
@@ -77,8 +83,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                         <div>Variant IDs</div>
                     </li>
                     <li className="col-xs-12 col-sm-4 gutter-exc">
-                        <div><span>ClinVar Variantion ID: {this.state.clinvar_id}</span></div>
-                        <div><span>dbSNP ID: rs{this.state.dbSNP_id}</span></div>
+                        <div><span>ClinVar Variantion ID: {clinvar_id}</span></div>
+                        <div><span>dbSNP ID: rs{dbSNP_id}</span></div>
                     </li>
                     <li className="col-xs-12 col-sm-4 gutter-exc">
                         <div>Other description</div>
@@ -90,7 +96,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                         <div>Variant Type</div>
                     </li>
                     <li className="col-xs-12 col-sm-4 gutter-exc">
-                        <div><span>{this.state.variant_type}</span></div>
+                        <div><span>{variant_type}</span></div>
                     </li>
                     <li className="col-xs-12 col-sm-4 gutter-exc">
                         <div>Other description</div>
@@ -102,7 +108,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                         <div>Associated Gene</div>
                     </li>
                     <li className="col-xs-12 col-sm-4 gutter-exc">
-                        <div><span>{this.state.gene_symbol}</span></div>
+                        <div><span>{gene_symbol}</span></div>
                     </li>
                     <li className="col-xs-12 col-sm-4 gutter-exc">
                         <div>Other description</div>
