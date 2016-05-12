@@ -2,15 +2,23 @@
 var React = require('react');
 var globals = require('../globals');
 
+// Import react-tabs npm to create tabs
 var ReactTabs = require('react-tabs');
 var Tab = ReactTabs.Tab;
 var Tabs = ReactTabs.Tabs;
 var TabList = ReactTabs.TabList;
 var TabPanel = ReactTabs.TabPanel;
 
+// Prevent react-tabs default styles being used on tabs
 Tabs.setUseDefaultStyles(false);
 
+// Import individual tab components
 var CurationInterpretationBasicInfo = require('./interpretation/basic_info').CurationInterpretationBasicInfo;
+var CurationInterpretationPopulation = require('./interpretation/population').CurationInterpretationPopulation;
+var CurationInterpretationComputational = require('./interpretation/computational').CurationInterpretationComputational;
+var CurationInterpretationFunctional = require('./interpretation/functional').CurationInterpretationFunctional;
+var CurationInterpretationSegregation = require('./interpretation/segregation').CurationInterpretationSegregation;
+var CurationInterpretationCase = require('./interpretation/case').CurationInterpretationCase;
 
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
@@ -27,6 +35,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         var variant = this.props.variantData;
         var loadingComplete = this.props.loadingComplete;
 
+        // The ordering of TabPanels are corresponding to that of tabs
+        // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
         return (
             <div className="container curation-variant-tab-group">
                 <Tabs onSelect={this.handleSelect} selectedIndex={0}>
@@ -42,19 +52,19 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <div className="tab-panel"><CurationInterpretationBasicInfo data={variant} shouldFetchData={loadingComplete} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel">Tab: Population</div>
+                        <div className="tab-panel"><CurationInterpretationPopulation data={variant} shouldFetchData={loadingComplete} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel">Tab: Computational</div>
+                        <div className="tab-panel"><CurationInterpretationComputational data={variant} shouldFetchData={loadingComplete} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel">Tab: Functional</div>
+                        <div className="tab-panel"><CurationInterpretationFunctional data={variant} shouldFetchData={loadingComplete} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel">Tab: Segregation</div>
+                        <div className="tab-panel"><CurationInterpretationSegregation data={variant} shouldFetchData={loadingComplete} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel">Tab: Case</div>
+                        <div className="tab-panel"><CurationInterpretationCase data={variant} shouldFetchData={loadingComplete} /></div>
                     </TabPanel>
                 </Tabs>
             </div>
