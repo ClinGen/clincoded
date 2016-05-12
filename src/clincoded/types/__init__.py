@@ -162,13 +162,10 @@ class Variant(Item):
     def represent(self, clinvarVariantTitle, otherDescription):
         if clinvarVariantTitle != '':
             return clinvarVariantTitle
-        #elif carId != '':
-        #    return carId
         elif otherDescription != '':
             return otherDescription
         else:
             return ''
-
 
 @collection(
     name='gdm',
@@ -916,7 +913,7 @@ class Interpretation(Item):
     })
     def interpretation_status(self, evaluations):
         if len(evaluations) > 0:
-            return 'Criteria Evaluation'
+            return 'Evaluation'
         else:
             return 'In Progress'
 

@@ -1,22 +1,40 @@
 [
     {
-        "uuid": "3bed92ae-1477-4973-83b8-878de5f0d8f0",
-        "variant": "c71fc085-2683-11e5-b9fe-60f81dc5b05a",
+        "uuid": "f26a694d-5f09-45fd-818a-861e4108e65a",
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
         "genes": [
             "e265b19c-1c34-11e5-a27c-60f81dc5b05a"
         ],
         "disease": "788cd05e-16a6-11e5-97c0-60f81dc5b05a",
         "interpretationTranscript": "",
         "transcripts": [
-            "8f1b7cb9-e798-412d-adf4-cbe140998407",
-            "80b09246-29fd-4658-9799-158d9ecd00e2",
-            "6b921aa1-be9f-489b-82d2-043d97b0c2a0"
+            "80b09246-29fd-4658-9799-158d9ecd00e2"
         ],
         "proteins": [
-            "e0fd3202-6213-48b1-8570-1d1c8ff0212e",
-            "7e437957-4dfa-4d17-97b2-57fc6784b5f4",
-            "c0da4a9c-cd8a-41a8-9a20-949088124512"
+            "7e437957-4dfa-4d17-97b2-57fc6784b5f4"
         ],
-        "evaluations": []
+        "evaluations": [],
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-05-10T22:47:10.000000+00:00",
+        "last_modified": "2016-05-10T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "b3e105b5-d08a-4520-9305-c1419d9027d4",
+        "variant": "ad310ea9-e215-498c-a001-a6c216105e4c",
+        "genes": [
+            "e7c51b8a-1c34-11e5-ab27-60f81dc5b05a"
+        ],
+        "disease": "788e024f-16a6-11e5-a0b5-60f81dc5b05a",
+        "interpretationTranscript": "",
+        "transcripts": [
+            "8f1b7cb9-e798-412d-adf4-cbe140998407"
+        ],
+        "proteins": [
+            "e0fd3202-6213-48b1-8570-1d1c8ff0212e"
+        ],
+        "evaluations": [],
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-05-11T22:47:10.000000+00:00",
+        "last_modified": "2016-05-11T22:59:10.000000+00:00"
     }
 ]

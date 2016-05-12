@@ -81,16 +81,12 @@
         }
     },
     "columns": {
-        "variant.clinvarVariantId": {
-            "title": "ClinVar ID",
+        "uuid": {
+            "title": "uuid",
             "type": "string"
         },
-        "variant.clinvarVariantTitle": {
-            "title": "ClinVar Title",
-            "type": "string"
-        },
-        "variant.otherDescription": {
-            "title": "Other Description",
+        "variant.represent": {
+            "title": "Variant",
             "type": "string"
         },
         "submitted_by.title": {

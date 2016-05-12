@@ -78,3 +78,9 @@ def variant_1_2(value, system):
 
         else:
             value['clinvarVariantTitle'] = ''
+
+    if 'clinvarVariantId' not in value:
+        value['clinvarVariantId'] = ''
+
+    if 'otherDescription' not in value:
+        value['otherDescription'] = ''
