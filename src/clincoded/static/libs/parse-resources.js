@@ -58,20 +58,30 @@ module.exports.parseCAR = parseCAR;
 
 function parseCAR(json) {
     var data = {};
+    // set carId in payload, since we'll always have this from a CAR response
     data.carId = json['@id'].substring(json['@id'].indexOf('CA'));
-    console.log(json);
     if (json.externalRecords) {
+        // extract ClinVar data if available
         if (json.externalRecords.ClinVar && json.externalRecords.ClinVar.length > 0) {
             data.clinvarVariantId = json.externalRecords.ClinVar[0].variationId;
             data.clinvarVariantTitle = json.externalRecords.ClinVar[0].preferredName;
         }
     }
-    data.hgvs = [];
+    var temp_gr_hgvs = {};
+    var temp_other_hgvs = [];
     if (json.genomicAlleles && json.genomicAlleles.length > 0) {
         json.genomicAlleles.map(function(genomicAllele, i) {
             if (genomicAllele.hgvs && genomicAllele.hgvs.length > 0) {
+                // check the genomicAlleles hgvs terms
                 genomicAllele.hgvs.map(function(hgvs_temp, j) {
-                    data.hgvs.push(hgvs_temp);
+                    // skip the hgvs term if it starts with 'CM'
+                    if (!hgvs_temp.startsWith('CM')) {
+                        if (hgvs_temp.startsWith('NC')) {
+                            // special handling for 'NC' hgvs terms
+                        } else {
+                            temp_other_hgvs.push(hgvs_temp);
+                        }
+                    }
                 });
             }
         });
@@ -80,10 +90,18 @@ function parseCAR(json) {
         json.transcriptAlleles.map(function(transcriptAllele, i) {
             if (transcriptAllele.hgvs && transcriptAllele.hgvs.length > 0) {
                 transcriptAllele.hgvs.map(function(hgvs_temp, j) {
-                    data.hgvs.push(hgvs_temp);
+                    temp_other_hgvs.push(hgvs_temp);
                 });
             }
         });
+    }
+
+    var temp_hgvs = {};
+    if (temp_other_hgvs.length > 0) {
+        temp_hgvs.others = temp_other_hgvs;
+    }
+    if (temp_hgvs != {}) {
+        data.hgvsNames = temp_hgvs;
     }
     console.log(data);
     return data;
