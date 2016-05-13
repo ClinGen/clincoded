@@ -905,6 +905,10 @@ class Interpretation(Item):
         'proteins',
         'evaluations',
         'evaluations.submitted_by',
+        'evaluations.variant',
+        'evaluations.disease',
+        'evaluations.populations',
+        'evaluations.populations.submitted_by'
     ]
 
     @calculated_property(schema={
@@ -991,6 +995,15 @@ class Evaluation(Item):
     def interpretation_associated(self, request, interpretation_associated):
         return paths_filtered_by_status(request, interpretation_associated)
 
+    @calculated_property(schema={
+        "title": "Number of Population",
+        "type": "string"
+    })
+    def population_count(self, populations=[]):
+        if len(populations) > 0:
+            return len(populations)
+        return ''
+
 
 @collection(
     name='populations',
@@ -1004,8 +1017,13 @@ class Population(Item):
     schema = load_schema('clincoded:schemas/population.json')
     name_key = 'uuid'
     embedded = [
+        'submitted_by',
         'variant',
-        'evaluation_associated'
+        'evaluation_associated',
+        'evaluation_associated.interpretation_associated',
+        'evaluation_associated.interpretation_associated.genes',
+        'evaluation_associated.interpretation_associated.transcripts',
+        'evaluation_associated.interpretation_associated.proteins'
     ]
     rev = {
         'evaluation_associated': ('evaluation', 'populations')
@@ -1018,6 +1036,15 @@ class Population(Item):
     })
     def evaluation_associated(self, request, evaluation_associated):
         return paths_filtered_by_status(request, evaluation_associated)
+
+    @calculated_property(schema={
+        "title": "Number of MAF",
+        "type": "string"
+    })
+    def maf_count(self, mafs=[]):
+        if len(mafs) > 0:
+            return len(mafs)
+        return ''
 ### End of collections for variant curation ###
 
 

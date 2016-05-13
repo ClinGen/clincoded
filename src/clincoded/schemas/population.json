@@ -30,5 +30,19 @@
             "type": "string",
             "linkTo": "variant"
         }
+    },
+    "columns": {
+        "variant": {
+            "title": "Variant",
+            "type": "string"
+        },
+        "maf_count": {
+            "title": "# MAF",
+            "type": "string"
+        },
+        "submitted_by.title": {
+            "title": "Capturer",
+            "type": "string"
+        }
     }
 }

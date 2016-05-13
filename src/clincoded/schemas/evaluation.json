@@ -59,6 +59,14 @@
         "criteria": {
             "title": "Criteria",
             "type": "string"
+        },
+        "population_count": {
+            "title": "# Population",
+            "type": "string"
+        },
+        "submitted_by.title": {
+            "title": "Evaluator",
+            "type": "string"
         }
     }
 }
