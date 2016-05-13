@@ -2,12 +2,15 @@
     {
         "uuid": "09dbca61-a1a0-4ba4-ae68-99f4f1ca7493",
         "variant": "df8135d4-2685-11e5-af19-60f81dc5b05a",
-        "population": [
+        "populations": [
             "f0a51b16-cc7b-406f-9ae6-566d28e31b03"
         ],
         "disease": "788e024f-16a6-11e5-a0b5-60f81dc5b05a",
         "criteria": "BS1",
         "value": "Yes",
-        "description": "some thing here."
+        "description": "some thing here.",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-05-11T22:47:10.000000+00:00",
+        "last_modified": "2016-05-11T22:59:10.000000+00:00"
     }
 ]

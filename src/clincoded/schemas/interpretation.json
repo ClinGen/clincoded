@@ -75,13 +75,22 @@
             "default": [],
             "items": {
                 "title": "Evaluation",
-                "type": "string"
+                "type": "string",
+                "linkTo": "evaluation"
             }
         }
     },
     "columns": {
         "variant.represent": {
             "title": "Variant",
+            "type": "string"
+        },
+        "interpretation_status": {
+            "title": "Statue",
+            "type": "string"
+        },
+        "evaluation_count": {
+            "title": "# Evaluations",
             "type": "string"
         },
         "interpretation_disease": {
@@ -93,7 +102,11 @@
             "type": "string"
         },
         "interpretation_transcripts": {
-            "title": "Transcripts",
+            "title": "# Transcripts",
+            "type": "string"
+        },
+        "interpretation_proteins": {
+            "title": "# Proteins",
             "type": "string"
         },
         "submitted_by.title": {

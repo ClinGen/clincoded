@@ -923,7 +923,7 @@ class Interpretation(Item):
     })
     def interpretation_disease(self, disease=''):
         if disease != '':
-            return 'Orpha Number: ' + disease[9:-1]
+            return 'Orpha' + disease[10:-1]
         return ''
 
     @calculated_property(schema={
@@ -942,11 +942,23 @@ class Interpretation(Item):
         "type": "string",
     })
     def interpretation_transcripts(self, transcripts):
-        if len(transcripts) > 1:
-            return ", ".join(transcripts)
-        elif len(transcripts) == 1:
-            return transcripts[0]
-        return ''
+        return len(transcripts)
+
+    @calculated_property(schema={
+        "title": "Proteins",
+        "type": "string",
+    })
+    def interpretation_proteins(self, proteins):
+        return len(proteins)
+
+    @calculated_property(schema={
+        "title": "Evaluations",
+        "type": "string",
+    })
+    def evaluation_count(self, evaluations):
+        if len(evaluations) == 0:
+            return ''
+        return len(evaluations)
 
 
 @collection(
@@ -987,8 +999,8 @@ class Evaluation(Item):
         'title': 'Population',
         'description': 'Listing of Population',
     })
-class Lab(Item):
-    item_type = 'lab'
+class Population(Item):
+    item_type = 'population'
     schema = load_schema('clincoded:schemas/population.json')
     name_key = 'uuid'
     embedded = [
