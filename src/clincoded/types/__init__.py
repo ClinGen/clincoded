@@ -120,10 +120,17 @@ class Variant(Item):
         'associatedPathogenicities.assessments',
         'associatedPathogenicities.assessments.submitted_by',
         'associatedPathogenicities.variant',
-        'associatedPathogenicities.submitted_by'
+        'associatedPathogenicities.submitted_by',
+        'associatedInterpretations',
+        'associatedInterpretations.submitted_by',
+        'associatedInterpretations.disease',
+        'associatedInterpretations.transcripts',
+        'associatedInterpretations.proteins',
+        'associatedInterpretations.evaluations',
     ]
     rev = {
-        'associatedPathogenicities': ('pathogenicity', 'variant')
+        'associatedPathogenicities': ('pathogenicity', 'variant'),
+        'associatedInterpretations': ('interpretation', 'variant')
     }
 
     @calculated_property(schema={
@@ -137,6 +144,28 @@ class Variant(Item):
     def associatedPathogenicities(self, request, associatedPathogenicities):
         return paths_filtered_by_status(request, associatedPathogenicities)
 
+    @calculated_property(schema={
+        "title": "Associated interpretation",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "interpretation.variant",
+        },
+    })
+    def associatedInterpretations(self, request, associatedInterpretations):
+        return paths_filtered_by_status(request, associatedInterpretations)
+
+    @calculated_property(schema={
+        "title": "Variant Representive",
+        "type": "string"
+    })
+    def represent(self, clinvarVariantTitle, otherDescription):
+        if clinvarVariantTitle != '':
+            return clinvarVariantTitle
+        elif otherDescription != '':
+            return otherDescription
+        else:
+            return ''
 
 @collection(
     name='gdm',
@@ -827,7 +856,98 @@ class Provisional(Item):
     })
     def gdm_associated(self, request, gdm_associated):
         return paths_filtered_by_status(request, gdm_associated)
-### end of new collections for curation data
+### end of new collections for gene curation data
+
+
+### Collections for varaint curation ###
+@collection(
+    name='transcripts',
+    unique_key='transcript:uuid',
+    properties={
+        'title': 'Transcript',
+        'description': 'List of Transcript',
+    })
+class Transcript(Item):
+    item_type = 'transcript'
+    schema = load_schema('clincoded:schemas/transcript.json')
+    name_key = 'uuid'
+
+@collection(
+    name='proteins',
+    unique_key='protein:uuid',
+    properties={
+        'title': 'Protein',
+        'description': 'List of Protein'
+    })
+class Protein(Item):
+    item_type = 'protein'
+    schema = load_schema('clincoded:schemas/protein.json')
+    name_key = 'uuid'
+
+
+@collection(
+    name='interpretations',
+    unique_key='interpretation:uuid',
+    properties={
+        'title': 'Interpretation',
+        'description': 'List of Interpretations',
+    })
+class Interpretation(Item):
+    item_type = 'interpretation'
+    schema = load_schema('clincoded:schemas/interpretation.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'variant',
+        'genes',
+        'disease',
+        'transcripts',
+        'proteins',
+        #'evaluations',
+        #'evaluations.submitted_by',
+    ]
+
+    @calculated_property(schema={
+        "title": "Interpretation Status",
+        "type": "string",
+    })
+    def interpretation_status(self, evaluations):
+        if len(evaluations) > 0:
+            return 'Evaluation'
+        else:
+            return 'In Progress'
+
+    @calculated_property(schema={
+        "title": "Disease",
+        "type": "string",
+    })
+    def interpretation_disease(self, disease=''):
+        if disease != '':
+            return 'Orpha Number: ' + disease[9:-1]
+        return ''
+
+    @calculated_property(schema={
+        "title": "Genes",
+        "type": "string",
+    })
+    def interpretation_genes(self, genes):
+        if len(genes) > 1:
+            return ", ".join(genes)
+        elif len(genes) == 1:
+            return genes[0][7:-1]
+        return ''
+
+    @calculated_property(schema={
+        "title": "Transcripts",
+        "type": "string",
+    })
+    def interpretation_transcripts(self, transcripts):
+        if len(transcripts) > 1:
+            return ", ".join(transcripts)
+        elif len(transcripts) == 1:
+            return transcripts[0]
+        return ''
+### End of collections for variant curation ###
 
 
 @collection(

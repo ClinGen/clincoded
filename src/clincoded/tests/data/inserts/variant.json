@@ -155,10 +155,10 @@
             "gRCh37": "NC_000018.9:g.58038906A>G",
             "gRCh38": "NC_000018.10:g.60371673A>G",
             "others": [
-            "NM_005912.2:c.677T>C",
-            "NG_016441.1:g.6096T>C",
-            "NP_005903.2:p.Ile226Thr"
-        ]
+                "NM_005912.2:c.677T>C",
+                "NG_016441.1:g.6096T>C",
+                "NP_005903.2:p.Ile226Thr"
+            ]
         },
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
@@ -174,10 +174,10 @@
             "gRCh37": "NC_000018.9:g.58038977G>T",
             "gRCh38": "NC_000018.10:g.60371744G>T",
             "others": [
-            "NM_005912.2:c.606C>A",
-            "NG_016441.1:g.6025C>A",
-            "NP_005903.2:p.Phe202Leu"
-        ]
+                "NM_005912.2:c.606C>A",
+                "NG_016441.1:g.6025C>A",
+                "NP_005903.2:p.Phe202Leu"
+            ]
         },
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
@@ -205,6 +205,7 @@
     },
     {
         "uuid": "ad310ea9-e215-498c-a001-a6c216105e4c",
+
         "dbSNPIds": [],
         "clinVarRCVs": [],
         "clinvarVariantTitle": "",
