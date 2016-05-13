@@ -903,8 +903,8 @@ class Interpretation(Item):
         'disease',
         'transcripts',
         'proteins',
-        #'evaluations',
-        #'evaluations.submitted_by',
+        'evaluations',
+        'evaluations.submitted_by',
     ]
 
     @calculated_property(schema={
@@ -947,6 +947,65 @@ class Interpretation(Item):
         elif len(transcripts) == 1:
             return transcripts[0]
         return ''
+
+
+@collection(
+    name='evaluations',
+    unique_key='evaluation:name',
+    properties={
+        'title': 'Evaluations',
+        'description': 'Listing of Evaluations',
+    })
+class Evaluation(Item):
+    item_type = 'evaluation'
+    schema = load_schema('clincoded:schemas/evaluation.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'variant',
+        'disease',
+        'populations',
+        'interpretation_associated'
+    ]
+    rev = {
+        'interpretation_associated': ('interpretation', 'evaluations')
+    }
+
+    @calculated_property(schema={
+        "title": "Interpretation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "interpretation.evaluations"
+    })
+    def interpretation_associated(self, request, interpretation_associated):
+        return paths_filtered_by_status(request, interpretation_associated)
+
+
+@collection(
+    name='populations',
+    unique_key='population:name',
+    properties={
+        'title': 'Population',
+        'description': 'Listing of Population',
+    })
+class Lab(Item):
+    item_type = 'lab'
+    schema = load_schema('clincoded:schemas/population.json')
+    name_key = 'uuid'
+    embedded = [
+        'variant',
+        'evaluation_associated'
+    ]
+    rev = {
+        'evaluation_associated': ('evaluation', 'populations')
+    }
+
+    @calculated_property(schema={
+        "title": "Evaluation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "evaluation.populations"
+    })
+    def evaluation_associated(self, request, evaluation_associated):
+        return paths_filtered_by_status(request, evaluation_associated)
 ### End of collections for variant curation ###
 
 
