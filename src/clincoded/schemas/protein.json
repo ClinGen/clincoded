@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": [],
-    "identifyingProperties": ["uuid"],
+    "identifyingProperties": ["uuid", "sourceId"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -19,14 +19,12 @@
         "source": {
             "title": "Source",
             "description": "What out source database the transcript data has been retrieved from",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "sourceId": {
             "title": "Source ID",
             "description": "Primary key in the out source db.",
-            "type": "string",
-            "default": ""
+            "type": "string"
         }
     },
     "columns": {

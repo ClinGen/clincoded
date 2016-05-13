@@ -2,10 +2,7 @@
     {
         "uuid": "f26a694d-5f09-45fd-818a-861e4108e65a",
         "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
-        "genes": [
-            "e265b19c-1c34-11e5-a27c-60f81dc5b05a"
-        ],
-        "disease": "788cd05e-16a6-11e5-97c0-60f81dc5b05a",
+        "genes": [],
         "interpretationTranscript": "",
         "transcripts": [
             "80b09246-29fd-4658-9799-158d9ecd00e2"

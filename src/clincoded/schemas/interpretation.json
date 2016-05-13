@@ -36,16 +36,15 @@
         },
         "disease": {
             "title": "Disease",
-            "description": "Disease associated to the variant. Could be none.",
+            "description": "Disease associated to the variant.",
+            "comment": "Not more than one disease, can be none.",
             "type": "string",
-            "default": "",
             "linkTo": "orphaPhenotype"
         },
         "interpretationTranscript": {
             "title": "Interpretation Transcript",
             "description": "User selected transcript",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "transcripts": {
             "title": "Transcripts",
@@ -81,12 +80,20 @@
         }
     },
     "columns": {
-        "uuid": {
-            "title": "uuid",
-            "type": "string"
-        },
         "variant.represent": {
             "title": "Variant",
+            "type": "string"
+        },
+        "interpretation_disease": {
+            "title": "Disease",
+            "type": "string"
+        },
+        "interpretation_genes": {
+            "title": "Genes",
+            "type": "string"
+        },
+        "interpretation_transcripts": {
+            "title": "Transcripts",
             "type": "string"
         },
         "submitted_by.title": {

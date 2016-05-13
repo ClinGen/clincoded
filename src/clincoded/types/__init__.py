@@ -917,6 +917,36 @@ class Interpretation(Item):
         else:
             return 'In Progress'
 
+    @calculated_property(schema={
+        "title": "Disease",
+        "type": "string",
+    })
+    def interpretation_disease(self, disease=''):
+        if disease != '':
+            return 'Orpha Number: ' + disease[9:-1]
+        return ''
+
+    @calculated_property(schema={
+        "title": "Genes",
+        "type": "string",
+    })
+    def interpretation_genes(self, genes):
+        if len(genes) > 1:
+            return ", ".join(genes)
+        elif len(genes) == 1:
+            return genes[0][7:-1]
+        return ''
+
+    @calculated_property(schema={
+        "title": "Transcripts",
+        "type": "string",
+    })
+    def interpretation_transcripts(self, transcripts):
+        if len(transcripts) > 1:
+            return ", ".join(transcripts)
+        elif len(transcripts) == 1:
+            return transcripts[0]
+        return ''
 ### End of collections for variant curation ###
 
 
