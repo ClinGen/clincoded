@@ -246,10 +246,24 @@ var AddResourceIdModal = React.createClass({
                     <Input type="button-button" title={this.state.txtInputButton} inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
                     <div className="row">&nbsp;<br />&nbsp;</div>
                     {this.state.resourceFetched ?
-                    <span>
+                    <div>
                         <p>&nbsp;<br />{this.state.txtResourceResponse}</p>
                         <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
-                    </span>
+                        {this.state.tempResource && this.state.tempResource.hgvsNames ?
+                            <div className="row">
+                                {this.state.tempResource.hgvsNames.others && this.state.tempResource.hgvsNames.others.length > 0 ?
+                                    <div className="row">
+                                        <span className="col-sm-5 col-md-4 control-label"><label>HGVS terms</label></span>
+                                        <span className="col-sm-7 col-md-8 text-no-input">
+                                            {this.state.tempResource.hgvsNames.others.map(function(hgvs, i) {
+                                                return <span key={hgvs}>{hgvs}<br /></span>;
+                                            })}
+                                        </span>
+                                    </div>
+                                : null}
+                            </div>
+                        : null}
+                    </div>
                     : <span><p className="alert alert-info">{this.state.txtHelpText}</p></span>}
                 </div>
                 <div className='modal-footer'>
