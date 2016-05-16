@@ -346,26 +346,19 @@ function clinvarSubmitResource() {
                     if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle']) {
                         this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
                             return this.getRestData(result['@graph'][0]['@id']).then(result => {
-                                result.extraData = this.state.tempResource.extraData;
                                 this.props.updateParentForm(result, this.props.fieldNum);
                             });
                         });
                     } else {
-                        result.extraData = this.state.tempResource.extraData;
                         this.props.updateParentForm(result, this.props.fieldNum);
                     }
                 });
             } else {
                 // variation is new to our db
-                let cleanedResource = this.state.tempResource;
-                var tempExtraData = this.state.tempResource.extraData;
-                delete cleanedResource['extraData'];
-                this.postRestData('/variants/', cleanedResource).then(result_raw => {
+                this.postRestData('/variants/', this.state.tempResource).then(result => {
                     // record the user adding a new variant entry
-                    this.recordHistory('add', result_raw['@graph'][0]).then(history => {
-                        let result = result_raw['@graph'][0];
-                        result.extraData = tempExtraData;
-                        this.props.updateParentForm(result, this.props.fieldNum);
+                    this.recordHistory('add', result['@graph'][0]).then(history => {
+                        this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
                     });
                 });
             }
@@ -421,14 +414,8 @@ function carQueryResource() {
         var data;
         var id = this.state.inputValue;
         this.getRestData(url + id).then(json => {
-            data = json;
-            console.log('------------json-----------');
-            console.log(data);
-            console.log('------------json-----------');
-            parseCAR(data);
-
-            /*
-            if (data.clinvarVariantId) {
+            data = parseCAR(json);
+            if (data.carId) {
                 // found the result we want
                 this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
             } else {
@@ -436,7 +423,6 @@ function carQueryResource() {
                 this.setFormErrors('resourceId', 'ClinVar ID not found');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
-            */
         });
     } else {
         this.setState({queryResourceBusy: false});
@@ -444,10 +430,9 @@ function carQueryResource() {
 }
 function carSubmitResource() {
     // for dealing with the main form
-    /*
     this.setState({submitResourceBusy: true});
-    if (this.state.tempResource.clinvarVariantId) {
-        this.getRestData('/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId).then(check => {
+    if (this.state.tempResource.carId) {
+        this.getRestData('/search/?type=variant&carId=' + this.state.tempResource.carId).then(check => {
             if (check.total) {
                 // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
@@ -456,26 +441,19 @@ function carSubmitResource() {
                     if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle']) {
                         this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
                             return this.getRestData(result['@graph'][0]['@id']).then(result => {
-                                result.extraData = this.state.tempResource.extraData;
                                 this.props.updateParentForm(result, this.props.fieldNum);
                             });
-                        });``
+                        });
                     } else {
-                        result.extraData = this.state.tempResource.extraData;
                         this.props.updateParentForm(result, this.props.fieldNum);
                     }
                 });
             } else {
                 // variation is new to our db
-                let cleanedResource = this.state.tempResource;
-                var tempExtraData = this.state.tempResource.extraData;
-                delete cleanedResource['extraData'];
-                this.postRestData('/variants/', cleanedResource).then(result_raw => {
+                this.postRestData('/variants/', this.state.tempResource).then(result => {
                     // record the user adding a new variant entry
-                    this.recordHistory('add', result_raw['@graph'][0]).then(history => {
-                        let result = result_raw['@graph'][0];
-                        result.extraData = tempExtraData;
-                        this.props.updateParentForm(result, this.props.fieldNum);
+                    this.recordHistory('add', result['@graph'][0]).then(history => {
+                        this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
                     });
                 });
             }
@@ -483,5 +461,4 @@ function carSubmitResource() {
             this.props.closeModal();
         });
     }
-    */
 }

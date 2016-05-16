@@ -44,7 +44,7 @@ var SelectVariant = React.createClass({
     },
 
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
-    updateClinvarVariantId: function(data) {
+    updateVariantData: function(data) {
         var newVariantInfo = _.clone(this.state.variantInfo);
         var currVariantOption = this.state.variantOption;
         var addVariantDisabled;
@@ -108,33 +108,32 @@ var SelectVariant = React.createClass({
                                 </div>
                             </div>
                             : null}
-                            {this.state.variantData && this.state.variantData.extraData ?
+                            {this.state.variantData && this.state.variantData.hgvsNames ?
                             <div className="row">
-                                {this.state.variantData.extraData.hgvs && this.state.variantData.extraData.hgvs.length > 0 ?
+                                {this.state.variantData.hgvsNames.others && this.state.variantData.hgvsNames.others.length > 0 ?
                                     <div className="row">
                                         <span className="col-sm-5 col-md-4 control-label"><label>HGVS terms</label></span>
                                         <span className="col-sm-7 col-md-8 text-no-input">
-                                            {this.state.variantData.extraData.hgvs.map(function(hgvs, i) {
+                                            {this.state.variantData.hgvsNames.others.map(function(hgvs, i) {
                                                 return <span key={hgvs}>{hgvs}<br /></span>;
                                             })}
                                         </span>
                                     </div>
                                 : null}
-
                             </div>
                             : null}
                             {this.state.variantIdType == "ClinVar Variation ID" ?
                             <div className="row">
                                 <AddResourceId resourceType="clinvar" label="ClinVar" wrapperClass="modal-buttons-wrapper" buttonWrapperClass="modal-button-align-reset"
                                     buttonText={this.state.variantData ? "Edit ClinVar ID" : "Add ClinVar ID" } initialFormValue={this.state.variantData && this.state.variantData.clinvarVariantId}
-                                    clearButtonText="Cancel Variant Selection" updateParentForm={this.updateClinvarVariantId} buttonOnly={true} />
+                                    clearButtonText="Cancel Variant Selection" updateParentForm={this.updateVariantData} buttonOnly={true} />
                             </div>
                             : null}
                             {this.state.variantIdType == "ClinGen Allele Registry ID" ?
                             <div className="row">
                                 <AddResourceId resourceType="car" label="ClinGen Allele Registry" wrapperClass="modal-buttons-wrapper" buttonWrapperClass="modal-button-align-reset"
                                     buttonText={this.state.variantData ? "Edit CAR ID" : "Add CAR ID" } initialFormValue={this.state.variantData && this.state.variantData.carVariantId}
-                                    clearButtonText="Cancel Variant Selection" updateParentForm={this.updateCarVariantId} buttonOnly={true} clearButtonRender={false} />
+                                    clearButtonText="Cancel Variant Selection" updateParentForm={this.updateVariantData} buttonOnly={true} clearButtonRender={false} />
                             </div>
                             : null}
                             {this.state.variantData ?

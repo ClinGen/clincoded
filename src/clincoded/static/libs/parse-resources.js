@@ -67,7 +67,7 @@ function parseCAR(json) {
             data.clinvarVariantTitle = json.externalRecords.ClinVar[0].preferredName;
         }
     }
-    var temp_gr_hgvs = {};
+    var temp_nc_hgvs = {};
     var temp_other_hgvs = [];
     if (json.genomicAlleles && json.genomicAlleles.length > 0) {
         json.genomicAlleles.map(function(genomicAllele, i) {
@@ -76,11 +76,14 @@ function parseCAR(json) {
                 genomicAllele.hgvs.map(function(hgvs_temp, j) {
                     // skip the hgvs term if it starts with 'CM'
                     if (!hgvs_temp.startsWith('CM')) {
+                        /*
                         if (hgvs_temp.startsWith('NC')) {
                             // special handling for 'NC' hgvs terms
+                            temp_nc_hgvs[genomicAllele.referenceSequence] = hgvs_temp;
                         } else {
                             temp_other_hgvs.push(hgvs_temp);
-                        }
+                        }*/
+                        temp_other_hgvs.push(hgvs_temp);
                     }
                 });
             }
@@ -103,6 +106,6 @@ function parseCAR(json) {
     if (temp_hgvs != {}) {
         data.hgvsNames = temp_hgvs;
     }
-    console.log(data);
+
     return data;
 }
