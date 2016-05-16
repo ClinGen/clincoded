@@ -25,6 +25,12 @@
             "title": "Source ID",
             "description": "Primary key in the out source db.",
             "type": "string"
+        },
+        "active": {
+            "title": "Active",
+            "description": "Boolean switch for usage",
+            "type": "boolean",
+            "default": true
         }
     },
     "columns": {
