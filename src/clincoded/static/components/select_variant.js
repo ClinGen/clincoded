@@ -108,18 +108,12 @@ var SelectVariant = React.createClass({
                                 </div>
                             </div>
                             : null}
-                            {this.state.variantData && this.state.variantData.hgvsNames ?
+                            {this.state.variantData && this.state.variantData.carId ?
                             <div className="row">
-                                {this.state.variantData.hgvsNames.others && this.state.variantData.hgvsNames.others.length > 0 ?
-                                    <div className="row">
-                                        <span className="col-sm-5 col-md-4 control-label"><label>HGVS terms</label></span>
-                                        <span className="col-sm-7 col-md-8 text-no-input">
-                                            {this.state.variantData.hgvsNames.others.map(function(hgvs, i) {
-                                                return <span key={hgvs}>{hgvs}<br /></span>;
-                                            })}
-                                        </span>
-                                    </div>
-                                : null}
+                                <div className="row">
+                                    <span className="col-sm-5 col-md-4 control-label"><label>CAR ID</label></span>
+                                    <span className="col-sm-7 col-md-8 text-no-input">{this.state.variantData.carId}</span>
+                                </div>
                             </div>
                             : null}
                             {this.state.variantIdType == "ClinVar Variation ID" ?
@@ -134,6 +128,20 @@ var SelectVariant = React.createClass({
                                 <AddResourceId resourceType="car" label="ClinGen Allele Registry" wrapperClass="modal-buttons-wrapper" buttonWrapperClass="modal-button-align-reset"
                                     buttonText={this.state.variantData ? "Edit CAR ID" : "Add CAR ID" } initialFormValue={this.state.variantData && this.state.variantData.carVariantId}
                                     clearButtonText="Cancel Variant Selection" updateParentForm={this.updateVariantData} buttonOnly={true} clearButtonRender={false} />
+                            </div>
+                            : null}
+                            {this.state.variantData && this.state.variantData.hgvsNames ?
+                            <div className="row">
+                                {this.state.variantData.hgvsNames.others && this.state.variantData.hgvsNames.others.length > 0 ?
+                                    <div className="row">
+                                        <span className="col-sm-5 col-md-4 control-label"><label>HGVS terms</label></span>
+                                        <span className="col-sm-7 col-md-8 text-no-input">
+                                            {this.state.variantData.hgvsNames.others.map(function(hgvs, i) {
+                                                return <span key={hgvs}>{hgvs}<br /></span>;
+                                            })}
+                                        </span>
+                                    </div>
+                                : null}
                             </div>
                             : null}
                             {this.state.variantData ?
