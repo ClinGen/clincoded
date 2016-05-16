@@ -7,6 +7,7 @@ var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
 var CuratorHistory = require('./curator_history');
+var variantHgvsRender = require('./curator').variantHgvsRender;
 var parseAndLogError = require('./mixins').parseAndLogError;
 
 var parseClinvar = require('../libs/parse-resources').parseClinvar;
@@ -255,9 +256,7 @@ var AddResourceIdModal = React.createClass({
                                     <div className="row">
                                         <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
                                         <span className="col-sm-7 col-md-9 text-no-input">
-                                            {this.state.tempResource.hgvsNames.others.map(function(hgvs, i) {
-                                                return <span key={hgvs}>{hgvs}<br /></span>;
-                                            })}
+                                            {variantHgvsRender(this.state.tempResource.hgvsNames)}
                                         </span>
                                     </div>
                                 : null}

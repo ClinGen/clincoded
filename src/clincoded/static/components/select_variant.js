@@ -9,6 +9,7 @@ var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
+var variantHgvsRender = require('./curator').variantHgvsRender;
 var CuratorHistory = require('./curator_history');
 var add_external_resource = require('./add_external_resource');
 var external_url_map = globals.external_url_map;
@@ -130,22 +131,16 @@ var SelectVariant = React.createClass({
                                     clearButtonText="Cancel Variant Selection" updateParentForm={this.updateVariantData} buttonOnly={true} clearButtonRender={false} />
                             </div>
                             : null}
-                            {this.state.variantData && this.state.variantData.hgvsNames ?
+                            {this.state.variantData && this.state.variantData.hgvsNames && Object.keys(this.state.variantData.hgvsNames).length > 0 ?
                             <div className="row">
-                                {this.state.variantData.hgvsNames.others && this.state.variantData.hgvsNames.others.length > 0 ?
-                                    <div className="row">
-                                        <span className="col-sm-5 col-md-4 control-label"><label>HGVS terms</label></span>
-                                        <span className="col-sm-7 col-md-8 text-no-input">
-                                            {this.state.variantData.hgvsNames.others.map(function(hgvs, i) {
-                                                return <span key={hgvs}>{hgvs}<br /></span>;
-                                            })}
-                                        </span>
-                                    </div>
-                                : null}
+                                <span className="col-sm-5 col-md-4 control-label"><label>HGVS terms</label></span>
+                                <span className="col-sm-7 col-md-8 text-no-input">
+                                    {variantHgvsRender(this.state.variantData.hgvsNames)}
+                                </span>
                             </div>
                             : null}
                             {this.state.variantData ?
-                            <div className="row">
+                            <div className="row submit-buttons-wrapper">
                                 <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="View Variant" inputDisabled={!this.state.variantLoaded} />
                                 <Input type="button" inputClassName="btn-default btn-inline-spacer pull-right" title="Cancel Variant Selection" clickHandler={this.cancelVariantSelection} />
                             </div>

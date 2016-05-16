@@ -1913,6 +1913,26 @@ var renderLabelNote = module.exports.renderLabelNote = function(label) {
     );
 };
 
+var variantHgvsRender = module.exports.variantHgvsRender = function(hgvsNames) {
+    return (
+        <div>
+            {hgvsNames.GRCh38 ?
+                <span>{hgvsNames.GRCh38} (GRCh38)<br /></span>
+            : null}
+            {hgvsNames.GRCh37 ?
+                <span>{hgvsNames.GRCh37} (GRCh37)<br /></span>
+            : null}
+            {hgvsNames.others && hgvsNames.others.length > 0 ?
+            <span>
+                {hgvsNames.others.map(function(hgvs, i) {
+                    return <span key={hgvs}>{hgvs}<br /></span>;
+                })}
+            </span>
+            : null}
+        </div>
+    );
+};
+
 // Class for delete button (and associated modal) of Group, Family, Individual, and Experimental
 // Data objects. This class only renderes the button; please see DeleteButtonModal for bulk of
 // functionality
