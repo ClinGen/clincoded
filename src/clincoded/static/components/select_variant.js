@@ -95,7 +95,7 @@ var SelectVariant = React.createClass({
                                         <option value="ClinVar Variation ID">ClinVar Variation ID</option>
                                         <option value="ClinGen Allele Registry ID">ClinGen Allele Registry ID</option>
                                     </Input>
-                                    <p className="col-sm-7 col-sm-offset-5 input-note-below"><strong>Note:</strong> Select ID type based on above instructions. Use the ClinVar VariationID whenever possible.</p>
+                                    <p className="col-sm-7 col-sm-offset-5 input-note-below-no-bottom"><strong>Note:</strong> Select ID type based on above instructions. Use the ClinVar VariationID whenever possible.</p>
                                 </div>
                             </div>
                             : null}

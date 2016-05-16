@@ -253,8 +253,8 @@ var AddResourceIdModal = React.createClass({
                             <div className="row">
                                 {this.state.tempResource.hgvsNames.others && this.state.tempResource.hgvsNames.others.length > 0 ?
                                     <div className="row">
-                                        <span className="col-sm-5 col-md-4 control-label"><label>HGVS terms</label></span>
-                                        <span className="col-sm-7 col-md-8 text-no-input">
+                                        <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
+                                        <span className="col-sm-7 col-md-9 text-no-input">
                                             {this.state.tempResource.hgvsNames.others.map(function(hgvs, i) {
                                                 return <span key={hgvs}>{hgvs}<br /></span>;
                                             })}
