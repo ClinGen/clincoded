@@ -56,7 +56,6 @@ class Disease(Item):
     item_type = 'disease'
     schema = load_schema('clincoded:schemas/disease.json')
     name_key = 'uuid'
-
 @collection(
     name='statistics',
     unique_key='statistic:uuid',
@@ -72,7 +71,6 @@ class Statistic(Item):
         'variants',
         'assessments'
     ]
-
 @collection(
     name='controlgroups',
     unique_key='controlGroup:uuid',
@@ -899,6 +897,8 @@ class Interpretation(Item):
     embedded = [
         'submitted_by',
         'variant',
+        'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
         'genes',
         'disease',
         'transcripts',
@@ -908,14 +908,15 @@ class Interpretation(Item):
     ]
 
     @calculated_property(schema={
-        "title": "Interpretation Status",
+        "title": "Status",
         "type": "string",
     })
-    def interpretation_status(self, evaluations):
-        if len(evaluations) > 0:
+    def interpretation_status(self, evaluations=[], provisional_variant=[]):
+        if len(provisional_variant) > 0:
+            return 'Provisional'
+        elif len(evaluations) > 0:
             return 'Evaluation'
-        else:
-            return 'In Progress'
+        return 'In Progress'
 
     @calculated_property(schema={
         "title": "Disease",
@@ -923,14 +924,14 @@ class Interpretation(Item):
     })
     def interpretation_disease(self, disease=''):
         if disease != '':
-            return 'Orpha Number: ' + disease[9:-1]
+            return 'Orpha' + disease[10:-1]
         return ''
 
     @calculated_property(schema={
         "title": "Genes",
         "type": "string",
     })
-    def interpretation_genes(self, genes):
+    def interpretation_genes(self, genes=[]):
         if len(genes) > 1:
             return ", ".join(genes)
         elif len(genes) == 1:
@@ -941,7 +942,7 @@ class Interpretation(Item):
         "title": "Transcripts",
         "type": "string",
     })
-    def interpretation_transcripts(self, transcripts):
+    def interpretation_transcripts(self, transcripts=[]):
         if len(transcripts) > 1:
             return ", ".join(transcripts)
         elif len(transcripts) == 1:
