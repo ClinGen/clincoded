@@ -79,12 +79,12 @@ var SelectVariant = React.createClass({
                                 <div className="row">
                                     <div className="alert alert-info">
                                         Instructions (please follow this order to determine correct ID for variant)<br /><br />
-                                        <ol>
-                                            <li>Search <a href="">ClinVar</a> for variant.</li>
+                                        <ol className="instructions">
+                                            <li>Search <a href="http://www.ncbi.nlm.nih.gov/clinvar/">ClinVar</a> for variant.</li>
                                             <li>If found in ClinVar, select “ClinVar VariationID” from the pull-down to enter it.</li>
                                             <li>If not found in ClinVar, search the <a href="">ClinGen Allele Registry</a> with a valid HGVS term for that variant.</li>
-                                            <li>If <a href="">ClinGen Allele Registry</a> returns a ClinVar ID, select “ClinVar VariationID” from the pull-down to enter it.</li>
-                                            <li>If <a href="">ClinGen Allele Registry</a> does not find a ClinVar ID, register the variant to return a CA ID and then select “ClinGen Allele Registry ID (CA ID)” from the pull-down to enter it.</li>
+                                            <li>If <a href={external_url_map['CAR-test']}>ClinGen Allele Registry</a> returns a ClinVar ID, select “ClinVar VariationID” from the pull-down to enter it.</li>
+                                            <li>If <a href={external_url_map['CAR-test']}>ClinGen Allele Registry</a> does not find a ClinVar ID, register the variant to return a CA ID and then select "ClinGen Allele Registry ID (CA ID)" from the pull-down and enter the CA ID.</li>
                                         </ol>
                                     </div>
                                 </div>

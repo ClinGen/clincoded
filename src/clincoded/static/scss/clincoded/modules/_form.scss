@@ -31,6 +31,16 @@
     .submit-buttons-wrapper {
         margin-top: 20px;
     }
+
+    ol.instructions{
+        li {
+            padding-bottom: 10px;
+        }
+
+        li:last-child {
+            padding-bottom: 0;
+        }
+    }
 }
 
 .form-error {
