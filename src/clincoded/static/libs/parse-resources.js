@@ -95,11 +95,21 @@ function parseCAR(json) {
             }
         });
     }
+    // extract the aminoAcidAlleles hgvs terms
+    if (json.aminoAcidAlleles && json.aminoAcidAlleles.length > 0) {
+        json.aminoAcidAlleles.map(function(allele, i) {
+            if (allele.hgvs && allele.hgvs.length > 0) {
+                allele.hgvs.map(function(hgvs_temp, j) {
+                    temp_other_hgvs.push(hgvs_temp);
+                });
+            }
+        });
+    }
     // extract the transcriptAlleles hgvs terms
     if (json.transcriptAlleles && json.transcriptAlleles.length > 0) {
-        json.transcriptAlleles.map(function(transcriptAllele, i) {
-            if (transcriptAllele.hgvs && transcriptAllele.hgvs.length > 0) {
-                transcriptAllele.hgvs.map(function(hgvs_temp, j) {
+        json.transcriptAlleles.map(function(allele, i) {
+            if (allele.hgvs && allele.hgvs.length > 0) {
+                allele.hgvs.map(function(hgvs_temp, j) {
                     temp_other_hgvs.push(hgvs_temp);
                 });
             }

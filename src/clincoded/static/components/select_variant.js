@@ -112,7 +112,7 @@ var SelectVariant = React.createClass({
                             {this.state.variantData && this.state.variantData.carId ?
                             <div className="row">
                                 <div className="row">
-                                    <span className="col-sm-5 col-md-4 control-label"><label>CAR ID</label></span>
+                                    <span className="col-sm-5 col-md-4 control-label"><label>CA ID</label></span>
                                     <span className="col-sm-7 col-md-8 text-no-input"><a href={external_url_map['CARallele-test'] + this.state.variantData.carId + '.html'} target="_blank">{this.state.variantData.carId}</a></span>
                                 </div>
                             </div>
@@ -127,7 +127,7 @@ var SelectVariant = React.createClass({
                             {this.state.variantIdType == "ClinGen Allele Registry ID" ?
                             <div className="row">
                                 <AddResourceId resourceType="car" label="ClinGen Allele Registry" wrapperClass="modal-buttons-wrapper" buttonWrapperClass="modal-button-align-reset"
-                                    buttonText={this.state.variantData ? "Edit CAR ID" : "Add CAR ID" } initialFormValue={this.state.variantData && this.state.variantData.carVariantId}
+                                    buttonText={this.state.variantData ? "Edit CA ID" : "Add CA ID" } initialFormValue={this.state.variantData && this.state.variantData.carVariantId}
                                     clearButtonText="Cancel Variant Selection" updateParentForm={this.updateVariantData} buttonOnly={true} clearButtonRender={false} />
                             </div>
                             : null}

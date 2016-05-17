@@ -399,7 +399,7 @@ function carTxt(field) {
             txt = 'Retrieve from CAR';
             break;
         case 'helpText':
-            txt = <span>You must enter a ClinGen Allele Registry ID. The CAR ID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).</span>;
+            txt = <span>You must enter a ClinGen Allele Registry (CAR) ID (CA ID). This CA ID is returned when you register an allele with the CAR (example: <a href={external_url_map['CARallele-test'] + '139214.html'} target="_blank">CA139214</a>).</span>;
             break;
         case 'resourceResponse':
             txt = "Below is the CAR Preferred Title for the CAR ID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
@@ -423,7 +423,7 @@ function carQueryResource() {
     // for pinging and parsing data from ClinVar
     this.saveFormValue('resourceId', this.state.inputValue);
     if (carValidateForm.call(this)) {
-        var url = 'http://reg.test.genome.network/allele/';
+        var url = 'http://reg.genome.network/allele/';
         var data;
         var id = this.state.inputValue;
         this.getRestData(url + id).then(json => {
