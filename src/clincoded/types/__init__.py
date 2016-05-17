@@ -124,7 +124,6 @@ class Variant(Item):
         'associatedInterpretations.disease',
         'associatedInterpretations.transcripts',
         'associatedInterpretations.proteins',
-        'associatedInterpretations.evaluations',
     ]
     rev = {
         'associatedPathogenicities': ('pathogenicity', 'variant'),
@@ -903,8 +902,6 @@ class Interpretation(Item):
         'disease',
         'transcripts',
         'proteins',
-        #'evaluations',
-        #'evaluations.submitted_by',
     ]
 
     @calculated_property(schema={

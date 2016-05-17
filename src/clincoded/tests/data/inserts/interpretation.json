@@ -21,6 +21,9 @@
         "genes": [
             "e7c51b8a-1c34-11e5-ab27-60f81dc5b05a"
         ],
+        "evaluations": [
+            "test data."
+        ],
         "provisional_variant": [
             "Pathogenic"
         ],
