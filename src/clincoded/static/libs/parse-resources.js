@@ -106,6 +106,8 @@ function parseCAR(json) {
         });
     }
 
+    // this bit will have to change once we actually get assembly info from the CAR
+    // so that the proper key:value pairs are created for hgvs terms
     var temp_hgvs = {};
     if (temp_other_hgvs.length > 0) {
         temp_hgvs.others = temp_other_hgvs;
