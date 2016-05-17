@@ -113,7 +113,7 @@ var SelectVariant = React.createClass({
                             <div className="row">
                                 <div className="row">
                                     <span className="col-sm-5 col-md-4 control-label"><label>CAR ID</label></span>
-                                    <span className="col-sm-7 col-md-8 text-no-input">{this.state.variantData.carId}</span>
+                                    <span className="col-sm-7 col-md-8 text-no-input"><a href={external_url_map['CARallele-test'] + this.state.variantData.carId + '.html'} target="_blank">{this.state.variantData.carId}</a></span>
                                 </div>
                             </div>
                             : null}
