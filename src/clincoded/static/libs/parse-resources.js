@@ -58,8 +58,17 @@ function parseCAR(json) {
     if (json.externalRecords) {
         // extract ClinVar data if available
         if (json.externalRecords.ClinVar && json.externalRecords.ClinVar.length > 0) {
+            // we only need to look at the first entry since the variantionID and preferred name
+            // should be the same for all of them
             data.clinvarVariantId = json.externalRecords.ClinVar[0].variationId;
             data.clinvarVariantTitle = json.externalRecords.ClinVar[0].preferredName;
+        }
+        // extract dbSNPId data if available
+        if (json.externalRecords.dbSNP && json.externalRecords.dbSNP.length > 0) {
+            data.dbSNPIds = [];
+            json.externalRecords.dbSNP.map(function(dbSNPentry, i) {
+                data.dbSNPIds.push(dbSNPentry.rs);
+            });
         }
     }
     var temp_nc_hgvs = {};
@@ -67,10 +76,12 @@ function parseCAR(json) {
     if (json.genomicAlleles && json.genomicAlleles.length > 0) {
         json.genomicAlleles.map(function(genomicAllele, i) {
             if (genomicAllele.hgvs && genomicAllele.hgvs.length > 0) {
-                // check the genomicAlleles hgvs terms
+                // extract the genomicAlleles hgvs terms
                 genomicAllele.hgvs.map(function(hgvs_temp, j) {
                     // skip the hgvs term if it starts with 'CM'
                     if (!hgvs_temp.startsWith('CM')) {
+                        // temp work-around; cannot easily get reference genome for NCs
+                        // dump everything as 'other' hgvs term for now...
                         /*
                         if (hgvs_temp.startsWith('NC')) {
                             // special handling for 'NC' hgvs terms
@@ -84,6 +95,7 @@ function parseCAR(json) {
             }
         });
     }
+    // extract the transcriptAlleles hgvs terms
     if (json.transcriptAlleles && json.transcriptAlleles.length > 0) {
         json.transcriptAlleles.map(function(transcriptAllele, i) {
             if (transcriptAllele.hgvs && transcriptAllele.hgvs.length > 0) {
