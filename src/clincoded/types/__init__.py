@@ -840,7 +840,7 @@ class Provisional(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
-        'gdm_associated',
+        'gdm_associated'
     ]
     rev = {
         'gdm_associated': ('gdm', 'provisionalClassifications'),
@@ -901,7 +901,7 @@ class Interpretation(Item):
         'genes',
         'disease',
         'transcripts',
-        'proteins',
+        'proteins'
     ]
 
     @calculated_property(schema={
@@ -944,6 +944,17 @@ class Interpretation(Item):
             return ", ".join(transcripts)
         elif len(transcripts) == 1:
             return transcripts[0]
+        return ''
+
+    @calculated_property(schema={
+        "title": "Proteins",
+        "type": "string",
+    })
+    def interpretation_proteins(self, proteins=[]):
+        if len(proteins) > 1:
+            return ", ".join(proteins)
+        elif len(proteins) == 1:
+            return proteins[0]
         return ''
 ### End of collections for variant curation ###
 
