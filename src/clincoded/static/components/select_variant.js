@@ -42,6 +42,9 @@ var SelectVariant = React.createClass({
     // When the form is submitted...
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+        if (this.state.variantData && this.state.variantData.uuid) {
+            this.context.navigate('/curation-variant/?variant=' + this.state.variantData.uuid);
+        }
     },
 
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
