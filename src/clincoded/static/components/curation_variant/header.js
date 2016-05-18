@@ -10,11 +10,13 @@ var CurationRecordCurator = require('./record_curator').CurationRecordCurator;
 // Curation data header for Gene:Disease
 var VariantCurationHeader = module.exports.VariantCurationHeader = React.createClass({
     propTypes: {
-        variantData: React.PropTypes.object // ClinVar data payload
+        variantData: React.PropTypes.object, // ClinVar data payload
+        session: React.PropTypes.object
     },
 
     render: function() {
         var variant = this.props.variantData;
+        var session = this.props.session;
 
         return (
             <div>
@@ -27,7 +29,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
                     <div className="row equal-height">
                         <CurationRecordVariant data={variant} />
                         <CurationRecordGeneDisease data={variant} />
-                        <CurationRecordCurator data={variant} />
+                        <CurationRecordCurator data={variant} session={session} />
                     </div>
                 </div>
             </div>
