@@ -79,56 +79,57 @@ function parseCAR(json) {
                     // skip the hgvs term if it starts with 'CM'
                     if (!hgvs_temp.startsWith('CM')) {
                         // FIXME/TODO: cannot easily get reference genome for NCs from CAR.
-                        // Base it off the RS###### for now...
+                        // Dump everything into the 'others' field for now.
+                        /*
                         if (hgvs_temp.startsWith('NC')) {
                             if (genomicAllele.referenceSequence.endsWith('RS000065')) {
                                 variant.hgvsNames.GRCh38 = hgvs_temp;
                             } else if (genomicAllele.referenceSequence.endsWith('RS000041')) {
                                 variant.hgvsNames.GRCh37 = hgvs_temp;
                             } else {
-                                if (!variant.hgvsNames.others) {
-                                    variant.hgvsNames.others = [];
-                                }
-                                variant.hgvsNames.others.push(hgvs_temp);
+                                variant = parseCarHgvsHandler(hgvs_temp, variant);
                             }
                         } else {
-                            if (!variant.hgvsNames.others) {
-                                variant.hgvsNames.others = [];
-                            }
-                            variant.hgvsNames.others.push(hgvs_temp);
+                            variant = parseCarHgvsHandler(hgvs_temp, variant);
                         }
+                        */
+                        variant = parseCarHgvsHandler(hgvs_temp, variant);
                     }
                 });
             }
         });
     }
-    // TODO: these should really be cleaned up so it's not using the same code over and over again
     // extract the aminoAcidAlleles hgvs terms
     if (json.aminoAcidAlleles && json.aminoAcidAlleles.length > 0) {
-        json.aminoAcidAlleles.map(function(allele, i) {
-            if (allele.hgvs && allele.hgvs.length > 0) {
-                allele.hgvs.map(function(hgvs_temp, j) {
-                    if (!variant.hgvsNames.others) {
-                        variant.hgvsNames.others = [];
-                    }
-                    variant.hgvsNames.others.push(hgvs_temp);
-                });
-            }
-        });
+        variant = parseCarHgvsLoop(json.aminoAcidAlleles, variant);
     }
     // extract the transcriptAlleles hgvs terms
     if (json.transcriptAlleles && json.transcriptAlleles.length > 0) {
-        json.transcriptAlleles.map(function(allele, i) {
-            if (allele.hgvs && allele.hgvs.length > 0) {
-                allele.hgvs.map(function(hgvs_temp, j) {
-                    if (!variant.hgvsNames.others) {
-                        variant.hgvsNames.others = [];
-                    }
-                    variant.hgvsNames.others.push(hgvs_temp);
-                });
-            }
-        });
+        variant = parseCarHgvsLoop(json.transcriptAlleles, variant);
     }
 
+    return variant;
+}
+
+// helper function for the parseCar() function; loops through some of the CAR's repeating
+// data structures to find HGVS terms and add them to the variant object
+function parseCarHgvsLoop(alleles, variant) {
+    alleles.map(function(allele, i) {
+        if (allele.hgvs && allele.hgvs.length > 0) {
+            allele.hgvs.map(function(hgvs_temp, j) {
+                variant = parseCarHgvsHandler(hgvs_temp, variant);
+            });
+        }
+    });
+    return variant;
+}
+
+// helper function for the parseCar() function: checks to see if the variant object's hgvsNames'
+// others variable is set, creates it if not, and adds an HGVS term to it
+function parseCarHgvsHandler(hgvs_temp, variant) {
+    if (!variant.hgvsNames.others) {
+        variant.hgvsNames.others = [];
+    }
+    variant.hgvsNames.others.push(hgvs_temp);
     return variant;
 }
