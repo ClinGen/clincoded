@@ -856,7 +856,7 @@ class Provisional(Item):
 ### end of new collections for gene curation data
 
 
-### Collections for varaint curation ###
+### Collections for variant curation ###
 @collection(
     name='transcripts',
     unique_key='transcript:uuid',
