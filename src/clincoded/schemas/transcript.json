@@ -10,6 +10,7 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/standard_status" },
         { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
@@ -18,12 +19,12 @@
         },
         "source": {
             "title": "Source",
-            "description": "What out source database the transcript data has been retrieved from",
+            "description": "From what external source the transcript data has been retrieved",
             "type": "string"
         },
         "sourceId": {
             "title": "Source ID",
-            "description": "Primary key in the out source db.",
+            "description": "Primary key in the external data source.",
             "type": "string"
         }
     },

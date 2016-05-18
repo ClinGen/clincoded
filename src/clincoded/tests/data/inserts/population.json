@@ -7,7 +7,7 @@
                 "population": "African",
                 "alleleCount": 0,
                 "alleleNumber": 10144,
-                "NumberOfHomozygotes": 0,
+                "numberOfHomozygotes": 0,
                 "alleleFrequency": 0
             },
             {
@@ -15,7 +15,7 @@
                 "population": "East Asian",
                 "alleleCount": 0,
                 "alleleNumber": 8000,
-                "NumberOfHomozygotes": 0,
+                "numberOfHomozygotes": 0,
                 "alleleFrequency": 0
             },
             {
@@ -23,7 +23,7 @@
                 "population": "European (Finnish)",
                 "alleleCount": 2,
                 "alleleNumber": 6524,
-                "NumberOfHomozygotes": 0,
+                "numberOfHomozygotes": 0,
                 "alleleFrequency": 0.0003066
             },
             {
@@ -31,7 +31,7 @@
                 "population": "European (Non-Finnish)",
                 "alleleCount": 20,
                 "alleleNumber": 64630,
-                "NumberOfHomozygotes": 0,
+                "numberOfHomozygotes": 0,
                 "alleleFrequency": 0.0003095
             },
             {
@@ -39,7 +39,7 @@
                 "population": "Latino",
                 "alleleCount": 0,
                 "alleleNumber": 11104,
-                "NumberOfHomozygotes": 0,
+                "numberOfHomozygotes": 0,
                 "alleleFrequency": 0
             },
             {
@@ -47,7 +47,7 @@
                 "population": "South Asian",
                 "alleleCount": 0,
                 "alleleNumber": 16290,
-                "NumberOfHomozygotes": 0,
+                "numberOfHomozygotes": 0,
                 "alleleFrequency": 0
             },
             {
@@ -55,7 +55,7 @@
                 "population": "Other",
                 "alleleCount": 1,
                 "alleleNumber": 866,
-                "NumberOfHomozygotes": 0,
+                "numberOfHomozygotes": 0,
                 "alleleFrequency": 0.001129
             },
             {
@@ -63,32 +63,63 @@
                 "population": "Total",
                 "alleleCount": 23,
                 "alleleNumber": 117576,
-                "NumberOfHomozygotes": 0,
+                "numberOfHomozygotes": 0,
                 "alleleFrequency": 0.0001956
             },
             {
                 "source": "1000G",
-                "Global MAF": 0
+                "global MAF": 0
             },
             {
                 "source": "ESP",
                 "population": "EA",
                 "chrTested": 8456,
-                "wttCount": 8454,
-                "wttFreq": 0.99976,
-                "vcCount": 2,
-                "vcFreq": 0.00024
+                "wt:t": {
+                    "count": 8454,
+                    "freq": 0.99976
+                },
+                "variant:C": {
+                    "count": 2,
+                    "freq": 0.00024
+                }
             },
             {
                 "source": "ESP",
                 "population": "AA",
                 "chrTested": 4268,
-                "wttCount": 4268,
-                "wttFreq": 1.00,
-                "vcCount": 0,
-                "vcFreq": 0
+                "wt:t": {
+                    "count": 4268,
+                    "freq": 1.00
+                },
+                "varaint:C": {
+                    "count": 0,
+                    "freq": 0
+                }
+            },
+            {
+                "source": "ESP",
+                "Coverage: EA+AA": 37
+            },
+            {
+                "source": "ESP",
+                "Coverage: EA": 39
+            },
+            {
+                "source": "ESP",
+                "Coverage: EA+AA": 3
+            },
+            {
+                "source": "ESP",
+                "Strand Warning": "none"
             }
         ],
+        "variant": "df8135d4-2685-11e5-af19-60f81dc5b05a",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-05-11T22:47:10.000000+00:00",
+        "last_modified": "2016-05-11T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "3a1cfc75-35e3-4336-a6e3-0e90f08e1c4f",
         "variant": "df8135d4-2685-11e5-af19-60f81dc5b05a",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2016-05-11T22:47:10.000000+00:00",

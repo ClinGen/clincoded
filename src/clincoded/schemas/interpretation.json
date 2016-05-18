@@ -10,6 +10,7 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/standard_status" },
         { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
@@ -26,7 +27,6 @@
             "title": "Genes",
             "description": "List of genes related the variant",
             "type": "array",
-            "default": [],
             "items": {
                 "title": "Gene",
                 "description": "uuid of a single gene.",
@@ -50,7 +50,6 @@
             "title": "Transcripts",
             "description": "List of transcript related to the variant",
             "type": "array",
-            "default": [],
             "items": {
                 "title": "Transcript",
                 "type": "string",
@@ -61,7 +60,6 @@
             "title": "Proteins",
             "description": "List of proteins related to the variant",
             "type": "array",
-            "default": [],
             "items": {
                 "title": "Protein",
                 "type": "string",
@@ -72,11 +70,28 @@
             "title": "Evaluations",
             "description": "List of evaluation involded in the interpretation",
             "type": "array",
-            "default": [],
             "items": {
                 "title": "Evaluation",
                 "type": "string",
                 "linkTo": "evaluation"
+            }
+        },
+        "provisional_variant": {
+            "title": "Provisional Classification",
+            "description": "List of provisional classification for the interpretation.",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "linkTo": "provisional_variant"
+            }
+        },
+        "approvements": {
+            "title": "Approvement",
+            "description": "List of approvement to the interpretation",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "comment": "will link to object approvement later."
             }
         }
     },

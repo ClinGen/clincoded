@@ -10,6 +10,7 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/standard_status" },
         { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
@@ -18,11 +19,12 @@
         },
         "mafs": {
             "title": "Allele Frequency",
-            "description": "Allele frequency data for the variant",
+            "description": "List of allele frequency data.",
             "type": "array",
-            "default": [],
             "items": {
-                "type": "object"
+                "type": "object",
+                "description": "MAF data saved as key:value pairs",
+                "comment": "No property declared. Flexiable for different key:value format. See test data for exsample."
             }
         },
         "variant": {
@@ -32,7 +34,7 @@
         }
     },
     "columns": {
-        "variant": {
+        "variant.represent": {
             "title": "Variant",
             "type": "string"
         },

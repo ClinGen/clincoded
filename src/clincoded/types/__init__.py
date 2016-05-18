@@ -123,10 +123,7 @@ class Variant(Item):
         'associatedPathogenicities.submitted_by',
         'associatedInterpretations',
         'associatedInterpretations.submitted_by',
-        'associatedInterpretations.disease',
-        'associatedInterpretations.transcripts',
-        'associatedInterpretations.proteins',
-        'associatedInterpretations.evaluations',
+        'associatedInterpretations.disease'
     ]
     rev = {
         'associatedPathogenicities': ('pathogenicity', 'variant'),
@@ -859,12 +856,12 @@ class Provisional(Item):
 ### end of new collections for gene curation data
 
 
-### Collections for varaint curation ###
+### Collections for variant curation ###
 @collection(
     name='transcripts',
     unique_key='transcript:uuid',
     properties={
-        'title': 'Transcript',
+        'title': 'Transcripts',
         'description': 'List of Transcript',
     })
 class Transcript(Item):
@@ -876,7 +873,7 @@ class Transcript(Item):
     name='proteins',
     unique_key='protein:uuid',
     properties={
-        'title': 'Protein',
+        'title': 'Proteins',
         'description': 'List of Protein'
     })
 class Protein(Item):
@@ -889,7 +886,7 @@ class Protein(Item):
     name='interpretations',
     unique_key='interpretation:uuid',
     properties={
-        'title': 'Interpretation',
+        'title': 'Interpretations',
         'description': 'List of Interpretations',
     })
 class Interpretation(Item):
@@ -899,27 +896,34 @@ class Interpretation(Item):
     embedded = [
         'submitted_by',
         'variant',
+        'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
         'genes',
         'disease',
         'transcripts',
         'proteins',
         'evaluations',
         'evaluations.submitted_by',
-        'evaluations.variant',
+        #'evaluations.variant',
         'evaluations.disease',
         'evaluations.populations',
-        'evaluations.populations.submitted_by'
+        'evaluations.populations.submitted_by',
+        'provisional_variant',
+        'provisional_variant.submitted_by'
     ]
 
     @calculated_property(schema={
-        "title": "Interpretation Status",
+        "title": "Status",
         "type": "string",
     })
-    def interpretation_status(self, evaluations):
-        if len(evaluations) > 0:
+    def interpretation_status(self, evaluations=[], provisional_variant=[], approvements=[]):
+        if len(approvements) > 0:
+            return 'Approved'
+        elif len(provisional_variant) > 0:
+            return 'Provisional'
+        elif len(evaluations) > 0:
             return 'Evaluation'
-        else:
-            return 'In Progress'
+        return 'In Progress'
 
     @calculated_property(schema={
         "title": "Disease",
@@ -934,7 +938,7 @@ class Interpretation(Item):
         "title": "Genes",
         "type": "string",
     })
-    def interpretation_genes(self, genes):
+    def interpretation_genes(self, genes=[]):
         if len(genes) > 1:
             return ", ".join(genes)
         elif len(genes) == 1:
@@ -945,21 +949,21 @@ class Interpretation(Item):
         "title": "Transcripts",
         "type": "string",
     })
-    def interpretation_transcripts(self, transcripts):
+    def interpretation_transcripts(self, transcripts=[]):
         return len(transcripts)
 
     @calculated_property(schema={
         "title": "Proteins",
         "type": "string",
     })
-    def interpretation_proteins(self, proteins):
+    def interpretation_proteins(self, proteins=[]):
         return len(proteins)
 
     @calculated_property(schema={
         "title": "Evaluations",
         "type": "string",
     })
-    def evaluation_count(self, evaluations):
+    def evaluation_count(self, evaluations=[]):
         if len(evaluations) == 0:
             return ''
         return len(evaluations)
@@ -967,7 +971,7 @@ class Interpretation(Item):
 
 @collection(
     name='evaluations',
-    unique_key='evaluation:name',
+    unique_key='evaluation:uuid',
     properties={
         'title': 'Evaluations',
         'description': 'Listing of Evaluations',
@@ -979,9 +983,13 @@ class Evaluation(Item):
     embedded = [
         'submitted_by',
         'variant',
+        'variant.associatedInterpretations',
         'disease',
         'populations',
-        'interpretation_associated'
+        'interpretation_associated',
+        #'interpretation_associated.variant',
+        #'interpretation_associated.variant.associatedInterpretations',
+        #'interpretation_associated.variant.associatedInterpretations.submitted_by'
     ]
     rev = {
         'interpretation_associated': ('interpretation', 'evaluations')
@@ -1007,9 +1015,9 @@ class Evaluation(Item):
 
 @collection(
     name='populations',
-    unique_key='population:name',
+    unique_key='population:uuid',
     properties={
-        'title': 'Population',
+        'title': 'Populations',
         'description': 'Listing of Population',
     })
 class Population(Item):
@@ -1021,9 +1029,8 @@ class Population(Item):
         'variant',
         'evaluation_associated',
         'evaluation_associated.interpretation_associated',
-        'evaluation_associated.interpretation_associated.genes',
-        'evaluation_associated.interpretation_associated.transcripts',
-        'evaluation_associated.interpretation_associated.proteins'
+        #'evaluation_associated.interpretation_associated.variant',
+        #'evaluation_associated.interpretation_associated.variant.associatedInterpretations'
     ]
     rev = {
         'evaluation_associated': ('evaluation', 'populations')
@@ -1045,6 +1052,49 @@ class Population(Item):
         if len(mafs) > 0:
             return len(mafs)
         return ''
+
+
+@collection(
+    name='provisional-variant',
+    unique_key='provisional_variant:uuid',
+    properties={
+        'title': 'Provisional Classification for Variant Curation',
+        'description': 'Listing of Provisional Classifications',
+    })
+class Provisional_variant(Item):
+    item_type = 'provisional_variant'
+    schema = load_schema('clincoded:schemas/provisional_variant.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'interpretation_associated',
+        'interpretation_associated.variant'
+    ]
+    rev = {
+        'interpretation_associated': ('interpretation', 'provisional_variant')
+    }
+
+    @calculated_property(schema={
+        "title": "Interpretation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "interpretation.provisional_variant"
+    })
+    def interpretation_associated(self, request, interpretation_associated):
+        return paths_filtered_by_status(request, interpretation_associated)
+
+    @calculated_property(schema={
+        "title": "Altered Classification",
+        "type": "string"
+    })
+    def alteredClassification_present(self, alteredClassification=''):
+        return alteredClassification
+
+    @calculated_property(schema={
+        "title": "Reasons",
+        "type": "string"
+    })
+    def reason_present(self, reason=''):
+        return reason
 ### End of collections for variant curation ###
 
 
