@@ -33,7 +33,7 @@ var SelectVariant = React.createClass({
 
     getInitialState: function() {
         return {
-            variantIdType: 'none',
+            variantIdType: 'select',
             variantLoaded: false,
             variantData: null
         };
@@ -60,7 +60,7 @@ var SelectVariant = React.createClass({
     },
 
     cancelVariantSelection: function() {
-        this.setState({variantLoaded: false, variantIdType: 'none'});
+        this.setState({variantLoaded: false, variantIdType: 'select'});
         this.setState({variantData: null});
     },
 
@@ -94,7 +94,8 @@ var SelectVariant = React.createClass({
                                 <div className="row">
                                     <Input type="select" ref="variantIdType" label="Select Variant by ID type"
                                         labelClassName="col-sm-5 control-label" value={this.state.variantIdType} wrapperClassName="col-sm-7" groupClassName="form-group"
-                                        defaultValue="none" handleChange={this.handleChange} inputDisabled={this.state.variantLoaded}>
+                                        defaultValue="select" handleChange={this.handleChange} inputDisabled={this.state.variantLoaded}>
+                                        <option value="select" disabled>Select</option>
                                         <option value="none" disabled></option>
                                         <option value="ClinVar Variation ID">ClinVar Variation ID</option>
                                         <option value="ClinGen Allele Registry ID">ClinGen Allele Registry ID</option>
