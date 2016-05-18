@@ -1,11 +1,10 @@
 'use strict';
+var _ = require('underscore');
+
+// Function for parsing ClinVar data for variant object creation
 // Derived from:
 // https://github.com/standard-analytics/pubmed-schema-org/blob/master/lib/pubmed.js
-var _ = require('underscore');
-var moment = require('moment');
-
 module.exports.parseClinvar = parseClinvar;
-
 function parseClinvar(xml){
     var variant = {};
     var doc = new DOMParser().parseFromString(xml, 'text/xml');
@@ -49,8 +48,8 @@ function parseClinvar(xml){
     return variant;
 }
 
+// Function for parsing CAR data for variant object creation
 module.exports.parseCAR = parseCAR;
-
 function parseCAR(json) {
     var data = {};
     // set carId in payload, since we'll always have this from a CAR response
