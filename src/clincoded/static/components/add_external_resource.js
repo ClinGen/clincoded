@@ -402,7 +402,7 @@ function carTxt(field) {
             txt = <span>You must enter a ClinGen Allele Registry (CAR) ID (CA ID). This CA ID is returned when you register an allele with the CAR (example: <a href={external_url_map['CARallele-test'] + '139214.html'} target="_blank">CA139214</a>).</span>;
             break;
         case 'resourceResponse':
-            txt = "Below is the CAR Preferred Title for the CAR ID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below is the CAR Preferred Title for the CA ID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
             break;
     }
     return txt;
@@ -415,7 +415,7 @@ function carValidateForm() {
     // valid if the input only has numbers
     if (valid && !formInput.match(/^CA[0-9]{6}$/)) {
         valid = false;
-        this.setFormErrors('resourceId', 'Invalid CAR ID');
+        this.setFormErrors('resourceId', 'Invalid CA ID');
     }
     return valid;
 }
@@ -433,7 +433,7 @@ function carQueryResource() {
                 this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
             } else {
                 // no result from ClinVar
-                this.setFormErrors('resourceId', 'ClinVar ID not found');
+                this.setFormErrors('resourceId', 'CA ID not found');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
         });
