@@ -3,11 +3,16 @@ var React = require('react');
 var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../globals');
+var RestMixin = require('../rest').RestMixin;
+var LocalStorageMixin = require('react-localstorage');
 
 // Display the curator data of the curation data
 var CurationRecordCurator = module.exports.CurationRecordCurator = React.createClass({
+    mixins: [RestMixin, LocalStorageMixin],
+
     propTypes: {
-        data: React.PropTypes.object // ClinVar data payload
+        data: React.PropTypes.object, // ClinVar data payload
+        session: React.PropTypes.object
     },
 
     getDefaultProps: function() {
@@ -16,16 +21,34 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         };
     },
 
+    getInterpretations: function(data, session, type) {
+        var myInterpretations = [];
+        var otherInterpretations = [];
+        var interpretations = data.associatedInterpretations;
+        for (var i=0; i<interpretations.length; i++) {
+            if (typeof interpretations[i] !== 'undefined') {
+                if (interpretations[i].submitted_by.uuid === session.user_properties.uuid) {
+                    myInterpretations.push(interpretations[i]);
+                } else if (interpretations[i].submitted_by.uuid !== session.user_properties.uuid) {
+                    otherInterpretations.push(interpretations[i]);
+                }
+            }
+        }
+        if (type === 'currentUser') {
+            return myInterpretations;
+        } else if (type === 'otherUsers') {
+            return otherInterpretations;
+        }
+    },
+
     render: function() {
         var variant = this.props.data;
+        var session = this.props.session;
         var recordHeader = this.props.recordHeader;
         if (variant) {
-            var status = (variant.status) ? variant.status : 'Unknown';
-            var creator = (variant.submitted_by.title) ? variant.submitted_by.title : 'Unknown';
-            var last_edited = (variant.last_modified) ? variant.last_modified : 'Unknown';
-            if (variant.annotations) {
-                var annotationOwners = getAnnotationOwners(variant);
-                //var latestAnnotation = gdm && findLatestAnnotation(gdm);
+            if (variant.associatedInterpretations && variant.associatedInterpretations.length > 0) {
+                var myInterpretations = this.getInterpretations(variant, session, 'currentUser');
+                var otherInterpretations = this.getInterpretations(variant, session, 'otherUsers');
             }
         }
 
@@ -34,58 +57,43 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                 <div className="curation-data-curator">
                     <h4>{recordHeader}</h4>
                     {variant ?
-                        <dl className="inline-dl clearfix">
-                            <dt>Status: </dt><dd>{status}</dd>
-                            <dt>Creator: </dt><dd>{creator}</dd>
-                            <dt>Last edited: </dt><dd>{moment(last_edited).format('YYYY MMM DD, h:mm a')}</dd>
-                            {annotationOwners && annotationOwners.length ?
-                                <div>
-                                    <dt>Other interpretations: </dt>
-                                    <dd>
-                                        {annotationOwners.map(function(owner, i) {
-                                            return (
-                                                <span key={i}>
-                                                    {i > 0 ? ', ' : ''}
-                                                    <a href={'mailto:' + owner.email}>{owner.title}</a>
-                                                </span>
-                                            );
-                                        })}
-                                    </dd>
+                        <div className="clearfix">
+                            {myInterpretations && myInterpretations.length ?
+                                <div className="current-user-interpretations">
+                                    <dl className="inline-dl clearfix">
+                                        <dt>My interpretations: </dt>
+                                        <dd>
+                                            {myInterpretations.map(function(item, i) {
+                                                return (
+                                                    <div key={i}>
+                                                        <span className="my-interpretation">Status: {item.interpretation_status}, last edited: {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </dd>
+                                    </dl>
                                 </div>
                             : null}
-                        </dl>
+                            {otherInterpretations && otherInterpretations.length ?
+                                <div className="other-users-interpretations">
+                                    <dl className="inline-dl clearfix">
+                                        <dt>Other interpretations: </dt>
+                                        <dd>
+                                            {otherInterpretations.map(function(item, i) {
+                                                return (
+                                                    <div key={i}>
+                                                        <span className="other-interpretation">Status: {item.interpretation_status}, last edited: {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </dd>
+                                    </dl>
+                                </div>
+                            : null}
+                        </div>
                     : null}
                 </div>
             </div>
         );
     }
 });
-
-// Get a de-duped array of annotation submitted_by objects sorted by last name from the given GDM.
-var getAnnotationOwners = function(data) {
-    var owners = data && data.annotations.map(function(annotation) {
-        return annotation.submitted_by;
-    });
-    var annotationOwners = _.chain(owners).uniq(function(owner) {
-        return owner.uuid;
-    }).sortBy('last_name').value();
-    return annotationOwners;
-};
-
-// Return the latest annotation in the given GDM. This is the internal version; use the memoized version externally.
-var findLatestAnnotation = module.exports.findLatestAnnotation = function(gdm) {
-    var annotations = gdm && gdm.annotations;
-    var latestAnnotation = null;
-    var latestTime = 0;
-    if (annotations && annotations.length) {
-        annotations.forEach(function(annotation) {
-            // Get Unix timestamp version of annotation's time and compare against the saved version.
-            var time = moment(annotation.date_created).format('x');
-            if (latestTime < time) {
-                latestAnnotation = annotation;
-                latestTime = time;
-            }
-        });
-    }
-    return latestAnnotation;
-};
