@@ -70,8 +70,7 @@ function parseCAR(json) {
             });
         }
     }
-    var temp_nc_hgvs = {};
-    var temp_other_hgvs = [];
+    data.hgvsNames = {};
     if (json.genomicAlleles && json.genomicAlleles.length > 0) {
         json.genomicAlleles.map(function(genomicAllele, i) {
             if (genomicAllele.hgvs && genomicAllele.hgvs.length > 0) {
@@ -80,26 +79,39 @@ function parseCAR(json) {
                     // skip the hgvs term if it starts with 'CM'
                     if (!hgvs_temp.startsWith('CM')) {
                         // FIXME/TODO: cannot easily get reference genome for NCs from CAR.
-                        // Dump everything as 'other' hgvs term for now...
-                        /*
+                        // Base it off the RS###### for now...
                         if (hgvs_temp.startsWith('NC')) {
-                            // special handling for 'NC' hgvs terms
-                            temp_nc_hgvs[genomicAllele.referenceSequence] = hgvs_temp;
+                            if (genomicAllele.referenceSequence.endsWith('RS000065')) {
+                                data.hgvsNames.GRCh38 = hgvs_temp;
+                            } else if (genomicAllele.referenceSequence.endsWith('RS000041')) {
+                                data.hgvsNames.GRCh37 = hgvs_temp;
+                            } else {
+                                if (!data.hgvsNames.others) {
+                                    data.hgvsNames.others = [];
+                                }
+                                data.hgvsNames.others.push(hgvs_temp);
+                            }
                         } else {
-                            temp_other_hgvs.push(hgvs_temp);
-                        }*/
-                        temp_other_hgvs.push(hgvs_temp);
+                            if (!data.hgvsNames.others) {
+                                data.hgvsNames.others = [];
+                            }
+                            data.hgvsNames.others.push(hgvs_temp);
+                        }
                     }
                 });
             }
         });
     }
+    // TODO: these should really be cleaned up so it's not using the same code over and over again
     // extract the aminoAcidAlleles hgvs terms
     if (json.aminoAcidAlleles && json.aminoAcidAlleles.length > 0) {
         json.aminoAcidAlleles.map(function(allele, i) {
             if (allele.hgvs && allele.hgvs.length > 0) {
                 allele.hgvs.map(function(hgvs_temp, j) {
-                    temp_other_hgvs.push(hgvs_temp);
+                    if (!data.hgvsNames.others) {
+                        data.hgvsNames.others = [];
+                    }
+                    data.hgvsNames.others.push(hgvs_temp);
                 });
             }
         });
@@ -109,20 +121,13 @@ function parseCAR(json) {
         json.transcriptAlleles.map(function(allele, i) {
             if (allele.hgvs && allele.hgvs.length > 0) {
                 allele.hgvs.map(function(hgvs_temp, j) {
-                    temp_other_hgvs.push(hgvs_temp);
+                    if (!data.hgvsNames.others) {
+                        data.hgvsNames.others = [];
+                    }
+                    data.hgvsNames.others.push(hgvs_temp);
                 });
             }
         });
-    }
-
-    // this bit will have to change once we actually get assembly info from the CAR
-    // so that the proper key:value pairs are created for hgvs terms
-    var temp_hgvs = {};
-    if (temp_other_hgvs.length > 0) {
-        temp_hgvs.others = temp_other_hgvs;
-    }
-    if (temp_hgvs != {}) {
-        data.hgvsNames = temp_hgvs;
     }
 
     return data;
