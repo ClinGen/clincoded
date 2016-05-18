@@ -309,10 +309,10 @@ function clinvarTxt(field) {
             txt = 'Retrieve from ClinVar';
             break;
         case 'helpText':
-            txt = <span>You must enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page - example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>;
+            txt = <span>You must enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>;
             break;
         case 'resourceResponse':
-            txt = "Below is the ClinVar Preferred Title for the VariationID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below are the data from ClinVar for the VariationID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
             break;
     }
     return txt;
@@ -425,19 +425,19 @@ function carTxt(field) {
             txt = 'ClinGen Allele Registry';
             break;
         case 'inputLabel':
-            txt = 'Enter CAR ID';
+            txt = 'Enter CA ID';
             break;
         case 'editLabel':
-            txt = 'Edit CAR ID';
+            txt = 'Edit CA ID';
             break;
         case 'inputButton':
-            txt = 'Retrieve from CAR';
+            txt = 'Retrieve from ClinGen Allele Registry';
             break;
         case 'helpText':
-            txt = <span>You must enter a ClinGen Allele Registry (CAR) ID (CA ID). This CA ID is returned when you register an allele with the CAR (example: <a href={external_url_map['CARallele-test'] + '139214.html'} target="_blank">CA139214</a>).</span>;
+            txt = <span>You must enter a ClinGen Allele Registry ID (CA ID). This CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele-test'] + '139214.html'} target="_blank">CA139214</a>).</span>;
             break;
         case 'resourceResponse':
-            txt = "Below is the CAR Preferred Title for the CA ID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below are the data from the ClinGen Allele Registry for the CA ID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
             break;
     }
     return txt;
