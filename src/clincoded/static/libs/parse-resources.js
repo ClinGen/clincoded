@@ -51,26 +51,26 @@ function parseClinvar(xml){
 // Function for parsing CAR data for variant object creation
 module.exports.parseCAR = parseCAR;
 function parseCAR(json) {
-    var data = {};
+    var variant = {};
     // set carId in payload, since we'll always have this from a CAR response
-    data.carId = json['@id'].substring(json['@id'].indexOf('CA'));
+    variant.carId = json['@id'].substring(json['@id'].indexOf('CA'));
     if (json.externalRecords) {
         // extract ClinVar data if available
         if (json.externalRecords.ClinVar && json.externalRecords.ClinVar.length > 0) {
             // we only need to look at the first entry since the variantionID and preferred name
             // should be the same for all of them
-            data.clinvarVariantId = json.externalRecords.ClinVar[0].variationId;
-            data.clinvarVariantTitle = json.externalRecords.ClinVar[0].preferredName;
+            variant.clinvarVariantId = json.externalRecords.ClinVar[0].variationId;
+            variant.clinvarVariantTitle = json.externalRecords.ClinVar[0].preferredName;
         }
         // extract dbSNPId data if available
         if (json.externalRecords.dbSNP && json.externalRecords.dbSNP.length > 0) {
-            data.dbSNPIds = [];
+            variant.dbSNPIds = [];
             json.externalRecords.dbSNP.map(function(dbSNPentry, i) {
-                data.dbSNPIds.push(dbSNPentry.rs);
+                variant.dbSNPIds.push(dbSNPentry.rs);
             });
         }
     }
-    data.hgvsNames = {};
+    variant.hgvsNames = {};
     if (json.genomicAlleles && json.genomicAlleles.length > 0) {
         json.genomicAlleles.map(function(genomicAllele, i) {
             if (genomicAllele.hgvs && genomicAllele.hgvs.length > 0) {
@@ -82,20 +82,20 @@ function parseCAR(json) {
                         // Base it off the RS###### for now...
                         if (hgvs_temp.startsWith('NC')) {
                             if (genomicAllele.referenceSequence.endsWith('RS000065')) {
-                                data.hgvsNames.GRCh38 = hgvs_temp;
+                                variant.hgvsNames.GRCh38 = hgvs_temp;
                             } else if (genomicAllele.referenceSequence.endsWith('RS000041')) {
-                                data.hgvsNames.GRCh37 = hgvs_temp;
+                                variant.hgvsNames.GRCh37 = hgvs_temp;
                             } else {
-                                if (!data.hgvsNames.others) {
-                                    data.hgvsNames.others = [];
+                                if (!variant.hgvsNames.others) {
+                                    variant.hgvsNames.others = [];
                                 }
-                                data.hgvsNames.others.push(hgvs_temp);
+                                variant.hgvsNames.others.push(hgvs_temp);
                             }
                         } else {
-                            if (!data.hgvsNames.others) {
-                                data.hgvsNames.others = [];
+                            if (!variant.hgvsNames.others) {
+                                variant.hgvsNames.others = [];
                             }
-                            data.hgvsNames.others.push(hgvs_temp);
+                            variant.hgvsNames.others.push(hgvs_temp);
                         }
                     }
                 });
@@ -108,10 +108,10 @@ function parseCAR(json) {
         json.aminoAcidAlleles.map(function(allele, i) {
             if (allele.hgvs && allele.hgvs.length > 0) {
                 allele.hgvs.map(function(hgvs_temp, j) {
-                    if (!data.hgvsNames.others) {
-                        data.hgvsNames.others = [];
+                    if (!variant.hgvsNames.others) {
+                        variant.hgvsNames.others = [];
                     }
-                    data.hgvsNames.others.push(hgvs_temp);
+                    variant.hgvsNames.others.push(hgvs_temp);
                 });
             }
         });
@@ -121,14 +121,14 @@ function parseCAR(json) {
         json.transcriptAlleles.map(function(allele, i) {
             if (allele.hgvs && allele.hgvs.length > 0) {
                 allele.hgvs.map(function(hgvs_temp, j) {
-                    if (!data.hgvsNames.others) {
-                        data.hgvsNames.others = [];
+                    if (!variant.hgvsNames.others) {
+                        variant.hgvsNames.others = [];
                     }
-                    data.hgvsNames.others.push(hgvs_temp);
+                    variant.hgvsNames.others.push(hgvs_temp);
                 });
             }
         });
     }
 
-    return data;
+    return variant;
 }
