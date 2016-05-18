@@ -5,6 +5,7 @@ var globals = require('../globals');
 var RestMixin = require('../rest').RestMixin;
 
 var VariantCurationHeader = require('./header').VariantCurationHeader;
+var VariantCurationActions = require('./actions').VariantCurationActions;
 var VariantCurationInterpretation = require('./interpretation').VariantCurationInterpretation;
 
 var queryKeyValue = globals.queryKeyValue;
@@ -44,6 +45,7 @@ var VariantCurationHub = React.createClass({
         return (
             <div>
                 <VariantCurationHeader variantData={variantData} session={session} />
+                <VariantCurationActions variantData={variantData} session={session} />
                 <VariantCurationInterpretation variantData={variantData} session={session} loadingComplete={isLoadingComplete} />
             </div>
         );
