@@ -284,9 +284,10 @@ var AddResourceIdModal = React.createClass({
 Below are the logic and helper functions for the difference resource types.
 The ___Txt() functions hold the different text that should be displayed for that resource in the modal.
 The ___ValidateForm() functions hold the function that validates the input in the modal, specific to that resource.
-The ___QueryResource() function holds the primary logic for reaching out to the resource and parsing the data/handling the response,
+The ___QueryResource() functions hold the primary logic for reaching out to the resource and parsing the data/handling the response,
     specific to that resource. These functions are called when the user hits the 'Retrieve'/'Edit' button in the modal
-The ___SubmitResource() function holds the primary logic for submitting the parsed resource object to the internal database,
+The ___RenderResourceResult() functions return the rendered html elements for the resource response
+The ___SubmitResource() functions hold the primary logic for submitting the parsed resource object to the internal database,
     specific to that resource. These functions are called when the user hits the 'Submit' button on the modal, subsequently closing it.
 */
 
