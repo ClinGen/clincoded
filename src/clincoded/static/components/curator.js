@@ -1913,6 +1913,9 @@ var renderLabelNote = module.exports.renderLabelNote = function(label) {
     );
 };
 
+// Global function for handling the ordering and rendering of HGVS names.
+// Passed variable should be the hgvsNames object of the variant object.
+// Bumps up rendering order of GRCh38 and GRCh37
 var variantHgvsRender = module.exports.variantHgvsRender = function(hgvsNames) {
     return (
         <div>

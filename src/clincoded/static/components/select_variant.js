@@ -39,7 +39,8 @@ var SelectVariant = React.createClass({
         };
     },
 
-    // When the form is submitted...
+    // When the form is submitted, we should already have the relevant variant saved in our db,
+    // and its uuid. Forward the user to the variant curation hub on click.
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         if (this.state.variantData && this.state.variantData.uuid) {
@@ -47,23 +48,23 @@ var SelectVariant = React.createClass({
         }
     },
 
-    // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
+    // Update the variantData upon interaction with the Add Resource modal
     updateVariantData: function(data) {
         var newVariantInfo = _.clone(this.state.variantInfo);
         var currVariantOption = this.state.variantOption;
         var addVariantDisabled;
         if (data) {
-            // Set state
-            this.setState({variantLoaded: true});
-            this.setState({variantData: data});
+            this.setState({variantLoaded: true, variantData: data});
         }
     },
 
+    // If the user clicks the Cancel Variant Selection button, reset the page
     cancelVariantSelection: function() {
         this.setState({variantLoaded: false, variantIdType: 'select'});
         this.setState({variantData: null});
     },
 
+    // Handle change of the select Variant Type dropdown
     handleChange: function(ref, e) {
         if (ref === 'variantIdType' && this.refs[ref].getValue()) {
             this.setState({variantIdType: this.refs[ref].getValue()});

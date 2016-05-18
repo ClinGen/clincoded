@@ -80,8 +80,8 @@ function parseCAR(json) {
                 genomicAllele.hgvs.map(function(hgvs_temp, j) {
                     // skip the hgvs term if it starts with 'CM'
                     if (!hgvs_temp.startsWith('CM')) {
-                        // temp work-around; cannot easily get reference genome for NCs
-                        // dump everything as 'other' hgvs term for now...
+                        // FIXME/TODO: cannot easily get reference genome for NCs from CAR.
+                        // Dump everything as 'other' hgvs term for now...
                         /*
                         if (hgvs_temp.startsWith('NC')) {
                             // special handling for 'NC' hgvs terms

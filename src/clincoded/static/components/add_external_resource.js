@@ -25,7 +25,8 @@ var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
 
 
-// Class for the add resource button. This class only renderes the button to add and clear the fields.
+// Class for the add resource button. This class only renders the button to add and clear the fields, and contains the modal wrapper.
+// The modal itself is defined by the AddResourceIdModal class below.
 var AddResourceId = module.exports.AddResourceId = React.createClass({
     mixins: [ModalMixin],
     propTypes: {
@@ -43,7 +44,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         buttonClass: React.PropTypes.string, // specify any special css classes for the button
         clearButtonClass: React.PropTypes.string, // specify any special css classes for the button
         buttonOnly: React.PropTypes.bool, // specify whether or not only the button should be rendered (no form-group)
-        clearButtonRender: React.PropTypes.bool
+        clearButtonRender: React.PropTypes.bool // specify whether or not the Clear button should be rendered
     },
 
     getInitialState: function() {
@@ -69,6 +70,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         this.props.updateParentForm(null, this.props.fieldNum);
     },
 
+    // renders the main Add/Edit button
     buttonRender: function() {
         return (
             <span className={"inline-button-wrapper button-push" + (this.props.buttonWrapperClass ? " " + this.props.buttonWrapperClass : "")}>
@@ -83,6 +85,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         );
     },
 
+    // renders the main Clear button
     clearButtonRender: function() {
         return (
             <Input type="button" title={this.props.clearButtonText ? this.props.clearButtonText : "Clear"} inputClassName={"btn-default" + (this.props.clearButtonClass ? " " + this.props.clearButtonClass : "")} clickHandler={this.resetForm} />
@@ -136,16 +139,16 @@ var AddResourceIdModal = React.createClass({
 
     getInitialState: function() {
         return {
-            txtInputLabel: '',
-            txtInputButton: '',
-            txtHelpText: '',
-            txtResourceResponse: '',
-            inputValue: '',
-            queryResourceDisabled: true,
-            queryResourceBusy: false, // True while form is submitting
-            resourceFetched: false,
-            tempResource: {},
-            submitResourceBusy: false
+            txtInputLabel: '', // Text for the input's label (rendered above the input box)
+            txtInputButton: '', // Text for the input's submit button (rendered below the input box)
+            txtHelpText: '', // Text for blue box below input's submit button (disappears after the input button is clicked)
+            txtResourceResponse: '', // Text to display once a response from the resource has been obtained
+            inputValue: '', // Default value for input box
+            queryResourceDisabled: true, // Flag to disable the input button
+            queryResourceBusy: false, // Flag to indicate the input button's 'busy' state
+            resourceFetched: false, // Flag to indicate that a response from the resource has been obtained
+            tempResource: {}, // Temporary object to hold the resource response
+            submitResourceBusy: false // Flag to indicate that the modal's submit button is in a 'busy' state (creating local db entry)
         };
     },
 
@@ -186,7 +189,7 @@ var AddResourceIdModal = React.createClass({
         }
     },
 
-    // called when the button to ping the outside API is pressed
+    // called when the button to ping the outside resource is pressed
     queryResource: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.setState({queryResourceBusy: true, resourceFetched: false});
@@ -201,7 +204,7 @@ var AddResourceIdModal = React.createClass({
         }
     },
 
-    // called when the button to submit the resource to the main form is pressed
+    // called when the button to submit the resource to the main form (local db) is pressed
     submitResource: function(e) {
         e.preventDefault(); e.stopPropagation();
         // Apply submitResource logic depending on resourceType
@@ -274,6 +277,16 @@ var AddResourceIdModal = React.createClass({
         );
     }
 });
+
+/*
+Below are the logic and helper functions for the difference resource types.
+The ___Txt() functions hold the different text that should be displayed for that resource in the modal.
+The ___ValidateForm() functions hold the function that validates the input in the modal, specific to that resource.
+The ___QueryResource() function holds the primary logic for reaching out to the resource and parsing the data/handling the response,
+    specific to that resource. These functions are called when the user hits the 'Retrieve'/'Edit' button in the modal
+The ___SubmitResource() function holds the primary logic for submitting the parsed resource object to the internal database,
+    specific to that resource. These functions are called when the user hits the 'Submit' button on the modal, subsequently closing it.
+*/
 
 // Logic and helper functions for resource type 'clinvar' for AddResource modal
 function clinvarTxt(field) {
@@ -383,7 +396,7 @@ function clinvarSubmitResource() {
 
 // Logic and helper functions for resource type 'car' for AddResource modal
 function carTxt(field) {
-    // Text to use for the resource type of 'clinvar'
+    // Text to use for the resource type of 'car'
     var txt;
     switch(field) {
         case 'modalTitle':
@@ -408,11 +421,11 @@ function carTxt(field) {
     return txt;
 }
 function carValidateForm() {
-    // validating the field for ClinVarIDs
+    // validating the field for CA IDs
     var valid = this.validateDefault();
     var formInput = this.getFormValue('resourceId');
 
-    // valid if the input only has numbers
+    // valid if the input begins with 'CA', followed by 6 numbers
     if (valid && !formInput.match(/^CA[0-9]{6}$/)) {
         valid = false;
         this.setFormErrors('resourceId', 'Invalid CA ID');
@@ -420,7 +433,7 @@ function carValidateForm() {
     return valid;
 }
 function carQueryResource() {
-    // for pinging and parsing data from ClinVar
+    // for pinging and parsing data from CAR
     this.saveFormValue('resourceId', this.state.inputValue);
     if (carValidateForm.call(this)) {
         var url = 'http://reg.genome.network/allele/';
@@ -432,7 +445,9 @@ function carQueryResource() {
                 // found the result we want
                 this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
             } else {
-                // no result from ClinVar
+                // no result from CAR
+                // FIXME: the CAR, when a CA ID is not found, does not respond with a clean JSON. It instead responds with a 404
+                // or a XMLHttpRequest/CORS error that indicates that the error was a 404. Current code does not handle this.
                 this.setFormErrors('resourceId', 'CA ID not found');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
@@ -445,6 +460,10 @@ function carSubmitResource() {
     // for dealing with the main form
     this.setState({submitResourceBusy: true});
     if (this.state.tempResource.carId) {
+        // TODO: we agreed that if the user submits a CAR and receives a CAR response with a ClinVar ID, we
+        // will do a separate query to ClinVar and get their information. This should probably happen in
+        // the carQueryResource() function, but checking our own internal db against the carId or the ClinVarId needs to happen
+        // here as well
         this.getRestData('/search/?type=variant&carId=' + this.state.tempResource.carId).then(check => {
             if (check.total) {
                 // variation already exists in our db
