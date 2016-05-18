@@ -204,6 +204,20 @@ var AddResourceIdModal = React.createClass({
         }
     },
 
+    // called when a resource result is returned; returns render elements for the result
+    renderResourceResult: function() {
+        var renderResult;
+        switch(this.props.resourceType) {
+            case 'clinvar':
+                renderResult = clinvarRenderResourceResult.call(this);
+                break;
+            case 'car':
+                renderResult = carRenderResourceResult.call(this);
+                break;
+        }
+        return renderResult;
+    },
+
     // called when the button to submit the resource to the main form (local db) is pressed
     submitResource: function(e) {
         e.preventDefault(); e.stopPropagation();
@@ -252,19 +266,7 @@ var AddResourceIdModal = React.createClass({
                     {this.state.resourceFetched ?
                     <div>
                         <p>&nbsp;<br />{this.state.txtResourceResponse}</p>
-                        <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
-                        {this.state.tempResource && this.state.tempResource.hgvsNames ?
-                            <div className="row">
-                                {this.state.tempResource.hgvsNames.others && this.state.tempResource.hgvsNames.others.length > 0 ?
-                                    <div className="row">
-                                        <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
-                                        <span className="col-sm-7 col-md-9 text-no-input">
-                                            {variantHgvsRender(this.state.tempResource.hgvsNames)}
-                                        </span>
-                                    </div>
-                                : null}
-                            </div>
-                        : null}
+                        {this.renderResourceResult()}
                     </div>
                     : <span><p className="alert alert-info">{this.state.txtHelpText}</p></span>}
                 </div>
@@ -358,6 +360,25 @@ function clinvarQueryResource() {
     } else {
         this.setState({queryResourceBusy: false});
     }
+}
+function clinvarRenderResourceResult() {
+    return(
+        <div>
+            <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
+            {this.state.tempResource && this.state.tempResource.hgvsNames ?
+                <div className="row">
+                    {this.state.tempResource.hgvsNames.others && this.state.tempResource.hgvsNames.others.length > 0 ?
+                        <div className="row">
+                            <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
+                            <span className="col-sm-7 col-md-9 text-no-input">
+                                {variantHgvsRender(this.state.tempResource.hgvsNames)}
+                            </span>
+                        </div>
+                    : null}
+                </div>
+            : null}
+        </div>
+    );
 }
 function clinvarSubmitResource() {
     // for dealing with the main form
@@ -455,6 +476,25 @@ function carQueryResource() {
     } else {
         this.setState({queryResourceBusy: false});
     }
+}
+function carRenderResourceResult() {
+    return(
+        <div>
+            <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
+            {this.state.tempResource && this.state.tempResource.hgvsNames ?
+                <div className="row">
+                    {this.state.tempResource.hgvsNames.others && this.state.tempResource.hgvsNames.others.length > 0 ?
+                        <div className="row">
+                            <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
+                            <span className="col-sm-7 col-md-9 text-no-input">
+                                {variantHgvsRender(this.state.tempResource.hgvsNames)}
+                            </span>
+                        </div>
+                    : null}
+                </div>
+            : null}
+        </div>
+    );
 }
 function carSubmitResource() {
     // for dealing with the main form
