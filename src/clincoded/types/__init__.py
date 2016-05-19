@@ -945,17 +945,6 @@ class Interpretation(Item):
         elif len(transcripts) == 1:
             return transcripts[0]
         return ''
-
-    @calculated_property(schema={
-        "title": "Proteins",
-        "type": "string",
-    })
-    def interpretation_proteins(self, proteins=[]):
-        if len(proteins) > 1:
-            return ", ".join(proteins)
-        elif len(proteins) == 1:
-            return proteins[0]
-        return ''
 ### End of collections for variant curation ###
 
 
