@@ -44,7 +44,7 @@ var SelectVariant = React.createClass({
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         if (this.state.variantData && this.state.variantData.uuid) {
-            this.context.navigate('/curation-variant/?variant=' + this.state.variantData.uuid);
+            this.context.navigate('/variant-central/?variant=' + this.state.variantData.uuid);
         }
     },
 
