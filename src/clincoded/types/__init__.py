@@ -56,7 +56,6 @@ class Disease(Item):
     item_type = 'disease'
     schema = load_schema('clincoded:schemas/disease.json')
     name_key = 'uuid'
-
 @collection(
     name='statistics',
     unique_key='statistic:uuid',
@@ -72,7 +71,6 @@ class Statistic(Item):
         'variants',
         'assessments'
     ]
-
 @collection(
     name='controlgroups',
     unique_key='controlGroup:uuid',
@@ -120,10 +118,16 @@ class Variant(Item):
         'associatedPathogenicities.assessments',
         'associatedPathogenicities.assessments.submitted_by',
         'associatedPathogenicities.variant',
-        'associatedPathogenicities.submitted_by'
+        'associatedPathogenicities.submitted_by',
+        'associatedInterpretations',
+        'associatedInterpretations.submitted_by',
+        'associatedInterpretations.disease',
+        'associatedInterpretations.transcripts',
+        'associatedInterpretations.proteins',
     ]
     rev = {
-        'associatedPathogenicities': ('pathogenicity', 'variant')
+        'associatedPathogenicities': ('pathogenicity', 'variant'),
+        'associatedInterpretations': ('interpretation', 'variant')
     }
 
     @calculated_property(schema={
@@ -137,6 +141,28 @@ class Variant(Item):
     def associatedPathogenicities(self, request, associatedPathogenicities):
         return paths_filtered_by_status(request, associatedPathogenicities)
 
+    @calculated_property(schema={
+        "title": "Associated interpretation",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "interpretation.variant",
+        },
+    })
+    def associatedInterpretations(self, request, associatedInterpretations):
+        return paths_filtered_by_status(request, associatedInterpretations)
+
+    @calculated_property(schema={
+        "title": "Variant Representive",
+        "type": "string"
+    })
+    def represent(self, clinvarVariantTitle, otherDescription):
+        if clinvarVariantTitle != '':
+            return clinvarVariantTitle
+        elif otherDescription != '':
+            return otherDescription
+        else:
+            return ''
 
 @collection(
     name='gdm',
@@ -814,7 +840,7 @@ class Provisional(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
-        'gdm_associated',
+        'gdm_associated'
     ]
     rev = {
         'gdm_associated': ('gdm', 'provisionalClassifications'),
@@ -827,7 +853,99 @@ class Provisional(Item):
     })
     def gdm_associated(self, request, gdm_associated):
         return paths_filtered_by_status(request, gdm_associated)
-### end of new collections for curation data
+### end of new collections for gene curation data
+
+
+### Collections for variant curation ###
+@collection(
+    name='transcripts',
+    unique_key='transcript:uuid',
+    properties={
+        'title': 'Transcript',
+        'description': 'List of Transcripts',
+    })
+class Transcript(Item):
+    item_type = 'transcript'
+    schema = load_schema('clincoded:schemas/transcript.json')
+    name_key = 'uuid'
+
+@collection(
+    name='proteins',
+    unique_key='protein:uuid',
+    properties={
+        'title': 'Protein',
+        'description': 'List of Proteins'
+    })
+class Protein(Item):
+    item_type = 'protein'
+    schema = load_schema('clincoded:schemas/protein.json')
+    name_key = 'uuid'
+
+
+@collection(
+    name='interpretations',
+    unique_key='interpretation:uuid',
+    properties={
+        'title': 'Interpretation',
+        'description': 'List of Interpretations',
+    })
+class Interpretation(Item):
+    item_type = 'interpretation'
+    schema = load_schema('clincoded:schemas/interpretation.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'variant',
+        'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
+        'genes',
+        'disease',
+        'transcripts',
+        'proteins'
+    ]
+
+    @calculated_property(schema={
+        "title": "Status",
+        "type": "string",
+    })
+    def interpretation_status(self, evaluations=[], provisional_variant=[]):
+        if len(provisional_variant) > 0:
+            return 'Provisional'
+        elif len(evaluations) > 0:
+            return 'Evaluation'
+        return 'In Progress'
+
+    @calculated_property(schema={
+        "title": "Disease",
+        "type": "string",
+    })
+    def interpretation_disease(self, disease=''):
+        if disease != '':
+            return 'ORPHA' + disease[10:-1]
+        return ''
+
+    @calculated_property(schema={
+        "title": "Genes",
+        "type": "string",
+    })
+    def interpretation_genes(self, genes=[]):
+        if len(genes) > 1:
+            return ", ".join(genes)
+        elif len(genes) == 1:
+            return genes[0][7:-1]
+        return ''
+
+    @calculated_property(schema={
+        "title": "Transcripts",
+        "type": "string",
+    })
+    def interpretation_transcripts(self, transcripts=[]):
+        if len(transcripts) > 1:
+            return ", ".join(transcripts)
+        elif len(transcripts) == 1:
+            return transcripts[0]
+        return ''
+### End of collections for variant curation ###
 
 
 @collection(
