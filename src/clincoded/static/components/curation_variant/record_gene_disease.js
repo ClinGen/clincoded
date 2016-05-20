@@ -14,7 +14,7 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
 
     getDefaultProps: function() {
         return {
-            recordHeader: 'Associated Gene Information'
+            recordHeader: 'Variant Genomic Context'
         };
     },
 
@@ -26,17 +26,18 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
             var uniprotId = (variant.uniprotId) ? variant.uniprotId : 'Unknown';
             var associatedDisease = (variant.disease) ? variant.disease : 'Unknown';
             var omimId = (variant.omimId) ? variant.omimId : 'Unknown';
+            var dbSNPId = (variant.dbSNPIds.length) ? variant.dbSNPIds[0] : 'Unknown';
         }
 
         return (
-            <div className="col-xs-12 col-sm-4 gutter-exc">
+            <div className="col-xs-12 col-sm-3 gutter-exc">
                 <div className="curation-data-disease">
                     <h4>{recordHeader}</h4>
                     {variant ?
                         <dl className="inline-dl clearfix">
-                            <dt>Associated gene: </dt><dd><a href={external_url_map['HGNC'] + geneSymbol} target="_blank" title={'HGNC page for ' + geneSymbol + ' in a new window'}>{geneSymbol}</a></dd>
-                            <dt>Uniprot: </dt><dd>{uniprotId}</dd>
-                            <dt>Associated disease: </dt><dd>{associatedDisease + '[OMIM: ' + omimId + ']'}</dd>
+                            <dd><a href={'https://genome.ucsc.edu/cgi-bin/hgTracks?hgsid=495481371_651Qv59AJmqfdVAkBKyHLysuGEJz&org=Human&db=hg38&pix=2525&position=' + dbSNPId} target="_blank" title={'UCSC Genome Browser for ' + dbSNPId + ' in a new window'}>UCSC</a></dd>
+                            <dd><a href={'http://www.ncbi.nlm.nih.gov/variation/view/?q=' + dbSNPId} target="_blank" title={'Variation Viewer page for ' + dbSNPId + ' in a new window'}>Variation Viewer</a></dd>
+                            <dd><a href="http://uswest.ensembl.org/Homo_sapiens/Gene/Summary?g=" target="_blank" title={'Ensembl Browser page for ' + dbSNPId + ' in a new window'}>Ensembl Browser</a></dd>
                         </dl>
                     : null}
                 </div>
