@@ -966,8 +966,6 @@
 }
 
 .curation-variant-tab-group {
-    margin-top: 2px;
-
     .react-tabs [role=tablist] {
         border: none;
         margin: 0;
@@ -1058,33 +1056,63 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     .computational li>div,
     .functional li>div,
     .segregation li>div,
-    .case li>div {
+    .gene-specific li>div {
         background: rgba(0, 128, 128, 0.2);
         margin: 0 15px 10px 0;
     }
 }
 
 /* variant curation interface - interpretation action bar */
-.curation-actions .evidence-only {
-    background: #e9e9e9;
-    margin-top: 2px;
-    padding: 6px;
-}
+.curation-actions {
+    .evidence-only {
+        padding: 20px 0;
+    }
 
-.curation-actions .interpretation-record {
-    background: #e9e9e9;
-    margin-top: 2px;
-    padding: 6px;
+    .interpretation-record {
+        padding: 20px 0;
 
-    h3 {
-        float: left;
-        margin-top: 0;
-        margin-bottom: 0;
-        text-align: center;
-        vertical-align: bottom;
+        h2 {
+            margin-top: 0;
+            margin-bottom: 0;
+            position: absolute;
+            text-align: center;
+            width: 1128px;
+        }
     }
 }
 
 .curation-data-curator .current-user-interpretations {
     margin-bottom: 10px;
+
+    dl.inline-dl dt {
+        float: none;
+    }
 }
+
+.curation-variant  {
+    .curation-data-disease,
+    .curation-data-gene,
+    .curation-data-curator {
+        padding: 10px;
+        background-color: rgb(215, 236, 215);
+
+        @media screen and (min-width: $screen-sm-min) {
+            margin-bottom: -99999px;
+            padding-bottom: 99999px;
+        }
+
+        h4 {
+            border-bottom: 1px solid #c9c9c9;
+            margin-top: 0;
+            padding-bottom: 5px;
+        }
+    }
+
+    .curation-data-disease,
+    .curation-data-gene {
+        dd {
+            float: none;
+        }
+    }
+}
+
