@@ -17,7 +17,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
 
     getDefaultProps: function() {
         return {
-            recordHeader: 'Evidence History'
+            recordHeader: 'Interpretations'
         };
     },
 
@@ -53,7 +53,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         }
 
         return (
-            <div className="col-xs-12 col-sm-4 gutter-exc">
+            <div className="col-xs-12 col-sm-6 gutter-exc">
                 <div className="curation-data-curator">
                     <h4>{recordHeader}</h4>
                     {variant ?
@@ -61,12 +61,12 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                             {myInterpretations && myInterpretations.length ?
                                 <div className="current-user-interpretations">
                                     <dl className="inline-dl clearfix">
-                                        <dt>My interpretations: </dt>
+                                        <dt>My interpretations:</dt>
                                         <dd>
                                             {myInterpretations.map(function(item, i) {
                                                 return (
                                                     <div key={i}>
-                                                        <span className="my-interpretation">Status: {item.interpretation_status}, last edited: {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}</span>
+                                                        <span className="my-interpretation">{(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}{item.interpretation_status}, (last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}) <a href={'/interpretations/' + item.uuid}>View</a> | <a href={'/variant-central/?editsc&variant=' + item.variant.uuid + '&interpretation=' + item.uuid}>Edit</a></span>
                                                     </div>
                                                 );
                                             })}
@@ -77,12 +77,12 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                             {otherInterpretations && otherInterpretations.length ?
                                 <div className="other-users-interpretations">
                                     <dl className="inline-dl clearfix">
-                                        <dt>Other interpretations: </dt>
+                                        <dt>Other interpretations:</dt>
                                         <dd>
                                             {otherInterpretations.map(function(item, i) {
                                                 return (
                                                     <div key={i}>
-                                                        <span className="other-interpretation">Status: {item.interpretation_status}, last edited: {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}</span>
+                                                        <span className="other-interpretation">{item.submitted_by.title}, {item.interpretation_status}, {(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}(last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}) <a href={'/interpretations/' + item.uuid}>View</a></span>
                                                     </div>
                                                 );
                                             })}
