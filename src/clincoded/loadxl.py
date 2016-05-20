@@ -35,12 +35,9 @@ ORDER = [
     'pathogenicity',
     'provisionalClassification',
     'gdm',
-    'population',
-    'evaluation',
-    'provisional_variant',
     'interpretation',
     'curatorHistory',
-    'curator_page', # keep at bottom so it can load other type data
+    'curator_page' # keep at bottom so it can load other type data
 ]
 
 ##############################################################################

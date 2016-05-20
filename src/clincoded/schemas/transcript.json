@@ -19,12 +19,12 @@
         },
         "source": {
             "title": "Source",
-            "description": "From what external source the transcript data has been retrieved",
+            "description": "From what external source the transcript data has been retrieved.",
             "type": "string"
         },
         "sourceId": {
             "title": "Source ID",
-            "description": "Primary key in the external data source.",
+            "description": "Primary key used in the external data source.",
             "type": "string"
         }
     },

@@ -56,7 +56,6 @@ class Disease(Item):
     item_type = 'disease'
     schema = load_schema('clincoded:schemas/disease.json')
     name_key = 'uuid'
-
 @collection(
     name='statistics',
     unique_key='statistic:uuid',
@@ -72,7 +71,6 @@ class Statistic(Item):
         'variants',
         'assessments'
     ]
-
 @collection(
     name='controlgroups',
     unique_key='controlGroup:uuid',
@@ -123,7 +121,9 @@ class Variant(Item):
         'associatedPathogenicities.submitted_by',
         'associatedInterpretations',
         'associatedInterpretations.submitted_by',
-        'associatedInterpretations.disease'
+        'associatedInterpretations.disease',
+        'associatedInterpretations.transcripts',
+        'associatedInterpretations.proteins',
     ]
     rev = {
         'associatedPathogenicities': ('pathogenicity', 'variant'),
@@ -843,7 +843,7 @@ class Provisional(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
-        'gdm_associated',
+        'gdm_associated'
     ]
     rev = {
         'gdm_associated': ('gdm', 'provisionalClassifications'),
@@ -864,7 +864,7 @@ class Provisional(Item):
     name='transcripts',
     unique_key='transcript:uuid',
     properties={
-        'title': 'Transcripts',
+        'title': 'Transcript',
         'description': 'List of Transcripts',
     })
 class Transcript(Item):
@@ -876,7 +876,7 @@ class Transcript(Item):
     name='proteins',
     unique_key='protein:uuid',
     properties={
-        'title': 'Proteins',
+        'title': 'Protein',
         'description': 'List of Proteins'
     })
 class Protein(Item):
@@ -904,25 +904,15 @@ class Interpretation(Item):
         'genes',
         'disease',
         'transcripts',
-        'proteins',
-        'evaluations',
-        'evaluations.submitted_by',
-        #'evaluations.variant',
-        'evaluations.disease',
-        'evaluations.populations',
-        'evaluations.populations.submitted_by',
-        'provisional_variant',
-        'provisional_variant.submitted_by'
+        'proteins'
     ]
 
     @calculated_property(schema={
         "title": "Status",
         "type": "string",
     })
-    def interpretation_status(self, evaluations=[], provisional_variant=[], approvements=[]):
-        if len(approvements) > 0:
-            return 'Approved'
-        elif len(provisional_variant) > 0:
+    def interpretation_status(self, evaluations=[], provisional_variant=[]):
+        if len(provisional_variant) > 0:
             return 'Provisional'
         elif len(evaluations) > 0:
             return 'Evaluation'
@@ -953,64 +943,10 @@ class Interpretation(Item):
         "type": "string",
     })
     def interpretation_transcripts(self, transcripts=[]):
-        return len(transcripts)
-
-    @calculated_property(schema={
-        "title": "Proteins",
-        "type": "string",
-    })
-    def interpretation_proteins(self, proteins=[]):
-        return len(proteins)
-
-    @calculated_property(schema={
-        "title": "Evaluations",
-        "type": "string",
-    })
-    def evaluation_count(self, evaluations=[]):
-        if len(evaluations) == 0:
-            return ''
-        return len(evaluations)
-
-
-@collection(
-    name='evaluations',
-    unique_key='evaluation:uuid',
-    properties={
-        'title': 'Evaluations',
-        'description': 'Listing of Evaluations',
-    })
-class Evaluation(Item):
-    item_type = 'evaluation'
-    schema = load_schema('clincoded:schemas/evaluation.json')
-    name_key = 'uuid'
-    embedded = [
-        'submitted_by',
-        'variant',
-        'variant.associatedInterpretations',
-        'variant.associatedInterpretations.submitted_by',
-        'disease',
-        'populations',
-        'interpretation_associated'
-    ]
-    rev = {
-        'interpretation_associated': ('interpretation', 'evaluations')
-    }
-
-    @calculated_property(schema={
-        "title": "Interpretation Associated",
-        "type": ["string", "object"],
-        "linkFrom": "interpretation.evaluations"
-    })
-    def interpretation_associated(self, request, interpretation_associated):
-        return paths_filtered_by_status(request, interpretation_associated)
-
-    @calculated_property(schema={
-        "title": "Number of Population",
-        "type": "string"
-    })
-    def population_count(self, populations=[]):
-        if len(populations) > 0:
-            return len(populations)
+        if len(transcripts) > 1:
+            return ", ".join(transcripts)
+        elif len(transcripts) == 1:
+            return transcripts[0]
         return ''
 
 
