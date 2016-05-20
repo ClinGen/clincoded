@@ -43,12 +43,12 @@
         },
         "interpretationTranscript": {
             "title": "Interpretation Transcript",
-            "description": "User selected transcript",
+            "description": "Transcript selected/added by user.",
             "type": "string"
         },
         "transcripts": {
             "title": "Transcripts",
-            "description": "List of transcript related to the variant",
+            "description": "List of transcripts related to the variant",
             "type": "array",
             "items": {
                 "title": "Transcript",
@@ -68,7 +68,7 @@
         },
         "evaluations": {
             "title": "Evaluations",
-            "description": "List of evaluation involded in the interpretation",
+            "description": "List of criteria evaluations in the interpretation",
             "type": "array",
             "items": {
                 "title": "Evaluation",
@@ -78,20 +78,11 @@
         },
         "provisional_variant": {
             "title": "Provisional Classification",
-            "description": "List of provisional classification for the interpretation.",
+            "description": "List of provisional classifications in the interpretation.",
             "type": "array",
             "items": {
                 "type": "string",
                 "linkTo": "provisional_variant"
-            }
-        },
-        "approvements": {
-            "title": "Approvement",
-            "description": "List of approvement to the interpretation",
-            "type": "array",
-            "items": {
-                "type": "string",
-                "comment": "will link to object approvement later."
             }
         }
     },

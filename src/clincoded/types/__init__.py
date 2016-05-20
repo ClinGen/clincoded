@@ -156,13 +156,16 @@ class Variant(Item):
         "title": "Variant Representive",
         "type": "string"
     })
-    def represent(self, clinvarVariantTitle, otherDescription):
+    def represent(self, clinvarVariantTitle='', carId='', otherDescription=''):
         if clinvarVariantTitle != '':
             return clinvarVariantTitle
+        elif carId != '':
+            return carId
         elif otherDescription != '':
-            return otherDescription
+            return 'Other Description: ' + otherDescription
         else:
             return ''
+
 
 @collection(
     name='gdm',
@@ -862,7 +865,7 @@ class Provisional(Item):
     unique_key='transcript:uuid',
     properties={
         'title': 'Transcripts',
-        'description': 'List of Transcript',
+        'description': 'List of Transcripts',
     })
 class Transcript(Item):
     item_type = 'transcript'
@@ -874,7 +877,7 @@ class Transcript(Item):
     unique_key='protein:uuid',
     properties={
         'title': 'Proteins',
-        'description': 'List of Protein'
+        'description': 'List of Proteins'
     })
 class Protein(Item):
     item_type = 'protein'
@@ -931,7 +934,7 @@ class Interpretation(Item):
     })
     def interpretation_disease(self, disease=''):
         if disease != '':
-            return 'Orpha' + disease[10:-1]
+            return 'ORPHA' + disease[10:-1]
         return ''
 
     @calculated_property(schema={
@@ -984,12 +987,10 @@ class Evaluation(Item):
         'submitted_by',
         'variant',
         'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
         'disease',
         'populations',
-        'interpretation_associated',
-        #'interpretation_associated.variant',
-        #'interpretation_associated.variant.associatedInterpretations',
-        #'interpretation_associated.variant.associatedInterpretations.submitted_by'
+        'interpretation_associated'
     ]
     rev = {
         'interpretation_associated': ('interpretation', 'evaluations')
@@ -1027,10 +1028,9 @@ class Population(Item):
     embedded = [
         'submitted_by',
         'variant',
+        'variant.associatedInterpretations',
         'evaluation_associated',
-        'evaluation_associated.interpretation_associated',
-        #'evaluation_associated.interpretation_associated.variant',
-        #'evaluation_associated.interpretation_associated.variant.associatedInterpretations'
+        'evaluation_associated.interpretation_associated'
     ]
     rev = {
         'evaluation_associated': ('evaluation', 'populations')
@@ -1068,7 +1068,8 @@ class Provisional_variant(Item):
     embedded = [
         'submitted_by',
         'interpretation_associated',
-        'interpretation_associated.variant'
+        'interpretation_associated.variant',
+        'interpretation_associated.variant.associatedInterpretations'
     ]
     rev = {
         'interpretation_associated': ('interpretation', 'provisional_variant')
