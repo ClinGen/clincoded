@@ -14,7 +14,7 @@
     {
         "uuid": "3c7f2766-22ad-4163-a59e-947f320bb958",
         "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
-        "functional": "Functional data",
+        "segregation": "test data",
         "disease": "788e024f-16a6-11e5-a0b5-60f81dc5b05a",
         "criteria": "PS2",
         "value": "No",

@@ -54,8 +54,7 @@
         },
         "criteria": {
             "title": "Criteria",
-            "description": "AMCG criteria to be evaluated. Must be one of the 28 codes",
-            "comment": "See ACMG Standard and Guidelines paper for details",
+            "description": "ACMG criteria to be evaluated. Must be one of the 28 codes",
             "type": "string"
         },
         "value": {

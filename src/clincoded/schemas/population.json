@@ -23,8 +23,8 @@
             "type": "array",
             "items": {
                 "type": "object",
-                "description": "MAF data saved as key:value pairs",
-                "comment": "No property declared. Flexiable for different key:value format. See test data for exsample."
+                "description": "MAF data saved as object",
+                "comment": "No property defined. Flexiable for different key:value format. See test data for exsample. If there is a key existing in multiple object, related values must be same type."
             }
         },
         "variant": {

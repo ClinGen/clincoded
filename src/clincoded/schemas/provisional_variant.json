@@ -1,7 +1,7 @@
 {
     "title": "Provisional_variant",
     "id": "/profiles/provisional_variant.json",
-    "description": "Schema for storing provisional data for Variant Curation",
+    "description": "Schema for storing provisional classification data for Variant Curation",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": [],
@@ -43,7 +43,7 @@
         },
         "reason": {
             "title": "Reasons",
-            "description": "Explain why user change the classification.",
+            "description": "Reasons user change the classification.",
             "type": "string"
         }
     },
