@@ -18,12 +18,13 @@ var CurationInterpretationPopulation = require('./interpretation/population').Cu
 var CurationInterpretationComputational = require('./interpretation/computational').CurationInterpretationComputational;
 var CurationInterpretationFunctional = require('./interpretation/functional').CurationInterpretationFunctional;
 var CurationInterpretationSegregation = require('./interpretation/segregation').CurationInterpretationSegregation;
-var CurationInterpretationCase = require('./interpretation/case').CurationInterpretationCase;
+var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific').CurationInterpretationGeneSpecific;
 
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
+        interpretationUuid: React.PropTypes.string,
         loadingComplete: React.PropTypes.bool
     },
 
@@ -33,6 +34,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     render: function() {
         var variant = this.props.variantData;
+        var interpretationUuid = this.props.interpretationUuid;
         var loadingComplete = this.props.loadingComplete;
 
         // The ordering of TabPanels are corresponding to that of tabs
@@ -45,14 +47,14 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <Tab className="tab-label col-sm-2">Population</Tab>
                         <Tab className="tab-label col-sm-2">Computational</Tab>
                         <Tab className="tab-label col-sm-2">Functional</Tab>
-                        <Tab className="tab-label col-sm-2">Segregation</Tab>
-                        <Tab className="tab-label col-sm-2">Case</Tab>
+                        <Tab className="tab-label col-sm-2">Segregation/Case</Tab>
+                        <Tab className="tab-label col-sm-2">Gene-specific</Tab>
                     </TabList>
                     <TabPanel>
                         <div className="tab-panel"><CurationInterpretationBasicInfo data={variant} shouldFetchData={loadingComplete} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationPopulation data={variant} shouldFetchData={loadingComplete} /></div>
+                        <div className="tab-panel"><CurationInterpretationPopulation data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel"><CurationInterpretationComputational data={variant} shouldFetchData={loadingComplete} /></div>
@@ -64,7 +66,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <div className="tab-panel"><CurationInterpretationSegregation data={variant} shouldFetchData={loadingComplete} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationCase data={variant} shouldFetchData={loadingComplete} /></div>
+                        <div className="tab-panel"><CurationInterpretationGeneSpecific data={variant} shouldFetchData={loadingComplete} /></div>
                     </TabPanel>
                 </Tabs>
             </div>
