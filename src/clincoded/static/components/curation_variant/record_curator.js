@@ -66,7 +66,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                             {myInterpretations.map(function(item, i) {
                                                 return (
                                                     <div key={i}>
-                                                        <span className="my-interpretation">{(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}{item.interpretation_status}, (last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}) <a href={'/interpretations/' + item.uuid}>View</a> | <a href={'/variant-central/?editsc&variant=' + item.variant.uuid + '&interpretation=' + item.uuid}>Edit</a></span>
+                                                        <span className="my-interpretation">{(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}{item.interpretation_status}, (last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}) <a href={'/interpretations/' + item.uuid}>View</a> | <a href={'/variant-central/?editsc&variant=' + variant.uuid + '&interpretation=' + item.uuid}>Edit</a></span>
                                                     </div>
                                                 );
                                             })}
