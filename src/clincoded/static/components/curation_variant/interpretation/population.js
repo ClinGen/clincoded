@@ -5,26 +5,41 @@ var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var LocalStorageMixin = require('react-localstorage');
+var form = require('../../../libs/bootstrap/form');
 
 var external_url_map = globals.external_url_map;
+var queryKeyValue = globals.queryKeyValue;
+var Form = form.Form;
+var FormMixin = form.FormMixin;
+var Input = form.Input;
+var InputMixin = form.InputMixin;
 
-// Display the curator data of the curation data
+// Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
-    mixins: [RestMixin, LocalStorageMixin],
+    mixins: [FormMixin, RestMixin, LocalStorageMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
+        interpretationUuid: React.PropTypes.string,
         shouldFetchData: React.PropTypes.bool
     },
 
     getInitialState: function() {
         return {
             clinvar_id: null, // ClinVar JSON response from NCBI
+            interpretationUuid: this.props.interpretationUuid,
             shouldFetchData: false
         };
     },
 
+    getDefaultProps: function() {
+        return {
+            stateFilterKeys: []
+        };
+    },
+
     componentWillReceiveProps: function(nextProps) {
+        this.setState({interpretationUuid: nextProps.interpretationUuid});
         this.setState({shouldFetchData: nextProps.shouldFetchData});
         if (this.state.shouldFetchData === true) {
             this.fetchData();
@@ -69,14 +84,25 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     </li>
                 </ul>
+                {(this.state.interpretationUuid) ?
                 <ul className="section-criteria-evaluation clearfix">
                     <li className="col-xs-12 gutter-exc">
-                        <div>
-                            <h4>Evaluation Criteria</h4>
-                            <div>Question and description placeholder</div>
-                        </div>
+                        <Form formClassName="form-horizontal form-std">
+                            <div className="evaluation">
+                                <h4>Evaluation Criteria</h4>
+                                <Input type="select" ref="evaluation" label="Does this meet your criteria?" defaultValue="No Selection"
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                    <option value="No Selection">No Selection</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </Input>
+                                <Input type="textarea" ref="evaluation-desc" label="Description:" rows="5" placeholder="e.g. free text"
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                            </div>
+                        </Form>
                     </li>
                 </ul>
+                : null}
             </div>
         );
     }
