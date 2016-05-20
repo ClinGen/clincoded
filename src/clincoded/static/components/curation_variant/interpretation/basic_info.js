@@ -42,7 +42,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
             this.getRestData('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&retmode=json&id=' + clinVarId).then(response => {
                 var clinvar_data = response.result[clinVarId];
-                console.log("clinvar_data is === " + JSON.stringify(clinvar_data));
+                // console.log("clinvar_data is === " + JSON.stringify(clinvar_data));
                 this.setState({
                     clinvar_id: clinvar_data.uid,
                     dbSNP_id: clinvar_data.variation_set[0].variation_xrefs[0].db_id,
