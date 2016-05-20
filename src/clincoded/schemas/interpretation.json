@@ -77,30 +77,13 @@
             }
         },
         "provisional_variant": {
-            "title": "Provisional Classification",
+            "title": "Provisional Classifications",
             "description": "List of provisional classifications in the interpretation.",
             "type": "array",
             "items": {
+                "title": "Provisional",
                 "type": "string",
                 "linkTo": "provisional_variant"
-            }
-        },
-        "provisional_variant": {
-            "title": "Provisional Classification for variant",
-            "type": "array",
-            "default": [],
-            "items": {
-                "title": "Provisional_Variant",
-                "type": "string"
-            }
-        },
-        "provisional_variant": {
-            "title": "Provisional Classification for variant",
-            "type": "array",
-            "default": [],
-            "items": {
-                "title": "Provisional_Variant",
-                "type": "string"
             }
         }
     },
@@ -115,6 +98,26 @@
         },
         "interpretation_disease": {
             "title": "Disease",
+            "type": "string"
+        },
+        "evaluation_count": {
+            "title": "# Evaluations",
+            "type": "string"
+        },
+        "provisional_count": {
+            "title": "# Provisional",
+            "type": "string"
+        },
+        "interpretation_genes": {
+            "title": "Genes",
+            "type": "string"
+        },
+        "interpretation_transcripts": {
+            "title": "# Transcripts",
+            "type": "string"
+        },
+        "interpretation_proteins": {
+            "title": "# Proteins",
             "type": "string"
         },
         "submitted_by.title": {

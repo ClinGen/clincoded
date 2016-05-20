@@ -859,7 +859,7 @@ class Provisional(Item):
 ### end of new collections for gene curation data
 
 
-### Collections for variant curation ###
+### Collections/Classes for variant curation ###
 @collection(
     name='transcripts',
     unique_key='transcript:uuid',
@@ -904,7 +904,15 @@ class Interpretation(Item):
         'genes',
         'disease',
         'transcripts',
-        'proteins'
+        'proteins',
+        'evaluations',
+        'evaluations.submitted_by',
+        #'evaluations.variant',
+        'evaluations.disease',
+        'evaluations.populations',
+        'evaluations.populations.submitted_by',
+        'provisional_variant',
+        'provisional_variant.submitted_by'
     ]
 
     @calculated_property(schema={
@@ -949,6 +957,72 @@ class Interpretation(Item):
             return transcripts[0]
         return ''
 
+    @calculated_property(schema={
+        "title": "Proteins",
+        "type": "string",
+    })
+    def interpretation_proteins(self, proteins=[]):
+        return len(proteins)
+
+    @calculated_property(schema={
+        "title": "Evaluations",
+        "type": "string",
+    })
+    def evaluation_count(self, evaluations=[]):
+        if len(evaluations) == 0:
+            return ''
+        return len(evaluations)
+
+    @calculated_property(schema={
+        "title": "Provisionals",
+        "type": "string",
+    })
+    def provisional_count(self, provisional_variant=[]):
+        if len(provisional_variant) == 0:
+            return ''
+        return len(provisional_variant)
+
+
+@collection(
+    name='evaluations',
+    unique_key='evaluation:uuid',
+    properties={
+        'title': 'Evaluations',
+        'description': 'Listing of Evaluations',
+    })
+class Evaluation(Item):
+    item_type = 'evaluation'
+    schema = load_schema('clincoded:schemas/evaluation.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'variant',
+        'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
+        'disease',
+        'populations',
+        'interpretation_associated'
+    ]
+    rev = {
+        'interpretation_associated': ('interpretation', 'evaluations')
+    }
+
+    @calculated_property(schema={
+        "title": "Interpretation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "interpretation.evaluations"
+    })
+    def interpretation_associated(self, request, interpretation_associated):
+        return paths_filtered_by_status(request, interpretation_associated)
+
+    @calculated_property(schema={
+        "title": "Number of Population",
+        "type": "string"
+    })
+    def population_count(self, populations=[]):
+        if len(populations) > 0:
+            return len(populations)
+
 
 @collection(
     name='populations',
@@ -965,8 +1039,10 @@ class Population(Item):
         'submitted_by',
         'variant',
         'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
         'evaluation_associated',
-        'evaluation_associated.interpretation_associated'
+        'evaluation_associated.interpretation_associated',
+        'evaluation_associated.interpretation_associated.disease'
     ]
     rev = {
         'evaluation_associated': ('evaluation', 'populations')
@@ -1005,7 +1081,9 @@ class Provisional_variant(Item):
         'submitted_by',
         'interpretation_associated',
         'interpretation_associated.variant',
-        'interpretation_associated.variant.associatedInterpretations'
+        'interpretation_associated.variant.associatedInterpretations',
+        'interpretation_associated.variant.associatedInterpretations.submitted_by',
+        'interpretation_associated.variant.associatedInterpretations.disease'
     ]
     rev = {
         'interpretation_associated': ('interpretation', 'provisional_variant')
@@ -1032,7 +1110,7 @@ class Provisional_variant(Item):
     })
     def reason_present(self, reason=''):
         return reason
-### End of collections for variant curation ###
+### End of Collections/Classes for variant curation ###
 
 
 @collection(
