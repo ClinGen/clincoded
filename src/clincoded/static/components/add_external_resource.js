@@ -471,9 +471,18 @@ function carQueryResource() {
         var id = this.state.inputValue;
         this.getRestData(url + id).then(json => {
             data = parseCAR(json);
-            if (data.carId) {
-                // found the result we want
-                this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+            if (data.clinvarVariantId) {
+                url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
+                this.getRestDataXml(url + data.clinvarVariantId).then(xml => {
+                    var data_cv = parseClinvar(xml);
+                    if (data_cv.clinvarVariantId) {
+                        // found the result we want
+                        data_cv.carId = this.state.inputValue;
+                        this.setState({queryResourceBusy: false, tempResource: data_cv, resourceFetched: true});
+                    } else {
+                        this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                    }
+                });
             } else {
                 // no result from CAR
                 // FIXME: the CAR, when a CA ID is not found, does not respond with a clean JSON. It instead responds with a 404
