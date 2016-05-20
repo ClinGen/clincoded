@@ -467,6 +467,14 @@
     }
 }
 
+.title-ellipsis-shorter {
+    max-width: 80%;
+
+    @media screen and (min-width: $screen-sm-min) {
+        max-width: 77%;
+    }
+}
+
 .dotted {
     border-bottom: 1px dotted #000;
 }
