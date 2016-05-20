@@ -10,6 +10,7 @@ var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
 var methods = require('./methods');
 var Assessments = require('./assessment');
+var add_external_resource = require('./add_external_resource');
 var CuratorHistory = require('./curator_history');
 
 var CurationMixin = curator.CurationMixin;
@@ -31,7 +32,7 @@ var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
-var AddResourceId = curator.AddResourceId;
+var AddResourceId = add_external_resource.AddResourceId;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 5;

@@ -35,5 +35,6 @@ require('./edit');
 require('./inputs');
 require('./provisional_curation');
 require('./add_curator');
+require('./select_variant');
 
 module.exports = require('./app');

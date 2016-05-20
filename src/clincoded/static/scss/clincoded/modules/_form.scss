@@ -14,6 +14,33 @@
     margin-bottom: 50px;
 }
 
+.form-variant-select {
+    margin-top: 50px;
+    margin-bottom: 50px;
+
+    .modal-buttons-wrapper {
+        margin: 15px 0 15px 0;
+    }
+
+    .submit-buttons-wrapper {
+        margin-top: 20px;
+    }
+
+    ol.instructions{
+        li {
+            padding-bottom: 10px;
+        }
+
+        ol {
+            padding-top: 10px;
+
+            li:last-child {
+                padding-bottom: 0;
+            }
+        }
+    }
+}
+
 .form-error {
     color: red;
     font-size: 0.85rem;

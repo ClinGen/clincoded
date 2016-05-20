@@ -91,7 +91,7 @@
             "type": "string"
         },
         "interpretation_status": {
-            "title": "Interpretatoin Status",
+            "title": "Interpretation Status",
             "type": "string"
         },
         "interpretation_disease": {

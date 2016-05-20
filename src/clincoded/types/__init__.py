@@ -840,7 +840,7 @@ class Provisional(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
-        'gdm_associated',
+        'gdm_associated'
     ]
     rev = {
         'gdm_associated': ('gdm', 'provisionalClassifications'),
@@ -862,7 +862,7 @@ class Provisional(Item):
     unique_key='transcript:uuid',
     properties={
         'title': 'Transcript',
-        'description': 'List of Transcript',
+        'description': 'List of Transcripts',
     })
 class Transcript(Item):
     item_type = 'transcript'
@@ -874,7 +874,7 @@ class Transcript(Item):
     unique_key='protein:uuid',
     properties={
         'title': 'Protein',
-        'description': 'List of Protein'
+        'description': 'List of Proteins'
     })
 class Protein(Item):
     item_type = 'protein'
@@ -901,7 +901,7 @@ class Interpretation(Item):
         'genes',
         'disease',
         'transcripts',
-        'proteins',
+        'proteins'
     ]
 
     @calculated_property(schema={
@@ -921,7 +921,7 @@ class Interpretation(Item):
     })
     def interpretation_disease(self, disease=''):
         if disease != '':
-            return 'Orpha' + disease[10:-1]
+            return 'ORPHA' + disease[10:-1]
         return ''
 
     @calculated_property(schema={
