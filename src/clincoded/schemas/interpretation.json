@@ -93,6 +93,15 @@
                 "title": "Provisional_Variant",
                 "type": "string"
             }
+        },
+        "provisional_variant": {
+            "title": "Provisional Classification for variant",
+            "type": "array",
+            "default": [],
+            "items": {
+                "title": "Provisional_Variant",
+                "type": "string"
+            }
         }
     },
     "columns": {
@@ -101,7 +110,7 @@
             "type": "string"
         },
         "interpretation_status": {
-        "title": "Interpretation Status",
+            "title": "Interpretation Status",
             "type": "string"
         },
         "interpretation_disease": {

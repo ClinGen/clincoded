@@ -82,5 +82,11 @@
         "title": "Add Curator",
         "status": "released",
         "uuid": "1d9c1f0c-4733-4cd0-a6f5-a5b40aa3ab48"
+    },
+    {
+        "name": "select-variant",
+        "title": "Search and Select Variant",
+        "status": "released",
+        "uuid": "ccf2ad6f-8b50-471e-b071-b0b2607873ae"
     }
 ]

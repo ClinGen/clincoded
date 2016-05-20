@@ -13,6 +13,7 @@ var methods = require('./methods');
 var individual_curation = require('./individual_curation');
 var Assessments = require('./assessment');
 var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
+var add_external_resource = require('./add_external_resource');
 var CuratorHistory = require('./curator_history');
 
 var Modal = modal.Modal;
@@ -39,7 +40,7 @@ var updateProbandVariants = individual_curation.updateProbandVariants;
 var recordIndividualHistory = individual_curation.recordIndividualHistory;
 var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
-var AddResourceId = curator.AddResourceId;
+var AddResourceId = add_external_resource.AddResourceId;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
