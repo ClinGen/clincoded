@@ -35,6 +35,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         labelVisible: React.PropTypes.bool, // specify whether or not the label is visible
         buttonText: React.PropTypes.string, // text for the button
         clearButtonText: React.PropTypes.string, // text for clear button
+        modalButtonText: React.PropTypes.string, // text for submit button in modal
         initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing (passed to Modal)
         fieldNum: React.PropTypes.string, // specify which field on the main form this should edit (passed to Modal)
         updateParentForm: React.PropTypes.func, // function to call upon pressing the Save button
@@ -76,7 +77,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
             <span className={"inline-button-wrapper button-push" + (this.props.buttonWrapperClass ? " " + this.props.buttonWrapperClass : "")}>
                 <Modal title={this.state.txtModalTitle} className="input-inline" modalClass="modal-default">
                     <a className={"btn btn-default" + (this.props.buttonClass ? " " + this.props.buttonClass : "") + (this.props.disabled ? " disabled" : "")}
-                        modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue}
+                        modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue} modalButtonText={this.props.modalButtonText}
                         fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} />}>
                             {this.props.buttonText}
                     </a>
@@ -127,6 +128,7 @@ var AddResourceIdModal = React.createClass({
     propTypes: {
         resourceType: React.PropTypes.string, // specify what the resource you're trying to add is
         initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing
+        modalButtonText: React.PropTypes.string, // text for submit button in modal
         fieldNum: React.PropTypes.string, // specify which field on the main form this should edit
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
@@ -273,7 +275,7 @@ var AddResourceIdModal = React.createClass({
                 <div className='modal-footer'>
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="button-button" inputClassName={this.getFormError('resourceId') === null || this.getFormError('resourceId') === undefined || this.getFormError('resourceId') === '' ?
-                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Save" clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} submitBusy={this.state.submitResourceBusy} />
+                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title={this.props.modalButtonText ? this.props.modalButtonText : "Save"} clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} submitBusy={this.state.submitResourceBusy} />
                 </div>
             </div>
         );
