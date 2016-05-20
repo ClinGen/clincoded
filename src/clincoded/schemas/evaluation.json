@@ -22,23 +22,29 @@
             "type": "string",
             "linkTo": "variant"
         },
-        "populations": {
+        "population": {
             "title": "Population",
-            "description": "List of population used as evidence to evaluate the criteria.",
-            "type": "array",
-            "items": {
-                "type": "string",
-                "linkTo": "population"
-            }
+            "description": "Population data used as evidence to evaluate the criteria.",
+            "type": "string",
+            "linkTo": "population"
         },
         "computational": {
             "title": "Computational",
-            "description": "List of computational",
-            "type": "array",
-            "items": {
-                "type": "string",
-                "comment": "will link to object computational later."
-            }
+            "description": "Computational data used as evidnece to evaluate the criteria.",
+            "type": "string",
+            "comment": "will link to object computational later."
+        },
+        "functional": {
+            "title": "Functional",
+            "description": "Functional data used as evidence to evaluate the criteria.",
+            "type": "string",
+            "comment": "will link to object functional later."
+        },
+        "segregation": {
+            "title": "Segregation",
+            "description": "Segregation data used as evidence to evaluate the criteria.",
+            "type": "string",
+            "comment": "will link to object segregation later."
         },
         "disease": {
             "title": "Disease",
@@ -71,8 +77,8 @@
             "title": "Criteria",
             "type": "string"
         },
-        "population_count": {
-            "title": "# Population",
+        "evidence_present": {
+            "title": "Evidence Type",
             "type": "string"
         },
         "submitted_by.title": {

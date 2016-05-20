@@ -909,8 +909,8 @@ class Interpretation(Item):
         'evaluations.submitted_by',
         #'evaluations.variant',
         'evaluations.disease',
-        'evaluations.populations',
-        'evaluations.populations.submitted_by',
+        'evaluations.population',
+        'evaluations.population.submitted_by',
         'provisional_variant',
         'provisional_variant.submitted_by'
     ]
@@ -1000,7 +1000,7 @@ class Evaluation(Item):
         'variant.associatedInterpretations',
         'variant.associatedInterpretations.submitted_by',
         'disease',
-        'populations',
+        'population',
         'interpretation_associated'
     ]
     rev = {
@@ -1019,9 +1019,15 @@ class Evaluation(Item):
         "title": "Number of Population",
         "type": "string"
     })
-    def population_count(self, populations=[]):
-        if len(populations) > 0:
-            return len(populations)
+    def evidence_present(self, population='', computational='', functional='', segregation=''):
+        if population != '':
+            return 'Population'
+        elif computational != '':
+            return 'Computational'
+        elif functional != '':
+            return 'Functional'
+        elif segregation != '':
+            return 'Segregation'
 
 
 @collection(
@@ -1029,7 +1035,7 @@ class Evaluation(Item):
     unique_key='population:uuid',
     properties={
         'title': 'Populations',
-        'description': 'Listing of Population',
+        'description': 'Listing of Populations',
     })
 class Population(Item):
     item_type = 'population'
@@ -1045,7 +1051,7 @@ class Population(Item):
         'evaluation_associated.interpretation_associated.disease'
     ]
     rev = {
-        'evaluation_associated': ('evaluation', 'populations')
+        'evaluation_associated': ('evaluation', 'population')
     }
 
     @calculated_property(schema={

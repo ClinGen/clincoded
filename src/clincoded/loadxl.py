@@ -40,7 +40,7 @@ ORDER = [
     'provisional_variant', # VCI
     'interpretation', # VCI
     'curatorHistory',
-    'curator_page' # keep at bottom so it can load other type data
+    'curator_page', # keep at bottom so it can load other type data
 ]
 
 ##############################################################################
