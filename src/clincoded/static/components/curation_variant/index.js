@@ -16,14 +16,15 @@ var VariantCurationHub = React.createClass({
 
     getInitialState: function() {
         return {
-            uuid: queryKeyValue('variant', this.props.href),
+            variantUuid: queryKeyValue('variant', this.props.href),
+            interpretationUuid: queryKeyValue('interpretation', this.props.href),
             variantObj: null,
             isLoadingComplete: false
         };
     },
 
     componentDidMount: function() {
-        this.getClinVarData(this.state.uuid);
+        this.getClinVarData(this.state.variantUuid);
     },
 
     // Retrieve the varaint object from db with the given uuid
@@ -39,17 +40,18 @@ var VariantCurationHub = React.createClass({
 
     render: function() {
         var variantData = this.state.variantObj;
+        var interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
         var isLoadingComplete = this.state.isLoadingComplete;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         return (
             <div>
                 <VariantCurationHeader variantData={variantData} session={session} />
-                <VariantCurationActions variantData={variantData} session={session} />
-                <VariantCurationInterpretation variantData={variantData} session={session} loadingComplete={isLoadingComplete} />
+                <VariantCurationActions variantData={variantData} interpretationUuid={interpretationUuid} session={session} />
+                <VariantCurationInterpretation variantData={variantData} interpretationUuid={interpretationUuid} session={session} loadingComplete={isLoadingComplete} />
             </div>
         );
     }
 });
 
-globals.curator_page.register(VariantCurationHub, 'curator_page', 'curation-variant');
+globals.curator_page.register(VariantCurationHub, 'curator_page', 'variant-central');
