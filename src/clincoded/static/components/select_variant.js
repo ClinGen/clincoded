@@ -39,29 +39,10 @@ var SelectVariant = React.createClass({
         };
     },
 
-    // When the form is submitted, we should already have the relevant variant saved in our db,
-    // and its uuid. Forward the user to the variant curation hub on click.
-    submitForm: function(e) {
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        if (this.state.variantData && this.state.variantData.uuid) {
-            this.context.navigate('/variant-central/?variant=' + this.state.variantData.uuid);
-        }
-    },
-
     // Update the variantData upon interaction with the Add Resource modal
     updateVariantData: function(data) {
-        var newVariantInfo = _.clone(this.state.variantInfo);
-        var currVariantOption = this.state.variantOption;
-        var addVariantDisabled;
-        if (data) {
-            this.setState({variantLoaded: true, variantData: data});
-        }
-    },
-
-    // If the user clicks the Cancel Variant Selection button, reset the page
-    cancelVariantSelection: function() {
-        this.setState({variantLoaded: false, variantIdType: 'select'});
-        this.setState({variantData: null});
+        this.setState({submitResourceBusy: false});
+        this.context.navigate('/variant-central/?variant=' + data.uuid);
     },
 
     // Handle change of the select Variant Type dropdown
@@ -77,7 +58,7 @@ var SelectVariant = React.createClass({
                 <h1>{this.props.context.title}</h1>
                 <div className="col-md-8 col-md-offset-2 col-sm-9 col-sm-offset-1 form-variant-select">
                     <Panel panelClassName="panel-select-variant">
-                        <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                        <Form formClassName="form-horizontal form-std">
                             {!this.state.variantLoaded ?
                             <div>
                                 <div className="row">
@@ -108,23 +89,6 @@ var SelectVariant = React.createClass({
                                 </div>
                             </div>
                             : null}
-                            {this.state.variantData && this.state.variantData.clinvarVariantId ?
-                            <div className="row">
-                                <h4 className="clinvar-preferred-title">{this.state.variantData.clinvarVariantTitle}</h4>
-                                <div className="row">
-                                    <span className="col-sm-5 col-md-4 control-label"><label>ClinVar Variation ID</label></span>
-                                    <span className="col-sm-7 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantData.clinvarVariantId} target="_blank">{this.state.variantData.clinvarVariantId}</a></span>
-                                </div>
-                            </div>
-                            : null}
-                            {this.state.variantData && this.state.variantData.carId ?
-                            <div className="row">
-                                <div className="row">
-                                    <span className="col-sm-5 col-md-4 control-label"><label>CA ID</label></span>
-                                    <span className="col-sm-7 col-md-8 text-no-input"><a href={external_url_map['CARallele-test'] + this.state.variantData.carId + '.html'} target="_blank">{this.state.variantData.carId}</a></span>
-                                </div>
-                            </div>
-                            : null}
                             {this.state.variantIdType == "ClinVar Variation ID" ?
                             <div className="row col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4">
                                 <AddResourceId resourceType="clinvar" label="ClinVar" wrapperClass="modal-buttons-wrapper"
@@ -136,21 +100,7 @@ var SelectVariant = React.createClass({
                             <div className="row col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4">
                                 <AddResourceId resourceType="car" label="ClinGen Allele Registry" wrapperClass="modal-buttons-wrapper"
                                     buttonText={this.state.variantData ? "Edit CA ID" : "Add CA ID" } initialFormValue={this.state.variantData && this.state.variantData.carVariantId}
-                                    clearButtonText="Cancel Variant Selection" updateParentForm={this.updateVariantData} buttonOnly={true} clearButtonRender={false} />
-                            </div>
-                            : null}
-                            {this.state.variantData && this.state.variantData.hgvsNames && Object.keys(this.state.variantData.hgvsNames).length > 0 ?
-                            <div className="row">
-                                <span className="col-sm-5 col-md-4 control-label"><label>HGVS terms</label></span>
-                                <span className="col-sm-7 col-md-8 text-no-input">
-                                    {variantHgvsRender(this.state.variantData.hgvsNames)}
-                                </span>
-                            </div>
-                            : null}
-                            {this.state.variantData ?
-                            <div className="row submit-buttons-wrapper">
-                                <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="View Variant" inputDisabled={!this.state.variantLoaded} />
-                                <Input type="button" inputClassName="btn-default btn-inline-spacer pull-right" title="Cancel Variant Selection" clickHandler={this.cancelVariantSelection} />
+                                    clearButtonText="Cancel Variant Selection" updateParentForm={this.updateVariantData} buttonOnly={true} />
                             </div>
                             : null}
                         </Form>
