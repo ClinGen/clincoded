@@ -170,7 +170,7 @@ var AddResourceIdModal = React.createClass({
                     txtInputLabel: tempTxtLabel,
                     txtInputButton: clinvarTxt('inputButton'),
                     txtHelpText: clinvarTxt('helpText'),
-                    txtResourceResponse: clinvarTxt('resourceResponse')
+                    txtResourceResponse: clinvarTxt('resourceResponse', this.props.modalButtonText ? this.props.modalButtonText : "Save")
                 });
                 break;
             case 'car':
@@ -185,7 +185,7 @@ var AddResourceIdModal = React.createClass({
                     txtInputLabel: tempTxtLabel,
                     txtInputButton: carTxt('inputButton'),
                     txtHelpText: carTxt('helpText'),
-                    txtResourceResponse: carTxt('resourceResponse')
+                    txtResourceResponse: carTxt('resourceResponse', this.props.modalButtonText ? this.props.modalButtonText : "Save")
                 });
                 break;
         }
@@ -294,9 +294,12 @@ The ___SubmitResource() functions hold the primary logic for submitting the pars
 */
 
 // Logic and helper functions for resource type 'clinvar' for AddResource modal
-function clinvarTxt(field) {
+function clinvarTxt(field, extra) {
     // Text to use for the resource type of 'clinvar'
     var txt;
+    if (!extra) {
+        extra = '';
+    }
     switch(field) {
         case 'modalTitle':
             txt = 'ClinVar Variant';
@@ -314,7 +317,7 @@ function clinvarTxt(field) {
             txt = <span>You must enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>;
             break;
         case 'resourceResponse':
-            txt = "Below are the data from ClinVar for the VariationID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below are the data from ClinVar for the VariationID you submitted. Press \"" + extra + "\" below if it is the correct Variant, otherwise revise your search above:";
             break;
     }
     return txt;
@@ -419,9 +422,12 @@ function clinvarSubmitResource() {
 }
 
 // Logic and helper functions for resource type 'car' for AddResource modal
-function carTxt(field) {
+function carTxt(field, extra) {
     // Text to use for the resource type of 'car'
     var txt;
+    if (!extra) {
+        extra = '';
+    }
     switch(field) {
         case 'modalTitle':
             txt = 'ClinGen Allele Registry';
@@ -439,7 +445,7 @@ function carTxt(field) {
             txt = <span>You must enter a ClinGen Allele Registry ID (CA ID). This CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele-test'] + '139214.html'} target="_blank">CA139214</a>).</span>;
             break;
         case 'resourceResponse':
-            txt = "Below are the data from the ClinGen Allele Registry for the CA ID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below are the data from the ClinGen Allele Registry for the CA ID you submitted. Press \"" + extra + "\" below if it is the correct Variant, otherwise revise your search above:";
             break;
     }
     return txt;
