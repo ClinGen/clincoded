@@ -360,7 +360,7 @@ function clinvarQueryResource() {
         })
         .catch(function(e) {
             // error handling for ClinVar query
-            this.setFormErrors('resourceId', 'Error querying ClinVar. Please try again.');
+            this.setFormErrors('resourceId', 'Error querying ClinVar. Please check your input and try again.');
             this.setState({queryResourceBusy: false, resourceFetched: false});
         });
     } else {
@@ -478,28 +478,26 @@ function carQueryResource() {
                         data_cv.carId = this.state.inputValue;
                         this.setState({queryResourceBusy: false, tempResource: data_cv, resourceFetched: true});
                     } else {
+                        // something failed with the parsing of ClinVar data; roll back to CAR data
                         this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                     }
                 })
                 .catch(function(e) {
                     // error handling for ClinVar query
-                    this.setFormErrors('resourceId', 'Error querying ClinVar for additional data. Please try again.');
+                    this.setFormErrors('resourceId', 'Error querying ClinVar for additional data. Please check your input and try again.');
                     this.setState({queryResourceBusy: false, resourceFetched: false});
                 });
             } else if (data.carId) {
                 // if the CAR result has no ClinVar variant ID, just use the CAR data set
                 this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
             } else {
-                // no result from CAR
-                // FIXME: the CAR, when a CA ID is not found, does not respond with a clean JSON. It instead responds with a 404
-                // or a XMLHttpRequest/CORS error that indicates that the error was a 404. Current code does not handle this.
                 this.setFormErrors('resourceId', 'CA ID not found');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
         })
         .catch(function(e) {
             // error handling for CAR query
-            this.setFormErrors('resourceId', 'Error querying the ClinGen Allele Registry. Please try again.');
+            this.setFormErrors('resourceId', 'Error querying the ClinGen Allele Registry. Please check your input and try again.');
             this.setState({queryResourceBusy: false, resourceFetched: false});
         });
     } else {
