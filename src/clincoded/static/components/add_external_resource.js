@@ -526,12 +526,14 @@ function carRenderResourceResult() {
 function carSubmitResource() {
     // for dealing with the main form
     this.setState({submitResourceBusy: true});
-    if (this.state.tempResource.carId) {
-        // TODO: we agreed that if the user submits a CAR and receives a CAR response with a ClinVar ID, we
-        // will do a separate query to ClinVar and get their information. This should probably happen in
-        // the carQueryResource() function, but checking our own internal db against the carId or the ClinVarId needs to happen
-        // here as well
-        this.getRestData('/search/?type=variant&carId=' + this.state.tempResource.carId).then(check => {
+    if (this.state.tempResource.clinvarVariantId || this.state.tempResource.carId) {
+        var internal_uri;
+        if (this.state.tempResource.clinvarVariantId) {
+            internal_uri = '/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId;
+        } else if (this.state.tempResource.carId) {
+            internal_uri = '/search/?type=variant&carId=' + this.state.tempResource.carId;
+        }
+        this.getRestData(internal_uri).then(check => {
             if (check.total) {
                 // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
