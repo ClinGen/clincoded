@@ -66,7 +66,9 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                             {myInterpretations.map(function(item, i) {
                                                 return (
                                                     <div key={i}>
-                                                        <span className="my-interpretation">{(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}{item.interpretation_status}, (last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}) <a href={'/interpretations/' + item.uuid}>View</a> | <a href={'/variant-central/?editsc&variant=' + variant.uuid + '&interpretation=' + item.uuid}>Edit</a></span>
+                                                        <span className="my-interpretation">
+                                                            {(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}{item.interpretation_status}, (last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}) <button type="button" className="btn btn-link" onClick={handleEditEvent.bind(this, '/interpretations/' + item.uuid)}>View</button> | <button type="button" className="btn btn-link" onClick={handleEditEvent.bind(this, '/variant-central/?edit=true&variant=' + variant.uuid + '&interpretation=' + item.uuid)}>Edit</button>
+                                                        </span>
                                                     </div>
                                                 );
                                             })}
@@ -82,7 +84,9 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                             {otherInterpretations.map(function(item, i) {
                                                 return (
                                                     <div key={i}>
-                                                        <span className="other-interpretation">{item.submitted_by.title}, {item.interpretation_status}, {(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}(last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}) <a href={'/interpretations/' + item.uuid}>View</a></span>
+                                                        <span className="other-interpretation">
+                                                            {item.submitted_by.title}, {item.interpretation_status}, {(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}(last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}) <button type="button" className="btn btn-link"  onClick={handleEditEvent.bind(this, '/interpretations/' + item.uuid)}>View</button>
+                                                        </span>
                                                     </div>
                                                 );
                                             })}
@@ -97,3 +101,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         );
     }
 });
+
+var handleEditEvent = function(url) {
+    window.location.href = url;
+}
