@@ -1125,5 +1125,11 @@ div.react-tabs .ReactTabs__TabPanel--selected {
             float: none;
         }
     }
-}
 
+    .curation-data-curator {
+        .btn-link {
+            border: none;
+            padding: 0;
+        }
+    }
+}
