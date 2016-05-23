@@ -357,6 +357,11 @@ function clinvarQueryResource() {
                 this.setFormErrors('resourceId', 'ClinVar ID not found');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
+        })
+        .catch(function(e) {
+            // error handling for ClinVar query
+            this.setFormErrors('resourceId', 'Error querying ClinVar. Please try again.');
+            this.setState({queryResourceBusy: false, resourceFetched: false});
         });
     } else {
         this.setState({queryResourceBusy: false});
@@ -464,6 +469,7 @@ function carQueryResource() {
         this.getRestData(url + id).then(json => {
             data = parseCAR(json);
             if (data.clinvarVariantId) {
+                // if the CAR result has a ClinVar variant ID, query ClinVar with it, and use its data
                 url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
                 this.getRestDataXml(url + data.clinvarVariantId).then(xml => {
                     var data_cv = parseClinvar(xml);
@@ -474,7 +480,15 @@ function carQueryResource() {
                     } else {
                         this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                     }
+                })
+                .catch(function(e) {
+                    // error handling for ClinVar query
+                    this.setFormErrors('resourceId', 'Error querying ClinVar for additional data. Please try again.');
+                    this.setState({queryResourceBusy: false, resourceFetched: false});
                 });
+            } else if (data.carId) {
+                // if the CAR result has no ClinVar variant ID, just use the CAR data set
+                this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
             } else {
                 // no result from CAR
                 // FIXME: the CAR, when a CA ID is not found, does not respond with a clean JSON. It instead responds with a 404
@@ -482,6 +496,11 @@ function carQueryResource() {
                 this.setFormErrors('resourceId', 'CA ID not found');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
+        })
+        .catch(function(e) {
+            // error handling for CAR query
+            this.setFormErrors('resourceId', 'Error querying the ClinGen Allele Registry. Please try again.');
+            this.setState({queryResourceBusy: false, resourceFetched: false});
         });
     } else {
         this.setState({queryResourceBusy: false});
