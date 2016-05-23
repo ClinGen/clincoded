@@ -483,7 +483,7 @@ function carQueryResource() {
                     var data_cv = parseClinvar(xml);
                     if (data_cv.clinvarVariantId) {
                         // found the result we want
-                        data_cv.carId = this.state.inputValue;
+                        data_cv.carId = id;
                         this.setState({queryResourceBusy: false, tempResource: data_cv, resourceFetched: true});
                     } else {
                         // something failed with the parsing of ClinVar data; roll back to CAR data
@@ -547,7 +547,7 @@ function carSubmitResource() {
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
                     // if no variant title in db, or db's variant title not matching the retrieved title,
                     // then update db and fetch result again
-                    if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle']) {
+                    if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'] || result['carId'] !== this.state.tempResource['carId']) {
                         this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
                             return this.getRestData(result['@graph'][0]['@id']).then(result => {
                                 this.props.updateParentForm(result, this.props.fieldNum);
