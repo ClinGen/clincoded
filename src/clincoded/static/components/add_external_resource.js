@@ -472,7 +472,7 @@ function carQueryResource() {
     this.saveFormValue('resourceId', this.state.inputValue);
     var error_msg;
     if (carValidateForm.call(this)) {
-        var url = 'http://reg.genome.network/allele/';
+        var url = 'http://reg.test.genome.network/allele/';
         var data;
         var id = this.state.inputValue;
         this.getRestData(url + id).then(json => {
@@ -505,15 +505,10 @@ function carQueryResource() {
             }
         }).catch(function(e) {
             // error handling for CAR query
-            if (e) {
-                error_msg = 'Error querying the ClinGen Allele Registry. Please check your input and try again.';
-            }
-        }).then(function() {
-            if (error_msg) {
-                this.setFormErrors('resourceId', error_msg);
-                this.setState({queryResourceBusy: false, resourceFetched: false});
-            }
-        }.call(this)
+            error_msg = 'Error querying the ClinGen Allele Registry. Please check your input and try again.';
+            this.setFormErrors('resourceId', error_msg);
+            this.setState({queryResourceBusy: false, resourceFetched: false});
+        }
         );
 
     } else {
