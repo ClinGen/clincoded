@@ -362,7 +362,7 @@ function clinvarQueryResource() {
             // error handling for ClinVar query
             this.setFormErrors('resourceId', 'Error querying ClinVar. Please check your input and try again.');
             this.setState({queryResourceBusy: false, resourceFetched: false});
-        });
+        }.call(this));
     } else {
         this.setState({queryResourceBusy: false});
     }
@@ -462,6 +462,7 @@ function carValidateForm() {
 function carQueryResource() {
     // for pinging and parsing data from CAR
     this.saveFormValue('resourceId', this.state.inputValue);
+    var error_msg;
     if (carValidateForm.call(this)) {
         var url = 'http://reg.genome.network/allele/';
         var data;
@@ -481,11 +482,11 @@ function carQueryResource() {
                         // something failed with the parsing of ClinVar data; roll back to CAR data
                         this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                     }
-                })
-                .catch(function(e) {
+                }).catch(function(e) {
                     // error handling for ClinVar query
-                    this.setFormErrors('resourceId', 'Error querying ClinVar for additional data. Please check your input and try again.');
-                    this.setState({queryResourceBusy: false, resourceFetched: false});
+                    if (e) {
+                        error_msg = 'Error querying ClinVar for additional data. Please check your input and try again.';
+                    }
                 });
             } else if (data.carId) {
                 // if the CAR result has no ClinVar variant ID, just use the CAR data set
@@ -494,12 +495,19 @@ function carQueryResource() {
                 this.setFormErrors('resourceId', 'CA ID not found');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
-        })
-        .catch(function(e) {
+        }).catch(function(e) {
             // error handling for CAR query
-            this.setFormErrors('resourceId', 'Error querying the ClinGen Allele Registry. Please check your input and try again.');
-            this.setState({queryResourceBusy: false, resourceFetched: false});
-        });
+            if (e) {
+                error_msg = 'Error querying the ClinGen Allele Registry. Please check your input and try again.';
+            }
+        }).then(function() {
+            if (error_msg) {
+                this.setFormErrors('resourceId', error_msg);
+                this.setState({queryResourceBusy: false, resourceFetched: false});
+            }
+        }.call(this)
+        );
+
     } else {
         this.setState({queryResourceBusy: false});
     }
