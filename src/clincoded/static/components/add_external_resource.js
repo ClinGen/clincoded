@@ -499,13 +499,19 @@ function carQueryResource() {
                 // if the CAR result has no ClinVar variant ID, just use the CAR data set
                 this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
             } else {
+                // in case the above two fail (theoretically a 404 json response, but an error is thrown instead (see below))
                 this.setFormErrors('resourceId', 'CA ID not found');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
         }).catch(e => {
             // error handling for CAR query
-            this.setFormErrors('resourceId', 'Error querying the ClinGen Allele Registry. Please check your input and try again.');
-            this.setState({queryResourceBusy: false, resourceFetched: false});
+            if (e.status == 404) {
+                this.setFormErrors('resourceId', 'CA ID not found');
+                this.setState({queryResourceBusy: false, resourceFetched: false});
+            } else {
+                this.setFormErrors('resourceId', 'Error querying the ClinGen Allele Registry. Please check your input and try again.');
+                this.setState({queryResourceBusy: false, resourceFetched: false});
+            }
         });
     } else {
         this.setState({queryResourceBusy: false});
