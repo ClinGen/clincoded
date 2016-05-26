@@ -1920,15 +1920,15 @@ var variantHgvsRender = module.exports.variantHgvsRender = function(hgvsNames) {
     return (
         <div>
             {hgvsNames.GRCh38 ?
-                <span>{hgvsNames.GRCh38} (GRCh38)<br /></span>
+                <span><span className="title-ellipsis title-ellipsis-shorter dotted" title={hgvsNames.GRCh38}>{hgvsNames.GRCh38}</span> (GRCh38)<br /></span>
             : null}
             {hgvsNames.GRCh37 ?
-                <span>{hgvsNames.GRCh37} (GRCh37)<br /></span>
+                <span><span className="title-ellipsis title-ellipsis-shorter dotted" title={hgvsNames.GRCh37}>{hgvsNames.GRCh37}</span> (GRCh37)<br /></span>
             : null}
             {hgvsNames.others && hgvsNames.others.length > 0 ?
             <span>
                 {hgvsNames.others.map(function(hgvs, i) {
-                    return <span key={hgvs}>{hgvs}<br /></span>;
+                    return <span><span key={hgvs} className="title-ellipsis title-ellipsis-shorter dotted" title={hgvs}>{hgvs}</span><br /></span>;
                 })}
             </span>
             : null}

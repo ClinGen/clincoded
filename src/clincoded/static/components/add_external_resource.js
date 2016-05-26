@@ -35,6 +35,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         labelVisible: React.PropTypes.bool, // specify whether or not the label is visible
         buttonText: React.PropTypes.string, // text for the button
         clearButtonText: React.PropTypes.string, // text for clear button
+        modalButtonText: React.PropTypes.string, // text for submit button in modal
         initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing (passed to Modal)
         fieldNum: React.PropTypes.string, // specify which field on the main form this should edit (passed to Modal)
         updateParentForm: React.PropTypes.func, // function to call upon pressing the Save button
@@ -76,7 +77,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
             <span className={"inline-button-wrapper button-push" + (this.props.buttonWrapperClass ? " " + this.props.buttonWrapperClass : "")}>
                 <Modal title={this.state.txtModalTitle} className="input-inline" modalClass="modal-default">
                     <a className={"btn btn-default" + (this.props.buttonClass ? " " + this.props.buttonClass : "") + (this.props.disabled ? " disabled" : "")}
-                        modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue}
+                        modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue} modalButtonText={this.props.modalButtonText}
                         fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} />}>
                             {this.props.buttonText}
                     </a>
@@ -127,6 +128,7 @@ var AddResourceIdModal = React.createClass({
     propTypes: {
         resourceType: React.PropTypes.string, // specify what the resource you're trying to add is
         initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing
+        modalButtonText: React.PropTypes.string, // text for submit button in modal
         fieldNum: React.PropTypes.string, // specify which field on the main form this should edit
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
@@ -168,7 +170,7 @@ var AddResourceIdModal = React.createClass({
                     txtInputLabel: tempTxtLabel,
                     txtInputButton: clinvarTxt('inputButton'),
                     txtHelpText: clinvarTxt('helpText'),
-                    txtResourceResponse: clinvarTxt('resourceResponse')
+                    txtResourceResponse: clinvarTxt('resourceResponse', this.props.modalButtonText ? this.props.modalButtonText : "Save")
                 });
                 break;
             case 'car':
@@ -183,7 +185,7 @@ var AddResourceIdModal = React.createClass({
                     txtInputLabel: tempTxtLabel,
                     txtInputButton: carTxt('inputButton'),
                     txtHelpText: carTxt('helpText'),
-                    txtResourceResponse: carTxt('resourceResponse')
+                    txtResourceResponse: carTxt('resourceResponse', this.props.modalButtonText ? this.props.modalButtonText : "Save")
                 });
                 break;
         }
@@ -273,7 +275,7 @@ var AddResourceIdModal = React.createClass({
                 <div className='modal-footer'>
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="button-button" inputClassName={this.getFormError('resourceId') === null || this.getFormError('resourceId') === undefined || this.getFormError('resourceId') === '' ?
-                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Save" clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} submitBusy={this.state.submitResourceBusy} />
+                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title={this.props.modalButtonText ? this.props.modalButtonText : "Save"} clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} submitBusy={this.state.submitResourceBusy} />
                 </div>
             </div>
         );
@@ -292,9 +294,12 @@ The ___SubmitResource() functions hold the primary logic for submitting the pars
 */
 
 // Logic and helper functions for resource type 'clinvar' for AddResource modal
-function clinvarTxt(field) {
+function clinvarTxt(field, extra) {
     // Text to use for the resource type of 'clinvar'
     var txt;
+    if (!extra) {
+        extra = '';
+    }
     switch(field) {
         case 'modalTitle':
             txt = 'ClinVar Variant';
@@ -312,7 +317,7 @@ function clinvarTxt(field) {
             txt = <span>You must enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>;
             break;
         case 'resourceResponse':
-            txt = "Below are the data from ClinVar for the VariationID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below are the data from ClinVar for the VariationID you submitted. Press \"" + extra + "\" below if it is the correct Variant, otherwise revise your search above:";
             break;
     }
     return txt;
@@ -417,9 +422,12 @@ function clinvarSubmitResource() {
 }
 
 // Logic and helper functions for resource type 'car' for AddResource modal
-function carTxt(field) {
+function carTxt(field, extra) {
     // Text to use for the resource type of 'car'
     var txt;
+    if (!extra) {
+        extra = '';
+    }
     switch(field) {
         case 'modalTitle':
             txt = 'ClinGen Allele Registry';
@@ -437,7 +445,7 @@ function carTxt(field) {
             txt = <span>You must enter a ClinGen Allele Registry ID (CA ID). This CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele-test'] + '139214.html'} target="_blank">CA139214</a>).</span>;
             break;
         case 'resourceResponse':
-            txt = "Below are the data from the ClinGen Allele Registry for the CA ID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below are the data from the ClinGen Allele Registry for the CA ID you submitted. Press \"" + extra + "\" below if it is the correct Variant, otherwise revise your search above:";
             break;
     }
     return txt;
