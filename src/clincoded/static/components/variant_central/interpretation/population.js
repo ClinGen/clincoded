@@ -46,7 +46,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
-    // Retrieve the varaint data from NCBI
+    // Retrieve the variant data from NCBI
     fetchData: function() {
         var variant = this.props.data;
         if (variant) {
