@@ -952,9 +952,7 @@ class Interpretation(Item):
     })
     def interpretation_transcripts(self, transcripts=[]):
         if len(transcripts) > 1:
-            return ", ".join(transcripts)
-        elif len(transcripts) == 1:
-            return transcripts[0]
+            return len(transcripts)
         return ''
 
     @calculated_property(schema={
@@ -962,7 +960,9 @@ class Interpretation(Item):
         "type": "string",
     })
     def interpretation_proteins(self, proteins=[]):
-        return len(proteins)
+        if len(proteins) > 0:
+            return len(proteins)
+        return ''
 
     @calculated_property(schema={
         "title": "Evaluations",

@@ -69,48 +69,6 @@
             {
                 "source": "1000G",
                 "global MAF": 0
-            },
-            {
-                "source": "ESP",
-                "population": "EA",
-                "chrTested": 8456,
-                "wt:t": {
-                    "count": 8454,
-                    "freq": 0.99976
-                },
-                "variant:C": {
-                    "count": 2,
-                    "freq": 0.00024
-                }
-            },
-            {
-                "source": "ESP",
-                "population": "AA",
-                "chrTested": 4268,
-                "wt:t": {
-                    "count": 4268,
-                    "freq": 1.00
-                },
-                "varaint:C": {
-                    "count": 0,
-                    "freq": 0
-                }
-            },
-            {
-                "source": "ESP",
-                "Coverage: EA+AA": 37
-            },
-            {
-                "source": "ESP",
-                "Coverage: EA": 39
-            },
-            {
-                "source": "ESP",
-                "Coverage: EA+AA": 3
-            },
-            {
-                "source": "ESP",
-                "Strand Warning": "none"
             }
         ],
         "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",

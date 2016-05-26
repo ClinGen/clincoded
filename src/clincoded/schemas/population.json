@@ -24,7 +24,7 @@
             "items": {
                 "type": "object",
                 "description": "MAF data saved as object",
-                "comment": "No property defined. Flexiable for different key:value format. See test data for exsample. If there is a key existing in multiple object, related values must be same type."
+                "comment": "No property defined. Flexiable for different key:value format. If there is a key existing in multiple object, related values must be same type."
             }
         },
         "variant": {
