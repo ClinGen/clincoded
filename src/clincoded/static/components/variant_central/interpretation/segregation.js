@@ -10,37 +10,13 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     mixins: [RestMixin],
 
     propTypes: {
-        data: React.PropTypes.object, // ClinVar data payload
-        shouldFetchData: React.PropTypes.bool
+        data: React.PropTypes.object
     },
 
     getInitialState: function() {
         return {
-            clinvar_id: null, // ClinVar JSON response from NCBI
-            shouldFetchData: false
+            clinvar_id: null
         };
-    },
-
-    componentWillReceiveProps: function(nextProps) {
-        this.setState({shouldFetchData: nextProps.shouldFetchData});
-        if (this.state.shouldFetchData === true) {
-            this.fetchData();
-        }
-    },
-
-    // Retrieve the varaint data from NCBI
-    fetchData: function() {
-        var variant = this.props.data;
-        if (variant) {
-            var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
-            this.getRestData('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&retmode=json&id=' + clinVarId).then(response => {
-                var clinvar_data = response.result[clinVarId];
-                console.log("clinvar_data is === " + JSON.stringify(clinvar_data));
-                this.setState({clinvar_id: clinvar_data.uid});
-            }).catch(function(e) {
-                console.log('GETGDM ERROR=: %o', e);
-            });
-        }
     },
 
     render: function() {
