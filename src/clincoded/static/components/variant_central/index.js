@@ -27,7 +27,7 @@ var VariantCurationHub = React.createClass({
         this.getClinVarData(this.state.variantUuid);
     },
 
-    // Retrieve the varaint object from db with the given uuid
+    // Retrieve the variant object from db with the given uuid
     getClinVarData: function(uuid) {
         return this.getRestData('/variants/' + uuid, null, true).then(response => {
             // The variant object successfully retrieved
