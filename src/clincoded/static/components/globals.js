@@ -158,6 +158,7 @@ module.exports.external_url_map = {
     'CL': 'http://www.ontobee.org/browser/index.php?o=CL',
     'CLSearch': 'http://www.ontobee.org/browser/rdf.php?o=CL&iri=http://purl.obolibrary.org/obo/',
     'EFO': 'http://www.ebi.ac.uk/efo/',
+    'dbSNP': 'http://www.ncbi.nlm.nih.gov/snp/',
     'CAR': 'http://reg.genome.network/site/cg-registry',
     'CARallele': 'http://reg.genome.network/allele/',
     'CAR-test': 'http://reg.test.genome.network/site/registry',
