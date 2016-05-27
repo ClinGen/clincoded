@@ -1066,9 +1066,9 @@ class Population(Item):
         "title": "Number of MAF",
         "type": "string"
     })
-    def maf_count(self, mafs=[]):
-        if len(mafs) > 0:
-            return len(mafs)
+    def maf_count(self, populations=[]):
+        if len(populations) > 0:
+            return len(populations)
         return ''
 
 

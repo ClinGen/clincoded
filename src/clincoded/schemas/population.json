@@ -17,9 +17,9 @@
         "schema_version": {
             "default": "1"
         },
-        "mafs": {
-            "title": "Allele Frequency",
-            "description": "List of allele frequency data.",
+        "populations": {
+            "title": "Populations",
+            "description": "List of allele frequency and related data.",
             "type": "array",
             "items": {
                 "type": "object",
@@ -39,7 +39,7 @@
             "type": "string"
         },
         "maf_count": {
-            "title": "# MAF",
+            "title": "# MAF Object",
             "type": "string"
         },
         "submitted_by.title": {
