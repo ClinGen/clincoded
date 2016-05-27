@@ -40,7 +40,7 @@ var CurationRecordVariant = module.exports.CurationRecordVariant = React.createC
                     {variant ?
                         <dl className="inline-dl clearfix">
                             <dd><a href={external_url_map['ClinVar'] + clinVarId} target="_blank" title={'ClinVar page for ' + clinVarId + ' in a new window'}>ClinVar</a></dd>
-                            <dd><a href={'http://reg.genome.network/allele/' + carId} target="_blank" title={'GlinGen Allele Registry page for ' + carId + ' in a new window'}>ClinGen Allele Registry</a></dd>
+                            <dd><a href={'http://reg.genome.network/allele/' + carId + '.html'} target="_blank" title={'GlinGen Allele Registry page for ' + carId + ' in a new window'}>ClinGen Allele Registry</a></dd>
                             <dd><a href={external_url_map['dbSNP'] + dbSNPId.slice(2)} target="_blank" title={'dbSNP page for ' + dbSNPId + ' in a new window'}>dbSNP</a></dd>
                         </dl>
                     : null}
