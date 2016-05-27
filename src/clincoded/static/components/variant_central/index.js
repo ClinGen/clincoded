@@ -18,6 +18,7 @@ var VariantCurationHub = React.createClass({
         return {
             variantUuid: queryKeyValue('variant', this.props.href),
             interpretationUuid: queryKeyValue('interpretation', this.props.href),
+            editKey: queryKeyValue('edit', this.props.href),
             variantObj: null,
             isLoadingComplete: false
         };
@@ -41,14 +42,15 @@ var VariantCurationHub = React.createClass({
     render: function() {
         var variantData = this.state.variantObj;
         var interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
+        var editKey = this.state.editKey;
         var isLoadingComplete = this.state.isLoadingComplete;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         return (
             <div>
-                <VariantCurationHeader variantData={variantData} session={session} />
-                <VariantCurationActions variantData={variantData} interpretationUuid={interpretationUuid} session={session} />
-                <VariantCurationInterpretation variantData={variantData} interpretationUuid={interpretationUuid} session={session} loadingComplete={isLoadingComplete} />
+                <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} />
+                <VariantCurationActions variantData={variantData} interpretationUuid={interpretationUuid} eidtKey={editKey} session={session} />
+                <VariantCurationInterpretation variantData={variantData} interpretationUuid={interpretationUuid} eidtKey={editKey} session={session} loadingComplete={isLoadingComplete} />
             </div>
         );
     }
