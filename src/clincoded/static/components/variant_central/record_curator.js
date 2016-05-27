@@ -6,12 +6,13 @@ var globals = require('../globals');
 var RestMixin = require('../rest').RestMixin;
 var LocalStorageMixin = require('react-localstorage');
 
-// Display the curator data of the curation data
+// Display in-progress or provisional interpretations associated with variant
 var CurationRecordCurator = module.exports.CurationRecordCurator = React.createClass({
     mixins: [RestMixin, LocalStorageMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
+        interpretationUuid: React.PropTypes.string,
         session: React.PropTypes.object
     },
 
@@ -21,6 +22,18 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         };
     },
 
+    getInitialState: function() {
+        return {
+            interpretationUuid: this.props.interpretationUuid
+        };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        this.setState({interpretationUuid: nextProps.interpretationUuid});
+    },
+
+    // Create 2 arrays of interpretations: one associated with current user
+    // while the other associated with other users
     getInterpretations: function(data, session, type) {
         var myInterpretations = [];
         var otherInterpretations = [];
@@ -45,6 +58,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         var variant = this.props.data;
         var session = this.props.session;
         var recordHeader = this.props.recordHeader;
+        var interpretationUuid = this.state.interpretationUuid;
         if (variant) {
             if (variant.associatedInterpretations && variant.associatedInterpretations.length > 0) {
                 var myInterpretations = this.getInterpretations(variant, session, 'currentUser');
@@ -69,6 +83,9 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                         <span className="my-interpretation">
                                                             {(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}{item.interpretation_status}, (last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}) <button type="button" className="btn btn-link" onClick={handleEditEvent.bind(this, '/interpretations/' + item.uuid)}>View</button> | <button type="button" className="btn btn-link" onClick={handleEditEvent.bind(this, '/variant-central/?edit=true&variant=' + variant.uuid + '&interpretation=' + item.uuid)}>Edit</button>
                                                         </span>
+                                                        {(item.uuid === interpretationUuid) ?
+                                                            <span className="current-interpretation"> &#x02713;</span>
+                                                        : null}
                                                     </div>
                                                 );
                                             })}
