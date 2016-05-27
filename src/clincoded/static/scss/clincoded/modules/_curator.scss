@@ -37,6 +37,10 @@
         margin: 5px 0 2px;
         font-size: 1.5rem;
         font-weight: bold;
+
+        span {
+            word-break: break-all;
+        }
     }
 
     h2 {
@@ -65,6 +69,12 @@
     @media screen and (min-width: $screen-sm-min) {
         margin-bottom: -99999px;
         padding-bottom: 99999px;
+    }
+
+    h4 {
+        border-bottom: 1px solid #c9c9c9;
+        margin-top: 0;
+        padding-bottom: 10px;
     }
 }
 
@@ -592,7 +602,7 @@
     border-top: 2px solid #aaa;
 
     table {
-        width: 100%
+        width: 100%;
     }
 
     td {
@@ -973,3 +983,155 @@
         }
     }
 }
+
+.curation-variant-tab-group {
+    .react-tabs [role=tablist] {
+        border: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .react-tabs [role=tab] {
+        background-color: #1b75bc;
+        border-top: none;
+        border-left: none;
+        border-bottom: solid 1px #fff;
+        border-right: solid 1px #fff;
+        bottom: -1px;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        list-style: none;
+        padding: 8px 2px;
+        position: relative;
+        text-align: center;
+    }
+
+    .react-tabs [role=tab][aria-selected=true] {
+        background-color: #fff;
+        border: solid 1px #1b75bc;
+        border-bottom: solid 1px #fff;
+        color: #000;
+    }
+
+    .react-tabs [role=tab][aria-selected=true] ~ li {
+        border-right: none;
+        border-left: solid 1px #fff;
+    }
+
+    .react-tabs [role=tab][aria-disabled=true] {
+        color: GrayText;
+        cursor: default;
+    }
+
+    .react-tabs [role=tab]:focus {
+        box-shadow: 0 0 5px hsl(208, 99%, 50%);
+        border-color: hsl(208, 99%, 50%);
+        outline: none;
+    }
+
+    .react-tabs [role=tab]:focus:after {
+        background: #fff;
+        content: "";
+        position: absolute;
+        height: 5px;
+        left: -4px;
+        right: -4px;
+        bottom: -5px;
+    }
+}
+
+
+div.react-tabs .ReactTabs__TabPanel--selected {
+    clear: both;
+
+    .tab-panel {
+        border: solid 1px #1b75bc;
+        padding: 15px;
+
+        ul, li {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+    }
+}
+
+.react-tabs .tab-panel .basic-info ul li {
+    padding: 5px 3px;
+}
+
+.react-tabs .tab-panel .basic-info ul:nth-child(odd) {
+    background: #f6f6f6;
+}
+
+.react-tabs .tab-panel .basic-info ul:nth-child(even) {
+    background: #fff;
+}
+
+/* FIXME - temp styles for placeholders */
+.react-tabs .tab-panel {
+    .population li>div,
+    .computational li>div,
+    .functional li>div,
+    .segregation li>div,
+    .gene-specific li>div {
+        background: rgba(0, 128, 128, 0.2);
+        margin: 0 15px 10px 0;
+    }
+}
+
+/* variant curation interface - interpretation action bar */
+.curation-actions {
+    .evidence-only {
+        padding: 20px 0;
+    }
+
+    .interpretation-record {
+        padding: 20px 0;
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 0;
+            position: absolute;
+            text-align: center;
+            width: 1128px;
+        }
+    }
+}
+
+.curation-data-curator .current-user-interpretations {
+    margin-bottom: 10px;
+
+    dl.inline-dl dt {
+        float: none;
+    }
+}
+
+.curation-variant  {
+    .curation-data-disease,
+    .curation-data-gene,
+    .curation-data-curator {
+        padding: 10px;
+        background-color: rgb(215, 236, 215);
+
+        @media screen and (min-width: $screen-sm-min) {
+            margin-bottom: -99999px;
+            padding-bottom: 99999px;
+        }
+
+        h4 {
+            border-bottom: 1px solid #c9c9c9;
+            margin-top: 0;
+            padding-bottom: 5px;
+        }
+    }
+
+    .curation-data-disease,
+    .curation-data-gene {
+        dd {
+            float: none;
+        }
+    }
+}
+
