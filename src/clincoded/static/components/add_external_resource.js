@@ -314,10 +314,10 @@ function clinvarTxt(field, extra) {
             txt = 'Retrieve from ClinVar';
             break;
         case 'helpText':
-            txt = <span>You must enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>;
+            txt = <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>;
             break;
         case 'resourceResponse':
-            txt = "Below are the data from ClinVar for the VariationID you submitted. Press \"" + extra + "\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below are the data from ClinVar for the VariationID you submitted. Select \"" + extra + "\" below if it is the correct variant, otherwise revise your search above:";
             break;
     }
     return txt;
@@ -447,10 +447,10 @@ function carTxt(field, extra) {
             txt = 'Retrieve from ClinGen Allele Registry';
             break;
         case 'helpText':
-            txt = <span>You must enter a ClinGen Allele Registry ID (CA ID). This CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele-test'] + '139214.html'} target="_blank">CA139214</a>).</span>;
+            txt = <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + '003323.html'} target="_blank">CA003323</a>).</span>;
             break;
         case 'resourceResponse':
-            txt = "Below are the data from the ClinGen Allele Registry for the CA ID you submitted. Press \"" + extra + "\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below are the data from the ClinGen Allele Registry for the CA ID you submitted. Select \"" + extra + "\" below if it is the correct variant, otherwise revise your search above:";
             break;
     }
     return txt;
