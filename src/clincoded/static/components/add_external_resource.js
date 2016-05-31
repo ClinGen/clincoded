@@ -472,7 +472,7 @@ function carQueryResource() {
     this.saveFormValue('resourceId', this.state.inputValue);
     var error_msg;
     if (carValidateForm.call(this)) {
-        var url = 'http://reg.test.genome.network/allele/';
+        var url = 'http://reg.genome.network/allele/';
         var data;
         var id = this.state.inputValue;
         this.getRestData(url + id).then(json => {
