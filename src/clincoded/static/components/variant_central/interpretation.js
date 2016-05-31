@@ -57,16 +57,16 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <div className="tab-panel"><CurationInterpretationPopulation data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationComputational data={variant} shouldFetchData={loadingComplete} /></div>
+                        <div className="tab-panel"><CurationInterpretationComputational data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationFunctional data={variant} shouldFetchData={loadingComplete} /></div>
+                        <div className="tab-panel"><CurationInterpretationFunctional data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationSegregation data={variant} shouldFetchData={loadingComplete} /></div>
+                        <div className="tab-panel"><CurationInterpretationSegregation data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationGeneSpecific data={variant} shouldFetchData={loadingComplete} /></div>
+                        <div className="tab-panel"><CurationInterpretationGeneSpecific data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                 </Tabs>
             </div>

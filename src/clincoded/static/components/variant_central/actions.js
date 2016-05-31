@@ -16,6 +16,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         variantData: React.PropTypes.object, // ClinVar data payload
         session: React.PropTypes.object,
         interpretationUuid: React.PropTypes.string,
+        editKey: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -24,6 +25,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             interpretationUuid: null
         };
     },
+
     /*
     componentDidUpdate: function(prevProps, prevState) {
         if (prevState.interpretationUuid !== this.state.interpretationUuid && this.state.interpretationUuid && this.state.variantUuid) {
@@ -62,7 +64,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         return (
             <div>
                 <div className="container curation-actions curation-variant">
-                {(this.props.interpretationUuid && this.props.interpretationUuid.length > 0) ?
+                {((this.props.interpretationUuid && this.props.interpretationUuid.length > 0) || (this.props.editKey && this.props.interpretationUuid.length > 0)) ?
                     <div className="interpretation-record clearfix">
                         <Input type="button-button" inputClassName="btn-primary pull-left" title="Return to Evidence Only" />
                         <h2><span>Variant Interpretation Record</span></h2>
