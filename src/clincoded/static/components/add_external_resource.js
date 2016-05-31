@@ -447,7 +447,7 @@ function carTxt(field, extra) {
             txt = 'Retrieve from ClinGen Allele Registry';
             break;
         case 'helpText':
-            txt = <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + '003323.html'} target="_blank">CA003323</a>).</span>;
+            txt = <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323</a>).</span>;
             break;
         case 'resourceResponse':
             txt = "Below are the data from the ClinGen Allele Registry for the CA ID you submitted. Select \"" + extra + "\" below if it is the correct variant, otherwise revise your search above:";

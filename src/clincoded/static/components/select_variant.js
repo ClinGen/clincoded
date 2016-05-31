@@ -83,7 +83,7 @@ var SelectVariant = React.createClass({
                                         <option value="select" disabled>Select</option>
                                         <option value="none" disabled></option>
                                         <option value="ClinVar Variation ID">ClinVar Variation ID</option>
-                                        <option value="ClinGen Allele Registry ID">ClinGen Allele Registry ID</option>
+                                        <option value="ClinGen Allele Registry ID (CA ID)">ClinGen Allele Registry ID (CA ID)</option>
                                     </Input>
                                     <p className="col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4 input-note-below-no-bottom"><strong>Note:</strong> Select ID type based on above instructions. Use the ClinVar VariationID whenever possible.</p>
                                 </div>
@@ -96,7 +96,7 @@ var SelectVariant = React.createClass({
                                     modalButtonText="View Evidence" updateParentForm={this.updateVariantData} buttonOnly={true} />
                             </div>
                             : null}
-                            {this.state.variantIdType == "ClinGen Allele Registry ID" ?
+                            {this.state.variantIdType == "ClinGen Allele Registry ID (CA ID)" ?
                             <div className="row col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4">
                                 <AddResourceId resourceType="car" label="ClinGen Allele Registry" wrapperClass="modal-buttons-wrapper"
                                     buttonText={this.state.variantData ? "Edit CA ID" : "Add CA ID" } initialFormValue={this.state.variantData && this.state.variantData.carVariantId}
