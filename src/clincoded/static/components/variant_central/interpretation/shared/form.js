@@ -15,12 +15,32 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         formContent: React.PropTypes.func
     },
 
+    getInitialState: function() {
+        return {
+            submitBusy: false
+        };
+    },
+
+    submitForm: function(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+
+        // Save all form values from the DOM.
+        this.saveAllFormValues();
+        this.setState({submitBusy: true});
+        var type = this.getFormValue('formType');
+        console.log(type);
+
+        this.setState({submitBusy: false});
+
+    },
+
     render: function() {
         return (
-            <Form submitHandler={this.props.submitForm} formClassName="form-horizontal form-std">
+            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <div className="evaluation">
                     <h4>Evaluation Criteria</h4>
                     {this.props.formContent.call(this)}
+                    <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                 </div>
             </Form>
         );

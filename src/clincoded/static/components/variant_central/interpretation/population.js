@@ -91,6 +91,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 <ul className="section-criteria-evaluation clearfix">
                     <li className="col-xs-12 gutter-exc">
                         <CurationInterpretationForm formContent={one} />
+                        <CurationInterpretationForm formContent={two} />
                     </li>
                 </ul>
                 : null}
@@ -103,6 +104,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 var one = function() {
     return (
         <div>
+            <Input type="text" ref="formType" value="one" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" required />
             <Input type="select" ref="evaluation" label="Does this meet your criteria2?" defaultValue="No Selection"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
@@ -115,3 +117,12 @@ var one = function() {
     );
 };
 
+var two = function() {
+    return (
+        <div>
+            <Input type="text" ref="formType" value="two" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" required />
+            <Input type="textarea" ref="evaluation-desc" label="Description heyo:" rows="5" placeholder="e.g. free text"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+        </div>
+    );
+};
