@@ -10,6 +10,13 @@ var CurationInterpretationForm = require('./shared/form').CurationInterpretation
 var external_url_map = globals.external_url_map;
 var queryKeyValue = globals.queryKeyValue;
 
+var form = require('../../../libs/bootstrap/form');
+
+var Form = form.Form;
+var FormMixin = form.FormMixin;
+var Input = form.Input;
+var InputMixin = form.InputMixin;
+
 // Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
     mixins: [RestMixin, LocalStorageMixin],
@@ -83,7 +90,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {(this.state.interpretationUuid) ?
                 <ul className="section-criteria-evaluation clearfix">
                     <li className="col-xs-12 gutter-exc">
-                        <CurationInterpretationForm />
+                        <CurationInterpretationForm formContent={one} />
                     </li>
                 </ul>
                 : null}
@@ -91,3 +98,20 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         );
     }
 });
+
+
+var one = function() {
+    return (
+        <div>
+            <Input type="select" ref="evaluation" label="Does this meet your criteria2?" defaultValue="No Selection"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="No Selection">No Selection</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </Input>
+            <Input type="textarea" ref="evaluation-desc" label="Description:" rows="5" placeholder="e.g. free text"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+        </div>
+    );
+};
+
