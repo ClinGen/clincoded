@@ -314,10 +314,10 @@ function clinvarTxt(field, extra) {
             txt = 'Retrieve from ClinVar';
             break;
         case 'helpText':
-            txt = <span>You must enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>;
+            txt = <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>;
             break;
         case 'resourceResponse':
-            txt = "Below are the data from ClinVar for the VariationID you submitted. Press \"" + extra + "\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below are the data from ClinVar for the VariationID you submitted. Select \"" + extra + "\" below if it is the correct variant, otherwise revise your search above:";
             break;
     }
     return txt;
@@ -362,6 +362,11 @@ function clinvarQueryResource() {
                 this.setFormErrors('resourceId', 'ClinVar ID not found');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
+        })
+        .catch(e => {
+            // error handling for ClinVar query
+            this.setFormErrors('resourceId', 'Error querying ClinVar. Please check your input and try again.');
+            this.setState({queryResourceBusy: false, resourceFetched: false});
         });
     } else {
         this.setState({queryResourceBusy: false});
@@ -442,10 +447,10 @@ function carTxt(field, extra) {
             txt = 'Retrieve from ClinGen Allele Registry';
             break;
         case 'helpText':
-            txt = <span>You must enter a ClinGen Allele Registry ID (CA ID). This CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele-test'] + '139214.html'} target="_blank">CA139214</a>).</span>;
+            txt = <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323</a>).</span>;
             break;
         case 'resourceResponse':
-            txt = "Below are the data from the ClinGen Allele Registry for the CA ID you submitted. Press \"" + extra + "\" below if it is the correct Variant, otherwise revise your search above:";
+            txt = "Below are the data from the ClinGen Allele Registry for the CA ID you submitted. Select \"" + extra + "\" below if it is the correct variant, otherwise revise your search above:";
             break;
     }
     return txt;
@@ -465,20 +470,46 @@ function carValidateForm() {
 function carQueryResource() {
     // for pinging and parsing data from CAR
     this.saveFormValue('resourceId', this.state.inputValue);
+    var error_msg;
     if (carValidateForm.call(this)) {
         var url = 'http://reg.genome.network/allele/';
         var data;
         var id = this.state.inputValue;
         this.getRestData(url + id).then(json => {
             data = parseCAR(json);
-            if (data.carId) {
-                // found the result we want
+            if (data.clinvarVariantId) {
+                // if the CAR result has a ClinVar variant ID, query ClinVar with it, and use its data
+                url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
+                this.getRestDataXml(url + data.clinvarVariantId).then(xml => {
+                    var data_cv = parseClinvar(xml);
+                    if (data_cv.clinvarVariantId) {
+                        // found the result we want
+                        data_cv.carId = id;
+                        this.setState({queryResourceBusy: false, tempResource: data_cv, resourceFetched: true});
+                    } else {
+                        // something failed with the parsing of ClinVar data; roll back to CAR data
+                        this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                    }
+                }).catch(e => {
+                    // error handling for ClinVar query
+                    this.setFormErrors('resourceId', 'Error querying ClinVar for additional data. Please check your input and try again.');
+                    this.setState({queryResourceBusy: false, resourceFetched: false});
+                });
+            } else if (data.carId) {
+                // if the CAR result has no ClinVar variant ID, just use the CAR data set
                 this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
             } else {
-                // no result from CAR
-                // FIXME: the CAR, when a CA ID is not found, does not respond with a clean JSON. It instead responds with a 404
-                // or a XMLHttpRequest/CORS error that indicates that the error was a 404. Current code does not handle this.
+                // in case the above two fail (theoretically a 404 json response, but an error is thrown instead (see below))
                 this.setFormErrors('resourceId', 'CA ID not found');
+                this.setState({queryResourceBusy: false, resourceFetched: false});
+            }
+        }).catch(e => {
+            // error handling for CAR query
+            if (e.status == 404) {
+                this.setFormErrors('resourceId', 'CA ID not found');
+                this.setState({queryResourceBusy: false, resourceFetched: false});
+            } else {
+                this.setFormErrors('resourceId', 'Error querying the ClinGen Allele Registry. Please check your input and try again.');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
         });
@@ -508,18 +539,20 @@ function carRenderResourceResult() {
 function carSubmitResource() {
     // for dealing with the main form
     this.setState({submitResourceBusy: true});
-    if (this.state.tempResource.carId) {
-        // TODO: we agreed that if the user submits a CAR and receives a CAR response with a ClinVar ID, we
-        // will do a separate query to ClinVar and get their information. This should probably happen in
-        // the carQueryResource() function, but checking our own internal db against the carId or the ClinVarId needs to happen
-        // here as well
-        this.getRestData('/search/?type=variant&carId=' + this.state.tempResource.carId).then(check => {
+    if (this.state.tempResource.clinvarVariantId || this.state.tempResource.carId) {
+        var internal_uri;
+        if (this.state.tempResource.clinvarVariantId) {
+            internal_uri = '/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId;
+        } else if (this.state.tempResource.carId) {
+            internal_uri = '/search/?type=variant&carId=' + this.state.tempResource.carId;
+        }
+        this.getRestData(internal_uri).then(check => {
             if (check.total) {
                 // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
                     // if no variant title in db, or db's variant title not matching the retrieved title,
                     // then update db and fetch result again
-                    if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle']) {
+                    if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'] || result['carId'] !== this.state.tempResource['carId']) {
                         this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
                             return this.getRestData(result['@graph'][0]['@id']).then(result => {
                                 this.props.updateParentForm(result, this.props.fieldNum);
