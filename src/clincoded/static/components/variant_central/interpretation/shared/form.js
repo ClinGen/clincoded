@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var _ = require('underscore');
 var form = require('../../../../libs/bootstrap/form');
 
 var Form = form.Form;
@@ -29,7 +30,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         this.setState({submitBusy: true});
         var type = this.getFormValue('formType');
         console.log(type);
-
+        setTimeout(function() {console.log('pause');}, 1000);
         this.setState({submitBusy: false});
 
     },
