@@ -76,9 +76,10 @@ function parseClinvarMixin(variant, allele, hgvs_list, dataset) {
     // Parse <HGVS> nodes
     var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
     for (var x = 0; x < HGVSnodes.length; x++) {
-        var hgvsObj =  {
+        var hgvsObj = {
             "HGVS": HGVSnodes[x].textContent,
             "Change": HGVSnodes[x].getAttribute('Change'),
+            "AccessionVersion": HGVSnodes[x].getAttribute('AccessionVersion'),
             "Type": HGVSnodes[x].getAttribute('Type')
         };
         // nucleotide change
