@@ -16,9 +16,7 @@ parts/
 *.pyc
 production.ini
 session-secret.b64
-src/clincoded/static/css/bootstrap.css
-src/clincoded/static/css/responsive.css
-src/clincoded/static/css/style.css
+src/clincoded/static/css/
 src/clincoded/static/scss/_variables.original.scss
 src/clincoded/static/build/
 src/clincoded/tests/js/build/
