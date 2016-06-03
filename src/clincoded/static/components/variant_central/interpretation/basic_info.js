@@ -15,6 +15,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
+        interpretationUuid: React.PropTypes.string,
         shouldFetchData: React.PropTypes.bool
     },
 
@@ -24,11 +25,13 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             dbSNP_id: null,
             variant_type: null,
             gene_symbol: null,
+            interpretationUuid: this.props.interpretationUuid,
             shouldFetchData: false
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
+        this.setState({interpretationUuid: nextProps.interpretationUuid});
         this.setState({shouldFetchData: nextProps.shouldFetchData});
         if (this.state.shouldFetchData === true) {
             this.fetchData();
@@ -113,7 +116,30 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                         <div>Other description</div>
                     </li>
                 </ul>
+                {(this.state.interpretationUuid) ?
+                <ul className="section-criteria-evaluation clearfix">
+                    <li className="col-xs-12 gutter-exc">
+                        <CurationInterpretationForm formContent={one} />
+                    </li>
+                </ul>
+                : null}
             </div>
         );
     }
 });
+
+var one = function() {
+    return (
+        <div>
+            <Input type="text" ref="formType" value="one" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" required />
+            <Input type="select" ref="evaluation" label="Does this meet your criteria2?" defaultValue="No Selection"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="No Selection">No Selection</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </Input>
+            <Input type="textarea" ref="evaluation-desc" label="Description:" rows="5" placeholder="e.g. free text"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+        </div>
+    );
+};

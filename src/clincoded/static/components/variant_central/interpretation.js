@@ -51,7 +51,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <Tab className="tab-label col-sm-2">Gene-specific</Tab>
                     </TabList>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationBasicInfo data={variant} shouldFetchData={loadingComplete} /></div>
+                        <div className="tab-panel"><CurationInterpretationBasicInfo data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel"><CurationInterpretationPopulation data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>

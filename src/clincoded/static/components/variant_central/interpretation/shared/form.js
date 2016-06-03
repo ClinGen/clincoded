@@ -14,7 +14,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     mixins: [RestMixin, FormMixin],
 
     propTypes: {
-        formContent: React.PropTypes.func
+        formContent: React.PropTypes.func,
+        extraData: React.PropTypes.object
     },
 
     contextTypes: {
@@ -34,7 +35,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // Save all form values from the DOM.
         this.saveAllFormValues();
         var type = this.getFormValue('formType');
-        console.log(type);
+        console.log(this.props.extraData);
 
         this.setState({submitBusy: false});
     },
