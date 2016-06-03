@@ -14,8 +14,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     mixins: [RestMixin, FormMixin],
 
     propTypes: {
-        formContent: React.PropTypes.func,
-        extraData: React.PropTypes.object
+        formTitle: React.PropTypes.string, // the title of this form section
+        renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
+        extraData: React.PropTypes.object, // any extra data that is passed from the parent page
+        formDataUpdater: React.PropTypes.func // the function that updates the rendered form with data from extraData
     },
 
     contextTypes: {
@@ -24,8 +26,17 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
     getInitialState: function() {
         return {
-            submitBusy: false
+            submitBusy: false,
+            extraData: null
         };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        // upon receiving props, call the formDataUpdater with the nextProps to update the forms, if applicable
+        this.setState({extraData: nextProps.extraData});
+        if (this.props.formDataUpdater) {
+            this.props.formDataUpdater.call(this, nextProps);
+        }
     },
 
     submitForm: function(e) {
@@ -35,7 +46,6 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // Save all form values from the DOM.
         this.saveAllFormValues();
         var type = this.getFormValue('formType');
-        console.log(this.props.extraData);
 
         this.setState({submitBusy: false});
     },
@@ -44,8 +54,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         return (
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <div className="evaluation">
-                    <h4>Evaluation Criteria</h4>
-                    {this.props.formContent.call(this)}
+                    {this.props.formTitle ?
+                        <h4>Evaluation Criteria</h4>
+                    : null}
+                    {this.props.renderedFormContent.call(this)}
                 </div>
                 <div className="curation-submit clearfix">
                     <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />

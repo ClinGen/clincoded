@@ -90,8 +90,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {(this.state.interpretationUuid) ?
                 <ul className="section-criteria-evaluation clearfix">
                     <li className="col-xs-12 gutter-exc">
-                        <CurationInterpretationForm formContent={one} />
-                        <CurationInterpretationForm formContent={two} />
+                        <CurationInterpretationForm renderedFormContent={one} />
+                        <CurationInterpretationForm renderedFormContent={two} />
                     </li>
                 </ul>
                 : null}
