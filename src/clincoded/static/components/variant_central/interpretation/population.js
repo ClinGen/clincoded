@@ -114,8 +114,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 var pm2 = function() {
     return (
         <div>
-            <Input type="text" ref="criteria" value="pm2" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" required />
-            <Input type="select" ref="value" label="Does this meet your criteria2?" defaultValue="No Selection"
+            <Input type="text" ref="criteria" value="pm2" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" inputDisabled={true} required />
+            <Input type="select" ref="value" label="Does this meet your criteria2?" defaultValue="No Selection" handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>
@@ -137,8 +137,8 @@ var pm2_update = function(nextProps) {
 var ps4 = function() {
     return (
         <div>
-            <Input type="text" ref="criteria" value="ps4" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" required />
-            <Input type="select" ref="value" label="Does this meet your criteria2?" defaultValue="No Selection"
+            <Input type="text" ref="criteria" value="ps4" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" inputDisabled={true} required />
+            <Input type="select" ref="value" label="Does this meet your criteria2?" defaultValue="No Selection" handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>

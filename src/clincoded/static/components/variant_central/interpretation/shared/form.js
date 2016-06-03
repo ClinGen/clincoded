@@ -28,6 +28,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     getInitialState: function() {
         return {
             submitBusy: false,
+            submitDisabled: true,
             extraData: null
         };
     },
@@ -37,6 +38,16 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         this.setState({extraData: nextProps.extraData});
         if (this.props.formDataUpdater) {
             this.props.formDataUpdater.call(this, nextProps);
+        }
+    },
+
+    handleChange: function(ref, e) {
+        if (ref === 'value') {
+            if (this.refs[ref].getValue() == 'No Selection') {
+                this.setState({submitDisabled: true});
+            } else {
+                this.setState({submitDisabled: false});
+            }
         }
     },
 
@@ -67,7 +78,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     {this.props.renderedFormContent.call(this)}
                 </div>
                 <div className="curation-submit clearfix">
-                    <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
+                    <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} inputDisabled={this.state.submitDisabled} />
                 </div>
             </Form>
         );
