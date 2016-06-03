@@ -100,8 +100,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {(this.state.interpretationUuid) ?
                 <ul className="section-criteria-evaluation clearfix">
                     <li className="col-xs-12 gutter-exc">
-                        <CurationInterpretationForm formTitle={"Question One"} renderedFormContent={one} extraData={this.state.data} formDataUpdater={one_update} />
-                        <CurationInterpretationForm formTitle={"Section 2"} renderedFormContent={two} extraData={this.state.data} formDataUpdater={two_update} />
+                        <CurationInterpretationForm formTitle={"PM2"} renderedFormContent={pm2} extraData={this.state.data} formDataUpdater={pm2_update} variantUuid={this.props.data['@id']} />
+                        <CurationInterpretationForm formTitle={"PS4 stuff"} renderedFormContent={ps4} extraData={this.state.data} formDataUpdater={ps4_update} variantUuid={this.props.data['@id']} />
                     </li>
                 </ul>
                 : null}
@@ -111,40 +111,48 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 });
 
 
-var one = function() {
+var pm2 = function() {
     return (
         <div>
-            <Input type="text" ref="formType" value="one" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" required />
-            <Input type="select" ref="evaluation" label="Does this meet your criteria2?" defaultValue="No Selection"
+            <Input type="text" ref="criteria" value="pm2" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" required />
+            <Input type="select" ref="value" label="Does this meet your criteria2?" defaultValue="No Selection"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
+                <option value="In Progress">In Progress</option>
             </Input>
-            <Input type="textarea" ref="evaluation-desc" label="Description:" rows="5" placeholder="e.g. free text"
+            <Input type="textarea" ref="description" label="Description:" rows="5" placeholder="e.g. free text"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 };
 
-var one_update = function(nextProps) {
+var pm2_update = function(nextProps) {
     if (nextProps.extraData) {
-        this.refs['evaluation-desc'].setValue(nextProps.extraData.test);
+        this.refs['description'].setValue(nextProps.extraData.test);
     }
 };
 
-var two = function() {
+var ps4 = function() {
     return (
         <div>
-            <Input type="text" ref="formType" value="two" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" required />
-            <Input type="text" ref="evaluation-desc" label="Description heyo:" rows="5" placeholder="e.g. free text" inputDisabled={true}
+            <Input type="text" ref="criteria" value="ps4" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" required />
+            <Input type="select" ref="value" label="Does this meet your criteria2?" defaultValue="No Selection"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="No Selection">No Selection</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="In Progress">In Progress</option>
+            </Input>
+            <Input type="text" ref="description" label="Description long:" rows="5" placeholder="e.g. free text" inputDisabled={true}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 };
 
-var two_update = function(nextProps) {
+var ps4_update = function(nextProps) {
     if (nextProps.extraData) {
-        this.refs['evaluation-desc'].setValue(nextProps.extraData.test2);
+        this.refs['description'].setValue(nextProps.extraData.test2);
     }
 };

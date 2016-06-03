@@ -17,7 +17,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         formTitle: React.PropTypes.string, // the title of this form section
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
         extraData: React.PropTypes.object, // any extra data that is passed from the parent page
-        formDataUpdater: React.PropTypes.func // the function that updates the rendered form with data from extraData
+        formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from extraData
+        variantUuid: React.PropTypes.string
     },
 
     contextTypes: {
@@ -45,8 +46,13 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
         // Save all form values from the DOM.
         this.saveAllFormValues();
-        var type = this.getFormValue('formType');
-        console.log(type);
+        var evaluation = {};
+        evaluation.variant = this.props.variantUuid;
+        evaluation.criteria = this.getFormValue('criteria');
+        evaluation.value = this.getFormValue('value');
+        evaluation.description = this.getFormValue('description');
+
+        console.log(evaluation);
 
         this.setState({submitBusy: false});
     },
