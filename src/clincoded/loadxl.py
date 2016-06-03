@@ -35,7 +35,10 @@ ORDER = [
     'pathogenicity',
     'provisionalClassification',
     'gdm',
-    'interpretation',
+    'population', # VCI
+    'evaluation', # VCI
+    'provisional_variant', # VCI
+    'interpretation', # VCI
     'curatorHistory',
     'curator_page', # keep at bottom so it can load other type data
 ]

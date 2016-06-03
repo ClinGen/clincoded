@@ -2,8 +2,6 @@
     {
         "uuid": "f26a694d-5f09-45fd-818a-861e4108e65a",
         "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
-        "genes": [],
-        "interpretationTranscript": "",
         "transcripts": [
             "80b09246-29fd-4658-9799-158d9ecd00e2"
         ],
@@ -21,10 +19,10 @@
             "e7c51b8a-1c34-11e5-ab27-60f81dc5b05a"
         ],
         "evaluations": [
-            "test data."
+            "09dbca61-a1a0-4ba4-ae68-99f4f1ca7493"
         ],
         "provisional_variant": [
-            "Pathogenic"
+            "a9886cb9-cea3-4372-8d2b-845563b47b1f"
         ],
         "disease": "788e024f-16a6-11e5-a0b5-60f81dc5b05a",
         "transcripts": [
