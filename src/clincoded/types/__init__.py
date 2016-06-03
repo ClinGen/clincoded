@@ -871,6 +871,22 @@ class Transcript(Item):
     item_type = 'transcript'
     schema = load_schema('clincoded:schemas/transcript.json')
     name_key = 'uuid'
+    embedded = [
+        'interpretation_associated',
+        'interpretation_associated.variant',
+    ]
+    rev = {
+        'interpretation_associated': ('interpretation', 'transcripts')
+    }
+
+    @calculated_property(schema={
+        "title": "Interpretation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "interpretation.transcripts"
+    })
+    def interpretation_associated(self, request, interpretation_associated):
+        return paths_filtered_by_status(request, interpretation_associated)
+
 
 @collection(
     name='proteins',
@@ -883,6 +899,21 @@ class Protein(Item):
     item_type = 'protein'
     schema = load_schema('clincoded:schemas/protein.json')
     name_key = 'uuid'
+    embedded = [
+        'interpretation_associated',
+        'interpretation_associated.variant',
+    ]
+    rev = {
+        'interpretation_associated': ('interpretation', 'proteins')
+    }
+
+    @calculated_property(schema={
+        "title": "Interpretation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "interpretation.proteins"
+    })
+    def interpretation_associated(self, request, interpretation_associated):
+        return paths_filtered_by_status(request, interpretation_associated)
 
 
 @collection(
@@ -907,16 +938,17 @@ class Interpretation(Item):
         'proteins',
         'evaluations',
         'evaluations.submitted_by',
-        #'evaluations.variant',
         'evaluations.disease',
         'evaluations.population',
         'evaluations.population.submitted_by',
+        'evaluations.computational',
+        'evaluations.computational.submitted_by',
         'provisional_variant',
         'provisional_variant.submitted_by'
     ]
 
     @calculated_property(schema={
-        "title": "Status",
+        "title": "Interpretation Status",
         "type": "string",
     })
     def interpretation_status(self, evaluations=[], provisional_variant=[]):
@@ -941,7 +973,10 @@ class Interpretation(Item):
     })
     def interpretation_genes(self, genes=[]):
         if len(genes) > 1:
-            return ", ".join(genes)
+            symbol_list = []
+            for gene in genes:
+                symbol_list.append(gene[7:-1])
+            return ", ".join(symbol_list)
         elif len(genes) == 1:
             return genes[0][7:-1]
         return ''
@@ -951,18 +986,18 @@ class Interpretation(Item):
         "type": "string",
     })
     def interpretation_transcripts(self, transcripts=[]):
-        if len(transcripts) > 1:
-            return len(transcripts)
-        return ''
+        if len(transcripts) == 0:
+            return ''
+        return len(transcripts)
 
     @calculated_property(schema={
         "title": "Proteins",
         "type": "string",
     })
     def interpretation_proteins(self, proteins=[]):
-        if len(proteins) > 0:
-            return len(proteins)
-        return ''
+        if len(proteins) == 0:
+            return ''
+        return len(proteins)
 
     @calculated_property(schema={
         "title": "Evaluations",
@@ -1001,6 +1036,7 @@ class Evaluation(Item):
         'variant.associatedInterpretations.submitted_by',
         'disease',
         'population',
+        'computational',
         'interpretation_associated'
     ]
     rev = {
@@ -1016,10 +1052,10 @@ class Evaluation(Item):
         return paths_filtered_by_status(request, interpretation_associated)
 
     @calculated_property(schema={
-        "title": "Number of Population",
+        "title": "Evidence Type",
         "type": "string"
     })
-    def evidence_present(self, population='', computational='', functional='', segregation=''):
+    def evidence_type(self, population='', computational='', functional='', segregation='', geneSpecific=''):
         if population != '':
             return 'Population'
         elif computational != '':
@@ -1028,6 +1064,8 @@ class Evaluation(Item):
             return 'Functional'
         elif segregation != '':
             return 'Segregation'
+        elif geneSpecific != '':
+            return 'Gene-Specific'
 
 
 @collection(
@@ -1069,6 +1107,49 @@ class Population(Item):
     def maf_count(self, populations=[]):
         if len(populations) > 0:
             return len(populations)
+        return ''
+
+
+@collection(
+    name='computational',
+    unique_key='computational:uuid',
+    properties={
+        'title': 'Computational',
+        'description': 'List of Computational Evidence',
+    })
+class Computational(Item):
+    item_type = 'computational'
+    schema = load_schema('clincoded:schemas/computational.json')
+    name_key = 'uuid'
+    embedded = [
+        'variant',
+        'disease',
+        'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
+        'evaluation_associated',
+        'evaluation_associated.interpretation_associated',
+        'evaluation_associated.interpretation_associated.disease'
+    ]
+    rev = {
+        'evaluation_associated': ('evaluation', 'computational')
+    }
+
+    @calculated_property(schema={
+        "title": "Evaluation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "evaluation.computational"
+    })
+    def evaluation_associated(self, request, evaluation_associated):
+        return paths_filtered_by_status(request, evaluation_associated)
+
+    @calculated_property(schema={
+        "title": "Disease",
+        "type": "string"
+    })
+    def disease_present(self, request, disease=''):
+        if disease != '':
+            diseaseObj = request.embed(disease, '@@object')
+            return diseaseObj['term']
         return ''
 
 
