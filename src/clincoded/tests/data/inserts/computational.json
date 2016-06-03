@@ -1,0 +1,38 @@
+
+[
+    {
+        "uuid": "63727d93-0d51-44b2-a568-d042ba10e8af",
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
+        "disease": "788e024f-16a6-11e5-a0b5-60f81dc5b05a",
+        "computationalData": [
+            {
+                "refSeqId": "NM_0000001.1",
+                "ensemblId": "ENST0000000002.2",
+                "isPrimary": true,
+                "molecularConsequence": {
+                    "term": "deletion",
+                    "soId": "SO:0000159"
+                },
+                "regionType": {
+                    "term": "splice_site",
+                    "soId": "SO:0000162"
+                },
+                "functionalConsequence": {
+                    "term": "Loss of function"
+                }
+            },
+            {
+                "refSeqId": "NP_005996",
+                "ensemblId": "ENSP00000423337",
+                "isPrimary": false,
+                "aminoAcidChange": {
+                    "term": "missense_variant",
+                    "soId": "SO:0001583"
+                }
+            }
+        ],
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-05-11T22:47:10.000000+00:00",
+        "last_modified": "2016-05-11T22:59:10.000000+00:00"
+    }
+]
