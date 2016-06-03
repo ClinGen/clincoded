@@ -31,7 +31,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return {
             clinvar_id: null, // ClinVar JSON response from NCBI
             interpretationUuid: this.props.interpretationUuid,
-            shouldFetchData: false
+            shouldFetchData: false,
+            data: {test: 'hey', test2: 'asdfasfasfdaas'}
         };
     },
 
@@ -71,13 +72,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <li className="col-xs-12 col-sm-4 gutter-exc">
                         <div className="ExAC">
                             <h4>ExAC</h4>
-                            <div>External data placeholder</div>
+                            <div>Test: {this.state.data ? this.state.data.test : ''}</div>
                         </div>
                     </li>
                     <li className="col-xs-12 col-sm-4 gutter-exc">
                         <div className="1000G">
                             <h4>1000G</h4>
-                            <div>External data placeholder</div>
+                            <div>Test: {this.state.data ? this.state.data.test2 : ''}</div>
                         </div>
                     </li>
                     <li className="col-xs-12 col-sm-4 gutter-exc">
@@ -90,8 +91,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {(this.state.interpretationUuid) ?
                 <ul className="section-criteria-evaluation clearfix">
                     <li className="col-xs-12 gutter-exc">
-                        <CurationInterpretationForm renderedFormContent={one} />
-                        <CurationInterpretationForm renderedFormContent={two} />
+                        <CurationInterpretationForm formTitle={"Question One"} renderedFormContent={one} extraData={this.state.data} formDataUpdater={one_update} />
+                        <CurationInterpretationForm formTitle={"Section 2"} renderedFormContent={two} extraData={this.state.data} formDataUpdater={two_update} />
                     </li>
                 </ul>
                 : null}
@@ -117,12 +118,24 @@ var one = function() {
     );
 };
 
+var one_update = function(nextProps) {
+    if (nextProps.extraData) {
+        this.refs['evaluation-desc'].setValue(nextProps.extraData.test);
+    }
+};
+
 var two = function() {
     return (
         <div>
             <Input type="text" ref="formType" value="two" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" required />
-            <Input type="textarea" ref="evaluation-desc" label="Description heyo:" rows="5" placeholder="e.g. free text"
+            <Input type="text" ref="evaluation-desc" label="Description heyo:" rows="5" placeholder="e.g. free text"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
+};
+
+var two_update = function(nextProps) {
+    if (nextProps.extraData) {
+        this.refs['evaluation-desc'].setValue(nextProps.extraData.test2);
+    }
 };

@@ -55,7 +55,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <div className="evaluation">
                     {this.props.formTitle ?
-                        <h4>Evaluation Criteria</h4>
+                        <h4>{this.props.formTitle}</h4>
                     : null}
                     {this.props.renderedFormContent.call(this)}
                 </div>
