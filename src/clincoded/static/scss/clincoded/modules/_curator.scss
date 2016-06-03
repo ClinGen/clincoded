@@ -1062,6 +1062,11 @@ div.react-tabs .ReactTabs__TabPanel--selected {
                 margin-right: 20px;
             }
         }
+
+        .basic-info .table th,
+        .basic-info .table td {
+            width: 33%;
+        }
     }
 }
 
