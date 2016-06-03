@@ -65,6 +65,15 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
+    ranodmizeData: function() {
+        console.log('randomize data');
+        let data = {
+            test: Math.floor((Math.random() * 10000000) + 1),
+            test2: Math.floor((Math.random() * 1000000) + 1)
+        };
+        this.setState({data: data});
+    },
+
     render: function() {
         return (
             <div className="variant-interpretation population">
@@ -84,7 +93,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <li className="col-xs-12 col-sm-4 gutter-exc">
                         <div className="ESP">
                             <h4>ESP</h4>
-                            <div>External data placeholder</div>
+                            <div><span onClick={this.ranodmizeData}>Randomize data</span></div>
                         </div>
                     </li>
                 </ul>
@@ -128,7 +137,7 @@ var two = function() {
     return (
         <div>
             <Input type="text" ref="formType" value="two" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" required />
-            <Input type="text" ref="evaluation-desc" label="Description heyo:" rows="5" placeholder="e.g. free text"
+            <Input type="text" ref="evaluation-desc" label="Description heyo:" rows="5" placeholder="e.g. free text" inputDisabled={true}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );

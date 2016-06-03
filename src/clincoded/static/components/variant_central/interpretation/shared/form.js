@@ -46,6 +46,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // Save all form values from the DOM.
         this.saveAllFormValues();
         var type = this.getFormValue('formType');
+        console.log(type);
 
         this.setState({submitBusy: false});
     },
