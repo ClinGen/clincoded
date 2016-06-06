@@ -28,7 +28,7 @@ var VariantCurationHub = React.createClass({
     componentDidMount: function() {
         this.getClinVarData(this.state.variantUuid);
         if (this.state.interpretationUuid) {
-            this.getRestData('/interpretation/' + this.state.interpretationUuid + '?frame=raw').then(interpretation => {
+            this.getRestData('/interpretation/' + this.state.interpretationUuid + '?frame=edit').then(interpretation => {
                 this.setState({interpretation: interpretation});
             });
         }
@@ -57,7 +57,7 @@ var VariantCurationHub = React.createClass({
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} />
                 <VariantCurationActions variantData={variantData} interpretationUuid={interpretationUuid} eidtKey={editKey} session={session} />
-                <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} eidtKey={editKey} session={session} loadingComplete={isLoadingComplete} />
+                <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} interpretationUuid={interpretationUuid} eidtKey={editKey} session={session} loadingComplete={isLoadingComplete} />
             </div>
         );
     }

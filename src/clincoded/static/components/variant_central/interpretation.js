@@ -25,6 +25,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
+        interpretationUuid: React.PropTypes.string,
         loadingComplete: React.PropTypes.bool
     },
 
@@ -35,6 +36,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     render: function() {
         var variant = this.props.variantData;
         var interpretation = this.props.interpretation;
+        var interpretationUuid = this.props.interpretationUuid;
         var loadingComplete = this.props.loadingComplete;
 
         // The ordering of TabPanels are corresponding to that of tabs
@@ -51,22 +53,22 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <Tab className="tab-label col-sm-2">Gene-specific</Tab>
                     </TabList>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationBasicInfo data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} /></div>
+                        <div className="tab-panel"><CurationInterpretationBasicInfo data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationPopulation data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} /></div>
+                        <div className="tab-panel"><CurationInterpretationPopulation data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationComputational data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} /></div>
+                        <div className="tab-panel"><CurationInterpretationComputational data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationFunctional data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} /></div>
+                        <div className="tab-panel"><CurationInterpretationFunctional data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationSegregation data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} /></div>
+                        <div className="tab-panel"><CurationInterpretationSegregation data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationGeneSpecific data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} /></div>
+                        <div className="tab-panel"><CurationInterpretationGeneSpecific data={variant} shouldFetchData={loadingComplete} interpretation={interpretation} interpretationUuid={interpretationUuid} /></div>
                     </TabPanel>
                 </Tabs>
             </div>

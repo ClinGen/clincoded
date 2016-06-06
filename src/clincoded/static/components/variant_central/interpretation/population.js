@@ -24,6 +24,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
+        interpretationUuid: React.PropTypes.string,
         shouldFetchData: React.PropTypes.bool
     },
 
@@ -31,6 +32,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return {
             clinvar_id: null, // ClinVar JSON response from NCBI
             interpretation: this.props.interpretation,
+            interpretationUuid: this.props.interpretationUuid,
             shouldFetchData: false,
             data: {test: 'hey', test2: 'asdfasfasfdaas'}
         };
@@ -43,7 +45,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentWillReceiveProps: function(nextProps) {
-        this.setState({interpretation: nextProps.interpretation});
+        this.setState({interpretation: nextProps.interpretation, interpretationUuid: nextProps.interpretationUuid});
         this.setState({shouldFetchData: nextProps.shouldFetchData});
         if (this.state.shouldFetchData === true) {
             this.fetchData();
@@ -100,8 +102,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {(this.state.interpretation) ?
                 <ul className="section-criteria-evaluation clearfix">
                     <li className="col-xs-12 gutter-exc">
-                        <CurationInterpretationForm formTitle={"PM2"} renderedFormContent={pm2} extraData={this.state.data} formDataUpdater={pm2_update} variantUuid={this.props.data['@id']} />
-                        <CurationInterpretationForm formTitle={"PS4 stuff"} renderedFormContent={ps4} extraData={this.state.data} formDataUpdater={ps4_update} variantUuid={this.props.data['@id']} />
+                        <CurationInterpretationForm formTitle={"PM2"} renderedFormContent={pm2} extraData={this.state.data}
+                            formDataUpdater={pm2_update} variantUuid={this.props.data['@id']}
+                            interpretationUuid={this.state.interpretationUuid} interpretation={this.state.interpretation} />
+                        <CurationInterpretationForm formTitle={"PS4 stuff"} renderedFormContent={ps4} extraData={this.state.data}
+                            formDataUpdater={ps4_update} variantUuid={this.props.data['@id']}
+                            interpretationUuid={this.state.interpretationUuid} interpretation={this.state.interpretation} />
                     </li>
                 </ul>
                 : null}

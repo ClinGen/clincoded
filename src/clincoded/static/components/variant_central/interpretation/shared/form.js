@@ -3,6 +3,7 @@ var React = require('react');
 var _ = require('underscore');
 var form = require('../../../../libs/bootstrap/form');
 var RestMixin = require('../../../rest').RestMixin;
+var curator = require('./curator');
 
 var Form = form.Form;
 var FormMixin = form.FormMixin;
@@ -18,7 +19,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
         extraData: React.PropTypes.object, // any extra data that is passed from the parent page
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from extraData
-        variantUuid: React.PropTypes.string
+        variantUuid: React.PropTypes.string,
+        interpretation: React.PropTypes.object,
+        interpretationUuid: React.PropTypes.string
     },
 
     contextTypes: {
@@ -29,12 +32,14 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         return {
             submitBusy: false,
             submitDisabled: true,
-            extraData: null
+            extraData: null,
+            interpretation: null
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
         // upon receiving props, call the formDataUpdater with the nextProps to update the forms, if applicable
+        this.setState({interpretation: nextProps.interpretation});
         this.setState({extraData: nextProps.extraData});
         if (this.props.formDataUpdater) {
             this.props.formDataUpdater.call(this, nextProps);
@@ -63,11 +68,50 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         evaluation.value = this.getFormValue('value');
         evaluation.description = this.getFormValue('description');
 
+        console.log(evaluation);
+        console.log(this.state.interpretation);
+        console.log(this.props.interpretationUuid);
+
+        var existingEvaluationUuid = null;
+
+        if (this.state.interpretation.evaluations) {
+            this.state.interpretation.evaluations.map(function(oldEvaluation, i) {
+                if (oldEvaluation.criteria == evaluation.criteria) {
+                    existingEvaluationUuid = oldEvaluation.uuid;
+                }
+            });
+        }
+
+        if (existingEvaluationUuid) {
+            return this.putRestData('/evaluation/' + existingEvaluationUuid, evaluation).then(data => {
+                this.setState({submitBusy: false});
+                return 'Data saved successfully';
+            }).catch(error => {
+                this.setState({submitBusy: false});
+                return 'Data did not save successfully';
+            });
+        } else {
+            return this.postRestData('/evaluation/', evaluation).then(data => {
+                return data['@graph'][0];
+            }).then(newEvaluation => {
+                if (!('evaluations' in this.state.interpretation)) {
+                    this.state.interpretation.evaluations = [];
+                }
+                this.state.interpretation.evaluations.push('/evaluations/' + newEvaluation.uuid);
+
+                return this.putRestData('/interpretation/' + this.props.interpretationUuid, this.state.interpretation).then(data => {
+                    this.setState({submitBusy: false});
+                    return 'Data saved successfully';
+                });
+            }).catch(error => {
+                this.setState({submitBusy: false});
+                return 'Data did not save successfully';
+            });
+        }
 
         //this.getRestData('/search/?type=evaluation&disease.orphaNumber=')
-        console.log(evaluation);
 
-        this.setState({submitBusy: false});
+
     },
 
     render: function() {
