@@ -119,7 +119,7 @@ var pm2 = function() {
     return (
         <div>
             <Input type="text" ref="criteria" value="pm2" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" inputDisabled={true} required />
-            <Input type="select" ref="value" label="Does this meet your criteria2?" defaultValue="No Selection" handleChange={this.handleChange}
+            <Input type="select" ref="value" label="Does this meet your criteria?" defaultValue="No Selection" handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>
@@ -133,8 +133,15 @@ var pm2 = function() {
 };
 
 var pm2_update = function(nextProps) {
-    if (nextProps.extraData) {
-        this.refs['description'].setValue(nextProps.extraData.test);
+    if (nextProps.interpretation) {
+        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
+            nextProps.interpretation.evaluations.map(evaulation => {
+                if (evaulation.criteria == 'pm2') {
+                    this.refs['value'].setValue(evaulation.value);
+                    this.refs['description'].setValue(evaulation.description);
+                }
+            });
+        }
     }
 };
 
@@ -156,6 +163,15 @@ var ps4 = function() {
 };
 
 var ps4_update = function(nextProps) {
+    if (nextProps.interpretation) {
+        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
+            nextProps.interpretation.evaluations.map(evaulation => {
+                if (evaulation.criteria == 'ps4') {
+                    this.refs['value'].setValue(evaulation.value);
+                }
+            });
+        }
+    }
     if (nextProps.extraData) {
         this.refs['description'].setValue(nextProps.extraData.test2);
     }

@@ -98,14 +98,23 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }).then(newEvaluation => {
             console.log('new evaluation uuid:');
             console.log(newEvaluation.uuid);
-            if (!('evaluations' in this.state.interpretation)) {
-                this.state.interpretation.evaluations = [];
+            let evaluationURI = '/evaluations/' + newEvaluation.uuid + '/';
+            // if the interpretation object does not have an evaluations object, create it
+            if (!('evaluations' in flatInterpretation)) {
+                flatInterpretation.evaluations = [];
             }
-            this.state.interpretation.evaluations.push('/evaluations/' + newEvaluation.uuid);
-
-            return this.putRestData('/interpretation/' + this.props.interpretationUuid, this.state.interpretation).then(data => {
-                return Promise.resolve(data['@graph'][0]);
-            });
+            if (flatInterpretation.evaluations.indexOf(evaluationURI) < 0) {
+                // if the interpretation object does not have the (new) evaluation in it, add it and
+                // update the interperetation object
+                console.log('update interpretation');
+                flatInterpretation.evaluations.push('/evaluations/' + newEvaluation.uuid);
+                return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
+            } else {
+                // if the interperation object already has the evaluation in it, skip updating the object
+                return Promise.resolve(null);
+            }
         }).catch(error => {
             console.log(error);
         });
