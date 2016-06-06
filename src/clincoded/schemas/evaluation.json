@@ -76,7 +76,7 @@
             "title": "Criteria",
             "type": "string"
         },
-        "evidence_present": {
+        "evidence_type": {
             "title": "Evidence Type",
             "type": "string"
         },
