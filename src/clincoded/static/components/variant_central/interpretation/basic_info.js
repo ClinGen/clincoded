@@ -77,32 +77,20 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     // Create primary transcript object
     // Called in the "fetchRefseqData" method after various states are set
     getPrimaryTranscript: function(str, nucleotide_change, protein_change, molecular_consequence) {
-        var transcript = {};
-        var SO_id_term = '';
-        for (var i=0; i<nucleotide_change.length; i++) {
-            // Match AccessionVersion within clinvarVariantTitle string
-            if (str.indexOf(nucleotide_change[i].AccessionVersion) > -1) {
-                // Find associated SO_id and SO_term. Concatenate them.
-                if (typeof molecular_consequence !== 'undefined' && molecular_consequence.length) {
-                    for (var x=0; x<molecular_consequence.length; x++) {
-                        if (molecular_consequence[x].HGVS === nucleotide_change[i].HGVS) {
-                            // 'SO_terms' is defined via requiring external mapping file
-                            for (var y=0; y<SO_terms.length; y++) {
-                                if (molecular_consequence[x].SOid === SO_terms[y].SO_id) {
-                                    SO_id_term = SO_terms[y].SO_id + ' ' + SO_terms[y].SO_term;
-                                }
-                            }
-                        }
-                    }
-                }
-                // FIXME: temporarily use protein_change[0] due to lack of mapping
-                // associated with nucleotide_change[i] in ClinVar data
-                transcript = {
-                    "nucleotide": nucleotide_change[i].HGVS,
-                    "protein": protein_change[0].HGVS,
-                    "molecular": SO_id_term
-                };
-            }
+        var transcript = {}, SO_id_term = '';
+        var result = nucleotide_change.find((n) => str.indexOf(n.AccessionVersion) > -1);
+        if (result && molecular_consequence.length) {
+            var item = molecular_consequence.find((x) => x.HGVS === result.HGVS);
+            // 'SO_terms' is defined via requiring external mapping file
+            var entry = SO_terms.find((v) => v.SO_id === item.SOid);
+            SO_id_term = entry.SO_term + ' ' + entry.SO_id;
+            // FIXME: temporarily use protein_change[0] due to lack of mapping
+            // associated with nucleotide transcript in ClinVar data
+            transcript = {
+                "nucleotide": result.HGVS,
+                "protein": protein_change[0].HGVS,
+                "molecular": SO_id_term
+            };
         }
         this.setState({primary_transcript: transcript});
     },
@@ -124,23 +112,20 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     // Then concatenate all pairs into string
     handleSOTerms: function(array) {
         var newArray = [],
-            newObj,
+            SO_id_term,
             newStr = '';
-        for (var x=0; x<array.length; x++) {
+        for (let value of array.values()) {
             // 'SO_terms' is defined via requiring external mapping file
-            for (var y=0; y<SO_terms.length; y++) {
-                if (array[x] === SO_terms[y].SO_term) {
-                    newObj = SO_terms[y].SO_id + ' ' + SO_terms[y].SO_term;
-                }
-            }
-            newArray.push(newObj);
+            var entry = SO_terms.find((v) => v.SO_term === value);
+            SO_id_term = entry.SO_term + ' ' + entry.SO_id;
+            newArray.push(SO_id_term);
         }
-        for (var i=0; i<newArray.length; i++) {
-            if (i === 0) {
-                newStr += newArray[i];
+        for (let [key, value] of newArray.entries()) {
+            if (key === 0) {
+                newStr += value;
             }
-            if (i > 0) {
-                newStr += ', ' + newArray[i];
+            if (key > 0) {
+                newStr += ', ' + value;
             }
         }
         return newStr;
@@ -173,11 +158,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     // For both GRCh38/hg38 and GRCh37/hg19
     ucscViewerURL: function(array, db, assembly) {
         var url = '';
-        for (var x=0; x<array.length; x++) {
-            if (array[x].Assembly === assembly) {
-                url = 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=' + db + '&position=Chr' + array[x].Chr + '%3A' + array[x].start + '-' + array[x].stop;
+        array.forEach(v => {
+            if (v.Assembly === assembly) {
+                url = 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=' + db + '&position=Chr' + v.Chr + '%3A' + v.start + '-' + v.stop;
             }
-        }
+        });
         return url;
     },
 
@@ -185,11 +170,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     // For both GRCh38 and GRCh37
     variationViewerURL: function(array, gene_symbol, assembly) {
         var url = '';
-        for (var x=0; x<array.length; x++) {
-            if (array[x].Assembly === assembly) {
-                url = 'http://www.ncbi.nlm.nih.gov/variation/view/?chr=' + array[x].Chr + '&q=' + gene_symbol + '&assm=' + array[x].AssemblyAccessionVersion + '&from=' + array[x].start + '&to=' + array[x].stop;
+        array.forEach(v => {
+            if (v.Assembly === assembly) {
+                url = 'http://www.ncbi.nlm.nih.gov/variation/view/?chr=' + v.Chr + '&q=' + gene_symbol + '&assm=' + v.AssemblyAccessionVersion + '&from=' + v.start + '&to=' + v.stop;
             }
-        }
+        });
         return url;
     },
 
@@ -277,7 +262,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             <dd>Variation Viewer [<a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh38')} target="_blank" title={'Variation Viewer page for ' + GRCh38 + ' in a new window'}>GRCh38</a> - <a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh37')} target="_blank" title={'Variation Viewer page for ' + GRCh37 + ' in a new window'}>GRCh37</a>]</dd>
                             <dd><a href={'http://uswest.ensembl.org/Homo_sapiens/Gene/Summary?g=' + this.getGeneId(ensembl_data)} target="_blank" title={'Ensembl Browser page for ' + this.getGeneId(ensembl_data) + ' in a new window'}>Ensembl Browser</a></dd>
                             <dd>UCSC [<a href={this.ucscViewerURL(sequence_location, 'hg38', 'GRCh38')} target="_blank" title={'UCSC Genome Browser for ' + GRCh38 + ' in a new window'}>GRCh38/hg38</a> - <a href={this.ucscViewerURL(sequence_location, 'hg19', 'GRCh37')} target="_blank" title={'UCSC Genome Browser for ' + GRCh37 + ' in a new window'}>GRCh37/hg19</a>]</dd>
-                            <dd><a href={'http://www.uniprot.org/uniprot/' + uniprot_id + '#family_and_domains'} target="_blank" title={'Uniprot page for ' + uniprot_id + ' in a new window'}>Uniprot</a></dd>
+                            <dd><a href={'http://www.uniprot.org/uniprot/' + uniprot_id} target="_blank" title={'UniProtKB page for ' + uniprot_id + ' in a new window'}>UniProtKB</a></dd>
                         </dl>
                     </div>
                 </div>
