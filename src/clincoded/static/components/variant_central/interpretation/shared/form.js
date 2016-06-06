@@ -67,9 +67,6 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         evaluation.value = this.getFormValue('value');
         evaluation.description = this.getFormValue('description');
 
-        console.log(evaluation);
-        console.log(this.state.interpretation);
-
         var existingEvaluationUuid = null;
         var flatInterpretation = null;
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(freshInterpretation => {
@@ -96,8 +93,6 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 });
             }
         }).then(newEvaluation => {
-            console.log('new evaluation uuid:');
-            console.log(newEvaluation.uuid);
             let evaluationURI = '/evaluations/' + newEvaluation.uuid + '/';
             // if the interpretation object does not have an evaluations object, create it
             if (!('evaluations' in flatInterpretation)) {
@@ -106,7 +101,6 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             if (flatInterpretation.evaluations.indexOf(evaluationURI) < 0) {
                 // if the interpretation object does not have the (new) evaluation in it, add it and
                 // update the interperetation object
-                console.log('update interpretation');
                 flatInterpretation.evaluations.push('/evaluations/' + newEvaluation.uuid);
                 return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
                     return Promise.resolve(data['@graph'][0]);

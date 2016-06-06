@@ -139,6 +139,7 @@ var pm2_update = function(nextProps) {
                 if (evaulation.criteria == 'pm2') {
                     this.refs['value'].setValue(evaulation.value);
                     this.refs['description'].setValue(evaulation.description);
+                    this.setState({submitDisabled: false});
                 }
             });
         }
@@ -168,6 +169,7 @@ var ps4_update = function(nextProps) {
             nextProps.interpretation.evaluations.map(evaulation => {
                 if (evaulation.criteria == 'ps4') {
                     this.refs['value'].setValue(evaulation.value);
+                    this.setState({submitDisabled: false});
                 }
             });
         }
