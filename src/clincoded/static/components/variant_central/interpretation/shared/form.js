@@ -63,6 +63,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         evaluation.value = this.getFormValue('value');
         evaluation.description = this.getFormValue('description');
 
+
+        //this.getRestData('/search/?type=evaluation&disease.orphaNumber=')
         console.log(evaluation);
 
         this.setState({submitBusy: false});

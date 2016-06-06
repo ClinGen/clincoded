@@ -23,14 +23,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
-        interpretationUuid: React.PropTypes.string,
+        interpretation: React.PropTypes.object,
         shouldFetchData: React.PropTypes.bool
     },
 
     getInitialState: function() {
         return {
             clinvar_id: null, // ClinVar JSON response from NCBI
-            interpretationUuid: this.props.interpretationUuid,
+            interpretation: this.props.interpretation,
             shouldFetchData: false,
             data: {test: 'hey', test2: 'asdfasfasfdaas'}
         };
@@ -43,7 +43,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentWillReceiveProps: function(nextProps) {
-        this.setState({interpretationUuid: nextProps.interpretationUuid});
+        this.setState({interpretation: nextProps.interpretation});
         this.setState({shouldFetchData: nextProps.shouldFetchData});
         if (this.state.shouldFetchData === true) {
             this.fetchData();
@@ -97,7 +97,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     </li>
                 </ul>
-                {(this.state.interpretationUuid) ?
+                {(this.state.interpretation) ?
                 <ul className="section-criteria-evaluation clearfix">
                     <li className="col-xs-12 gutter-exc">
                         <CurationInterpretationForm formTitle={"PM2"} renderedFormContent={pm2} extraData={this.state.data} formDataUpdater={pm2_update} variantUuid={this.props.data['@id']} />

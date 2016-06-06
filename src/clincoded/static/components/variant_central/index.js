@@ -18,6 +18,7 @@ var VariantCurationHub = React.createClass({
         return {
             variantUuid: queryKeyValue('variant', this.props.href),
             interpretationUuid: queryKeyValue('interpretation', this.props.href),
+            interpretation: null,
             editKey: queryKeyValue('edit', this.props.href),
             variantObj: null,
             isLoadingComplete: false
@@ -26,6 +27,11 @@ var VariantCurationHub = React.createClass({
 
     componentDidMount: function() {
         this.getClinVarData(this.state.variantUuid);
+        if (this.state.interpretationUuid) {
+            this.getRestData('/interpretation/' + this.state.interpretationUuid + '?frame=raw').then(interpretation => {
+                this.setState({interpretation: interpretation});
+            });
+        }
     },
 
     // Retrieve the variant object from db with the given uuid
@@ -41,6 +47,7 @@ var VariantCurationHub = React.createClass({
 
     render: function() {
         var variantData = this.state.variantObj;
+        var interpretation = (this.state.interpretation) ? this.state.interpretation : null;
         var interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
         var editKey = this.state.editKey;
         var isLoadingComplete = this.state.isLoadingComplete;
@@ -50,7 +57,7 @@ var VariantCurationHub = React.createClass({
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} />
                 <VariantCurationActions variantData={variantData} interpretationUuid={interpretationUuid} eidtKey={editKey} session={session} />
-                <VariantCurationInterpretation variantData={variantData} interpretationUuid={interpretationUuid} eidtKey={editKey} session={session} loadingComplete={isLoadingComplete} />
+                <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} eidtKey={editKey} session={session} loadingComplete={isLoadingComplete} />
             </div>
         );
     }
