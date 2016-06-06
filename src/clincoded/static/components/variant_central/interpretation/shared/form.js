@@ -3,7 +3,7 @@ var React = require('react');
 var _ = require('underscore');
 var form = require('../../../../libs/bootstrap/form');
 var RestMixin = require('../../../rest').RestMixin;
-var curator = require('./curator');
+var curator = require('../../../curator');
 
 var Form = form.Form;
 var FormMixin = form.FormMixin;
@@ -69,44 +69,47 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
         console.log(evaluation);
         console.log(this.state.interpretation);
-        console.log(this.props.interpretationUuid);
 
         var existingEvaluationUuid = null;
-
-        if (this.state.interpretation.evaluations) {
-            this.state.interpretation.evaluations.map(function(oldEvaluation, i) {
-                if (oldEvaluation.criteria == evaluation.criteria) {
-                    existingEvaluationUuid = oldEvaluation.uuid;
-                }
-            });
-        }
-
-        if (existingEvaluationUuid) {
-            return this.putRestData('/evaluation/' + existingEvaluationUuid, evaluation).then(data => {
-                this.setState({submitBusy: false});
-                return 'Data saved successfully';
-            }).catch(error => {
-                this.setState({submitBusy: false});
-                return 'Data did not save successfully';
-            });
-        } else {
-            return this.postRestData('/evaluation/', evaluation).then(data => {
-                return data['@graph'][0];
-            }).then(newEvaluation => {
-                if (!('evaluations' in this.state.interpretation)) {
-                    this.state.interpretation.evaluations = [];
-                }
-                this.state.interpretation.evaluations.push('/evaluations/' + newEvaluation.uuid);
-
-                return this.putRestData('/interpretation/' + this.props.interpretationUuid, this.state.interpretation).then(data => {
-                    this.setState({submitBusy: false});
-                    return 'Data saved successfully';
+        var flatInterpretation = null;
+        this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(freshInterpretation => {
+            flatInterpretation = curator.flatten(freshInterpretation);
+            // get fresh update of interpretation object so we have newest evaluation list
+            // check existing evaluations to see if one exists for the current criteria
+            if (freshInterpretation.evaluations) {
+                freshInterpretation.evaluations.map(function(freshEvaluation, i) {
+                    if (freshEvaluation.criteria == evaluation.criteria) {
+                        existingEvaluationUuid = freshEvaluation.uuid;
+                    }
                 });
-            }).catch(error => {
-                this.setState({submitBusy: false});
-                return 'Data did not save successfully';
+            }
+
+            if (existingEvaluationUuid) {
+                // evaluation for criteria exists; update the existing evaluation
+                return this.putRestData('/evaluation/' + existingEvaluationUuid, evaluation).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
+            } else {
+                // evaluation for criteria does not exist; create new evaluation
+                return this.postRestData('/evaluation/', evaluation).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
+            }
+        }).then(newEvaluation => {
+            console.log('new evaluation uuid:');
+            console.log(newEvaluation.uuid);
+            if (!('evaluations' in this.state.interpretation)) {
+                this.state.interpretation.evaluations = [];
+            }
+            this.state.interpretation.evaluations.push('/evaluations/' + newEvaluation.uuid);
+
+            return this.putRestData('/interpretation/' + this.props.interpretationUuid, this.state.interpretation).then(data => {
+                return Promise.resolve(data['@graph'][0]);
             });
-        }
+        }).catch(error => {
+            console.log(error);
+        });
+
 
         //this.getRestData('/search/?type=evaluation&disease.orphaNumber=')
 
