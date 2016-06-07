@@ -21,7 +21,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
     getInitialState: function() {
         return {
-            clinvar_id: null, // ClinVar JSON response from NCBI
+            clinvar_id: null, // ClinVar ID
+            car_id: null, // ClinGen Allele Registry ID
+            dbSNP_id: null,
             nucleotide_change: [],
             molecular_consequence: [],
             protein_change: [],
@@ -52,6 +54,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (variant) {
             var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
             this.setState({
+                clinvar_id: clinVarId,
+                car_id: variant.carId,
+                dbSNP_id: variant.dbSNPIds[0],
+                hgvs_GRCh37: variant.hgvsNames.gRCh37,
+                hgvs_GRCh37: variant.hgvsNames.gRCh37,
                 hgvs_GRCh37: variant.hgvsNames.gRCh37,
                 hgvs_GRCh38: variant.hgvsNames.gRCh38,
             });
@@ -179,6 +186,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     render: function() {
+        var clinvar_id = this.state.clinvar_id;
+        var car_id = this.state.car_id;
+        var dbSNP_id = this.state.dbSNP_id;
         var nucleotide_change = this.state.nucleotide_change;
         var molecular_consequence = this.state.molecular_consequence;
         var protein_change = this.state.protein_change;
@@ -193,15 +203,25 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
         return (
             <div className="variant-interpretation basic-info">
-                {(GRCh37 || GRCh38) ?
-                    <div className="bs-callout bs-callout-info">
+                <div className="bs-callout bs-callout-info clearfix">
+                    <div className="bs-callout-content-container">
+                        <h4>IDs</h4>
+                        <ul>
+                            {(clinvar_id) ? <li><span>ClinVar Variation ID: {clinvar_id}</span></li> : null}
+                            {(car_id) ? <li><span>ClinGen Allele ID: {car_id}</span></li> : null}
+                            {(dbSNP_id) ? <li><span>dbSNP ID: {dbSNP_id}</span></li> : null}
+                        </ul>
+                    </div>
+                    {(GRCh37 || GRCh38) ?
+                    <div className="bs-callout-content-container">
                         <h4>Genomic</h4>
                         <ul>
                             {(GRCh38) ? <li><span>{GRCh38 + ' (GRCh38)'}</span></li> : null}
                             {(GRCh37) ? <li><span>{GRCh37 + ' (GRCh37)'}</span></li> : null}
                         </ul>
                     </div>
-                : null}
+                    : null}
+                </div>
 
                 <div className="panel panel-info">
                     <div className="panel-heading"><h3 className="panel-title">Primary Transcript</h3></div>
@@ -260,7 +280,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="panel-body">
                         <dl className="inline-dl clearfix">
                             <dd>Variation Viewer [<a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh38')} target="_blank" title={'Variation Viewer page for ' + GRCh38 + ' in a new window'}>GRCh38</a> - <a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh37')} target="_blank" title={'Variation Viewer page for ' + GRCh37 + ' in a new window'}>GRCh37</a>]</dd>
-                            <dd><a href={'http://uswest.ensembl.org/Homo_sapiens/Gene/Summary?g=' + this.getGeneId(ensembl_data)} target="_blank" title={'Ensembl Browser page for ' + this.getGeneId(ensembl_data) + ' in a new window'}>Ensembl Browser</a></dd>
+                            <dd>Ensembl Browser [<a href={'http://uswest.ensembl.org/Homo_sapiens/Gene/Summary?g=' + this.getGeneId(ensembl_data)} target="_blank" title={'Ensembl Browser page for ' + this.getGeneId(ensembl_data) + ' in a new window'}>GRCh38</a>]</dd>
                             <dd>UCSC [<a href={this.ucscViewerURL(sequence_location, 'hg38', 'GRCh38')} target="_blank" title={'UCSC Genome Browser for ' + GRCh38 + ' in a new window'}>GRCh38/hg38</a> - <a href={this.ucscViewerURL(sequence_location, 'hg19', 'GRCh37')} target="_blank" title={'UCSC Genome Browser for ' + GRCh37 + ' in a new window'}>GRCh37/hg19</a>]</dd>
                             <dd><a href={'http://www.uniprot.org/uniprot/' + uniprot_id} target="_blank" title={'UniProtKB page for ' + uniprot_id + ' in a new window'}>UniProtKB</a></dd>
                         </dl>
