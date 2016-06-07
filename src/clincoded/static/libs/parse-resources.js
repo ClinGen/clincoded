@@ -65,29 +65,29 @@ function parseClinvarMixin(variant, allele, hgvs_list, dataset) {
     // Parse <MolecularConsequence> nodes
     var MolecularConsequenceList = allele.getElementsByTagName('MolecularConsequenceList')[0];
     var MolecularConsequence = MolecularConsequenceList.getElementsByTagName('MolecularConsequence');
-    for(var n = 0; n < MolecularConsequence.length; n++) {
+    for(let n of MolecularConsequence) {
         var MolecularObj = {
-            "HGVS": MolecularConsequence[n].getAttribute('HGVS'),
-            "SOid": MolecularConsequence[n].getAttribute('SOid'),
-            "Function": MolecularConsequence[n].getAttribute('Function')
+            "HGVS": n.getAttribute('HGVS'),
+            "SOid": n.getAttribute('SOid'),
+            "Function": n.getAttribute('Function')
         };
         variant.RefSeqTranscripts.MolecularConsequenceList.push(MolecularObj);
     }
     // Parse <HGVS> nodes
     var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
-    for (var x = 0; x < HGVSnodes.length; x++) {
+    for (let x of HGVSnodes) {
         var hgvsObj = {
-            "HGVS": HGVSnodes[x].textContent,
-            "Change": HGVSnodes[x].getAttribute('Change'),
-            "AccessionVersion": HGVSnodes[x].getAttribute('AccessionVersion'),
-            "Type": HGVSnodes[x].getAttribute('Type')
+            "HGVS": x.textContent,
+            "Change": x.getAttribute('Change'),
+            "AccessionVersion": x.getAttribute('AccessionVersion'),
+            "Type": x.getAttribute('Type')
         };
         // nucleotide change
-        if (HGVSnodes[x].getAttribute('Type') === 'HGVS, coding, RefSeq') {
+        if (x.getAttribute('Type') === 'HGVS, coding, RefSeq') {
             variant.RefSeqTranscripts.NucleotideChangeList.push(hgvsObj);
         }
         // protein change
-        if (HGVSnodes[x].getAttribute('Type') === 'HGVS, protein, RefSeq') {
+        if (x.getAttribute('Type') === 'HGVS, protein, RefSeq') {
             variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
         }
     }
@@ -98,15 +98,15 @@ function parseClinvarMixin(variant, allele, hgvs_list, dataset) {
     variant.gene.full_name = geneNode.getAttribute('FullName');
     // Parse <SequenceLocation> nodes
     var SequenceLocationNodes = allele.getElementsByTagName('SequenceLocation');
-    for(var y = 0; y < SequenceLocationNodes.length; y++) {
+    for(let y of SequenceLocationNodes) {
         var SequenceLocationObj = {
-            "Assembly": SequenceLocationNodes[y].getAttribute('Assembly'),
-            "AssemblyAccessionVersion": SequenceLocationNodes[y].getAttribute('AssemblyAccessionVersion'),
-            "AssemblyStatus": SequenceLocationNodes[y].getAttribute('AssemblyStatus'),
-            "Chr": SequenceLocationNodes[y].getAttribute('Chr'),
-            "Accession": SequenceLocationNodes[y].getAttribute('Accession'),
-            "start": SequenceLocationNodes[y].getAttribute('start'),
-            "stop": SequenceLocationNodes[y].getAttribute('stop')
+            "Assembly": y.getAttribute('Assembly'),
+            "AssemblyAccessionVersion": y.getAttribute('AssemblyAccessionVersion'),
+            "AssemblyStatus": y.getAttribute('AssemblyStatus'),
+            "Chr": y.getAttribute('Chr'),
+            "Accession": y.getAttribute('Accession'),
+            "start": y.getAttribute('start'),
+            "stop": y.getAttribute('stop')
         };
         variant.allele.SequenceLocation.push(SequenceLocationObj);
     }
