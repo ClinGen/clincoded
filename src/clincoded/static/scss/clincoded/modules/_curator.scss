@@ -1164,6 +1164,11 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     h4 {
         color: #1b809e;
     }
+
+    .bs-callout-content-container {
+        float: left;
+        margin-right: 10%;
+    }
 }
 
 .bs-callout+.bs-callout {
