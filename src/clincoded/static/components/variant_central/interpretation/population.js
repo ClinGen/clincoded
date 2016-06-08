@@ -24,7 +24,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
-        shouldFetchData: React.PropTypes.bool
+        shouldFetchData: React.PropTypes.bool,
+        updateInterpretationObj: React.PropTypes.func
     },
 
     getInitialState: function() {
@@ -102,10 +103,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <li className="col-xs-12 gutter-exc">
                         <CurationInterpretationForm formTitle={"PM2"} renderedFormContent={pm2} extraData={this.state.data}
                             formDataUpdater={pm2_update} variantUuid={this.props.data['@id']}
-                            interpretation={this.state.interpretation} />
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         <CurationInterpretationForm formTitle={"PS4 stuff"} renderedFormContent={ps4} extraData={this.state.data}
                             formDataUpdater={ps4_update} variantUuid={this.props.data['@id']}
-                            interpretation={this.state.interpretation} />
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </li>
                 </ul>
                 : null}

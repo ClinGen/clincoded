@@ -20,7 +20,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         extraData: React.PropTypes.object, // any extra data that is passed from the parent page
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from extraData
         variantUuid: React.PropTypes.string,
-        interpretation: React.PropTypes.object
+        interpretation: React.PropTypes.object,
+        updateInterpretationObj: React.PropTypes.func
     },
 
     contextTypes: {
@@ -111,6 +112,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 // if the interperation object already has the evaluation in it, skip updating the object
                 return Promise.resolve(freshInterpretation);
             }
+        }).then(interpretation => {
+            this.setState({submitBusy: false});
+            this.props.updateInterpretationObj(interpretation);
         }).catch(error => {
             console.log(error);
         });
