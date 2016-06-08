@@ -69,7 +69,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
         var existingEvaluationUuid = null;
         var flatInterpretation = null;
-        this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(freshInterpretation => {
+        var freshInterpretation = null;
+        this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+            freshInterpretation = interpretation;
             flatInterpretation = curator.flatten(freshInterpretation);
             // get fresh update of interpretation object so we have newest evaluation list
             // check existing evaluations to see if one exists for the current criteria
@@ -107,16 +109,11 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 });
             } else {
                 // if the interperation object already has the evaluation in it, skip updating the object
-                return Promise.resolve(null);
+                return Promise.resolve(freshInterpretation);
             }
         }).catch(error => {
             console.log(error);
         });
-
-
-        //this.getRestData('/search/?type=evaluation&disease.orphaNumber=')
-
-
     },
 
     render: function() {
