@@ -16,10 +16,12 @@
         "uuid": "b3e105b5-d08a-4520-9305-c1419d9027d4",
         "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
         "genes": [
-            "e7c51b8a-1c34-11e5-ab27-60f81dc5b05a"
+            "e7c51b8a-1c34-11e5-ab27-60f81dc5b05a",
+            "e265b19c-1c34-11e5-a27c-60f81dc5b05a"
         ],
         "evaluations": [
-            "09dbca61-a1a0-4ba4-ae68-99f4f1ca7493"
+            "09dbca61-a1a0-4ba4-ae68-99f4f1ca7493",
+            "1e66c5a1-6a7d-45c6-86b5-0bc4e4c0712b"
         ],
         "provisional_variant": [
             "a9886cb9-cea3-4372-8d2b-845563b47b1f"

@@ -36,6 +36,7 @@ ORDER = [
     'provisionalClassification',
     'gdm',
     'population', # VCI
+    'computational', # VCI
     'evaluation', # VCI
     'provisional_variant', # VCI
     'interpretation', # VCI
