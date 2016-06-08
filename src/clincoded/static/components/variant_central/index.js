@@ -46,7 +46,7 @@ var VariantCurationHub = React.createClass({
     },
 
     updateInterpretationObj: function(interpretation) {
-        console.log(interpretation);
+        this.setState({interpretation: interpretation});
     },
 
     render: function() {

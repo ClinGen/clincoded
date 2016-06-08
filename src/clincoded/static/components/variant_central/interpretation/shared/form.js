@@ -37,12 +37,29 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         };
     },
 
+    componentDidMount: function() {
+        if (this.props.interpretation) {
+            this.setState({interpretation: this.props.interpretation});
+        }
+        if (this.props.extraData) {
+            this.setState({extraData: this.props.extraData});
+            if (this.props.formDataUpdater) {
+                this.props.formDataUpdater.call(this, this.props);
+            }
+        }
+    },
+
     componentWillReceiveProps: function(nextProps) {
         // upon receiving props, call the formDataUpdater with the nextProps to update the forms, if applicable
-        this.setState({interpretation: nextProps.interpretation});
-        this.setState({extraData: nextProps.extraData});
-        if (this.props.formDataUpdater) {
-            this.props.formDataUpdater.call(this, nextProps);
+        if (typeof nextProps.interpretation !== undefined && nextProps.interpretation != this.props.interpretation) {
+            this.setState({interpretation: nextProps.interpretation});
+        }
+
+        if (typeof nextProps.extraData !== undefined && nextProps.extraData != this.props.extraData) {
+            this.setState({extraData: nextProps.extraData});
+            if (this.props.formDataUpdater) {
+                this.props.formDataUpdater.call(this, nextProps);
+            }
         }
     },
 
@@ -110,7 +127,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 });
             } else {
                 // if the interperation object already has the evaluation in it, skip updating the object
-                return Promise.resolve(freshInterpretation);
+                return this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(data => {
+                    return Promise.resolve(data);
+                });
             }
         }).then(interpretation => {
             this.setState({submitBusy: false});
