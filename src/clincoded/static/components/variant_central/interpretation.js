@@ -2,8 +2,8 @@
 var React = require('react');
 var globals = require('../globals');
 
-var queryHashValue = globals.queryHashValue;
-var setHashValue = globals.setHashValue;
+var queryKeyValue = globals.queryKeyValue;
+var editQueryValue = globals.editQueryValue;
 
 // Import react-tabs npm to create tabs
 var ReactTabs = require('react-tabs');
@@ -45,7 +45,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     getInitialState: function() {
         return {
-            selectedTab: (this.props.href ? tabList.indexOf(queryHashValue(this.props.href)) : 0) // set selectedTab to whatever is defined in the address; default to first tab if not set
+            selectedTab: (this.props.href ? tabList.indexOf(queryKeyValue('tab', this.props.href)) : 0) // set selectedTab to whatever is defined in the address; default to first tab if not set
         };
     },
 
@@ -53,9 +53,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     handleSelect: function (index, last) {
         this.setState({selectedTab: index});
         if (index == 0) {
-            window.history.replaceState(window.state, '', setHashValue(this.props.href, null));
+            window.history.replaceState(window.state, '', editQueryValue(this.props.href, 'tab', null));
         } else {
-            window.history.replaceState(window.state, '', setHashValue(this.props.href, tabList[index]));
+            window.history.replaceState(window.state, '', editQueryValue(this.props.href, 'tab', tabList[index]));
         }
     },
 

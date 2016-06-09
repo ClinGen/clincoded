@@ -98,6 +98,21 @@ module.exports.queryKeyValue = function (key, href) {
     return undefined;
 };
 
+// modify key's value from the query string in the url given in 'href'
+// if value is null, undefined, or '', the key is removed from the query string
+module.exports.editQueryValue = function(href, key, value) {
+    var queryParsed = href && url.parse(href, true);
+    delete queryParsed['search'];
+    if (queryParsed.query) {
+        if (value && value != '') {
+            queryParsed.query[key] = value;
+        } else {
+            delete queryParsed.query[key];
+        }
+    }
+    return url.format(queryParsed);
+};
+
 // Add a key-value pair as a query string to the given href. If href already
 // has query string values, this function adds the given key value to it.
 module.exports.addQueryKey = function(href, key, value) {
@@ -106,23 +121,6 @@ module.exports.addQueryKey = function(href, key, value) {
         return href + '&' + key + '=' + value;
     }
     return href + '?' + key + '=' + value;
-};
-
-// get the hash in the href. Remove the '#' in the string that the url package returns
-module.exports.queryHashValue = function(href) {
-    var hashParsed = href && url.parse(href, true).hash;
-    if (hashParsed) {
-        hashParsed.substr(1);
-    }
-    return hashParsed;
-};
-
-// return the full href, but with the new hash value specified by value. Leave value as
-// null or undefined and the hash will be removed
-module.exports.setHashValue = function(href, value) {
-    var inputHref = href && url.parse(href, true);
-    inputHref.hash = value ? value : null;
-    return url.format(inputHref);
 };
 
 
