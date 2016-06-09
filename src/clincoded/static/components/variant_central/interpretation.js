@@ -2,6 +2,8 @@
 var React = require('react');
 var globals = require('../globals');
 
+var queryHashValue = globals.queryHashValue;
+
 // Import react-tabs npm to create tabs
 var ReactTabs = require('react-tabs');
 var Tab = ReactTabs.Tab;
@@ -25,11 +27,44 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
         interpretationUuid: React.PropTypes.string,
-        loadingComplete: React.PropTypes.bool
+        loadingComplete: React.PropTypes.bool,
+        href: React.PropTypes.string
+    },
+
+    getInitialState: function() {
+        return {
+            selectedTab: (this.props.href ? this.convertTabToNum(queryHashValue(this.props.href)) : 0)
+        };
     },
 
     handleSelect: function (index, last) {
         console.log('Selected tab: ' + index + ', Last tab: ' + last);
+        console.log(queryHashValue(this.props.href));
+    },
+
+    convertTabToNum: function(tab) {
+        var num = 0;
+        switch(tab) {
+            case '#basic-info':
+                num = 0;
+                break;
+            case '#population':
+                num = 1;
+                break;
+            case '#computational':
+                num = 2;
+                break;
+            case '#functional':
+                num = 3;
+                break;
+            case '#segregation-case':
+                num = 4;
+                break;
+            case '#gene-specific':
+                num = 5;
+                break;
+        }
+        return num;
     },
 
     render: function() {
@@ -41,7 +76,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
         return (
             <div className="container curation-variant-tab-group">
-                <Tabs onSelect={this.handleSelect} selectedIndex={0}>
+                <Tabs onSelect={this.handleSelect} selectedIndex={this.state.selectedTab}>
                     <TabList className="tab-label-list">
                         <Tab className="tab-label col-sm-2">Basic Information</Tab>
                         <Tab className="tab-label col-sm-2">Population</Tab>

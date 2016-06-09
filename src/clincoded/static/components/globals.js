@@ -108,6 +108,11 @@ module.exports.addQueryKey = function(href, key, value) {
     return href + '?' + key + '=' + value;
 };
 
+module.exports.queryHashValue = function (href) {
+    var hashParsed = href && url.parse(href, true).hash;
+    return hashParsed.substr(1);
+};
+
 
 module.exports.productionHost = {'curation.clinicalgenome.org':1};
 
