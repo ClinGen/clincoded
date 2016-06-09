@@ -3,6 +3,7 @@ var React = require('react');
 var globals = require('../globals');
 
 var queryHashValue = globals.queryHashValue;
+var setHashValue = globals.setHashValue;
 
 // Import react-tabs npm to create tabs
 var ReactTabs = require('react-tabs');
@@ -22,6 +23,17 @@ var CurationInterpretationFunctional = require('./interpretation/functional').Cu
 var CurationInterpretationSegregation = require('./interpretation/segregation').CurationInterpretationSegregation;
 var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific').CurationInterpretationGeneSpecific;
 
+// list of tabs, in order of how they appear on the tab list
+// these values will be appended to the URI as you switch tabs
+var tabList = [
+    'basic-info',
+    'population',
+    'computational',
+    'functional',
+    'segregation-case',
+    'gene-specific'
+];
+
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
     propTypes: {
@@ -33,38 +45,18 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     getInitialState: function() {
         return {
-            selectedTab: (this.props.href ? this.convertTabToNum(queryHashValue(this.props.href)) : 0)
+            selectedTab: (this.props.href ? tabList.indexOf(queryHashValue(this.props.href)) : 0) // set selectedTab to whatever is defined in URI; default to first tab if not set
         };
     },
 
+    // set selectedTab to whichever tab the user switches to, and update the URI accordingly
     handleSelect: function (index, last) {
-        console.log('Selected tab: ' + index + ', Last tab: ' + last);
-        console.log(queryHashValue(this.props.href));
-    },
-
-    convertTabToNum: function(tab) {
-        var num = 0;
-        switch(tab) {
-            case '#basic-info':
-                num = 0;
-                break;
-            case '#population':
-                num = 1;
-                break;
-            case '#computational':
-                num = 2;
-                break;
-            case '#functional':
-                num = 3;
-                break;
-            case '#segregation-case':
-                num = 4;
-                break;
-            case '#gene-specific':
-                num = 5;
-                break;
+        this.setState({selectedTab: index});
+        if (index == 0) {
+            window.history.replaceState(window.state, '', setHashValue(this.props.href, null));
+        } else {
+            window.history.replaceState(window.state, '', setHashValue(this.props.href, tabList[index]));
         }
-        return num;
     },
 
     render: function() {

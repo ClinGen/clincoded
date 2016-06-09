@@ -108,9 +108,21 @@ module.exports.addQueryKey = function(href, key, value) {
     return href + '?' + key + '=' + value;
 };
 
-module.exports.queryHashValue = function (href) {
+// get the hash in the href. Remove the '#' in the string that the url package returns
+module.exports.queryHashValue = function(href) {
     var hashParsed = href && url.parse(href, true).hash;
-    return hashParsed.substr(1);
+    if (hashParsed) {
+        hashParsed.substr(1);
+    }
+    return hashParsed;
+};
+
+// return the full href, but with the new hash value specified by value. Leave value as
+// null or undefined and the hash will be removed
+module.exports.setHashValue = function(href, value) {
+    var inputHref = href && url.parse(href, true);
+    inputHref.hash = value ? value : null;
+    return url.format(inputHref);
 };
 
 
