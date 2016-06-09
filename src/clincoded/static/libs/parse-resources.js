@@ -5,7 +5,7 @@ var _ = require('underscore');
 // Derived from:
 // https://github.com/standard-analytics/pubmed-schema-org/blob/master/lib/pubmed.js
 module.exports.parseClinvar = parseClinvar;
-function parseClinvar(xml){
+function parseClinvar(xml, mixin){
     var variant = {};
     var doc = new DOMParser().parseFromString(xml, 'text/xml');
 
@@ -42,10 +42,74 @@ function parseClinvar(xml){
                         variant.dbSNPIds.push($XRef[i].getAttribute('ID'));
                     }
                 }
+                // Call to extract more ClinVar data from XML response
+                if (mixin) {
+                    parseClinvarMixin(variant, $Allele, $HGVSlist_raw, $VariationReport);
+                }
             }
         }
     }
     return variant;
+}
+
+// Function to extract more ClinVar data than what the db stores
+function parseClinvarMixin(variant, allele, hgvs_list, dataset) {
+    variant.RefSeqTranscripts = {};
+    variant.gene = {};
+    variant.allele = {};
+    variant.allele.SequenceLocation = [];
+    // Group transcripts by RefSeq nucleotide change, molecular consequence, and protein change
+    variant.RefSeqTranscripts.NucleotideChangeList = [];
+    variant.RefSeqTranscripts.MolecularConsequenceList = [];
+    variant.RefSeqTranscripts.ProteinChangeList = [];
+    // Parse <MolecularConsequence> nodes
+    var MolecularConsequenceList = allele.getElementsByTagName('MolecularConsequenceList')[0];
+    var MolecularConsequence = MolecularConsequenceList.getElementsByTagName('MolecularConsequence');
+    for(let n of MolecularConsequence) {
+        var MolecularObj = {
+            "HGVS": n.getAttribute('HGVS'),
+            "SOid": n.getAttribute('SOid'),
+            "Function": n.getAttribute('Function')
+        };
+        variant.RefSeqTranscripts.MolecularConsequenceList.push(MolecularObj);
+    }
+    // Parse <HGVS> nodes
+    var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
+    for (let x of HGVSnodes) {
+        var hgvsObj = {
+            "HGVS": x.textContent,
+            "Change": x.getAttribute('Change'),
+            "AccessionVersion": x.getAttribute('AccessionVersion'),
+            "Type": x.getAttribute('Type')
+        };
+        // nucleotide change
+        if (x.getAttribute('Type') === 'HGVS, coding, RefSeq') {
+            variant.RefSeqTranscripts.NucleotideChangeList.push(hgvsObj);
+        }
+        // protein change
+        if (x.getAttribute('Type') === 'HGVS, protein, RefSeq') {
+            variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
+        }
+    }
+    // Parse <gene> node
+    var geneList = dataset.getElementsByTagName('GeneList')[0];
+    var geneNode = geneList.getElementsByTagName('Gene')[0];
+    variant.gene.symbol = geneNode.getAttribute('Symbol');
+    variant.gene.full_name = geneNode.getAttribute('FullName');
+    // Parse <SequenceLocation> nodes
+    var SequenceLocationNodes = allele.getElementsByTagName('SequenceLocation');
+    for(let y of SequenceLocationNodes) {
+        var SequenceLocationObj = {
+            "Assembly": y.getAttribute('Assembly'),
+            "AssemblyAccessionVersion": y.getAttribute('AssemblyAccessionVersion'),
+            "AssemblyStatus": y.getAttribute('AssemblyStatus'),
+            "Chr": y.getAttribute('Chr'),
+            "Accession": y.getAttribute('Accession'),
+            "start": y.getAttribute('start'),
+            "stop": y.getAttribute('stop')
+        };
+        variant.allele.SequenceLocation.push(SequenceLocationObj);
+    }
 }
 
 // Function for parsing CAR data for variant object creation

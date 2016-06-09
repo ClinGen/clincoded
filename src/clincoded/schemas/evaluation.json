@@ -32,7 +32,7 @@
             "title": "Computational",
             "description": "Computational data used as evidnece to evaluate the criteria.",
             "type": "string",
-            "comment": "will link to object computational later."
+            "linkTo": "computational"
         },
         "functional": {
             "title": "Functional",
@@ -76,7 +76,7 @@
             "title": "Criteria",
             "type": "string"
         },
-        "evidence_present": {
+        "evidence_type": {
             "title": "Evidence Type",
             "type": "string"
         },

@@ -1054,19 +1054,20 @@ div.react-tabs .ReactTabs__TabPanel--selected {
             margin: 0;
             padding: 0;
         }
+
+        dl {
+            margin-bottom: 0;
+
+            dd {
+                margin-right: 20px;
+            }
+        }
+
+        .basic-info .table th,
+        .basic-info .table td {
+            width: 33%;
+        }
     }
-}
-
-.react-tabs .tab-panel .basic-info ul li {
-    padding: 5px 3px;
-}
-
-.react-tabs .tab-panel .basic-info ul:nth-child(odd) {
-    background: #f6f6f6;
-}
-
-.react-tabs .tab-panel .basic-info ul:nth-child(even) {
-    background: #fff;
 }
 
 /* FIXME - temp styles for placeholders */
@@ -1140,4 +1141,40 @@ div.react-tabs .ReactTabs__TabPanel--selected {
             padding: 0;
         }
     }
+}
+
+/* bootstrap callout component styles */
+.bs-callout {
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+    background: #fff;
+
+    h4 {
+        margin-top: 0;
+        margin-bottom: 5px;
+    }
+}
+
+.bs-callout-info {
+    border-left-color: #1b809e;
+
+    h4 {
+        color: #1b809e;
+    }
+
+    .bs-callout-content-container {
+        float: left;
+        margin-right: 10%;
+    }
+}
+
+.bs-callout+.bs-callout {
+    margin-top: -5px;
+}
+
+.panel.panel-info .panel-title {
+    font-weight: bold;
 }
