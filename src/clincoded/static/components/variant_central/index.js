@@ -61,7 +61,7 @@ var VariantCurationHub = React.createClass({
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} />
                 <VariantCurationActions variantData={variantData} interpretationUuid={interpretationUuid} eidtKey={editKey} session={session} />
-                <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} eidtKey={editKey} session={session} loadingComplete={isLoadingComplete} updateInterpretationObj={this.updateInterpretationObj} />
+                <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} eidtKey={editKey} session={session} href={this.props.href} loadingComplete={isLoadingComplete} updateInterpretationObj={this.updateInterpretationObj} />
             </div>
         );
     }
