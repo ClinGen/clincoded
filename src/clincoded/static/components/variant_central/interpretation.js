@@ -24,7 +24,7 @@ var CurationInterpretationSegregation = require('./interpretation/segregation').
 var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific').CurationInterpretationGeneSpecific;
 
 // list of tabs, in order of how they appear on the tab list
-// these values will be appended to the URI as you switch tabs
+// these values will be appended to the address as you switch tabs
 var tabList = [
     'basic-info',
     'population',
@@ -45,11 +45,11 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     getInitialState: function() {
         return {
-            selectedTab: (this.props.href ? tabList.indexOf(queryHashValue(this.props.href)) : 0) // set selectedTab to whatever is defined in URI; default to first tab if not set
+            selectedTab: (this.props.href ? tabList.indexOf(queryHashValue(this.props.href)) : 0) // set selectedTab to whatever is defined in the address; default to first tab if not set
         };
     },
 
-    // set selectedTab to whichever tab the user switches to, and update the URI accordingly
+    // set selectedTab to whichever tab the user switches to, and update the address accordingly
     handleSelect: function (index, last) {
         this.setState({selectedTab: index});
         if (index == 0) {
