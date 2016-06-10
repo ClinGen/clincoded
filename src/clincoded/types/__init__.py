@@ -943,12 +943,14 @@ class Interpretation(Item):
         'evaluations.population.submitted_by',
         'evaluations.computational',
         'evaluations.computational.submitted_by',
+        'evaluations.computational.nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.gene',
+        'evaluations.computational.nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.mechanisms.disease',
         'provisional_variant',
         'provisional_variant.submitted_by'
     ]
 
     @calculated_property(schema={
-        "title": "Interpretation Status",
+        "title": "Status",
         "type": "string",
     })
     def interpretation_status(self, evaluations=[], provisional_variant=[]):
@@ -1023,7 +1025,7 @@ class Interpretation(Item):
     unique_key='evaluation:uuid',
     properties={
         'title': 'Evaluations',
-        'description': 'Listing of Evaluations',
+        'description': 'List of Evaluations',
     })
 class Evaluation(Item):
     item_type = 'evaluation'
@@ -1037,6 +1039,8 @@ class Evaluation(Item):
         'disease',
         'population',
         'computational',
+        'computational.nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.gene',
+        'computational.nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.mechanisms.disease',
         'interpretation_associated'
     ]
     rev = {
@@ -1073,7 +1077,7 @@ class Evaluation(Item):
     unique_key='population:uuid',
     properties={
         'title': 'Populations',
-        'description': 'Listing of Populations',
+        'description': 'List of Population Evidence',
     })
 class Population(Item):
     item_type = 'population'
@@ -1101,7 +1105,7 @@ class Population(Item):
         return paths_filtered_by_status(request, evaluation_associated)
 
     @calculated_property(schema={
-        "title": "Number of MAF",
+        "title": "Number of Allele Frequency",
         "type": "string"
     })
     def maf_count(self, populations=[]):
@@ -1123,12 +1127,11 @@ class Computational(Item):
     name_key = 'uuid'
     embedded = [
         'variant',
-        'disease',
         'variant.associatedInterpretations',
-        'variant.associatedInterpretations.submitted_by',
+        'nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.gene',
+        'nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.mechanisms.disease',
         'evaluation_associated',
-        'evaluation_associated.interpretation_associated',
-        'evaluation_associated.interpretation_associated.disease'
+        'evaluation_associated.interpretation_associated'
     ]
     rev = {
         'evaluation_associated': ('evaluation', 'computational')
@@ -1143,13 +1146,18 @@ class Computational(Item):
         return paths_filtered_by_status(request, evaluation_associated)
 
     @calculated_property(schema={
-        "title": "Disease",
+        "title": "Molecular Consequence",
         "type": "string"
     })
-    def disease_present(self, request, disease=''):
-        if disease != '':
-            diseaseObj = request.embed(disease, '@@object')
-            return diseaseObj['term']
+    def molecular_consequence(self, missense={}, inFrameIndel={}, nonsenseOrFrameshiftOrSplice12={}, silentOrOtherSplice={}):
+        if len(missense) > 0:
+            return 'Missense'
+        elif len(inFrameIndel) > 0:
+            return 'In-Frame Indel'
+        elif len(nonsenseOrFrameshiftOrSplice12) > 0:
+            return 'Nonsense/Frameshift/Splice 1, 2'
+        elif len(silentOrOtherSplice) > 0:
+            return 'Silent/Splice (outside 1, 2)'
         return ''
 
 

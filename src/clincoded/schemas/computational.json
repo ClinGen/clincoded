@@ -22,9 +22,9 @@
             "type": "string",
             "linkTo": "variant"
         },
-        "Missense": {
+        "missense": {
             "title": "Missense",
-            "description": "Object Missense",
+            "description": "Sub-object Missense",
             "type": "object",
             "properties": {
                 "computationalTools": {
@@ -71,7 +71,7 @@
                                 "description": "Primary key of the variant in external source",
                                 "type": "string"
                             },
-                            "clinivalType": {
+                            "clinicalType": {
                                 "title": "Clinical Type",
                                 "description": "Varaint interpretation on pathogenicity",
                                 "type": "string"
@@ -106,6 +106,7 @@
         },
         "inFrameIndel": {
             "title": "In-Frame Indel",
+            "description": "Sub-object In-frame indel",
             "type": "object",
             "properties": {
                 "regionRepetitive": {
@@ -117,12 +118,15 @@
                     "description": "Protein length changes as a result of In-Frame deletion/insertion in a non-repeat region or stop-loss variant?",
                     "type": "boolean"
                 },
-                "noKnownFunction": "No Known Function",
-                "description": "In-Frame deletion/insertion in a repetitive region without a known function?",
-                "type": "boolean"
+                "noKnownFunction": {
+                    "title": "No Known Function",
+                    "description": "In-Frame deletion/insertion in a repetitive region without a known function?",
+                    "type": "boolean"
+                }
             }
         },
         "nonsenseOrFrameshiftOrSplice12": {
+            "description": "Sub-object Nonsense/Frameshift/Splice 1, 2",
             "type": "object",
             "properties": {
                 "totalExons": {
@@ -205,6 +209,7 @@
             }
         },
         "silentOrOtherSplice": {
+            "description": "Sub-object Silent/Splice (outside 1, 2)",
             "type": "object",
             "properties": {
                 "splicePredictors": {
