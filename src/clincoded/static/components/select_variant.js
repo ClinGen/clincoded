@@ -93,14 +93,14 @@ var SelectVariant = React.createClass({
                             <div className="row col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4">
                                 <AddResourceId resourceType="clinvar" label="ClinVar" wrapperClass="modal-buttons-wrapper"
                                     buttonText={this.state.variantData ? "Edit ClinVar ID" : "Add ClinVar ID" } initialFormValue={this.state.variantData && this.state.variantData.clinvarVariantId}
-                                    modalButtonText="View Evidence" updateParentForm={this.updateVariantData} buttonOnly={true} />
+                                    modalButtonText="Save and View Evidence" updateParentForm={this.updateVariantData} buttonOnly={true} />
                             </div>
                             : null}
                             {this.state.variantIdType == "ClinGen Allele Registry ID (CA ID)" ?
                             <div className="row col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4">
                                 <AddResourceId resourceType="car" label="ClinGen Allele Registry" wrapperClass="modal-buttons-wrapper"
                                     buttonText={this.state.variantData ? "Edit CA ID" : "Add CA ID" } initialFormValue={this.state.variantData && this.state.variantData.carVariantId}
-                                    modalButtonText="View Evidence" updateParentForm={this.updateVariantData} buttonOnly={true} />
+                                    modalButtonText="Save and View Evidence" updateParentForm={this.updateVariantData} buttonOnly={true} />
                             </div>
                             : null}
                         </Form>
