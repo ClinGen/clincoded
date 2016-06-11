@@ -180,6 +180,34 @@ module.exports = function(grunt) {
                     {expand: true, flatten: true, src: ['src/clincoded/static/build/*.js'], dest: 'src/clincoded/static/build/'}
                 ]
             }
+        },
+        compass: {
+            dist: {
+                options: {
+                    basePath: '/Users/karen/cherry/github/clincoded/parts/rubygems/bin/compass'
+                    // ,
+                    // watch: true
+                }
+            }
+        },
+        watch: {
+            scripts: {
+                files: 'src/clincoded/static/components/**/*.js',
+                tasks: ['browserify', 'filerev', 'replace']
+                // ,
+                // options: {
+                //   interrupt: true,
+                // },
+            },
+            css: {
+                files: 'src/clincoded/static/scss/**/*.scss',
+                tasks: ['compass']
+                // tasks: ['compass', 'filerev', 'replace']
+                // ,
+                // options: {
+                //   livereload: true,
+                // },
+            }
         }
     });
 
@@ -275,9 +303,11 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-filerev');
     grunt.loadNpmTasks('grunt-replace');
+    grunt.loadNpmTasks('grunt-contrib-compass');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('default', ['browserify', 'copy', 'filerev', 'replace']);
-    grunt.registerTask('watch', ['browserify:*:watch', 'wait']);
+    //grunt.registerTask('watch', ['browserify:*:watch', 'wait']);
 
 };
 

@@ -23,6 +23,8 @@
   },
   "devDependencies": {
     "exorcist": "^0.4.0",
+    "grunt-contrib-compass": "^1.1.1",
+    "grunt-contrib-watch": "^1.0.0",
     "jest-cli": "^0.9.2",
     "watchify": "^3.7.0"
   },
