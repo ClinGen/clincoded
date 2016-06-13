@@ -41,6 +41,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     componentWillReceiveProps: function(nextProps) {
         this.setState({shouldFetchData: nextProps.shouldFetchData});
         if (this.state.shouldFetchData === true) {
+            window.localStorage.clear();
             this.fetchRefseqData();
             this.fetchEnsemblData();
         }
@@ -53,12 +54,16 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
         if (variant) {
             var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
+            // Extract genomic substring from HGVS name whose assembly is GRCh37 or GRCh38
+            // Both of "GRCh37" and "gRCh37" (same for GRCh38) instances are possibly present in the variant object
+            var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
+            var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
             this.setState({
                 clinvar_id: clinVarId,
                 car_id: variant.carId,
                 dbSNP_id: variant.dbSNPIds[0],
-                hgvs_GRCh37: variant.hgvsNames.gRCh37,
-                hgvs_GRCh38: variant.hgvsNames.gRCh38,
+                hgvs_GRCh37: hgvs_GRCh37,
+                hgvs_GRCh38: hgvs_GRCh38,
             });
             // Get ClinVar data via the parseClinvar method defined in parse-resources.js
             this.getRestDataXml(url + clinVarId).then(xml => {
@@ -95,9 +100,10 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             SO_id_term = found.SO_term + ' ' + found.SO_id;
             // FIXME: temporarily use protein_change[0] due to lack of mapping
             // associated with nucleotide transcript in ClinVar data
+            var protein_hgvs = (typeof protein_change !== 'undefined' && protein_change.length) ? protein_change[0].HGVS : '--';
             transcript = {
                 "nucleotide": result.HGVS,
-                "protein": protein_change[0].HGVS,
+                "protein": protein_hgvs,
                 "molecular": SO_id_term
             };
         }
@@ -108,8 +114,10 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     fetchEnsemblData: function() {
         var variant = this.props.data;
         if (variant) {
-            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0] : 'Unknown';
-            this.getRestData('http://rest.ensembl.org/vep/human/id/' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+            // Extract only the number portion of the dbSNP id
+            var numberPattern = /\d+/g;
+            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
+            this.getRestData('http://rest.ensembl.org/vep/human/id/rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
                 this.setState({ensembl_transcripts: response[0].transcript_consequences});
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
