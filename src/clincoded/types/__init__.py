@@ -629,6 +629,8 @@ class Individual(Item):
         'variants.submitted_by',
         'otherPMIDs',
         'otherPMIDs.submitted_by',
+        'assessments',
+        'assessments.submitted_by',
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
         'associatedGroups.associatedAnnotations',
@@ -703,6 +705,15 @@ class Individual(Item):
             return 'Yes'
         else:
             return 'No'
+
+    @calculated_property(schema={
+        "title": "# Assessment",
+        "type": "string"
+    })
+    def assessment_individual(self, assessments=[]):
+        if len(assessments) > 0:
+            return len(assessments)
+        return ''
 
 
 @collection(

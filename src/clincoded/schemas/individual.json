@@ -238,6 +238,16 @@
                 "linkTo": "variant"
             }
         },
+        "assessments": {
+            "title": "Assessments",
+            "description": "List of assessments added from different curators",
+            "type": "array",
+            "items": {
+                "description": "Assessment from one curator",
+                "type": "string",
+                "linkTo": "assessment"
+            }
+        },
         "proband": {
             "title": "Proband",
             "description": "Whether or not associated with a proband variant to a family",
@@ -259,16 +269,12 @@
             "title": "Probands",
             "type": "string"
         },
+        "assessment_individual": {
+            "title": "# Assessment",
+            "type": "string"
+        },
         "submitted_by.title": {
             "title": "Creator",
-            "type": "string"
-        },
-        "date_created": {
-            "title": "Creation Date",
-            "type": "string"
-        },
-        "last_modified": {
-            "title": "Last Modified",
             "type": "string"
         }
     }
