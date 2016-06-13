@@ -20,6 +20,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         extraData: React.PropTypes.object, // any extra data that is passed from the parent page
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from extraData
         variantUuid: React.PropTypes.string,
+        criteria: React.PropTypes.object,
         interpretation: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func
     },
@@ -78,12 +79,16 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         this.setState({submitBusy: true});
 
         // Save all form values from the DOM.
+        var evaluations = {};
         this.saveAllFormValues();
-        var evaluation = {};
-        evaluation.variant = this.props.variantUuid;
-        evaluation.criteria = this.getFormValue('criteria');
-        evaluation.value = this.getFormValue('value');
-        evaluation.description = this.getFormValue('description');
+        this.props.criteria.map(criterion => {
+            evaluations[criterion] = {
+                variant: this.props.variantUuid,
+                criteria: criterion,
+                value: this.getFormValue(criterion + '-value'),
+                description: this.getFormValue(criterion + '-description')
+            };
+        });
 
         var existingEvaluationUuid = null;
         var flatInterpretation = null;
@@ -95,7 +100,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             // check existing evaluations to see if one exists for the current criteria
             if (freshInterpretation.evaluations) {
                 freshInterpretation.evaluations.map(function(freshEvaluation, i) {
-                    if (freshEvaluation.criteria == evaluation.criteria) {
+                    if (this.props.criteria.indexOf(freshEvaluation.criteria) > -1) {
                         existingEvaluationUuid = freshEvaluation.uuid;
                     }
                 });

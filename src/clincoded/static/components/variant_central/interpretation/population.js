@@ -101,11 +101,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {(this.state.interpretation) ?
                 <ul className="section-criteria-evaluation clearfix">
                     <li className="col-xs-12 gutter-exc">
-                        <CurationInterpretationForm formTitle={"PM2"} renderedFormContent={pm2} extraData={this.state.data}
-                            formDataUpdater={pm2_update} variantUuid={this.props.data['@id']}
+                        <CurationInterpretationForm formTitle={"Criteria Group 1"} renderedFormContent={pop_crit_1} extraData={this.state.data}
+                            formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"PS4 stuff"} renderedFormContent={ps4} extraData={this.state.data}
-                            formDataUpdater={ps4_update} variantUuid={this.props.data['@id']}
+                        <CurationInterpretationForm formTitle={"Criteria Group 2"} renderedFormContent={pop_crit_2} extraData={this.state.data}
+                            formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </li>
                 </ul>
@@ -116,30 +116,29 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 });
 
 
-var pm2 = function() {
+var pop_crit_1 = function() {
     return (
         <div>
-            <Input type="text" ref="criteria" value="pm2" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" inputDisabled={true} required />
-            <Input type="select" ref="value" label="Does this meet your criteria?" defaultValue="No Selection" handleChange={this.handleChange}
+            <Input type="select" ref="pm2-value" label="Does this meet criteria PM2?" defaultValue="No Selection" handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
                 <option value="In Progress">In Progress</option>
             </Input>
-            <Input type="textarea" ref="description" label="Description:" rows="5" placeholder="e.g. free text"
+            <Input type="textarea" ref="pm2-description" label="PM2 Description:" rows="5" placeholder="e.g. free text"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 };
 
-var pm2_update = function(nextProps) {
+var pop_crit_1_update = function(nextProps) {
     if (nextProps.interpretation) {
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
             nextProps.interpretation.evaluations.map(evaulation => {
                 if (evaulation.criteria == 'pm2') {
-                    this.refs['value'].setValue(evaulation.value);
-                    this.refs['description'].setValue(evaulation.description);
+                    this.refs['pm2-value'].setValue(evaulation.value);
+                    this.refs['pm2-description'].setValue(evaulation.description);
                     this.setState({submitDisabled: false});
                 }
             });
@@ -147,35 +146,47 @@ var pm2_update = function(nextProps) {
     }
 };
 
-var ps4 = function() {
+var pop_crit_2 = function() {
     return (
         <div>
-            <Input type="text" ref="criteria" value="ps4" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" inputDisabled={true} required />
-            <Input type="select" ref="value" label="Does this meet your criteria2?" defaultValue="No Selection" handleChange={this.handleChange}
+            <Input type="select" ref="ps4-value" label="Does this meet criteria PS4?" defaultValue="No Selection" handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
                 <option value="In Progress">In Progress</option>
             </Input>
-            <Input type="text" ref="description" label="Description long:" rows="5" placeholder="e.g. free text" inputDisabled={true}
+            <Input type="text" ref="ps4-description" label="PS4 Description:" rows="5" placeholder="e.g. free text" inputDisabled={true}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="select" ref="ps5-value" label="Does this meet criteria PS5?" defaultValue="No Selection" handleChange={this.handleChange}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="No Selection">No Selection</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="In Progress">In Progress</option>
+            </Input>
         </div>
     );
 };
 
-var ps4_update = function(nextProps) {
+var pop_crit_2_update = function(nextProps) {
     if (nextProps.interpretation) {
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaulation => {
-                if (evaulation.criteria == 'ps4') {
-                    this.refs['value'].setValue(evaulation.value);
-                    this.setState({submitDisabled: false});
+            nextProps.interpretation.evaluations.map(evaluation => {
+                switch(evaluation.criteria) {
+                    case 'ps4':
+                        this.refs['ps4-value'].setValue(evaluation.value);
+                        this.setState({submitDisabled: false});
+                        break;
+                    case 'ps5':
+                        this.refs['ps5-value'].setValue(evaluation.value);
+                        this.setState({submitDisabled: false});
+                        break;
                 }
             });
         }
     }
     if (nextProps.extraData) {
-        this.refs['description'].setValue(nextProps.extraData.test2);
+        this.refs['ps4-description'].setValue(nextProps.extraData.test2);
     }
 };
