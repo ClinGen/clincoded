@@ -34,10 +34,6 @@
             "title": "Variant",
             "type": "string"
         },
-        "maf_count": {
-            "title": "# MAF Object",
-            "type": "string"
-        },
         "submitted_by.title": {
             "title": "Capturer",
             "type": "string"
