@@ -1100,6 +1100,15 @@ class Population(Item):
     def evaluation_associated(self, request, evaluation_associated):
         return paths_filtered_by_status(request, evaluation_associated)
 
+    @calculated_property(schema={
+        "title": "# Populations",
+        "type": "string"
+    })
+    def maf_count(self, populations={}):
+        if len(populations) > 0:
+            return len(populations)
+        return ''
+
 
 @collection(
     name='computational',
