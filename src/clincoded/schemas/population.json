@@ -19,13 +19,9 @@
         },
         "populations": {
             "title": "Populations",
-            "description": "List of objects to save blob population data.",
-            "type": "array",
-            "items": {
-                "type": "object",
-                "description": "Allele frequency data saved as object",
-                "comment": "No property defined. Flexible for saving different key:value formats. If there is a key existing in multiple objects, their values must be same type."
-            }
+            "description": "Proterty to save blob population data.",
+            "type": "object",
+            "comment": "No property defined. Flexible for saving different key:value formats."
         },
         "variant": {
             "title": "Variant",
