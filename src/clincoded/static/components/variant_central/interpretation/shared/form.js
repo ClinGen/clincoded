@@ -19,10 +19,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
         extraData: React.PropTypes.object, // any extra data that is passed from the parent page
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from extraData
-        variantUuid: React.PropTypes.string,
-        criteria: React.PropTypes.array,
-        interpretation: React.PropTypes.object,
-        updateInterpretationObj: React.PropTypes.func
+        variantUuid: React.PropTypes.string, // UUID of the parent variant
+        criteria: React.PropTypes.array, // array of criteria codes being handled by this form
+        interpretation: React.PropTypes.object, // parent interpretation object
+        updateInterpretationObj: React.PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
     },
 
     contextTypes: {
@@ -31,17 +31,19 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
     getInitialState: function() {
         return {
-            submitBusy: false,
-            submitDisabled: false,
-            extraData: null,
-            interpretation: null
+            submitBusy: false, // spinner for Save button
+            submitDisabled: false, // changed by handleChange method, but disabled for now due to uncertain/non-universal logic
+            extraData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
+            interpretation: null // parent interpretation object
         };
     },
 
     componentDidMount: function() {
+        // update the interpretation object when loaded
         if (this.props.interpretation) {
             this.setState({interpretation: this.props.interpretation});
         }
+        // update the form when extra data is loaded
         if (this.props.extraData) {
             this.setState({extraData: this.props.extraData});
             if (this.props.formDataUpdater) {
@@ -51,11 +53,11 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     },
 
     componentWillReceiveProps: function(nextProps) {
-        // upon receiving props, call the formDataUpdater with the nextProps to update the forms, if applicable
+        // when props are updated, update the parent interpreatation object, if applicable
         if (typeof nextProps.interpretation !== undefined && nextProps.interpretation != this.props.interpretation) {
             this.setState({interpretation: nextProps.interpretation});
         }
-
+        // when props are updated, update the form with new extra data, if applicable
         if (typeof nextProps.extraData !== undefined && nextProps.extraData != this.props.extraData) {
             this.setState({extraData: nextProps.extraData});
             if (this.props.formDataUpdater) {
@@ -65,6 +67,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     },
 
     handleChange: function(ref, e) {
+        // disabled because logic is uncertain/not universal for all form use cases
         /*
         if (ref === 'value') {
             if (this.refs[ref].getValue() == 'No Selection') {
@@ -78,20 +81,21 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setState({submitBusy: true});
+        this.setState({submitBusy: true}); // Save button pressed; disable it and start spinner
 
         // Save all form values from the DOM.
-        var evaluations = {};
         this.saveAllFormValues();
 
+        var evaluations = {};
         var existingEvaluationUuids = {};
         var flatInterpretation = null;
         var freshInterpretation = null;
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
             freshInterpretation = interpretation;
+            // get fresh update of interpretation object so we have newest evaluation list, then flatten it
             flatInterpretation = curator.flatten(freshInterpretation);
-            // get fresh update of interpretation object so we have newest evaluation list
-            // check existing evaluations to see if one exists for the current criteria
+
+            // check existing evaluations and map their UUIDs if they match the criteria in this form
             if (freshInterpretation.evaluations) {
                 freshInterpretation.evaluations.map(freshEvaluation => {
                     if (this.props.criteria.indexOf(freshEvaluation.criteria) > -1) {
@@ -100,7 +104,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 });
             }
 
-            //returnPayload.push(this.putRestData(item['@id'] + '?render=false', deletedItem));
+            // generate individual promises for each evaluation. PUTs if the evaluation for the criteria code
+            // already exists, and POSTs if not
             var evaluationPromises = [];
             this.props.criteria.map(criterion => {
                 evaluations[criterion] = {
@@ -116,35 +121,39 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 }
             });
 
+            // handle all the above-generated promises
             return Promise.all(evaluationPromises);
         }).then(evaluationResults => {
-            let updateInterpretation = false;
+            let updateInterpretation = false; // flag for whether or not the evaluation object needs to be updated
+
             // if the interpretation object does not have an evaluations object, create it
             if (!('evaluations' in flatInterpretation)) {
                 flatInterpretation.evaluations = [];
             }
 
+            // go through the resulting evaluation object URIs...
             evaluationResults.map(evaluationResult => {
                 let evaluationURI = evaluationResult['@graph'][0]['@id'];
+                // ... and if it doesn't exist in the original interpretation object, add it
                 if (flatInterpretation.evaluations.indexOf(evaluationURI) < 0) {
-                    // if the interpretation object does not have the (new) evaluation in it, add it and
-                    // update the interperetation object
                     flatInterpretation.evaluations.push(evaluationURI);
-                    updateInterpretation = true;
+                    updateInterpretation = true; // interpretation object now needs to be updated
                 }
             });
 
+            // if a new evaluation has been added to the interpretation object, PUT the updated object in
             if (updateInterpretation) {
                 return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
                     return Promise.resolve(data['@graph'][0]);
                 });
             } else {
-                // if the interperation object already has the evaluation in it, skip updating the object
+                // otherwise just get an updated copy of the interpretation object, just in case
                 return this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(data => {
                     return Promise.resolve(data);
                 });
             }
         }).then(interpretation => {
+            // REST handling is done. Re-enable Save button, and send the interpretation object back to index.js
             this.setState({submitBusy: false});
             this.props.updateInterpretationObj(interpretation);
         }).catch(error => {
