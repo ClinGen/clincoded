@@ -179,41 +179,42 @@ module.exports = function(grunt) {
                 files: [
                     {expand: true, flatten: true, src: ['src/clincoded/static/build/*.js'], dest: 'src/clincoded/static/build/'}
                 ]
+            },
+            dev: {
+                options: {
+                    patterns: [
+                        {
+                            match: 'bundleJsFile',
+                            replacement: "/static/build/bundle.js"
+                        },
+                        {
+                            match: 'cssFile',
+                            replacement: "/static/css/style.css"
+                        }
+                    ]
+                },
+                files: [
+                    {expand: true, flatten: true, src: ['src/clincoded/static/build/*.js'], dest: 'src/clincoded/static/build/'}
+                ]
             }
         },
         compass: {
-            dist: {
-                options: {
-                    basePath: '/Users/karen/cherry/github/clincoded/parts/rubygems/bin/compass'
-                    // ,
-                    // watch: true
-                }
-            }
+            dev: {}
         },
         watch: {
             scripts: {
                 files: 'src/clincoded/static/components/**/*.js',
-                tasks: ['browserify', 'filerev', 'replace']
-                // ,
-                // options: {
-                //   interrupt: true,
-                // },
+                tasks: ['browserify:browser', 'browserify:server', 'replace:dev']
             },
             css: {
                 files: 'src/clincoded/static/scss/**/*.scss',
                 tasks: ['compass']
-                // tasks: ['compass', 'filerev', 'replace']
-                // ,
-                // options: {
-                //   livereload: true,
-                // },
             }
         }
     });
 
-    grunt.registerMultiTask('browserify', function (watch) {
+    grunt.registerMultiTask('browserify', function () {
         var browserify = require('browserify');
-        var watchify = require('watchify');
         var _ = grunt.util._;
         var path = require('path');
         var fs = require('fs');
@@ -222,15 +223,10 @@ module.exports = function(grunt) {
         var options = _.extend({
             debug: true,
             cache: {},
-            packageCache: {},
-            fullPaths: watch
+            packageCache: {}
         }, data.options);
 
         var b = browserify(options);
-        if (watch) {
-            b = watchify(b);
-        }
-
         var i;
         var reqs = [];
         (data.src || []).forEach(function (src) {
@@ -306,8 +302,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-compass');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
-    grunt.registerTask('default', ['browserify', 'copy', 'filerev', 'replace']);
-    //grunt.registerTask('watch', ['browserify:*:watch', 'wait']);
+    grunt.registerTask('default', ['browserify', 'copy', 'filerev', 'replace:dist']);
+    grunt.registerTask('dev', ['browserify','replace:dev', 'watch']);
 
 };
 
