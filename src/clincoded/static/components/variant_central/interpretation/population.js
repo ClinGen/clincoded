@@ -6,11 +6,77 @@ var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var LocalStorageMixin = require('react-localstorage');
 var CurationInterpretationForm = require('./shared/form').CurationInterpretationForm;
+var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
 
 var external_url_map = globals.external_url_map;
 var queryKeyValue = globals.queryKeyValue;
+
+// FIXME: The thousand_genome{} still needs a method to have data assigned
+// FIXME: Properties have 'null' values for now in the initial phase.
+// They should contain pre-existing values if they exist in the db. Or 'null' if not.
+var populationObj = {
+    exac: {
+        allele_count: {},
+        allele_number: {},
+        hom_number: {},
+        allele_frequency: {
+            african: '',
+            east_asian: '',
+            european_non_finnish: '',
+            european_finnish: '',
+            latino: '',
+            other: '',
+            south_asian: '',
+            total: ''
+        },
+        chrom: '',
+        pos: '',
+        ref: '',
+        alt: ''
+    },
+    thousand_genome: {
+        allele: {
+            african: [],
+            all: [],
+            east_asian: [],
+            european: [],
+            latino: [],
+            south_asian: [],
+            esp6500_african_american: [],
+            esp6500_european_american: []
+        },
+        genotype: {
+            african: [],
+            all: [],
+            east_asian: [],
+            european: [],
+            latino: [],
+            south_asian: [],
+            esp6500_african_american: [],
+            esp6500_european_american: []
+        }
+    },
+    esp: {
+        allele_count: {
+            african_american: {},
+            all: {},
+            european_american: {}
+        },
+        genotype_count: {
+            african_american: {},
+            all: {},
+            european_american: {}
+        },
+        avg_sample_read: '',
+        rsid: '',
+        chrom: '',
+        hg19_start: '',
+        ref: '',
+        alt: ''
+    }
+};
 
 // Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
@@ -37,6 +103,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             myvariant_exac_allele: {}, // ExAC population frequencies from myvariant.info
             myvariant_esp_population: {}, // ESP (EVS) population allele from myvariant.info
             interpretationUuid: this.props.interpretationUuid,
+            hasExacData: false, // flag to display ExAC table
+            hasEspData: false, // flag to display ESP table
             shouldFetchData: false
         };
     },
@@ -45,6 +113,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         this.setState({interpretationUuid: nextProps.interpretationUuid});
         this.setState({shouldFetchData: nextProps.shouldFetchData});
         if (this.state.shouldFetchData === true) {
+            window.localStorage.clear();
             this.fetchMyVariantInfo();
             this.fetchEnsemblData();
         }
@@ -55,6 +124,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var variant = this.props.data;
         var url = 'http://myvariant.info/v1/variant/';
         if (variant) {
+            // Extract only the number portion of the dbSNP id
+            var numberPattern = /\d+/g;
+            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
             // Extract genomic substring from HGVS name whose assembly is GRCh37
             // Both of "GRCh37" and "gRCh37" instances are possibly present in the variant object
             var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
@@ -65,11 +137,19 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var variant_id = found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':'));
             this.getRestData(url + variant_id).then(response => {
                 this.setState({myvariant_exac_population: response.exac});
+                // Calling methods to update global object with ExAC & ESP population data
+                // FIXME: Need to create a new copy of the global object with new data
+                // while leaving the original object with pre-existing data
+                // for comparison of any potential changed values
+                this.assignExacData(response, rsid);
+                this.assignEspData(response);
                 // ExAC allele frequency info is not available in all variant data from myvariant.info
+                // FIXME: Need to remove this when switching to using the global population object for table UI
                 if (response.dbnsfp && response.dbnsfp.exac) {
                     this.setState({myvariant_exac_allele: response.dbnsfp.exac});
                 }
                 // ESP allele data of a given variant from myvariant.info
+                // FIXME: Need to remove this when switching to using the global population object for table UI
                 if (response.evs) {
                     this.setState({myvariant_esp_population: response.evs});
                 }
@@ -77,6 +157,64 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 console.log('MyVariant Fetch Error=: %o', e);
             });
         }
+    },
+
+    // Method to assign ExAC population data to global population object
+    assignExacData: function(response, rsid) {
+        // Not all variants can be found in ExAC
+        // Do nothing if the exac{...} object is not returned from myvariant.info
+        if (response.exac) {
+            // Get ExAC allele frequency from Ensembl (VEP) directly
+            // Because myvariant.info doesn't always return ExAC allele frequency data
+            this.getRestData('http://rest.ensembl.org/vep/human/id/rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(ensembl_exac_data => {
+                populationObj.exac.allele_frequency.african = ensembl_exac_data[0].colocated_variants[0].exac_afr_maf;
+                populationObj.exac.allele_frequency.east_asian = ensembl_exac_data[0].colocated_variants[0].exac_eas_maf;
+                populationObj.exac.allele_frequency.european_non_finnish = ensembl_exac_data[0].colocated_variants[0].exac_nfe_maf;
+                populationObj.exac.allele_frequency.european_finnish = ensembl_exac_data[0].colocated_variants[0].exac_fin_maf;
+                populationObj.exac.allele_frequency.latino = ensembl_exac_data[0].colocated_variants[0].exac_amr_maf;
+                populationObj.exac.allele_frequency.other = ensembl_exac_data[0].colocated_variants[0].exac_oth_maf;
+                populationObj.exac.allele_frequency.south_asian = ensembl_exac_data[0].colocated_variants[0].exac_sas_maf;
+                populationObj.exac.allele_frequency.total = ensembl_exac_data[0].colocated_variants[0].exac_adj_maf;
+            }).catch(function(e) {
+                console.log('Ensembl Fetch Error=: %o', e);
+            });
+            // Get other ExAC population data from myvariant.info, such allele_count, allele_number, homozygotes number, etc
+            populationObj.exac.allele_count = response.exac.ac;
+            populationObj.exac.allele_number = response.exac.an;
+            populationObj.exac.hom_number = response.exac.hom;
+            populationObj.exac.chrom = response.exac.chrom;
+            populationObj.exac.pos = response.exac.pos;
+            populationObj.exac.ref = response.exac.ref;
+            populationObj.exac.alt = response.exac.alt;
+            // Set a flag to display data in the table
+            this.setState({hasExacData: true});
+        }
+    },
+
+    // Method to assign ESP population data to global population object
+    assignEspData: function(response) {
+        // Not all variants return the evs{...} object from myvariant.info
+        if (response.evs) {
+            populationObj.esp.allele_count.african_american = response.evs.allele_count.african_american;
+            populationObj.esp.allele_count.all = response.evs.allele_count.all;
+            populationObj.esp.allele_count.european_american = response.evs.allele_count.european_american;
+            populationObj.esp.genotype_count.african_american = response.evs.genotype_count.african_american;
+            populationObj.esp.genotype_count.all = response.evs.genotype_count.all_genotype;
+            populationObj.esp.genotype_count.european_american = response.evs.genotype_count.european_american;
+            populationObj.esp.avg_sample_read = response.evs.avg_sample_read;
+            populationObj.esp.rsid = response.evs.rsid;
+            populationObj.esp.chrom = response.evs.chrom;
+            populationObj.esp.hg19_start = response.evs.hg19.start;
+            populationObj.esp.ref = response.evs.ref;
+            populationObj.esp.alt = response.evs.alt;
+            // Set a flag to display data in the table
+            this.setState({hasEspData: true});
+        }
+    },
+
+    // FIXME: Need to be implemented
+    assign1000GData: function(response) {
+
     },
 
     // Retrieve 1000GENOMES population data from rest.ensembl.org
@@ -97,6 +235,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             });
             // Get ExAC allele frequency as a fallback strategy
             // In the event where myvariant.info doesn't return ExAC allele frequency info
+            // FIXME: Need to remove this when switching to using the global population object for table UI
             this.getRestData('http://rest.ensembl.org/vep/human/id/rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
                 this.setState({ensembl_exac_allele: response[0].colocated_variants[0]});
             }).catch(function(e) {
@@ -156,25 +295,45 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return displayVal;
     },
 
+    // handler for saving the global population object into the db
+    handleNewPopulation: function(e) {
+        e.preventDefault(); e.stopPropagation();
+        var variant = this.props.data;
+        var newPopulationObj;
+        if (variant) {
+            // Put together a new population object
+            newPopulationObj = {
+                variant: variant.uuid,
+                populations: populationObject
+            };
+        }
+        // Post new population to the DB.
+        this.postRestData('/populations/', newPopulationObj).then(data => {
+            console.log("Population data has been saved: " + data['@graph'][0].uuid);
+        }).catch(e => {parseAndLogError.bind(undefined, 'postRequest')});
+    },
+
     render: function() {
+        // FIXME: Need to switch to using the global population object
         var ensembl_variation = this.state.ensembl_variation_data,
             ensembl_populations = this.state.ensembl_populations,
             ensembl_population_genotypes = this.state.ensembl_population_genotypes;
-        var exac_pop = this.state.myvariant_exac_population,
-            exac_allele = this.state.myvariant_exac_allele,
-            ensembl_exac_allele = this.state.ensembl_exac_allele;
+        // Genotype alleles (e.g. 'C|C', 'T|T', 'C|T') used by 1000G
         var allele_ancestral, allele_minor, allele_mixed;
         if (ensembl_variation) {
             allele_ancestral = ensembl_variation.ancestral_allele + '|' + ensembl_variation.ancestral_allele;
             allele_minor = ensembl_variation.minor_allele + '|' + ensembl_variation.minor_allele;
             allele_mixed = ensembl_variation.ancestral_allele + '|' + ensembl_variation.minor_allele;
         }
-        var esp_pop = this.state.myvariant_esp_population;
-        var esp_allele_chimp, esp_allele_alt, esp_allele_mixed;
-        if (esp_pop) {
-            esp_allele_chimp = esp_pop.chimp_allele + esp_pop.chimp_allele;
-            esp_allele_alt = esp_pop.alt + esp_pop.alt;
-            esp_allele_mixed = esp_pop.alt + esp_pop.chimp_allele;
+
+        var exac = populationObj.exac; // Get ExAC data from global population object
+        var esp = populationObj.esp; // Get ESP data from global population object
+        // Genotype alleles (e.g. 'CC', 'TT', 'TC') used by ESP
+        var esp_allele_ref, esp_allele_alt, esp_allele_mixed;
+        if (esp) {
+            esp_allele_ref = esp.ref + esp.ref;
+            esp_allele_alt = esp.alt + esp.alt;
+            esp_allele_mixed = esp.alt + esp.ref;
         }
 
         return (
@@ -185,7 +344,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <div className="bs-callout-content-container">
                             <dl className="inline-dl clearfix">
                                 <dt>Population: </dt><dd>XXXXXX</dd>
-                                <dt># Varaint Alleles: </dt><dd>XXXXXX</dd>
+                                <dt># Variant Alleles: </dt><dd>XXXXXX</dd>
                                 <dt>Total # Alleles Tested: </dt><dd>XXXXXX</dd>
                             </dl>
                         </div>
@@ -207,10 +366,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </li>
                 </ul>
                 : null}
-
-                {(exac_pop && exac_allele) ?
+                
+                {(this.state.hasExacData) ?
                     <div className="panel panel-info datasource-ExAC">
-                        <div className="panel-heading"><h3 className="panel-title">ExAC {exac_pop.chrom + ':' + exac_pop.pos + ' ' + exac_pop.ref + '/' + exac_pop.alt}</h3></div>
+                        <div className="panel-heading"><h3 className="panel-title">ExAC {exac.chrom + ':' + exac.pos + ' ' + exac.ref + '/' + exac.alt}<a href={'http://exac.broadinstitute.org/variant/' + exac.chrom + '-' + exac.pos + '-' + exac.ref + '-' + exac.alt} target="_blank">(See ExAC data)</a></h3></div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -224,61 +383,61 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             <tbody>
                                 <tr>
                                     <td>African</td>
-                                    <td>{(exac_pop.ac) ? exac_pop.ac.ac_afr : null}</td>
-                                    <td>{(exac_pop.an) ? exac_pop.an.an_afr : null}</td>
-                                    <td>{(exac_pop.hom) ? exac_pop.hom.hom_afr : null}</td>
-                                    <td>{(exac_allele.afr_af) ? exac_allele.afr_af : ensembl_exac_allele.exac_afr_maf}</td>
+                                    <td>{exac.allele_count.ac_afr}</td>
+                                    <td>{exac.allele_number.an_afr}</td>
+                                    <td>{exac.hom_number.hom_afr}</td>
+                                    <td>{exac.allele_frequency.african}</td>
                                 </tr>
                                 <tr>
                                     <td>Other</td>
-                                    <td>{(exac_pop.ac) ? exac_pop.ac.ac_oth : null}</td>
-                                    <td>{(exac_pop.an) ? exac_pop.an.an_oth : null}</td>
-                                    <td>{(exac_pop.hom) ? exac_pop.hom.hom_oth : null}</td>
-                                    <td>{(exac_allele.oth_af) ? exac_allele.oth_af : ensembl_exac_allele.exac_oth_maf}</td>
+                                    <td>{exac.allele_count.ac_oth}</td>
+                                    <td>{exac.allele_number.an_oth}</td>
+                                    <td>{exac.hom_number.hom_oth}</td>
+                                    <td>{exac.allele_frequency.other}</td>
                                 </tr>
                                 <tr>
                                     <td>Latino</td>
-                                    <td>{(exac_pop.ac) ? exac_pop.ac.ac_amr : null}</td>
-                                    <td>{(exac_pop.an) ? exac_pop.an.an_amr : null}</td>
-                                    <td>{(exac_pop.hom) ? exac_pop.hom.hom_amr : null}</td>
-                                    <td>{(exac_allele.amr_af) ? exac_allele.amr_af : ensembl_exac_allele.exac_amr_maf}</td>
+                                    <td>{exac.allele_count.ac_amr}</td>
+                                    <td>{exac.allele_number.an_amr}</td>
+                                    <td>{exac.hom_number.hom_amr}</td>
+                                    <td>{exac.allele_frequency.latino}</td>
                                 </tr>
                                 <tr>
                                     <td>South Asian</td>
-                                    <td>{(exac_pop.ac) ? exac_pop.ac.ac_sas : null}</td>
-                                    <td>{(exac_pop.an) ? exac_pop.an.an_sas : null}</td>
-                                    <td>{(exac_pop.hom) ? exac_pop.hom.hom_sas : null}</td>
-                                    <td>{(exac_allele.sas_af) ? exac_allele.sas_af : ensembl_exac_allele.exac_sas_maf}</td>
+                                    <td>{exac.allele_count.ac_sas}</td>
+                                    <td>{exac.allele_number.an_sas}</td>
+                                    <td>{exac.hom_number.hom_sas}</td>
+                                    <td>{exac.allele_frequency.south_asian}</td>
                                 </tr>
                                 <tr>
                                     <td>European (Non-Finnish)</td>
-                                    <td>{(exac_pop.ac) ? exac_pop.ac.ac_nfe : null}</td>
-                                    <td>{(exac_pop.an) ? exac_pop.an.an_nfe : null}</td>
-                                    <td>{(exac_pop.hom) ? exac_pop.hom.hom_nfe : null}</td>
-                                    <td>{(exac_allele.nfe_af) ? exac_allele.nfe_af : ensembl_exac_allele.exac_nfe_maf}</td>
+                                    <td>{exac.allele_count.ac_nfe}</td>
+                                    <td>{exac.allele_number.an_nfe}</td>
+                                    <td>{exac.hom_number.hom_nfe}</td>
+                                    <td>{exac.allele_frequency.european_non_finnish}</td>
                                 </tr>
                                 <tr>
                                     <td>East Asian</td>
-                                    <td>{(exac_pop.ac) ? exac_pop.ac.ac_eas : null}</td>
-                                    <td>{(exac_pop.an) ? exac_pop.an.an_eas : null}</td>
-                                    <td>{(exac_pop.hom) ? exac_pop.hom.hom_eas : null}</td>
-                                    <td>{(exac_allele.eas_af) ? exac_allele.eas_af : ensembl_exac_allele.exac_eas_maf}</td>
+                                    <td>{exac.allele_count.ac_eas}</td>
+                                    <td>{exac.allele_number.an_eas}</td>
+                                    <td>{exac.hom_number.hom_eas}</td>
+                                    <td>{exac.allele_frequency.east_asian}</td>
                                 </tr>
                                 <tr>
                                     <td>European (Finnish)</td>
-                                    <td>{(exac_pop.ac) ? exac_pop.ac.ac_fin : null}</td>
-                                    <td>{(exac_pop.an) ? exac_pop.an.an_fin : null}</td>
-                                    <td>{(exac_pop.hom) ? exac_pop.hom.hom_fin : null}</td>
-                                    <td>{(exac_allele.fin_af) ? exac_allele.fin_af : ensembl_exac_allele.exac_fin_maf}</td>
+                                    <td>{exac.allele_count.ac_fin}</td>
+                                    <td>{exac.allele_number.an_fin}</td>
+                                    <td>{exac.hom_number.hom_fin}</td>
+                                    <td>{exac.allele_frequency.european_finnish}</td>
                                 </tr>
                             </tbody>
                             <tfoot>
                                 <tr className="count">
                                     <td>Total</td>
-                                    <td>{(exac_pop.ac) ? exac_pop.ac.ac_adj : null}</td>
-                                    <td>{(exac_pop.an) ? exac_pop.an.an_adj : null}</td>
-                                    <td>{(exac_pop.hom) ? exac_pop.hom.ac_hom : null}</td>
-                                    <td>{(exac_allele.adj_af) ? exac_allele.adj_af : ensembl_exac_allele.exac_adj_maf}</td>
+                                    <td>{exac.allele_count.ac_adj}</td>
+                                    <td>{exac.allele_number.an_adj}</td>
+                                    <td>{exac.hom_number.ac_hom}</td>
+                                    <td>{exac.allele_frequency.total}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -289,13 +448,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Varaint information could not be found at ExAC.</th>
+                                    <th>Variant information could not be found. Please see <a href={'http://exac.broadinstitute.org/variant/' + exac.chrom + '-' + exac.pos + '-' + exac.ref + '-' + exac.alt} target="_blank">variant data</a> at ExAC.</th>
                                 </tr>
                             </thead>
                         </table>
                     </div>
                 }
-
+                {/* FIXME: Need to switch to using the global population object for populating 1000G table data */}
                 {(ensembl_variation && ensembl_populations && ensembl_population_genotypes) ?
                     <div className="panel panel-info datasource-1000G">
                         <div className="panel-heading"><h3 className="panel-title">1000G: {ensembl_variation.name + ' ' + ensembl_variation.var_class}</h3></div>
@@ -383,16 +542,16 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Varaint information could not be found at 1000 Genomes.</th>
+                                    <th>Variant information could not be found.</th>
                                 </tr>
                             </thead>
                         </table>
                     </div>
                 }
 
-                {(esp_pop && esp_pop.allele_count && esp_pop.genotype_count) ?
+                {(this.state.hasEspData) ?
                     <div className="panel panel-info datasource-ESP">
-                        <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP): {esp_pop.rsid + '; ' + esp_pop.chrom + '.' + esp_pop.hg19.start + '; Alleles' + esp_pop.chimp_allele + '>' + esp_pop.alt}</h3></div>
+                        <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP): {esp.rsid + '; ' + esp.chrom + '.' + esp.hg19_start + '; Alleles ' + esp.ref + '>' + esp.alt}<a href={'http://evs.gs.washington.edu/EVS/PopStatsServlet?searchBy=rsID&target=' + esp.rsid + '&x=0&y=0'} target="_blank">(See ESP data)</a></h3></div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -404,33 +563,33 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             <tbody>
                                 <tr>
                                     <td>EA Allele</td>
-                                    <td>{this.handleEspData(esp_pop.allele_count.european_american, esp_pop.chimp_allele)}</td>
-                                    <td>{this.handleEspData(esp_pop.allele_count.european_american, esp_pop.alt)}</td>
-                                    <td>{this.handleEspData(esp_pop.genotype_count.european_american, esp_allele_chimp)}</td>
-                                    <td>{this.handleEspData(esp_pop.genotype_count.european_american, esp_allele_alt)}</td>
-                                    <td>{this.handleEspData(esp_pop.genotype_count.european_american, esp_allele_mixed)}</td>
+                                    <td>{this.handleEspData(esp.allele_count.european_american, esp.ref)}</td>
+                                    <td>{this.handleEspData(esp.allele_count.european_american, esp.alt)}</td>
+                                    <td>{this.handleEspData(esp.genotype_count.european_american, esp_allele_ref)}</td>
+                                    <td>{this.handleEspData(esp.genotype_count.european_american, esp_allele_alt)}</td>
+                                    <td>{this.handleEspData(esp.genotype_count.european_american, esp_allele_mixed)}</td>
                                 </tr>
                                 <tr>
                                     <td>AA Allele</td>
-                                    <td>{this.handleEspData(esp_pop.allele_count.african_american, esp_pop.chimp_allele)}</td>
-                                    <td>{this.handleEspData(esp_pop.allele_count.african_american, esp_pop.alt)}</td>
-                                    <td>{this.handleEspData(esp_pop.genotype_count.african_american, esp_allele_chimp)}</td>
-                                    <td>{this.handleEspData(esp_pop.genotype_count.african_american, esp_allele_alt)}</td>
-                                    <td>{this.handleEspData(esp_pop.genotype_count.african_american, esp_allele_mixed)}</td>
+                                    <td>{this.handleEspData(esp.allele_count.african_american, esp.ref)}</td>
+                                    <td>{this.handleEspData(esp.allele_count.african_american, esp.alt)}</td>
+                                    <td>{this.handleEspData(esp.genotype_count.african_american, esp_allele_ref)}</td>
+                                    <td>{this.handleEspData(esp.genotype_count.african_american, esp_allele_alt)}</td>
+                                    <td>{this.handleEspData(esp.genotype_count.african_american, esp_allele_mixed)}</td>
                                 </tr>
                                 <tr>
                                     <td>All Allele</td>
-                                    <td>{this.handleEspData(esp_pop.allele_count.all, esp_pop.chimp_allele)}</td>
-                                    <td>{this.handleEspData(esp_pop.allele_count.all, esp_pop.alt)}</td>
-                                    <td>{this.handleEspData(esp_pop.genotype_count.all_genotype, esp_allele_chimp)}</td>
-                                    <td>{this.handleEspData(esp_pop.genotype_count.all_genotype, esp_allele_alt)}</td>
-                                    <td>{this.handleEspData(esp_pop.genotype_count.all_genotype, esp_allele_mixed)}</td>
+                                    <td>{this.handleEspData(esp.allele_count.all, esp.ref)}</td>
+                                    <td>{this.handleEspData(esp.allele_count.all, esp.alt)}</td>
+                                    <td>{this.handleEspData(esp.genotype_count.all, esp_allele_ref)}</td>
+                                    <td>{this.handleEspData(esp.genotype_count.all, esp_allele_alt)}</td>
+                                    <td>{this.handleEspData(esp.genotype_count.all, esp_allele_mixed)}</td>
                                 </tr>
                             </tbody>
                             <tfoot>
                                 <tr className="count">
                                     <td>Average Sample Read Depth</td>
-                                    <td colSpan="5">{esp_pop.avg_sample_read}</td>
+                                    <td colSpan="5">{esp.avg_sample_read}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -441,7 +600,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Varaint information could not be found at Exome Sequencing Project.</th>
+                                    <th>Variant information could not be found. Please see <a href={'http://evs.gs.washington.edu/EVS/PopStatsServlet?searchBy=rsID&target=' + esp.rsid + '&x=0&y=0'} target="_blank">variant data</a> at ESP.</th>
                                 </tr>
                             </thead>
                         </table>
