@@ -985,6 +985,8 @@
 }
 
 .curation-variant-tab-group {
+    margin-bottom: 20px;
+
     .react-tabs [role=tablist] {
         border: none;
         margin: 0;
@@ -1075,6 +1077,18 @@ div.react-tabs .ReactTabs__TabPanel--selected {
 
         .population .datasource-ExAC .table tfoot td {
             font-weight: bold;
+        }
+
+        .population .datasource-ExAC .table tbody td,
+        .population .datasource-ExAC .table tfoot td {
+            width: 20%;
+        }
+
+        .population .datasource-1000G .table tbody td,
+        .population .datasource-1000G .table tfoot td,
+        .population .datasource-ESP .table tbody td,
+        .population .datasource-ESP .table tfoot td {
+            width: 16.66%;
         }
     }
 }
@@ -1186,4 +1200,9 @@ div.react-tabs .ReactTabs__TabPanel--selected {
 
 .panel.panel-info .panel-title {
     font-weight: bold;
+
+    a {
+        font-weight: normal;
+        margin-left: 20px;
+    }
 }
