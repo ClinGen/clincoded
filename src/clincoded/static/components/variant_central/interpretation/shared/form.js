@@ -20,7 +20,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         extraData: React.PropTypes.object, // any extra data that is passed from the parent page
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from extraData
         variantUuid: React.PropTypes.string,
-        criteria: React.PropTypes.object,
+        criteria: React.PropTypes.array,
         interpretation: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func
     },
@@ -32,7 +32,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     getInitialState: function() {
         return {
             submitBusy: false,
-            submitDisabled: true,
+            submitDisabled: false,
             extraData: null,
             interpretation: null
         };
@@ -65,6 +65,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     },
 
     handleChange: function(ref, e) {
+        /*
         if (ref === 'value') {
             if (this.refs[ref].getValue() == 'No Selection') {
                 this.setState({submitDisabled: true});
@@ -72,6 +73,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 this.setState({submitDisabled: false});
             }
         }
+        */
     },
 
     submitForm: function(e) {
@@ -81,16 +83,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // Save all form values from the DOM.
         var evaluations = {};
         this.saveAllFormValues();
-        this.props.criteria.map(criterion => {
-            evaluations[criterion] = {
-                variant: this.props.variantUuid,
-                criteria: criterion,
-                value: this.getFormValue(criterion + '-value'),
-                description: this.getFormValue(criterion + '-description')
-            };
-        });
 
-        var existingEvaluationUuid = null;
+        var existingEvaluationUuids = {};
         var flatInterpretation = null;
         var freshInterpretation = null;
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
@@ -99,34 +93,48 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             // get fresh update of interpretation object so we have newest evaluation list
             // check existing evaluations to see if one exists for the current criteria
             if (freshInterpretation.evaluations) {
-                freshInterpretation.evaluations.map(function(freshEvaluation, i) {
+                freshInterpretation.evaluations.map(freshEvaluation => {
                     if (this.props.criteria.indexOf(freshEvaluation.criteria) > -1) {
-                        existingEvaluationUuid = freshEvaluation.uuid;
+                        existingEvaluationUuids[freshEvaluation.criteria] = freshEvaluation.uuid;
                     }
                 });
             }
 
-            if (existingEvaluationUuid) {
-                // evaluation for criteria exists; update the existing evaluation
-                return this.putRestData('/evaluation/' + existingEvaluationUuid, evaluation).then(data => {
-                    return Promise.resolve(data['@graph'][0]);
-                });
-            } else {
-                // evaluation for criteria does not exist; create new evaluation
-                return this.postRestData('/evaluation/', evaluation).then(data => {
-                    return Promise.resolve(data['@graph'][0]);
-                });
-            }
-        }).then(newEvaluation => {
-            let evaluationURI = '/evaluations/' + newEvaluation.uuid + '/';
+            //returnPayload.push(this.putRestData(item['@id'] + '?render=false', deletedItem));
+            var evaluationPromises = [];
+            this.props.criteria.map(criterion => {
+                evaluations[criterion] = {
+                    variant: this.props.variantUuid,
+                    criteria: criterion,
+                    value: this.getFormValue(criterion + '-value'),
+                    description: this.getFormValue(criterion + '-description')
+                };
+                if (criterion in existingEvaluationUuids) {
+                    evaluationPromises.push(this.putRestData('/evaluation/' + existingEvaluationUuids[criterion], evaluations[criterion]));
+                } else {
+                    evaluationPromises.push(this.postRestData('/evaluation/', evaluations[criterion]));
+                }
+            });
+
+            return Promise.all(evaluationPromises);
+        }).then(evaluationResults => {
+            let updateInterpretation = false;
             // if the interpretation object does not have an evaluations object, create it
             if (!('evaluations' in flatInterpretation)) {
                 flatInterpretation.evaluations = [];
             }
-            if (flatInterpretation.evaluations.indexOf(evaluationURI) < 0) {
-                // if the interpretation object does not have the (new) evaluation in it, add it and
-                // update the interperetation object
-                flatInterpretation.evaluations.push('/evaluations/' + newEvaluation.uuid);
+
+            evaluationResults.map(evaluationResult => {
+                let evaluationURI = evaluationResult['@graph'][0]['@id'];
+                if (flatInterpretation.evaluations.indexOf(evaluationURI) < 0) {
+                    // if the interpretation object does not have the (new) evaluation in it, add it and
+                    // update the interperetation object
+                    flatInterpretation.evaluations.push(evaluationURI);
+                    updateInterpretation = true;
+                }
+            });
+
+            if (updateInterpretation) {
                 return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
                     return Promise.resolve(data['@graph'][0]);
                 });
