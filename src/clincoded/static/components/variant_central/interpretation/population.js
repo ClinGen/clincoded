@@ -101,10 +101,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {(this.state.interpretation) ?
                 <ul className="section-criteria-evaluation clearfix">
                     <li className="col-xs-12 gutter-exc">
-                        <CurationInterpretationForm formTitle={"Criteria Group 1"} renderedFormContent={pop_crit_1} evidenceData={this.state.data}
+                        <CurationInterpretationForm formTitle={"Criteria Group 1"} renderedFormContent={pop_crit_1} evidenceData={this.state.data} evidenceDataUpdated={true}
                             formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"Criteria Group 2"} renderedFormContent={pop_crit_2} evidenceData={this.state.data}
+                        <CurationInterpretationForm formTitle={"Criteria Group 2"} renderedFormContent={pop_crit_2} evidenceData={this.state.data} evidenceDataUpdated={true}
                             formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </li>

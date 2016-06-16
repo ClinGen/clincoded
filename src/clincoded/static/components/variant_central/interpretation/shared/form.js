@@ -18,6 +18,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         formTitle: React.PropTypes.string, // the title of this form section
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
         evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
+        evidenceDataUpdated: React.PropTypes.bool,
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from evidenceData
         variantUuid: React.PropTypes.string, // UUID of the parent variant
         criteria: React.PropTypes.array, // array of criteria codes being handled by this form
@@ -45,7 +46,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
         // update the form when extra data is loaded
         if (this.props.evidenceData) {
-            this.setState({evidenceData: this.props.evidenceData});
+            this.setState({evidenceData: this.props.evidenceData, evidenceDataUpdated: this.props.evidenceDataUpdated});
             if (this.props.formDataUpdater) {
                 this.props.formDataUpdater.call(this, this.props);
             }
@@ -59,7 +60,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
         // when props are updated, update the form with new extra data, if applicable
         if (typeof nextProps.evidenceData !== undefined && nextProps.evidenceData != this.props.evidenceData) {
-            this.setState({evidenceData: nextProps.evidenceData});
+            this.setState({evidenceData: nextProps.evidenceData, evidenceDataUpdated: nextProps.evidenceDataUpdated});
             if (this.props.formDataUpdater) {
                 this.props.formDataUpdater.call(this, nextProps);
             }
