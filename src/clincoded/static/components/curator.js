@@ -1928,7 +1928,7 @@ var variantHgvsRender = module.exports.variantHgvsRender = function(hgvsNames) {
             {hgvsNames.others && hgvsNames.others.length > 0 ?
             <span>
                 {hgvsNames.others.map(function(hgvs, i) {
-                    return <span><span key={hgvs} className="title-ellipsis title-ellipsis-shorter dotted" title={hgvs}>{hgvs}</span><br /></span>;
+                    return <span key={hgvs}><span className="title-ellipsis title-ellipsis-shorter dotted" title={hgvs}>{hgvs}</span><br /></span>;
                 })}
             </span>
             : null}

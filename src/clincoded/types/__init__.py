@@ -156,13 +156,16 @@ class Variant(Item):
         "title": "Variant Representive",
         "type": "string"
     })
-    def represent(self, clinvarVariantTitle, otherDescription):
+    def represent(self, clinvarVariantTitle='', carId='', otherDescription=''):
         if clinvarVariantTitle != '':
             return clinvarVariantTitle
+        elif carId != '':
+            return carId
         elif otherDescription != '':
-            return otherDescription
+            return 'Other Description: ' + otherDescription
         else:
             return ''
+
 
 @collection(
     name='gdm',
@@ -856,7 +859,7 @@ class Provisional(Item):
 ### end of new collections for gene curation data
 
 
-### Collections for variant curation ###
+### Collections/Classes for variant curation ###
 @collection(
     name='transcripts',
     unique_key='transcript:uuid',
@@ -868,6 +871,22 @@ class Transcript(Item):
     item_type = 'transcript'
     schema = load_schema('clincoded:schemas/transcript.json')
     name_key = 'uuid'
+    embedded = [
+        'interpretation_associated',
+        'interpretation_associated.variant',
+    ]
+    rev = {
+        'interpretation_associated': ('interpretation', 'transcripts')
+    }
+
+    @calculated_property(schema={
+        "title": "Interpretation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "interpretation.transcripts"
+    })
+    def interpretation_associated(self, request, interpretation_associated):
+        return paths_filtered_by_status(request, interpretation_associated)
+
 
 @collection(
     name='proteins',
@@ -880,13 +899,28 @@ class Protein(Item):
     item_type = 'protein'
     schema = load_schema('clincoded:schemas/protein.json')
     name_key = 'uuid'
+    embedded = [
+        'interpretation_associated',
+        'interpretation_associated.variant',
+    ]
+    rev = {
+        'interpretation_associated': ('interpretation', 'proteins')
+    }
+
+    @calculated_property(schema={
+        "title": "Interpretation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "interpretation.proteins"
+    })
+    def interpretation_associated(self, request, interpretation_associated):
+        return paths_filtered_by_status(request, interpretation_associated)
 
 
 @collection(
     name='interpretations',
     unique_key='interpretation:uuid',
     properties={
-        'title': 'Interpretation',
+        'title': 'Interpretations',
         'description': 'List of Interpretations',
     })
 class Interpretation(Item):
@@ -901,11 +935,20 @@ class Interpretation(Item):
         'genes',
         'disease',
         'transcripts',
-        'proteins'
+        'proteins',
+        'evaluations',
+        'evaluations.submitted_by',
+        'evaluations.disease',
+        'evaluations.population',
+        'evaluations.population.submitted_by',
+        'evaluations.computational',
+        'evaluations.computational.submitted_by',
+        'provisional_variant',
+        'provisional_variant.submitted_by'
     ]
 
     @calculated_property(schema={
-        "title": "Status",
+        "title": "Interpretation Status",
         "type": "string",
     })
     def interpretation_status(self, evaluations=[], provisional_variant=[]):
@@ -930,7 +973,10 @@ class Interpretation(Item):
     })
     def interpretation_genes(self, genes=[]):
         if len(genes) > 1:
-            return ", ".join(genes)
+            symbol_list = []
+            for gene in genes:
+                symbol_list.append(gene[7:-1])
+            return ", ".join(symbol_list)
         elif len(genes) == 1:
             return genes[0][7:-1]
         return ''
@@ -940,12 +986,218 @@ class Interpretation(Item):
         "type": "string",
     })
     def interpretation_transcripts(self, transcripts=[]):
-        if len(transcripts) > 1:
-            return ", ".join(transcripts)
-        elif len(transcripts) == 1:
-            return transcripts[0]
+        if len(transcripts) == 0:
+            return ''
+        return len(transcripts)
+
+    @calculated_property(schema={
+        "title": "Proteins",
+        "type": "string",
+    })
+    def interpretation_proteins(self, proteins=[]):
+        if len(proteins) == 0:
+            return ''
+        return len(proteins)
+
+    @calculated_property(schema={
+        "title": "Evaluations",
+        "type": "string",
+    })
+    def evaluation_count(self, evaluations=[]):
+        if len(evaluations) == 0:
+            return ''
+        return len(evaluations)
+
+    @calculated_property(schema={
+        "title": "Provisionals",
+        "type": "string",
+    })
+    def provisional_count(self, provisional_variant=[]):
+        if len(provisional_variant) == 0:
+            return ''
+        return len(provisional_variant)
+
+
+@collection(
+    name='evaluations',
+    unique_key='evaluation:uuid',
+    properties={
+        'title': 'Evaluations',
+        'description': 'Listing of Evaluations',
+    })
+class Evaluation(Item):
+    item_type = 'evaluation'
+    schema = load_schema('clincoded:schemas/evaluation.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'variant',
+        'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
+        'disease',
+        'population',
+        'computational',
+        'interpretation_associated'
+    ]
+    rev = {
+        'interpretation_associated': ('interpretation', 'evaluations')
+    }
+
+    @calculated_property(schema={
+        "title": "Interpretation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "interpretation.evaluations"
+    })
+    def interpretation_associated(self, request, interpretation_associated):
+        return paths_filtered_by_status(request, interpretation_associated)
+
+    @calculated_property(schema={
+        "title": "Evidence Type",
+        "type": "string"
+    })
+    def evidence_type(self, population='', computational='', functional='', segregation='', geneSpecific=''):
+        if population != '':
+            return 'Population'
+        elif computational != '':
+            return 'Computational'
+        elif functional != '':
+            return 'Functional'
+        elif segregation != '':
+            return 'Segregation'
+        elif geneSpecific != '':
+            return 'Gene-Specific'
+
+
+@collection(
+    name='populations',
+    unique_key='population:uuid',
+    properties={
+        'title': 'Populations',
+        'description': 'Listing of Populations',
+    })
+class Population(Item):
+    item_type = 'population'
+    schema = load_schema('clincoded:schemas/population.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'variant',
+        'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
+        'evaluation_associated',
+        'evaluation_associated.interpretation_associated',
+        'evaluation_associated.interpretation_associated.disease'
+    ]
+    rev = {
+        'evaluation_associated': ('evaluation', 'population')
+    }
+
+    @calculated_property(schema={
+        "title": "Evaluation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "evaluation.populations"
+    })
+    def evaluation_associated(self, request, evaluation_associated):
+        return paths_filtered_by_status(request, evaluation_associated)
+
+    @calculated_property(schema={
+        "title": "Number of MAF",
+        "type": "string"
+    })
+    def maf_count(self, populations=[]):
+        if len(populations) > 0:
+            return len(populations)
         return ''
-### End of collections for variant curation ###
+
+
+@collection(
+    name='computational',
+    unique_key='computational:uuid',
+    properties={
+        'title': 'Computational',
+        'description': 'List of Computational Evidence',
+    })
+class Computational(Item):
+    item_type = 'computational'
+    schema = load_schema('clincoded:schemas/computational.json')
+    name_key = 'uuid'
+    embedded = [
+        'variant',
+        'disease',
+        'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
+        'evaluation_associated',
+        'evaluation_associated.interpretation_associated',
+        'evaluation_associated.interpretation_associated.disease'
+    ]
+    rev = {
+        'evaluation_associated': ('evaluation', 'computational')
+    }
+
+    @calculated_property(schema={
+        "title": "Evaluation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "evaluation.computational"
+    })
+    def evaluation_associated(self, request, evaluation_associated):
+        return paths_filtered_by_status(request, evaluation_associated)
+
+    @calculated_property(schema={
+        "title": "Disease",
+        "type": "string"
+    })
+    def disease_present(self, request, disease=''):
+        if disease != '':
+            diseaseObj = request.embed(disease, '@@object')
+            return diseaseObj['term']
+        return ''
+
+
+@collection(
+    name='provisional-variant',
+    unique_key='provisional_variant:uuid',
+    properties={
+        'title': 'Provisional Classification for Variant Curation',
+        'description': 'Listing of Provisional Classifications',
+    })
+class Provisional_variant(Item):
+    item_type = 'provisional_variant'
+    schema = load_schema('clincoded:schemas/provisional_variant.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'interpretation_associated',
+        'interpretation_associated.variant',
+        'interpretation_associated.variant.associatedInterpretations',
+        'interpretation_associated.variant.associatedInterpretations.submitted_by',
+        'interpretation_associated.variant.associatedInterpretations.disease'
+    ]
+    rev = {
+        'interpretation_associated': ('interpretation', 'provisional_variant')
+    }
+
+    @calculated_property(schema={
+        "title": "Interpretation Associated",
+        "type": ["string", "object"],
+        "linkFrom": "interpretation.provisional_variant"
+    })
+    def interpretation_associated(self, request, interpretation_associated):
+        return paths_filtered_by_status(request, interpretation_associated)
+
+    @calculated_property(schema={
+        "title": "Altered Classification",
+        "type": "string"
+    })
+    def alteredClassification_present(self, alteredClassification=''):
+        return alteredClassification
+
+    @calculated_property(schema={
+        "title": "Reasons",
+        "type": "string"
+    })
+    def reason_present(self, reason=''):
+        return reason
+### End of Collections/Classes for variant curation ###
 
 
 @collection(

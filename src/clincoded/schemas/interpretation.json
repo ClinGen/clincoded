@@ -43,12 +43,12 @@
         },
         "interpretationTranscript": {
             "title": "Interpretation Transcript",
-            "description": "User selected transcript",
+            "description": "Transcript selected/added by user.",
             "type": "string"
         },
         "transcripts": {
             "title": "Transcripts",
-            "description": "List of transcript related to the variant",
+            "description": "List of transcripts related to the variant",
             "type": "array",
             "items": {
                 "title": "Transcript",
@@ -68,20 +68,22 @@
         },
         "evaluations": {
             "title": "Evaluations",
-            "description": "List of evaluation involded in the interpretation",
+            "description": "List of criteria evaluations in the interpretation",
             "type": "array",
             "items": {
                 "title": "Evaluation",
-                "type": "string"
+                "type": "string",
+                "linkTo": "evaluation"
             }
         },
         "provisional_variant": {
-            "title": "Provisional Classification for variant",
+            "title": "Provisional Classifications",
+            "description": "List of provisional classifications in the interpretation.",
             "type": "array",
-            "default": [],
             "items": {
-                "title": "Provisional_Variant",
-                "type": "string"
+                "title": "Provisional",
+                "type": "string",
+                "linkTo": "provisional_variant"
             }
         }
     },
@@ -96,6 +98,26 @@
         },
         "interpretation_disease": {
             "title": "Disease",
+            "type": "string"
+        },
+        "evaluation_count": {
+            "title": "# Evaluations",
+            "type": "string"
+        },
+        "provisional_count": {
+            "title": "# Provisional",
+            "type": "string"
+        },
+        "interpretation_genes": {
+            "title": "Genes",
+            "type": "string"
+        },
+        "interpretation_transcripts": {
+            "title": "# Transcripts",
+            "type": "string"
+        },
+        "interpretation_proteins": {
+            "title": "# Proteins",
             "type": "string"
         },
         "submitted_by.title": {

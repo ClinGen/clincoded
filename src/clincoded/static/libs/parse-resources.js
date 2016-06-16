@@ -131,11 +131,9 @@ function parseCAR(json) {
     variant.carId = json['@id'].substring(json['@id'].indexOf('CA'));
     if (json.externalRecords) {
         // extract ClinVar data if available
-        if (json.externalRecords.ClinVar && json.externalRecords.ClinVar.length > 0) {
-            // we only need to look at the first entry since the variantionID and preferred name
-            // should be the same for all of them
-            variant.clinvarVariantId = json.externalRecords.ClinVar[0].variationId;
-            variant.clinvarVariantTitle = json.externalRecords.ClinVar[0].preferredName;
+        if (json.externalRecords.ClinVarVariations && json.externalRecords.ClinVarVariations.length > 0) {
+            // only need the ClinVar Variation data, since we'll re-ping ClinVar with it, if available
+            variant.clinvarVariantId = json.externalRecords.ClinVarVariations[0].variationId;
         }
         // extract dbSNPId data if available
         if (json.externalRecords.dbSNP && json.externalRecords.dbSNP.length > 0) {
@@ -153,22 +151,16 @@ function parseCAR(json) {
                 genomicAllele.hgvs.map(function(hgvs_temp, j) {
                     // skip the hgvs term if it starts with 'CM'
                     if (!hgvs_temp.startsWith('CM')) {
-                        // FIXME/TODO: cannot easily get reference genome for NCs from CAR.
-                        // Dump everything into the 'others' field for now.
-                        /*
+                        // if NC, file by referenceGenome
                         if (hgvs_temp.startsWith('NC')) {
-                            if (genomicAllele.referenceSequence.endsWith('RS000065')) {
-                                variant.hgvsNames.GRCh38 = hgvs_temp;
-                            } else if (genomicAllele.referenceSequence.endsWith('RS000041')) {
-                                variant.hgvsNames.GRCh37 = hgvs_temp;
+                            if (genomicAllele.referenceGenome) {
+                                variant.hgvsNames[genomicAllele.referenceGenome] = hgvs_temp;
                             } else {
                                 variant = parseCarHgvsHandler(hgvs_temp, variant);
                             }
                         } else {
                             variant = parseCarHgvsHandler(hgvs_temp, variant);
                         }
-                        */
-                        variant = parseCarHgvsHandler(hgvs_temp, variant);
                     }
                 });
             }
@@ -182,7 +174,6 @@ function parseCAR(json) {
     if (json.transcriptAlleles && json.transcriptAlleles.length > 0) {
         variant = parseCarHgvsLoop(json.transcriptAlleles, variant);
     }
-
     return variant;
 }
 

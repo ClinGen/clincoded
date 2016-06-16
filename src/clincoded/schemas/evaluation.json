@@ -1,0 +1,88 @@
+{
+    "title": "Evaluation",
+    "id": "/profiles/evaluation.json",
+    "description": "Schema for storing criteria evaluation data for Variant Curation",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["variant", "criteria"],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/standard_status" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "variant": {
+            "title": "Variant",
+            "type": "string",
+            "linkTo": "variant"
+        },
+        "population": {
+            "title": "Population",
+            "description": "Population data used as evidence to evaluate the criteria.",
+            "type": "string",
+            "linkTo": "population"
+        },
+        "computational": {
+            "title": "Computational",
+            "description": "Computational data used as evidnece to evaluate the criteria.",
+            "type": "string",
+            "linkTo": "computational"
+        },
+        "functional": {
+            "title": "Functional",
+            "description": "Functional data used as evidence to evaluate the criteria.",
+            "type": "string",
+            "comment": "will link to object functional later."
+        },
+        "segregation": {
+            "title": "Segregation",
+            "description": "Segregation data used as evidence to evaluate the criteria.",
+            "type": "string",
+            "comment": "will link to object segregation later."
+        },
+        "disease": {
+            "title": "Disease",
+            "description": "Disease associated to the evidence",
+            "type": "string",
+            "linkTo": "orphaPhenotype"
+        },
+        "criteria": {
+            "title": "Criteria",
+            "description": "ACMG criteria to be evaluated. Must be one of the 28 codes",
+            "type": "string"
+        },
+        "value": {
+            "title": "Evaluation Value",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "description": "The reason to select evaluation value.",
+            "type": "string"
+        }
+    },
+    "columns": {
+        "variant.represent": {
+            "title": "Variant",
+            "type": "string"
+        },
+        "criteria": {
+            "title": "Criteria",
+            "type": "string"
+        },
+        "evidence_type": {
+            "title": "Evidence Type",
+            "type": "string"
+        },
+        "submitted_by.title": {
+            "title": "Evaluator",
+            "type": "string"
+        }
+    }
+}

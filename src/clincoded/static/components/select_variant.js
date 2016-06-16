@@ -65,12 +65,12 @@ var SelectVariant = React.createClass({
                                     <div className="alert alert-info">
                                         Instructions (please follow this order to determine correct ID for variant)<br /><br />
                                         <ol className="instructions">
-                                            <li>Search <a href="http://www.ncbi.nlm.nih.gov/clinvar/">ClinVar</a> for variant.</li>
+                                            <li>Search <a href={external_url_map['ClinVar']}>ClinVar</a> for variant.</li>
                                             <li>If found in ClinVar, select “ClinVar VariationID” from the pull-down to enter it.</li>
-                                            <li>If not found in ClinVar, search the <a href="">ClinGen Allele Registry</a> with a valid HGVS term for that variant.
+                                            <li>If not found in ClinVar, search the <a href={external_url_map['CAR']}>ClinGen Allele Registry</a> with a valid HGVS term for that variant.
                                             <ol type="a">
-                                                <li>If <a href={external_url_map['CAR-test']}>ClinGen Allele Registry</a> returns a ClinVar ID, select “ClinVar VariationID” from the pull-down to enter it.</li>
-                                                <li>If <a href={external_url_map['CAR-test']}>ClinGen Allele Registry</a> does not find a ClinVar ID, register the variant to return a CA ID and then select "ClinGen Allele Registry ID (CA ID)" from the pull-down and enter the CA ID.</li>
+                                                <li>If <a href={external_url_map['CAR']}>ClinGen Allele Registry</a> returns a ClinVar ID, select “ClinVar VariationID” from the pull-down to enter it.</li>
+                                                <li>If <a href={external_url_map['CAR']}>ClinGen Allele Registry</a> does not find a ClinVar ID, register the variant to return a CA ID and then select "ClinGen Allele Registry ID (CA ID)" from the pull-down and enter the CA ID.</li>
                                             </ol>
                                             </li>
                                         </ol>
@@ -83,7 +83,7 @@ var SelectVariant = React.createClass({
                                         <option value="select" disabled>Select</option>
                                         <option value="none" disabled></option>
                                         <option value="ClinVar Variation ID">ClinVar Variation ID</option>
-                                        <option value="ClinGen Allele Registry ID">ClinGen Allele Registry ID</option>
+                                        <option value="ClinGen Allele Registry ID (CA ID)">ClinGen Allele Registry ID (CA ID)</option>
                                     </Input>
                                     <p className="col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4 input-note-below-no-bottom"><strong>Note:</strong> Select ID type based on above instructions. Use the ClinVar VariationID whenever possible.</p>
                                 </div>
@@ -93,14 +93,14 @@ var SelectVariant = React.createClass({
                             <div className="row col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4">
                                 <AddResourceId resourceType="clinvar" label="ClinVar" wrapperClass="modal-buttons-wrapper"
                                     buttonText={this.state.variantData ? "Edit ClinVar ID" : "Add ClinVar ID" } initialFormValue={this.state.variantData && this.state.variantData.clinvarVariantId}
-                                    modalButtonText="View Variant" updateParentForm={this.updateVariantData} buttonOnly={true} />
+                                    modalButtonText="Save and View Evidence" updateParentForm={this.updateVariantData} buttonOnly={true} />
                             </div>
                             : null}
-                            {this.state.variantIdType == "ClinGen Allele Registry ID" ?
+                            {this.state.variantIdType == "ClinGen Allele Registry ID (CA ID)" ?
                             <div className="row col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4">
                                 <AddResourceId resourceType="car" label="ClinGen Allele Registry" wrapperClass="modal-buttons-wrapper"
                                     buttonText={this.state.variantData ? "Edit CA ID" : "Add CA ID" } initialFormValue={this.state.variantData && this.state.variantData.carVariantId}
-                                    modalButtonText="View Variant" updateParentForm={this.updateVariantData} buttonOnly={true} />
+                                    modalButtonText="Save and View Evidence" updateParentForm={this.updateVariantData} buttonOnly={true} />
                             </div>
                             : null}
                         </Form>

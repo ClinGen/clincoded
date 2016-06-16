@@ -7,12 +7,15 @@
         "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.1306C>T (p.Gln436Ter)",
         "carId": "CA144043",
         "hgvsNames": {
-            "grch37": "NC_000007.13:g.107423247G>A",
             "grch38": "NC_000007.14:g.107782802G>A",
+            "grch37": "NC_000007.13:g.107423247G>A",
             "others": [
-                "NM_000111.2:c.1306C>T",
                 "NG_008046.1:g.25432C>T",
-                "NP_000102.1:p.Gln436Ter"
+                "NM_000111.2:c.1306C>T",
+                "NP_000102.1:p.Gln436Ter",
+                "LRG_683p1:p.Gln436Ter",
+                "LRG_683t1:c.1306C>T",
+                "LRG_683:g.25432C>T"
             ]
         },
         "otherDescription": "",
@@ -27,12 +30,15 @@
         "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.1136G>C (p.Gly379Ala)",
         "carId": "CA144040",
         "hgvsNames": {
-            "gRCh37": "NC_000007.13:g.107423522C>G",
             "gRCh38": "NC_000007.14:g.107783077C>G",
+            "gRCh37": "NC_000007.13:g.107423522C>G",
             "others": [
-                "NM_000111.2:c.1136G>C",
                 "NG_008046.1:g.25157G>C",
-                "NP_000102.1:p.Gly379Ala"
+                "NM_000111.2:c.1136G>C",
+                "NP_000102.1:p.Gly379Ala",
+                "LRG_683p1:p.Gly379Ala",
+                "LRG_683t1:c.1136G>C",
+                "LRG_683:g.25157G>C"
             ]
         },
         "otherDescription": "",
@@ -47,12 +53,15 @@
         "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.1028G>A (p.Cys343Tyr)",
         "carId": "CA144035",
         "hgvsNames": {
-            "gRCh37": "NC_000007.13:g.107423741C>T",
             "gRCh38": "NC_000007.14:g.107783296C>T",
+            "gRCh37": "NC_000007.13:g.107423741C>T",
             "others": [
-                "NM_000111.2:c.1028G>A",
                 "NG_008046.1:g.24938G>A",
-                "NP_000102.1:p.Cys343Tyr"
+                "NM_000111.2:c.1028G>A",
+                "NP_000102.1:p.Cys343Tyr",
+                "LRG_683p1:p.Cys343Tyr",
+                "LRG_683t1:c.1028G>A",
+                "LRG_683:g.24938G>A"
             ]
         },
         "otherDescription": "",
@@ -67,8 +76,8 @@
         "clinvarVariantTitle": "NM_000475.4(NR0B1):c.1274G>T (p.Arg425Ile)",
         "carId": "CA263240",
         "hgvsNames": {
-            "gRCh37": "NC_000023.10:g.30322835C>A",
             "gRCh38": "NC_000023.11:g.30304718C>A",
+            "gRCh37": "NC_000023.10:g.30322835C>A",
             "others": [
                 "NM_000475.4:c.1274G>T",
                 "NG_009814.1:g.9661G>T",
@@ -83,7 +92,11 @@
         "uuid": "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a",
         "dbSNPIds": ["rs147674680"],
         "clinvarVariantId": "55847",
-        "clinVarRCVs": ["RCV000049262"],
+        "clinVarRCVs": [
+            "RCV000049262",
+            "RCV000049263",
+            "RCV000175486"
+        ],
         "hgvsNames": {
             "gRCh37": "NC_000003.12:g.70970756G>A",
             "gRCh38": "NC_000003.11:g.71019907G>A",
@@ -101,17 +114,25 @@
         "uuid": "e496545c-2685-11e5-a4b3-60f81dc5b05a",
         "dbSNPIds": ["rs76262710"],
         "clinvarVariantId": "38601",
-        "clinVarRCVs": ["RCV000032040"],
+        "clinVarRCVs": [
+            "RCV000032040",
+            "RCV000182594"
+        ],
         "clinvarVariantTitle": "NM_020975.4(RET):c.1852T>A (p.Cys618Ser)",
         "hgvsNames": {
-            "gRCh37": "NC_000010.10:g.43609096T>A",
             "gRCh38": "NC_000010.11:g.43113648T>A",
+            "gRCh37": "NC_000010.10:g.43609096T>A",
             "others": [
-                "NM_020975.4:c.1852T>A",
-                "NM_020630.4:c.1852T>A",
                 "NG_007489.1:g.41580T>A",
+                "NM_020630.4:c.1852T>A",
+                "NM_020975.4:c.1852T>A",
+                "NP_065681.1:p.Cys618Ser",
                 "NP_066124.1:p.Cys618Ser",
-                "NP_065681.1:p.Cys618Ser"
+                "LRG_518p1:p.Cys618Ser",
+                "LRG_518p2:p.Cys618Ser",
+                "LRG_518t1:c.1852T>A",
+                "LRG_518t2:c.1852T>A",
+                "LRG_518:g.41580T>A"
             ]
         },
         "otherDescription": "",
@@ -122,23 +143,25 @@
         "uuid": "df8135d4-2685-11e5-af19-60f81dc5b05a",
         "dbSNPIds": ["rs2298771"],
         "clinvarVariantId": "36753",
-        "clinVarRCVs": ["RCV000030432"],
-        "clinvarVariantTitle": "NM_006920.4(SCN1A):c.3166G>A (p.Ala1056Thr)",
+        "clinVarRCVs": [
+            "RCV000030432",
+            "RCV000079572"
+        ],
+        "clinvarVariantTitle": "NM_001165963.1(SCN1A):c.3199G>A (p.Ala1067Thr)",
         "hgvsNames": {
-            "gRCh37": "NC_000002.11:g.166892788C>T",
             "gRCh38": "NC_000002.12:g.166036278C>T",
+            "gRCh37": "NC_000002.11:g.166892788C>T",
             "others": [
-                "LRG_8t1:c.3166G>A",
+                "NG_011906.1:g.42362G>A",
+                "NM_001165963.1:c.3199G>A",
                 "NM_001165964.1:c.3115G>A",
                 "NM_006920.4:c.3166G>A",
-                "NM_001165963.1:c.3199G>A",
-                "LRG_8:g.42362G>A",
-                "NG_011906.1:g.42362G>A",
-                "p.A1067T:GCA>ACA",
-                "LRG_8p1:p.Ala1056Thr",
+                "NP_001159435.1:p.Ala1067Thr",
                 "NP_001159436.1:p.Ala1039Thr",
                 "NP_008851.3:p.Ala1056Thr",
-                "NP_001159435.1:p.Ala1067Thr"
+                "LRG_8p1:p.Ala1056Thr",
+                "LRG_8t1:c.3166G>A",
+                "LRG_8:g.42362G>A"
             ]
         },
         "otherDescription": "",
@@ -152,8 +175,8 @@
         "clinVarRCVs": ["RCV000030157"],
         "clinvarVariantTitle": "NM_005912.2(MC4R):c.677T>C (p.Ile226Thr)",
         "hgvsNames": {
-            "gRCh37": "NC_000018.9:g.58038906A>G",
             "gRCh38": "NC_000018.10:g.60371673A>G",
+            "gRCh37": "NC_000018.9:g.58038906A>G",
             "others": [
                 "NM_005912.2:c.677T>C",
                 "NG_016441.1:g.6096T>C",
@@ -171,8 +194,8 @@
         "clinVarRCVs": ["RCV000030156"],
         "clinvarVariantTitle": "NM_005912.2(MC4R):c.606C>A (p.Phe202Leu)",
         "hgvsNames": {
-            "gRCh37": "NC_000018.9:g.58038977G>T",
             "gRCh38": "NC_000018.10:g.60371744G>T",
+            "gRCh37": "NC_000018.9:g.58038977G>T",
             "others": [
                 "NM_005912.2:c.606C>A",
                 "NG_016441.1:g.6025C>A",
@@ -190,12 +213,15 @@
         "clinVarRCVs": ["RCV000049405"],
         "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.344delT (p.Ile115Thrfs)",
         "hgvsNames": {
-            "gRCh37": "NC_000007.13:g.107432313delA",
             "gRCh38": "NC_000007.14:g.107791868delA",
+            "gRCh37": "NC_000007.13:g.107432313delA",
             "others": [
-                "NM_000111.2:c.344delT",
                 "NG_008046.1:g.16366delT",
-                "NP_000102.1:p.Ile115Thrfs"
+                "NM_000111.2:c.344delT",
+                "NP_000102.1:p.Ile115Thrfs",
+                "LRG_683p1:p.Ile115Thrfs",
+                "LRG_683t1:c.344delT",
+                "LRG_683:g.16366delT"
             ]
         },
         "otherDescription": "",
@@ -205,7 +231,6 @@
     },
     {
         "uuid": "ad310ea9-e215-498c-a001-a6c216105e4c",
-
         "dbSNPIds": [],
         "clinVarRCVs": [],
         "clinvarVariantTitle": "",
@@ -221,7 +246,15 @@
         "dbSNPIds": [],
         "clinVarRCVs": ["RCV000010100"],
         "clinvarVariantTitle": "NM_005502.3(ABCA1):c.1584_1597delTGAGAGGAAGTTCTinsCGGGCGTGGTGGCAGGAGCTGTAATCCCAGCTACTTGGGAGGCTGAGGCACGAGAATCACTTGAACTCAGGAGGCAGAGGTTGCAGTGAGCTGAGGTCACGCCACTGTAC (p.Glu529_Gly867delinsGlyArgGlyGlyArgSerCysAsnProSerTyrLeuGlyGlyTer)",
-        "hgvsNames": {},
+        "hgvsNames": {
+            "gRCh38": "NC_000009.12:g.104831740_104831753delAGAACTTCCTCTCAinsGTACAGTGGCGTGACCTCAGCTCACTGCAACCTCTGCCTCCTGAGTTCAAGTGATTCTCGTGCCTCAGCCTCCCAAGTAGCTGGGATTACAGCTCCTGCCACCACGCCCG",
+            "gRCh37": "NC_000009.11:g.107594021_107594034delAGAACTTCCTCTCAinsGTACAGTGGCGTGACCTCAGCTCACTGCAACCTCTGCCTCCTGAGTTCAAGTGATTCTCGTGCCTCAGCCTCCCAAGTAGCTGGGATTACAGCTCCTGCCACCACGCCCG",
+            "others": [
+                "NG_007981.1:g.101403_101416delTGAGAGGAAGTTCTinsCGGGCGTGGTGGCAGGAGCTGTAATCCCAGCTACTTGGGAGGCTGAGGCACGAGAATCACTTGAACTCAGGAGGCAGAGGTTGCAGTGAGCTGAGGTCACGCCACTGTAC",
+                "NM_005502.3:c.1584_1597delTGAGAGGAAGTTCTinsCGGGCGTGGTGGCAGGAGCTGTAATCCCAGCTACTTGGGAGGCTGAGGCACGAGAATCACTTGAACTCAGGAGGCAGAGGTTGCAGTGAGCTGAGGTCACGCCACTGTAC",
+                "NP_005493.2:p.Glu529_Gly867delinsGlyArgGlyGlyArgSerCysAsnProSerTyrLeuGlyGlyTer"
+            ]
+        },
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-10-21T22:47:10.000000+00:00",
@@ -233,7 +266,19 @@
         "dbSNPIds": [],
         "clinVarRCVs": ["RCV000076475"],
         "clinvarVariantTitle": "NM_000251.2(MSH2):c.243_273del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG (p.Lys82_Glu425delinsTer)",
-        "hgvsNames": {},
+        "hgvsNames": {
+            "gRCh38": "NC_000002.12:g.47408432_47408462del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAA...(Total 257)",
+            "gRCh37": "NC_000002.11:g.47635571_47635601del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAA...(Total 257)",
+            "others": [
+                "LRG_218t1:c.243_273del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG",
+                "LRG_218:g.10309_10339del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG...(Total 250)",
+                "NM_000251.1:c.243_273delinsCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG",
+                "NM_000251.2:c.243_273del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG",
+                "NG_007110.2:g.10309_10339del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG...(Total 250)",
+                "NP_000242.1:p.Lys82_Glu425delinsTer",
+                "LRG_218p1:p.Lys82_Glu425delinsTer"
+            ]
+        },
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2016-02-02T22:47:10.000000+00:00",
