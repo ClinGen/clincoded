@@ -1102,7 +1102,7 @@ class Population(Item):
 
     @calculated_property(schema={
         "title": "# Populations",
-        "type": "string"
+        "type": "number"
     })
     def maf_count(self, populations={}):
         return len(populations)
