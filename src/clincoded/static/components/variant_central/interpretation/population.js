@@ -109,6 +109,19 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         };
     },
 
+    componentDidMount: function() {
+        console.log("population component is mounted");
+        if (this.state.shouldFetchData === false) {
+            this.setState({shouldFetchData: true});
+            if (this.state.hasExacData === false) {
+                this.fetchMyVariantInfo();
+            }
+            if (this.state.hasEspData === false) {
+                this.fetchEnsemblData();
+            }
+        }
+    },
+
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretationUuid: nextProps.interpretationUuid});
         this.setState({shouldFetchData: nextProps.shouldFetchData});
