@@ -17,8 +17,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     propTypes: {
         formTitle: React.PropTypes.string, // the title of this form section
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
-        extraData: React.PropTypes.object, // any extra data that is passed from the parent page
-        formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from extraData
+        evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
+        formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from evidenceData
         variantUuid: React.PropTypes.string, // UUID of the parent variant
         criteria: React.PropTypes.array, // array of criteria codes being handled by this form
         interpretation: React.PropTypes.object, // parent interpretation object
@@ -33,7 +33,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         return {
             submitBusy: false, // spinner for Save button
             submitDisabled: false, // changed by handleChange method, but disabled for now due to uncertain/non-universal logic
-            extraData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
+            evidenceData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
             interpretation: null // parent interpretation object
         };
     },
@@ -44,8 +44,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             this.setState({interpretation: this.props.interpretation});
         }
         // update the form when extra data is loaded
-        if (this.props.extraData) {
-            this.setState({extraData: this.props.extraData});
+        if (this.props.evidenceData) {
+            this.setState({evidenceData: this.props.evidenceData});
             if (this.props.formDataUpdater) {
                 this.props.formDataUpdater.call(this, this.props);
             }
@@ -58,8 +58,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             this.setState({interpretation: nextProps.interpretation});
         }
         // when props are updated, update the form with new extra data, if applicable
-        if (typeof nextProps.extraData !== undefined && nextProps.extraData != this.props.extraData) {
-            this.setState({extraData: nextProps.extraData});
+        if (typeof nextProps.evidenceData !== undefined && nextProps.evidenceData != this.props.evidenceData) {
+            this.setState({evidenceData: nextProps.evidenceData});
             if (this.props.formDataUpdater) {
                 this.props.formDataUpdater.call(this, nextProps);
             }
