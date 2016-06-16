@@ -1105,9 +1105,7 @@ class Population(Item):
         "type": "string"
     })
     def maf_count(self, populations={}):
-        if len(populations) > 0:
-            return len(populations)
-        return ''
+        return len(populations)
 
 
 @collection(
