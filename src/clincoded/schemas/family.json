@@ -326,6 +326,12 @@
                     "description": "Additional information of the segregation",
                     "type": "string"
                 },
+                "lodScore": {
+                    "title": "LOD Score",
+                    "description": "Score entered by user.",
+                    "comments": "May be changed to a calculated property later.",
+                    "type": "number"
+                },
                 "variants": {
                     "title": "Variants Associated with Proband",
                     "description": "List of variant uuid(s)",
