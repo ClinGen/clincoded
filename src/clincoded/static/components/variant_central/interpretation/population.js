@@ -148,49 +148,44 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var found = genomic_chr_mapping.find((entry) => entry.GenomicRefSeq === NC_genomic);
             // Format variant_id for use of myvariant.info REST API
             var variant_id = found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':'));
+            this.getRestData('http://rest.ensembl.org/vep/human/id/rs' + rsid + '?content-type=application/json').then(exac_allele_frequency => {
+                // Calling method to update global object with ExAC Allele Frequency data
+                this.assignAlleleFrequencyData(exac_allele_frequency);
+            }).catch(function(e) {
+                console.log('VEP Allele Frequency Fetch Error=: %o', e);
+            });
             this.getRestData(url + variant_id).then(response => {
                 this.setState({myvariant_exac_population: response.exac});
                 // Calling methods to update global object with ExAC & ESP population data
                 // FIXME: Need to create a new copy of the global object with new data
                 // while leaving the original object with pre-existing data
                 // for comparison of any potential changed values
-                this.assignExacData(response, rsid);
+                this.assignExacData(response);
                 this.assignEspData(response);
-                // ExAC allele frequency info is not available in all variant data from myvariant.info
-                // FIXME: Need to remove this when switching to using the global population object for table UI
-                if (response.dbnsfp && response.dbnsfp.exac) {
-                    this.setState({myvariant_exac_allele: response.dbnsfp.exac});
-                }
-                // ESP allele data of a given variant from myvariant.info
-                // FIXME: Need to remove this when switching to using the global population object for table UI
-                if (response.evs) {
-                    this.setState({myvariant_esp_population: response.evs});
-                }
             }).catch(function(e) {
                 console.log('MyVariant Fetch Error=: %o', e);
             });
         }
     },
 
+    // Get ExAC allele frequency from Ensembl (VEP) directly
+    // Because myvariant.info doesn't always return ExAC allele frequency data
+    assignAlleleFrequencyData: function(allele_frequency) {
+        populationObj.exac.allele_frequency.african = allele_frequency[0].colocated_variants[0].exac_afr_maf;
+        populationObj.exac.allele_frequency.east_asian = allele_frequency[0].colocated_variants[0].exac_eas_maf;
+        populationObj.exac.allele_frequency.european_non_finnish = allele_frequency[0].colocated_variants[0].exac_nfe_maf;
+        populationObj.exac.allele_frequency.european_finnish = allele_frequency[0].colocated_variants[0].exac_fin_maf;
+        populationObj.exac.allele_frequency.latino = allele_frequency[0].colocated_variants[0].exac_amr_maf;
+        populationObj.exac.allele_frequency.other = allele_frequency[0].colocated_variants[0].exac_oth_maf;
+        populationObj.exac.allele_frequency.south_asian = allele_frequency[0].colocated_variants[0].exac_sas_maf;
+        populationObj.exac.allele_frequency.total = allele_frequency[0].colocated_variants[0].exac_adj_maf;
+    },
+
     // Method to assign ExAC population data to global population object
-    assignExacData: function(response, rsid) {
+    assignExacData: function(response) {
         // Not all variants can be found in ExAC
         // Do nothing if the exac{...} object is not returned from myvariant.info
         if (response.exac) {
-            // Get ExAC allele frequency from Ensembl (VEP) directly
-            // Because myvariant.info doesn't always return ExAC allele frequency data
-            this.getRestData('http://rest.ensembl.org/vep/human/id/rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(ensembl_exac_data => {
-                populationObj.exac.allele_frequency.african = ensembl_exac_data[0].colocated_variants[0].exac_afr_maf;
-                populationObj.exac.allele_frequency.east_asian = ensembl_exac_data[0].colocated_variants[0].exac_eas_maf;
-                populationObj.exac.allele_frequency.european_non_finnish = ensembl_exac_data[0].colocated_variants[0].exac_nfe_maf;
-                populationObj.exac.allele_frequency.european_finnish = ensembl_exac_data[0].colocated_variants[0].exac_fin_maf;
-                populationObj.exac.allele_frequency.latino = ensembl_exac_data[0].colocated_variants[0].exac_amr_maf;
-                populationObj.exac.allele_frequency.other = ensembl_exac_data[0].colocated_variants[0].exac_oth_maf;
-                populationObj.exac.allele_frequency.south_asian = ensembl_exac_data[0].colocated_variants[0].exac_sas_maf;
-                populationObj.exac.allele_frequency.total = ensembl_exac_data[0].colocated_variants[0].exac_adj_maf;
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
             // Get other ExAC population data from myvariant.info, such allele_count, allele_number, homozygotes number, etc
             populationObj.exac.allele_count = response.exac.ac;
             populationObj.exac.allele_number = response.exac.an;
