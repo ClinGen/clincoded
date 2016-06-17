@@ -943,8 +943,6 @@ class Interpretation(Item):
         'evaluations.population.submitted_by',
         'evaluations.computational',
         'evaluations.computational.submitted_by',
-        'evaluations.computational.nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.gene',
-        'evaluations.computational.nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.mechanisms.disease',
         'provisional_variant',
         'provisional_variant.submitted_by'
     ]
@@ -1039,8 +1037,6 @@ class Evaluation(Item):
         'disease',
         'population',
         'computational',
-        'computational.nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.gene',
-        'computational.nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.mechanisms.disease',
         'interpretation_associated'
     ]
     rev = {
@@ -1105,13 +1101,11 @@ class Population(Item):
         return paths_filtered_by_status(request, evaluation_associated)
 
     @calculated_property(schema={
-        "title": "Number of Allele Frequency",
-        "type": "string"
+        "title": "# Populations",
+        "type": "number"
     })
     def maf_count(self, populations=[]):
-        if len(populations) > 0:
-            return len(populations)
-        return ''
+        return len(populations)
 
 
 @collection(
@@ -1128,8 +1122,6 @@ class Computational(Item):
     embedded = [
         'variant',
         'variant.associatedInterpretations',
-        'nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.gene',
-        'nonsenseOrFrameshiftOrSplice12.lof.lofMachanisms.mechanisms.disease',
         'evaluation_associated',
         'evaluation_associated.interpretation_associated'
     ]
@@ -1146,19 +1138,11 @@ class Computational(Item):
         return paths_filtered_by_status(request, evaluation_associated)
 
     @calculated_property(schema={
-        "title": "Molecular Consequence",
-        "type": "string"
+        "title": "# Criterion",
+        "type": "number"
     })
-    def molecular_consequence(self, missense={}, inFrameIndel={}, nonsenseOrFrameshiftOrSplice12={}, silentOrOtherSplice={}):
-        if len(missense) > 0:
-            return 'Missense'
-        elif len(inFrameIndel) > 0:
-            return 'In-Frame Indel'
-        elif len(nonsenseOrFrameshiftOrSplice12) > 0:
-            return 'Nonsense/Frameshift/Splice 1, 2'
-        elif len(silentOrOtherSplice) > 0:
-            return 'Silent/Splice (outside 1, 2)'
-        return ''
+    def criteria_count(self, evaluation_associated=[]):
+        return len(evaluation_associated)
 
 
 @collection(

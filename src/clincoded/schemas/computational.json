@@ -22,204 +22,74 @@
             "type": "string",
             "linkTo": "variant"
         },
-        "missense": {
-            "title": "Missense",
-            "description": "Sub-object Missense",
+        "computationalTools": {
             "type": "object",
             "properties": {
-                "computationalTools": {
-                    "title": "Computational Tools",
-                    "type": "object",
-                    "properties": {
-                        "overAllValue": {
-                            "title": "Overall",
-                            "description": "Overall value of all computational tools",
-                            "type": "string"
-                        },
-                        "proteinPredictors": {
-                            "title": "Protein Predictors",
-                            "description": "Value of protein predictors",
-                            "type": "string"
-                        },
-                        "conservationAnalysis": {
-                            "title": "Conservation Analysis",
-                            "description": "Value of conservation Analysis",
-                            "type": "string"
-                        },
-                        "splicingPredictors": {
-                            "title": "Splicing Predictors",
-                            "description": "Value of splicing predictors",
-                            "type": "string"
-                        }
-                    }
-                },
-                "otherVariantsInCodon": {
-                    "title": "Other Variants in Codon",
-                    "description": "List of variants.",
+                "proteinPredictors": {
+                    "title": "Protein Predictors",
                     "type": "array",
                     "items": {
-                        "title": "Variant",
-                        "type": "object",
-                        "properties": {
-                            "source": {
-                                "title": "source",
-                                "description": "External source of the variant",
-                                "type": "string"
-                            },
-                            "sourceId": {
-                                "title": "Source ID",
-                                "description": "Primary key of the variant in external source",
-                                "type": "string"
-                            },
-                            "clinicalType": {
-                                "title": "Clinical Type",
-                                "description": "Varaint interpretation on pathogenicity",
-                                "type": "string"
-                            },
-                            "protein": {
-                                "title": "Protein Presentation",
-                                "type": "string"
-                            },
-                            "cDNA": {
-                                "title": "cDNA Presentation",
-                                "type": "string"
-                            }
-                        }
+                        "type": "object"
                     }
                 },
-                "differentChange": {
-                    "title": "Different Change",
-                    "description": "Different pathogenic missense change at residue?",
-                    "type": "boolean"
-                },
-                "sameAAChange": {
-                    "title": "Same Aminal Acid Change",
-                    "description": "Same AA change as established pathogenic variant?",
-                    "type": "boolean"
-                },
-                "truncatingCauseDisease": {
-                    "title": "Truncating Cause Disease",
-                    "description": "Only truncating cause disease?",
-                    "type": "boolean"
-                }
-            }
-        },
-        "inFrameIndel": {
-            "title": "In-Frame Indel",
-            "description": "Sub-object In-frame indel",
-            "type": "object",
-            "properties": {
-                "regionRepetitive": {
-                    "title": "Region Repetitive",
-                    "type": "boolean"
-                },
-                "proteinLengthChanges": {
-                    "title": "Protein Length Changes",
-                    "description": "Protein length changes as a result of In-Frame deletion/insertion in a non-repeat region or stop-loss variant?",
-                    "type": "boolean"
-                },
-                "noKnownFunction": {
-                    "title": "No Known Function",
-                    "description": "In-Frame deletion/insertion in a repetitive region without a known function?",
-                    "type": "boolean"
-                }
-            }
-        },
-        "nonsenseOrFrameshiftOrSplice12": {
-            "description": "Sub-object Nonsense/Frameshift/Splice 1, 2",
-            "type": "object",
-            "properties": {
-                "totalExons": {
-                    "title": "Total Exons",
-                    "description": "Total number of exons",
-                    "type": "number"
-                },
-                "affectedExons": {
-                    "title": "Affected Exons",
-                    "description": "List of affected exons",
+                "conservationAnalysis": {
+                    "title": "Conservation Analysis",
                     "type": "array",
                     "items": {
-                        "title": "Affected Exon",
-                        "type": "number"
+                        "type": "object"
                     }
                 },
-                "lof": {
-                    "title": "Known LOF",
-                    "description": "Object containing LOF data",
-                    "type": "object",
-                    "properties": {
-                        "prematureStopLocation": {
-                            "type": "object",
-                            "properties": {
-                                "residue": {
-                                    "title": "Residue",
-                                    "type": "string"
-                                },
-                                "exon": {
-                                    "title": "Exon",
-                                    "type": "number"
-                                },
-                                "genomic": {
-                                    "title": "Genomic",
-                                    "type": "string"
-                                },
-                                "match55bpRule": {
-                                    "title": "Match 55bp Rule",
-                                    "description": "Greater than 55bp from penult exon",
-                                    "type": "boolean"
-                                }
-                            }
-                        },
-                        "lofMachanisms": {
-                            "type": "object",
-                            "properties": {
-                                "gene": {
-                                    "title": "Gene",
-                                    "type": "string",
-                                    "linkTo": "gene"
-                                },
-                                "mechanisms": {
-                                    "title": "LOF Mechanisms",
-                                    "description": "List of LOF mechanisms related to the gene",
-                                    "type": "array",
-                                    "items": {
-                                        "title": "Mechanism",
-                                        "type": "object",
-                                        "properties": {
-                                            "disease": {
-                                                "title": "Disease",
-                                                "type": "string",
-                                                "linkTo": "orphaPhenotype"
-                                            },
-                                            "knownMechanism": {
-                                                "title": "Known Mechanism",
-                                                "type": "boolean"
-                                            },
-                                            "sourceOfLOF": {
-                                                "title": "Source of LOF Data",
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                "splicingPredictions": {
+                    "title": "Splicing Predictions",
+                    "type": "array",
+                    "items": {
+                        "type": "object"
                     }
+                },
+                "averageChangeToNearestSplice": {
+                    "title": "Average Change to Nearest Splice Site",
+                    "type": "number"
+                },
+                "distanceToNearestSplice": {
+                    "type": "number"
+                },
+                "exonLocation": {
+                    "description": "Location of affected exon",
+                    "type": "number"
                 }
             }
         },
-        "silentOrOtherSplice": {
-            "description": "Sub-object Silent/Splice (outside 1, 2)",
-            "type": "object",
-            "properties": {
-                "splicePredictors": {
-                    "title": "Splice Predictions",
-                    "type": "string"
-                },
-                "averageChange": {
-                    "title": "Average Change",
-                    "description": "Average change at nearest splice site",
-                    "type": "number"
+        "otherVariantsInCodon": {
+            "title": "Other Variants in Codon",
+            "description": "List of variants.",
+            "type": "array",
+            "items": {
+                "title": "Variant",
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "title": "Source",
+                        "description": "External source of the variant",
+                        "type": "string"
+                    },
+                    "sourceId": {
+                        "title": "Source ID",
+                        "description": "Primary key of the variant in external source",
+                        "type": "string"
+                    },
+                    "clinical": {
+                        "title": "Clinical Type",
+                        "description": "Varaint interpretation on pathogenicity",
+                        "type": "string"
+                    },
+                    "protein": {
+                        "title": "Protein Presentation",
+                        "type": "string"
+                    },
+                    "cDNA": {
+                        "title": "cDNA Presentation",
+                        "type": "string"
+                    }
                 }
             }
         }
@@ -229,10 +99,9 @@
             "title": "Variant",
             "type": "string"
         },
-        "molecular_consequence": {
-            "title": "Molecular Consequence",
-            "type": "string"
+        "criteria_count": {
+            "title": "# Criterion",
+            "type": "number"
         }
     }
 }
-
