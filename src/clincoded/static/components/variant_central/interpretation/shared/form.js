@@ -114,9 +114,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
             // figure out if we need to create a new evidence data object or not
             if (this.state.evidenceDataUpdated) {
-                let evidenceObject = {
-                    variant: this.props.variantUuid
-                };
+                let evidenceObject = {variant: this.props.variantUuid};
                 evidenceObject[this.state.evidenceType + 'Data'] = this.state.evidenceData;
                 return this.postRestData('/' + this.props.evidenceType + '/', evidenceObject).then(evidenceResult => {
                     return Promise.resolve(evidenceResult['@graph'][0]['@id']);
