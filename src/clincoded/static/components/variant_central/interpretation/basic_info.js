@@ -41,6 +41,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     componentWillReceiveProps: function(nextProps) {
         this.setState({shouldFetchData: nextProps.shouldFetchData});
         if (this.state.shouldFetchData === true) {
+            window.localStorage.clear();
             this.fetchRefseqData();
             this.fetchEnsemblData();
         }
@@ -53,28 +54,34 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
         if (variant) {
             var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
+            // Extract genomic substring from HGVS name whose assembly is GRCh37 or GRCh38
+            // Both of "GRCh37" and "gRCh37" (same for GRCh38) instances are possibly present in the variant object
+            var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
+            var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
             this.setState({
                 clinvar_id: clinVarId,
                 car_id: variant.carId,
                 dbSNP_id: variant.dbSNPIds[0],
-                hgvs_GRCh37: variant.hgvsNames.gRCh37,
-                hgvs_GRCh37: variant.hgvsNames.gRCh37,
-                hgvs_GRCh37: variant.hgvsNames.gRCh37,
-                hgvs_GRCh38: variant.hgvsNames.gRCh38,
+                hgvs_GRCh37: hgvs_GRCh37,
+                hgvs_GRCh38: hgvs_GRCh38,
             });
+            // Get ClinVar data via the parseClinvar method defined in parse-resources.js
             this.getRestDataXml(url + clinVarId).then(xml => {
                 // Passing 'true' option to invoke 'mixin' function
-                // To extract more ClinVar data for 'basic info' tab
-                var d = parseClinvar(xml, true);
+                // To extract more ClinVar data for 'Basic Information' tab
+                var variantData = parseClinvar(xml, true);
                 this.setState({
-                    nucleotide_change: d.RefSeqTranscripts.NucleotideChangeList,
-                    protein_change: d.RefSeqTranscripts.ProteinChangeList,
-                    molecular_consequence: d.RefSeqTranscripts.MolecularConsequenceList,
-                    sequence_location: d.allele.SequenceLocation,
-                    gene_symbol: d.gene.symbol
+                    nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
+                    protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
+                    molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
+                    sequence_location: variantData.allele.SequenceLocation,
+                    gene_symbol: variantData.gene.symbol
                 });
+                // Calling method to get uniprot id for LinkOut link
                 this.getUniprotId(this.state.gene_symbol);
-                this.getPrimaryTranscript(d.clinvarVariantTitle, this.state.nucleotide_change, this.state.protein_change, this.state.molecular_consequence);
+                // Calling method to identify nucleotide change, protein change and molecular consequence
+                // Used for UI display in the Primary Transcript table
+                this.getPrimaryTranscript(variantData.clinvarVariantTitle, this.state.nucleotide_change, this.state.protein_change, this.state.molecular_consequence);
             }).catch(function(e) {
                 console.log('RefSeq Fetch Error=: %o', e);
             });
@@ -89,13 +96,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (result && molecular_consequence.length) {
             var item = molecular_consequence.find((x) => x.HGVS === result.HGVS);
             // 'SO_terms' is defined via requiring external mapping file
-            var entry = SO_terms.find((v) => v.SO_id === item.SOid);
-            SO_id_term = entry.SO_term + ' ' + entry.SO_id;
+            var found = SO_terms.find((entry) => entry.SO_id === item.SOid);
+            SO_id_term = found.SO_term + ' ' + found.SO_id;
             // FIXME: temporarily use protein_change[0] due to lack of mapping
             // associated with nucleotide transcript in ClinVar data
+            var protein_hgvs = (typeof protein_change !== 'undefined' && protein_change.length) ? protein_change[0].HGVS : '--';
             transcript = {
                 "nucleotide": result.HGVS,
-                "protein": protein_change[0].HGVS,
+                "protein": protein_hgvs,
                 "molecular": SO_id_term
             };
         }
@@ -106,8 +114,10 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     fetchEnsemblData: function() {
         var variant = this.props.data;
         if (variant) {
-            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0] : 'Unknown';
-            this.getRestData('http://rest.ensembl.org/vep/human/id/' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+            // Extract only the number portion of the dbSNP id
+            var numberPattern = /\d+/g;
+            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
+            this.getRestData('http://rest.ensembl.org/vep/human/id/rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
                 this.setState({ensembl_transcripts: response[0].transcript_consequences});
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
@@ -123,10 +133,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             newStr = '';
         for (let value of array.values()) {
             // 'SO_terms' is defined via requiring external mapping file
-            var entry = SO_terms.find((v) => v.SO_term === value);
-            SO_id_term = entry.SO_term + ' ' + entry.SO_id;
+            var found = SO_terms.find((entry) => entry.SO_term === value);
+            SO_id_term = found.SO_term + ' ' + found.SO_id;
             newArray.push(SO_id_term);
         }
+        // Concatenate SO terms with comma delimiter
         for (let [key, value] of newArray.entries()) {
             if (key === 0) {
                 newStr += value;
@@ -165,9 +176,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     // For both GRCh38/hg38 and GRCh37/hg19
     ucscViewerURL: function(array, db, assembly) {
         var url = '';
-        array.forEach(v => {
-            if (v.Assembly === assembly) {
-                url = 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=' + db + '&position=Chr' + v.Chr + '%3A' + v.start + '-' + v.stop;
+        array.forEach(SequenceLocationObj => {
+            if (SequenceLocationObj.Assembly === assembly) {
+                url = 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=' + db + '&position=Chr' + SequenceLocationObj.Chr + '%3A' + SequenceLocationObj.start + '-' + SequenceLocationObj.stop;
             }
         });
         return url;
@@ -177,9 +188,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     // For both GRCh38 and GRCh37
     variationViewerURL: function(array, gene_symbol, assembly) {
         var url = '';
-        array.forEach(v => {
-            if (v.Assembly === assembly) {
-                url = 'http://www.ncbi.nlm.nih.gov/variation/view/?chr=' + v.Chr + '&q=' + gene_symbol + '&assm=' + v.AssemblyAccessionVersion + '&from=' + v.start + '&to=' + v.stop;
+        array.forEach(SequenceLocationObj => {
+            if (SequenceLocationObj.Assembly === assembly) {
+                url = 'http://www.ncbi.nlm.nih.gov/variation/view/?chr=' + SequenceLocationObj.Chr + '&q=' + gene_symbol + '&assm=' + SequenceLocationObj.AssemblyAccessionVersion + '&from=' + SequenceLocationObj.start + '&to=' + SequenceLocationObj.stop;
             }
         });
         return url;
