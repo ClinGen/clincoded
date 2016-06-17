@@ -1,0 +1,98 @@
+[
+  {
+    "GenomicRefSeq": "NC_000001.10",
+    "ChrFormat": "chr1"
+  },
+  {
+    "GenomicRefSeq": "NC_000002.11",
+    "ChrFormat": "chr2"
+  },
+  {
+    "GenomicRefSeq": "NC_000003.11",
+    "ChrFormat": "chr3"
+  },
+  {
+    "GenomicRefSeq": "NC_000004.11",
+    "ChrFormat": "chr4"
+  },
+  {
+    "GenomicRefSeq": "NC_000005.9",
+    "ChrFormat": "chr5"
+  },
+  {
+    "GenomicRefSeq": "NC_000006.11",
+    "ChrFormat": "chr6"
+  },
+  {
+    "GenomicRefSeq": "NC_000007.13",
+    "ChrFormat": "chr7"
+  },
+  {
+    "GenomicRefSeq": "NC_000008.10",
+    "ChrFormat": "chr8"
+  },
+  {
+    "GenomicRefSeq": "NC_000009.11",
+    "ChrFormat": "chr9"
+  },
+  {
+    "GenomicRefSeq": "NC_000010.10",
+    "ChrFormat": "chr10"
+  },
+  {
+    "GenomicRefSeq": "NC_000011.9",
+    "ChrFormat": "chr11"
+  },
+  {
+    "GenomicRefSeq": "NC_000012.11",
+    "ChrFormat": "chr12"
+  },
+  {
+    "GenomicRefSeq": "NC_000013.10",
+    "ChrFormat": "chr13"
+  },
+  {
+    "GenomicRefSeq": "NC_000014.8",
+    "ChrFormat": "chr14"
+  },
+  {
+    "GenomicRefSeq": "NC_000015.9",
+    "ChrFormat": "chr15"
+  },
+  {
+    "GenomicRefSeq": "NC_000016.9",
+    "ChrFormat": "chr16"
+  },
+  {
+    "GenomicRefSeq": "NC_000017.10",
+    "ChrFormat": "chr17"
+  },
+  {
+    "GenomicRefSeq": "NC_000018.9",
+    "ChrFormat": "chr18"
+  },
+  {
+    "GenomicRefSeq": "NC_000019.9",
+    "ChrFormat": "chr19"
+  },
+  {
+    "GenomicRefSeq": "NC_000020.10",
+    "ChrFormat": "chr20"
+  },
+  {
+    "GenomicRefSeq": "NC_000021.8",
+    "ChrFormat": "chr21"
+  },
+  {
+    "GenomicRefSeq": "NC_000022.10",
+    "ChrFormat": "chr22"
+  },
+  {
+    "GenomicRefSeq": "NC_000023.10",
+    "ChrFormat": "chrX"
+  },
+  {
+    "GenomicRefSeq": "NC_000024.9",
+    "ChrFormat": "chrY"
+  }
+]
