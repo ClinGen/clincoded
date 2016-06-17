@@ -323,24 +323,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return displayVal;
     },
 
-    // handler for saving the global population object into the db
-    handleNewPopulation: function(e) {
-        e.preventDefault(); e.stopPropagation();
-        var variant = this.props.data;
-        var newPopulationObj;
-        if (variant) {
-            // Put together a new population object
-            newPopulationObj = {
-                variant: variant.uuid,
-                populations: populationObject
-            };
-        }
-        // Post new population to the DB.
-        this.postRestData('/populations/', newPopulationObj).then(data => {
-            console.log("Population data has been saved: " + data['@graph'][0].uuid);
-        }).catch(e => {parseAndLogError.bind(undefined, 'postRequest')});
-    },
-
     render: function() {
         // FIXME: Need to switch to using the global population object
         var ensembl_variation = this.state.ensembl_variation_data,
@@ -386,19 +368,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     </div>
                 </div>
-
-                {(this.state.interpretation) ?
-                <ul className="section-criteria-evaluation clearfix">
-                    <li className="col-xs-12 gutter-exc">
-                        <CurationInterpretationForm formTitle={"Criteria Group 1"} renderedFormContent={pop_crit_1} evidenceData={this.state.data} evidenceDataUpdated={true}
-                            formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"Criteria Group 2"} renderedFormContent={pop_crit_2} evidenceData={this.state.data} evidenceDataUpdated={true}
-                            formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                    </li>
-                </ul>
-                : null}
 
                 {(this.state.hasExacData) ?
                     <div className="panel panel-info datasource-ExAC">
@@ -639,6 +608,19 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </table>
                     </div>
                 }
+
+                {(this.state.interpretation) ?
+                <ul className="section-criteria-evaluation clearfix">
+                    <li className="col-xs-12 gutter-exc">
+                        <CurationInterpretationForm formTitle={"Criteria Group 1"} renderedFormContent={pop_crit_1} evidenceData={this.state.data} evidenceDataUpdated={true}
+                            formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        <CurationInterpretationForm formTitle={"Criteria Group 2"} renderedFormContent={pop_crit_2} evidenceData={this.state.data} evidenceDataUpdated={true}
+                            formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    </li>
+                </ul>
+                : null}
 
             </div>
         );
