@@ -59,39 +59,11 @@
                 }
             }
         },
-        "otherVariantsInCodon": {
-            "title": "Other Variants in Codon",
-            "description": "List of variants.",
-            "type": "array",
-            "items": {
-                "title": "Variant",
-                "type": "object",
-                "properties": {
-                    "source": {
-                        "title": "Source",
-                        "description": "External source of the variant",
-                        "type": "string"
-                    },
-                    "sourceId": {
-                        "title": "Source ID",
-                        "description": "Primary key of the variant in external source",
-                        "type": "string"
-                    },
-                    "clinical": {
-                        "title": "Clinical Type",
-                        "description": "Varaint interpretation on pathogenicity",
-                        "type": "string"
-                    },
-                    "protein": {
-                        "title": "Protein Presentation",
-                        "type": "string"
-                    },
-                    "cDNA": {
-                        "title": "cDNA Presentation",
-                        "type": "string"
-                    }
-                }
-            }
+        "computationalData": {
+            "title": "Computational Data",
+            "description": "Temp property to store blob computational data.",
+            "type": "object",
+            "comment": "No property defined. Flexible for saving different key:value formats."
         }
     },
     "columns": {

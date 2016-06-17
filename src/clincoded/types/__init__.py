@@ -1104,7 +1104,7 @@ class Population(Item):
         "title": "# Populations",
         "type": "number"
     })
-    def maf_count(self, populations=[]):
+    def maf_count(self, populations={}):
         return len(populations)
 
 
