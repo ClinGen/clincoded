@@ -17,6 +17,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     propTypes: {
         formTitle: React.PropTypes.string, // the title of this form section
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
+        evidenceType: React.PropTypes.string, // specified what type of evidence object is created
         evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
         evidenceDataUpdated: React.PropTypes.bool,
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from evidenceData
@@ -47,7 +48,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
         // update the form when extra data is loaded
         if (this.props.evidenceData) {
-            this.setState({evidenceData: this.props.evidenceData, evidenceDataUpdated: this.props.evidenceDataUpdated});
+            this.setState({evidenceType: this.props.evidenceType, evidenceData: this.props.evidenceData, evidenceDataUpdated: this.props.evidenceDataUpdated});
             if (this.props.formDataUpdater) {
                 this.props.formDataUpdater.call(this, this.props);
             }
@@ -61,7 +62,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
         // when props are updated, update the form with new extra data, if applicable
         if (typeof nextProps.evidenceData !== undefined && nextProps.evidenceData != this.props.evidenceData) {
-            this.setState({evidenceData: nextProps.evidenceData, evidenceDataUpdated: nextProps.evidenceDataUpdated});
+            this.setState({evidenceType: nextProps.evidenceType, evidenceData: nextProps.evidenceData, evidenceDataUpdated: nextProps.evidenceDataUpdated});
             if (this.props.formDataUpdater) {
                 this.props.formDataUpdater.call(this, nextProps);
             }
@@ -106,6 +107,23 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 });
             }
 
+
+            if (this.state.evidenceDataUpdated) {
+                let evidenceObject = {
+                    variant: this.props.variantUuid
+                };
+                evidenceObject[this.state.evidenceType + 'Data'] = this.state.evidenceData;
+                return this.postRestData('/' + this.props.evidenceType + '/', evidenceObject).then(evidenceResult => {
+                    return Promise.resolve(evidenceResult['@graph'][0]['@id']);
+                });
+            } else {
+                // logic for getting correct existing @id
+            }
+
+
+
+
+        }).then(evidenceResult => {
             // generate individual promises for each evaluation. PUTs if the evaluation for the criteria code
             // already exists, and POSTs if not
             var evaluationPromises = [];
@@ -116,6 +134,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     value: this.getFormValue(criterion + '-value'),
                     description: this.getFormValue(criterion + '-description')
                 };
+                evaluations[criterion][this.props.evidenceType] = evidenceResult; // don't forget to make the link to the evidence object
                 if (criterion in existingEvaluationUuids) {
                     evaluationPromises.push(this.putRestData('/evaluation/' + existingEvaluationUuids[criterion], evaluations[criterion]));
                 } else {
