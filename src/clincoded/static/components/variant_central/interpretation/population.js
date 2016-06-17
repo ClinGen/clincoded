@@ -109,6 +109,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         };
     },
 
+    // Invoke data fetching when this tab is clicked
     componentDidMount: function() {
         console.log("population component is mounted");
         if (this.state.shouldFetchData === false) {
