@@ -93,6 +93,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         var existingEvaluationUuids = {};
         var flatInterpretation = null;
         var freshInterpretation = null;
+        var evidenceObjectId = null;
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
             freshInterpretation = interpretation;
             // get fresh update of interpretation object so we have newest evaluation list, then flatten it
@@ -103,11 +104,15 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 freshInterpretation.evaluations.map(freshEvaluation => {
                     if (this.props.criteria.indexOf(freshEvaluation.criteria) > -1) {
                         existingEvaluationUuids[freshEvaluation.criteria] = freshEvaluation.uuid;
+                        // save the evidence object's id in case we can re-use it
+                        if (freshEvaluation[this.state.evidenceType]) {
+                            evidenceObjectId = freshEvaluation[this.state.evidenceType]['@id'] ? freshEvaluation[this.state.evidenceType]['@id'] : evidenceObjectId;
+                        }
                     }
                 });
             }
 
-
+            // figure out if we need to create a new evidence data object or not
             if (this.state.evidenceDataUpdated) {
                 let evidenceObject = {
                     variant: this.props.variantUuid
@@ -117,12 +122,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     return Promise.resolve(evidenceResult['@graph'][0]['@id']);
                 });
             } else {
-                // logic for getting correct existing @id
+                return Promise.resolve(evidenceObjectId);
             }
-
-
-
-
         }).then(evidenceResult => {
             // generate individual promises for each evaluation. PUTs if the evaluation for the criteria code
             // already exists, and POSTs if not
