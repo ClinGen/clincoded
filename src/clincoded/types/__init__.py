@@ -1112,13 +1112,11 @@ class Population(Item):
         return paths_filtered_by_status(request, evaluation_associated)
 
     @calculated_property(schema={
-        "title": "Number of MAF",
-        "type": "string"
+        "title": "# Populations",
+        "type": "number"
     })
-    def maf_count(self, populations=[]):
-        if len(populations) > 0:
-            return len(populations)
-        return ''
+    def maf_count(self, populations={}):
+        return len(populations)
 
 
 @collection(

@@ -29,12 +29,9 @@
         },
         "computationalData": {
             "title": "Computational Data",
-            "description": "List of objects. Temp property to store computational data. Will be edited/deleted later.",
-            "type": "array",
-            "items": {
-                "type": "object",
-                "comment": "No property defined. Flexible for saving different key:value formats."
-            }
+            "description": "Temp property to store blob computational data.",
+            "type": "object",
+            "comment": "No property defined. Flexible for saving different key:value formats."
         }
     },
     "columns": {
