@@ -35,7 +35,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             submitBusy: false, // spinner for Save button
             submitDisabled: false, // changed by handleChange method, but disabled for now due to uncertain/non-universal logic
             evidenceData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
-            interpretation: null // parent interpretation object
+            interpretation: null, // parent interpretation object
+            updateMsg: null
         };
     },
 
@@ -82,7 +83,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setState({submitBusy: true}); // Save button pressed; disable it and start spinner
+        this.setState({submitBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
 
         // Save all form values from the DOM.
         this.saveAllFormValues();
@@ -155,9 +156,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             }
         }).then(interpretation => {
             // REST handling is done. Re-enable Save button, and send the interpretation object back to index.js
-            this.setState({submitBusy: false});
+            this.setState({submitBusy: false, updateMsg: <span className="text-success">Evaluation saved successfully!</span>});
             this.props.updateInterpretationObj(interpretation);
         }).catch(error => {
+            this.setState({submitBusy: false, updateMsg: <span className="text-danger">Evaluation could not be saved successfully!</span>});
             console.log(error);
         });
     },
@@ -173,6 +175,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 </div>
                 <div className="curation-submit clearfix">
                     <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} inputDisabled={this.state.submitDisabled} />
+                    {this.state.updateMsg ?
+                        <div className="submit-info pull-right">{this.state.updateMsg}</div>
+                    : null}
                 </div>
             </Form>
         );
