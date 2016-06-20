@@ -351,11 +351,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {(this.state.interpretation) ?
                 <div className="row">
                     <div className="col-sm-12">
-                        <CurationInterpretationForm formTitle={"Criteria Group 1"} renderedFormContent={pop_crit_1}
+                        <CurationInterpretationForm formTitle={"Population Demo Criteria Group 1"} renderedFormContent={pop_crit_1}
                             evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
                             formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"Criteria Group 2"} renderedFormContent={pop_crit_2}
+                        <CurationInterpretationForm formTitle={"Population Demo Criteria Group 2"} renderedFormContent={pop_crit_2}
                             evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
                             formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
@@ -632,14 +632,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 var pop_crit_1 = function() {
     return (
         <div>
-            <Input type="select" ref="pm2-value" label="Does this meet criteria PM2?" defaultValue="No Selection"
+            <Input type="select" ref="pm2-value" label="Population Demo Criteria 1?" defaultValue="No Selection"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
                 <option value="In Progress">In Progress</option>
             </Input>
-            <Input type="textarea" ref="pm2-description" label="PM2 Description:" rows="5" placeholder="e.g. free text"
+            <Input type="textarea" ref="pm2-description" label="Population Demo Criteria Description:" rows="5" placeholder="e.g. free text"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -662,16 +662,16 @@ var pop_crit_1_update = function(nextProps) {
 var pop_crit_2 = function() {
     return (
         <div>
-            <Input type="select" ref="ps4-value" label="Does this meet criteria PS4?" defaultValue="No Selection"
+            <Input type="select" ref="ps4-value" label="Population Demo Criteria 2?" defaultValue="No Selection"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
                 <option value="In Progress">In Progress</option>
             </Input>
-            <Input type="text" ref="ps4-description" label="PS4 Description:" rows="5" placeholder="e.g. free text" inputDisabled={true}
+            <Input type="text" ref="ps4-description" label="Population Demo Criteria 2 Description:" rows="5" placeholder="e.g. free text" inputDisabled={true}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="ps5-value" label="Does this meet criteria PS5?" defaultValue="No Selection"
+            <Input type="select" ref="ps5-value" label="Population Demo Criteria 3?" defaultValue="No Selection"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>

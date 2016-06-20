@@ -41,7 +41,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 {(this.state.interpretation) ?
                 <div className="row">
                     <div className="col-sm-12">
-                        <CurationInterpretationForm formTitle={"Criteria Group Xbox"} renderedFormContent={comp_crit_1}
+                        <CurationInterpretationForm formTitle={"Predictors Demo Criteria"} renderedFormContent={comp_crit_1}
                             evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true}
                             formDataUpdater={comp_crit_1_update} variantUuid={this.props.data['@id']} criteria={['xbox1', 'xbox2']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
@@ -65,10 +65,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 var comp_crit_1 = function() {
     return (
         <div>
-            <Input type="checkbox" ref="xbox1-value" label="Xbox1?:" handleChange={this.handleCheckboxChange}
+            <Input type="checkbox" ref="xbox1-value" label="Predictors Demo Criteria 1?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['xbox1-value'] ? this.state.checkboxes['xbox1-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="checkbox" ref="xbox2-value" label="Xbox2?:" handleChange={this.handleCheckboxChange}
+            <Input type="checkbox" ref="xbox2-value" label="Predictors Demo Criteria 2?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['xbox2-value'] ? this.state.checkboxes['xbox1-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
