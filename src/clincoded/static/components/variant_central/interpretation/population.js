@@ -649,10 +649,10 @@ var pop_crit_1 = function() {
 var pop_crit_1_update = function(nextProps) {
     if (nextProps.interpretation) {
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaulation => {
-                if (evaulation.criteria == 'pm2') {
-                    this.refs['pm2-value'].setValue(evaulation.value);
-                    this.refs['pm2-description'].setValue(evaulation.description);
+            nextProps.interpretation.evaluations.map(evaluation => {
+                if (evaluation.criteria == 'pm2') {
+                    this.refs['pm2-value'].setValue(evaluation.value);
+                    this.refs['pm2-description'].setValue(evaluation.description);
                     this.setState({submitDisabled: false});
                 }
             });

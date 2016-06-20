@@ -78,15 +78,15 @@ var comp_crit_1 = function() {
 var comp_crit_1_update = function(nextProps) {
     if (nextProps.interpretation) {
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaulation => {
-                if (evaulation.criteria == 'xbox1') {
+            nextProps.interpretation.evaluations.map(evaluation => {
+                if (evaluation.criteria == 'xbox1') {
                     let tempCheckboxes = this.state.checkboxes;
-                    tempCheckboxes['xbox1-value'] = evaulation.value === 'true';
+                    tempCheckboxes['xbox1-value'] = evaluation.value === 'true';
                     this.setState({checkboxes: tempCheckboxes});
                 }
-                if (evaulation.criteria == 'xbox2') {
+                if (evaluation.criteria == 'xbox2') {
                     let tempCheckboxes = this.state.checkboxes;
-                    tempCheckboxes['xbox2-value'] = evaulation.value === 'true';
+                    tempCheckboxes['xbox2-value'] = evaluation.value === 'true';
                     this.setState({checkboxes: tempCheckboxes});
                 }
             });

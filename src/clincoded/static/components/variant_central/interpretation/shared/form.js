@@ -47,28 +47,27 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // update the interpretation object when loaded
         if (this.props.interpretation) {
             this.setState({interpretation: this.props.interpretation});
+
+            // update the form if needed
+            if (this.props.formDataUpdater) {
+                this.props.formDataUpdater.call(this, this.props);
+            }
         }
         // update the form when extra data is loaded
         if (this.props.evidenceData) {
             this.setState({evidenceType: this.props.evidenceType, evidenceData: this.props.evidenceData, evidenceDataUpdated: this.props.evidenceDataUpdated});
-            if (this.props.formDataUpdater) {
-                this.props.formDataUpdater.call(this, this.props);
-            }
         }
     },
 
     componentWillReceiveProps: function(nextProps) {
         // this block is for handling props and states when props (external data) is updated after the initial load/rendering
         // when props are updated, update the parent interpreatation object, if applicable
-        if (typeof nextProps.interpretation !== undefined && nextProps.interpretation != this.props.interpretation) {
+        if (typeof nextProps.interpretation !== undefined && _.isEqual(nextProps.interpretation, this.props.interpretation)) {
             this.setState({interpretation: nextProps.interpretation});
         }
         // when props are updated, update the form with new extra data, if applicable
         if (typeof nextProps.evidenceData !== undefined && nextProps.evidenceData != this.props.evidenceData) {
             this.setState({evidenceType: nextProps.evidenceType, evidenceData: nextProps.evidenceData, evidenceDataUpdated: nextProps.evidenceDataUpdated});
-            if (this.props.formDataUpdater) {
-                this.props.formDataUpdater.call(this, nextProps);
-            }
         }
     },
 
@@ -112,14 +111,19 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             }
 
             // figure out if we need to create a new evidence data object or not
-            if (this.state.evidenceDataUpdated) {
-                let evidenceObject = {variant: this.props.variantUuid};
-                evidenceObject[this.state.evidenceType + 'Data'] = this.state.evidenceData;
-                return this.postRestData('/' + this.props.evidenceType + '/', evidenceObject).then(evidenceResult => {
-                    return Promise.resolve(evidenceResult['@graph'][0]['@id']);
-                });
+            if (this.state.evidenceData) {
+                if (this.state.evidenceDataUpdated) {
+                    let evidenceObject = {variant: this.props.variantUuid};
+                    evidenceObject[this.state.evidenceType + 'Data'] = this.state.evidenceData;
+                    return this.postRestData('/' + this.props.evidenceType + '/', evidenceObject).then(evidenceResult => {
+                        return Promise.resolve(evidenceResult['@graph'][0]['@id']);
+                    });
+                } else {
+                    return Promise.resolve(evidenceObjectId);
+                }
             } else {
-                return Promise.resolve(evidenceObjectId);
+                // no relevant evidence object involved
+                return Promise.resolve(null);
             }
         }).then(evidenceResult => {
             // generate individual promises for each evaluation. PUTs if the evaluation for the criteria code
@@ -139,8 +143,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 } else {
                     evaluations[criterion]['value'] = this.refs[criterion + '-value'].getValue();
                 }
-                evaluations[criterion][this.props.evidenceType] = evidenceResult; // don't forget to make the link to the evidence object
-                console.log(evaluations[criterion]);
+                // make link to evidence object, if applicable
+                if (evidenceResult) {
+                    evaluations[criterion][this.props.evidenceType] = evidenceResult;
+                }
                 if (criterion in existingEvaluationUuids) {
                     evaluationPromises.push(this.putRestData('/evaluation/' + existingEvaluationUuids[criterion], evaluations[criterion]));
                 } else {
