@@ -348,6 +348,21 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         return (
             <div className="variant-interpretation population">
+                {(this.state.interpretation) ?
+                <div className="row">
+                    <div className="col-sm-12">
+                        <CurationInterpretationForm formTitle={"Criteria Group 1"} renderedFormContent={pop_crit_1}
+                            evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
+                            formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        <CurationInterpretationForm formTitle={"Criteria Group 2"} renderedFormContent={pop_crit_2}
+                            evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
+                            formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    </div>
+                </div>
+                : null}
+
                 <div className="bs-callout bs-callout-info clearfix">
                     <h4>Highest Minor Allele Frequency</h4>
                     <div className="clearfix">
@@ -608,22 +623,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </table>
                     </div>
                 }
-
-                {(this.state.interpretation) ?
-                <div className="row">
-                    <div className="col-sm-12">
-                        <CurationInterpretationForm formTitle={"Criteria Group 1"} renderedFormContent={pop_crit_1}
-                            evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
-                            formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"Criteria Group 2"} renderedFormContent={pop_crit_2}
-                            evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
-                            formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                    </div>
-                </div>
-                : null}
-
             </div>
         );
     }

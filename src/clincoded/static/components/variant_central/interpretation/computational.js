@@ -38,15 +38,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     render: function() {
         return (
             <div className="variant-interpretation computational">
-                <ul className="section-calculator clearfix">
-                    <li className="col-xs-12 gutter-exc">
-                        <div>
-                            <h4>Pathogenicity Calculator</h4>
-                            <div>Calculator placeholder</div>
-                        </div>
-                    </li>
-                </ul>
-
                 {(this.state.interpretation) ?
                 <div className="row">
                     <div className="col-sm-12">
@@ -57,6 +48,15 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     </div>
                 </div>
                 : null}
+
+                <ul className="section-calculator clearfix">
+                    <li className="col-xs-12 gutter-exc">
+                        <div>
+                            <h4>Pathogenicity Calculator</h4>
+                            <div>Calculator placeholder</div>
+                        </div>
+                    </li>
+                </ul>
             </div>
         );
     }
