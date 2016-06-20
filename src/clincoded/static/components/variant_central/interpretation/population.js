@@ -610,8 +610,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
 
                 {(this.state.interpretation) ?
-                <ul className="section-criteria-evaluation clearfix">
-                    <li className="col-xs-12 gutter-exc">
+                <div className="row">
+                    <div className="col-sm-12">
                         <CurationInterpretationForm formTitle={"Criteria Group 1"} renderedFormContent={pop_crit_1}
                             evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
                             formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
@@ -620,8 +620,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
                             formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                    </li>
-                </ul>
+                    </div>
+                </div>
                 : null}
 
             </div>

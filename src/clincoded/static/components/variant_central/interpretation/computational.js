@@ -48,7 +48,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </ul>
 
                 {(this.state.interpretation) ?
-                <div className="row group-curation-content">
+                <div className="row">
                     <div className="col-sm-12">
                         <CurationInterpretationForm formTitle={"Criteria Group Xbox"} renderedFormContent={comp_crit_1}
                             evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true}
@@ -67,7 +67,6 @@ var comp_crit_1 = function() {
         <div>
             <Input type="checkbox" ref="xbox1-value" label="Xbox1?:"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            }
             <Input type="checkbox" ref="xbox2-value" label="Xbox2?:"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
