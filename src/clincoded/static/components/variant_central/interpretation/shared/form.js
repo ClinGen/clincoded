@@ -37,6 +37,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             submitDisabled: false, // disabled for now due to uncertain/non-universal logic
             evidenceData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
             interpretation: null, // parent interpretation object
+            checkboxes: {}, // store any checkbox values
             updateMsg: null // specifies what html to display next to button after press
         };
     },
@@ -69,6 +70,12 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 this.props.formDataUpdater.call(this, nextProps);
             }
         }
+    },
+
+    handleCheckboxChange: function(ref, e) {
+        let tempCheckboxes = this.state.checkboxes;
+        tempCheckboxes[ref] = tempCheckboxes[ref] ? false : true;
+        this.setState({checkboxes: tempCheckboxes});
     },
 
     submitForm: function(e) {
@@ -125,14 +132,15 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     description: this.getFormValue(criterion + '-description')
                 };
                 // check whether or not criterion value is a checkbox and handle accordingly
-                if (this.getFormValue(criterion + '-value') === true) {
+                if (this.refs[criterion + '-value'].getValue() === true) {
                     evaluations[criterion]['value'] = 'true';
-                } else if (this.getFormValue(criterion + '-value') === false) {
+                } else if (this.refs[criterion + '-value'].getValue() === false) {
                     evaluations[criterion]['value'] = 'false';
                 } else {
-                    evaluations[criterion]['value'] = this.getFormValue(criterion + '-value');
+                    evaluations[criterion]['value'] = this.refs[criterion + '-value'].getValue();
                 }
                 evaluations[criterion][this.props.evidenceType] = evidenceResult; // don't forget to make the link to the evidence object
+                console.log(evaluations[criterion]);
                 if (criterion in existingEvaluationUuids) {
                     evaluationPromises.push(this.putRestData('/evaluation/' + existingEvaluationUuids[criterion], evaluations[criterion]));
                 } else {

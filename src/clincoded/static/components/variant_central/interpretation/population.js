@@ -633,7 +633,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 var pop_crit_1 = function() {
     return (
         <div>
-            <Input type="select" ref="pm2-value" label="Does this meet criteria PM2?" defaultValue="No Selection" handleChange={this.handleChange}
+            <Input type="select" ref="pm2-value" label="Does this meet criteria PM2?" defaultValue="No Selection"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>
@@ -663,7 +663,7 @@ var pop_crit_1_update = function(nextProps) {
 var pop_crit_2 = function() {
     return (
         <div>
-            <Input type="select" ref="ps4-value" label="Does this meet criteria PS4?" defaultValue="No Selection" handleChange={this.handleChange}
+            <Input type="select" ref="ps4-value" label="Does this meet criteria PS4?" defaultValue="No Selection"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>
@@ -672,7 +672,7 @@ var pop_crit_2 = function() {
             </Input>
             <Input type="text" ref="ps4-description" label="PS4 Description:" rows="5" placeholder="e.g. free text" inputDisabled={true}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="ps5-value" label="Does this meet criteria PS5?" defaultValue="No Selection" handleChange={this.handleChange}
+            <Input type="select" ref="ps5-value" label="Does this meet criteria PS5?" defaultValue="No Selection"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="No Selection">No Selection</option>
                 <option value="Yes">Yes</option>
