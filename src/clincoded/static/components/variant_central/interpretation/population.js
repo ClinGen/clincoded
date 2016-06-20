@@ -179,15 +179,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
-    ranodmizeData: function() {
-        console.log('randomize data');
-        let data = {
-            test: Math.floor((Math.random() * 10000000) + 1),
-            test2: Math.floor((Math.random() * 1000000) + 1)
-        };
-        this.setState({data: data});
-    },
-
     // Get ExAC allele frequency from Ensembl (VEP) directly
     // Because myvariant.info doesn't always return ExAC allele frequency data
     assignAlleleFrequencyData: function(allele_frequency) {
