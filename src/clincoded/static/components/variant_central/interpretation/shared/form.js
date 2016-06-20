@@ -122,9 +122,16 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 evaluations[criterion] = {
                     variant: this.props.variantUuid,
                     criteria: criterion,
-                    value: this.getFormValue(criterion + '-value'),
                     description: this.getFormValue(criterion + '-description')
                 };
+                // check whether or not criterion value is a checkbox and handle accordingly
+                if (this.getFormValue(criterion + '-value') === true) {
+                    evaluations[criterion]['value'] = 'true';
+                } else if (this.getFormValue(criterion + '-value') === false) {
+                    evaluations[criterion]['value'] = 'false';
+                } else {
+                    evaluations[criterion]['value'] = this.getFormValue(criterion + '-value');
+                }
                 evaluations[criterion][this.props.evidenceType] = evidenceResult; // don't forget to make the link to the evidence object
                 if (criterion in existingEvaluationUuids) {
                     evaluationPromises.push(this.putRestData('/evaluation/' + existingEvaluationUuids[criterion], evaluations[criterion]));
