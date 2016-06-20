@@ -69,7 +69,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
         return (
             <div className="container curation-variant-tab-group">
-                <Tabs onSelect={this.handleSelect} selectedIndex={this.state.selectedTab}>
+                <Tabs onSelect={this.handleSelect} selectedIndex={this.state.selectedTab} forceRenderTabPanel={true}>
                     <TabList className="tab-label-list">
                         <Tab className="tab-label col-sm-2">Basic Information</Tab>
                         <Tab className="tab-label col-sm-2">Population</Tab>
