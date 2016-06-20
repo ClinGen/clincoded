@@ -19,7 +19,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
         evidenceType: React.PropTypes.string, // specified what type of evidence object is created
         evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
-        evidenceDataUpdated: React.PropTypes.bool,
+        evidenceDataUpdated: React.PropTypes.bool, // passed in by parent page, which does the comparison of stored and new external data
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from evidenceData
         variantUuid: React.PropTypes.string, // UUID of the parent variant
         criteria: React.PropTypes.array, // array of criteria codes being handled by this form
@@ -34,14 +34,15 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     getInitialState: function() {
         return {
             submitBusy: false, // spinner for Save button
-            submitDisabled: false, // changed by handleChange method, but disabled for now due to uncertain/non-universal logic
+            submitDisabled: false, // disabled for now due to uncertain/non-universal logic
             evidenceData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
             interpretation: null, // parent interpretation object
-            updateMsg: null
+            updateMsg: null // specifies what html to display next to button after press
         };
     },
 
     componentDidMount: function() {
+        // this block is for handling props and states on initial load/rendering
         // update the interpretation object when loaded
         if (this.props.interpretation) {
             this.setState({interpretation: this.props.interpretation});
@@ -56,6 +57,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     },
 
     componentWillReceiveProps: function(nextProps) {
+        // this block is for handling props and states when props (external data) is updated after the initial load/rendering
         // when props are updated, update the parent interpreatation object, if applicable
         if (typeof nextProps.interpretation !== undefined && nextProps.interpretation != this.props.interpretation) {
             this.setState({interpretation: nextProps.interpretation});
@@ -67,19 +69,6 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 this.props.formDataUpdater.call(this, nextProps);
             }
         }
-    },
-
-    handleChange: function(ref, e) {
-        // disabled because logic is uncertain/not universal for all form use cases
-        /*
-        if (ref === 'value') {
-            if (this.refs[ref].getValue() == 'No Selection') {
-                this.setState({submitDisabled: true});
-            } else {
-                this.setState({submitDisabled: false});
-            }
-        }
-        */
     },
 
     submitForm: function(e) {
@@ -106,6 +95,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                         existingEvaluationUuids[freshEvaluation.criteria] = freshEvaluation.uuid;
                         // save the evidence object's id in case we can re-use it
                         if (freshEvaluation[this.state.evidenceType]) {
+                            // Note: all evaluations/criteria codes in a form block should all reference the same singular evidence object.
+                            // This code has no special handling in the case it encounters multiple evaluations that refer to different evidence
+                            // objects. Evaluations that do not point to an evidence object, however, are skipped over
                             evidenceObjectId = freshEvaluation[this.state.evidenceType]['@id'] ? freshEvaluation[this.state.evidenceType]['@id'] : evidenceObjectId;
                         }
                     }
