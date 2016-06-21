@@ -137,7 +137,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // Retrieve ExAC population data from myvariant.info
     fetchMyVariantInfo: function() {
         var variant = this.props.data;
-        var url = 'http://myvariant.info/v1/variant/';
+        var url = this.props.protocol + external_url_map['MyVariantInfo'];
         if (variant) {
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
@@ -150,7 +150,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var found = genomic_chr_mapping.find((entry) => entry.GenomicRefSeq === NC_genomic);
             // Format variant_id for use of myvariant.info REST API
             var variant_id = found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':'));
-            this.getRestData('http://rest.ensembl.org/vep/human/id/rs' + rsid + '?content-type=application/json').then(exac_allele_frequency => {
+            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(exac_allele_frequency => {
                 // Calling method to update global object with ExAC Allele Frequency data
                 this.assignAlleleFrequencyData(exac_allele_frequency);
             }).catch(function(e) {
@@ -234,7 +234,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
             var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
-            this.getRestData('http://rest.ensembl.org/variation/human/rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
+            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
                 this.setState({
                     ensembl_variation_data: response,
                     ensembl_populations: response.populations,
@@ -246,7 +246,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // Get ExAC allele frequency as a fallback strategy
             // In the event where myvariant.info doesn't return ExAC allele frequency info
             // FIXME: Need to remove this when switching to using the global population object for table UI
-            this.getRestData('http://rest.ensembl.org/vep/human/id/rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
+            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
                 this.setState({ensembl_exac_allele: response[0].colocated_variants[0]});
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
@@ -379,7 +379,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
                 {(this.state.hasExacData) ?
                     <div className="panel panel-info datasource-ExAC">
-                        <div className="panel-heading"><h3 className="panel-title">ExAC {exac.chrom + ':' + exac.pos + ' ' + exac.ref + '/' + exac.alt}<a href={'http://exac.broadinstitute.org/variant/' + exac.chrom + '-' + exac.pos + '-' + exac.ref + '-' + exac.alt} target="_blank">(See ExAC data)</a></h3></div>
+                        <div className="panel-heading"><h3 className="panel-title">ExAC {exac.chrom + ':' + exac.pos + ' ' + exac.ref + '/' + exac.alt}<a href={this.props.protocol + external_url_map['EXAC'] + exac.chrom + '-' + exac.pos + '-' + exac.ref + '-' + exac.alt} target="_blank">(See ExAC data)</a></h3></div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -458,7 +458,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Variant information could not be found. Please see <a href={'http://exac.broadinstitute.org/variant/' + exac.chrom + '-' + exac.pos + '-' + exac.ref + '-' + exac.alt} target="_blank">variant data</a> at ExAC.</th>
+                                    <th>Variant information could not be found. Please see <a href={this.props.protocol + external_url_map['EXAC'] + exac.chrom + '-' + exac.pos + '-' + exac.ref + '-' + exac.alt} target="_blank">variant data</a> at ExAC.</th>
                                 </tr>
                             </thead>
                         </table>
@@ -561,7 +561,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
                 {(this.state.hasEspData) ?
                     <div className="panel panel-info datasource-ESP">
-                        <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP): {esp.rsid + '; ' + esp.chrom + '.' + esp.hg19_start + '; Alleles ' + esp.ref + '>' + esp.alt}<a href={'http://evs.gs.washington.edu/EVS/PopStatsServlet?searchBy=rsID&target=' + esp.rsid + '&x=0&y=0'} target="_blank">(See ESP data)</a></h3></div>
+                        <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP): {esp.rsid + '; ' + esp.chrom + '.' + esp.hg19_start + '; Alleles ' + esp.ref + '>' + esp.alt}<a href={this.props.protocol + external_url_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp.rsid + '&x=0&y=0'} target="_blank">(See ESP data)</a></h3></div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -610,7 +610,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Variant information could not be found. Please see <a href={'http://evs.gs.washington.edu/EVS/PopStatsServlet?searchBy=rsID&target=' + esp.rsid + '&x=0&y=0'} target="_blank">variant data</a> at ESP.</th>
+                                    <th>Variant information could not be found. Please see <a href={this.props.protocol + external_url_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp.rsid + '&x=0&y=0'} target="_blank">variant data</a> at ESP.</th>
                                 </tr>
                             </thead>
                         </table>

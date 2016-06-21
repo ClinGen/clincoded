@@ -182,7 +182,10 @@ module.exports.external_url_map = {
     'CARallele-test': '//reg.test.genome.network/allele/',
     'EnsemblVEP': '//rest.ensembl.org/vep/human/id/',
     'UCSCGenomeBrowser': '//genome.ucsc.edu/cgi-bin/hgTracks',
-    'NCBIVariationViewer': '//www.ncbi.nlm.nih.gov/variation/view/'
+    'NCBIVariationViewer': '//www.ncbi.nlm.nih.gov/variation/view/',
+    'MyVariantInfo': '//myvariant.info/v1/variant/',
+    'EXAC': '//exac.broadinstitute.org/variant/',
+    'ESP_EVS': '//evs.gs.washington.edu/EVS/PopStatsServlet?'
 };
 
 
