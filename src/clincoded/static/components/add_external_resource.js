@@ -349,7 +349,7 @@ function clinvarQueryResource() {
     // for pinging and parsing data from ClinVar
     this.saveFormValue('resourceId', this.state.inputValue);
     if (clinvarValidateForm.call(this)) {
-        var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
+        var url = this.props.protocol + external_url_map['ClinVarEutils'];
         var data;
         var id = this.state.inputValue;
         this.getRestDataXml(url + id).then(xml => {
@@ -472,14 +472,14 @@ function carQueryResource() {
     this.saveFormValue('resourceId', this.state.inputValue);
     var error_msg;
     if (carValidateForm.call(this)) {
-        var url = 'http://reg.genome.network/allele/';
+        var url = this.props.protocol + external_url_map['CARallele'];
         var data;
         var id = this.state.inputValue;
         this.getRestData(url + id).then(json => {
             data = parseCAR(json);
             if (data.clinvarVariantId) {
                 // if the CAR result has a ClinVar variant ID, query ClinVar with it, and use its data
-                url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
+                url = this.props.protocol + external_url_map['ClinVarEutils'];
                 this.getRestDataXml(url + data.clinvarVariantId).then(xml => {
                     var data_cv = parseClinvar(xml);
                     if (data_cv.clinvarVariantId) {

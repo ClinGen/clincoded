@@ -164,6 +164,7 @@ module.exports.external_url_map = {
     'OMIM': 'http://omim.org/',
     'ClinVar': 'http://www.ncbi.nlm.nih.gov/clinvar/',
     'ClinVarSearch': 'http://www.ncbi.nlm.nih.gov/clinvar/variation/',
+    'ClinVarEutils': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=',
     'HPO': 'http://compbio.charite.de/hpoweb/showterm?id=',
     'HPOBrowser': 'http://compbio.charite.de/hpoweb/showterm?id=HP:0000118',
     'Uberon': 'http://uberon.github.io/',
@@ -175,7 +176,7 @@ module.exports.external_url_map = {
     'EFO': 'http://www.ebi.ac.uk/efo/',
     'dbSNP': 'http://www.ncbi.nlm.nih.gov/snp/',
     'CAR': 'http://reg.genome.network/site/cg-registry',
-    'CARallele': 'http://reg.genome.network/allele/',
+    'CARallele': '//reg.genome.network/allele/',
     'CAR-test': 'http://reg.test.genome.network/site/registry',
     'CARallele-test': 'http://reg.test.genome.network/allele/'
 };
