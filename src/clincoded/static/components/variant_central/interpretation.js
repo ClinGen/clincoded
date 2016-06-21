@@ -40,12 +40,12 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         variantData: React.PropTypes.object, // ClinVar data payload
         interpretationUuid: React.PropTypes.string,
         loadingComplete: React.PropTypes.bool,
-        href: React.PropTypes.string
+        href_url: React.PropTypes.object
     },
 
     getInitialState: function() {
         return {
-            selectedTab: (this.props.href ? tabList.indexOf(queryKeyValue('tab', this.props.href)) : 0) // set selectedTab to whatever is defined in the address; default to first tab if not set
+            selectedTab: (this.props.href_url.href ? tabList.indexOf(queryKeyValue('tab', this.props.href_url.href)) : 0) // set selectedTab to whatever is defined in the address; default to first tab if not set
         };
     },
 
@@ -53,9 +53,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     handleSelect: function (index, last) {
         this.setState({selectedTab: index});
         if (index == 0) {
-            window.history.replaceState(window.state, '', editQueryValue(this.props.href, 'tab', null));
+            window.history.replaceState(window.state, '', editQueryValue(this.props.href_url.href, 'tab', null));
         } else {
-            window.history.replaceState(window.state, '', editQueryValue(this.props.href, 'tab', tabList[index]));
+            window.history.replaceState(window.state, '', editQueryValue(this.props.href_url.href, 'tab', tabList[index]));
         }
     },
 
@@ -78,22 +78,38 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <Tab className="tab-label col-sm-2">Gene-specific</Tab>
                     </TabList>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationBasicInfo data={variant} shouldFetchData={loadingComplete} /></div>
+                        <div className="tab-panel"><CurationInterpretationBasicInfo data={variant} shouldFetchData={loadingComplete}
+                            protocol={this.props.href_url.protocol} /></div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationPopulation data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
+                        <div className="tab-panel">
+                            <CurationInterpretationPopulation data={variant} shouldFetchData={loadingComplete}
+                            interpretationUuid={interpretationUuid} protocol={this.props.href_url.protocol} />
+                        </div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationComputational data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
+                        <div className="tab-panel">
+                            <CurationInterpretationComputational data={variant} shouldFetchData={loadingComplete}
+                            interpretationUuid={interpretationUuid} protocol={this.props.href_url.protocol} />
+                        </div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationFunctional data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
+                        <div className="tab-panel">
+                            <CurationInterpretationFunctional data={variant} shouldFetchData={loadingComplete}
+                            interpretationUuid={interpretationUuid} protocol={this.props.href_url.protocol} />
+                        </div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationSegregation data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
+                        <div className="tab-panel">
+                            <CurationInterpretationSegregation data={variant} shouldFetchData={loadingComplete}
+                            interpretationUuid={interpretationUuid} protocol={this.props.href_url.protocol} />
+                        </div>
                     </TabPanel>
                     <TabPanel>
-                        <div className="tab-panel"><CurationInterpretationGeneSpecific data={variant} shouldFetchData={loadingComplete} interpretationUuid={interpretationUuid} /></div>
+                        <div className="tab-panel">
+                            <CurationInterpretationGeneSpecific data={variant} shouldFetchData={loadingComplete}
+                            interpretationUuid={interpretationUuid} protocol={this.props.href_url.protocol} />
+                        </div>
                     </TabPanel>
                 </Tabs>
             </div>

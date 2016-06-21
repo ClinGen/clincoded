@@ -85,7 +85,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
         interpretationUuid: React.PropTypes.string,
-        shouldFetchData: React.PropTypes.bool
+        shouldFetchData: React.PropTypes.bool,
+        protocol: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -375,7 +376,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </li>
                 </ul>
                 : null}
-                
+
                 {(this.state.hasExacData) ?
                     <div className="panel panel-info datasource-ExAC">
                         <div className="panel-heading"><h3 className="panel-title">ExAC {exac.chrom + ':' + exac.pos + ' ' + exac.ref + '/' + exac.alt}<a href={'http://exac.broadinstitute.org/variant/' + exac.chrom + '-' + exac.pos + '-' + exac.ref + '-' + exac.alt} target="_blank">(See ExAC data)</a></h3></div>

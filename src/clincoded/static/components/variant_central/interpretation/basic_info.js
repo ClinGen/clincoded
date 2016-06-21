@@ -16,7 +16,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
-        shouldFetchData: React.PropTypes.bool
+        shouldFetchData: React.PropTypes.bool,
+        protocol: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -51,7 +52,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     fetchRefseqData: function() {
         //var refseq_data = {};
         var variant = this.props.data;
-        var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
+        var url = this.props.protocol + external_url_map['ClinVarEutils'];
         if (variant) {
             var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
             // Extract genomic substring from HGVS name whose assembly is GRCh37 or GRCh38
