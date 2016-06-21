@@ -9,6 +9,7 @@ var LocalStorageMixin = require('react-localstorage');
 var SO_terms = require('./mapping/SO_term.json');
 
 var external_url_map = globals.external_url_map;
+var dbxref_prefix_map = globals.dbxref_prefix_map;
 
 // Display the curator data of the curation data
 var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasicInfo = React.createClass({
@@ -118,7 +119,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
             var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
-            this.getRestData('http://rest.ensembl.org/vep/human/id/rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
                 this.setState({ensembl_transcripts: response[0].transcript_consequences});
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
@@ -165,7 +166,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     // Used to construct LinkOut URL to Uniprot
     getUniprotId: function(gene_symbol) {
         if (gene_symbol) {
-            this.getRestData('http://rest.genenames.org/fetch/symbol/' + gene_symbol).then(result => {
+            this.getRestData(this.props.protocol + external_url_map['HGNCFetch'] + gene_symbol).then(result => {
                 this.setState({uniprot_id: result.response.docs[0].uniprot_ids[0]});
             }).catch(function(e) {
                 console.log('HGNC Fetch Error=: %o', e);
@@ -179,7 +180,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var url = '';
         array.forEach(SequenceLocationObj => {
             if (SequenceLocationObj.Assembly === assembly) {
-                url = 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=' + db + '&position=Chr' + SequenceLocationObj.Chr + '%3A' + SequenceLocationObj.start + '-' + SequenceLocationObj.stop;
+                url = this.props.protocol + external_url_map['UCSCGenomeBrowser'] + '?db=' + db + '&position=Chr' + SequenceLocationObj.Chr + '%3A' + SequenceLocationObj.start + '-' + SequenceLocationObj.stop;
             }
         });
         return url;
@@ -191,7 +192,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var url = '';
         array.forEach(SequenceLocationObj => {
             if (SequenceLocationObj.Assembly === assembly) {
-                url = 'http://www.ncbi.nlm.nih.gov/variation/view/?chr=' + SequenceLocationObj.Chr + '&q=' + gene_symbol + '&assm=' + SequenceLocationObj.AssemblyAccessionVersion + '&from=' + SequenceLocationObj.start + '&to=' + SequenceLocationObj.stop;
+                url = this.props.protocol + external_url_map['NCBIVariationViewer'] + '?chr=' + SequenceLocationObj.Chr + '&q=' + gene_symbol + '&assm=' + SequenceLocationObj.AssemblyAccessionVersion + '&from=' + SequenceLocationObj.start + '&to=' + SequenceLocationObj.stop;
             }
         });
         return url;
@@ -292,9 +293,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="panel-body">
                         <dl className="inline-dl clearfix">
                             <dd>Variation Viewer [<a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh38')} target="_blank" title={'Variation Viewer page for ' + GRCh38 + ' in a new window'}>GRCh38</a> - <a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh37')} target="_blank" title={'Variation Viewer page for ' + GRCh37 + ' in a new window'}>GRCh37</a>]</dd>
-                            <dd>Ensembl Browser [<a href={'http://uswest.ensembl.org/Homo_sapiens/Gene/Summary?g=' + this.getGeneId(ensembl_data)} target="_blank" title={'Ensembl Browser page for ' + this.getGeneId(ensembl_data) + ' in a new window'}>GRCh38</a>]</dd>
+                            <dd>Ensembl Browser [<a href={dbxref_prefix_map['ENSEMBL'] + this.getGeneId(ensembl_data)} target="_blank" title={'Ensembl Browser page for ' + this.getGeneId(ensembl_data) + ' in a new window'}>GRCh38</a>]</dd>
                             <dd>UCSC [<a href={this.ucscViewerURL(sequence_location, 'hg38', 'GRCh38')} target="_blank" title={'UCSC Genome Browser for ' + GRCh38 + ' in a new window'}>GRCh38/hg38</a> - <a href={this.ucscViewerURL(sequence_location, 'hg19', 'GRCh37')} target="_blank" title={'UCSC Genome Browser for ' + GRCh37 + ' in a new window'}>GRCh37/hg19</a>]</dd>
-                            <dd><a href={'http://www.uniprot.org/uniprot/' + uniprot_id} target="_blank" title={'UniProtKB page for ' + uniprot_id + ' in a new window'}>UniProtKB</a></dd>
+                            <dd><a href={dbxref_prefix_map['UniProtKB'] + uniprot_id} target="_blank" title={'UniProtKB page for ' + uniprot_id + ' in a new window'}>UniProtKB</a></dd>
                         </dl>
                     </div>
                 </div>

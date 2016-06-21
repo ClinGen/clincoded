@@ -159,6 +159,7 @@ module.exports.external_url_map = {
     'OrphaNet': 'http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=',
     'OrphanetHome': 'http://www.orpha.net/',
     'HGNC': 'http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=',
+    'HGNCFetch': '//rest.genenames.org/fetch/symbol/',
     'HGNCHome': 'http://www.genenames.org/',
     'Entrez': 'http://www.ncbi.nlm.nih.gov/gene/',
     'OMIM': 'http://omim.org/',
@@ -178,7 +179,10 @@ module.exports.external_url_map = {
     'CAR': 'http://reg.genome.network/site/cg-registry',
     'CARallele': '//reg.genome.network/allele/',
     'CAR-test': 'http://reg.test.genome.network/site/registry',
-    'CARallele-test': 'http://reg.test.genome.network/allele/'
+    'CARallele-test': '//reg.test.genome.network/allele/',
+    'EnsemblVEP': '//rest.ensembl.org/vep/human/id/',
+    'UCSCGenomeBrowser': '//genome.ucsc.edu/cgi-bin/hgTracks',
+    'NCBIVariationViewer': '//www.ncbi.nlm.nih.gov/variation/view/'
 };
 
 
