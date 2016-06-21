@@ -76,25 +76,29 @@
         },
         "variationType": {
             "title": "Variation Type",
+            "description": "Variation type of the variant",
             "type": "string"
         },
         "molecularConsequenceList": {
             "title": "Molecular Consequence",
-            "description": "List of object to store term, SO id to a transcript in the variant",
+            "description": "List of object to store molecular consequence term, SO id to transcripts of the variant",
             "type": "array",
             "items": {
                 "type": "object",
                 "properties": {
                     "hgvsName": {
                         "title": "HGVS term",
+                        "description": "Transcript name",
                         "type": "string"
                     },
                     "term": {
                         "title": "Term of Molecular Consequence",
+                        "description": "Term of molecular consequence",
                         "type": "string"
                     },
                     "soId": {
                         "title": "SO ID",
+                        "description": "SO id of molecular consequence",
                         "type": "string"
                     }
                 }

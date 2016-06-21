@@ -404,7 +404,7 @@
             "title": "Individual",
             "type": "string"
         },
-        "submitted_by.uuid": {
+        "submitted_by.title": {
             "title": "Creator",
             "type": "string"
         },
