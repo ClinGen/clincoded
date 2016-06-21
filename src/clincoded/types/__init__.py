@@ -1138,7 +1138,7 @@ class Population(Item):
     @calculated_property(schema={
         "title": "Evaluation Associated",
         "type": ["string", "object"],
-        "linkFrom": "evaluation.populations"
+        "linkFrom": "evaluation.population"
     })
     def evaluation_associated(self, request, evaluation_associated):
         return paths_filtered_by_status(request, evaluation_associated)
@@ -1147,8 +1147,8 @@ class Population(Item):
         "title": "# Populations",
         "type": "number"
     })
-    def maf_count(self, populations={}):
-        return len(populations)
+    def maf_count(self, populationData={}):
+        return len(populationData)
 
 
 @collection(
