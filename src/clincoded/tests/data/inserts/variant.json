@@ -18,6 +18,14 @@
                 "LRG_683:g.25432C>T"
             ]
         },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_000111.2:c.1028G>A",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
+        ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-07-10T22:47:10.000000+00:00"
@@ -41,6 +49,14 @@
                 "LRG_683:g.25157G>C"
             ]
         },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_000111.2:c.1136G>C",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
+        ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-07-26T22:47:10.000000+00:00"
@@ -64,6 +80,14 @@
                 "LRG_683:g.24938G>A"
             ]
         },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_000111.2:c.1028G>A",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
+        ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-07-23T22:47:10.000000+00:00"
@@ -84,6 +108,14 @@
                 "NP_000466.2:p.Arg425Ile"
             ]
         },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_000475.4:c.1274G>T",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
+        ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-07-28T22:47:10.000000+00:00"
@@ -106,6 +138,14 @@
                 "NP_116071.2:p.Pro568Ser"
             ]
         },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_032682.5:c.1702C>T",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
+        ],
         "otherDescription": "",
         "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
         "date_created": "2015-08-01T22:47:10.000000+00:00"
@@ -135,6 +175,14 @@
                 "LRG_518:g.41580T>A"
             ]
         },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_020975.4:c.1852T>A",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
+        ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-01-14T22:47:10.000000+00:00"
@@ -164,6 +212,14 @@
                 "LRG_8:g.42362G>A"
             ]
         },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_006920.4:c.3166G>A",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
+        ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-06-14T22:47:10.000000+00:00"
@@ -183,6 +239,14 @@
                 "NP_005903.2:p.Ile226Thr"
             ]
         },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_005912.2:c.677T>C",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
+        ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-03-14T22:47:10.000000+00:00"
@@ -202,6 +266,14 @@
                 "NP_005903.2:p.Phe202Leu"
             ]
         },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_005912.2:c.606C>A",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
+        ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-04-14T22:47:10.000000+00:00"
@@ -224,6 +296,14 @@
                 "LRG_683:g.16366delT"
             ]
         },
+        "variationType": "Deletion",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_000111.2:c.344delT",
+                "term": "frameshift variant",
+                "soId": "SO:0001589"
+            }
+        ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-09-21T22:47:10.000000+00:00",
@@ -255,6 +335,7 @@
                 "NP_005493.2:p.Glu529_Gly867delinsGlyArgGlyGlyArgSerCysAsnProSerTyrLeuGlyGlyTer"
             ]
         },
+        "variationType": "Indel",
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-10-21T22:47:10.000000+00:00",
@@ -279,6 +360,7 @@
                 "LRG_218p1:p.Lys82_Glu425delinsTer"
             ]
         },
+        "variationType": "Indel",
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2016-02-02T22:47:10.000000+00:00",

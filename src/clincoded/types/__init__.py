@@ -157,14 +157,48 @@ class Variant(Item):
         "type": "string"
     })
     def represent(self, clinvarVariantTitle='', carId='', otherDescription=''):
-        if clinvarVariantTitle != '':
+        if clinvarVariantTitle != '' and len(clinvarVariantTitle) < 51:
             return clinvarVariantTitle
+        elif clinvarVariantTitle != '':
+            return clinvarVariantTitle[:51] + '...'
         elif carId != '':
             return carId
         elif otherDescription != '':
-            return 'Other Description: ' + otherDescription
+            return otherDescription
         else:
             return ''
+
+    @calculated_property(schema={
+        "title": "Variant Representive",
+        "type": "string"
+    })
+    def source(self, clinvarVariantId='', carId='', otherDescription=''):
+        if clinvarVariantId != '':
+            return 'ClinVar'
+        elif carId != '':
+            return 'ClinGen AR'
+        elif otherDescription != '':
+            return 'Internal'
+        else:
+            return ''
+
+    @calculated_property(schema={
+        "title": "Variant Representive",
+        "type": "string"
+    })
+    def variation_type(self, variationType=''):
+        if variationType != '':
+            return variationType
+        return ''
+
+    @calculated_property(schema={
+        "title": "Variant Representive",
+        "type": "string"
+    })
+    def molecular_consequence(self, molecularConsequenceList=[]):
+        if len(molecularConsequenceList) > 0:
+            return molecularConsequenceList[0]['term']
+        return ''
 
 
 @collection(
@@ -708,12 +742,10 @@ class Individual(Item):
 
     @calculated_property(schema={
         "title": "# Assessment",
-        "type": "string"
+        "type": "number"
     })
-    def assessment_individual(self, assessments=[]):
-        if len(assessments) > 0:
-            return len(assessments)
-        return ''
+    def assessment_count(self, assessments=[]):
+        return len(assessments)
 
 
 @collection(

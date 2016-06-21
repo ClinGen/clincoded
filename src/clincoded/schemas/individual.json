@@ -269,9 +269,9 @@
             "title": "Probands",
             "type": "string"
         },
-        "assessment_individual": {
+        "assessment_count": {
             "title": "# Assessment",
-            "type": "string"
+            "type": "number"
         },
         "submitted_by.title": {
             "title": "Creator",
