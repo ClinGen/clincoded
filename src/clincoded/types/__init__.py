@@ -153,10 +153,10 @@ class Variant(Item):
         return paths_filtered_by_status(request, associatedInterpretations)
 
     @calculated_property(schema={
-        "title": "Variant Representive",
+        "title": "Variant Representation",
         "type": "string"
     })
-    def represent(self, clinvarVariantId='', carId='', otherDescription=''):
+    def variant_identifier(self, clinvarVariantId='', carId='', otherDescription=''):
         if clinvarVariantId != '':
             return clinvarVariantId
         elif carId != '':
@@ -167,7 +167,7 @@ class Variant(Item):
             return ''
 
     @calculated_property(schema={
-        "title": "Variant Representive",
+        "title": "Variant Source",
         "type": "string"
     })
     def source(self, clinvarVariantId='', carId='', otherDescription=''):
@@ -181,7 +181,7 @@ class Variant(Item):
             return ''
 
     @calculated_property(schema={
-        "title": "Variant Representive",
+        "title": "Variant Type",
         "type": "string"
     })
     def variation_type(self, variationType=''):
@@ -190,7 +190,7 @@ class Variant(Item):
         return ''
 
     @calculated_property(schema={
-        "title": "Variant Representive",
+        "title": "Molecular Consequence",
         "type": "string"
     })
     def molecular_consequence(self, molecularConsequenceList=[]):

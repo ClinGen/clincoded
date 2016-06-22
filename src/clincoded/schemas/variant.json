@@ -106,7 +106,7 @@
         }
     },
     "columns": {
-        "represent": {
+        "variant_identifier": {
             "title": "Variant",
             "type": "string"
         },
