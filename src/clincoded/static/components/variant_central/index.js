@@ -18,6 +18,7 @@ var VariantCurationHub = React.createClass({
         return {
             variantUuid: queryKeyValue('variant', this.props.href),
             interpretationUuid: queryKeyValue('interpretation', this.props.href),
+            interpretation: null,
             editKey: queryKeyValue('edit', this.props.href),
             variantObj: null,
             isLoadingComplete: false
@@ -26,6 +27,11 @@ var VariantCurationHub = React.createClass({
 
     componentDidMount: function() {
         this.getClinVarData(this.state.variantUuid);
+        if (this.state.interpretationUuid) {
+            this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
+                this.setState({interpretation: interpretation});
+            });
+        }
     },
 
     // Retrieve the variant object from db with the given uuid
@@ -39,8 +45,13 @@ var VariantCurationHub = React.createClass({
         });
     },
 
+    updateInterpretationObj: function(interpretation) {
+        this.setState({interpretation: interpretation});
+    },
+
     render: function() {
         var variantData = this.state.variantObj;
+        var interpretation = (this.state.interpretation) ? this.state.interpretation : null;
         var interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
         var editKey = this.state.editKey;
         var isLoadingComplete = this.state.isLoadingComplete;
@@ -50,8 +61,8 @@ var VariantCurationHub = React.createClass({
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} />
                 <VariantCurationActions variantData={variantData} interpretationUuid={interpretationUuid} eidtKey={editKey} session={session} />
-                <VariantCurationInterpretation variantData={variantData} interpretationUuid={interpretationUuid} editKey={editKey} session={session}
-                    loadingComplete={isLoadingComplete} href_url={this.props.href_url} />
+                <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
+                    href_url={this.props.href_url} loadingComplete={isLoadingComplete} updateInterpretationObj={this.updateInterpretationObj} />
             </div>
         );
     }

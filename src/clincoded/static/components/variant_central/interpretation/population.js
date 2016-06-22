@@ -13,6 +13,13 @@ var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
 var external_url_map = globals.external_url_map;
 var queryKeyValue = globals.queryKeyValue;
 
+var form = require('../../../libs/bootstrap/form');
+
+var Form = form.Form;
+var FormMixin = form.FormMixin;
+var Input = form.Input;
+var InputMixin = form.InputMixin;
+
 // FIXME: The thousand_genome{} still needs a method to have data assigned
 // FIXME: Properties have 'null' values for now in the initial phase.
 // They should contain pre-existing values if they exist in the db. Or 'null' if not.
@@ -84,15 +91,18 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
-        interpretationUuid: React.PropTypes.string,
+        interpretation: React.PropTypes.object,
         shouldFetchData: React.PropTypes.bool,
+        updateInterpretationObj: React.PropTypes.func,
         protocol: React.PropTypes.string
     },
 
     getInitialState: function() {
         return {
+            data: {test: 'hey', test2: 'asdfasfasfdaas'},
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
+            interpretation: this.props.interpretation,
             dbSNP_id: null,
             hgvs_GRCh37: null,
             gene_symbol: null,
@@ -125,7 +135,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentWillReceiveProps: function(nextProps) {
-        this.setState({interpretationUuid: nextProps.interpretationUuid});
+        this.setState({interpretation: nextProps.interpretation});
         this.setState({shouldFetchData: nextProps.shouldFetchData});
         if (this.state.shouldFetchData === true) {
             window.localStorage.clear();
@@ -305,24 +315,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return displayVal;
     },
 
-    // handler for saving the global population object into the db
-    handleNewPopulation: function(e) {
-        e.preventDefault(); e.stopPropagation();
-        var variant = this.props.data;
-        var newPopulationObj;
-        if (variant) {
-            // Put together a new population object
-            newPopulationObj = {
-                variant: variant.uuid,
-                populations: populationObject
-            };
-        }
-        // Post new population to the DB.
-        this.postRestData('/populations/', newPopulationObj).then(data => {
-            console.log("Population data has been saved: " + data['@graph'][0].uuid);
-        }).catch(e => {parseAndLogError.bind(undefined, 'postRequest')});
-    },
-
     render: function() {
         // FIXME: Need to switch to using the global population object
         var ensembl_variation = this.state.ensembl_variation_data,
@@ -348,6 +340,21 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         return (
             <div className="variant-interpretation population">
+                {(this.state.interpretation) ?
+                <div className="row">
+                    <div className="col-sm-12">
+                        <CurationInterpretationForm formTitle={"Population Demo Criteria Group 1"} renderedFormContent={pop_crit_1}
+                            evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
+                            formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        <CurationInterpretationForm formTitle={"Population Demo Criteria Group 2"} renderedFormContent={pop_crit_2}
+                            evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
+                            formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    </div>
+                </div>
+                : null}
+
                 <div className="bs-callout bs-callout-info clearfix">
                     <h4>Highest Minor Allele Frequency</h4>
                     <div className="clearfix">
@@ -616,8 +623,83 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </table>
                     </div>
                 }
-
             </div>
         );
     }
 });
+
+
+var pop_crit_1 = function() {
+    return (
+        <div>
+            <Input type="select" ref="pm2-value" label="Population Demo Criteria 1?" defaultValue="No Selection"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="No Selection">No Selection</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="In Progress">In Progress</option>
+            </Input>
+            <Input type="textarea" ref="pm2-description" label="Population Demo Criteria Description:" rows="5" placeholder="e.g. free text"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+        </div>
+    );
+};
+
+var pop_crit_1_update = function(nextProps) {
+    if (nextProps.interpretation) {
+        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
+            nextProps.interpretation.evaluations.map(evaluation => {
+                if (evaluation.criteria == 'pm2') {
+                    this.refs['pm2-value'].setValue(evaluation.value);
+                    this.refs['pm2-description'].setValue(evaluation.description);
+                    this.setState({submitDisabled: false});
+                }
+            });
+        }
+    }
+};
+
+var pop_crit_2 = function() {
+    return (
+        <div>
+            <Input type="select" ref="ps4-value" label="Population Demo Criteria 2?" defaultValue="No Selection"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="No Selection">No Selection</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="In Progress">In Progress</option>
+            </Input>
+            <Input type="text" ref="ps4-description" label="Population Demo Criteria 2 Description:" rows="5" placeholder="e.g. free text" inputDisabled={true}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="select" ref="ps5-value" label="Population Demo Criteria 3?" defaultValue="No Selection"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="No Selection">No Selection</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="In Progress">In Progress</option>
+            </Input>
+        </div>
+    );
+};
+
+var pop_crit_2_update = function(nextProps) {
+    if (nextProps.interpretation) {
+        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
+            nextProps.interpretation.evaluations.map(evaluation => {
+                switch(evaluation.criteria) {
+                    case 'ps4':
+                        this.refs['ps4-value'].setValue(evaluation.value);
+                        this.setState({submitDisabled: false});
+                        break;
+                    case 'ps5':
+                        this.refs['ps5-value'].setValue(evaluation.value);
+                        this.setState({submitDisabled: false});
+                        break;
+                }
+            });
+        }
+    }
+    if (nextProps.extraData) {
+        this.refs['ps4-description'].setValue(nextProps.extraData.test2);
+    }
+};

@@ -1,7 +1,7 @@
 [
     {
         "uuid": "f0a51b16-cc7b-406f-9ae6-566d28e31b03",
-        "populations": {
+        "populationData": {
             "ExAC": [
                 {
                     "population": "African",
