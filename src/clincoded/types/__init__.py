@@ -156,11 +156,9 @@ class Variant(Item):
         "title": "Variant Representive",
         "type": "string"
     })
-    def represent(self, clinvarVariantTitle='', carId='', otherDescription=''):
-        if clinvarVariantTitle != '' and len(clinvarVariantTitle) < 51:
-            return clinvarVariantTitle
-        elif clinvarVariantTitle != '':
-            return clinvarVariantTitle[:51] + '...'
+    def represent(self, clinvarVariantId='', carId='', otherDescription=''):
+        if clinvarVariantId != '':
+            return clinvarVariantId
         elif carId != '':
             return carId
         elif otherDescription != '':
