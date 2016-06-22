@@ -11,6 +11,7 @@ var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
 
 var external_url_map = globals.external_url_map;
+var dbxref_prefix_map = globals.dbxref_prefix_map;
 var queryKeyValue = globals.queryKeyValue;
 
 var form = require('../../../libs/bootstrap/form');
@@ -568,7 +569,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
                 {(this.state.hasEspData) ?
                     <div className="panel panel-info datasource-ESP">
-                        <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP): {esp.rsid + '; ' + esp.chrom + '.' + esp.hg19_start + '; Alleles ' + esp.ref + '>' + esp.alt}<a href={this.props.protocol + external_url_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp.rsid + '&x=0&y=0'} target="_blank">(See ESP data)</a></h3></div>
+                        <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP): {esp.rsid + '; ' + esp.chrom + '.' + esp.hg19_start + '; Alleles ' + esp.ref + '>' + esp.alt}<a href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp.rsid + '&x=0&y=0'} target="_blank">(See ESP data)</a></h3></div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -617,7 +618,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Variant information could not be found. Please see <a href={this.props.protocol + external_url_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp.rsid + '&x=0&y=0'} target="_blank">variant data</a> at ESP.</th>
+                                    <th>Variant information could not be found. Please see <a href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp.rsid + '&x=0&y=0'} target="_blank">variant data</a> at ESP.</th>
                                 </tr>
                             </thead>
                         </table>

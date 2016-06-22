@@ -132,6 +132,7 @@ module.exports.clincodedVersionMap = {
 
 module.exports.dbxref_prefix_map = {
     "UniProtKB": "http://www.uniprot.org/uniprot/",
+    "ESP_EVS": "http://evs.gs.washington.edu/EVS/PopStatsServlet?",
     "HGNC": "http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
     // ENSEMBL link only works for human
     "ENSEMBL": "http://www.ensembl.org/Homo_sapiens/Gene/Summary?g=",
@@ -184,8 +185,7 @@ module.exports.external_url_map = {
     'UCSCGenomeBrowser': '//genome.ucsc.edu/cgi-bin/hgTracks',
     'NCBIVariationViewer': '//www.ncbi.nlm.nih.gov/variation/view/',
     'MyVariantInfo': '//myvariant.info/v1/variant/',
-    'EXAC': '//exac.broadinstitute.org/variant/',
-    'ESP_EVS': '//evs.gs.washington.edu/EVS/PopStatsServlet?'
+    'EXAC': '//exac.broadinstitute.org/variant/'
 };
 
 
