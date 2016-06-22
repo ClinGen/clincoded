@@ -63,6 +63,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     }
 });
 
+// FIXME: all functions below here are examples; references to these in above render() should also be removed
 var comp_crit_1 = function() {
     return (
         <div>

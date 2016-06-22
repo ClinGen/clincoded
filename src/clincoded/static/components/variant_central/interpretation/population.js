@@ -99,7 +99,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     getInitialState: function() {
         return {
-            data: {test: 'hey', test2: 'asdfasfasfdaas'},
+            data: {test: 'hey', test2: 'asdfasfasfdaas'}, // FIXME: test data to pass to evaluation forms; remove
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
             interpretation: this.props.interpretation,
@@ -628,7 +628,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     }
 });
 
-
+// FIXME: all functions below here are examples; references to these in above render() should also be removed
 var pop_crit_1 = function() {
     return (
         <div>
