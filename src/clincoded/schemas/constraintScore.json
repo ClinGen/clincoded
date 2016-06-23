@@ -1,0 +1,153 @@
+{
+    "title": "GeneConstraintScores",
+    "description": "Schema for storing constraint scores of gene",
+    "id": "/profiles/constraintScore.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["symbol"],
+    "identifyingProperties": ["uuid", "symbol"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/standard_status" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "transcript": {
+            "title": "Transcript",
+            "description": "Ensembl transcript ID",
+            "type": "string"
+        },
+        "symbol": {
+            "title": "Symbol",
+            "description": "Ensembl gene symbol, partially identical to HGNC",
+            "type": "string",
+            "uniqueKey": true
+        },
+        "chromosome": {
+            "title": "Chromosome",
+            "type": "string"
+        },
+        "numberExons": {
+            "title": "Number of Exons",
+            "description": "Number of exons in the transcript",
+            "type": "number"
+        },
+        "cdsStart": {
+            "title": "CDS Start",
+            "description": "Beginning of the transcript coding sequence if + strand, end if - strand",
+            "type": "number"
+        },
+        "cdsEnd": {
+            "title": "CDS End",
+            "description": "End of the transcript coding sequence if + strand, beginning if - strand",
+            "type": "number"
+        },
+        "bp": {
+            "title": "Number of Base Pairs",
+            "description": "Number of coding base pairs",
+            "type": "number"
+        },
+        "muSyn": {
+            "title": "Probability of Synonymous Mutations",
+            "description": "Probability of a synonymous mutation across the transcript",
+            "type": "number"
+        },
+        "muMis": {
+            "title": "Probability of Missense Mutations",
+            "description": "Probability of a missense mutation across the transcript",
+            "type": "number"
+        },
+        "muLOF": {
+            "title": "Probability of LOF Mutations",
+            "description": "Probability of a loss-of-function mutation across the transcript",
+            "type": "number"
+        },
+        "nSyn": {
+            "title": "Number of Rare Synonymous Variants",
+            "description": "Number of rare (MAF < 0.1%) synonymous variants found in ExAC r0.3",
+            "type": "number"
+        },
+        "nMis": {
+            "title": "Number of Rare Missense Variants",
+            "description": "Number of rare (MAF < 0.1%) missense variants found in ExAC r0.3",
+            "type": "number"
+        },
+        "nLOF": {
+            "title": "Number of Rare LOF Variants",
+            "description": "Number of rare (MAF < 0.1%) loss-of-function variants found in ExAC r0.3",
+            "type": "number"
+        },
+        "expSyn": {
+            "title": "Adjusted Number of Expected Rare Variants",
+            "description": "Depth adjusted number of expected rare (MAF < 0.1%) synonymous variants",
+            "type": "number"
+        },
+        "expMis": {
+            "title": "Adjusted Number of Expected Rare Missense Variants",
+            "description": "Depth adjusted number of expected rare (MAF < 0.1%) missense variants",
+            "type": "number"
+        },
+        "expLOF": {
+            "title": "Adjusted Number of Rare LOF Variants",
+            "description": "Depth adjusted number of expected rare (MAF < 0.1%) loss-of-function variants",
+            "type": "number"
+        },
+        "synZ": {
+            "title": "Synonymous Z score",
+            "description": "Corrected synonymous Z score",
+            "type": "number"
+        },
+        "misZ": {
+            "title": "Missense Z Score",
+            "description": "Corrected missense Z score",
+            "type": "number"
+        },
+        "lofZ": {
+            "title": "LOF Z score",
+            "description": "Corrected loss-of-function Z score",
+            "type": "number"
+        },
+        "pLI": {
+            "title": "Probability of LOF",
+            "description": "The probability of being loss-of-function intolerant (intolerant of both heterozygous and homozygous lof variants)",
+            "type": "number"
+        },
+        "pRec": {
+            "title": "Probability of Homozygous LOF",
+            "description": "The probability of being intolerant of homozygous, but not heterozygous lof variants",
+            "type": "number"
+        },
+        "pNull": {
+            "title": "Probability of Hetrozygous And Homozygous LOF",
+            "description": "the probability of being tolerant of both heterozygous and homozygous lof variants",
+            "type": "number"
+        }
+    },
+    "columns": {
+        "symbol": {
+            "title": "Symbol",
+            "type": "string"
+        },
+        "transcript": {
+            "title": "Transcript",
+            "type": "string"
+        },
+        "pLI": {
+            "title": "pLI",
+            "type": "number"
+        },
+        "pRec": {
+            "title": "pRec",
+            "type": "number"
+        },
+        "pNull": {
+            "title": "pNull",
+            "type": "number"
+        }
+    }
+}
