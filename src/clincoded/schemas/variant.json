@@ -73,27 +73,53 @@
             "description": "List of other descriptions",
             "type": "string",
             "default": ""
+        },
+        "variationType": {
+            "title": "Variation Type",
+            "description": "Variation type of the variant",
+            "type": "string"
+        },
+        "molecularConsequenceList": {
+            "title": "Molecular Consequence",
+            "description": "List of object to store molecular consequence term, SO id to transcripts of the variant",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "hgvsName": {
+                        "title": "HGVS term",
+                        "description": "Transcript name",
+                        "type": "string"
+                    },
+                    "term": {
+                        "title": "Term of Molecular Consequence",
+                        "description": "Term of molecular consequence",
+                        "type": "string"
+                    },
+                    "soId": {
+                        "title": "SO ID",
+                        "description": "SO id of molecular consequence",
+                        "type": "string"
+                    }
+                }
+            }
         }
     },
     "columns": {
-        "uuid": {
+        "variant_identifier": {
             "title": "Variant",
             "type": "string"
         },
-        "clinvarVariantId": {
-            "title": "ClinVar Variation ID",
+        "source": {
+            "title": "Source",
             "type": "string"
         },
-        "clinvarVariantTitle": {
-            "title": "ClinVar Prefered Name",
+        "variation_type": {
+            "title": "Variation Type",
             "type": "string"
         },
-        "carId": {
-            "title": "CAR ID",
-            "type": "string"
-        },
-        "otherDescription": {
-            "title": "Other Description",
+        "molecular_consequence": {
+            "title": "Molecular Consequence",
             "type": "string"
         }
     }
