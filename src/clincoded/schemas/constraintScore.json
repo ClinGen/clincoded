@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["symbol"],
-    "identifyingProperties": ["uuid", "symbol"],
+    "identifyingProperties": ["uuid", "symbol", "transcript"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -20,11 +20,12 @@
         "transcript": {
             "title": "Transcript",
             "description": "Ensembl transcript ID",
-            "type": "string"
+            "type": "string",
+            "uniqueItems": true
         },
         "symbol": {
             "title": "Symbol",
-            "description": "Ensembl gene symbol, partially identical to HGNC",
+            "description": "Ensembl gene symbol. Most of them are identical to HGNC",
             "type": "string",
             "uniqueKey": true
         },

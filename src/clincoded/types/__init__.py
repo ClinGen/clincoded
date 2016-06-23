@@ -20,6 +20,20 @@ def includeme(config):
 
 # new collections added for handling curation data, 06/19/2015
 @collection(
+    name='constraintscores',
+    unique_key='constraintScore:symbol',
+    properties={
+        'title': 'Constraint Scores of Gene',
+        'description': 'List of constraint scores of gene',
+    })
+class ConstraintScore(Item):
+    item_type = 'constraintScore'
+    schema = load_schema('clincoded:schemas/constraintScore.json')
+    name_key = 'symbol'
+
+
+
+@collection(
     name='genes',
     unique_key='gene:symbol',
     properties={

@@ -1,0 +1,82 @@
+[
+    {
+        "uuid": "fd97d928-22a3-41b6-bb99-f75ab832cf23",
+        "transcript": "ENST00000340107.4",
+        "symbol": "FGFR3",
+        "chromosome": "4",
+        "numberExons": 17,
+        "pLI": 0.00290912236409275,
+        "pRec": 0.996560983354136,
+        "pNull": 0.000529894281771077
+    },
+    {
+        "uuid": "38a99d21-1728-49af-b4f8-e606775377ce",
+        "transcript": "ENST00000337432.4",
+        "symbol": "RAD51C",
+        "chromosome": "17",
+        "numberExons": 9,
+        "pLI": 4.27808774468152e-09,
+        "pRec": 0.195397780599171,
+        "pNull": 0.804602215122741
+    },
+    {
+        "uuid": "b1d3f8a8-1cd5-4c90-a858-42b75a11377a",
+        "transcript": "ENST00000526495.1",
+        "symbol": "DICER1",
+        "chromosome": "14",
+        "numberExons": 26,
+        "pLI": 0.999994550946,
+        "pRec": 5.44905339955331e-06,
+        "pNull": 2.22094630940701e-18
+    },
+    {
+        "uuid": "83eb235d-aebe-405a-9622-7987a1aff59d",
+        "transcript": "ENST00000327367.4",
+        "symbol": "SMAD3",
+        "chromosome": "15",
+        "numberExons": 9,
+        "pLI":  0.868268313208796,
+        "pRec": 0.131654637230956,
+        "pNull": 7.704956024792e-05
+    },
+    {
+        "uuid": "fe6808e8-2a35-48aa-8022-58fb58c38026",
+        "transcript": "ENST00000371906.4",
+        "symbol": "AGTR2",
+        "chromosome": "X",
+        "numberExons": 1,
+        "pLI": 0.0125489579921142,
+        "pRec": 0.651428928078237,
+        "pNull": 0.336022113929648
+    },
+    {
+        "uuid": "d9074acd-bcd2-4120-8c43-0b7c346f978e",
+        "transcript": "ENST00000361763.4",
+        "symbol": "CD3E",
+        "chromosome": "11",
+        "numberExons": 8,
+        "pLI": 0.302672925327359,
+        "pRec": 0.693277660616761,
+        "pNull": 0.00404941405587938
+    },
+    {
+        "uuid": "c8b0a82f-0f17-4f36-a283-6bf70582a005",
+        "transcript": "ENST00000267430.5",
+        "symbol": "FANCM",
+        "chromosome": "14",
+        "numberExons": 23,
+        "pLI": 6.24486171840289e-12,
+        "pRec": 0.99998024181229,
+        "pNull": 1.97581814647238e-05
+    },
+    {
+        "uuid": "fa22fa2f-43f7-425f-9588-5e87011641a0",
+        "transcript": "ENST00000280700.5",
+        "symbol": "NGLY1",
+        "chromosome": "3",
+        "numberExons": 12,
+        "pLI": 2.20290079449091e-10,
+        "pRec": 0.645404621836809,
+        "pNull": 0.354595377942901
+    }
+]

@@ -18,6 +18,7 @@ ORDER = [
     'document',
     'image',
     'gene',
+    'constraintScore',
     'orphaPhenotype',
     #'disease',
     'article',
