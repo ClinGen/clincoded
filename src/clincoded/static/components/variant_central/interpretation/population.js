@@ -168,6 +168,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 console.log('VEP Allele Frequency Fetch Error=: %o', e);
             });
             this.getRestData(url + variant_id).then(response => {
+                console.log('EXAC');
+                console.log(response);
                 this.setState({myvariant_exac_population: response.exac});
                 // Calling methods to update global object with ExAC & ESP population data
                 // FIXME: Need to create a new copy of the global object with new data
