@@ -102,11 +102,11 @@
         },
         "evaluation_count": {
             "title": "# Evaluations",
-            "type": "string"
+            "type": "number"
         },
         "provisional_count": {
             "title": "# Provisional",
-            "type": "string"
+            "type": "number"
         },
         "interpretation_genes": {
             "title": "Genes",
@@ -114,11 +114,11 @@
         },
         "interpretation_transcripts": {
             "title": "# Transcripts",
-            "type": "string"
+            "type": "number"
         },
         "interpretation_proteins": {
             "title": "# Proteins",
-            "type": "string"
+            "type": "number"
         },
         "submitted_by.title": {
             "title": "Creator",

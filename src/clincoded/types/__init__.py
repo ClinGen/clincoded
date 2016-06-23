@@ -983,38 +983,30 @@ class Interpretation(Item):
 
     @calculated_property(schema={
         "title": "Transcripts",
-        "type": "string",
+        "type": "number",
     })
     def interpretation_transcripts(self, transcripts=[]):
-        if len(transcripts) == 0:
-            return ''
         return len(transcripts)
 
     @calculated_property(schema={
         "title": "Proteins",
-        "type": "string",
+        "type": "number",
     })
     def interpretation_proteins(self, proteins=[]):
-        if len(proteins) == 0:
-            return ''
         return len(proteins)
 
     @calculated_property(schema={
         "title": "Evaluations",
-        "type": "string",
+        "type": "number",
     })
     def evaluation_count(self, evaluations=[]):
-        if len(evaluations) == 0:
-            return ''
         return len(evaluations)
 
     @calculated_property(schema={
         "title": "Provisionals",
-        "type": "string",
+        "type": "number",
     })
     def provisional_count(self, provisional_variant=[]):
-        if len(provisional_variant) == 0:
-            return ''
         return len(provisional_variant)
 
 
@@ -1036,7 +1028,9 @@ class Evaluation(Item):
         'variant.associatedInterpretations.submitted_by',
         'disease',
         'population',
+        'population.evaluation_associated',
         'computational',
+        'computational.evaluation_associated',
         'interpretation_associated'
     ]
     rev = {
@@ -1095,7 +1089,7 @@ class Population(Item):
     @calculated_property(schema={
         "title": "Evaluation Associated",
         "type": ["string", "object"],
-        "linkFrom": "evaluation.populations"
+        "linkFrom": "evaluation.population"
     })
     def evaluation_associated(self, request, evaluation_associated):
         return paths_filtered_by_status(request, evaluation_associated)
@@ -1104,8 +1098,8 @@ class Population(Item):
         "title": "# Populations",
         "type": "number"
     })
-    def maf_count(self, populations={}):
-        return len(populations)
+    def maf_count(self, populationData=[]):
+        return len(populationData)
 
 
 @collection(
