@@ -5,7 +5,7 @@ var _ = require('underscore');
 // Derived from:
 // https://github.com/standard-analytics/pubmed-schema-org/blob/master/lib/pubmed.js
 module.exports.parseClinvar = parseClinvar;
-function parseClinvar(xml, mixin){
+function parseClinvar(xml, extended){
     var variant = {};
     var doc = new DOMParser().parseFromString(xml, 'text/xml');
 
@@ -43,8 +43,8 @@ function parseClinvar(xml, mixin){
                     }
                 }
                 // Call to extract more ClinVar data from XML response
-                if (mixin) {
-                    parseClinvarMixin(variant, $Allele, $HGVSlist_raw, $VariationReport);
+                if (extended) {
+                    parseClinvarExtended(variant, $Allele, $HGVSlist_raw, $VariationReport);
                 }
             }
         }
@@ -53,7 +53,7 @@ function parseClinvar(xml, mixin){
 }
 
 // Function to extract more ClinVar data than what the db stores
-function parseClinvarMixin(variant, allele, hgvs_list, dataset) {
+function parseClinvarExtended(variant, allele, hgvs_list, dataset) {
     variant.RefSeqTranscripts = {};
     variant.gene = {};
     variant.allele = {};

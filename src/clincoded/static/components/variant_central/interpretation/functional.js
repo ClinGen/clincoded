@@ -10,7 +10,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     mixins: [RestMixin],
 
     propTypes: {
-        data: React.PropTypes.object
+        data: React.PropTypes.object,
+        protocol: React.PropTypes.string
     },
 
     getInitialState: function() {
