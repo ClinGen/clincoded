@@ -1443,6 +1443,10 @@ var flatten = module.exports.flatten = function(obj, type) {
                 flat = flattenProvisional(obj);
                 break;
 
+            case 'interpretation':
+                flat = flattenInterpretation(obj);
+                break;
+
             default:
                 break;
         }
@@ -1781,6 +1785,57 @@ var provisionalSimpleProps = [
 
 function flattenProvisional(provisional) {
     var flat = cloneSimpleProps(provisional, provisionalSimpleProps);
+
+    return flat;
+}
+
+var interpretationSimpleProps = ["active", "date_created"];
+
+function flattenInterpretation(interpretation) {
+    // First copy simple properties before fixing the special properties
+    var flat = cloneSimpleProps(interpretation, interpretationSimpleProps);
+
+    if (interpretation.variant) {
+        flat.variant = interpretation.variant['@id'];
+    }
+
+    if (interpretation.genes && interpretation.genes.length) {
+        flat.genes = interpretation.genes.map(function(gene) {
+            return gene['@id'];
+        });
+    }
+
+    if (interpretation.disease) {
+        flat.disease = interpretation.disease['@id'];
+    }
+
+    if (interpretation.interpretationTranscript) {
+        flat.interpretationTranscript = interpretation.interpretationTranscript['@id'];
+    }
+
+    if (interpretation.transcripts && interpretation.transcripts.length) {
+        flat.transcripts = interpretation.transcripts.map(function(transcript) {
+            return transcript['@id'];
+        });
+    }
+
+    if (interpretation.proteins && interpretation.proteins.length) {
+        flat.proteins = interpretation.proteins.map(function(protein) {
+            return protein['@id'];
+        });
+    }
+
+    if (interpretation.evaluations && interpretation.evaluations.length) {
+        flat.evaluations = interpretation.evaluations.map(function(evaluation) {
+            return evaluation['@id'];
+        });
+    }
+
+    if (interpretation.provisional_variant && interpretation.provisional_variant.length) {
+        flat.provisional_variant = interpretation.provisional_variant.map(function(provisional) {
+            return provisional['@id'];
+        });
+    }
 
     return flat;
 }

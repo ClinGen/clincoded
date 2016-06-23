@@ -153,18 +153,50 @@ class Variant(Item):
         return paths_filtered_by_status(request, associatedInterpretations)
 
     @calculated_property(schema={
-        "title": "Variant Representive",
+        "title": "Variant Representation",
         "type": "string"
     })
-    def represent(self, clinvarVariantTitle='', carId='', otherDescription=''):
-        if clinvarVariantTitle != '':
-            return clinvarVariantTitle
+    def variant_identifier(self, clinvarVariantId='', carId='', otherDescription=''):
+        if clinvarVariantId != '':
+            return clinvarVariantId
         elif carId != '':
             return carId
         elif otherDescription != '':
-            return 'Other Description: ' + otherDescription
+            return otherDescription
         else:
             return ''
+
+    @calculated_property(schema={
+        "title": "Variant Source",
+        "type": "string"
+    })
+    def source(self, clinvarVariantId='', carId='', otherDescription=''):
+        if clinvarVariantId != '':
+            return 'ClinVar'
+        elif carId != '':
+            return 'ClinGen AR'
+        elif otherDescription != '':
+            return 'Internal'
+        else:
+            return ''
+
+    @calculated_property(schema={
+        "title": "Variant Type",
+        "type": "string"
+    })
+    def variation_type(self, variationType=''):
+        if variationType != '':
+            return variationType
+        return ''
+
+    @calculated_property(schema={
+        "title": "Molecular Consequence",
+        "type": "string"
+    })
+    def molecular_consequence(self, molecularConsequenceList=[]):
+        if len(molecularConsequenceList) > 0:
+            return molecularConsequenceList[0]['term']
+        return ''
 
 
 @collection(
@@ -629,6 +661,8 @@ class Individual(Item):
         'variants.submitted_by',
         'otherPMIDs',
         'otherPMIDs.submitted_by',
+        'assessments',
+        'assessments.submitted_by',
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
         'associatedGroups.associatedAnnotations',
@@ -703,6 +737,13 @@ class Individual(Item):
             return 'Yes'
         else:
             return 'No'
+
+    @calculated_property(schema={
+        "title": "# Assessment",
+        "type": "number"
+    })
+    def assessment_count(self, assessments=[]):
+        return len(assessments)
 
 
 @collection(
@@ -1098,7 +1139,7 @@ class Population(Item):
         "title": "# Populations",
         "type": "number"
     })
-    def maf_count(self, populationData=[]):
+    def maf_count(self, populationData={}):
         return len(populationData)
 
 

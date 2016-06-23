@@ -258,6 +258,8 @@ var Input = module.exports.Input = React.createClass({
         if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
             ReactDOM.findDOMNode(this.refs.input).value = val;
             this.setState({value: val});
+        } else if (this.props.type === 'select') {
+            this.setSelectedOption(val);
         } else if (this.props.type === 'checkbox') {
             ReactDOM.findDOMNode(this.refs.input).checked = val;
             this.setState({value: val});
@@ -287,6 +289,11 @@ var Input = module.exports.Input = React.createClass({
     resetSelectedCheckbox: function() {
         var selectNode = this.refs.input;
         selectNode.checked = false;
+    },
+
+    setSelectedOption: function(val) {
+        var select = this.refs.input;
+        select.value = val;
     },
 
     // Get the selected option from a <select> list
