@@ -1169,6 +1169,7 @@ class Computational(Item):
     embedded = [
         'variant',
         'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
         'evaluation_associated',
         'evaluation_associated.interpretation_associated'
     ]
