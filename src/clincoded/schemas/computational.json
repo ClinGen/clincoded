@@ -141,12 +141,12 @@
                     },
                     "source": {
                         "title": "Source",
-                        "description": "External source of the variant",
+                        "description": "Source of the variant",
                         "type": "string"
                     },
                     "sourceId": {
                         "title": "Source ID",
-                        "description": "Primary key of the variant in external source",
+                        "description": "Primary ID of the variant in source",
                         "type": "string"
                     }
                 }

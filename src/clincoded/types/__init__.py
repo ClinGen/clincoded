@@ -989,7 +989,7 @@ class Interpretation(Item):
     ]
 
     @calculated_property(schema={
-        "title": "Status",
+        "title": "Interpretation Status",
         "type": "string",
     })
     def interpretation_status(self, evaluations=[], provisional_variant=[]):
@@ -1143,7 +1143,7 @@ class Population(Item):
         return len(populationData)
 
     @calculated_property(schema={
-        "title": "Criteria",
+        "title": "Criteria Met",
         "type": "string"
     })
     def criteria_list(self, request, evaluation_associated=[]):
@@ -1185,7 +1185,7 @@ class Computational(Item):
         return paths_filtered_by_status(request, evaluation_associated)
 
     @calculated_property(schema={
-        "title": "Criteria",
+        "title": "Criteria Met",
         "type": "string"
     })
     def criteria_list(self, request, evaluation_associated=[]):
