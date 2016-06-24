@@ -207,7 +207,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
             var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
+            this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
+                console.log('ENSEMBL1');
                 console.log(response);
                 this.setState({
                     ensembl_variation_data: response,
@@ -220,7 +221,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // Get ExAC allele frequency as a fallback strategy
             // In the event where myvariant.info doesn't return ExAC allele frequency info
             // FIXME: Need to remove this when switching to using the global population object for table UI
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
+            this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
+                console.log('ENSEMBL2');
+                console.log(response);
                 this.setState({ensembl_exac_allele: response[0].colocated_variants[0]});
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
