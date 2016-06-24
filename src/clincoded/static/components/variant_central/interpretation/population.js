@@ -122,16 +122,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var variant_id = found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':'));
             this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(exac_allele_frequency => {
                 // Calling method to update global object with ExAC Allele Frequency data
-                console.log('VEP');
-                console.log(exac_allele_frequency);
                 this.assignAlleleFrequencyData(exac_allele_frequency);
                 this.setState({external_data: populationObj});
             }).catch(function(e) {
                 console.log('VEP Allele Frequency Fetch Error=: %o', e);
             });
             this.getRestData(url + variant_id).then(response => {
-                console.log('EXAC');
-                console.log(response);
                 this.setState({myvariant_exac_population: response.exac});
                 // Calling methods to update global object with ExAC & ESP population data
                 // FIXME: Need to create a new copy of the global object with new data
@@ -212,6 +208,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var numberPattern = /\d+/g;
             var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
             this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
+                console.log(response);
                 this.setState({
                     ensembl_variation_data: response,
                     ensembl_populations: response.populations,
