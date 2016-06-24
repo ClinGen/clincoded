@@ -26,68 +26,6 @@ var InputMixin = form.InputMixin;
 // They should contain pre-existing values if they exist in the db. Or 'null' if not.
 var populationObj = {
     exac: {
-        allele_count: {},
-        allele_number: {},
-        hom_number: {},
-        allele_frequency: {
-            african: '',
-            east_asian: '',
-            european_non_finnish: '',
-            european_finnish: '',
-            latino: '',
-            other: '',
-            south_asian: '',
-            total: ''
-        },
-        chrom: '',
-        pos: '',
-        ref: '',
-        alt: ''
-    },
-    thousand_genome: {
-        allele: {
-            african: [],
-            all: [],
-            east_asian: [],
-            european: [],
-            latino: [],
-            south_asian: [],
-            esp6500_african_american: [],
-            esp6500_european_american: []
-        },
-        genotype: {
-            african: [],
-            all: [],
-            east_asian: [],
-            european: [],
-            latino: [],
-            south_asian: [],
-            esp6500_african_american: [],
-            esp6500_european_american: []
-        }
-    },
-    esp: {
-        allele_count: {
-            african_american: {},
-            all: {},
-            european_american: {}
-        },
-        genotype_count: {
-            african_american: {},
-            all: {},
-            european_american: {}
-        },
-        avg_sample_read: '',
-        rsid: '',
-        chrom: '',
-        hg19_start: '',
-        ref: '',
-        alt: ''
-    }
-};
-
-var populationObjTwo = {
-    exac: {
         afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {},
         _order: ['afr', 'oth', 'amr', 'sas', 'nfe', 'eas', 'fin'],
         _labels: {afr: 'African', amr: 'Latino', eas: 'East Asian', fin: 'European (Finnish)', nfe: 'European (Non-Finnish)', oth: 'Other', sas: 'South Asian'}
@@ -187,7 +125,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 console.log('VEP');
                 console.log(exac_allele_frequency);
                 this.assignAlleleFrequencyData(exac_allele_frequency);
-                this.setState({external_data: populationObjTwo});
+                this.setState({external_data: populationObj});
             }).catch(function(e) {
                 console.log('VEP Allele Frequency Fetch Error=: %o', e);
             });
@@ -201,7 +139,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 // for comparison of any potential changed values
                 this.assignExacData(response);
                 this.assignEspData(response);
-                this.setState({external_data: populationObjTwo});
+                this.setState({external_data: populationObj});
             }).catch(function(e) {
                 console.log('MyVariant Fetch Error=: %o', e);
             });
@@ -211,10 +149,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // Get ExAC allele frequency from Ensembl (VEP) directly
     // Because myvariant.info doesn't always return ExAC allele frequency data
     assignAlleleFrequencyData: function(allele_frequency) {
-        populationObjTwo.exac._order.map(key => {
-            populationObjTwo.exac[key].af = allele_frequency[0].colocated_variants[0]['exac_' + key + '_maf'];
+        populationObj.exac._order.map(key => {
+            populationObj.exac[key].af = allele_frequency[0].colocated_variants[0]['exac_' + key + '_maf'];
         });
-        populationObjTwo.exac._tot.af = allele_frequency[0].colocated_variants[0].exac_adj_maf;
+        populationObj.exac._tot.af = allele_frequency[0].colocated_variants[0].exac_adj_maf;
     },
 
     // Method to assign ExAC population data to global population object
@@ -223,18 +161,18 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         // Do nothing if the exac{...} object is not returned from myvariant.info
         if (response.exac) {
             // Get other ExAC population data from myvariant.info, such allele_count, allele_number, homozygotes number, etc
-            populationObjTwo.exac._order.map(key => {
-                populationObjTwo.exac[key].ac = response.exac.ac['ac_' + key];
-                populationObjTwo.exac[key].an = response.exac.an['an_' + key];
-                populationObjTwo.exac[key].hom = response.exac.hom['hom_' + key];
+            populationObj.exac._order.map(key => {
+                populationObj.exac[key].ac = response.exac.ac['ac_' + key];
+                populationObj.exac[key].an = response.exac.an['an_' + key];
+                populationObj.exac[key].hom = response.exac.hom['hom_' + key];
             });
-            populationObjTwo.exac._tot.ac = response.exac.ac.ac_adj;
-            populationObjTwo.exac._tot.an = response.exac.an.an_adj;
-            populationObjTwo.exac._tot.hom = response.exac.hom.ac_hom;
-            populationObjTwo.exac._extra.chrom = response.exac.chrom;
-            populationObjTwo.exac._extra.pos = response.exac.pos;
-            populationObjTwo.exac._extra.ref = response.exac.ref;
-            populationObjTwo.exac._extra.alt = response.exac.alt;
+            populationObj.exac._tot.ac = response.exac.ac.ac_adj;
+            populationObj.exac._tot.an = response.exac.an.an_adj;
+            populationObj.exac._tot.hom = response.exac.hom.ac_hom;
+            populationObj.exac._extra.chrom = response.exac.chrom;
+            populationObj.exac._extra.pos = response.exac.pos;
+            populationObj.exac._extra.ref = response.exac.ref;
+            populationObj.exac._extra.alt = response.exac.alt;
             // Set a flag to display data in the table
             this.setState({hasExacData: true});
         }
@@ -244,18 +182,18 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     assignEspData: function(response) {
         // Not all variants return the evs{...} object from myvariant.info
         if (response.evs) {
-            populationObjTwo.esp.aa.ac = response.evs.allele_count.african_american;
-            populationObjTwo.esp.aa.gc = response.evs.genotype_count.african_american;
-            populationObjTwo.esp.ea.ac = response.evs.allele_count.european_american;
-            populationObjTwo.esp.ea.gc = response.evs.genotype_count.european_american;
-            populationObjTwo.esp._tot.ac = response.evs.allele_count.all;
-            populationObjTwo.esp._tot.gc = response.evs.genotype_count.all_genotype;
-            populationObjTwo.esp._extra.avg_sample_read = response.evs.avg_sample_read;
-            populationObjTwo.esp._extra.rsid = response.evs.rsid;
-            populationObjTwo.esp._extra.chrom = response.evs.chrom;
-            populationObjTwo.esp._extra.hg19_start = response.evs.hg19.start;
-            populationObjTwo.esp._extra.ref = response.evs.ref;
-            populationObjTwo.esp._extra.alt = response.evs.alt;
+            populationObj.esp.aa.ac = response.evs.allele_count.african_american;
+            populationObj.esp.aa.gc = response.evs.genotype_count.african_american;
+            populationObj.esp.ea.ac = response.evs.allele_count.european_american;
+            populationObj.esp.ea.gc = response.evs.genotype_count.european_american;
+            populationObj.esp._tot.ac = response.evs.allele_count.all;
+            populationObj.esp._tot.gc = response.evs.genotype_count.all_genotype;
+            populationObj.esp._extra.avg_sample_read = response.evs.avg_sample_read;
+            populationObj.esp._extra.rsid = response.evs.rsid;
+            populationObj.esp._extra.chrom = response.evs.chrom;
+            populationObj.esp._extra.hg19_start = response.evs.hg19.start;
+            populationObj.esp._extra.ref = response.evs.ref;
+            populationObj.esp._extra.alt = response.evs.alt;
             // Set a flag to display data in the table
             this.setState({hasEspData: true});
         }
