@@ -31,7 +31,15 @@ var populationObj = {
         _labels: {afr: 'African', amr: 'Latino', eas: 'East Asian', fin: 'European (Finnish)', nfe: 'European (Non-Finnish)', oth: 'Other', sas: 'South Asian'}
     },
     thousand_genome: {
-        afr: {}, amr: {}, eas: {}, eur: {}, sas: {}, espaa: {}, espea: {}, _tot: {}, _extra: {},
+        afr: {ac: {}, gc: {}, gf: {}},
+        amr: {ac: {}, gc: {}, gf: {}},
+        eas: {ac: {}, gc: {}, gf: {}},
+        eur: {ac: {}, gc: {}, gf: {}},
+        sas: {ac: {}, gc: {}, gf: {}},
+        espaa: {ac: {}, gc: {}, gf: {}},
+        espea: {ac: {}, gc: {}, gf: {}},
+        _tot: {ac: {}, gc: {}, gf: {}},
+        _extra: {},
         _order: ['afr', 'amr', 'eas', 'eur', 'sas', 'espaa', 'espea'],
         _labels: {afr: 'AFR', amr: 'AMR', eas: 'EAS', eur: 'EUR', sas: 'SAS', espaa: 'ESP6500: African American', espea: 'ESP6500: European American'}
     },
@@ -122,7 +130,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var variant_id = found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':'));
             this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(exac_allele_frequency => {
                 // Calling method to update global object with ExAC Allele Frequency data
-                this.assignAlleleFrequencyData(exac_allele_frequency);
+                this.parseAlleleFrequencyData(exac_allele_frequency);
                 this.setState({external_data: populationObj});
             }).catch(function(e) {
                 console.log('VEP Allele Frequency Fetch Error=: %o', e);
@@ -133,8 +141,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 // FIXME: Need to create a new copy of the global object with new data
                 // while leaving the original object with pre-existing data
                 // for comparison of any potential changed values
-                this.assignExacData(response);
-                this.assignEspData(response);
+                this.parseExacData(response);
+                this.parseEspData(response);
                 this.setState({external_data: populationObj});
             }).catch(function(e) {
                 console.log('MyVariant Fetch Error=: %o', e);
@@ -144,7 +152,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     // Get ExAC allele frequency from Ensembl (VEP) directly
     // Because myvariant.info doesn't always return ExAC allele frequency data
-    assignAlleleFrequencyData: function(allele_frequency) {
+    parseAlleleFrequencyData: function(allele_frequency) {
         populationObj.exac._order.map(key => {
             populationObj.exac[key].af = allele_frequency[0].colocated_variants[0]['exac_' + key + '_maf'];
         });
@@ -152,7 +160,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to assign ExAC population data to global population object
-    assignExacData: function(response) {
+    parseExacData: function(response) {
         // Not all variants can be found in ExAC
         // Do nothing if the exac{...} object is not returned from myvariant.info
         if (response.exac) {
@@ -175,7 +183,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to assign ESP population data to global population object
-    assignEspData: function(response) {
+    parseEspData: function(response) {
         // Not all variants return the evs{...} object from myvariant.info
         if (response.evs) {
             populationObj.esp.aa.ac = response.evs.allele_count.african_american;
@@ -195,9 +203,37 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
-    // FIXME: Need to be implemented
-    assign1000GData: function(response) {
-
+    parse1000GData: function(response) {
+        if (response.population_genotypes) {
+            response.population_genotypes.map(population_genotype => {
+                let populationCode = population_genotype.population.genotype.substring(population_genotype.population.genotype.length - 3).toLowerCase;
+                if (population_genotype.population.indexOf('1000GENOMES:phase_3') == 0 &&
+                    populationObj.thousand_genome._order.indexOf(populationCode) > 0) {
+                    populationObj.thousand_genome[populationCode].ac[population_genotype.genotype] = population_genotype.count;
+                    populationObj.thousand_genome[populationCode].gf[population_genotype.genotype] = population_genotype.frequency;
+                } else if (population_genotype.population == 'ESP6500:African_American') {
+                    populationObj.thousand_genome.espaa.ac[population_genotype.genotype] = population_genotype.count;
+                    populationObj.thousand_genome.espaa.gf[population_genotype.genotype] = population_genotype.frequency;
+                } else if (population_genotype.population == 'ESP6500:European_American') {
+                    populationObj.thousand_genome.espea.ac[population_genotype.genotype] = population_genotype.count;
+                    populationObj.thousand_genome.espea.gf[population_genotype.genotype] = population_genotype.frequency;
+                }
+            });
+            response.populations.map(population => {
+                let populationCode = population.population.genotype.substring(population.population.genotype.length - 3).toLowerCase;
+                if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
+                    populationObj.thousand_genome._order.indexOf(populationCode) > 0) {
+                    populationObj.thousand_genome[populationCode].ac[population.allele] = population.allele_count;
+                    populationObj.thousand_genome[populationCode].gf[population.allele] = population.frequency;
+                } else if (population.population == 'ESP6500:African_American') {
+                    populationObj.thousand_genome.espaa.ac[population.genotype] = population.allele_count;
+                    populationObj.thousand_genome.espaa.gf[population.genotype] = population.frequency;
+                } else if (population.population == 'ESP6500:European_American') {
+                    populationObj.thousand_genome.espea.ac[population.genotype] = population.allele_count;
+                    populationObj.thousand_genome.espea.gf[population.genotype] = population.frequency;
+                }
+            });
+        }
     },
 
     // Retrieve 1000GENOMES population data from rest.ensembl.org
@@ -210,6 +246,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
                 console.log('ENSEMBL1');
                 console.log(response);
+                this.parse1000GData(response);
                 this.setState({
                     ensembl_variation_data: response,
                     ensembl_populations: response.populations,
