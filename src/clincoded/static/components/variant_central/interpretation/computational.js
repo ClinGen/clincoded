@@ -21,7 +21,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         data: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
         shouldFetchData: React.PropTypes.bool,
-        updateInterpretationObj: React.PropTypes.func
+        updateInterpretationObj: React.PropTypes.func,
+        protocol: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -62,6 +63,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     }
 });
 
+// FIXME: all functions below here are examples; references to these in above render() should also be removed
 var comp_crit_1 = function() {
     return (
         <div>

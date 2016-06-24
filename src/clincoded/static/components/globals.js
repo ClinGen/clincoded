@@ -132,6 +132,7 @@ module.exports.clincodedVersionMap = {
 
 module.exports.dbxref_prefix_map = {
     "UniProtKB": "http://www.uniprot.org/uniprot/",
+    "ESP_EVS": "http://evs.gs.washington.edu/EVS/PopStatsServlet?",
     "HGNC": "http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
     // ENSEMBL link only works for human
     "ENSEMBL": "http://www.ensembl.org/Homo_sapiens/Gene/Summary?g=",
@@ -159,11 +160,13 @@ module.exports.external_url_map = {
     'OrphaNet': 'http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=',
     'OrphanetHome': 'http://www.orpha.net/',
     'HGNC': 'http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=',
+    'HGNCFetch': '//rest.genenames.org/fetch/symbol/',
     'HGNCHome': 'http://www.genenames.org/',
     'Entrez': 'http://www.ncbi.nlm.nih.gov/gene/',
     'OMIM': 'http://omim.org/',
     'ClinVar': 'http://www.ncbi.nlm.nih.gov/clinvar/',
     'ClinVarSearch': 'http://www.ncbi.nlm.nih.gov/clinvar/variation/',
+    'ClinVarEutils': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=',
     'HPO': 'http://compbio.charite.de/hpoweb/showterm?id=',
     'HPOBrowser': 'http://compbio.charite.de/hpoweb/showterm?id=HP:0000118',
     'Uberon': 'http://uberon.github.io/',
@@ -175,9 +178,14 @@ module.exports.external_url_map = {
     'EFO': 'http://www.ebi.ac.uk/efo/',
     'dbSNP': 'http://www.ncbi.nlm.nih.gov/snp/',
     'CAR': 'http://reg.genome.network/site/cg-registry',
-    'CARallele': 'http://reg.genome.network/allele/',
+    'CARallele': '//reg.genome.network/allele/',
     'CAR-test': 'http://reg.test.genome.network/site/registry',
-    'CARallele-test': 'http://reg.test.genome.network/allele/'
+    'CARallele-test': '//reg.test.genome.network/allele/',
+    'EnsemblVEP': '//rest.ensembl.org/vep/human/id/',
+    'UCSCGenomeBrowser': '//genome.ucsc.edu/cgi-bin/hgTracks',
+    'NCBIVariationViewer': '//www.ncbi.nlm.nih.gov/variation/view/',
+    'MyVariantInfo': '//myvariant.info/v1/variant/',
+    'EXAC': '//exac.broadinstitute.org/variant/'
 };
 
 
