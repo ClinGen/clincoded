@@ -88,7 +88,7 @@
         }
     },
     "columns": {
-        "variant.represent": {
+        "variant.variant_identifier": {
             "title": "Variant",
             "type": "string"
         },
@@ -106,18 +106,6 @@
         },
         "provisional_count": {
             "title": "# Provisional",
-            "type": "number"
-        },
-        "interpretation_genes": {
-            "title": "Genes",
-            "type": "string"
-        },
-        "interpretation_transcripts": {
-            "title": "# Transcripts",
-            "type": "number"
-        },
-        "interpretation_proteins": {
-            "title": "# Proteins",
             "type": "number"
         },
         "submitted_by.title": {

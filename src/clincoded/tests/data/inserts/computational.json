@@ -47,40 +47,42 @@
                     "prediction": ""
                 }
             ],
-            "splicingPredictions": [
-                {
-                    "source": "MaxEnScan",
-                    "5or3": "5",
-                    "scoreRange": "[0-12]",
-                    "value": "9.7"
-                },
-                {
-                    "source": "NNSplice",
-                    "5or3": "5",
-                    "scoreRange": "[0-1]",
-                    "value": "1.0"
-                },
-                {
-                    "source": "MaxEnScan",
-                    "5or3": "3",
-                    "scoreRange": "[0-16]",
-                    "value": ""
-                },
-                {
-                    "source": "NNSplice",
-                    "5or3": "3",
-                    "scoreRange": "[0-1]",
-                    "value": ""
-                }
-            ],
-            "averageChangeToNearestSplice": 0.002772,
-            "distanceToNearestSplice": 123,
-            "exonLocation": 2
+            "splicingPredictions": {
+                "averageChangeToNearestSplice": 0.002772,
+                "predictionData": [
+                    {
+                        "source": "MaxEnScan",
+                        "directionality": "5'",
+                        "scoreRange": "[0-12]",
+                        "value": 9.7
+                    },
+                    {
+                        "source": "NNSplice",
+                        "directionality": "5'",
+                        "scoreRange": "[0-1]",
+                        "value": 1.0
+                    },
+                    {
+                        "source": "MaxEnScan",
+                        "directionality": "3'",
+                        "scoreRange": "[0-16]"
+                    },
+                    {
+                        "source": "NNSplice",
+                        "directionality": "3'",
+                        "scoreRange": "[0-1]"
+                    }
+                ]
+            },
+            "additionalInfo": {
+                "distanceToNearestSplice": 123,
+                "exonLocation": 2
+            }
         }
     },
     {
         "uuid": "90a4a469-d226-4264-9903-a6bc3d6997cf",
-        "variant": "3080772e-2685-11e5-ad92-60f81dc5b05a",
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
         "otherVariantsInCodon": [
             {
                 "source": "ClinVar",
@@ -106,10 +108,6 @@
     },
     {
         "uuid": "b388132e-e334-4e36-a178-96fcee811ec2",
-        "variant": "df8135d4-2685-11e5-af19-60f81dc5b05a"
-    },
-    {
-        "uuid": "7a9ac6d1-7816-4a06-b8d1-b953e9088665",
-        "variant": "d439f000-2685-11e5-9792-60f81dc5b05a"
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a"
     }
 ]

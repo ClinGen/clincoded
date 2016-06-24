@@ -23,50 +23,122 @@
             "linkTo": "variant"
         },
         "computationalTools": {
+            "comment": "Criteria related: (BP4 or PP3) and/or BP7 ",
             "type": "object",
             "properties": {
                 "proteinPredictors": {
                     "title": "Protein Predictors",
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "type": "object",
+                        "properties": {
+                            "source": {
+                                "title": "Source",
+                                "type": "string"
+                            },
+                            "sourceRange": {
+                                "title": "Source/Range",
+                                "type": "string"
+                            },
+                            "prediction": {
+                                "title": "Prediction",
+                                "type": "string"
+                            }
+                        }
                     }
                 },
                 "conservationAnalysis": {
                     "title": "Conservation Analysis",
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "type": "object",
+                        "properties": {
+                            "source": {
+                                "title": "Source",
+                                "type": "string"
+                            },
+                            "sourceRange": {
+                                "title": "Source/Range",
+                                "type": "string"
+                            },
+                            "prediction": {
+                                "title": "Prediction",
+                                "type": "string"
+                            }
+                        }
                     }
                 },
                 "splicingPredictions": {
                     "title": "Splicing Predictions",
-                    "type": "array",
-                    "items": {
-                        "type": "object"
+                    "type": "object",
+                    "properties": {
+                        "averageChangeToNearestSplice": {
+                            "title": "Average Change to Nearest Splice Site",
+                            "type": "number"
+                        },
+                        "predictionData": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "source": {
+                                        "title": "Source",
+                                        "type": "string"
+                                    },
+                                    "directionality": {
+                                        "title": "5 Prime End or 3 Prime End",
+                                        "type": "string"
+                                    },
+                                    "sourceRange": {
+                                        "title": "Source/Range",
+                                        "type": "string"
+                                    },
+                                    "value": {
+                                        "title": "Prediction",
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
-                "averageChangeToNearestSplice": {
-                    "title": "Average Change to Nearest Splice Site",
-                    "type": "number"
-                },
-                "distanceToNearestSplice": {
-                    "type": "number"
-                },
-                "exonLocation": {
-                    "description": "Location of affected exon",
-                    "type": "number"
+                "additionalInfo": {
+                    "title": "Additional Information",
+                    "type": "object",
+                    "properties": {
+                        "distanceToNearestSplice": {
+                            "type": "number"
+                        },
+                        "exonLocation": {
+                            "description": "Location of affected exon",
+                            "type": "number"
+                        }
+                    }
                 }
             }
         },
         "otherVariantsInCodon": {
+            "comment": "Criteria related: PS1 and/or PM5",
             "title": "Other Variants in Codon",
-            "description": "List of variants.",
+            "description": "List of variants within codon.",
             "type": "array",
             "items": {
-                "title": "Variant",
                 "type": "object",
                 "properties": {
+                    "cDNA": {
+                        "title": "cDNA",
+                        "type": "string"
+                    },
+                    "protein": {
+                        "title": "Protein Presentation",
+                        "type": "string"
+                    },
+                    "clinicalType": {
+                        "title": "Clinical Type of Variant",
+                        "description": "Variant interpretation on pathogenicity",
+                        "type": "string",
+                        "comment": "This property is relevant to data field Interpretation in UI"
+                    },
                     "source": {
                         "title": "Source",
                         "description": "External source of the variant",
@@ -76,32 +148,19 @@
                         "title": "Source ID",
                         "description": "Primary key of the variant in external source",
                         "type": "string"
-                    },
-                    "clinical": {
-                        "title": "Clinical Type",
-                        "description": "Varaint interpretation on pathogenicity",
-                        "type": "string"
-                    },
-                    "protein": {
-                        "title": "Protein Presentation",
-                        "type": "string"
-                    },
-                    "cDNA": {
-                        "title": "cDNA Presentation",
-                        "type": "string"
                     }
                 }
             }
         }
     },
     "columns": {
-        "variant.represent": {
+        "variant.variant_identifier": {
             "title": "Variant",
             "type": "string"
         },
-        "criteria_count": {
-            "title": "# Criterion",
-            "type": "number"
+        "criteria_list": {
+            "title": "Criteria Met",
+            "type": "string"
         }
     }
 }

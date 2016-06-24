@@ -158,11 +158,11 @@ class Variant(Item):
     })
     def variant_identifier(self, clinvarVariantId='', carId='', otherDescription=''):
         if clinvarVariantId != '':
-            return clinvarVariantId
+            return "ClinVar Variation ID: " + clinvarVariantId
         elif carId != '':
-            return carId
+            return "CAR ID: " + carId
         elif otherDescription != '':
-            return otherDescription
+            return "Other Description: " + otherDescription
         else:
             return ''
 
@@ -1142,6 +1142,18 @@ class Population(Item):
     def maf_count(self, populationData={}):
         return len(populationData)
 
+    @calculated_property(schema={
+        "title": "Criteria",
+        "type": "string"
+    })
+    def criteria_list(self, request, evaluation_associated=[]):
+        if len(evaluation_associated) > 0:
+            c_list = []
+            for evaluation in evaluation_associated:
+                e_obj = request.embed(evaluation, '@@object')
+                c_list.append(e_obj['criteria'] + ': ' + e_obj['value'])
+            return '; '.join(c_list)
+        return ''
 
 @collection(
     name='computational',
@@ -1173,11 +1185,17 @@ class Computational(Item):
         return paths_filtered_by_status(request, evaluation_associated)
 
     @calculated_property(schema={
-        "title": "# Criterion",
-        "type": "number"
+        "title": "Criteria",
+        "type": "string"
     })
-    def criteria_count(self, evaluation_associated=[]):
-        return len(evaluation_associated)
+    def criteria_list(self, request, evaluation_associated=[]):
+        if len(evaluation_associated) > 0:
+            c_list = []
+            for evaluation in evaluation_associated:
+                e_obj = request.embed(evaluation, '@@object')
+                c_list.append(e_obj['criteria'] + ': ' + e_obj['value'])
+            return '; '.join(c_list)
+        return ''
 
 
 @collection(
