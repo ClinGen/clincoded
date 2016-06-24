@@ -271,15 +271,37 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return displayVal;
     },
 
-    // Function to get 1000G genotype values and populate table cells
-    handleEspData: function(alleleObj, allele) {
-        var displayVal = '--';
-        Object.keys(alleleObj).forEach(function(key) {
-            if (key === allele) {
-                displayVal = key + ': ' + alleleObj[key];
-            }
-        });
-        return displayVal;
+    renderExacRow: function(key, exac, rowNameCustom, className) {
+        let rowName = exac._labels[key];
+        if (key == '_tot') {
+            rowName = rowNameCustom;
+        }
+        return (
+            <tr key={key} className={className ? className : ''}>
+                <td>{rowName}</td>
+                <td>{exac[key].ac !== null ? exac[key].ac : '--'}</td>
+                <td>{exac[key].an !== null ? exac[key].an : '--'}</td>
+                <td>{exac[key].hom !== null ? exac[key].hom : '--'}</td>
+                <td>{exac[key].af !== null ? exac[key].af : '--'}</td>
+            </tr>
+        );
+    },
+
+    renderEspRow: function(key, esp, rowNameCustom, className) {
+        let rowName = esp._labels[key];
+        if (key == '_tot') {
+            rowName = rowNameCustom;
+        }
+        return (
+            <tr key={key} className={className ? className : ''}>
+                <td>{rowName}</td>
+                <td>{esp[key].ac[esp._extra.ref] !== null ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
+                <td>{esp[key].ac[esp._extra.alt] !== null ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
+                <td>{esp[key].gc[esp._extra.ref + esp._extra.ref] !== null ? esp._extra.ref + esp._extra.ref + ': ' + esp[key].gc[esp._extra.ref + esp._extra.ref] : '--'}</td>
+                <td>{esp[key].gc[esp._extra.alt + esp._extra.alt] !== null ? esp._extra.alt + esp._extra.alt + ': ' + esp[key].gc[esp._extra.alt + esp._extra.alt] : '--'}</td>
+                <td>{esp[key].gc[esp._extra.alt + esp._extra.ref] !== null ? esp._extra.alt + esp._extra.ref + ': ' + esp[key].gc[esp._extra.alt + esp._extra.ref] : '--'}</td>
+            </tr>
+        );
     },
 
     render: function() {
@@ -312,11 +334,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 <div className="row">
                     <div className="col-sm-12">
                         <CurationInterpretationForm formTitle={"Population Demo Criteria Group 1"} renderedFormContent={pop_crit_1}
-                            evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
+                            evidenceType={'population'} evidenceData={this.state.external_data} evidenceDataUpdated={true}
                             formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         <CurationInterpretationForm formTitle={"Population Demo Criteria Group 2"} renderedFormContent={pop_crit_2}
-                            evidenceType={'population'} evidenceData={this.state.data} evidenceDataUpdated={true}
+                            evidenceType={'population'} evidenceData={this.state.external_data} evidenceDataUpdated={true}
                             formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
@@ -367,25 +389,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </thead>
                             <tbody>
                                 {exac._order.map(key => {
-                                    return (
-                                        <tr key={key}>
-                                            <td>{exac._labels[key]}</td>
-                                            <td>{exac[key].ac}</td>
-                                            <td>{exac[key].an}</td>
-                                            <td>{exac[key].hom}</td>
-                                            <td>{exac[key].af}</td>
-                                        </tr>
-                                    );
+                                    return (this.renderExacRow(key, exac));
                                 })}
                             </tbody>
                             <tfoot>
-                                <tr className="count">
-                                    <td>Total</td>
-                                    <td>{exac._tot.ac}</td>
-                                    <td>{exac._tot.an}</td>
-                                    <td>{exac._tot.hom}</td>
-                                    <td>{exac._tot.af}</td>
-                                </tr>
+                                {this.renderExacRow('_tot', exac, 'Total', 'count')}
                             </tfoot>
                         </table>
                     </div>
@@ -508,7 +516,18 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                     <th colSpan="3">Genotype Count</th>
                                 </tr>
                             </thead>
-
+                            <tbody>
+                                {esp._order.map(key => {
+                                    return (this.renderEspRow(key, esp));
+                                })}
+                                {this.renderEspRow('_tot', esp, 'All Allele', 'count')}
+                            </tbody>
+                            <tfoot>
+                                <tr className="count">
+                                    <td>Average Sample Read Depth</td>
+                                    <td colSpan="5">{esp._extra.avg_sample_read}</td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 :
