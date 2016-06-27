@@ -71,20 +71,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
             interpretation: this.props.interpretation,
-            dbSNP_id: null,
             hgvs_GRCh37: null,
-            gene_symbol: null,
-            ensembl_variation_data: {},
-            ensembl_populations: [],
-            ensembl_population_genotypes: [],
             ensembl_exac_allele: {},
-            myvariant_exac_population: {}, // ExAC population counts from myvariant.info
-            myvariant_exac_allele: {}, // ExAC population frequencies from myvariant.info
-            myvariant_esp_population: {}, // ESP (EVS) population allele from myvariant.info
             interpretationUuid: this.props.interpretationUuid,
             hasExacData: false, // flag to display ExAC table
-            hasEspData: false, // flag to display ESP table
             hasTGenomesData: false,
+            hasEspData: false, // flag to display ESP table
             shouldFetchData: false
         };
     },
@@ -137,7 +129,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 console.log('VEP Allele Frequency Fetch Error=: %o', e);
             });
             this.getRestData(url + variant_id).then(response => {
-                this.setState({myvariant_exac_population: response.exac});
                 // Calling methods to update global object with ExAC & ESP population data
                 // FIXME: Need to create a new copy of the global object with new data
                 // while leaving the original object with pre-existing data
@@ -167,7 +158,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // Get ExAC allele frequency as a fallback strategy
             // In the event where myvariant.info doesn't return ExAC allele frequency info
             // FIXME: Need to remove this when switching to using the global population object for table UI
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
+            if (populationObj.)
+            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
                 this.setState({ensembl_exac_allele: response[0].colocated_variants[0]});
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
@@ -282,10 +274,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{this.ifNullOrUndefined(exac[key].ac) ? exac[key].ac : '--'}</td>
-                <td>{this.ifNullOrUndefined(exac[key].an) ? exac[key].an : '--'}</td>
-                <td>{this.ifNullOrUndefined(exac[key].hom) ? exac[key].hom : '--'}</td>
-                <td>{this.ifNullOrUndefined(exac[key].af) ? exac[key].af : '--'}</td>
+                <td>{exac[key].ac ? exac[key].ac : '--'}</td>
+                <td>{exac[key].an ? exac[key].an : '--'}</td>
+                <td>{exac[key].hom ? exac[key].hom : '--'}</td>
+                <td>{exac[key].af ? exac[key].af : '--'}</td>
             </tr>
         );
     },
@@ -298,11 +290,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{this.ifNullOrUndefined(tGenomes[key].af[tGenomes._extra.ref]) ? tGenomes._extra.ref + ': ' + tGenomes[key].af[tGenomes._extra.ref] : '--'}{this.ifNullOrUndefined(tGenomes[key].ac[tGenomes._extra.ref]) ? ' (' + tGenomes[key].ac[tGenomes._extra.ref] + ')' : ''}</td>
-                <td>{this.ifNullOrUndefined(tGenomes[key].af[tGenomes._extra.alt]) ? tGenomes._extra.alt + ': ' + tGenomes[key].af[tGenomes._extra.alt] : '--'}{this.ifNullOrUndefined(tGenomes[key].ac[tGenomes._extra.alt]) ? ' (' + tGenomes[key].ac[tGenomes._extra.alt] + ')' : ''}</td>
-                <td>{this.ifNullOrUndefined(tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.ref]) ? tGenomes._extra.ref + '|' + tGenomes._extra.ref + ': ' + tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.ref] : '--'}{this.ifNullOrUndefined(tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.ref]) ? ' (' + tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.ref] + ')' : ''}</td>
-                <td>{this.ifNullOrUndefined(tGenomes[key].gf[tGenomes._extra.alt + '|' + tGenomes._extra.alt]) ? tGenomes._extra.alt + '|' + tGenomes._extra.alt + ': ' + tGenomes[key].gf[tGenomes._extra.alt + '|' + tGenomes._extra.alt] : '--'}{this.ifNullOrUndefined(tGenomes[key].gc[tGenomes._extra.alt + '|' + tGenomes._extra.alt]) ? ' (' + tGenomes[key].gc[tGenomes._extra.alt + '|' + tGenomes._extra.alt] + ')' : ''}</td>
-                <td>{this.ifNullOrUndefined(tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.alt]) ? tGenomes._extra.ref + '|' + tGenomes._extra.alt + ': ' + tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.alt] : '--'}{this.ifNullOrUndefined(tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.alt]) ? ' (' + tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.alt] + ')' : ''}</td>
+                <td>{tGenomes[key].af[tGenomes._extra.ref] ? tGenomes._extra.ref + ': ' + tGenomes[key].af[tGenomes._extra.ref] : '--'}{tGenomes[key].ac[tGenomes._extra.ref] ? ' (' + tGenomes[key].ac[tGenomes._extra.ref] + ')' : ''}</td>
+                <td>{tGenomes[key].af[tGenomes._extra.alt] ? tGenomes._extra.alt + ': ' + tGenomes[key].af[tGenomes._extra.alt] : '--'}{tGenomes[key].ac[tGenomes._extra.alt] ? ' (' + tGenomes[key].ac[tGenomes._extra.alt] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.ref] ? tGenomes._extra.ref + '|' + tGenomes._extra.ref + ': ' + tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.ref] : '--'}{tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.ref] ? ' (' + tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.ref] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[tGenomes._extra.alt + '|' + tGenomes._extra.alt] ? tGenomes._extra.alt + '|' + tGenomes._extra.alt + ': ' + tGenomes[key].gf[tGenomes._extra.alt + '|' + tGenomes._extra.alt] : '--'}{tGenomes[key].gc[tGenomes._extra.alt + '|' + tGenomes._extra.alt] ? ' (' + tGenomes[key].gc[tGenomes._extra.alt + '|' + tGenomes._extra.alt] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.alt] ? tGenomes._extra.ref + '|' + tGenomes._extra.alt + ': ' + tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.alt] : '--'}{tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.alt] ? ' (' + tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.alt] + ')' : ''}</td>
             </tr>
         );
     },
@@ -315,28 +307,16 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{this.ifNullOrUndefined(esp[key].ac[esp._extra.ref]) ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
-                <td>{this.ifNullOrUndefined(esp[key].ac[esp._extra.alt]) ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
-                <td>{this.ifNullOrUndefined(esp[key].gc[esp._extra.ref + esp._extra.ref]) ? esp._extra.ref + esp._extra.ref + ': ' + esp[key].gc[esp._extra.ref + esp._extra.ref] : '--'}</td>
-                <td>{this.ifNullOrUndefined(esp[key].gc[esp._extra.alt + esp._extra.alt]) ? esp._extra.alt + esp._extra.alt + ': ' + esp[key].gc[esp._extra.alt + esp._extra.alt] : '--'}</td>
-                <td>{this.ifNullOrUndefined(esp[key].gc[esp._extra.alt + esp._extra.ref]) ? esp._extra.alt + esp._extra.ref + ': ' + esp[key].gc[esp._extra.alt + esp._extra.ref] : '--'}</td>
+                <td>{esp[key].ac[esp._extra.ref] ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
+                <td>{esp[key].ac[esp._extra.alt] ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
+                <td>{esp[key].gc[esp._extra.ref + esp._extra.ref] ? esp._extra.ref + esp._extra.ref + ': ' + esp[key].gc[esp._extra.ref + esp._extra.ref] : '--'}</td>
+                <td>{esp[key].gc[esp._extra.alt + esp._extra.alt] ? esp._extra.alt + esp._extra.alt + ': ' + esp[key].gc[esp._extra.alt + esp._extra.alt] : '--'}</td>
+                <td>{esp[key].gc[esp._extra.alt + esp._extra.ref] ? esp._extra.alt + esp._extra.ref + ': ' + esp[key].gc[esp._extra.alt + esp._extra.ref] : '--'}</td>
             </tr>
         );
     },
 
-    ifNullOrUndefined: function(value) {
-        if (typeof value !== 'undefined' && value !== null) {
-            return true;
-        } else {
-            return false;
-        }
-    },
-
     render: function() {
-        // FIXME: Need to switch to using the global population object
-        var ensembl_variation = this.state.ensembl_variation_data,
-            ensembl_populations = this.state.ensembl_populations,
-            ensembl_population_genotypes = this.state.ensembl_population_genotypes;
         // Genotype alleles (e.g. 'C|C', 'T|T', 'C|T') used by 1000G
         var allele_ancestral, allele_minor, allele_mixed;
         if (ensembl_variation) {
