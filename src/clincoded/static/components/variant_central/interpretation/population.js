@@ -121,9 +121,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var found = genomic_chr_mapping.find((entry) => entry.GenomicRefSeq === NC_genomic);
             // Format variant_id for use of myvariant.info REST API
             var variant_id = found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':'));
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(exac_allele_frequency => {
+            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
                 // Calling method to update global object with ExAC Allele Frequency data
-                this.parseAlleleFrequencyData(exac_allele_frequency);
+                this.parseAlleleFrequencyData(response);
                 this.setState({external_data: populationObj});
             }).catch(function(e) {
                 console.log('VEP Allele Frequency Fetch Error=: %o', e);
@@ -158,22 +158,25 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // Get ExAC allele frequency as a fallback strategy
             // In the event where myvariant.info doesn't return ExAC allele frequency info
             // FIXME: Need to remove this when switching to using the global population object for table UI
-            if (populationObj.)
+            // FIXME_MC: Also need to figure out how to make sure the promises do not conflict: they're not chained, but dependent on the result of the other
+            /*
             this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
+                this.parseAlleleFrequencyData(response);
                 this.setState({ensembl_exac_allele: response[0].colocated_variants[0]});
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
             });
+            */
         }
     },
 
     // Get ExAC allele frequency from Ensembl (VEP) directly
     // Because myvariant.info doesn't always return ExAC allele frequency data
-    parseAlleleFrequencyData: function(allele_frequency) {
+    parseAlleleFrequencyData: function(response) {
         populationObj.exac._order.map(key => {
-            populationObj.exac[key].af = allele_frequency[0].colocated_variants[0]['exac_' + key + '_maf'];
+            populationObj.exac[key].af = response[0].colocated_variants[0]['exac_' + key + '_maf'];
         });
-        populationObj.exac._tot.af = allele_frequency[0].colocated_variants[0].exac_adj_maf;
+        populationObj.exac._tot.af = response[0].colocated_variants[0].exac_adj_maf;
     },
 
     // Method to assign ExAC population data to global population object
