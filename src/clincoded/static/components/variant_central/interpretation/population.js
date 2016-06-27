@@ -24,11 +24,24 @@ var InputMixin = form.InputMixin;
 // FIXME: The tGenomes{} still needs a method to have data assigned
 // FIXME: Properties have 'null' values for now in the initial phase.
 // They should contain pre-existing values if they exist in the db. Or 'null' if not.
-var populationObj = {
+var populationStatic = {
     exac: {
-        afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {},
         _order: ['afr', 'oth', 'amr', 'sas', 'nfe', 'eas', 'fin'],
         _labels: {afr: 'African', amr: 'Latino', eas: 'East Asian', fin: 'European (Finnish)', nfe: 'European (Non-Finnish)', oth: 'Other', sas: 'South Asian'}
+    },
+    tGenomes: {
+        _order: ['afr', 'amr', 'eas', 'eur', 'sas', 'espaa', 'espea'],
+        _labels: {afr: 'AFR', amr: 'AMR', eas: 'EAS', eur: 'EUR', sas: 'SAS', espaa: 'ESP6500: African American', espea: 'ESP6500: European American'}
+    },
+    esp: {
+        _order: ['ea', 'aa'],
+        _labels: {ea: 'EA Allele', aa: 'AA Allele'}
+    }
+};
+
+var populationObj = {
+    exac: {
+        afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
     },
     tGenomes: {
         afr: {ac: {}, af: {}, gc: {}, gf: {}},
@@ -39,17 +52,13 @@ var populationObj = {
         espaa: {ac: {}, af: {}, gc: {}, gf: {}},
         espea: {ac: {}, af: {}, gc: {}, gf: {}},
         _tot: {ac: {}, af: {}, gc: {}, gf: {}},
-        _extra: {},
-        _order: ['afr', 'amr', 'eas', 'eur', 'sas', 'espaa', 'espea'],
-        _labels: {afr: 'AFR', amr: 'AMR', eas: 'EAS', eur: 'EUR', sas: 'SAS', espaa: 'ESP6500: African American', espea: 'ESP6500: European American'}
+        _extra: {}
     },
     esp: {
         aa: {ac: {}, gc: {}},
         ea: {ac: {}, gc: {}},
         _tot: {ac: {}, gc: {}},
-        _extra: {},
-        _order: ['ea', 'aa'],
-        _labels: {ea: 'EA Allele', aa: 'AA Allele'}
+        _extra: {}
     }
 };
 
@@ -173,7 +182,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // Get ExAC allele frequency from Ensembl (VEP) directly
     // Because myvariant.info doesn't always return ExAC allele frequency data
     parseAlleleFrequencyData: function(response) {
-        populationObj.exac._order.map(key => {
+        populationStatic.exac._order.map(key => {
             populationObj.exac[key].af = response[0].colocated_variants[0]['exac_' + key + '_maf'];
         });
         populationObj.exac._tot.af = response[0].colocated_variants[0].exac_adj_maf;
@@ -185,7 +194,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         // Do nothing if the exac{...} object is not returned from myvariant.info
         if (response.exac) {
             // Get other ExAC population data from myvariant.info, such allele_count, allele_number, homozygotes number, etc
-            populationObj.exac._order.map(key => {
+            populationStatic.exac._order.map(key => {
                 populationObj.exac[key].ac = response.exac.ac['ac_' + key];
                 populationObj.exac[key].an = response.exac.an['an_' + key];
                 populationObj.exac[key].hom = response.exac.hom['hom_' + key];
@@ -212,7 +221,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             response.populations.map(population => {
                 let populationCode = population.population.substring(20).toLowerCase();
                 if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
-                    populationObj.tGenomes._order.indexOf(populationCode) > 0) {
+                    populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
                     populationObj.tGenomes[populationCode].ac[population.allele] = population.allele_count;
                     populationObj.tGenomes[populationCode].af[population.allele] = population.frequency;
                 } else if (population.population == '1000GENOMES:phase_3:ALL') {
@@ -231,7 +240,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             response.population_genotypes.map(population_genotype => {
                 let populationCode = population_genotype.population.substring(20).toLowerCase();
                 if (population_genotype.population.indexOf('1000GENOMES:phase_3:') == 0 &&
-                    populationObj.tGenomes._order.indexOf(populationCode) > 0) {
+                    populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
                     populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = population_genotype.count;
                     populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = population_genotype.frequency;
                 } else if (population_genotype.population == '1000GENOMES:phase_3:ALL') {
@@ -271,8 +280,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // method to render a row of data for the ExAC table
-    renderExacRow: function(key, exac, rowNameCustom, className) {
-        let rowName = exac._labels[key];
+    renderExacRow: function(key, exac, exacStatic, rowNameCustom, className) {
+        let rowName = exacStatic._labels[key];
         if (key == '_tot') {
             rowName = rowNameCustom;
         }
@@ -288,8 +297,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // method to render a row of data for the 1000Genomes table
-    renderTGenomesRow: function(key, tGenomes, rowNameCustom, className) {
-        let rowName = tGenomes._labels[key];
+    renderTGenomesRow: function(key, tGenomes, tGenomesStatic, rowNameCustom, className) {
+        let rowName = tGenomesStatic._labels[key];
         if (key == '_tot') {
             rowName = rowNameCustom;
         }
@@ -306,8 +315,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // method to render a row of data for the ESP table
-    renderEspRow: function(key, esp, rowNameCustom, className) {
-        let rowName = esp._labels[key];
+    renderEspRow: function(key, esp, espStatic, rowNameCustom, className) {
+        let rowName = espStatic._labels[key];
         if (key == '_tot') {
             rowName = rowNameCustom;
         }
@@ -324,9 +333,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     render: function() {
-        var exac = this.state.external_data && this.state.external_data.exac ? this.state.external_data.exac : null; // Get ExAC data from global population object
-        var tGenomes = this.state.external_data && this.state.external_data.tGenomes ? this.state.external_data.tGenomes : null;
-        var esp = this.state.external_data && this.state.external_data.esp ? this.state.external_data.esp : null; // Get ESP data from global population object
+        var exacStatic = populationStatic.exac,
+            tGenomesStatic = populationStatic.tGenomes,
+            espStatic = populationStatic.esp;
+        var exac = this.state.external_data && this.state.external_data.exac ? this.state.external_data.exac : null, // Get ExAC data from global population object
+            tGenomes = this.state.external_data && this.state.external_data.tGenomes ? this.state.external_data.tGenomes : null,
+            esp = this.state.external_data && this.state.external_data.esp ? this.state.external_data.esp : null; // Get ESP data from global population object
 
         return (
             <div className="variant-interpretation population">
@@ -388,12 +400,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                 </tr>
                             </thead>
                             <tbody>
-                                {exac._order.map(key => {
-                                    return (this.renderExacRow(key, exac));
+                                {exacStatic._order.map(key => {
+                                    return (this.renderExacRow(key, exac, exacStatic));
                                 })}
                             </tbody>
                             <tfoot>
-                                {this.renderExacRow('_tot', exac, 'Total', 'count')}
+                                {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
                             </tfoot>
                         </table>
                     </div>
@@ -423,9 +435,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                 </tr>
                             </thead>
                             <tbody>
-                                {this.renderTGenomesRow('_tot', tGenomes, 'ALL')}
-                                {tGenomes._order.map(key => {
-                                    return (this.renderTGenomesRow(key, tGenomes));
+                                {this.renderTGenomesRow('_tot', tGenomes, tGenomesStatic, 'ALL')}
+                                {tGenomesStatic._order.map(key => {
+                                    return (this.renderTGenomesRow(key, tGenomes, tGenomesStatic));
                                 })}
                             </tbody>
                         </table>
@@ -454,10 +466,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                 </tr>
                             </thead>
                             <tbody>
-                                {esp._order.map(key => {
-                                    return (this.renderEspRow(key, esp));
+                                {espStatic._order.map(key => {
+                                    return (this.renderEspRow(key, esp, espStatic));
                                 })}
-                                {this.renderEspRow('_tot', esp, 'All Allele', 'count')}
+                                {this.renderEspRow('_tot', esp, espStatic, 'All Allele', 'count')}
                             </tbody>
                             <tfoot>
                                 <tr className="count">
