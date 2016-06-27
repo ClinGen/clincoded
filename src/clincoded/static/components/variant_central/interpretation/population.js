@@ -282,10 +282,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{exac[key].ac !== null ? exac[key].ac : '--'}</td>
-                <td>{exac[key].an !== null ? exac[key].an : '--'}</td>
-                <td>{exac[key].hom !== null ? exac[key].hom : '--'}</td>
-                <td>{exac[key].af !== null ? exac[key].af : '--'}</td>
+                <td>{this.ifNullOrUndefined(exac[key].ac) ? exac[key].ac : '--'}</td>
+                <td>{this.ifNullOrUndefined(exac[key].an) ? exac[key].an : '--'}</td>
+                <td>{this.ifNullOrUndefined(exac[key].hom) ? exac[key].hom : '--'}</td>
+                <td>{this.ifNullOrUndefined(exac[key].af) ? exac[key].af : '--'}</td>
             </tr>
         );
     },
@@ -315,11 +315,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{esp[key].ac[esp._extra.ref] !== null ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
-                <td>{esp[key].ac[esp._extra.alt] !== null ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
-                <td>{esp[key].gc[esp._extra.ref + esp._extra.ref] !== null ? esp._extra.ref + esp._extra.ref + ': ' + esp[key].gc[esp._extra.ref + esp._extra.ref] : '--'}</td>
-                <td>{esp[key].gc[esp._extra.alt + esp._extra.alt] !== null ? esp._extra.alt + esp._extra.alt + ': ' + esp[key].gc[esp._extra.alt + esp._extra.alt] : '--'}</td>
-                <td>{esp[key].gc[esp._extra.alt + esp._extra.ref] !== null ? esp._extra.alt + esp._extra.ref + ': ' + esp[key].gc[esp._extra.alt + esp._extra.ref] : '--'}</td>
+                <td>{this.ifNullOrUndefined(esp[key].ac[esp._extra.ref]) ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
+                <td>{this.ifNullOrUndefined(esp[key].ac[esp._extra.alt]) ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
+                <td>{this.ifNullOrUndefined(esp[key].gc[esp._extra.ref + esp._extra.ref]) ? esp._extra.ref + esp._extra.ref + ': ' + esp[key].gc[esp._extra.ref + esp._extra.ref] : '--'}</td>
+                <td>{this.ifNullOrUndefined(esp[key].gc[esp._extra.alt + esp._extra.alt]) ? esp._extra.alt + esp._extra.alt + ': ' + esp[key].gc[esp._extra.alt + esp._extra.alt] : '--'}</td>
+                <td>{this.ifNullOrUndefined(esp[key].gc[esp._extra.alt + esp._extra.ref]) ? esp._extra.alt + esp._extra.ref + ': ' + esp[key].gc[esp._extra.alt + esp._extra.ref] : '--'}</td>
             </tr>
         );
     },
