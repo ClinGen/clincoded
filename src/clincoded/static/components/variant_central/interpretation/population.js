@@ -106,8 +106,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretation: nextProps.interpretation});
-        this.setState({shouldFetchData: nextProps.shouldFetchData});
-        if (this.state.shouldFetchData === true) {
+        if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
+            this.setState({shouldFetchData: nextProps.shouldFetchData});
             window.localStorage.clear();
             this.fetchMyVariantInfo();
             this.fetchEnsemblData();

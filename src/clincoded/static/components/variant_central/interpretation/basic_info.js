@@ -41,8 +41,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     componentWillReceiveProps: function(nextProps) {
-        this.setState({shouldFetchData: nextProps.shouldFetchData});
-        if (this.state.shouldFetchData === true) {
+        if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
+            this.setState({shouldFetchData: nextProps.shouldFetchData});
             window.localStorage.clear();
             this.fetchRefseqData();
             this.fetchEnsemblData();
