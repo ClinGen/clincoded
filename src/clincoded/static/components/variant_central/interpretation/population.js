@@ -202,6 +202,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
+    // parse 1000Genome data
     parseTGenomesData: function(response) {
         populationObj.tGenomes._extra.name = response.name;
         populationObj.tGenomes._extra.var_class = response.var_class;
@@ -269,6 +270,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
+    // method to render a row of data for the ExAC table
     renderExacRow: function(key, exac, rowNameCustom, className) {
         let rowName = exac._labels[key];
         if (key == '_tot') {
@@ -285,6 +287,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         );
     },
 
+    // method to render a row of data for the 1000Genomes table
     renderTGenomesRow: function(key, tGenomes, rowNameCustom, className) {
         let rowName = tGenomes._labels[key];
         if (key == '_tot') {
@@ -302,6 +305,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         );
     },
 
+    // method to render a row of data for the ESP table
     renderEspRow: function(key, esp, rowNameCustom, className) {
         let rowName = esp._labels[key];
         if (key == '_tot') {
@@ -320,24 +324,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     render: function() {
-        // Genotype alleles (e.g. 'C|C', 'T|T', 'C|T') used by 1000G
-        var allele_ancestral, allele_minor, allele_mixed;
-        if (ensembl_variation) {
-            allele_ancestral = ensembl_variation.ancestral_allele + '|' + ensembl_variation.ancestral_allele;
-            allele_minor = ensembl_variation.minor_allele + '|' + ensembl_variation.minor_allele;
-            allele_mixed = ensembl_variation.ancestral_allele + '|' + ensembl_variation.minor_allele;
-        }
-
         var exac = this.state.external_data && this.state.external_data.exac ? this.state.external_data.exac : null; // Get ExAC data from global population object
         var tGenomes = this.state.external_data && this.state.external_data.tGenomes ? this.state.external_data.tGenomes : null;
         var esp = this.state.external_data && this.state.external_data.esp ? this.state.external_data.esp : null; // Get ESP data from global population object
-        // Genotype alleles (e.g. 'CC', 'TT', 'TC') used by ESP
-        var esp_allele_ref, esp_allele_alt, esp_allele_mixed;
-        if (esp) {
-            esp_allele_ref = esp.ref + esp.ref;
-            esp_allele_alt = esp.alt + esp.alt;
-            esp_allele_mixed = esp.alt + esp.ref;
-        }
 
         return (
             <div className="variant-interpretation population">
@@ -419,6 +408,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </thead>
                         </table>
                     </div>
+                    // FIXME: below URL is dependent on a response, but this block is executed on lack of a response
                     //Please see <a href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">variant data</a> at ExAC.
                 }
                 {this.state.hasTGenomesData ?
@@ -488,6 +478,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </thead>
                         </table>
                     </div>
+                    // FIXME: below URL is dependent on a response, but this block is executed on lack of a response
                     // Please see <a href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">variant data</a> at ESP.
                 }
             </div>
