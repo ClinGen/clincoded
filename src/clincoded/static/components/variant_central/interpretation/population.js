@@ -151,6 +151,30 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
+    // Retrieve 1000GENOMES population data from rest.ensembl.org
+    fetchEnsemblData: function() {
+        var variant = this.props.data;
+        if (variant) {
+            // Extract only the number portion of the dbSNP id
+            var numberPattern = /\d+/g;
+            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
+            this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
+                this.parseTGenomesData(response);
+                this.setState({external_data: populationObj});
+            }).catch(function(e) {
+                console.log('Ensembl Fetch Error=: %o', e);
+            });
+            // Get ExAC allele frequency as a fallback strategy
+            // In the event where myvariant.info doesn't return ExAC allele frequency info
+            // FIXME: Need to remove this when switching to using the global population object for table UI
+            this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
+                this.setState({ensembl_exac_allele: response[0].colocated_variants[0]});
+            }).catch(function(e) {
+                console.log('Ensembl Fetch Error=: %o', e);
+            });
+        }
+    },
+
     // Get ExAC allele frequency from Ensembl (VEP) directly
     // Because myvariant.info doesn't always return ExAC allele frequency data
     parseAlleleFrequencyData: function(allele_frequency) {
@@ -183,29 +207,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
-    // Method to assign ESP population data to global population object
-    parseEspData: function(response) {
-        // Not all variants return the evs{...} object from myvariant.info
-        if (response.evs) {
-            populationObj.esp.aa.ac = response.evs.allele_count.african_american;
-            populationObj.esp.aa.gc = response.evs.genotype_count.african_american;
-            populationObj.esp.ea.ac = response.evs.allele_count.european_american;
-            populationObj.esp.ea.gc = response.evs.genotype_count.european_american;
-            populationObj.esp._tot.ac = response.evs.allele_count.all;
-            populationObj.esp._tot.gc = response.evs.genotype_count.all_genotype;
-            populationObj.esp._extra.avg_sample_read = response.evs.avg_sample_read;
-            populationObj.esp._extra.rsid = response.evs.rsid;
-            populationObj.esp._extra.chrom = response.evs.chrom;
-            populationObj.esp._extra.hg19_start = response.evs.hg19.start;
-            populationObj.esp._extra.ref = response.evs.ref;
-            populationObj.esp._extra.alt = response.evs.alt;
-            // Set a flag to display data in the table
-            this.setState({hasEspData: true});
-        }
-    },
-
     parseTGenomesData: function(response) {
-        console.log(response);
         populationObj.tGenomes._extra.name = response.name;
         populationObj.tGenomes._extra.var_class = response.var_class;
         populationObj.tGenomes._extra.ref = response.ancestral_allele;
@@ -248,72 +250,28 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             });
         }
-        console.log(populationObj);
         this.setState({hasTGenomesData: true});
     },
 
-    // Retrieve 1000GENOMES population data from rest.ensembl.org
-    fetchEnsemblData: function() {
-        var variant = this.props.data;
-        if (variant) {
-            // Extract only the number portion of the dbSNP id
-            var numberPattern = /\d+/g;
-            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
-                this.parseTGenomesData(response);
-                this.setState({external_data: populationObj});
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
-            // Get ExAC allele frequency as a fallback strategy
-            // In the event where myvariant.info doesn't return ExAC allele frequency info
-            // FIXME: Need to remove this when switching to using the global population object for table UI
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
-                this.setState({ensembl_exac_allele: response[0].colocated_variants[0]});
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
+    // Method to assign ESP population data to global population object
+    parseEspData: function(response) {
+        // Not all variants return the evs{...} object from myvariant.info
+        if (response.evs) {
+            populationObj.esp.aa.ac = response.evs.allele_count.african_american;
+            populationObj.esp.aa.gc = response.evs.genotype_count.african_american;
+            populationObj.esp.ea.ac = response.evs.allele_count.european_american;
+            populationObj.esp.ea.gc = response.evs.genotype_count.european_american;
+            populationObj.esp._tot.ac = response.evs.allele_count.all;
+            populationObj.esp._tot.gc = response.evs.genotype_count.all_genotype;
+            populationObj.esp._extra.avg_sample_read = response.evs.avg_sample_read;
+            populationObj.esp._extra.rsid = response.evs.rsid;
+            populationObj.esp._extra.chrom = response.evs.chrom;
+            populationObj.esp._extra.hg19_start = response.evs.hg19.start;
+            populationObj.esp._extra.ref = response.evs.ref;
+            populationObj.esp._extra.alt = response.evs.alt;
+            // Set a flag to display data in the table
+            this.setState({hasEspData: true});
         }
-    },
-
-    // Function to get 1000G values and populate table cells
-    handle1000GPopData: function(data, population, allele) {
-        var displayVal = '--';
-        var pop_items = [], pop_item;
-        data.forEach(item => {
-            if (item.population === population) {
-                pop_items.push(item);
-            }
-        });
-        // It's possible that a variant returns no 1000G population data, such as rs386833446
-        if (pop_items.length) {
-            pop_item = pop_items.find((n) => n.allele === allele);
-            // It's possible that a returned 1000G population object has no matching allele
-            if (pop_item) {
-                displayVal = pop_item.allele + ': ' + pop_item.frequency + ' (' + pop_item.allele_count + ')';
-            }
-        }
-        return displayVal;
-    },
-
-    // Function to get 1000G genotype values and populate table cells
-    handle1000GGenotype: function(data, population, genotype) {
-        var displayVal = '--';
-        var pop_items = [], pop_item;
-        data.forEach(item => {
-            if (item.population === population) {
-                pop_items.push(item);
-            }
-        });
-        // It's possible that a variant returns no 1000G population data
-        if (pop_items.length) {
-            pop_item = pop_items.find((n) => n.genotype === genotype);
-            // It's possible that a returned 1000G population object has no matching genotype
-            if (pop_item) {
-                displayVal = pop_item.genotype + ': ' + pop_item.frequency + ' (' + pop_item.count + ')';
-            }
-        }
-        return displayVal;
     },
 
     renderExacRow: function(key, exac, rowNameCustom, className) {
@@ -340,11 +298,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{tGenomes[key].af[tGenomes._extra.ref] !== null ? tGenomes._extra.ref + ': ' + tGenomes[key].af[tGenomes._extra.ref] : '--'}{tGenomes[key].ac[tGenomes._extra.ref] !== null ? ' (' + tGenomes[key].ac[tGenomes._extra.ref] + ')' : ''}</td>
-                <td>{tGenomes[key].af[tGenomes._extra.alt] !== null ? tGenomes._extra.alt + ': ' + tGenomes[key].af[tGenomes._extra.alt] : '--'}{tGenomes[key].ac[tGenomes._extra.alt] !== null ? ' (' + tGenomes[key].ac[tGenomes._extra.alt] + ')' : ''}</td>
-                <td>{tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.ref] !== null ? tGenomes._extra.ref + '|' + tGenomes._extra.ref + ': ' + tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.ref] : '--'}{tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.ref] !== null ? ' (' + tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.ref] + ')' : ''}</td>
-                <td>{tGenomes[key].gf[tGenomes._extra.alt + '|' + tGenomes._extra.alt] !== null ? tGenomes._extra.alt + '|' + tGenomes._extra.alt + ': ' + tGenomes[key].gf[tGenomes._extra.alt + '|' + tGenomes._extra.alt] : '--'}{tGenomes[key].gc[tGenomes._extra.alt + '|' + tGenomes._extra.alt] !== null ? ' (' + tGenomes[key].gc[tGenomes._extra.alt + '|' + tGenomes._extra.alt] + ')' : ''}</td>
-                <td>{tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.alt] !== null ? tGenomes._extra.ref + '|' + tGenomes._extra.alt + ': ' + tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.alt] : '--'}{tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.alt] !== null ? ' (' + tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.alt] + ')' : ''}</td>
+                <td>{this.ifNullOrUndefined(tGenomes[key].af[tGenomes._extra.ref]) ? tGenomes._extra.ref + ': ' + tGenomes[key].af[tGenomes._extra.ref] : '--'}{this.ifNullOrUndefined(tGenomes[key].ac[tGenomes._extra.ref]) ? ' (' + tGenomes[key].ac[tGenomes._extra.ref] + ')' : ''}</td>
+                <td>{this.ifNullOrUndefined(tGenomes[key].af[tGenomes._extra.alt]) ? tGenomes._extra.alt + ': ' + tGenomes[key].af[tGenomes._extra.alt] : '--'}{this.ifNullOrUndefined(tGenomes[key].ac[tGenomes._extra.alt]) ? ' (' + tGenomes[key].ac[tGenomes._extra.alt] + ')' : ''}</td>
+                <td>{this.ifNullOrUndefined(tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.ref]) ? tGenomes._extra.ref + '|' + tGenomes._extra.ref + ': ' + tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.ref] : '--'}{this.ifNullOrUndefined(tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.ref]) ? ' (' + tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.ref] + ')' : ''}</td>
+                <td>{this.ifNullOrUndefined(tGenomes[key].gf[tGenomes._extra.alt + '|' + tGenomes._extra.alt]) ? tGenomes._extra.alt + '|' + tGenomes._extra.alt + ': ' + tGenomes[key].gf[tGenomes._extra.alt + '|' + tGenomes._extra.alt] : '--'}{this.ifNullOrUndefined(tGenomes[key].gc[tGenomes._extra.alt + '|' + tGenomes._extra.alt]) ? ' (' + tGenomes[key].gc[tGenomes._extra.alt + '|' + tGenomes._extra.alt] + ')' : ''}</td>
+                <td>{this.ifNullOrUndefined(tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.alt]) ? tGenomes._extra.ref + '|' + tGenomes._extra.alt + ': ' + tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.alt] : '--'}{this.ifNullOrUndefined(tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.alt]) ? ' (' + tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.alt] + ')' : ''}</td>
             </tr>
         );
     },
@@ -364,6 +322,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 <td>{esp[key].gc[esp._extra.alt + esp._extra.ref] !== null ? esp._extra.alt + esp._extra.ref + ': ' + esp[key].gc[esp._extra.alt + esp._extra.ref] : '--'}</td>
             </tr>
         );
+    },
+
+    ifNullOrUndefined: function(value) {
+        if (typeof value !== 'undefined' && value !== null) {
+            return true;
+        } else {
+            return false;
+        }
     },
 
     render: function() {
@@ -460,103 +426,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </table>
                     </div>
                 :
-                    /*<div className="panel panel-info datasource-ExAC">
+                    <div className="panel panel-info datasource-ExAC">
                         <div className="panel-heading"><h3 className="panel-title">ExAC</h3></div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Variant information could not be found. Please see <a href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">variant data</a> at ExAC.</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>*/
-                    null
-                }
-                {/* FIXME: Need to switch to using the global population object for populating 1000G table data */}
-                {(ensembl_variation && ensembl_populations && ensembl_population_genotypes) ?
-                    <div className="panel panel-info datasource-1000G">
-                        <div className="panel-heading"><h3 className="panel-title">1000G: {ensembl_variation.name + ' ' + ensembl_variation.var_class}</h3></div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Population</th>
-                                    <th colSpan="2">Allele Frequency (count)</th>
-                                    <th colSpan="3">Genotype Frequnecy (count)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>ALL</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:ALL', ensembl_variation.ancestral_allele)}</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:ALL', ensembl_variation.minor_allele)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:ALL', allele_ancestral)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:ALL', allele_minor)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:ALL', allele_mixed)}</td>
-                                </tr>
-                                <tr>
-                                    <td>AFR</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:AFR', ensembl_variation.ancestral_allele)}</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:AFR', ensembl_variation.minor_allele)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:AFR', allele_ancestral)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:AFR', allele_minor)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:AFR', allele_mixed)}</td>
-                                </tr>
-                                <tr>
-                                    <td>AMR</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:AMR', ensembl_variation.ancestral_allele)}</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:AMR', ensembl_variation.minor_allele)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:AMR', allele_ancestral)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:AMR', allele_minor)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:AMR', allele_mixed)}</td>
-                                </tr>
-                                <tr>
-                                    <td>EAS</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:EAS', ensembl_variation.ancestral_allele)}</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:EAS', ensembl_variation.minor_allele)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:EAS', allele_ancestral)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:EAS', allele_minor)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:EAS', allele_mixed)}</td>
-                                </tr>
-                                <tr>
-                                    <td>EUR</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:EUR', ensembl_variation.ancestral_allele)}</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:EUR', ensembl_variation.minor_allele)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:EUR', allele_ancestral)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:EUR', allele_minor)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:EUR', allele_mixed)}</td>
-                                </tr>
-                                <tr>
-                                    <td>SAS</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:SAS', ensembl_variation.ancestral_allele)}</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, '1000GENOMES:phase_3:SAS', ensembl_variation.minor_allele)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:SAS', allele_ancestral)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:SAS', allele_minor)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, '1000GENOMES:phase_3:SAS', allele_mixed)}</td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr className="count">
-                                    <td>ESP6500: African American</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, 'ESP6500:African_American', ensembl_variation.ancestral_allele)}</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, 'ESP6500:African_American', ensembl_variation.minor_allele)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, 'ESP6500:African_American', allele_ancestral)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, 'ESP6500:African_American', allele_minor)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, 'ESP6500:African_American', allele_mixed)}</td>
-                                </tr>
-                                <tr className="count">
-                                    <td>ESP6500: European American</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, 'ESP6500:European_American', ensembl_variation.ancestral_allele)}</td>
-                                    <td>{this.handle1000GPopData(ensembl_populations, 'ESP6500:European_American', ensembl_variation.minor_allele)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, 'ESP6500:European_American', allele_ancestral)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, 'ESP6500:European_American', allele_minor)}</td>
-                                    <td>{this.handle1000GGenotype(ensembl_population_genotypes, 'ESP6500:European_American', allele_mixed)}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                :
-                    <div className="panel panel-info datasource-1000G">
-                        <div className="panel-heading"><h3 className="panel-title">1000G</h3></div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -565,11 +436,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </thead>
                         </table>
                     </div>
+                    //Please see <a href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">variant data</a> at ExAC.
                 }
-
                 {this.state.hasTGenomesData ?
                     <div className="panel panel-info datasource-1000G">
-                        <div className="panel-heading"><h3 className="panel-title">1000G: {ensembl_variation.name + ' ' + ensembl_variation.var_class}</h3></div>
+                        <div className="panel-heading"><h3 className="panel-title">1000G: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}</h3></div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -587,10 +458,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </table>
                     </div>
                 :
-                    null
+                    <div className="panel panel-info datasource-1000G">
+                        <div className="panel-heading"><h3 className="panel-title">1000G</h3></div>
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Variant information could not be found.</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 }
-
-
                 {this.state.hasEspData ?
                     <div className="panel panel-info datasource-ESP">
                         <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}<a href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">(See ESP data)</a></h3></div>
@@ -617,17 +495,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </table>
                     </div>
                 :
-                    /*<div className="panel panel-info datasource-ESP">
+                    <div className="panel panel-info datasource-ESP">
                         <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP)</h3></div>
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Variant information could not be found. Please see <a href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">variant data</a> at ESP.</th>
+                                    <th>Variant information could not be found.</th>
                                 </tr>
                             </thead>
                         </table>
-                    </div>*/
-                    null
+                    </div>
+                    // Please see <a href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">variant data</a> at ESP.
                 }
             </div>
         );
