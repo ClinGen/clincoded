@@ -181,22 +181,24 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseExacData: function(response) {
         // Not all variants can be found in ExAC
         // Do nothing if the exac{...} object is not returned from myvariant.info
-        let populationObj = this.state.populationObj;
         if (response.exac) {
-            // Get other ExAC population data from myvariant.info, such allele_count, allele_number, homozygotes number, etc
+            let populationObj = this.state.populationObj;
+            // get the allele count, allele number, and homozygote count for desired populations
             populationStatic.exac._order.map(key => {
                 populationObj.exac[key].ac = response.exac.ac['ac_' + key];
                 populationObj.exac[key].an = response.exac.an['an_' + key];
                 populationObj.exac[key].hom = response.exac.hom['hom_' + key];
             });
+            // get the allele count, allele number, and homozygote count totals
             populationObj.exac._tot.ac = response.exac.ac.ac_adj;
             populationObj.exac._tot.an = response.exac.an.an_adj;
             populationObj.exac._tot.hom = response.exac.hom.ac_hom;
+            // get extra ExAC information
             populationObj.exac._extra.chrom = response.exac.chrom;
             populationObj.exac._extra.pos = response.exac.pos;
             populationObj.exac._extra.ref = response.exac.ref;
             populationObj.exac._extra.alt = response.exac.alt;
-            // Set a flag to display data in the table
+            // update populationObj, and set flag indicating that we have ExAC data
             this.setState({hasExacData: true, populationObj: populationObj});
         }
     },
@@ -204,48 +206,62 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // parse 1000Genome data
     parseTGenomesData: function(response) {
         let populationObj = this.state.populationObj;
+        // get extra 1000Genome information
         populationObj.tGenomes._extra.name = response.name;
         populationObj.tGenomes._extra.var_class = response.var_class;
         populationObj.tGenomes._extra.ref = response.ancestral_allele;
         populationObj.tGenomes._extra.alt = response.minor_allele;
+        // get the allele count and frequencies...
         if (response.populations) {
             response.populations.map(population => {
+                // extract 20 characters and forward to get population code (not always relevant)
                 let populationCode = population.population.substring(20).toLowerCase();
                 if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
                     populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                    // ... for specific populations
                     populationObj.tGenomes[populationCode].ac[population.allele] = population.allele_count;
                     populationObj.tGenomes[populationCode].af[population.allele] = population.frequency;
                 } else if (population.population == '1000GENOMES:phase_3:ALL') {
+                    // ... and totals
                     populationObj.tGenomes._tot.ac[population.allele] = population.allele_count;
                     populationObj.tGenomes._tot.af[population.allele] = population.frequency;
                 } else if (population.population == 'ESP6500:African_American') {
+                    // ... and ESP AA
                     populationObj.tGenomes.espaa.ac[population.allele] = population.allele_count;
                     populationObj.tGenomes.espaa.af[population.allele] = population.frequency;
                 } else if (population.population == 'ESP6500:European_American') {
+                    // ... and ESP EA
                     populationObj.tGenomes.espea.ac[population.allele] = population.allele_count;
                     populationObj.tGenomes.espea.af[population.allele] = population.frequency;
                 }
             });
         }
+        // get the genotype counts and frequencies...
         if (response.population_genotypes) {
             response.population_genotypes.map(population_genotype => {
+                // extract 20 characters and forward to get population code (not always relevant)
                 let populationCode = population_genotype.population.substring(20).toLowerCase();
                 if (population_genotype.population.indexOf('1000GENOMES:phase_3:') == 0 &&
                     populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                    // ... for specific populations
                     populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = population_genotype.count;
                     populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = population_genotype.frequency;
                 } else if (population_genotype.population == '1000GENOMES:phase_3:ALL') {
+                    // ... and totals
                     populationObj.tGenomes._tot.gc[population_genotype.genotype] = population_genotype.count;
                     populationObj.tGenomes._tot.gf[population_genotype.genotype] = population_genotype.frequency;
                 } else if (population_genotype.population == 'ESP6500:African_American') {
+                    // ... and ESP AA
                     populationObj.tGenomes.espaa.gc[population_genotype.genotype] = population_genotype.count;
                     populationObj.tGenomes.espaa.gf[population_genotype.genotype] = population_genotype.frequency;
                 } else if (population_genotype.population == 'ESP6500:European_American') {
+                    // ... and ESP EA
                     populationObj.tGenomes.espea.gc[population_genotype.genotype] = population_genotype.count;
                     populationObj.tGenomes.espea.gf[population_genotype.genotype] = population_genotype.frequency;
                 }
             });
         }
+        // update populationObj, and set flag indicating that we have 1000Genomes data
         this.setState({hasTGenomesData: true, populationObj: populationObj});
     },
 
@@ -254,6 +270,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         // Not all variants return the evs{...} object from myvariant.info
         if (response.evs) {
             let populationObj = this.state.populationObj;
+            // get relevant numbers and extra information from ESP
             populationObj.esp.aa.ac = response.evs.allele_count.african_american;
             populationObj.esp.aa.gc = response.evs.genotype_count.african_american;
             populationObj.esp.ea.ac = response.evs.allele_count.european_american;
@@ -266,7 +283,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             populationObj.esp._extra.hg19_start = response.evs.hg19.start;
             populationObj.esp._extra.ref = response.evs.ref;
             populationObj.esp._extra.alt = response.evs.alt;
-            // Set a flag to display data in the table
+            // update populationObj, and set flag indicating that we have ESP data
             this.setState({hasEspData: true, populationObj: populationObj});
         }
     },
@@ -291,6 +308,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // method to render a row of data for the 1000Genomes table
     renderTGenomesRow: function(key, tGenomes, tGenomesStatic, rowNameCustom, className) {
         let rowName = tGenomesStatic._labels[key];
+        // generate genotype strings from reference and alt allele information
+        let g_ref = tGenomes._extra.ref + '|' + tGenomes._extra.ref,
+            g_alt = tGenomes._extra.alt + '|' + tGenomes._extra.alt,
+            g_mixed = tGenomes._extra.ref + '|' + tGenomes._extra.alt;
         if (key == '_tot') {
             rowName = rowNameCustom;
         }
@@ -299,9 +320,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 <td>{rowName}</td>
                 <td>{tGenomes[key].af[tGenomes._extra.ref] ? tGenomes._extra.ref + ': ' + tGenomes[key].af[tGenomes._extra.ref] : '--'}{tGenomes[key].ac[tGenomes._extra.ref] ? ' (' + tGenomes[key].ac[tGenomes._extra.ref] + ')' : ''}</td>
                 <td>{tGenomes[key].af[tGenomes._extra.alt] ? tGenomes._extra.alt + ': ' + tGenomes[key].af[tGenomes._extra.alt] : '--'}{tGenomes[key].ac[tGenomes._extra.alt] ? ' (' + tGenomes[key].ac[tGenomes._extra.alt] + ')' : ''}</td>
-                <td>{tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.ref] ? tGenomes._extra.ref + '|' + tGenomes._extra.ref + ': ' + tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.ref] : '--'}{tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.ref] ? ' (' + tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.ref] + ')' : ''}</td>
-                <td>{tGenomes[key].gf[tGenomes._extra.alt + '|' + tGenomes._extra.alt] ? tGenomes._extra.alt + '|' + tGenomes._extra.alt + ': ' + tGenomes[key].gf[tGenomes._extra.alt + '|' + tGenomes._extra.alt] : '--'}{tGenomes[key].gc[tGenomes._extra.alt + '|' + tGenomes._extra.alt] ? ' (' + tGenomes[key].gc[tGenomes._extra.alt + '|' + tGenomes._extra.alt] + ')' : ''}</td>
-                <td>{tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.alt] ? tGenomes._extra.ref + '|' + tGenomes._extra.alt + ': ' + tGenomes[key].gf[tGenomes._extra.ref + '|' + tGenomes._extra.alt] : '--'}{tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.alt] ? ' (' + tGenomes[key].gc[tGenomes._extra.ref + '|' + tGenomes._extra.alt] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[g_ref] ? g_ref + ': ' + tGenomes[key].gf[g_ref] : '--'}{tGenomes[key].gc[g_ref] ? ' (' + tGenomes[key].gc[g_ref] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[g_alt] ? g_alt + ': ' + tGenomes[key].gf[g_alt] : '--'}{tGenomes[key].gc[g_alt] ? ' (' + tGenomes[key].gc[g_alt] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[g_mixed] ? g_mixed + ': ' + tGenomes[key].gf[g_mixed] : '--'}{tGenomes[key].gc[g_mixed] ? ' (' + tGenomes[key].gc[g_mixed] + ')' : ''}</td>
             </tr>
         );
     },
@@ -309,6 +330,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // method to render a row of data for the ESP table
     renderEspRow: function(key, esp, espStatic, rowNameCustom, className) {
         let rowName = espStatic._labels[key];
+        // generate genotype strings from reference and alt allele information
+        let g_ref = esp._extra.ref + esp._extra.ref,
+            g_alt = esp._extra.alt + esp._extra.alt,
+            g_mixed = esp._extra.alt + esp._extra.ref;
         if (key == '_tot') {
             rowName = rowNameCustom;
         }
@@ -317,9 +342,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 <td>{rowName}</td>
                 <td>{esp[key].ac[esp._extra.ref] ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
                 <td>{esp[key].ac[esp._extra.alt] ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
-                <td>{esp[key].gc[esp._extra.ref + esp._extra.ref] ? esp._extra.ref + esp._extra.ref + ': ' + esp[key].gc[esp._extra.ref + esp._extra.ref] : '--'}</td>
-                <td>{esp[key].gc[esp._extra.alt + esp._extra.alt] ? esp._extra.alt + esp._extra.alt + ': ' + esp[key].gc[esp._extra.alt + esp._extra.alt] : '--'}</td>
-                <td>{esp[key].gc[esp._extra.alt + esp._extra.ref] ? esp._extra.alt + esp._extra.ref + ': ' + esp[key].gc[esp._extra.alt + esp._extra.ref] : '--'}</td>
+                <td>{esp[key].gc[g_ref] ? g_ref + ': ' + esp[key].gc[g_ref] : '--'}</td>
+                <td>{esp[key].gc[g_alt] ? g_alt + ': ' + esp[key].gc[g_alt] : '--'}</td>
+                <td>{esp[key].gc[g_mixed] ? g_mixed + ': ' + esp[key].gc[g_mixed] : '--'}</td>
             </tr>
         );
     },
