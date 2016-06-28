@@ -40,6 +40,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         };
     },
 
+    componentDidMount: function() {
+        if (this.props.data) {
+            this.setState({shouldFetchData: true});
+            this.fetchRefseqData();
+            this.fetchEnsemblData();
+        }
+    },
+
     componentWillReceiveProps: function(nextProps) {
         if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
             this.setState({shouldFetchData: true});

@@ -85,6 +85,15 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         };
     },
 
+    componentDidMount: function() {
+        this.setState({interpretation: this.props.interpretation});
+        if (this.props.data) {
+            this.setState({shouldFetchData: true});
+            this.fetchMyVariantInfo();
+            this.fetchEnsemblData();
+        }
+    },
+
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretation: nextProps.interpretation});
         if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
