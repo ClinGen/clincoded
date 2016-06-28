@@ -4,7 +4,6 @@ var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
-var LocalStorageMixin = require('react-localstorage');
 var CurationInterpretationForm = require('./shared/form').CurationInterpretationForm;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
@@ -21,9 +20,6 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 
-// FIXME: The tGenomes{} still needs a method to have data assigned
-// FIXME: Properties have 'null' values for now in the initial phase.
-// They should contain pre-existing values if they exist in the db. Or 'null' if not.
 var populationStatic = {
     exac: {
         _order: ['afr', 'oth', 'amr', 'sas', 'nfe', 'eas', 'fin'],
@@ -39,32 +35,9 @@ var populationStatic = {
     }
 };
 
-var populationObj = {
-    exac: {
-        afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
-    },
-    tGenomes: {
-        afr: {ac: {}, af: {}, gc: {}, gf: {}},
-        amr: {ac: {}, af: {}, gc: {}, gf: {}},
-        eas: {ac: {}, af: {}, gc: {}, gf: {}},
-        eur: {ac: {}, af: {}, gc: {}, gf: {}},
-        sas: {ac: {}, af: {}, gc: {}, gf: {}},
-        espaa: {ac: {}, af: {}, gc: {}, gf: {}},
-        espea: {ac: {}, af: {}, gc: {}, gf: {}},
-        _tot: {ac: {}, af: {}, gc: {}, gf: {}},
-        _extra: {}
-    },
-    esp: {
-        aa: {ac: {}, gc: {}},
-        ea: {ac: {}, gc: {}},
-        _tot: {ac: {}, gc: {}},
-        _extra: {}
-    }
-};
-
 // Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
-    mixins: [RestMixin, LocalStorageMixin],
+    mixins: [RestMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
@@ -76,7 +49,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     getInitialState: function() {
         return {
-            external_data: null,
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
             interpretation: this.props.interpretation,
@@ -86,29 +58,36 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             hasExacData: false, // flag to display ExAC table
             hasTGenomesData: false,
             hasEspData: false, // flag to display ESP table
-            shouldFetchData: false
+            shouldFetchData: false,
+            populationObj: {
+                exac: {
+                    afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
+                },
+                tGenomes: {
+                    afr: {ac: {}, af: {}, gc: {}, gf: {}},
+                    amr: {ac: {}, af: {}, gc: {}, gf: {}},
+                    eas: {ac: {}, af: {}, gc: {}, gf: {}},
+                    eur: {ac: {}, af: {}, gc: {}, gf: {}},
+                    sas: {ac: {}, af: {}, gc: {}, gf: {}},
+                    espaa: {ac: {}, af: {}, gc: {}, gf: {}},
+                    espea: {ac: {}, af: {}, gc: {}, gf: {}},
+                    _tot: {ac: {}, af: {}, gc: {}, gf: {}},
+                    _extra: {}
+                },
+                esp: {
+                    aa: {ac: {}, gc: {}},
+                    ea: {ac: {}, gc: {}},
+                    _tot: {ac: {}, gc: {}},
+                    _extra: {}
+                }
+            }
         };
-    },
-
-    // Invoke data fetching when this tab is clicked
-    componentDidMount: function() {
-        console.log("population component is mounted");
-        if (this.state.shouldFetchData === false) {
-            this.setState({shouldFetchData: true});
-            if (this.state.hasExacData === false) {
-                this.fetchMyVariantInfo();
-            }
-            if (this.state.hasEspData === false) {
-                this.fetchEnsemblData();
-            }
-        }
     },
 
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretation: nextProps.interpretation});
         if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
-            this.setState({shouldFetchData: nextProps.shouldFetchData});
-            window.localStorage.clear();
+            this.setState({shouldFetchData: true});
             this.fetchMyVariantInfo();
             this.fetchEnsemblData();
         }
@@ -133,7 +112,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
                 // Calling method to update global object with ExAC Allele Frequency data
                 this.parseAlleleFrequencyData(response);
-                this.setState({external_data: populationObj});
             }).catch(function(e) {
                 console.log('VEP Allele Frequency Fetch Error=: %o', e);
             });
@@ -144,7 +122,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 // for comparison of any potential changed values
                 this.parseExacData(response);
                 this.parseEspData(response);
-                this.setState({external_data: populationObj});
             }).catch(function(e) {
                 console.log('MyVariant Fetch Error=: %o', e);
             });
@@ -160,7 +137,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
             this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
                 this.parseTGenomesData(response);
-                this.setState({external_data: populationObj});
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
             });
@@ -182,16 +158,20 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // Get ExAC allele frequency from Ensembl (VEP) directly
     // Because myvariant.info doesn't always return ExAC allele frequency data
     parseAlleleFrequencyData: function(response) {
+        let populationObj = this.state.populationObj;
         populationStatic.exac._order.map(key => {
             populationObj.exac[key].af = response[0].colocated_variants[0]['exac_' + key + '_maf'];
         });
         populationObj.exac._tot.af = response[0].colocated_variants[0].exac_adj_maf;
+
+        this.setState({populationObj: populationObj});
     },
 
     // Method to assign ExAC population data to global population object
     parseExacData: function(response) {
         // Not all variants can be found in ExAC
         // Do nothing if the exac{...} object is not returned from myvariant.info
+        let populationObj = this.state.populationObj;
         if (response.exac) {
             // Get other ExAC population data from myvariant.info, such allele_count, allele_number, homozygotes number, etc
             populationStatic.exac._order.map(key => {
@@ -207,12 +187,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             populationObj.exac._extra.ref = response.exac.ref;
             populationObj.exac._extra.alt = response.exac.alt;
             // Set a flag to display data in the table
-            this.setState({hasExacData: true});
+            this.setState({hasExacData: true, populationObj: populationObj});
         }
     },
 
     // parse 1000Genome data
     parseTGenomesData: function(response) {
+        let populationObj = this.state.populationObj;
         populationObj.tGenomes._extra.name = response.name;
         populationObj.tGenomes._extra.var_class = response.var_class;
         populationObj.tGenomes._extra.ref = response.ancestral_allele;
@@ -255,13 +236,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             });
         }
-        this.setState({hasTGenomesData: true});
+        this.setState({hasTGenomesData: true, populationObj: populationObj});
     },
 
     // Method to assign ESP population data to global population object
     parseEspData: function(response) {
         // Not all variants return the evs{...} object from myvariant.info
         if (response.evs) {
+            let populationObj = this.state.populationObj;
             populationObj.esp.aa.ac = response.evs.allele_count.african_american;
             populationObj.esp.aa.gc = response.evs.genotype_count.african_american;
             populationObj.esp.ea.ac = response.evs.allele_count.european_american;
@@ -275,7 +257,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             populationObj.esp._extra.ref = response.evs.ref;
             populationObj.esp._extra.alt = response.evs.alt;
             // Set a flag to display data in the table
-            this.setState({hasEspData: true});
+            this.setState({hasEspData: true, populationObj: populationObj});
         }
     },
 
@@ -336,9 +318,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var exacStatic = populationStatic.exac,
             tGenomesStatic = populationStatic.tGenomes,
             espStatic = populationStatic.esp;
-        var exac = this.state.external_data && this.state.external_data.exac ? this.state.external_data.exac : null, // Get ExAC data from global population object
-            tGenomes = this.state.external_data && this.state.external_data.tGenomes ? this.state.external_data.tGenomes : null,
-            esp = this.state.external_data && this.state.external_data.esp ? this.state.external_data.esp : null; // Get ESP data from global population object
+        var exac = this.state.populationObj && this.state.populationObj.exac ? this.state.populationObj.exac : null, // Get ExAC data from global population object
+            tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
+            esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
 
         return (
             <div className="variant-interpretation population">
@@ -346,11 +328,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 <div className="row">
                     <div className="col-sm-12">
                         <CurationInterpretationForm formTitle={"Population Demo Criteria Group 1"} renderedFormContent={pop_crit_1}
-                            evidenceType={'population'} evidenceData={this.state.external_data} evidenceDataUpdated={true}
+                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true}
                             formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         <CurationInterpretationForm formTitle={"Population Demo Criteria Group 2"} renderedFormContent={pop_crit_2}
-                            evidenceType={'population'} evidenceData={this.state.external_data} evidenceDataUpdated={true}
+                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true}
                             formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
