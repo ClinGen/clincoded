@@ -6,45 +6,35 @@
             "proteinPredictors": [
                 {
                     "source": "sift",
-                    "sourceRange": "-",
                     "prediction": "D(amaging), T(olerated)"
                 },
                 {
                     "source": "PolyPhen2-HDV",
-                    "range": "-",
                     "prediction": "Etc."
                 },
                 {
                     "source": "PolyPhen2-HDAR",
-                    "range": "0-1",
+                    "score": 1,
                     "prediction": ""
                 },
                 {
                     "source": "LRT",
-                    "range": "0-1",
+                    "score": 1,
                     "prediction": ""
                 }
             ],
             "conservationAnalysis": [
                 {
-                    "source": "Phylop20",
-                    "sourceRange": "",
-                    "prediction": ""
+                    "source": "Phylop20"
                 },
                 {
-                    "source": "Phylop100",
-                    "sourceRange": "",
-                    "prediction": ""
+                    "source": "Phylop100"
                 },
                 {
-                    "source": "PhastCons100",
-                    "sourceRange": "",
-                    "prediction": ""
+                    "source": "PhastCons100"
                 },
                 {
-                    "source": "PhastCons200",
-                    "sourceRange": "",
-                    "prediction": ""
+                    "source": "PhastCons200"
                 }
             ],
             "splicingPredictions": {
@@ -53,24 +43,24 @@
                     {
                         "source": "MaxEnScan",
                         "directionality": "5'",
-                        "scoreRange": "[0-12]",
+                        "range": "[0-12]",
                         "value": 9.7
                     },
                     {
                         "source": "NNSplice",
                         "directionality": "5'",
-                        "scoreRange": "[0-1]",
+                        "range": "[0-1]",
                         "value": 1.0
                     },
                     {
                         "source": "MaxEnScan",
                         "directionality": "3'",
-                        "scoreRange": "[0-16]"
+                        "range": "[0-16]"
                     },
                     {
                         "source": "NNSplice",
                         "directionality": "3'",
-                        "scoreRange": "[0-1]"
+                        "range": "[0-1]"
                     }
                 ]
             },

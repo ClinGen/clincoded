@@ -36,9 +36,9 @@
                                 "title": "Source",
                                 "type": "string"
                             },
-                            "sourceRange": {
-                                "title": "Source/Range",
-                                "type": "string"
+                            "score": {
+                                "title": "Score",
+                                "type": "number"
                             },
                             "prediction": {
                                 "title": "Prediction",
@@ -57,9 +57,9 @@
                                 "title": "Source",
                                 "type": "string"
                             },
-                            "sourceRange": {
-                                "title": "Source/Range",
-                                "type": "string"
+                            "score": {
+                                "title": "Score",
+                                "type": "number"
                             },
                             "prediction": {
                                 "title": "Prediction",
@@ -89,8 +89,8 @@
                                         "title": "5 Prime End or 3 Prime End",
                                         "type": "string"
                                     },
-                                    "sourceRange": {
-                                        "title": "Source/Range",
+                                    "range": {
+                                        "title": "Range",
                                         "type": "string"
                                     },
                                     "value": {
