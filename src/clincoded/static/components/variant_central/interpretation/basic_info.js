@@ -5,6 +5,7 @@ var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
+//var LocalStorageMixin = require('react-localstorage');
 var SO_terms = require('./mapping/SO_term.json');
 
 var external_url_map = globals.external_url_map;
