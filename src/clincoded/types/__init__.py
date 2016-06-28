@@ -125,7 +125,7 @@ class Variant(Item):
         'associatedInterpretations.transcripts',
         'associatedInterpretations.proteins',
         'experimental_associated',
-        'experimental_associated.associatedAnnotations.article',
+        'experimental_associated.associatedAnnotations.article'
     ]
     rev = {
         'associatedPathogenicities': ('pathogenicity', 'variant'),
@@ -166,9 +166,8 @@ class Variant(Item):
     def experimental_associated(self, request, experimental_associated):
         return paths_filtered_by_status(request, experimental_associated)
 
-
     @calculated_property(schema={
-        "title": "Variant Representation",
+        "title": "Variant Identifier",
         "type": "string"
     })
     def variant_identifier(self, clinvarVariantId='', carId='', otherDescription=''):
