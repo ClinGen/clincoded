@@ -68,12 +68,16 @@
         }
     },
     "columns": {
-        "variant.represent": {
+        "variant.variant_identifier": {
             "title": "Variant",
             "type": "string"
         },
         "criteria": {
             "title": "Criteria",
+            "type": "string"
+        },
+        "value": {
+            "title": "Met",
             "type": "string"
         },
         "evidence_type": {

@@ -22,25 +22,144 @@
             "type": "string",
             "linkTo": "variant"
         },
-        "disease": {
-            "title": "Disease",
-            "type": "string",
-            "linkTo": "orphaPhenotype"
-        },
-        "computationalData": {
-            "title": "Computational Data",
-            "description": "Temp property to store blob computational data.",
+        "computationalTools": {
+            "comment": "Criteria related: (BP4 or PP3) and/or BP7 ",
             "type": "object",
-            "comment": "No property defined. Flexible for saving different key:value formats."
+            "properties": {
+                "proteinPredictors": {
+                    "title": "Protein Predictors",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "source": {
+                                "title": "Source",
+                                "type": "string"
+                            },
+                            "score": {
+                                "title": "Score",
+                                "type": "number"
+                            },
+                            "prediction": {
+                                "title": "Prediction",
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "conservationAnalysis": {
+                    "title": "Conservation Analysis",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "source": {
+                                "title": "Source",
+                                "type": "string"
+                            },
+                            "score": {
+                                "title": "Score",
+                                "type": "number"
+                            },
+                            "prediction": {
+                                "title": "Prediction",
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "splicingPredictions": {
+                    "title": "Splicing Predictions",
+                    "type": "object",
+                    "properties": {
+                        "averageChangeToNearestSplice": {
+                            "title": "Average Change to Nearest Splice Site",
+                            "type": "number"
+                        },
+                        "predictionData": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "source": {
+                                        "title": "Source",
+                                        "type": "string"
+                                    },
+                                    "directionality": {
+                                        "title": "5 Prime End or 3 Prime End",
+                                        "type": "string"
+                                    },
+                                    "range": {
+                                        "title": "Range",
+                                        "type": "string"
+                                    },
+                                    "value": {
+                                        "title": "Prediction",
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "additionalInfo": {
+                    "title": "Additional Information",
+                    "type": "object",
+                    "properties": {
+                        "distanceToNearestSplice": {
+                            "type": "number"
+                        },
+                        "exonLocation": {
+                            "description": "Location of affected exon",
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "otherVariantsInCodon": {
+            "comment": "Criteria related: PS1 and/or PM5",
+            "title": "Other Variants in Codon",
+            "description": "List of variants within codon.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "cDNA": {
+                        "title": "cDNA",
+                        "type": "string"
+                    },
+                    "protein": {
+                        "title": "Protein Presentation",
+                        "type": "string"
+                    },
+                    "clinicalType": {
+                        "title": "Clinical Type of Variant",
+                        "description": "Variant interpretation on pathogenicity",
+                        "type": "string",
+                        "comment": "This property is relevant to data field Interpretation in UI"
+                    },
+                    "source": {
+                        "title": "Source",
+                        "description": "Source of the variant",
+                        "type": "string"
+                    },
+                    "sourceId": {
+                        "title": "Source ID",
+                        "description": "Primary ID of the variant in source",
+                        "type": "string"
+                    }
+                }
+            }
         }
     },
     "columns": {
-        "variant.represent": {
+        "variant.variant_identifier": {
             "title": "Variant",
             "type": "string"
         },
-        "disease_present": {
-            "title": "Disease",
+        "criteria_list": {
+            "title": "Criteria Met",
             "type": "string"
         }
     }

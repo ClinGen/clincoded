@@ -30,16 +30,12 @@
         }
     },
     "columns": {
-        "variant.represent": {
+        "variant.variant_identifier": {
             "title": "Variant",
             "type": "string"
         },
-        "maf_count": {
-            "title": "# Populations",
-            "type": "number"
-        },
-        "submitted_by.title": {
-            "title": "Capturer",
+        "criteria_list": {
+            "title": "Criteria Met",
             "type": "string"
         }
     }

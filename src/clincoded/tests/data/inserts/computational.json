@@ -1,40 +1,103 @@
-
 [
     {
         "uuid": "63727d93-0d51-44b2-a568-d042ba10e8af",
         "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
-        "disease": "788e024f-16a6-11e5-a0b5-60f81dc5b05a",
-        "computationalData": {
-            "missense": {
-                "computationalTools": {
-                    "overAllValue": "Deleterious",
-                    "proteinPredictions": "Deleterious",
-                    "conservationAnalysis": "Not conserved",
-                    "splicingPredictions": "No impact"
+        "computationalTools": {
+            "proteinPredictors": [
+                {
+                    "source": "sift",
+                    "prediction": "D(amaging), T(olerated)"
                 },
-                "otherVariantsInCodon": [
+                {
+                    "source": "PolyPhen2-HDV",
+                    "prediction": "Etc."
+                },
+                {
+                    "source": "PolyPhen2-HDAR",
+                    "score": 1,
+                    "prediction": ""
+                },
+                {
+                    "source": "LRT",
+                    "score": 1,
+                    "prediction": ""
+                }
+            ],
+            "conservationAnalysis": [
+                {
+                    "source": "Phylop20"
+                },
+                {
+                    "source": "Phylop100"
+                },
+                {
+                    "source": "PhastCons100"
+                },
+                {
+                    "source": "PhastCons200"
+                }
+            ],
+            "splicingPredictions": {
+                "averageChangeToNearestSplice": 0.002772,
+                "predictionData": [
                     {
-                        "source": "ClinVar",
-                        "sourceId": "52829",
-                        "cDNA": "c.93G>A",
-                        "protein": "p.Trp31Arg",
-                        "interp": "Pathogenic"
+                        "source": "MaxEnScan",
+                        "directionality": "5'",
+                        "range": "[0-12]",
+                        "value": 9.7
                     },
                     {
-
-                        "source": "VCI",
-                        "cDNA": "c.93G>A",
-                        "protein": "p.Trp31Cys",
-                        "interp": "VUS"
+                        "source": "NNSplice",
+                        "directionality": "5'",
+                        "range": "[0-1]",
+                        "value": 1.0
+                    },
+                    {
+                        "source": "MaxEnScan",
+                        "directionality": "3'",
+                        "range": "[0-16]"
+                    },
+                    {
+                        "source": "NNSplice",
+                        "directionality": "3'",
+                        "range": "[0-1]"
                     }
-                ],
-                "differentMissenseChange": true,
-                "sameAAChange": true,
-                "onlyTruncatingCauseDisease": false
+                ]
+            },
+            "additionalInfo": {
+                "distanceToNearestSplice": 123,
+                "exonLocation": 2
             }
-        },
-        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
-        "date_created": "2016-05-11T22:47:10.000000+00:00",
-        "last_modified": "2016-05-11T22:59:10.000000+00:00"
+        }
+    },
+    {
+        "uuid": "90a4a469-d226-4264-9903-a6bc3d6997cf",
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
+        "otherVariantsInCodon": [
+            {
+                "source": "ClinVar",
+                "sourceId": "52829",
+                "clinicalType": "Pathogenic",
+                "protein": "p.Trp31Arg",
+                "cDNA": "c.93G>A"
+            },
+            {
+                "source": "ClinVar",
+                "sourceId": "52775",
+                "clinicalType": "Pathogenic",
+                "protein": "p.Trp31Met",
+                "cDNA": "c.91T>C"
+            },
+            {
+                "source": "VCI",
+                "clinicalType": "VUS",
+                "protein": "p.Trp31Cys",
+                "cDNA": "c.93G>T"
+            }
+        ]
+    },
+    {
+        "uuid": "b388132e-e334-4e36-a178-96fcee811ec2",
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a"
     }
 ]

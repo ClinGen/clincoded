@@ -158,11 +158,11 @@ class Variant(Item):
     })
     def variant_identifier(self, clinvarVariantId='', carId='', otherDescription=''):
         if clinvarVariantId != '':
-            return clinvarVariantId
+            return "ClinVar Variation ID: " + clinvarVariantId
         elif carId != '':
-            return carId
+            return "CAR ID: " + carId
         elif otherDescription != '':
-            return otherDescription
+            return "Other Description: " + otherDescription
         else:
             return ''
 
@@ -1024,38 +1024,30 @@ class Interpretation(Item):
 
     @calculated_property(schema={
         "title": "Transcripts",
-        "type": "string",
+        "type": "number",
     })
     def interpretation_transcripts(self, transcripts=[]):
-        if len(transcripts) == 0:
-            return ''
         return len(transcripts)
 
     @calculated_property(schema={
         "title": "Proteins",
-        "type": "string",
+        "type": "number",
     })
     def interpretation_proteins(self, proteins=[]):
-        if len(proteins) == 0:
-            return ''
         return len(proteins)
 
     @calculated_property(schema={
         "title": "Evaluations",
-        "type": "string",
+        "type": "number",
     })
     def evaluation_count(self, evaluations=[]):
-        if len(evaluations) == 0:
-            return ''
         return len(evaluations)
 
     @calculated_property(schema={
         "title": "Provisionals",
-        "type": "string",
+        "type": "number",
     })
     def provisional_count(self, provisional_variant=[]):
-        if len(provisional_variant) == 0:
-            return ''
         return len(provisional_variant)
 
 
@@ -1064,7 +1056,7 @@ class Interpretation(Item):
     unique_key='evaluation:uuid',
     properties={
         'title': 'Evaluations',
-        'description': 'Listing of Evaluations',
+        'description': 'List of Evaluations',
     })
 class Evaluation(Item):
     item_type = 'evaluation'
@@ -1077,7 +1069,9 @@ class Evaluation(Item):
         'variant.associatedInterpretations.submitted_by',
         'disease',
         'population',
+        'population.evaluation_associated',
         'computational',
+        'computational.evaluation_associated',
         'interpretation_associated'
     ]
     rev = {
@@ -1114,7 +1108,7 @@ class Evaluation(Item):
     unique_key='population:uuid',
     properties={
         'title': 'Populations',
-        'description': 'Listing of Populations',
+        'description': 'List of Population Evidence',
     })
 class Population(Item):
     item_type = 'population'
@@ -1148,6 +1142,18 @@ class Population(Item):
     def maf_count(self, populationData={}):
         return len(populationData)
 
+    @calculated_property(schema={
+        "title": "Criteria Met",
+        "type": "string"
+    })
+    def criteria_list(self, request, evaluation_associated=[]):
+        if len(evaluation_associated) > 0:
+            c_list = []
+            for evaluation in evaluation_associated:
+                e_obj = request.embed(evaluation, '@@object')
+                c_list.append(e_obj['criteria'] + ': ' + e_obj['value'])
+            return '; '.join(c_list)
+        return ''
 
 @collection(
     name='computational',
@@ -1162,12 +1168,10 @@ class Computational(Item):
     name_key = 'uuid'
     embedded = [
         'variant',
-        'disease',
         'variant.associatedInterpretations',
         'variant.associatedInterpretations.submitted_by',
         'evaluation_associated',
-        'evaluation_associated.interpretation_associated',
-        'evaluation_associated.interpretation_associated.disease'
+        'evaluation_associated.interpretation_associated'
     ]
     rev = {
         'evaluation_associated': ('evaluation', 'computational')
@@ -1182,13 +1186,16 @@ class Computational(Item):
         return paths_filtered_by_status(request, evaluation_associated)
 
     @calculated_property(schema={
-        "title": "Disease",
+        "title": "Criteria Met",
         "type": "string"
     })
-    def disease_present(self, request, disease=''):
-        if disease != '':
-            diseaseObj = request.embed(disease, '@@object')
-            return diseaseObj['term']
+    def criteria_list(self, request, evaluation_associated=[]):
+        if len(evaluation_associated) > 0:
+            c_list = []
+            for evaluation in evaluation_associated:
+                e_obj = request.embed(evaluation, '@@object')
+                c_list.append(e_obj['criteria'] + ': ' + e_obj['value'])
+            return '; '.join(c_list)
         return ''
 
 
