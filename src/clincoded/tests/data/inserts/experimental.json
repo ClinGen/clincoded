@@ -182,8 +182,7 @@
             "phenotypeHPO": "HP:0012345"
         },
         "variants": [
-            "df8135d4-2685-11e5-af19-60f81dc5b05a",
-            "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
+            "df8135d4-2685-11e5-af19-60f81dc5b05a"
         ],
         "assessments": [
             "a4aeb035-0a9c-41e0-9963-1deeb4e1301d",
