@@ -1,0 +1,128 @@
+{
+    "title": "Interpretation",
+    "id": "/profiles/interpretation.json",
+    "description": "Schema for storing and using interpretation data for Variant Curation",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["variant"],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/standard_status" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "variant": {
+            "title": "Variant",
+            "description": "Variant to be interpreted",
+            "type": "string",
+            "linkTo": "variant"
+        },
+        "genes": {
+            "title": "Genes",
+            "description": "List of genes related the variant",
+            "type": "array",
+            "items": {
+                "title": "Gene",
+                "description": "uuid of a single gene.",
+                "type": "string",
+                "linkTo": "gene"
+            }
+        },
+        "disease": {
+            "title": "Disease",
+            "description": "Disease associated to the variant.",
+            "comment": "Not more than one disease, can be none.",
+            "type": "string",
+            "linkTo": "orphaPhenotype"
+        },
+        "interpretationTranscript": {
+            "title": "Interpretation Transcript",
+            "description": "Transcript selected/added by user.",
+            "type": "string"
+        },
+        "transcripts": {
+            "title": "Transcripts",
+            "description": "List of transcripts related to the variant",
+            "type": "array",
+            "items": {
+                "title": "Transcript",
+                "type": "string",
+                "linkTo": "transcript"
+            }
+        },
+        "proteins": {
+            "title": "Proteins",
+            "description": "List of proteins related to the variant",
+            "type": "array",
+            "items": {
+                "title": "Protein",
+                "type": "string",
+                "linkTo": "protein"
+            }
+        },
+        "evaluations": {
+            "title": "Evaluations",
+            "description": "List of criteria evaluations in the interpretation",
+            "type": "array",
+            "items": {
+                "title": "Evaluation",
+                "type": "string",
+                "linkTo": "evaluation"
+            }
+        },
+        "provisional_variant": {
+            "title": "Provisional Classifications",
+            "description": "List of provisional classifications in the interpretation.",
+            "type": "array",
+            "items": {
+                "title": "Provisional",
+                "type": "string",
+                "linkTo": "provisional_variant"
+            }
+        }
+    },
+    "columns": {
+        "variant.represent": {
+            "title": "Variant",
+            "type": "string"
+        },
+        "interpretation_status": {
+            "title": "Interpretation Status",
+            "type": "string"
+        },
+        "interpretation_disease": {
+            "title": "Disease",
+            "type": "string"
+        },
+        "evaluation_count": {
+            "title": "# Evaluations",
+            "type": "string"
+        },
+        "provisional_count": {
+            "title": "# Provisional",
+            "type": "string"
+        },
+        "interpretation_genes": {
+            "title": "Genes",
+            "type": "string"
+        },
+        "interpretation_transcripts": {
+            "title": "# Transcripts",
+            "type": "string"
+        },
+        "interpretation_proteins": {
+            "title": "# Proteins",
+            "type": "string"
+        },
+        "submitted_by.title": {
+            "title": "Creator",
+            "type": "string"
+        }
+    }
+}

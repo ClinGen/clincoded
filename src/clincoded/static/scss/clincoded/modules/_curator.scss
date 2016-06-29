@@ -37,6 +37,10 @@
         margin: 5px 0 2px;
         font-size: 1.5rem;
         font-weight: bold;
+
+        span {
+            word-break: break-all;
+        }
     }
 
     h2 {
@@ -65,6 +69,12 @@
     @media screen and (min-width: $screen-sm-min) {
         margin-bottom: -99999px;
         padding-bottom: 99999px;
+    }
+
+    h4 {
+        border-bottom: 1px solid #c9c9c9;
+        margin-top: 0;
+        padding-bottom: 10px;
     }
 }
 
@@ -280,7 +290,7 @@
     }
 }
 
-.panel-create-gene-disease {
+.panel-create-gene-disease, .panel-select-variant {
     .panel-std {
         padding-bottom: 40px;
     }
@@ -467,6 +477,14 @@
     }
 }
 
+.title-ellipsis-shorter {
+    max-width: 80%;
+
+    @media screen and (min-width: $screen-sm-min) {
+        max-width: 77%;
+    }
+}
+
 .dotted {
     border-bottom: 1px dotted #000;
 }
@@ -496,6 +514,10 @@
     margin-bottom: 40px;
 }
 
+.input-note-below-no-bottom {
+    margin-top: -20px;
+}
+
 .orphanet-copy {
     margin-top: -15px;
 
@@ -517,6 +539,12 @@
     .no-resize {
         resize: none;
         overflow-x: hidden;
+    }
+}
+
+.variant-interpretation {
+    input[type=checkbox] {
+        margin-top: 11px;
     }
 }
 
@@ -580,7 +608,7 @@
     border-top: 2px solid #aaa;
 
     table {
-        width: 100%
+        width: 100%;
     }
 
     td {
@@ -645,8 +673,11 @@
     }
 }
 
-.delete-button-wrapper {
+.inline-button-wrapper {
     display: inline-block;
+}
+
+.delete-button-push {
     margin-right: 20px;
 }
 
@@ -656,6 +687,10 @@
     font-weight: bold;
     line-height: 2.5;
     padding-right: 10px;
+}
+
+.button-push {
+    margin-right: 15px;
 }
 
 .summary-matrix {
@@ -952,5 +987,228 @@
             word-break: break-all;
             word-wrap: break-word;
         }
+    }
+}
+
+.curation-variant-tab-group {
+    margin-bottom: 20px;
+
+    .react-tabs [role=tablist] {
+        border: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .react-tabs [role=tab] {
+        background-color: #1b75bc;
+        border-top: none;
+        border-left: none;
+        border-bottom: solid 1px #fff;
+        border-right: solid 1px #fff;
+        bottom: -1px;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        list-style: none;
+        padding: 8px 2px;
+        position: relative;
+        text-align: center;
+    }
+
+    .react-tabs [role=tab][aria-selected=true] {
+        background-color: #fff;
+        border: solid 1px #1b75bc;
+        border-bottom: solid 1px #fff;
+        color: #000;
+    }
+
+    .react-tabs [role=tab][aria-selected=true] ~ li {
+        border-right: none;
+        border-left: solid 1px #fff;
+    }
+
+    .react-tabs [role=tab][aria-disabled=true] {
+        color: GrayText;
+        cursor: default;
+    }
+
+    .react-tabs [role=tab]:focus {
+        box-shadow: 0 0 5px hsl(208, 99%, 50%);
+        border-color: hsl(208, 99%, 50%);
+        outline: none;
+    }
+
+    .react-tabs [role=tab]:focus:after {
+        background: #fff;
+        content: "";
+        position: absolute;
+        height: 5px;
+        left: -4px;
+        right: -4px;
+        bottom: -5px;
+    }
+}
+
+
+div.react-tabs .ReactTabs__TabPanel--selected {
+    clear: both;
+
+    .tab-panel {
+        border: solid 1px #1b75bc;
+        padding: 15px;
+
+        ul, li {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        dl {
+            margin-bottom: 0;
+
+            dd {
+                margin-right: 20px;
+            }
+        }
+
+        .basic-info .table th,
+        .basic-info .table td {
+            width: 33%;
+        }
+
+        .population .table tfoot .count:first-child td {
+            border-top: 2px solid #333;
+            color: #333;
+        }
+
+        .population .datasource-ExAC .table tfoot td {
+            font-weight: bold;
+        }
+
+        .population .datasource-ExAC .table tbody td,
+        .population .datasource-ExAC .table tfoot td {
+            width: 20%;
+        }
+
+        .population .datasource-1000G .table tbody td,
+        .population .datasource-1000G .table tfoot td,
+        .population .datasource-ESP .table tbody td,
+        .population .datasource-ESP .table tfoot td {
+            width: 16.66%;
+        }
+    }
+}
+
+/* FIXME - temp styles for placeholders */
+.react-tabs .tab-panel {
+    .population li>div,
+    .computational li>div,
+    .functional li>div,
+    .segregation li>div,
+    .gene-specific li>div {
+        background: rgba(0, 128, 128, 0.2);
+        margin: 0 15px 10px 0;
+    }
+}
+
+/* variant curation interface - interpretation action bar */
+.curation-actions {
+    .evidence-only {
+        padding: 20px 0;
+    }
+
+    .interpretation-record {
+        padding: 20px 0;
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 0;
+            position: absolute;
+            text-align: center;
+            width: 1128px;
+        }
+    }
+}
+
+.curation-data-curator .current-user-interpretations {
+    margin-bottom: 10px;
+
+    dl.inline-dl dt {
+        float: none;
+    }
+}
+
+.curation-variant  {
+    .curation-data-disease,
+    .curation-data-gene,
+    .curation-data-curator {
+        padding: 10px;
+        background-color: rgb(215, 236, 215);
+
+        @media screen and (min-width: $screen-sm-min) {
+            margin-bottom: -99999px;
+            padding-bottom: 99999px;
+        }
+
+        h4 {
+            border-bottom: 1px solid #c9c9c9;
+            margin-top: 0;
+            padding-bottom: 5px;
+        }
+    }
+
+    .curation-data-disease,
+    .curation-data-gene {
+        dd {
+            float: none;
+        }
+    }
+
+    .curation-data-curator {
+        .btn-link {
+            border: none;
+            padding: 0;
+        }
+    }
+}
+
+/* bootstrap callout component styles */
+.bs-callout {
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+    background: #fff;
+
+    h4 {
+        margin-top: 0;
+        margin-bottom: 5px;
+    }
+}
+
+.bs-callout-info {
+    border-left-color: #1b809e;
+
+    h4 {
+        color: #1b809e;
+    }
+
+    .bs-callout-content-container {
+        float: left;
+        margin-right: 10%;
+    }
+}
+
+.bs-callout+.bs-callout {
+    margin-top: -5px;
+}
+
+.panel.panel-info .panel-title {
+    font-weight: bold;
+
+    a {
+        font-weight: normal;
+        margin-left: 20px;
     }
 }

@@ -38,6 +38,7 @@
             "numberOfUnaffectedIndividuals": 10,
             "probandAssociatedWithBoth": true,
             "additionalInformation": "11 of the 15 family members were sequenced",
+            "lodScore": 5.4321,
             "variants": [
                 "df8135d4-2685-11e5-af19-60f81dc5b05a",
                 "3b3af7f0-2685-11e5-bc56-60f81dc5b05a"
@@ -97,6 +98,7 @@
             "numberOfUnaffectedIndividuals": 10,
             "probandAssociatedWithBoth": true,
             "additionalInformation": "11 of the 15 family members were sequenced",
+            "lodScore": 7.6543,
             "variants": [
                 "d9717187-2685-11e5-9eac-60f81dc5b05a"
             ]

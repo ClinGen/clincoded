@@ -98,6 +98,21 @@ module.exports.queryKeyValue = function (key, href) {
     return undefined;
 };
 
+// modify key's value from the query string in the url given in 'href'
+// if value is null, undefined, or '', the key is removed from the query string
+module.exports.editQueryValue = function(href, key, value) {
+    var queryParsed = href && url.parse(href, true);
+    delete queryParsed['search'];
+    if (queryParsed.query) {
+        if (value && value != '') {
+            queryParsed.query[key] = value;
+        } else {
+            delete queryParsed.query[key];
+        }
+    }
+    return url.format(queryParsed);
+};
+
 // Add a key-value pair as a query string to the given href. If href already
 // has query string values, this function adds the given key value to it.
 module.exports.addQueryKey = function(href, key, value) {
@@ -117,6 +132,7 @@ module.exports.clincodedVersionMap = {
 
 module.exports.dbxref_prefix_map = {
     "UniProtKB": "http://www.uniprot.org/uniprot/",
+    "ESP_EVS": "http://evs.gs.washington.edu/EVS/PopStatsServlet?",
     "HGNC": "http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
     // ENSEMBL link only works for human
     "ENSEMBL": "http://www.ensembl.org/Homo_sapiens/Gene/Summary?g=",
@@ -144,11 +160,13 @@ module.exports.external_url_map = {
     'OrphaNet': 'http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=',
     'OrphanetHome': 'http://www.orpha.net/',
     'HGNC': 'http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=',
+    'HGNCFetch': '//rest.genenames.org/fetch/symbol/',
     'HGNCHome': 'http://www.genenames.org/',
     'Entrez': 'http://www.ncbi.nlm.nih.gov/gene/',
     'OMIM': 'http://omim.org/',
     'ClinVar': 'http://www.ncbi.nlm.nih.gov/clinvar/',
     'ClinVarSearch': 'http://www.ncbi.nlm.nih.gov/clinvar/variation/',
+    'ClinVarEutils': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=',
     'HPO': 'http://compbio.charite.de/hpoweb/showterm?id=',
     'HPOBrowser': 'http://compbio.charite.de/hpoweb/showterm?id=HP:0000118',
     'Uberon': 'http://uberon.github.io/',
@@ -157,7 +175,17 @@ module.exports.external_url_map = {
     'QuickGoSearch': 'http://www.ebi.ac.uk/QuickGO/GTerm?id=',
     'CL': 'http://www.ontobee.org/browser/index.php?o=CL',
     'CLSearch': 'http://www.ontobee.org/browser/rdf.php?o=CL&iri=http://purl.obolibrary.org/obo/',
-    'EFO': 'http://www.ebi.ac.uk/efo/'
+    'EFO': 'http://www.ebi.ac.uk/efo/',
+    'dbSNP': 'http://www.ncbi.nlm.nih.gov/snp/',
+    'CAR': 'http://reg.genome.network/site/cg-registry',
+    'CARallele': '//reg.genome.network/allele/',
+    'CAR-test': 'http://reg.test.genome.network/site/registry',
+    'CARallele-test': '//reg.test.genome.network/allele/',
+    'EnsemblVEP': '//rest.ensembl.org/vep/human/id/',
+    'UCSCGenomeBrowser': '//genome.ucsc.edu/cgi-bin/hgTracks',
+    'NCBIVariationViewer': '//www.ncbi.nlm.nih.gov/variation/view/',
+    'MyVariantInfo': '//myvariant.info/v1/variant/',
+    'EXAC': '//exac.broadinstitute.org/variant/'
 };
 
 

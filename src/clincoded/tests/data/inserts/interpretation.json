@@ -1,0 +1,40 @@
+[
+    {
+        "uuid": "f26a694d-5f09-45fd-818a-861e4108e65a",
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
+        "transcripts": [
+            "80b09246-29fd-4658-9799-158d9ecd00e2"
+        ],
+        "proteins": [
+            "7e437957-4dfa-4d17-97b2-57fc6784b5f4"
+        ],
+        "submitted_by": "812b6327-b35b-4759-b08e-687be57460fe",
+        "date_created": "2016-05-10T22:47:10.000000+00:00",
+        "last_modified": "2016-05-10T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "b3e105b5-d08a-4520-9305-c1419d9027d4",
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
+        "genes": [
+            "e7c51b8a-1c34-11e5-ab27-60f81dc5b05a",
+            "e265b19c-1c34-11e5-a27c-60f81dc5b05a"
+        ],
+        "evaluations": [
+            "09dbca61-a1a0-4ba4-ae68-99f4f1ca7493",
+            "1e66c5a1-6a7d-45c6-86b5-0bc4e4c0712b"
+        ],
+        "provisional_variant": [
+            "a9886cb9-cea3-4372-8d2b-845563b47b1f"
+        ],
+        "disease": "788e024f-16a6-11e5-a0b5-60f81dc5b05a",
+        "transcripts": [
+            "8f1b7cb9-e798-412d-adf4-cbe140998407"
+        ],
+        "proteins": [
+            "e0fd3202-6213-48b1-8570-1d1c8ff0212e"
+        ],
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-05-11T22:47:10.000000+00:00",
+        "last_modified": "2016-05-11T22:59:10.000000+00:00"
+    }
+]

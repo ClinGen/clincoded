@@ -9,8 +9,6 @@ var globals = require('./globals');
 var CuratorHistory = require('./curator_history');
 var parseAndLogError = require('./mixins').parseAndLogError;
 
-var parseClinvar = require('../libs/parse-resources').parseClinvar;
-
 var Panel = panel.Panel;
 var Modal = modal.Modal;
 var ModalMixin = modal.ModalMixin;
@@ -1445,6 +1443,10 @@ var flatten = module.exports.flatten = function(obj, type) {
                 flat = flattenProvisional(obj);
                 break;
 
+            case 'interpretation':
+                flat = flattenInterpretation(obj);
+                break;
+
             default:
                 break;
         }
@@ -1787,6 +1789,57 @@ function flattenProvisional(provisional) {
     return flat;
 }
 
+var interpretationSimpleProps = ["active", "date_created"];
+
+function flattenInterpretation(interpretation) {
+    // First copy simple properties before fixing the special properties
+    var flat = cloneSimpleProps(interpretation, interpretationSimpleProps);
+
+    if (interpretation.variant) {
+        flat.variant = interpretation.variant['@id'];
+    }
+
+    if (interpretation.genes && interpretation.genes.length) {
+        flat.genes = interpretation.genes.map(function(gene) {
+            return gene['@id'];
+        });
+    }
+
+    if (interpretation.disease) {
+        flat.disease = interpretation.disease['@id'];
+    }
+
+    if (interpretation.interpretationTranscript) {
+        flat.interpretationTranscript = interpretation.interpretationTranscript['@id'];
+    }
+
+    if (interpretation.transcripts && interpretation.transcripts.length) {
+        flat.transcripts = interpretation.transcripts.map(function(transcript) {
+            return transcript['@id'];
+        });
+    }
+
+    if (interpretation.proteins && interpretation.proteins.length) {
+        flat.proteins = interpretation.proteins.map(function(protein) {
+            return protein['@id'];
+        });
+    }
+
+    if (interpretation.evaluations && interpretation.evaluations.length) {
+        flat.evaluations = interpretation.evaluations.map(function(evaluation) {
+            return evaluation['@id'];
+        });
+    }
+
+    if (interpretation.provisional_variant && interpretation.provisional_variant.length) {
+        flat.provisional_variant = interpretation.provisional_variant.map(function(provisional) {
+            return provisional['@id'];
+        });
+    }
+
+    return flat;
+}
+
 
 // Given an array of group or families in 'objList', render a list of Orphanet IDs for all diseases in those
 // groups or families.
@@ -1915,6 +1968,29 @@ var renderLabelNote = module.exports.renderLabelNote = function(label) {
     );
 };
 
+// Global function for handling the ordering and rendering of HGVS names.
+// Passed variable should be the hgvsNames object of the variant object.
+// Bumps up rendering order of GRCh38 and GRCh37
+var variantHgvsRender = module.exports.variantHgvsRender = function(hgvsNames) {
+    return (
+        <div>
+            {hgvsNames.GRCh38 ?
+                <span><span className="title-ellipsis title-ellipsis-shorter dotted" title={hgvsNames.GRCh38}>{hgvsNames.GRCh38}</span> (GRCh38)<br /></span>
+            : null}
+            {hgvsNames.GRCh37 ?
+                <span><span className="title-ellipsis title-ellipsis-shorter dotted" title={hgvsNames.GRCh37}>{hgvsNames.GRCh37}</span> (GRCh37)<br /></span>
+            : null}
+            {hgvsNames.others && hgvsNames.others.length > 0 ?
+            <span>
+                {hgvsNames.others.map(function(hgvs, i) {
+                    return <span key={hgvs}><span className="title-ellipsis title-ellipsis-shorter dotted" title={hgvs}>{hgvs}</span><br /></span>;
+                })}
+            </span>
+            : null}
+        </div>
+    );
+};
+
 // Class for delete button (and associated modal) of Group, Family, Individual, and Experimental
 // Data objects. This class only renderes the button; please see DeleteButtonModal for bulk of
 // functionality
@@ -1946,13 +2022,13 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
         return (
             <span>
                 {this.props.disabled ?
-                <div className="delete-button-wrapper pull-right" onMouseEnter={this.showNotice} onMouseLeave={this.hideNotice}>
+                <div className="inline-button-wrapper delete-button-push pull-right" onMouseEnter={this.showNotice} onMouseLeave={this.hideNotice}>
                     <a className="btn btn-danger" disabled="disabled">
                         Delete
                     </a>
                 </div>
                 :
-                <div className="delete-button-wrapper pull-right"><Modal title="Delete Item" modalClass="modal-danger">
+                <div className="inline-button-wrapper delete-button-push pull-right"><Modal title="Delete Item" modalClass="modal-danger">
                     <a className="btn btn-danger" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
                         Delete
                     </a>
@@ -2205,290 +2281,3 @@ var DeleteButtonModal = React.createClass({
         );
     }
 });
-
-// Class for the add resource button. This class only renderes the button to add and clear the fields.
-var AddResourceId = module.exports.AddResourceId = React.createClass({
-    mixins: [ModalMixin],
-    propTypes: {
-        resourceType: React.PropTypes.string, // specify what the resource you're trying to add is (passed to Modal)
-        label: React.PropTypes.object, // text for the button's label
-        labelVisible: React.PropTypes.bool, // specify whether or not the label is visible
-        buttonText: React.PropTypes.string, // text for the button
-        initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing (passed to Modal)
-        fieldNum: React.PropTypes.string, // specify which field on the main form this should edit (passed to Modal)
-        updateParentForm: React.PropTypes.func, // function to call upon pressing the Save button
-        disabled: React.PropTypes.bool // specify whether or not the button on the main form is disabled
-    },
-
-    getInitialState: function() {
-        return {
-            txtModalTitle: ''
-        };
-    },
-
-    // set the text of the modal title on load
-    componentDidMount: function() {
-        switch(this.props.resourceType) {
-            case 'clinvar':
-                this.setState({txtModalTitle: clinvarTxt('modalTitle')});
-                break;
-        }
-    },
-
-    // called when the 'Clear' button is pressed on the main form
-    resetForm: function(e) {
-        this.props.updateParentForm(null, this.props.fieldNum);
-    },
-
-    render: function() {
-        return (
-            <div className="form-group">
-                <span className="col-sm-5 control-label">{this.props.labelVisible ? <label>{this.props.label}</label> : null}</span>
-                <span className="col-sm-7">
-                <div className="delete-button-wrapper">
-                    <Modal title={this.state.txtModalTitle} className="input-inline" modalClass="modal-default">
-                        <a className={"btn btn-default" + (this.props.disabled ? " disabled" : "")} modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue}
-                            fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} />}>
-                                {this.props.buttonText}
-                        </a>
-                    </Modal>
-                </div>
-                {this.props.initialFormValue ?
-                    <Input type="button" title="Clear" inputClassName="btn-default" clickHandler={this.resetForm} />
-                : null}
-                </span>
-            </div>
-        );
-    }
-});
-
-// Class for the modal for adding external resource IDs
-var AddResourceIdModal = React.createClass({
-    mixins: [FormMixin, RestMixin, CuratorHistory],
-
-    propTypes: {
-        resourceType: React.PropTypes.string, // specify what the resource you're trying to add is
-        initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing
-        fieldNum: React.PropTypes.string, // specify which field on the main form this should edit
-        closeModal: React.PropTypes.func, // Function to call to close the modal
-        protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateParentForm: React.PropTypes.func // Function to call when submitting and closing the modal
-    },
-
-    contextTypes: {
-        fetch: React.PropTypes.func // Function to perform a search
-    },
-
-    getInitialState: function() {
-        return {
-            txtInputLabel: '',
-            txtInputButton: '',
-            txtHelpText: '',
-            txtResourceResponse: '',
-            inputValue: '',
-            queryResourceDisabled: true,
-            queryResourceBusy: false, // True while form is submitting
-            resourceFetched: false,
-            tempResource: {},
-            submitResourceBusy: false
-        };
-    },
-
-    // load text for different parts of the modal on load
-    componentDidMount: function() {
-        switch(this.props.resourceType) {
-            case 'clinvar':
-                var tempTxtLabel;
-                if (this.props.initialFormValue) {
-                    tempTxtLabel = clinvarTxt('editLabel');
-                    this.setState({queryResourceDisabled: false});
-                    this.setState({inputValue: this.props.initialFormValue});
-                } else {
-                    tempTxtLabel = clinvarTxt('inputLabel');
-                }
-                this.setState({
-                    txtInputLabel: tempTxtLabel,
-                    txtInputButton: clinvarTxt('inputButton'),
-                    txtHelpText: clinvarTxt('helpText'),
-                    txtResourceResponse: clinvarTxt('resourceResponse')
-                });
-                break;
-        }
-    },
-
-    // called when the button to ping the outside API is pressed
-    queryResource: function(e) {
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setState({queryResourceBusy: true, resourceFetched: false});
-        // Apply queryResource logic depending on resourceType
-        switch(this.props.resourceType) {
-            case 'clinvar':
-                clinvarQueryResource.call(this);
-                break;
-        }
-    },
-
-    // called when the button to submit the resource to the main form is pressed
-    submitResource: function(e) {
-        e.preventDefault(); e.stopPropagation();
-        // Apply submitResource logic depending on resourceType
-        switch(this.props.resourceType) {
-            case 'clinvar':
-                clinvarSubmitResource.call(this);
-                break;
-        }
-    },
-
-    // called when the value in the input field is changed
-    handleChange: function(e) {
-        if (this.refs.resourceId) {
-            var tempResourceId = this.refs.resourceId.getValue();
-            this.setState({inputValue: tempResourceId, resourceFetched: false, tempResource: {}});
-            if (this.refs.resourceId.getValue().length > 0) {
-                this.setState({queryResourceDisabled: false});
-            } else {
-                this.setState({queryResourceDisabled: true});
-            }
-        }
-    },
-
-    // Called when the modal form's cancel button is clicked. Just closes the modal like
-    // nothing happened.
-    cancelForm: function(e) {
-        // Changed modal cancel button from a form input to a html button
-        // as to avoid accepting enter/return key as a click event.
-        // Removed hack in this method.
-        this.props.closeModal();
-    },
-
-    render: function() {
-        return (
-            <div className="form-std">
-                <div className="modal-body">
-                    <Input type="text" ref="resourceId" label={this.state.txtInputLabel} handleChange={this.handleChange} value={this.props.initialFormValue}
-                        error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')} submitHandler={this.submitResource}
-                        labelClassName="control-label" groupClassName="resource-input" required />
-                    <Input type="button-button" title={this.state.txtInputButton} inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
-                    <div className="row">&nbsp;<br />&nbsp;</div>
-                    {this.state.resourceFetched ?
-                    <span>
-                        <p>&nbsp;<br />{this.state.txtResourceResponse}</p>
-                        <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
-                    </span>
-                    : <span><p className="alert alert-info">{this.state.txtHelpText}</p></span>}
-                </div>
-                <div className='modal-footer'>
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
-                    <Input type="button-button" inputClassName={this.getFormError('resourceId') === null || this.getFormError('resourceId') === undefined || this.getFormError('resourceId') === '' ?
-                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Save" clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} submitBusy={this.state.submitResourceBusy} />
-                </div>
-            </div>
-        );
-    }
-});
-
-// Logic and helper functions for resource type 'clinvar' for AddResource modal
-function clinvarTxt(field) {
-    // Text to use for the resource type of 'clinvar'
-    var txt;
-    switch(field) {
-        case 'modalTitle':
-            txt = 'ClinVar Variant';
-            break;
-        case 'inputLabel':
-            txt = 'Enter ClinVar VariationID';
-            break;
-        case 'editLabel':
-            txt = 'Edit ClinVar VariationID';
-            break;
-        case 'inputButton':
-            txt = 'Retrieve from ClinVar';
-            break;
-        case 'helpText':
-            txt = <span>You must enter a ClinVar VariationID. The VariationID is the number found after <strong>/variation/</strong> in the URL for a variant in ClinVar (<a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">example</a>: 139214).</span>;
-            break;
-        case 'resourceResponse':
-            txt = "Below is the ClinVar Preferred Title for the VariationID you submitted. Press \"Save\" below if it is the correct Variant, otherwise revise your search above:";
-            break;
-    }
-    return txt;
-}
-function clinvarValidateForm() {
-    // validating the field for ClinVarIDs
-    var valid = this.validateDefault();
-    var formInput = this.getFormValue('resourceId');
-
-    // valid if input isn't zero-filled
-    if (valid && formInput.match(/^0+$/)) {
-        valid = false;
-        this.setFormErrors('resourceId', 'Invalid ClinVar ID');
-    }
-    // valid if input isn't zero-leading
-    if (valid && formInput.match(/^0+/)) {
-        valid = false;
-        this.setFormErrors('resourceId', 'Please re-enter ClinVar ID without any leading 0\'s');
-
-    }
-    // valid if the input only has numbers
-    if (valid && !formInput.match(/^[0-9]*$/)) {
-        valid = false;
-        this.setFormErrors('resourceId', 'Only numbers allowed');
-    }
-    return valid;
-}
-function clinvarQueryResource() {
-    // for pinging and parsing data from ClinVar
-    this.saveFormValue('resourceId', this.state.inputValue);
-    if (clinvarValidateForm.call(this)) {
-        var url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=';
-        var data;
-        var id = this.state.inputValue;
-        this.getRestDataXml(url + id).then(xml => {
-            data = parseClinvar(xml);
-            if (data.clinvarVariantId) {
-                // found the result we want
-                this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
-            } else {
-                // no result from ClinVar
-                this.setFormErrors('resourceId', 'ClinVar ID not found');
-                this.setState({queryResourceBusy: false, resourceFetched: false});
-            }
-        });
-    } else {
-        this.setState({queryResourceBusy: false});
-    }
-}
-function clinvarSubmitResource() {
-    // for dealing with the main form
-    this.setState({submitResourceBusy: true});
-    if (this.state.tempResource.clinvarVariantId) {
-        this.getRestData('/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId).then(check => {
-            if (check.total) {
-                // variation already exists in our db
-                this.getRestData(check['@graph'][0]['@id']).then(result => {
-                    // if no variant title in db, or db's variant title not matching the retrieved title,
-                    // then update db and fetch result again
-                    if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle']) {
-                        this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
-                            return this.getRestData(result['@graph'][0]['@id']).then(result => {
-                                this.props.updateParentForm(result, this.props.fieldNum);
-                            });
-                        });
-                    } else {
-                        this.props.updateParentForm(result, this.props.fieldNum);
-                    }
-                });
-            } else {
-                // variation is new to our db
-                this.postRestData('/variants/', this.state.tempResource).then(result => {
-                    // record the user adding a new variant entry
-                    this.recordHistory('add', result['@graph'][0]).then(history => {
-                        this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
-                    });
-                });
-            }
-            this.setState({submitResourceBusy: false});
-            this.props.closeModal();
-        });
-    }
-}

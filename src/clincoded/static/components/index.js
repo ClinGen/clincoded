@@ -17,6 +17,7 @@ require('./search');
 require('./publication');
 require('./curator');
 require('./curation_central');
+require('./variant_central');
 require('./create_gene_disease');
 require('./dashboard');
 require('./gdm');
@@ -34,5 +35,6 @@ require('./edit');
 require('./inputs');
 require('./provisional_curation');
 require('./add_curator');
+require('./select_variant');
 
 module.exports = require('./app');

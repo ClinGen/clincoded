@@ -1,0 +1,17 @@
+[
+    {
+        "uuid": "e0fd3202-6213-48b1-8570-1d1c8ff0212e",
+        "source": "Ensembl",
+        "sourceId": "ENSP00000423337"
+    },
+    {
+        "uuid": "7e437957-4dfa-4d17-97b2-57fc6784b5f4",
+        "source": "Ensembl",
+        "sourceId": "ENSP00000354554"
+    },
+    {
+        "uuid": "c0da4a9c-cd8a-41a8-9a20-949088124512",
+        "source": "Uniprot",
+        "sourceId": "P51587"
+    }
+]

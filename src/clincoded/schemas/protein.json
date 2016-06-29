@@ -1,0 +1,41 @@
+{
+    "title": "Protein",
+    "id": "/profiles/protein.json",
+    "description": "Schema for storing and using protein data",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [],
+    "identifyingProperties": ["uuid", "sourceId"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/standard_status" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "source": {
+            "title": "Source",
+            "description": "From what external source the transcript data has been retrieved.",
+            "type": "string"
+        },
+        "sourceId": {
+            "title": "Source ID",
+            "description": "Primary key in the external data source.",
+            "type": "string"
+        }
+    },
+    "columns": {
+        "sourceId": {
+            "title": "Source ID",
+            "type": "string"
+        },
+        "source": {
+            "title": "Source",
+            "type": "string"
+        }
+    }
+}

@@ -1,0 +1,47 @@
+{
+    "title": "Computational",
+    "id": "/profiles/computational.json",
+    "description": "Schema for storing computational data for Variant Curation",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/standard_status" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "variant": {
+            "title": "Variant",
+            "type": "string",
+            "linkTo": "variant"
+        },
+        "disease": {
+            "title": "Disease",
+            "type": "string",
+            "linkTo": "orphaPhenotype"
+        },
+        "computationalData": {
+            "title": "Computational Data",
+            "description": "Temp property to store blob computational data.",
+            "type": "object",
+            "comment": "No property defined. Flexible for saving different key:value formats."
+        }
+    },
+    "columns": {
+        "variant.represent": {
+            "title": "Variant",
+            "type": "string"
+        },
+        "disease_present": {
+            "title": "Disease",
+            "type": "string"
+        }
+    }
+}
