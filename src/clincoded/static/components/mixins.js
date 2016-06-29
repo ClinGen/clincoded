@@ -97,6 +97,8 @@ module.exports.GoogleAuth = {
     },
 
     componentDidMount: function() {
+        var subdomain = window.location.hostname.substring(0, window.location.hostname.indexOf('.clinicalgenome.org'));
+        console.log(subdomain);
         // Load triggerLogin() into global namespace so Google Auth can see it
         window[this.triggerLogin] = this.triggerLogin;
         // Check for gapi (defined by platform.js from google - external js file)
@@ -105,7 +107,9 @@ module.exports.GoogleAuth = {
             window.gapi.load('auth2', function() {
                 // set the app key (this needs to change)
                 window.gapi.auth2.init({
-                    client_id: '789621077193-bop2e2s2ga14e98pbgth49uqucmmm5i4.apps.googleusercontent.com'
+                    client_id: '789621077193-bop2e2s2ga14e98pbgth49uqucmmm5i4.apps.googleusercontent.com',
+                    redirect_uri: 'http://mc-auth-test.instance.clinicalgenome.org',
+                    state: subdomain
                 });
             });
             // Specify custom login button + triggers
