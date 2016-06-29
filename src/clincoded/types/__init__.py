@@ -124,10 +124,13 @@ class Variant(Item):
         'associatedInterpretations.disease',
         'associatedInterpretations.transcripts',
         'associatedInterpretations.proteins',
+        'experimental_associated',
+        'experimental_associated.associatedAnnotations.article'
     ]
     rev = {
         'associatedPathogenicities': ('pathogenicity', 'variant'),
-        'associatedInterpretations': ('interpretation', 'variant')
+        'associatedInterpretations': ('interpretation', 'variant'),
+        'experimental_associated': ('experimental', 'variants')
     }
 
     @calculated_property(schema={
@@ -153,16 +156,27 @@ class Variant(Item):
         return paths_filtered_by_status(request, associatedInterpretations)
 
     @calculated_property(schema={
+        "title": "Experimental Associated",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "experimental.variants",
+        },
+    })
+    def experimental_associated(self, request, experimental_associated):
+        return paths_filtered_by_status(request, experimental_associated)
+
+    @calculated_property(schema={
         "title": "Variant Representation",
         "type": "string"
     })
     def variant_identifier(self, clinvarVariantId='', carId='', otherDescription=''):
         if clinvarVariantId != '':
-            return clinvarVariantId
+            return "ClinVar Variation ID: " + clinvarVariantId
         elif carId != '':
-            return carId
+            return "CAR ID: " + carId
         elif otherDescription != '':
-            return otherDescription
+            return "Other Description: " + otherDescription
         else:
             return ''
 

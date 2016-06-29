@@ -132,6 +132,8 @@
             "evidenceLocationInPaper": "Paragraph 31-32, page 2"
         },
         "variants": [
+            "c71fc085-2683-11e5-b9fe-60f81dc5b05a",
+            "df8135d4-2685-11e5-af19-60f81dc5b05a",
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
         ],
         "assessments": [
@@ -155,6 +157,7 @@
             "evidenceInPaper": "Paragraph 2-5, page 5"
         },
         "variants": [
+            "df8135d4-2685-11e5-af19-60f81dc5b05a",
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
         ]
     },
@@ -179,7 +182,7 @@
             "phenotypeHPO": "HP:0012345"
         },
         "variants": [
-            "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
+            "df8135d4-2685-11e5-af19-60f81dc5b05a"
         ],
         "assessments": [
             "a4aeb035-0a9c-41e0-9963-1deeb4e1301d",
