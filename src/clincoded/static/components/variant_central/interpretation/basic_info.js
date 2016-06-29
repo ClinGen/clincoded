@@ -17,7 +17,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
-        shouldFetchData: React.PropTypes.bool,
         protocol: React.PropTypes.string
     },
 
@@ -35,8 +34,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             hgvs_GRCh37: null,
             hgvs_GRCh38: null,
             gene_symbol: null,
-            uniprot_id: null,
-            shouldFetchData: false
+            uniprot_id: null
         };
     },
 
