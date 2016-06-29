@@ -682,7 +682,8 @@ var FamilyCuration = React.createClass({
                             results.forEach(function(result, i) {
                                 if (result.total) {
                                     // Search got a result. Add a string for family.variants for this existing variant
-                                    familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
+                                    familyVariants.push(result['@graph'][0]['@id']);
+                                    //familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                 } else {
                                     // Search got no result; make a new variant and save it in an array so we can write them.
                                     // Look for the term in the filters to see what term failed to find a match
@@ -731,7 +732,8 @@ var FamilyCuration = React.createClass({
 
                                 // Add the newly written variants to the family
                                 results.forEach(result => {
-                                    familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
+                                    familyVariants.push(result['@graph'][0]['@id']);
+                                    //familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                 });
                             }
                             return Promise.resolve(results);
