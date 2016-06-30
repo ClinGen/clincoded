@@ -293,9 +293,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
+    // calculate highest MAF value and related info from external data
     calculateHighestMAF: function() {
         let populationObj = this.state.populationObj;
         let highestMAFObj = {af: 0};
+        // check against exac data
         populationStatic.exac._order.map(pop => {
             if (populationObj.exac[pop].af && populationObj.exac[pop].af) {
                 if (populationObj.exac[pop].af > highestMAFObj.af) {
@@ -308,6 +310,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
         });
+        // check against 1000g data
         populationStatic.tGenomes._order.map(pop => {
             let alt = populationObj.tGenomes._extra.alt;
             if (populationObj.tGenomes[pop].af && populationObj.tGenomes[pop].af[alt]) {
@@ -321,6 +324,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
         });
+        // check against esp data
         populationStatic.esp._order.map(pop => {
             let alt = populationObj.esp._extra.alt;
             if (populationObj.esp[pop].ac) {
@@ -337,6 +341,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
         });
+        // embed highest MAF and related data into population obj, and update to state
         populationObj.highestMAF = highestMAFObj;
         this.setState({populationObj: populationObj});
     },
