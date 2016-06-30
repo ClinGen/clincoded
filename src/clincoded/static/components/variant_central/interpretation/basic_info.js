@@ -5,7 +5,7 @@ var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
-var LocalStorageMixin = require('react-localstorage');
+//var LocalStorageMixin = require('react-localstorage');
 var SO_terms = require('./mapping/SO_term.json');
 
 var external_url_map = globals.external_url_map;
@@ -13,7 +13,7 @@ var dbxref_prefix_map = globals.dbxref_prefix_map;
 
 // Display the curator data of the curation data
 var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasicInfo = React.createClass({
-    mixins: [RestMixin, LocalStorageMixin],
+    mixins: [RestMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
