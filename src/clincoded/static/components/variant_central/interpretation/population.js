@@ -91,23 +91,22 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         this.setState({interpretation: this.props.interpretation});
         if (this.props.data) {
             this.setState({shouldFetchData: true});
-            this.fetchMyVariantInfo();
-            this.fetchEnsemblData();
+            this.fetchMyVariantInfo(this.props.data);
+            this.fetchEnsemblData(this.props.data);
         }
     },
 
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretation: nextProps.interpretation});
-        if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
+        if (nextProps.data && this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
             this.setState({shouldFetchData: true});
-            this.fetchMyVariantInfo();
-            this.fetchEnsemblData();
+            this.fetchMyVariantInfo(nextProps.data);
+            this.fetchEnsemblData(nextProps.data);
         }
     },
 
     // Retrieve ExAC population data from myvariant.info
-    fetchMyVariantInfo: function() {
-        var variant = this.props.data;
+    fetchMyVariantInfo: function(variant) {
         var url = this.props.protocol + external_url_map['MyVariantInfo'];
         if (variant) {
             // Extract only the number portion of the dbSNP id
@@ -143,8 +142,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Retrieve 1000GENOMES population data from rest.ensembl.org
-    fetchEnsemblData: function() {
-        var variant = this.props.data;
+    fetchEnsemblData: function(variant) {
         if (variant) {
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
