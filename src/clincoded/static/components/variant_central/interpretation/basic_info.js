@@ -48,6 +48,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
     },
 
+    componentWillReceiveProps: function(nextProps) {
+        if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
+            this.setState({shouldFetchData: true});
+            this.fetchRefseqData();
+            this.fetchEnsemblData();
+        }
+    },
+
     // Retrieve the variant data from NCBI REST API
     fetchRefseqData: function() {
         //var refseq_data = {};
