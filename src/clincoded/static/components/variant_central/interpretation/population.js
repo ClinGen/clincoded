@@ -59,8 +59,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             hasExacData: false, // flag to display ExAC table
             hasTGenomesData: false,
             hasEspData: false, // flag to display ESP table
+            mafCalculated: false,
             shouldFetchData: false,
             populationObj: {
+                highestMAF: null,
                 exac: {
                     afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
@@ -294,8 +296,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     calculateHighestMAF: function() {
         let populationObj = this.state.populationObj;
         let highestMAFObj = {af: 0};
-        console.log(populationObj);
-        console.log('ExAC');
         populationStatic.exac._order.map(pop => {
             if (populationObj.exac[pop].af && populationObj.exac[pop].af) {
                 if (populationObj.exac[pop].af > highestMAFObj.af) {
@@ -309,7 +309,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
         });
-        console.log('1000G');
         populationStatic.tGenomes._order.map(pop => {
             let alt = populationObj.tGenomes._extra.alt;
             if (populationObj.tGenomes[pop].af && populationObj.tGenomes[pop].af[alt]) {
@@ -324,7 +323,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
         });
-        console.log('ESP');
         populationStatic.esp._order.map(pop => {
             let alt = populationObj.esp._extra.alt;
             if (populationObj.esp[pop].ac) {
@@ -342,7 +340,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
         });
-        console.log(highestMAFObj);
+        populationObj.highestMAF = highestMAFObj;
+        this.setState({populationObj: populationObj});
     },
 
     // method to render a row of data for the ExAC table
@@ -410,7 +409,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var exacStatic = populationStatic.exac,
             tGenomesStatic = populationStatic.tGenomes,
             espStatic = populationStatic.esp;
-        var exac = this.state.populationObj && this.state.populationObj.exac ? this.state.populationObj.exac : null, // Get ExAC data from global population object
+        var highestMAF = this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null,
+            exac = this.state.populationObj && this.state.populationObj.exac ? this.state.populationObj.exac : null, // Get ExAC data from global population object
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
 
@@ -436,15 +436,15 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="clearfix">
                         <div className="bs-callout-content-container">
                             <dl className="inline-dl clearfix">
-                                <dt>Population: </dt><dd>XXXXXX</dd>
-                                <dt># Variant Alleles: </dt><dd>XXXXXX</dd>
-                                <dt>Total # Alleles Tested: </dt><dd>XXXXXX</dd>
+                                <dt>Population: </dt><dd>{highestMAF && highestMAF.popLabel ? highestMAF.popLabel : 'N/A'}</dd>
+                                <dt># Variant Alleles: </dt><dd>{highestMAF && highestMAF.ac ? highestMAF.ac : 'N/A'}</dd>
+                                <dt>Total # Alleles Tested: </dt><dd>{highestMAF && highestMAF.ac_tot ? highestMAF.ac_tot : 'N/A'}</dd>
                             </dl>
                         </div>
                         <div className="bs-callout-content-container">
                             <dl className="inline-dl clearfix">
-                                <dt>Source: </dt><dd>XXXXXX</dd>
-                                <dt>Allele Frequency: </dt><dd>XXXXXX</dd>
+                                <dt>Source: </dt><dd>{highestMAF && highestMAF.source ? highestMAF.source : 'N/A'}</dd>
+                                <dt>Allele Frequency: </dt><dd>{highestMAF && highestMAF.af ? highestMAF.af : 'N/A'}</dd>
                                 <dt>CI - lower: </dt><dd>XXXXXX</dd>
                                 <dt>CI - upper: </dt><dd>XXXXXX</dd>
                             </dl>
