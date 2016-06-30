@@ -122,6 +122,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
                 // Calling method to update global object with ExAC Allele Frequency data
                 this.parseAlleleFrequencyData(response);
+                this.calculateHighestMAF();
             }).catch(function(e) {
                 console.log('VEP Allele Frequency Fetch Error=: %o', e);
             });
@@ -132,6 +133,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 // for comparison of any potential changed values
                 this.parseExacData(response);
                 this.parseEspData(response);
+                this.calculateHighestMAF();
             }).catch(function(e) {
                 console.log('MyVariant Fetch Error=: %o', e);
             });
@@ -147,6 +149,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
             this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
                 this.parseTGenomesData(response);
+                this.calculateHighestMAF();
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
             });
@@ -271,12 +274,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (response.evs) {
             let populationObj = this.state.populationObj;
             // get relevant numbers and extra information from ESP
-            populationObj.esp.aa.ac = response.evs.allele_count.african_american;
-            populationObj.esp.aa.gc = response.evs.genotype_count.african_american;
-            populationObj.esp.ea.ac = response.evs.allele_count.european_american;
-            populationObj.esp.ea.gc = response.evs.genotype_count.european_american;
-            populationObj.esp._tot.ac = response.evs.allele_count.all;
-            populationObj.esp._tot.gc = response.evs.genotype_count.all_genotype;
+            populationObj.esp.aa.ac = parseInt(response.evs.allele_count.african_american);
+            populationObj.esp.aa.gc = parseInt(response.evs.genotype_count.african_american);
+            populationObj.esp.ea.ac = parseInt(response.evs.allele_count.european_american);
+            populationObj.esp.ea.gc = parseInt(response.evs.genotype_count.european_american);
+            populationObj.esp._tot.ac = parseInt(response.evs.allele_count.all);
+            populationObj.esp._tot.gc = parseInt(response.evs.genotype_count.all_genotype);
             populationObj.esp._extra.avg_sample_read = response.evs.avg_sample_read;
             populationObj.esp._extra.rsid = response.evs.rsid;
             populationObj.esp._extra.chrom = response.evs.chrom;
@@ -286,6 +289,60 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // update populationObj, and set flag indicating that we have ESP data
             this.setState({hasEspData: true, populationObj: populationObj});
         }
+    },
+
+    calculateHighestMAF: function() {
+        let populationObj = this.state.populationObj;
+        let highestMAFObj = {af: 0};
+        console.log(populationObj);
+        console.log('ExAC');
+        populationStatic.exac._order.map(pop => {
+            if (populationObj.exac[pop].af && populationObj.exac[pop].af) {
+                if (populationObj.exac[pop].af > highestMAFObj.af) {
+                    console.log(highestMAFObj.af + ' trumped by ' + pop + ' with value ' + populationObj.exac[pop].af);
+                    highestMAFObj.pop = pop;
+                    highestMAFObj.popLabel = populationStatic.exac._labels[pop];
+                    highestMAFObj.ac = populationObj.exac[pop].ac;
+                    highestMAFObj.ac_tot = populationObj.exac._tot.ac;
+                    highestMAFObj.source = 'ExAC';
+                    highestMAFObj.af = populationObj.exac[pop].af;
+                }
+            }
+        });
+        console.log('1000G');
+        populationStatic.tGenomes._order.map(pop => {
+            let alt = populationObj.tGenomes._extra.alt;
+            if (populationObj.tGenomes[pop].af && populationObj.tGenomes[pop].af[alt]) {
+                if (populationObj.tGenomes[pop].af[alt] > highestMAFObj.af) {
+                    console.log(highestMAFObj.af + ' trumped by ' + pop + ' with value ' + populationObj.tGenomes[pop].af[alt]);
+                    highestMAFObj.pop = pop;
+                    highestMAFObj.popLabel = populationStatic.tGenomes._labels[pop];
+                    highestMAFObj.ac = populationObj.tGenomes[pop].ac[alt];
+                    highestMAFObj.ac_tot = populationObj.tGenomes._tot.ac[alt];
+                    highestMAFObj.source = '1000Genomes';
+                    highestMAFObj.af = populationObj.tGenomes[pop].af[alt];
+                }
+            }
+        });
+        console.log('ESP');
+        populationStatic.esp._order.map(pop => {
+            let alt = populationObj.esp._extra.alt;
+            if (populationObj.esp[pop].ac) {
+                let ref = populationObj.esp._extra.ref,
+                    alt = populationObj.esp._extra.alt;
+                let tempMAF = populationObj.esp[pop].ac[alt] / (populationObj.esp[pop].ac[ref] + populationObj.esp[pop].ac[alt]);
+                if (tempMAF > highestMAFObj.af) {
+                    console.log(highestMAFObj.af + ' trumped by ' + pop + ' with value ' + populationObj.esp[pop].af[alt]);
+                    highestMAFObj.pop = pop;
+                    highestMAFObj.popLabel = populationStatic.esp._labels[pop];
+                    highestMAFObj.ac = populationObj.esp[pop].ac[alt];
+                    highestMAFObj.ac_tot = populationObj.esp[pop].ac[ref] + populationObj.esp[pop].ac[alt];
+                    highestMAFObj.source = 'ESP';
+                    highestMAFObj.af = tempMAF;
+                }
+            }
+        });
+        console.log(highestMAFObj);
     },
 
     // method to render a row of data for the ExAC table
