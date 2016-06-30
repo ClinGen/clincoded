@@ -34,16 +34,29 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             hgvs_GRCh37: null,
             hgvs_GRCh38: null,
             gene_symbol: null,
-            uniprot_id: null
+            uniprot_id: null,
+            hasRefseqData: false,
+            hasEnsemblData: false
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
-        if (nextProps.data || this.props.data) {
-            window.localStorage.clear();
-            this.fetchRefseqData();
-            this.fetchEnsemblData();
+        if (nextProps.data && this.props.data) {
+            if (!this.state.hasRefseqData) {
+                this.fetchRefseqData();
+            }
+            if (!this.state.hasEnsemblData) {
+                this.fetchEnsemblData();
+            }
         }
+    },
+
+    componentWillUnmount: function() {
+        this.setState({
+            hasRefseqData: false,
+            hasEnsemblData: false
+        });
+        window.localStorage.clear();
     },
 
     // Retrieve the variant data from NCBI REST API
@@ -70,6 +83,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 // To extract more ClinVar data for 'Basic Information' tab
                 var variantData = parseClinvar(xml, true);
                 this.setState({
+                    hasRefseqData: true,
                     nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
                     protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
                     molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
@@ -117,7 +131,10 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             var numberPattern = /\d+/g;
             var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
             this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
-                this.setState({ensembl_transcripts: response[0].transcript_consequences});
+                this.setState({
+                    hasEnsemblData: true,
+                    ensembl_transcripts: response[0].transcript_consequences
+                });
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
             });
