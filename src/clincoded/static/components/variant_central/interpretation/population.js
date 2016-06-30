@@ -175,9 +175,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseAlleleFrequencyData: function(response) {
         let populationObj = this.state.populationObj;
         populationStatic.exac._order.map(key => {
-            populationObj.exac[key].af = response[0].colocated_variants[0]['exac_' + key + '_maf'];
+            populationObj.exac[key].af = parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
         });
-        populationObj.exac._tot.af = response[0].colocated_variants[0].exac_adj_maf;
+        populationObj.exac._tot.af = parseFloat(response[0].colocated_variants[0].exac_adj_maf);
 
         this.setState({populationObj: populationObj});
     },
@@ -190,17 +190,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             let populationObj = this.state.populationObj;
             // get the allele count, allele number, and homozygote count for desired populations
             populationStatic.exac._order.map(key => {
-                populationObj.exac[key].ac = response.exac.ac['ac_' + key];
-                populationObj.exac[key].an = response.exac.an['an_' + key];
-                populationObj.exac[key].hom = response.exac.hom['hom_' + key];
+                populationObj.exac[key].ac = parseInt(response.exac.ac['ac_' + key]);
+                populationObj.exac[key].an = parseInt(response.exac.an['an_' + key]);
+                populationObj.exac[key].hom = parseInt(response.exac.hom['hom_' + key]);
             });
             // get the allele count, allele number, and homozygote count totals
-            populationObj.exac._tot.ac = response.exac.ac.ac_adj;
-            populationObj.exac._tot.an = response.exac.an.an_adj;
-            populationObj.exac._tot.hom = response.exac.hom.ac_hom;
+            populationObj.exac._tot.ac = parseInt(response.exac.ac.ac_adj);
+            populationObj.exac._tot.an = parseInt(response.exac.an.an_adj);
+            populationObj.exac._tot.hom = parseInt(response.exac.hom.ac_hom);
             // get extra ExAC information
-            populationObj.exac._extra.chrom = response.exac.chrom;
-            populationObj.exac._extra.pos = response.exac.pos;
+            populationObj.exac._extra.chrom = response.exac.chrom + ''; // ensure that the chromosome is stored as a String
+            populationObj.exac._extra.pos = parseInt(response.exac.pos);
             populationObj.exac._extra.ref = response.exac.ref;
             populationObj.exac._extra.alt = response.exac.alt;
             // update populationObj, and set flag indicating that we have ExAC data
@@ -224,20 +224,20 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
                     populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
                     // ... for specific populations
-                    populationObj.tGenomes[populationCode].ac[population.allele] = population.allele_count;
-                    populationObj.tGenomes[populationCode].af[population.allele] = population.frequency;
+                    populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
+                    populationObj.tGenomes[populationCode].af[population.allele] = parseFloat(population.frequency);
                 } else if (population.population == '1000GENOMES:phase_3:ALL') {
                     // ... and totals
-                    populationObj.tGenomes._tot.ac[population.allele] = population.allele_count;
-                    populationObj.tGenomes._tot.af[population.allele] = population.frequency;
+                    populationObj.tGenomes._tot.ac[population.allele] = parseInt(population.allele_count);
+                    populationObj.tGenomes._tot.af[population.allele] = parseFloat(population.frequency);
                 } else if (population.population == 'ESP6500:African_American') {
                     // ... and ESP AA
-                    populationObj.tGenomes.espaa.ac[population.allele] = population.allele_count;
-                    populationObj.tGenomes.espaa.af[population.allele] = population.frequency;
+                    populationObj.tGenomes.espaa.ac[population.allele] = parseInt(population.allele_count);
+                    populationObj.tGenomes.espaa.af[population.allele] = parseFloat(population.frequency);
                 } else if (population.population == 'ESP6500:European_American') {
                     // ... and ESP EA
-                    populationObj.tGenomes.espea.ac[population.allele] = population.allele_count;
-                    populationObj.tGenomes.espea.af[population.allele] = population.frequency;
+                    populationObj.tGenomes.espea.ac[population.allele] = parseInt(population.allele_count);
+                    populationObj.tGenomes.espea.af[population.allele] = parseFloat(population.frequency);
                 }
             });
         }
@@ -249,20 +249,20 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 if (population_genotype.population.indexOf('1000GENOMES:phase_3:') == 0 &&
                     populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
                     // ... for specific populations
-                    populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = population_genotype.count;
-                    populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = population_genotype.frequency;
+                    populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = parseInt(population_genotype.count);
+                    populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
                 } else if (population_genotype.population == '1000GENOMES:phase_3:ALL') {
                     // ... and totals
-                    populationObj.tGenomes._tot.gc[population_genotype.genotype] = population_genotype.count;
-                    populationObj.tGenomes._tot.gf[population_genotype.genotype] = population_genotype.frequency;
+                    populationObj.tGenomes._tot.gc[population_genotype.genotype] = parseInt(population_genotype.count);
+                    populationObj.tGenomes._tot.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
                 } else if (population_genotype.population == 'ESP6500:African_American') {
                     // ... and ESP AA
-                    populationObj.tGenomes.espaa.gc[population_genotype.genotype] = population_genotype.count;
-                    populationObj.tGenomes.espaa.gf[population_genotype.genotype] = population_genotype.frequency;
+                    populationObj.tGenomes.espaa.gc[population_genotype.genotype] = parseInt(population_genotype.count);
+                    populationObj.tGenomes.espaa.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
                 } else if (population_genotype.population == 'ESP6500:European_American') {
                     // ... and ESP EA
-                    populationObj.tGenomes.espea.gc[population_genotype.genotype] = population_genotype.count;
-                    populationObj.tGenomes.espea.gf[population_genotype.genotype] = population_genotype.frequency;
+                    populationObj.tGenomes.espea.gc[population_genotype.genotype] = parseInt(population_genotype.count);
+                    populationObj.tGenomes.espea.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
                 }
             });
         }
@@ -282,10 +282,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             populationObj.esp.ea.gc = parseInt(response.evs.genotype_count.european_american);
             populationObj.esp._tot.ac = parseInt(response.evs.allele_count.all);
             populationObj.esp._tot.gc = parseInt(response.evs.genotype_count.all_genotype);
-            populationObj.esp._extra.avg_sample_read = response.evs.avg_sample_read;
+            populationObj.esp._extra.avg_sample_read = parseInt(response.evs.avg_sample_read);
             populationObj.esp._extra.rsid = response.evs.rsid;
-            populationObj.esp._extra.chrom = response.evs.chrom;
-            populationObj.esp._extra.hg19_start = response.evs.hg19.start;
+            populationObj.esp._extra.chrom = response.evs.chrom + ''; // ensure that the chromosome is stored as a String
+            populationObj.esp._extra.hg19_start = parseInt(response.evs.hg19.start);
             populationObj.esp._extra.ref = response.evs.ref;
             populationObj.esp._extra.alt = response.evs.alt;
             // update populationObj, and set flag indicating that we have ESP data
@@ -330,6 +330,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             if (populationObj.esp[pop].ac) {
                 let ref = populationObj.esp._extra.ref,
                     alt = populationObj.esp._extra.alt;
+                // esp does not report back frequencies, so we have to calculate it off counts
                 let tempMAF = populationObj.esp[pop].ac[alt] / (populationObj.esp[pop].ac[ref] + populationObj.esp[pop].ac[alt]);
                 if (tempMAF > highestMAFObj.af) {
                     highestMAFObj.pop = pop;
