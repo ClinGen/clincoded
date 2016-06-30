@@ -153,16 +153,16 @@ class Variant(Item):
         return paths_filtered_by_status(request, associatedInterpretations)
 
     @calculated_property(schema={
-        "title": "Variant Representation",
+        "title": "Variant Identifier",
         "type": "string"
     })
     def variant_identifier(self, clinvarVariantId='', carId='', otherDescription=''):
         if clinvarVariantId != '':
-            return clinvarVariantId
+            return 'ClinVar ID: ' + clinvarVariantId
         elif carId != '':
-            return carId
+            return 'CAR ID: ' + carId
         elif otherDescription != '':
-            return otherDescription
+            return 'Other Description: ' + otherDescription
         else:
             return ''
 
