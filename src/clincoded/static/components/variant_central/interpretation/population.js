@@ -447,8 +447,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             <dl className="inline-dl clearfix">
                                 <dt>Source: </dt><dd>{highestMAF && highestMAF.source ? highestMAF.source : 'N/A'}</dd>
                                 <dt>Allele Frequency: </dt><dd>{highestMAF && highestMAF.af ? highestMAF.af : 'N/A'}</dd>
-                                <dt>CI - lower: </dt><dd>XXXXXX</dd>
-                                <dt>CI - upper: </dt><dd>XXXXXX</dd>
+                                {(this.state.interpretation) ?
+                                    <span>
+                                        <dt>CI - lower: </dt><dd>XXXXXX</dd>
+                                        <dt>CI - upper: </dt><dd>XXXXXX</dd>
+                                    </span>
+                                : null}
                             </dl>
                         </div>
                     </div>
