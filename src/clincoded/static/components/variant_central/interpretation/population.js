@@ -96,15 +96,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
-    componentWillReceiveProps: function(nextProps) {
-        this.setState({interpretation: nextProps.interpretation});
-        if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
-            this.setState({shouldFetchData: true});
-            this.fetchMyVariantInfo();
-            this.fetchEnsemblData();
-        }
-    },
-
     // Retrieve ExAC population data from myvariant.info
     fetchMyVariantInfo: function() {
         var variant = this.props.data;
