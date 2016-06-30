@@ -299,7 +299,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         populationStatic.exac._order.map(pop => {
             if (populationObj.exac[pop].af && populationObj.exac[pop].af) {
                 if (populationObj.exac[pop].af > highestMAFObj.af) {
-                    console.log(highestMAFObj.af + ' trumped by ' + pop + ' with value ' + populationObj.exac[pop].af);
                     highestMAFObj.pop = pop;
                     highestMAFObj.popLabel = populationStatic.exac._labels[pop];
                     highestMAFObj.ac = populationObj.exac[pop].ac;
@@ -313,7 +312,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             let alt = populationObj.tGenomes._extra.alt;
             if (populationObj.tGenomes[pop].af && populationObj.tGenomes[pop].af[alt]) {
                 if (populationObj.tGenomes[pop].af[alt] > highestMAFObj.af) {
-                    console.log(highestMAFObj.af + ' trumped by ' + pop + ' with value ' + populationObj.tGenomes[pop].af[alt]);
                     highestMAFObj.pop = pop;
                     highestMAFObj.popLabel = populationStatic.tGenomes._labels[pop];
                     highestMAFObj.ac = populationObj.tGenomes[pop].ac[alt];
@@ -330,7 +328,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     alt = populationObj.esp._extra.alt;
                 let tempMAF = populationObj.esp[pop].ac[alt] / (populationObj.esp[pop].ac[ref] + populationObj.esp[pop].ac[alt]);
                 if (tempMAF > highestMAFObj.af) {
-                    console.log(highestMAFObj.af + ' trumped by ' + pop + ' with value ' + populationObj.esp[pop].af[alt]);
                     highestMAFObj.pop = pop;
                     highestMAFObj.popLabel = populationStatic.esp._labels[pop];
                     highestMAFObj.ac = populationObj.esp[pop].ac[alt];
