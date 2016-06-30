@@ -276,13 +276,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (response.evs) {
             let populationObj = this.state.populationObj;
             // get relevant numbers and extra information from ESP
-            populationObj.esp.aa.ac = parseInt(response.evs.allele_count.african_american);
-            populationObj.esp.aa.gc = parseInt(response.evs.genotype_count.african_american);
-            populationObj.esp.ea.ac = parseInt(response.evs.allele_count.european_american);
-            populationObj.esp.ea.gc = parseInt(response.evs.genotype_count.european_american);
-            populationObj.esp._tot.ac = parseInt(response.evs.allele_count.all);
-            populationObj.esp._tot.gc = parseInt(response.evs.genotype_count.all_genotype);
-            populationObj.esp._extra.avg_sample_read = parseInt(response.evs.avg_sample_read);
+            populationObj.esp.aa.ac = this.dictValuesToInt(response.evs.allele_count.african_american);
+            populationObj.esp.aa.gc = this.dictValuesToInt(response.evs.genotype_count.african_american);
+            populationObj.esp.ea.ac = this.dictValuesToInt(response.evs.allele_count.european_american);
+            populationObj.esp.ea.gc = this.dictValuesToInt(response.evs.genotype_count.european_american);
+            populationObj.esp._tot.ac = this.dictValuesToInt(response.evs.allele_count.all);
+            populationObj.esp._tot.gc = this.dictValuesToInt(response.evs.genotype_count.all_genotype);
+            populationObj.esp._extra.avg_sample_read = response.evs.avg_sample_read;
             populationObj.esp._extra.rsid = response.evs.rsid;
             populationObj.esp._extra.chrom = response.evs.chrom + ''; // ensure that the chromosome is stored as a String
             populationObj.esp._extra.hg19_start = parseInt(response.evs.hg19.start);
@@ -291,6 +291,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // update populationObj, and set flag indicating that we have ESP data
             this.setState({hasEspData: true, populationObj: populationObj});
         }
+    },
+
+    // method to run through dictionary/Object's values and convert them to Int
+    dictValuesToInt: function(dict) {
+        for (var key in dict) {
+            dict[key] = parseInt(dict[key]);
+        }
+        return dict;
     },
 
     // calculate highest MAF value and related info from external data
