@@ -158,11 +158,11 @@ class Variant(Item):
     })
     def variant_identifier(self, clinvarVariantId='', carId='', otherDescription=''):
         if clinvarVariantId != '':
-            return 'ClinVar ID: ' + clinvarVariantId
+            return clinvarVariantId
         elif carId != '':
-            return 'CAR ID: ' + carId
+            return carId
         elif otherDescription != '':
-            return 'Other Description: ' + otherDescription
+            return otherDescription
         else:
             return ''
 
