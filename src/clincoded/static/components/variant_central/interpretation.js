@@ -80,37 +80,37 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     </TabList>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationBasicInfo data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationBasicInfo data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationPopulation data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationPopulation data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationComputational data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationComputational data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationFunctional data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationFunctional data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationSegregation data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationSegregation data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationGeneSpecific data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationGeneSpecific data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
