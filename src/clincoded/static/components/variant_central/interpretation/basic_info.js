@@ -56,7 +56,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             hasRefseqData: false,
             hasEnsemblData: false
         });
-        window.localStorage.clear();
     },
 
     // Retrieve the variant data from NCBI REST API
@@ -180,11 +179,15 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     // Used to construct LinkOut URL to Uniprot
     getUniprotId: function(gene_symbol) {
         if (gene_symbol) {
+            // FIXME: Use hardcoded uniprot id for now until we find an alternate API to address SSL issue
+            /*
             this.getRestData(this.props.protocol + external_url_map['HGNCFetch'] + gene_symbol).then(result => {
                 this.setState({uniprot_id: result.response.docs[0].uniprot_ids[0]});
             }).catch(function(e) {
                 console.log('HGNC Fetch Error=: %o', e);
             });
+            */
+            this.setState({uniprot_id: 'P38398'});
         }
     },
 
