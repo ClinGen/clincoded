@@ -119,6 +119,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var found = genomic_chr_mapping.find((entry) => entry.GenomicRefSeq === NC_genomic);
             // Format variant_id for use of myvariant.info REST API
             var variant_id = found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':'));
+            if (variant_id.indexOf('del') > 0) {
+                variant_id = variant_id.substring(0, variant_id.indexOf('del') + 3);
+            }
             this.getRestData(url + variant_id).then(response => {
                 // Calling methods to update global object with ExAC & ESP population data
                 // FIXME: Need to create a new copy of the global object with new data
@@ -291,7 +294,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     highestMAFObj.pop = pop;
                     highestMAFObj.popLabel = populationStatic.exac._labels[pop];
                     highestMAFObj.ac = populationObj.exac[pop].ac;
-                    highestMAFObj.ac_tot = populationObj.exac._tot.ac;
+                    highestMAFObj.ac_tot = populationObj.exac[pop].an;
                     highestMAFObj.source = 'ExAC';
                     highestMAFObj.af = populationObj.exac[pop].af;
                 }
@@ -299,13 +302,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         });
         // check against 1000g data
         populationStatic.tGenomes._order.map(pop => {
-            let alt = populationObj.tGenomes._extra.alt;
+            let ref = populationObj.tGenomes._extra.ref,
+                alt = populationObj.tGenomes._extra.alt;
             if (populationObj.tGenomes[pop].af && populationObj.tGenomes[pop].af[alt]) {
                 if (populationObj.tGenomes[pop].af[alt] > highestMAFObj.af) {
                     highestMAFObj.pop = pop;
                     highestMAFObj.popLabel = populationStatic.tGenomes._labels[pop];
                     highestMAFObj.ac = populationObj.tGenomes[pop].ac[alt];
-                    highestMAFObj.ac_tot = populationObj.tGenomes._tot.ac[alt];
+                    highestMAFObj.ac_tot = populationObj.tGenomes[pop].ac[ref] + populationObj.tGenomes[pop].ac[alt];
                     highestMAFObj.source = '1000Genomes';
                     highestMAFObj.af = populationObj.tGenomes[pop].af[alt];
                 }
