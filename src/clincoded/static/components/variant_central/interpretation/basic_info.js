@@ -43,22 +43,23 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     componentDidMount: function() {
         if (this.props.data) {
             this.setState({shouldFetchData: true});
-            this.fetchRefseqData(this.props.data);
-            this.fetchEnsemblData(this.props.data);
+            this.fetchRefseqData();
+            this.fetchEnsemblData();
         }
     },
 
     componentWillReceiveProps: function(nextProps) {
-        if (nextProps.data && this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
+        if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
             this.setState({shouldFetchData: true});
-            this.fetchRefseqData(nextProps.data);
-            this.fetchEnsemblData(nextProps.data);
+            this.fetchRefseqData();
+            this.fetchEnsemblData();
         }
     },
 
     // Retrieve the variant data from NCBI REST API
-    fetchRefseqData: function(variant) {
+    fetchRefseqData: function() {
         //var refseq_data = {};
+        var variant = this.props.data;
         var url = this.props.protocol + external_url_map['ClinVarEutils'];
         if (variant) {
             var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
@@ -119,7 +120,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     // Retrieve variant data from Ensembl REST API
-    fetchEnsemblData: function(variant) {
+    fetchEnsemblData: function() {
+        var variant = this.props.data;
         if (variant) {
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
