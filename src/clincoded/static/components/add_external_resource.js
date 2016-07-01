@@ -31,7 +31,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
     mixins: [ModalMixin],
     propTypes: {
         resourceType: React.PropTypes.string, // specify what the resource you're trying to add is (passed to Modal)
-        label: React.PropTypes.string, // text for the button's label
+        label: React.PropTypes.object, // html for the button's label
         labelVisible: React.PropTypes.bool, // specify whether or not the label is visible
         buttonText: React.PropTypes.string, // text for the button
         clearButtonText: React.PropTypes.string, // text for clear button
@@ -106,7 +106,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         } else {
             return (
                 <div className="form-group">
-                    <span className="col-sm-5 control-label">{this.props.labelVisible ? <label>{this.props.label}</label> : null}</span>
+                    <span className="col-sm-5 control-label">{this.props.labelVisible ? this.props.label : null}</span>
                     <span className="col-sm-7">
                         <div className={"inline-button-wrapper button-push" + (this.props.wrapperClass ? " " + this.props.wrapperClass : "")}>
                             {this.buttonRender()}
@@ -378,6 +378,10 @@ function clinvarRenderResourceResult() {
             <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
             {this.state.tempResource && this.state.tempResource.hgvsNames ?
                 <div className="row">
+                    <div className="row">
+                        <span className="col-sm-5 col-md-3 control-label"><label>ClinVar Variant ID</label></span>
+                        <span className="col-sm-7 col-md-9 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
+                    </div>
                     {this.state.tempResource.hgvsNames.others && this.state.tempResource.hgvsNames.others.length > 0 ?
                         <div className="row">
                             <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
@@ -523,6 +527,16 @@ function carRenderResourceResult() {
             <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
             {this.state.tempResource && this.state.tempResource.hgvsNames ?
                 <div className="row">
+                    <div className="row">
+                        <span className="col-sm-5 col-md-3 control-label"><label>CA ID</label></span>
+                        <span className="col-sm-7 col-md-9 text-no-input"><a href={external_url_map['CARallele'] + this.state.tempResource.carId + '.html'} target="_blank"><strong>{this.state.tempResource.carId}</strong> <i className="icon icon-external-link"></i></a></span>
+                    </div>
+                    {this.state.tempResource.clinvarVariantId ?
+                        <div className="row">
+                            <span className="col-sm-5 col-md-3 control-label"><label>ClinVar Variant ID</label></span>
+                            <span className="col-sm-7 col-md-9 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
+                        </div>
+                    : null}
                     {this.state.tempResource.hgvsNames.others && this.state.tempResource.hgvsNames.others.length > 0 ?
                         <div className="row">
                             <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
