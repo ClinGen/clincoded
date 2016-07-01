@@ -91,8 +91,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         this.setState({interpretation: this.props.interpretation});
         if (this.props.data) {
             this.setState({shouldFetchData: true});
-            this.fetchMyVariantInfo();
-            this.fetchEnsemblData();
+            this.fetchExternalData();
         }
     },
 
@@ -100,13 +99,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         this.setState({interpretation: nextProps.interpretation});
         if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
             this.setState({shouldFetchData: true});
-            this.fetchMyVariantInfo();
-            this.fetchEnsemblData();
+            this.fetchExternalData();
         }
     },
 
     // Retrieve ExAC population data from myvariant.info
-    fetchMyVariantInfo: function() {
+    fetchExternalData: function() {
         var variant = this.props.data;
         var url = this.props.protocol + external_url_map['MyVariantInfo'];
         if (variant) {
@@ -129,45 +127,22 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 this.parseExacData(response);
                 this.parseEspData(response);
                 this.calculateHighestMAF();
-            }).then(response => {
-                this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
-                    // Calling method to update global object with ExAC Allele Frequency data
-                    this.parseAlleleFrequencyData(response);
-                    this.calculateHighestMAF();
-                }).catch(function(e) {
-                    console.log('VEP Allele Frequency Fetch Error=: %o', e);
-                });
             }).catch(function(e) {
                 console.log('MyVariant Fetch Error=: %o', e);
             });
-        }
-    },
-
-    // Retrieve 1000GENOMES population data from rest.ensembl.org
-    fetchEnsemblData: function() {
-        var variant = this.props.data;
-        if (variant) {
-            // Extract only the number portion of the dbSNP id
-            var numberPattern = /\d+/g;
-            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
+            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
+                // Calling method to update global object with ExAC Allele Frequency data
+                this.parseAlleleFrequencyData(response);
+                this.calculateHighestMAF();
+            }).catch(function(e) {
+                console.log('VEP Allele Frequency Fetch Error=: %o', e);
+            });
             this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
                 this.parseTGenomesData(response);
                 this.calculateHighestMAF();
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
             });
-            // Get ExAC allele frequency as a fallback strategy
-            // In the event where myvariant.info doesn't return ExAC allele frequency info
-            // FIXME: Need to remove this when switching to using the global population object for table UI
-            // FIXME_MC: Also need to figure out how to make sure the promises do not conflict: they're not chained, but dependent on the result of the other
-            /*
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
-                this.parseAlleleFrequencyData(response);
-                this.setState({ensembl_exac_allele: response[0].colocated_variants[0]});
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
-            */
         }
     },
 
