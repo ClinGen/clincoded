@@ -39,7 +39,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
-        loadingComplete: React.PropTypes.bool,
         href_url: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func
     },
@@ -63,7 +62,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     render: function() {
         var variant = this.props.variantData;
         var interpretation = this.props.interpretation;
-        var loadingComplete = this.props.loadingComplete;
 
         // The ordering of TabPanels are corresponding to that of tabs
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
