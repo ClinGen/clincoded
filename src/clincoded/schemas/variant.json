@@ -122,5 +122,12 @@
             "title": "Molecular Consequence",
             "type": "string"
         }
+    },
+    "boost_values": {
+        "clinvarVariantId": 1.0,
+        "clinVarRCVs": 1.0,
+        "carId": 1.0,
+        "otherDescription": 1.0,
+        "source": 1.0
     }
 }

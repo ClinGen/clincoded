@@ -482,7 +482,7 @@
             "type": "string"
         },
         "uuid": {
-            "title": "ExperimentalData",
+            "title": "uuid",
             "type": "string"
         },
         "date_created": {
@@ -499,6 +499,10 @@
         }
     },
     "boost_values": {
-        "evidenceType": 1.0
+        "evidenceType": 1.0,
+        "variants": 1.0,
+        "variants.uuid": 1.0,
+        "variants.clinvarVariantId": 1.0,
+        "variants.clinvarVariantTitle": 1.0
     }
 }
