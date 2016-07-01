@@ -1031,7 +1031,6 @@ var ExperimentalCuration = React.createClass({
                                 if (result.total) {
                                     // Search got a result. Add a string for experimentalData.variants for this existing variant
                                     experimentalDataVariants.push(result['@graph'][0]['@id']);
-                                    //experimentalDataVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                 } else {
                                     // Search got no result; make a new variant and save it in an array so we can write them.
                                     // Look for the term in the filters to see what term failed to find a match
@@ -1081,7 +1080,6 @@ var ExperimentalCuration = React.createClass({
                                 // Add the newly written variants to the experimental data
                                 results.forEach(result => {
                                     experimentalDataVariants.push(result['@graph'][0]['@id']);
-                                    //experimentalDataVariants.push('/variants/' + result['@graph'][0].uuid + '/');
                                 });
                             }
                             return Promise.resolve(results);
