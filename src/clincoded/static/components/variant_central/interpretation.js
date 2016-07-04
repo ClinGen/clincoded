@@ -16,6 +16,7 @@ var TabPanel = ReactTabs.TabPanel;
 Tabs.setUseDefaultStyles(false);
 
 // Import individual tab components
+var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
 var CurationInterpretationBasicInfo = require('./interpretation/basic_info').CurationInterpretationBasicInfo;
 var CurationInterpretationPopulation = require('./interpretation/population').CurationInterpretationPopulation;
 var CurationInterpretationComputational = require('./interpretation/computational').CurationInterpretationComputational;
@@ -69,6 +70,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
         return (
             <div className="container curation-variant-tab-group">
+                <CurationInterpretationCriteria interpretation={interpretation} />
                 <Tabs onSelect={this.handleSelect} selectedIndex={this.state.selectedTab} forceRenderTabPanel={true}>
                     <TabList className="tab-label-list">
                         <Tab className="tab-label col-sm-2">Basic Information</Tab>
