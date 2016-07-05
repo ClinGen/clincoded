@@ -1022,9 +1022,6 @@ class Interpretation(Item):
             return genes[0][7:-1]
         return ''
 
-    def interpretation_proteins(self, proteins=[]):
-        return len(proteins)
-
     @calculated_property(schema={
         "title": "Evaluations",
         "type": "number",
