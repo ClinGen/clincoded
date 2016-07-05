@@ -153,7 +153,7 @@ class Variant(Item):
         return paths_filtered_by_status(request, associatedInterpretations)
 
     @calculated_property(schema={
-        "title": "Variant Identifier",
+        "title": "Variant ID",
         "type": "string"
     })
     def variant_identifier(self, clinvarVariantId='', carId='', otherDescription=''):

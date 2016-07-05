@@ -89,7 +89,11 @@
     },
     "columns": {
         "variant.variant_identifier": {
-            "title": "Variant",
+            "title": "Variant ID",
+            "type": "string"
+        },
+        "variant.source": {
+            "title": "Variant Source",
             "type": "string"
         },
         "interpretation_status": {
