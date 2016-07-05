@@ -1225,20 +1225,56 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     cursor: default;
     padding: 5px 0.745em;
 
-    &.benign-strong {
+    &.benign-strong[data-status='evaluated'] {
         background-color: #62387e;
         color: #fff;
     }
 
-    &.benign-supporting {
+    &.benign-strong[data-status='not_evaluated'] {
+        background-color: lighten(#62387e, 30%);
+        color: #fff;
+    }
+
+    &.benign-supporting[data-status='evaluated'] {
         background-color: #2b67a0;
         color: #fff;
     }
 
-    &.pathogenic-supporting {
+    &.benign-supporting[data-status='not_evaluated'] {
+        background-color: lighten(#2b67a0, 30%);
+        color: #fff;
+    }
+
+    &.pathogenic-supporting[data-status='evaluated']  {
         background-color: #728b42;
         color: #fff;
     }
+
+    &.pathogenic-supporting[data-status='not_evaluated']  {
+        background-color: lighten(#728b42, 30%);
+        color: #fff;
+    }
+
+    &.pathogenic-moderate[data-status='evaluated'] {
+        background-color: #d36735;
+        color: #fff;
+    }
+
+    &.pathogenic-moderate[data-status='not_evaluated'] {
+        background-color: lighten(#d36735, 30%);
+        color: #fff;
+    }
+
+    &.pathogenic-strong[data-status='evaluated'] {
+        background-color: #d33535;
+        color: #fff;
+    }
+
+    &.pathogenic-strong[data-status='not_evaluated'] {
+        background-color: lighten(#d33535, 30%);
+        color: #fff;
+    }
+
 }
 
 /**
