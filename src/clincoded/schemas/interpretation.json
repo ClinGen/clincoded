@@ -96,29 +96,21 @@
             "title": "Interpretation Status",
             "type": "string"
         },
+        "interpretation_genes": {
+            "title": "Genes",
+            "type": "string"
+        },
         "interpretation_disease": {
             "title": "Disease",
             "type": "string"
         },
         "evaluation_count": {
             "title": "# Evaluations",
-            "type": "string"
+            "type": "number"
         },
         "provisional_count": {
             "title": "# Provisional",
-            "type": "string"
-        },
-        "interpretation_genes": {
-            "title": "Genes",
-            "type": "string"
-        },
-        "interpretation_transcripts": {
-            "title": "# Transcripts",
-            "type": "string"
-        },
-        "interpretation_proteins": {
-            "title": "# Proteins",
-            "type": "string"
+            "type": "number"
         },
         "submitted_by.title": {
             "title": "Creator",
