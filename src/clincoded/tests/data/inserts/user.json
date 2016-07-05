@@ -1735,5 +1735,20 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "piotr.pawliczek@bcm.edu",
+        "first_name": "Piotr",
+        "last_name": "Pawliczek",
+        "uuid": "9d08b49e-80eb-4755-9ab6-559287b10b0a",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
