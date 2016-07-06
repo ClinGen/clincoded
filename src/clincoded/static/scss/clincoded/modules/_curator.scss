@@ -1223,7 +1223,8 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     background-color: #ddd;
     color: #555;
     cursor: default;
-    padding: 5px 0.745em;
+    padding: 5px 0.725em;
+    font-weight: bold;
 
     &.benign-strong[data-status='evaluated'] {
         background-color: #62387e;
@@ -1231,8 +1232,8 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     }
 
     &.benign-strong[data-status='not_evaluated'] {
-        background-color: lighten(#62387e, 30%);
-        color: #fff;
+        background-color: #fff;
+        color: #62387e;
     }
 
     &.benign-supporting[data-status='evaluated'] {
@@ -1241,8 +1242,8 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     }
 
     &.benign-supporting[data-status='not_evaluated'] {
-        background-color: lighten(#2b67a0, 30%);
-        color: #fff;
+        background-color: #fff;
+        color: #2b67a0;
     }
 
     &.pathogenic-supporting[data-status='evaluated']  {
@@ -1251,8 +1252,8 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     }
 
     &.pathogenic-supporting[data-status='not_evaluated']  {
-        background-color: lighten(#728b42, 30%);
-        color: #fff;
+        background-color: #fff;
+        color: #728b42;
     }
 
     &.pathogenic-moderate[data-status='evaluated'] {
@@ -1261,8 +1262,8 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     }
 
     &.pathogenic-moderate[data-status='not_evaluated'] {
-        background-color: lighten(#d36735, 30%);
-        color: #fff;
+        background-color: #fff;
+        color: #d36735;
     }
 
     &.pathogenic-strong[data-status='evaluated'] {
@@ -1271,8 +1272,8 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     }
 
     &.pathogenic-strong[data-status='not_evaluated'] {
-        background-color: lighten(#d33535, 30%);
-        color: #fff;
+        background-color: #fff;
+        color: #d33535;
     }
 
 }
