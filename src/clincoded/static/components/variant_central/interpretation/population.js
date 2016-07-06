@@ -199,7 +199,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseTGenomesData: function(response) {
         // not all variants are SNPs. Do nothing if variant is not a SNP
         if (response.var_class && response.var_class == 'SNP') {
-            console.log(response);
             let populationObj = this.state.populationObj;
             // get extra 1000Genome information
             populationObj.tGenomes._extra.name = response.name;
