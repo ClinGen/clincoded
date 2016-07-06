@@ -39,7 +39,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
-        loadingComplete: React.PropTypes.bool,
         href_url: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func
     },
@@ -63,7 +62,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     render: function() {
         var variant = this.props.variantData;
         var interpretation = this.props.interpretation;
-        var loadingComplete = this.props.loadingComplete;
 
         // The ordering of TabPanels are corresponding to that of tabs
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
@@ -80,37 +78,37 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     </TabList>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationBasicInfo data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationBasicInfo data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationPopulation data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationPopulation data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationComputational data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationComputational data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationFunctional data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationFunctional data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationSegregation data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationSegregation data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
-                            <CurationInterpretationGeneSpecific data={variant} shouldFetchData={loadingComplete} protocol={this.props.href_url.protocol}
+                            <CurationInterpretationGeneSpecific data={variant} protocol={this.props.href_url.protocol}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>

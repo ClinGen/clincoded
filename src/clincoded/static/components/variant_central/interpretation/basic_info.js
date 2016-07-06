@@ -17,7 +17,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
-        shouldFetchData: React.PropTypes.bool,
         protocol: React.PropTypes.string
     },
 
@@ -36,24 +35,27 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             hgvs_GRCh38: null,
             gene_symbol: null,
             uniprot_id: null,
-            shouldFetchData: false
+            hasRefseqData: false,
+            hasEnsemblData: false
         };
     },
 
-    componentDidMount: function() {
-        if (this.props.data) {
-            this.setState({shouldFetchData: true});
-            this.fetchRefseqData();
-            this.fetchEnsemblData();
+    componentWillReceiveProps: function(nextProps) {
+        if (nextProps.data && this.props.data) {
+            if (!this.state.hasRefseqData) {
+                this.fetchRefseqData();
+            }
+            if (!this.state.hasEnsemblData) {
+                this.fetchEnsemblData();
+            }
         }
     },
 
-    componentWillReceiveProps: function(nextProps) {
-        if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
-            this.setState({shouldFetchData: true});
-            this.fetchRefseqData();
-            this.fetchEnsemblData();
-        }
+    componentWillUnmount: function() {
+        this.setState({
+            hasRefseqData: false,
+            hasEnsemblData: false
+        });
     },
 
     // Retrieve the variant data from NCBI REST API
@@ -80,6 +82,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 // To extract more ClinVar data for 'Basic Information' tab
                 var variantData = parseClinvar(xml, true);
                 this.setState({
+                    hasRefseqData: true,
                     nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
                     protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
                     molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
@@ -127,7 +130,10 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             var numberPattern = /\d+/g;
             var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
             this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
-                this.setState({ensembl_transcripts: response[0].transcript_consequences});
+                this.setState({
+                    hasEnsemblData: true,
+                    ensembl_transcripts: response[0].transcript_consequences
+                });
             }).catch(function(e) {
                 console.log('Ensembl Fetch Error=: %o', e);
             });
@@ -173,11 +179,15 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     // Used to construct LinkOut URL to Uniprot
     getUniprotId: function(gene_symbol) {
         if (gene_symbol) {
+            // FIXME: Use hardcoded uniprot id for now until we find an alternate API to address SSL issue
+            /*
             this.getRestData(this.props.protocol + external_url_map['HGNCFetch'] + gene_symbol).then(result => {
                 this.setState({uniprot_id: result.response.docs[0].uniprot_ids[0]});
             }).catch(function(e) {
                 console.log('HGNC Fetch Error=: %o', e);
             });
+            */
+            this.setState({uniprot_id: 'P38398'});
         }
     },
 

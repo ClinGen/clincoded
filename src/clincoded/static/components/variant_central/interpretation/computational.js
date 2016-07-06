@@ -20,7 +20,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
-        shouldFetchData: React.PropTypes.bool,
         updateInterpretationObj: React.PropTypes.func,
         protocol: React.PropTypes.string
     },
