@@ -191,6 +191,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseTGenomesData: function(response) {
         // not all variants are SNPs. Do nothing if variant is not a SNP
         if (response.var_class && response.var_class == 'SNP') {
+            console.log(response);
             let populationObj = this.state.populationObj;
             // get extra 1000Genome information
             populationObj.tGenomes._extra.name = response.name;
@@ -204,18 +205,22 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     let populationCode = population.population.substring(20).toLowerCase();
                     if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
                         populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
-                        // ... for specific populations
+                        this.parseTGenomesDataAltAllele(populationObj, population);
+                        // ... for specific populations =
                         populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes[populationCode].af[population.allele] = parseFloat(population.frequency);
                     } else if (population.population == '1000GENOMES:phase_3:ALL') {
+                        this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and totals
                         populationObj.tGenomes._tot.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes._tot.af[population.allele] = parseFloat(population.frequency);
                     } else if (population.population == 'ESP6500:African_American') {
+                        this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and ESP AA
                         populationObj.tGenomes.espaa.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes.espaa.af[population.allele] = parseFloat(population.frequency);
                     } else if (population.population == 'ESP6500:European_American') {
+                        this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and ESP EA
                         populationObj.tGenomes.espea.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes.espea.af[population.allele] = parseFloat(population.frequency);
@@ -250,6 +255,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // update populationObj, and set flag indicating that we have 1000Genomes data
             this.setState({hasTGenomesData: true, populationObj: populationObj});
         }
+    },
+
+    parseTGenomesDataAltAllele: function(populationObj, population) {
+        if (!populationObj.tGenomes._extra.alt && population.allele != populationObj.tGenomes._extra.ref) {
+            populationObj.tGenomes._extra.alt = population.allele;
+        }
+        return populationObj;
     },
 
     // Method to assign ESP population data to global population object
