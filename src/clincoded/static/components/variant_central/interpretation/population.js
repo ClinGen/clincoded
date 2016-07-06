@@ -92,10 +92,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         this.setState({interpretation: nextProps.interpretation});
         if (nextProps.data && this.props.data) {
             if (!this.state.hasExacData || !this.state.hasEspData) {
-                this.fetchMyVariantInfo();
+                this.fetchExternalData('myVariantInfo');
             }
             if (!this.state.hasTGenomesData) {
-                this.fetchEnsemblData();
+                this.fetchExternalData('Ensembl');
             }
         }
     },
@@ -109,7 +109,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Retrieve ExAC population data from myvariant.info
-    fetchExternalData: function() {
+    fetchExternalData: function(mode) {
         var variant = this.props.data;
         var url = this.props.protocol + external_url_map['MyVariantInfo'];
         if (variant) {
@@ -127,30 +127,33 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             if (variant_id.indexOf('del') > 0) {
                 variant_id = variant_id.substring(0, variant_id.indexOf('del') + 3);
             }
-            this.getRestData(url + variant_id).then(response => {
-                // Calling methods to update global object with ExAC & ESP population data
-                // FIXME: Need to create a new copy of the global object with new data
-                // while leaving the original object with pre-existing data
-                // for comparison of any potential changed values
-                this.parseExacData(response);
-                this.parseEspData(response);
-                this.calculateHighestMAF();
-            }).catch(function(e) {
-                console.log('MyVariant Fetch Error=: %o', e);
-            });
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
-                // Calling method to update global object with ExAC Allele Frequency data
-                this.parseAlleleFrequencyData(response);
-                this.calculateHighestMAF();
-            }).catch(function(e) {
-                console.log('VEP Allele Frequency Fetch Error=: %o', e);
-            });
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
-                this.parseTGenomesData(response);
-                this.calculateHighestMAF();
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
+            if (mode === 'myVariantInfo') {
+                this.getRestData(url + variant_id).then(response => {
+                    // Calling methods to update global object with ExAC & ESP population data
+                    // FIXME: Need to create a new copy of the global object with new data
+                    // while leaving the original object with pre-existing data
+                    // for comparison of any potential changed values
+                    this.parseExacData(response);
+                    this.parseEspData(response);
+                    this.calculateHighestMAF();
+                }).catch(function(e) {
+                    console.log('MyVariant Fetch Error=: %o', e);
+                });
+                this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
+                    // Calling method to update global object with ExAC Allele Frequency data
+                    this.parseAlleleFrequencyData(response);
+                    this.calculateHighestMAF();
+                }).catch(function(e) {
+                    console.log('VEP Allele Frequency Fetch Error=: %o', e);
+                });
+            } else if (mode === 'Ensembl') {
+                this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
+                    this.parseTGenomesData(response);
+                    this.calculateHighestMAF();
+                }).catch(function(e) {
+                    console.log('Ensembl Fetch Error=: %o', e);
+                });
+            }
         }
     },
 
