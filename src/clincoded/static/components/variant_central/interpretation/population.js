@@ -43,7 +43,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
-        shouldFetchData: React.PropTypes.bool,
         updateInterpretationObj: React.PropTypes.func,
         protocol: React.PropTypes.string
     },
@@ -59,8 +58,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             hasExacData: false, // flag to display ExAC table
             hasTGenomesData: false,
             hasEspData: false, // flag to display ESP table
-            mafCalculated: false,
-            shouldFetchData: false,
             populationObj: {
                 highestMAF: null,
                 exac: {
@@ -89,18 +86,26 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     componentDidMount: function() {
         this.setState({interpretation: this.props.interpretation});
-        if (this.props.data) {
-            this.setState({shouldFetchData: true});
-            this.fetchExternalData();
-        }
     },
 
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretation: nextProps.interpretation});
-        if (this.state.shouldFetchData === false && nextProps.shouldFetchData === true) {
-            this.setState({shouldFetchData: true});
-            this.fetchExternalData();
+        if (nextProps.data && this.props.data) {
+            if (!this.state.hasExacData || !this.state.hasEspData) {
+                this.fetchMyVariantInfo();
+            }
+            if (!this.state.hasTGenomesData) {
+                this.fetchEnsemblData();
+            }
         }
+    },
+
+    componentWillUnmount: function() {
+        this.setState({
+            hasExacData: false,
+            hasTGenomesData: false,
+            hasEspData: false
+        });
     },
 
     // Retrieve ExAC population data from myvariant.info
