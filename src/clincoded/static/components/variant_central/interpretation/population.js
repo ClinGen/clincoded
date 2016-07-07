@@ -200,6 +200,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         // not all variants are SNPs. Do nothing if variant is not a SNP
         if (response.var_class && response.var_class == 'SNP') {
             let populationObj = this.state.populationObj;
+            let updated1000GData = false;
             // get extra 1000Genome information
             populationObj.tGenomes._extra.name = response.name;
             populationObj.tGenomes._extra.var_class = response.var_class;
@@ -216,21 +217,25 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         // ... for specific populations =
                         populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes[populationCode].af[population.allele] = parseFloat(population.frequency);
+                        updated1000GData = true;
                     } else if (population.population == '1000GENOMES:phase_3:ALL') {
                         this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and totals
                         populationObj.tGenomes._tot.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes._tot.af[population.allele] = parseFloat(population.frequency);
+                        updated1000GData = true;
                     } else if (population.population == 'ESP6500:African_American') {
                         this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and ESP AA
                         populationObj.tGenomes.espaa.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes.espaa.af[population.allele] = parseFloat(population.frequency);
+                        updated1000GData = true;
                     } else if (population.population == 'ESP6500:European_American') {
                         this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and ESP EA
                         populationObj.tGenomes.espea.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes.espea.af[population.allele] = parseFloat(population.frequency);
+                        updated1000GData = true;
                     }
                 });
             }
@@ -244,23 +249,29 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         // ... for specific populations
                         populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        updated1000GData = true;
                     } else if (population_genotype.population == '1000GENOMES:phase_3:ALL') {
                         // ... and totals
                         populationObj.tGenomes._tot.gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes._tot.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        updated1000GData = true;
                     } else if (population_genotype.population == 'ESP6500:African_American') {
                         // ... and ESP AA
                         populationObj.tGenomes.espaa.gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes.espaa.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        updated1000GData = true;
                     } else if (population_genotype.population == 'ESP6500:European_American') {
                         // ... and ESP EA
                         populationObj.tGenomes.espea.gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes.espea.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        updated1000GData = true;
                     }
                 });
             }
-            // update populationObj, and set flag indicating that we have 1000Genomes data
-            this.setState({hasTGenomesData: true, populationObj: populationObj});
+            if (updated1000GData) {
+                // update populationObj, and set flag indicating that we have 1000Genomes data
+                this.setState({hasTGenomesData: true, populationObj: populationObj});
+            }
         }
     },
 
