@@ -186,7 +186,10 @@ module.exports.external_url_map = {
     'UCSCGenomeBrowser': '//genome.ucsc.edu/cgi-bin/hgTracks',
     'NCBIVariationViewer': '//www.ncbi.nlm.nih.gov/variation/view/',
     'MyVariantInfo': '//myvariant.info/v1/variant/',
-    'EXAC': '//exac.broadinstitute.org/variant/'
+    'EXAC': '//exac.broadinstitute.org/variant/',
+    'EXACHome': 'http://exac.broadinstitute.org/',
+    'ESPHome': 'http://evs.gs.washington.edu/EVS/',
+    '1000GenomesHome': 'http://www.1000genomes.org/'
 };
 
 
