@@ -1226,53 +1226,27 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     padding: 5px 0.725em;
     font-weight: bold;
 
-    &.benign-strong[data-status='evaluated'] {
-        background-color: #62387e;
-        color: #fff;
-    }
-
-    &.benign-strong[data-status='not_evaluated'] {
-        background-color: #fff;
+    &.benign-strong {
         color: #62387e;
     }
 
-    &.benign-supporting[data-status='evaluated'] {
-        background-color: #2b67a0;
-        color: #fff;
-    }
-
-    &.benign-supporting[data-status='not_evaluated'] {
-        background-color: #fff;
+    &.benign-supporting {
         color: #2b67a0;
     }
 
-    &.pathogenic-supporting[data-status='evaluated']  {
-        background-color: #728b42;
-        color: #fff;
-    }
-
-    &.pathogenic-supporting[data-status='not_evaluated']  {
-        background-color: #fff;
+    &.pathogenic-supporting  {
         color: #728b42;
     }
 
-    &.pathogenic-moderate[data-status='evaluated'] {
-        background-color: #d36735;
-        color: #fff;
-    }
-
-    &.pathogenic-moderate[data-status='not_evaluated'] {
-        background-color: #fff;
+    &.pathogenic-moderate {
         color: #d36735;
     }
 
-    &.pathogenic-strong[data-status='evaluated'] {
-        background-color: #d33535;
-        color: #fff;
+    &.pathogenic-strong {
+        color: #d33535;
     }
 
-    &.pathogenic-strong[data-status='not_evaluated'] {
-        background-color: #fff;
+    &.pathogenic-very-strong {
         color: #d33535;
     }
 
