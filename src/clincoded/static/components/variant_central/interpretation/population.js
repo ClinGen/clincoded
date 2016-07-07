@@ -113,22 +113,24 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (variant) {
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
-            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
+            var rsid = (variant.dbSNPIds && variant.dbSNPIds.length > 0) ? variant.dbSNPIds[0].match(numberPattern) : null;
             // Extract genomic substring from HGVS name whose assembly is GRCh37
             // Both of "GRCh37" and "gRCh37" instances are possibly present in the variant object
             var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
-            var NC_genomic = hgvs_GRCh37.substr(0, hgvs_GRCh37.indexOf(':'));
+            var NC_genomic = hgvs_GRCh37 ? hgvs_GRCh37.substr(0, hgvs_GRCh37.indexOf(':')) : null;
             // 'genomic_chr_mapping' is defined via requiring external mapping file
             var found = genomic_chr_mapping.find((entry) => entry.GenomicRefSeq === NC_genomic);
             // Format variant_id for use of myvariant.info REST API
-            var variant_id = found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':'));
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
-                // Calling method to update global object with ExAC Allele Frequency data
-                this.parseAlleleFrequencyData(response);
-            }).catch(function(e) {
-                console.log('VEP Allele Frequency Fetch Error=: %o', e);
-            });
-            if (hgvs_GRCh37) {
+            var variant_id = (hgvs_GRCh37 && found) ? found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':')) : null;
+            if (rsid) {
+                this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
+                    // Calling method to update global object with ExAC Allele Frequency data
+                    this.parseAlleleFrequencyData(response);
+                }).catch(function(e) {
+                    console.log('VEP Allele Frequency Fetch Error=: %o', e);
+                });
+            }
+            if (variant_id) {
                 this.getRestData(url + variant_id).then(response => {
                     // Calling methods to update global object with ExAC & ESP population data
                     // FIXME: Need to create a new copy of the global object with new data
@@ -149,12 +151,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (variant) {
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
-            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
-                this.parseTGenomesData(response);
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
+            var rsid = (variant.dbSNPIds && variant.dbSNPIds > 0) ? variant.dbSNPIds[0].match(numberPattern) : '';
+            if (rsid) {
+                this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
+                    this.parseTGenomesData(response);
+                }).catch(function(e) {
+                    console.log('Ensembl Fetch Error=: %o', e);
+                });
+            }
             // Get ExAC allele frequency as a fallback strategy
             // In the event where myvariant.info doesn't return ExAC allele frequency info
             // FIXME: Need to remove this when switching to using the global population object for table UI

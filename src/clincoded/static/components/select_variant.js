@@ -70,7 +70,7 @@ var SelectVariant = React.createClass({
                                             <li>If not found in ClinVar, search the <a href={external_url_map['CAR']}>ClinGen Allele Registry</a> with a valid HGVS term for that variant.
                                             <ol type="a">
                                                 <li>If <a href={external_url_map['CAR']}>ClinGen Allele Registry</a> returns a ClinVar ID, select “ClinVar VariationID” from the pull-down to enter it.</li>
-                                                <li>If <a href={external_url_map['CAR']}>ClinGen Allele Registry</a> does not find a ClinVar ID, register the variant to return a CA ID and then select "ClinGen Allele Registry ID (CA ID)" from the pull-down and enter the CA ID.</li>
+                                                <li>If <a href={external_url_map['CAR']}>ClinGen Allele Registry</a> does not find a ClinVar ID, register the variant to return a CA ID and then select "ClinGen Allele Registry ID (CA ID)" from the pull-down and enter the CA ID. Note: Please register your allele using a GRCh37 HGVS term. For an rsID, you can us the <a href="https://mutalyzer.nl/snp-converter">SNP Converter</a> functionality of <a href="https://mutalyzer.nl/">Mutalyzer</a> to retrieve the GRCh37 chromosomal HGVS</li>
                                             </ol>
                                             </li>
                                         </ol>
