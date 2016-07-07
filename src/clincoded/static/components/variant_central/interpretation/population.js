@@ -506,13 +506,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Variant information could not be found.</th>
+                                    <th>No population data was found for this allele in ExAC. <a href={external_url_map['EXACHome']}>Search ExAC</a> for this variant.</th>
                                 </tr>
                             </thead>
                         </table>
                     </div>
-                    // FIXME: below URL is dependent on a response, but this block is executed on lack of a response
-                    //Please see <a href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">variant data</a> at ExAC.
                 }
                 {this.state.hasTGenomesData ?
                     <div className="panel panel-info datasource-1000G">
@@ -539,7 +537,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Variant information could not be found.</th>
+                                    <th>No population data was found for this allele in 1000G. <a href={external_url_map['1000GenomesHome']}>Search 1000G</a> for this variant.</th>
                                 </tr>
                             </thead>
                         </table>
@@ -576,13 +574,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Variant information could not be found.</th>
+                                    <th>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']}>Search ESP</a> for this variant.</th>
                                 </tr>
                             </thead>
                         </table>
                     </div>
-                    // FIXME: below URL is dependent on a response, but this block is executed on lack of a response
-                    // Please see <a href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">variant data</a> at ESP.
                 }
             </div>
         );
