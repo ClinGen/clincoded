@@ -76,7 +76,7 @@ var SelectVariant = React.createClass({
                                         </ol>
                                     </div>
                                     <div className="alert alert-warning">
-                                        When registering your allele in the ClinGen Allele Registry, please use a GRCh37 HGVS term in order to retrieve all available evidence for the allele. For an rsID, you can us the <a href="https://mutalyzer.nl/snp-converter">SNP Converter</a> functionality of <a href="https://mutalyzer.nl/">Mutalyzer</a> to retrieve the GRCh37 genomic HGVS term.
+                                        When registering your allele in the ClinGen Allele Registry, please use a <strong>GRCh37</strong> HGVS term in order to retrieve all available evidence for the allele. For an rsID, you can us the <a href="https://mutalyzer.nl/snp-converter">SNP Converter</a> functionality of <a href="https://mutalyzer.nl/">Mutalyzer</a> to retrieve the GRCh37 genomic HGVS term.
                                     </div>
                                 </div>
                                 <div className="row">
