@@ -52,7 +52,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
             interpretation: this.props.interpretation,
-            hgvs_GRCh37: null,
             ensembl_exac_allele: {},
             interpretationUuid: this.props.interpretationUuid,
             hasExacData: false, // flag to display ExAC table
@@ -129,16 +128,18 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             }).catch(function(e) {
                 console.log('VEP Allele Frequency Fetch Error=: %o', e);
             });
-            this.getRestData(url + variant_id).then(response => {
-                // Calling methods to update global object with ExAC & ESP population data
-                // FIXME: Need to create a new copy of the global object with new data
-                // while leaving the original object with pre-existing data
-                // for comparison of any potential changed values
-                this.parseExacData(response);
-                this.parseEspData(response);
-            }).catch(function(e) {
-                console.log('MyVariant Fetch Error=: %o', e);
-            });
+            if (hgvs_GRCh37) {
+                this.getRestData(url + variant_id).then(response => {
+                    // Calling methods to update global object with ExAC & ESP population data
+                    // FIXME: Need to create a new copy of the global object with new data
+                    // while leaving the original object with pre-existing data
+                    // for comparison of any potential changed values
+                    this.parseExacData(response);
+                    this.parseEspData(response);
+                }).catch(function(e) {
+                    console.log('MyVariant Fetch Error=: %o', e);
+                });
+            }
         }
     },
 
