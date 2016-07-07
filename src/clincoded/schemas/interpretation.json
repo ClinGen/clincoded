@@ -88,12 +88,20 @@
         }
     },
     "columns": {
-        "variant.represent": {
-            "title": "Variant",
+        "variant.variant_identifier": {
+            "title": "Variant ID",
+            "type": "string"
+        },
+        "variant.source": {
+            "title": "Variant Source",
             "type": "string"
         },
         "interpretation_status": {
             "title": "Interpretation Status",
+            "type": "string"
+        },
+        "interpretation_genes": {
+            "title": "Genes",
             "type": "string"
         },
         "interpretation_disease": {
@@ -102,23 +110,11 @@
         },
         "evaluation_count": {
             "title": "# Evaluations",
-            "type": "string"
+            "type": "number"
         },
         "provisional_count": {
             "title": "# Provisional",
-            "type": "string"
-        },
-        "interpretation_genes": {
-            "title": "Genes",
-            "type": "string"
-        },
-        "interpretation_transcripts": {
-            "title": "# Transcripts",
-            "type": "string"
-        },
-        "interpretation_proteins": {
-            "title": "# Proteins",
-            "type": "string"
+            "type": "number"
         },
         "submitted_by.title": {
             "title": "Creator",
