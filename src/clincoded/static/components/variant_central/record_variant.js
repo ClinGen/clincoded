@@ -29,7 +29,10 @@ var CurationRecordVariant = module.exports.CurationRecordVariant = React.createC
         if (variant) {
             var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : null;
             var carId = (variant.carId) ? variant.carId : null;
-            var dbSNPId = (variant.dbSNPIds.length) ? 'rs'+variant.dbSNPIds[0] : null;
+            var dbSNPId = (variant.dbSNPIds.length) ? variant.dbSNPIds[0] : null;
+            if (dbSNPId && !dbSNPId.indexOf('rs')) {
+                dbSNPId = 'rs' + dbSNPId;
+            }
         }
         var addEdit = this.props.interpretationTranscript ? 'Edit' : 'Add';
 
