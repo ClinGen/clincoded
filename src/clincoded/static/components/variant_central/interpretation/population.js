@@ -52,13 +52,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
             interpretation: this.props.interpretation,
-            hgvs_GRCh37: null,
             ensembl_exac_allele: {},
             interpretationUuid: this.props.interpretationUuid,
             hasExacData: false, // flag to display ExAC table
             hasTGenomesData: false,
             hasEspData: false, // flag to display ESP table
             populationObj: {
+                highestMAF: null,
                 exac: {
                     afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
@@ -91,10 +91,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         this.setState({interpretation: nextProps.interpretation});
         if (nextProps.data && this.props.data) {
             if (!this.state.hasExacData || !this.state.hasEspData) {
-                this.fetchMyVariantInfo();
+                this.fetchExternalData('myVariantInfo');
             }
             if (!this.state.hasTGenomesData) {
-                this.fetchEnsemblData();
+                this.fetchExternalData('Ensembl');
             }
         }
     },
@@ -108,64 +108,57 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Retrieve ExAC population data from myvariant.info
-    fetchMyVariantInfo: function() {
+    fetchExternalData: function(mode) {
         var variant = this.props.data;
         var url = this.props.protocol + external_url_map['MyVariantInfo'];
         if (variant) {
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
-            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
+            var rsid = (variant.dbSNPIds && variant.dbSNPIds.length > 0) ? variant.dbSNPIds[0].match(numberPattern) : null;
             // Extract genomic substring from HGVS name whose assembly is GRCh37
             // Both of "GRCh37" and "gRCh37" instances are possibly present in the variant object
             var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
-            var NC_genomic = hgvs_GRCh37.substr(0, hgvs_GRCh37.indexOf(':'));
+            var NC_genomic = hgvs_GRCh37 ? hgvs_GRCh37.substr(0, hgvs_GRCh37.indexOf(':')) : null;
             // 'genomic_chr_mapping' is defined via requiring external mapping file
             var found = genomic_chr_mapping.find((entry) => entry.GenomicRefSeq === NC_genomic);
             // Format variant_id for use of myvariant.info REST API
-            var variant_id = found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':'));
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
-                // Calling method to update global object with ExAC Allele Frequency data
-                this.parseAlleleFrequencyData(response);
-            }).catch(function(e) {
-                console.log('VEP Allele Frequency Fetch Error=: %o', e);
-            });
-            this.getRestData(url + variant_id).then(response => {
-                // Calling methods to update global object with ExAC & ESP population data
-                // FIXME: Need to create a new copy of the global object with new data
-                // while leaving the original object with pre-existing data
-                // for comparison of any potential changed values
-                this.parseExacData(response);
-                this.parseEspData(response);
-            }).catch(function(e) {
-                console.log('MyVariant Fetch Error=: %o', e);
-            });
-        }
-    },
-
-    // Retrieve 1000GENOMES population data from rest.ensembl.org
-    fetchEnsemblData: function() {
-        var variant = this.props.data;
-        if (variant) {
-            // Extract only the number portion of the dbSNP id
-            var numberPattern = /\d+/g;
-            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
-                this.parseTGenomesData(response);
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
-            // Get ExAC allele frequency as a fallback strategy
-            // In the event where myvariant.info doesn't return ExAC allele frequency info
-            // FIXME: Need to remove this when switching to using the global population object for table UI
-            // FIXME_MC: Also need to figure out how to make sure the promises do not conflict: they're not chained, but dependent on the result of the other
-            /*
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1').then(response => {
-                this.parseAlleleFrequencyData(response);
-                this.setState({ensembl_exac_allele: response[0].colocated_variants[0]});
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
-            */
+            var variant_id = (hgvs_GRCh37 && found) ? found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':')) : null;
+            if (variant_id && variant_id.indexOf('del') > 0) {
+                variant_id = variant_id.substring(0, variant_id.indexOf('del') + 3);
+            }
+            if (mode === 'myVariantInfo') {
+                if (variant_id) {
+                    this.getRestData(url + variant_id).then(response => {
+                        // Calling methods to update global object with ExAC & ESP population data
+                        // FIXME: Need to create a new copy of the global object with new data
+                        // while leaving the original object with pre-existing data
+                        // for comparison of any potential changed values
+                        this.parseExacData(response);
+                        this.parseEspData(response);
+                        this.calculateHighestMAF();
+                    }).catch(function(e) {
+                        console.log('MyVariant Fetch Error=: %o', e);
+                    });
+                }
+                if (rsid) {
+                    this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
+                        // Calling method to update global object with ExAC Allele Frequency data
+                        this.parseAlleleFrequencyData(response);
+                        this.calculateHighestMAF();
+                    }).catch(function(e) {
+                        console.log('VEP Allele Frequency Fetch Error=: %o', e);
+                    });
+                }
+            } else if (mode === 'Ensembl') {
+                if (rsid) {
+                    this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
+                        this.parseTGenomesData(response);
+                        this.calculateHighestMAF();
+                    }).catch(function(e) {
+                        console.log('Ensembl Fetch Error=: %o', e);
+                    });
+                }
+            }
         }
     },
 
@@ -174,9 +167,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseAlleleFrequencyData: function(response) {
         let populationObj = this.state.populationObj;
         populationStatic.exac._order.map(key => {
-            populationObj.exac[key].af = response[0].colocated_variants[0]['exac_' + key + '_maf'];
+            populationObj.exac[key].af = parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
         });
-        populationObj.exac._tot.af = response[0].colocated_variants[0].exac_adj_maf;
+        populationObj.exac._tot.af = parseFloat(response[0].colocated_variants[0].exac_adj_maf);
 
         this.setState({populationObj: populationObj});
     },
@@ -189,17 +182,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             let populationObj = this.state.populationObj;
             // get the allele count, allele number, and homozygote count for desired populations
             populationStatic.exac._order.map(key => {
-                populationObj.exac[key].ac = response.exac.ac['ac_' + key];
-                populationObj.exac[key].an = response.exac.an['an_' + key];
-                populationObj.exac[key].hom = response.exac.hom['hom_' + key];
+                populationObj.exac[key].ac = parseInt(response.exac.ac['ac_' + key]);
+                populationObj.exac[key].an = parseInt(response.exac.an['an_' + key]);
+                populationObj.exac[key].hom = parseInt(response.exac.hom['hom_' + key]);
             });
             // get the allele count, allele number, and homozygote count totals
-            populationObj.exac._tot.ac = response.exac.ac.ac_adj;
-            populationObj.exac._tot.an = response.exac.an.an_adj;
-            populationObj.exac._tot.hom = response.exac.hom.ac_hom;
+            populationObj.exac._tot.ac = parseInt(response.exac.ac.ac_adj);
+            populationObj.exac._tot.an = parseInt(response.exac.an.an_adj);
+            populationObj.exac._tot.hom = parseInt(response.exac.hom.ac_hom);
             // get extra ExAC information
-            populationObj.exac._extra.chrom = response.exac.chrom;
-            populationObj.exac._extra.pos = response.exac.pos;
+            populationObj.exac._extra.chrom = response.exac.chrom + ''; // ensure that the chromosome is stored as a String
+            populationObj.exac._extra.pos = parseInt(response.exac.pos);
             populationObj.exac._extra.ref = response.exac.ref;
             populationObj.exac._extra.alt = response.exac.alt;
             // update populationObj, and set flag indicating that we have ExAC data
@@ -209,64 +202,78 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     // parse 1000Genome data
     parseTGenomesData: function(response) {
-        let populationObj = this.state.populationObj;
-        // get extra 1000Genome information
-        populationObj.tGenomes._extra.name = response.name;
-        populationObj.tGenomes._extra.var_class = response.var_class;
-        populationObj.tGenomes._extra.ref = response.ancestral_allele;
-        populationObj.tGenomes._extra.alt = response.minor_allele;
-        // get the allele count and frequencies...
-        if (response.populations) {
-            response.populations.map(population => {
-                // extract 20 characters and forward to get population code (not always relevant)
-                let populationCode = population.population.substring(20).toLowerCase();
-                if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
-                    populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
-                    // ... for specific populations
-                    populationObj.tGenomes[populationCode].ac[population.allele] = population.allele_count;
-                    populationObj.tGenomes[populationCode].af[population.allele] = population.frequency;
-                } else if (population.population == '1000GENOMES:phase_3:ALL') {
-                    // ... and totals
-                    populationObj.tGenomes._tot.ac[population.allele] = population.allele_count;
-                    populationObj.tGenomes._tot.af[population.allele] = population.frequency;
-                } else if (population.population == 'ESP6500:African_American') {
-                    // ... and ESP AA
-                    populationObj.tGenomes.espaa.ac[population.allele] = population.allele_count;
-                    populationObj.tGenomes.espaa.af[population.allele] = population.frequency;
-                } else if (population.population == 'ESP6500:European_American') {
-                    // ... and ESP EA
-                    populationObj.tGenomes.espea.ac[population.allele] = population.allele_count;
-                    populationObj.tGenomes.espea.af[population.allele] = population.frequency;
-                }
-            });
+        // not all variants are SNPs. Do nothing if variant is not a SNP
+        if (response.var_class && response.var_class == 'SNP') {
+            let populationObj = this.state.populationObj;
+            // get extra 1000Genome information
+            populationObj.tGenomes._extra.name = response.name;
+            populationObj.tGenomes._extra.var_class = response.var_class;
+            populationObj.tGenomes._extra.ref = response.ancestral_allele;
+            populationObj.tGenomes._extra.alt = response.minor_allele;
+            // get the allele count and frequencies...
+            if (response.populations) {
+                response.populations.map(population => {
+                    // extract 20 characters and forward to get population code (not always relevant)
+                    let populationCode = population.population.substring(20).toLowerCase();
+                    if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
+                        populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                        this.parseTGenomesDataAltAllele(populationObj, population);
+                        // ... for specific populations =
+                        populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
+                        populationObj.tGenomes[populationCode].af[population.allele] = parseFloat(population.frequency);
+                    } else if (population.population == '1000GENOMES:phase_3:ALL') {
+                        this.parseTGenomesDataAltAllele(populationObj, population);
+                        // ... and totals
+                        populationObj.tGenomes._tot.ac[population.allele] = parseInt(population.allele_count);
+                        populationObj.tGenomes._tot.af[population.allele] = parseFloat(population.frequency);
+                    } else if (population.population == 'ESP6500:African_American') {
+                        this.parseTGenomesDataAltAllele(populationObj, population);
+                        // ... and ESP AA
+                        populationObj.tGenomes.espaa.ac[population.allele] = parseInt(population.allele_count);
+                        populationObj.tGenomes.espaa.af[population.allele] = parseFloat(population.frequency);
+                    } else if (population.population == 'ESP6500:European_American') {
+                        this.parseTGenomesDataAltAllele(populationObj, population);
+                        // ... and ESP EA
+                        populationObj.tGenomes.espea.ac[population.allele] = parseInt(population.allele_count);
+                        populationObj.tGenomes.espea.af[population.allele] = parseFloat(population.frequency);
+                    }
+                });
+            }
+            // get the genotype counts and frequencies...
+            if (response.population_genotypes) {
+                response.population_genotypes.map(population_genotype => {
+                    // extract 20 characters and forward to get population code (not always relevant)
+                    let populationCode = population_genotype.population.substring(20).toLowerCase();
+                    if (population_genotype.population.indexOf('1000GENOMES:phase_3:') == 0 &&
+                        populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                        // ... for specific populations
+                        populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = parseInt(population_genotype.count);
+                        populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                    } else if (population_genotype.population == '1000GENOMES:phase_3:ALL') {
+                        // ... and totals
+                        populationObj.tGenomes._tot.gc[population_genotype.genotype] = parseInt(population_genotype.count);
+                        populationObj.tGenomes._tot.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                    } else if (population_genotype.population == 'ESP6500:African_American') {
+                        // ... and ESP AA
+                        populationObj.tGenomes.espaa.gc[population_genotype.genotype] = parseInt(population_genotype.count);
+                        populationObj.tGenomes.espaa.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                    } else if (population_genotype.population == 'ESP6500:European_American') {
+                        // ... and ESP EA
+                        populationObj.tGenomes.espea.gc[population_genotype.genotype] = parseInt(population_genotype.count);
+                        populationObj.tGenomes.espea.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                    }
+                });
+            }
+            // update populationObj, and set flag indicating that we have 1000Genomes data
+            this.setState({hasTGenomesData: true, populationObj: populationObj});
         }
-        // get the genotype counts and frequencies...
-        if (response.population_genotypes) {
-            response.population_genotypes.map(population_genotype => {
-                // extract 20 characters and forward to get population code (not always relevant)
-                let populationCode = population_genotype.population.substring(20).toLowerCase();
-                if (population_genotype.population.indexOf('1000GENOMES:phase_3:') == 0 &&
-                    populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
-                    // ... for specific populations
-                    populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = population_genotype.count;
-                    populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = population_genotype.frequency;
-                } else if (population_genotype.population == '1000GENOMES:phase_3:ALL') {
-                    // ... and totals
-                    populationObj.tGenomes._tot.gc[population_genotype.genotype] = population_genotype.count;
-                    populationObj.tGenomes._tot.gf[population_genotype.genotype] = population_genotype.frequency;
-                } else if (population_genotype.population == 'ESP6500:African_American') {
-                    // ... and ESP AA
-                    populationObj.tGenomes.espaa.gc[population_genotype.genotype] = population_genotype.count;
-                    populationObj.tGenomes.espaa.gf[population_genotype.genotype] = population_genotype.frequency;
-                } else if (population_genotype.population == 'ESP6500:European_American') {
-                    // ... and ESP EA
-                    populationObj.tGenomes.espea.gc[population_genotype.genotype] = population_genotype.count;
-                    populationObj.tGenomes.espea.gf[population_genotype.genotype] = population_genotype.frequency;
-                }
-            });
+    },
+
+    parseTGenomesDataAltAllele: function(populationObj, population) {
+        if (!populationObj.tGenomes._extra.alt && population.allele != populationObj.tGenomes._extra.ref) {
+            populationObj.tGenomes._extra.alt = population.allele;
         }
-        // update populationObj, and set flag indicating that we have 1000Genomes data
-        this.setState({hasTGenomesData: true, populationObj: populationObj});
+        return populationObj;
     },
 
     // Method to assign ESP population data to global population object
@@ -275,21 +282,84 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (response.evs) {
             let populationObj = this.state.populationObj;
             // get relevant numbers and extra information from ESP
-            populationObj.esp.aa.ac = response.evs.allele_count.african_american;
-            populationObj.esp.aa.gc = response.evs.genotype_count.african_american;
-            populationObj.esp.ea.ac = response.evs.allele_count.european_american;
-            populationObj.esp.ea.gc = response.evs.genotype_count.european_american;
-            populationObj.esp._tot.ac = response.evs.allele_count.all;
-            populationObj.esp._tot.gc = response.evs.genotype_count.all_genotype;
+            populationObj.esp.aa.ac = this.dictValuesToInt(response.evs.allele_count.african_american);
+            populationObj.esp.aa.gc = this.dictValuesToInt(response.evs.genotype_count.african_american);
+            populationObj.esp.ea.ac = this.dictValuesToInt(response.evs.allele_count.european_american);
+            populationObj.esp.ea.gc = this.dictValuesToInt(response.evs.genotype_count.european_american);
+            populationObj.esp._tot.ac = this.dictValuesToInt(response.evs.allele_count.all);
+            populationObj.esp._tot.gc = this.dictValuesToInt(response.evs.genotype_count.all_genotype);
             populationObj.esp._extra.avg_sample_read = response.evs.avg_sample_read;
             populationObj.esp._extra.rsid = response.evs.rsid;
-            populationObj.esp._extra.chrom = response.evs.chrom;
-            populationObj.esp._extra.hg19_start = response.evs.hg19.start;
+            populationObj.esp._extra.chrom = response.evs.chrom + ''; // ensure that the chromosome is stored as a String
+            populationObj.esp._extra.hg19_start = parseInt(response.evs.hg19.start);
             populationObj.esp._extra.ref = response.evs.ref;
             populationObj.esp._extra.alt = response.evs.alt;
             // update populationObj, and set flag indicating that we have ESP data
             this.setState({hasEspData: true, populationObj: populationObj});
         }
+    },
+
+    // method to run through dictionary/Object's values and convert them to Int
+    dictValuesToInt: function(dict) {
+        for (var key in dict) {
+            dict[key] = parseInt(dict[key]);
+        }
+        return dict;
+    },
+
+    // calculate highest MAF value and related info from external data
+    calculateHighestMAF: function() {
+        let populationObj = this.state.populationObj;
+        let highestMAFObj = {af: 0};
+        // check against exac data
+        populationStatic.exac._order.map(pop => {
+            if (populationObj.exac[pop].af && populationObj.exac[pop].af) {
+                if (populationObj.exac[pop].af > highestMAFObj.af) {
+                    highestMAFObj.pop = pop;
+                    highestMAFObj.popLabel = populationStatic.exac._labels[pop];
+                    highestMAFObj.ac = populationObj.exac[pop].ac;
+                    highestMAFObj.ac_tot = populationObj.exac[pop].an;
+                    highestMAFObj.source = 'ExAC';
+                    highestMAFObj.af = populationObj.exac[pop].af;
+                }
+            }
+        });
+        // check against 1000g data
+        populationStatic.tGenomes._order.map(pop => {
+            let ref = populationObj.tGenomes._extra.ref,
+                alt = populationObj.tGenomes._extra.alt;
+            if (populationObj.tGenomes[pop].af && populationObj.tGenomes[pop].af[alt]) {
+                if (populationObj.tGenomes[pop].af[alt] > highestMAFObj.af) {
+                    highestMAFObj.pop = pop;
+                    highestMAFObj.popLabel = populationStatic.tGenomes._labels[pop];
+                    highestMAFObj.ac = populationObj.tGenomes[pop].ac[alt];
+                    highestMAFObj.ac_tot = populationObj.tGenomes[pop].ac[ref] + populationObj.tGenomes[pop].ac[alt];
+                    highestMAFObj.source = '1000Genomes';
+                    highestMAFObj.af = populationObj.tGenomes[pop].af[alt];
+                }
+            }
+        });
+        // check against esp data
+        populationStatic.esp._order.map(pop => {
+            let alt = populationObj.esp._extra.alt;
+            if (populationObj.esp[pop].ac) {
+                let ref = populationObj.esp._extra.ref,
+                    alt = populationObj.esp._extra.alt;
+                // esp does not report back frequencies, so we have to calculate it off counts
+                let tempMAF = populationObj.esp[pop].ac[alt] / (populationObj.esp[pop].ac[ref] + populationObj.esp[pop].ac[alt]);
+                if (tempMAF > highestMAFObj.af) {
+                    highestMAFObj.pop = pop;
+                    highestMAFObj.popLabel = populationStatic.esp._labels[pop];
+                    highestMAFObj.ac = populationObj.esp[pop].ac[alt];
+                    highestMAFObj.ac_tot = populationObj.esp[pop].ac[ref] + populationObj.esp[pop].ac[alt];
+                    highestMAFObj.source = 'ESP';
+                    highestMAFObj.af = tempMAF;
+                }
+            }
+        });
+        // embed highest MAF and related data into population obj, and update to state
+        populationObj.highestMAF = highestMAFObj;
+        this.setState({populationObj: populationObj});
     },
 
     // method to render a row of data for the ExAC table
@@ -357,7 +427,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var exacStatic = populationStatic.exac,
             tGenomesStatic = populationStatic.tGenomes,
             espStatic = populationStatic.esp;
-        var exac = this.state.populationObj && this.state.populationObj.exac ? this.state.populationObj.exac : null, // Get ExAC data from global population object
+        var highestMAF = this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null,
+            exac = this.state.populationObj && this.state.populationObj.exac ? this.state.populationObj.exac : null, // Get ExAC data from global population object
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
 
@@ -383,17 +454,21 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="clearfix">
                         <div className="bs-callout-content-container">
                             <dl className="inline-dl clearfix">
-                                <dt>Population: </dt><dd>XXXXXX</dd>
-                                <dt># Variant Alleles: </dt><dd>XXXXXX</dd>
-                                <dt>Total # Alleles Tested: </dt><dd>XXXXXX</dd>
+                                <dt>Population: </dt><dd>{highestMAF && highestMAF.popLabel ? highestMAF.popLabel : 'N/A'}</dd>
+                                <dt># Variant Alleles: </dt><dd>{highestMAF && highestMAF.ac ? highestMAF.ac : 'N/A'}</dd>
+                                <dt>Total # Alleles Tested: </dt><dd>{highestMAF && highestMAF.ac_tot ? highestMAF.ac_tot : 'N/A'}</dd>
                             </dl>
                         </div>
                         <div className="bs-callout-content-container">
                             <dl className="inline-dl clearfix">
-                                <dt>Source: </dt><dd>XXXXXX</dd>
-                                <dt>Allele Frequency: </dt><dd>XXXXXX</dd>
-                                <dt>CI - lower: </dt><dd>XXXXXX</dd>
-                                <dt>CI - upper: </dt><dd>XXXXXX</dd>
+                                <dt>Source: </dt><dd>{highestMAF && highestMAF.source ? highestMAF.source : 'N/A'}</dd>
+                                <dt>Allele Frequency: </dt><dd>{highestMAF && highestMAF.af ? highestMAF.af : 'N/A'}</dd>
+                                {(this.state.interpretation) ?
+                                    <span>
+                                        <dt>CI - lower: </dt><dd>XXXXXX</dd>
+                                        <dt>CI - upper: </dt><dd>XXXXXX</dd>
+                                    </span>
+                                : null}
                             </dl>
                         </div>
                     </div>

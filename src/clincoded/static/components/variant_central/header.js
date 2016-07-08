@@ -33,6 +33,11 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
                         <CurationRecordGeneDisease data={variant} />
                         <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} session={session} />
                     </div>
+                    {variant && !variant.hgvsNames.GRCh37 ?
+                        <div className="alert alert-warning">
+                            <strong>Warning:</strong> You registered your allele in the ClinGen Allele Registry using a GRCh38 HGVS term. This will currently limit some of the population and predictive evidence that can be retrieved for this variant until an upcoming version of the ClinGen Allele Registry is available.
+                        </div>
+                    : null}
                 </div>
             </div>
         );
