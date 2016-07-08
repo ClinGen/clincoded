@@ -565,7 +565,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="panel panel-info datasource-1000G">
                         <div className="panel-heading">
                             <h3 className="panel-title">1000G: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}
-                                <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + esp._extra.rsid} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
+                                <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
                             </h3>
                         </div>
                         <table className="table">
