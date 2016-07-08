@@ -102,20 +102,12 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
     },
 
-    // Return all RefSeq hgvsNames in an array
+    // Return all non NC_ genomic hgvsNames in an array
     parseHgvsNames: function(hgvsNames) {
-        var hgvs_names = [], NC_terms = [];
+        var hgvs_names = [];
         if (hgvsNames) {
-            if (hgvsNames.GRCh38) {
-                NC_terms.push(hgvsNames.GRCh38);
-            }
-            if (hgvsNames.GRCh37) {
-                NC_terms.push(hgvsNames.GRCh37);
-            }
             if (hgvsNames.others) {
-                hgvs_names = NC_terms.concat(hgvsNames.others);
-            } else {
-                hgvs_names = NC_terms;
+                hgvs_names = hgvsNames.others;
             }
         }
         return hgvs_names;
