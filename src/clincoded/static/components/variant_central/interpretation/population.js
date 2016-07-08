@@ -57,6 +57,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             hasExacData: false, // flag to display ExAC table
             hasTGenomesData: false,
             hasEspData: false, // flag to display ESP table
+            geneENSG: null,
             populationObj: {
                 highestMAF: null,
                 exac: {
@@ -144,6 +145,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
                         // Calling method to update global object with ExAC Allele Frequency data
                         this.parseAlleleFrequencyData(response);
+                        this.parseGeneConstraintScores(response);
                         this.calculateHighestMAF();
                     }).catch(function(e) {
                         console.log('VEP Allele Frequency Fetch Error=: %o', e);
@@ -172,6 +174,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         populationObj.exac._tot.af = parseFloat(response[0].colocated_variants[0].exac_adj_maf);
 
         this.setState({populationObj: populationObj});
+    },
+
+    // Get gene ENSG value to link out to Gene's page on ExAC, as temporary stop gap for displaying
+    // constraint scores (see #750)
+    parseGeneConstraintScores: function(response) {
+        if (response && response.length > 0 && response[0].transcript_consequences && response[0].transcript_consequences.length > 0) {
+            this.setState({geneENSG: response[0].transcript_consequences[0].gene_id});
+        }
     },
 
     // Method to assign ExAC population data to global population object
