@@ -182,6 +182,7 @@ module.exports.external_url_map = {
     'CAR-test': 'http://reg.test.genome.network/site/registry',
     'CARallele-test': '//reg.test.genome.network/allele/',
     'EnsemblVEP': '//rest.ensembl.org/vep/human/id/',
+    'EnsemblHgvsVEP': '//rest.ensembl.org/vep/human/hgvs/',
     'EnsemblVariation': '//rest.ensembl.org/variation/human/',
     'UCSCGenomeBrowser': '//genome.ucsc.edu/cgi-bin/hgTracks',
     'NCBIVariationViewer': '//www.ncbi.nlm.nih.gov/variation/view/',
