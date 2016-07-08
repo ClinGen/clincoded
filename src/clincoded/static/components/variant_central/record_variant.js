@@ -30,7 +30,7 @@ var CurationRecordVariant = module.exports.CurationRecordVariant = React.createC
             var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : null;
             var carId = (variant.carId) ? variant.carId : null;
             var dbSNPId = (variant.dbSNPIds.length) ? variant.dbSNPIds[0] : null;
-            if (dbSNPId && !dbSNPId.indexOf('rs')) {
+            if (dbSNPId && dbSNPId.indexOf('rs') == -1) {
                 dbSNPId = 'rs' + dbSNPId;
             }
         }
@@ -43,17 +43,17 @@ var CurationRecordVariant = module.exports.CurationRecordVariant = React.createC
                     {clinVarId || carId ?
                         <dl className="inline-dl clearfix">
                             {clinVarId ?
-                                <dd><a href={'http://www.ncbi.nlm.nih.gov/clinvar/variation/' + clinVarId} target="_blank" title={'ClinVar page for ' + clinVarId + ' in a new window'}>{'ClinVar ID: '+clinVarId}</a></dd>
+                                <dd>ClinVar ID:&nbsp;<a href={'http://www.ncbi.nlm.nih.gov/clinvar/variation/' + clinVarId} target="_blank" title={'ClinVar page for ' + clinVarId + ' in a new window'}>{clinVarId}</a></dd>
                                 :
                                 null
                             }
                             {carId ?
-                                <dd><a href={'http://reg.genome.network/allele/' + carId + '.html'} target="_blank" title={'GlinGen Allele Registry page for ' + carId + ' in a new window'}>{'ClinGen Allele Registry ID: '+carId}</a></dd>
+                                <dd>ClinGen Allele Registry ID:&nbsp;<a href={'http://reg.genome.network/allele/' + carId + '.html'} target="_blank" title={'GlinGen Allele Registry page for ' + carId + ' in a new window'}>{carId}</a></dd>
                                 :
                                 null
                             }
                             {dbSNPId ?
-                                <dd><a href={'http://www.ncbi.nlm.nih.gov/snp/?term=' + dbSNPId} target="_blank" title={'dbSNP page for ' + dbSNPId + ' in a new window'}>{'dbSNP ID: '+dbSNPId}</a></dd>
+                                <dd>dbSNP ID:&nbsp;<a href={'http://www.ncbi.nlm.nih.gov/snp/?term=' + dbSNPId} target="_blank" title={'dbSNP page for ' + dbSNPId + ' in a new window'}>{dbSNPId}</a></dd>
                                 :
                                 null
                             }
