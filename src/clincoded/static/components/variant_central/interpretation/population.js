@@ -503,6 +503,15 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </dl>
                         </div>
                     </div>
+                    {this.state.geneENSG ?
+                        <div>
+                            <br />
+                            <h4>ExAC Constraint Score</h4>
+                            <div className="clearfix">
+                                <div className="bs-callout-content-container"><a href={external_url_map['EXAC'] + this.state.geneENSG} target="_blank">View pLI in ExAC <i className="icon icon-external-link"></i></a></div>
+                            </div>
+                        </div>
+                    : null}
                 </div>
 
                 {(this.state.interpretationUuid) ?
