@@ -30,7 +30,7 @@
         }
     },
     "columns": {
-        "variant.represent": {
+        "variant.variant_identifier": {
             "title": "Variant",
             "type": "string"
         },
