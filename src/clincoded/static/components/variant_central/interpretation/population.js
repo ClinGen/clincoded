@@ -199,13 +199,23 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseTGenomesData: function(response) {
         // not all variants are SNPs. Do nothing if variant is not a SNP
         if (response.var_class && response.var_class == 'SNP') {
+            // FIXME: this GRCh vs gRCh needs to be reconciled in the data model and data import
+            let hgvs_GRCh37 = (this.props.data.hgvsNames.GRCh37) ? this.props.data.hgvsNames.GRCh37 : this.props.data.hgvsNames.gRCh37;
+            let hgvs_GRCh38 = (this.props.data.hgvsNames.GRCh38) ? this.props.data.hgvsNames.GRCh38 : this.props.data.hgvsNames.gRCh38;
             let populationObj = this.state.populationObj;
             let updated1000GData = false;
             // get extra 1000Genome information
             populationObj.tGenomes._extra.name = response.name;
             populationObj.tGenomes._extra.var_class = response.var_class;
-            populationObj.tGenomes._extra.ref = response.ancestral_allele;
-            populationObj.tGenomes._extra.alt = response.minor_allele;
+            if (hgvs_GRCh37.indexOf('>') > -1 || hgvs_GRCh38.indexOf('>') > -1) {
+                // if SNP variant, extract allele information from hgvs names, preferring grch38
+                populationObj.tGenomes._extra.ref = hgvs_GRCh38 ? hgvs_GRCh38.charAt(hgvs_GRCh38.length - 3) : hgvs_GRCh37.charAt(hgvs_GRCh37.length - 3);
+                populationObj.tGenomes._extra.alt = hgvs_GRCh38 ? hgvs_GRCh38.charAt(hgvs_GRCh38.length - 1) : hgvs_GRCh37.charAt(hgvs_GRCh37.length - 1);
+            } else {
+                // fallback for non-SNP variants
+                populationObj.tGenomes._extra.ref = response.ancestral_allele;
+                populationObj.tGenomes._extra.alt = response.minor_allele;
+            }
             // get the allele count and frequencies...
             if (response.populations) {
                 response.populations.map(population => {
