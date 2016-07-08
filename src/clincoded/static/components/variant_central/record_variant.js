@@ -53,7 +53,7 @@ var CurationRecordVariant = module.exports.CurationRecordVariant = React.createC
                                 null
                             }
                             {dbSNPId ?
-                                <dd>dbSNP ID:&nbsp;<a href={'http://www.ncbi.nlm.nih.gov/snp/?term=' + dbSNPId} target="_blank" title={'dbSNP page for ' + dbSNPId + ' in a new window'}>{dbSNPId}</a></dd>
+                                <dd>dbSNP ID:&nbsp;<a href={'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=' + dbSNPId.replace('rs', '')} target="_blank" title={'dbSNP page for ' + dbSNPId + ' in a new window'}>{dbSNPId}</a></dd>
                                 :
                                 null
                             }
