@@ -35,7 +35,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
                     </div>
                     {variant && !variant.hgvsNames.GRCh37 ?
                         <div className="alert alert-warning">
-                            <strong>Warning:</strong> Your variant is not associated with a GRCh37 genomic representation. This will currently limit some of the population and predictive evidence retrieved for this variant
+                            <strong>Warning:</strong> Your variant is not associated with a GRCh37 genomic representation. This will currently limit some of the population and predictive evidence retrieved for this variant.
                         </div>
                     : null}
                 </div>
