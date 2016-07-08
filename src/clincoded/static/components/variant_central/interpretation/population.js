@@ -500,7 +500,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
                 {this.state.hasExacData ?
                     <div className="panel panel-info datasource-ExAC">
-                        <div className="panel-heading"><h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}<a href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">(See ExAC data <i className="icon icon-external-link"></i>)</a></h3></div>
+                        <div className="panel-heading">
+                            <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}
+                                <a className="panel-subtitle pull-right" href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">See ExAC data <i className="icon icon-external-link"></i></a>
+                            </h3>
+                        </div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -535,7 +539,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
                 {this.state.hasTGenomesData ?
                     <div className="panel panel-info datasource-1000G">
-                        <div className="panel-heading"><h3 className="panel-title">1000G: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class} <a href={external_url_map['EnsemblPopulationPage'] + esp._extra.rsid} target="_blank">(See 1000G data <i className="icon icon-external-link"></i>)</a></h3></div>
+                        <div className="panel-heading">
+                            <h3 className="panel-title">1000G: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}
+                                <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + esp._extra.rsid} target="_blank">See 1000G data <i className="icon icon-external-link"></i></a>
+                            </h3>
+                        </div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -566,7 +574,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
                 {this.state.hasEspData ?
                     <div className="panel panel-info datasource-ESP">
-                        <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}<a href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">(See ESP data <i className="icon icon-external-link"></i>)</a></h3></div>
+                        <div className="panel-heading">
+                            <h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}
+                                <a className="panel-subtitle pull-right" href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">See ESP data <i className="icon icon-external-link"></i></a>
+                            </h3>
+                        </div>
                         <table className="table">
                             <thead>
                                 <tr>
