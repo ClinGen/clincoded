@@ -1324,3 +1324,9 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
     opacity: 1;
 }
+
+/* set up vertical padding for div */
+.btn-vertical-space {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
