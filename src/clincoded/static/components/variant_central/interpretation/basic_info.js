@@ -64,7 +64,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         //var refseq_data = {};
         var variant = this.props.data;
         var url = this.props.protocol + external_url_map['ClinVarEutils'];
-        if (variant) {
+        if (variant && variant.clinvarVariantId) {
             var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
             // Extract genomic substring from HGVS name whose assembly is GRCh37 or GRCh38
             // Both of "GRCh37" and "gRCh37" (same for GRCh38) instances are possibly present in the variant object
@@ -158,17 +158,19 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             var chrosome = (found.ChrFormat) ? found.ChrFormat.substr(3) : '';
             // Format hgvs_notation for vep/:species/hgvs/:hgvs_notation api
             var hgvs_notation = chrosome + hgvs_GRCh38.slice(hgvs_GRCh38.indexOf(':'));
-            if (hgvs_notation.indexOf('del') > 0) {
-                hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
-            }
-            this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
-                this.setState({
-                    hasEnsemblData: true,
-                    ensembl_transcripts: response[0].transcript_consequences
+            if (hgvs_notation) {
+                if (hgvs_notation.indexOf('del') > 0) {
+                    hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
+                }
+                this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+                    this.setState({
+                        hasEnsemblData: true,
+                        ensembl_transcripts: response[0].transcript_consequences
+                    });
+                }).catch(function(e) {
+                    console.log('Ensembl Fetch Error=: %o', e);
                 });
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
+            }
         }
     },
 

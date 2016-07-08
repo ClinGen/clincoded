@@ -52,7 +52,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
             interpretation: this.props.interpretation,
-            hgvs_GRCh37: null,
             ensembl_exac_allele: {},
             interpretationUuid: this.props.interpretationUuid,
             hasExacData: false, // flag to display ExAC table
@@ -115,44 +114,50 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (variant) {
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
-            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
+            var rsid = (variant.dbSNPIds && variant.dbSNPIds.length > 0) ? variant.dbSNPIds[0].match(numberPattern) : null;
             // Extract genomic substring from HGVS name whose assembly is GRCh37
             // Both of "GRCh37" and "gRCh37" instances are possibly present in the variant object
             var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
-            var NC_genomic = hgvs_GRCh37.substr(0, hgvs_GRCh37.indexOf(':'));
+            var NC_genomic = hgvs_GRCh37 ? hgvs_GRCh37.substr(0, hgvs_GRCh37.indexOf(':')) : null;
             // 'genomic_chr_mapping' is defined via requiring external mapping file
             var found = genomic_chr_mapping.GRCh37.find((entry) => entry.GenomicRefSeq === NC_genomic);
             // Format variant_id for use of myvariant.info REST API
-            var variant_id = found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':'));
-            if (variant_id.indexOf('del') > 0) {
+            var variant_id = (hgvs_GRCh37 && found) ? found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':')) : null;
+            if (variant_id && variant_id.indexOf('del') > 0) {
                 variant_id = variant_id.substring(0, variant_id.indexOf('del') + 3);
             }
             if (mode === 'myVariantInfo') {
-                this.getRestData(url + variant_id).then(response => {
-                    // Calling methods to update global object with ExAC & ESP population data
-                    // FIXME: Need to create a new copy of the global object with new data
-                    // while leaving the original object with pre-existing data
-                    // for comparison of any potential changed values
-                    this.parseExacData(response);
-                    this.parseEspData(response);
-                    this.calculateHighestMAF();
-                }).catch(function(e) {
-                    console.log('MyVariant Fetch Error=: %o', e);
-                });
-                this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
-                    // Calling method to update global object with ExAC Allele Frequency data
-                    this.parseAlleleFrequencyData(response);
-                    this.calculateHighestMAF();
-                }).catch(function(e) {
-                    console.log('VEP Allele Frequency Fetch Error=: %o', e);
-                });
+                if (variant_id) {
+                    this.getRestData(url + variant_id).then(response => {
+                        // Calling methods to update global object with ExAC & ESP population data
+                        // FIXME: Need to create a new copy of the global object with new data
+                        // while leaving the original object with pre-existing data
+                        // for comparison of any potential changed values
+                        this.parseExacData(response);
+                        this.parseEspData(response);
+                        this.calculateHighestMAF();
+                    }).catch(function(e) {
+                        console.log('MyVariant Fetch Error=: %o', e);
+                    });
+                }
+                if (rsid) {
+                    this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
+                        // Calling method to update global object with ExAC Allele Frequency data
+                        this.parseAlleleFrequencyData(response);
+                        this.calculateHighestMAF();
+                    }).catch(function(e) {
+                        console.log('VEP Allele Frequency Fetch Error=: %o', e);
+                    });
+                }
             } else if (mode === 'Ensembl') {
-                this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
-                    this.parseTGenomesData(response);
-                    this.calculateHighestMAF();
-                }).catch(function(e) {
-                    console.log('Ensembl Fetch Error=: %o', e);
-                });
+                if (rsid) {
+                    this.getRestData(this.props.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
+                        this.parseTGenomesData(response);
+                        this.calculateHighestMAF();
+                    }).catch(function(e) {
+                        console.log('Ensembl Fetch Error=: %o', e);
+                    });
+                }
             }
         }
     },
