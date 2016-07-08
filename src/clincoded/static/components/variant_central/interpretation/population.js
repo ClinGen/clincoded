@@ -365,7 +365,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     highestMAFObj.popLabel = populationStatic.tGenomes._labels[pop];
                     highestMAFObj.ac = populationObj.tGenomes[pop].ac[alt];
                     highestMAFObj.ac_tot = populationObj.tGenomes[pop].ac[ref] + populationObj.tGenomes[pop].ac[alt];
-                    highestMAFObj.source = '1000Genomes';
+                    highestMAFObj.source = '1000 Genomes';
                     highestMAFObj.af = populationObj.tGenomes[pop].af[alt];
                 }
             }
@@ -564,7 +564,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {this.state.hasTGenomesData ?
                     <div className="panel panel-info datasource-1000G">
                         <div className="panel-heading">
-                            <h3 className="panel-title">1000G: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}
+                            <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}
                                 <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
                             </h3>
                         </div>
@@ -586,11 +586,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </div>
                 :
                     <div className="panel panel-info datasource-1000G">
-                        <div className="panel-heading"><h3 className="panel-title">1000G</h3></div>
+                        <div className="panel-heading"><h3 className="panel-title">1000 Genomes</h3></div>
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>No population data was found for this allele in 1000G. <a href={external_url_map['1000GenomesHome']}>Search 1000G</a> for this variant.</th>
+                                    <th>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']}>Search 1000 Genomes</a> for this variant.</th>
                                 </tr>
                             </thead>
                         </table>
