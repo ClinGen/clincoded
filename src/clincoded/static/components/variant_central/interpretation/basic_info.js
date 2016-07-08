@@ -63,7 +63,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         //var refseq_data = {};
         var variant = this.props.data;
         var url = this.props.protocol + external_url_map['ClinVarEutils'];
-        if (variant) {
+        if (variant && variant.clinvarVariantId) {
             var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
             // Extract genomic substring from HGVS name whose assembly is GRCh37 or GRCh38
             // Both of "GRCh37" and "gRCh37" (same for GRCh38) instances are possibly present in the variant object
@@ -129,15 +129,17 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (variant) {
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
-            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
-                this.setState({
-                    hasEnsemblData: true,
-                    ensembl_transcripts: response[0].transcript_consequences
+            var rsid = (variant.dbSNPIds && variant.dbSNPIds.length > 0) ? variant.dbSNPIds[0].match(numberPattern) : null;
+            if (rsid) {
+                this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+                    this.setState({
+                        hasEnsemblData: true,
+                        ensembl_transcripts: response[0].transcript_consequences
+                    });
+                }).catch(function(e) {
+                    console.log('Ensembl Fetch Error=: %o', e);
                 });
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
+            }
         }
     },
 
