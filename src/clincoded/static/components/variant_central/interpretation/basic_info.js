@@ -34,6 +34,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             primary_transcript: {},
             hgvs_GRCh37: null,
             hgvs_GRCh38: null,
+            hasHgvsGRCh37: false,
+            hasHgvsGRCh38: false,
             gene_symbol: null,
             uniprot_id: null,
             hasRefseqData: false,
@@ -64,41 +66,54 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         //var refseq_data = {};
         var variant = this.props.data;
         var url = this.props.protocol + external_url_map['ClinVarEutils'];
-        if (variant && variant.clinvarVariantId) {
-            var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
+        if (variant) {
+            if (variant.clinvarVariantId) {
+                this.setState({clinvar_id: variant.clinvarVariantId});
+                // Get ClinVar data via the parseClinvar method defined in parse-resources.js
+                this.getRestDataXml(url + variant.clinvarVariantId).then(xml => {
+                    // Passing 'true' option to invoke 'mixin' function
+                    // To extract more ClinVar data for 'Basic Information' tab
+                    var variantData = parseClinvar(xml, true);
+                    this.setState({
+                        hasRefseqData: true,
+                        clinvar_hgvs_names: this.parseHgvsNames(variantData.hgvsNames),
+                        nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
+                        protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
+                        molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
+                        sequence_location: variantData.allele.SequenceLocation,
+                        gene_symbol: variantData.gene.symbol
+                    });
+                    // Calling method to get uniprot id for LinkOut link
+                    this.getUniprotId(this.state.gene_symbol);
+                    // Calling method to identify nucleotide change, protein change and molecular consequence
+                    // Used for UI display in the Primary Transcript table
+                    this.getPrimaryTranscript(variantData.clinvarVariantTitle, this.state.nucleotide_change, this.state.protein_change, this.state.molecular_consequence);
+                }).catch(function(e) {
+                    console.log('RefSeq Fetch Error=: %o', e);
+                });
+            }
+            if (variant.carId) {
+                this.setState({car_id: variant.carId});
+            }
+            if (variant.dbSNPIds.length) {
+                this.setState({dbSNP_id: variant.dbSNPIds[0]});
+            }
             // Extract genomic substring from HGVS name whose assembly is GRCh37 or GRCh38
             // Both of "GRCh37" and "gRCh37" (same for GRCh38) instances are possibly present in the variant object
             var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
-            var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
-            this.setState({
-                clinvar_id: clinVarId,
-                car_id: variant.carId,
-                dbSNP_id: variant.dbSNPIds[0],
-                hgvs_GRCh37: hgvs_GRCh37,
-                hgvs_GRCh38: hgvs_GRCh38,
-            });
-            // Get ClinVar data via the parseClinvar method defined in parse-resources.js
-            this.getRestDataXml(url + clinVarId).then(xml => {
-                // Passing 'true' option to invoke 'mixin' function
-                // To extract more ClinVar data for 'Basic Information' tab
-                var variantData = parseClinvar(xml, true);
+            if (hgvs_GRCh37) {
                 this.setState({
-                    hasRefseqData: true,
-                    clinvar_hgvs_names: this.parseHgvsNames(variantData.hgvsNames),
-                    nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
-                    protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
-                    molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
-                    sequence_location: variantData.allele.SequenceLocation,
-                    gene_symbol: variantData.gene.symbol
+                    hgvs_GRCh37: hgvs_GRCh37,
+                    hasHgvsGRCh37: true
                 });
-                // Calling method to get uniprot id for LinkOut link
-                this.getUniprotId(this.state.gene_symbol);
-                // Calling method to identify nucleotide change, protein change and molecular consequence
-                // Used for UI display in the Primary Transcript table
-                this.getPrimaryTranscript(variantData.clinvarVariantTitle, this.state.nucleotide_change, this.state.protein_change, this.state.molecular_consequence);
-            }).catch(function(e) {
-                console.log('RefSeq Fetch Error=: %o', e);
-            });
+            }
+            var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
+            if (hgvs_GRCh38) {
+                this.setState({
+                    hgvs_GRCh38: hgvs_GRCh38,
+                    hasHgvsGRCh38: true
+                });
+            }
         }
     },
 
@@ -143,25 +158,27 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             // We are extracting genomic substring from HGVS name whose assembly is GRCh38
             // Both of "GRCh38" and "gRCh38" instances are possibly present in the variant object
             var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
-            var NC_genomic = hgvs_GRCh38.substr(0, hgvs_GRCh38.indexOf(':'));
-            // 'genomic_chr_mapping' is defined via requiring external mapping file
-            var found = genomic_chr_mapping.GRCh38.find((entry) => entry.GenomicRefSeq === NC_genomic);
-            // Can't simply filter alpha letters due to the presence of 'chrX' and 'chrY'
-            var chrosome = (found.ChrFormat) ? found.ChrFormat.substr(3) : '';
-            // Format hgvs_notation for vep/:species/hgvs/:hgvs_notation api
-            var hgvs_notation = chrosome + hgvs_GRCh38.slice(hgvs_GRCh38.indexOf(':'));
-            if (hgvs_notation) {
-                if (hgvs_notation.indexOf('del') > 0) {
-                    hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
-                }
-                this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
-                    this.setState({
-                        hasEnsemblData: true,
-                        ensembl_transcripts: response[0].transcript_consequences
+            if (hgvs_GRCh38) {
+                var NC_genomic = hgvs_GRCh38.substr(0, hgvs_GRCh38.indexOf(':'));
+                // 'genomic_chr_mapping' is defined via requiring external mapping file
+                var found = genomic_chr_mapping.GRCh38.find((entry) => entry.GenomicRefSeq === NC_genomic);
+                // Can't simply filter alpha letters due to the presence of 'chrX' and 'chrY'
+                var chrosome = (found.ChrFormat) ? found.ChrFormat.substr(3) : '';
+                // Format hgvs_notation for vep/:species/hgvs/:hgvs_notation api
+                var hgvs_notation = chrosome + hgvs_GRCh38.slice(hgvs_GRCh38.indexOf(':'));
+                if (hgvs_notation) {
+                    if (hgvs_notation.indexOf('del') > 0) {
+                        hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
+                    }
+                    this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+                        this.setState({
+                            hasEnsemblData: true,
+                            ensembl_transcripts: response[0].transcript_consequences
+                        });
+                    }).catch(function(e) {
+                        console.log('Ensembl Fetch Error=: %o', e);
                     });
-                }).catch(function(e) {
-                    console.log('Ensembl Fetch Error=: %o', e);
-                });
+                }
             }
         }
     },
@@ -276,21 +293,19 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
         return (
             <div className="variant-interpretation basic-info">
-                {(GRCh37 || GRCh38) ?
-                    <div className="bs-callout bs-callout-info clearfix">
-                        <div className="bs-callout-content-container">
-                            <h4>Genomic</h4>
-                            <ul>
-                                {(GRCh38) ? <li><span>{GRCh38 + ' (GRCh38)'}</span></li> : null}
-                                {(GRCh37) ? <li><span>{GRCh37 + ' (GRCh37)'}</span></li> : null}
-                            </ul>
-                        </div>
+                <div className="bs-callout bs-callout-info clearfix">
+                    <div className="bs-callout-content-container">
+                        <h4>Genomic</h4>
+                        <ul>
+                            {(GRCh38) ? <li><span>{GRCh38 + ' (GRCh38)'}</span></li> : null}
+                            {(GRCh37) ? <li><span>{GRCh37 + ' (GRCh37)'}</span></li> : null}
+                        </ul>
                     </div>
-                : null}
+                </div>
 
                 <div className="panel panel-info">
                     <div className="panel-heading"><h3 className="panel-title">ClinVar Primary Transcript</h3></div>
-                    {(primary_transcript) ?
+                    {(clinvar_id && primary_transcript) ?
                         <table className="table">
                             <thead>
                                 <tr>
@@ -320,7 +335,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading"><h3 className="panel-title">RefSeq Transcripts</h3></div>
-                    {(clinvar_hgvs_names) ?
+                    {(clinvar_id && clinvar_hgvs_names) ?
                         <table className="table">
                             <tbody>
                                 <tr>
@@ -341,29 +356,39 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading"><h3 className="panel-title">Ensembl Transcripts</h3></div>
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Nucleotide Change</th>
-                                <th>Protein Change</th>
-                                <th>Molecular Consequence</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {ensembl_data.map(function(item, i) {
-                                return (self.renderEnsemblData(item, i));
-                            })}
-                        </tbody>
-                    </table>
+                    {(this.state.hasHgvsGRCh38 && GRCh38) ?
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Nucleotide Change</th>
+                                    <th>Protein Change</th>
+                                    <th>Molecular Consequence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {ensembl_data.map(function(item, i) {
+                                    return (self.renderEnsemblData(item, i));
+                                })}
+                            </tbody>
+                        </table>
+                        :
+                         <table className="table"><tbody><tr><td>Unable to find transcripts</td></tr></tbody></table>
+                    }
                 </div>
 
                 <div className="panel panel-info">
                     <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
                     <div className="panel-body">
                         <dl className="inline-dl clearfix">
-                            <dd>Variation Viewer [<a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh38')} target="_blank" title={'Variation Viewer page for ' + GRCh38 + ' in a new window'}>GRCh38</a> - <a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh37')} target="_blank" title={'Variation Viewer page for ' + GRCh37 + ' in a new window'}>GRCh37</a>]</dd>
-                            <dd>Ensembl Browser [<a href={dbxref_prefix_map['ENSEMBL'] + this.getGeneId(ensembl_data)} target="_blank" title={'Ensembl Browser page for ' + this.getGeneId(ensembl_data) + ' in a new window'}>GRCh38</a>]</dd>
-                            <dd>UCSC [<a href={this.ucscViewerURL(sequence_location, 'hg38', 'GRCh38')} target="_blank" title={'UCSC Genome Browser for ' + GRCh38 + ' in a new window'}>GRCh38/hg38</a> - <a href={this.ucscViewerURL(sequence_location, 'hg19', 'GRCh37')} target="_blank" title={'UCSC Genome Browser for ' + GRCh37 + ' in a new window'}>GRCh37/hg19</a>]</dd>
+                            {(sequence_location.length && gene_symbol) ?
+                                <dd>Variation Viewer [<a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh38')} target="_blank" title={'Variation Viewer page for ' + GRCh38 + ' in a new window'}>GRCh38</a> - <a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh37')} target="_blank" title={'Variation Viewer page for ' + GRCh37 + ' in a new window'}>GRCh37</a>]</dd>
+                                : null }
+                            {(ensembl_data.length) ?
+                                <dd>Ensembl Browser [<a href={dbxref_prefix_map['ENSEMBL'] + this.getGeneId(ensembl_data)} target="_blank" title={'Ensembl Browser page for ' + this.getGeneId(ensembl_data) + ' in a new window'}>GRCh38</a>]</dd>
+                                : null}
+                            {(sequence_location.length) ?
+                                <dd>UCSC [<a href={this.ucscViewerURL(sequence_location, 'hg38', 'GRCh38')} target="_blank" title={'UCSC Genome Browser for ' + GRCh38 + ' in a new window'}>GRCh38/hg38</a> - <a href={this.ucscViewerURL(sequence_location, 'hg19', 'GRCh37')} target="_blank" title={'UCSC Genome Browser for ' + GRCh37 + ' in a new window'}>GRCh37/hg19</a>]</dd>
+                                : null}
                             { /* <dd><a href={dbxref_prefix_map['UniProtKB'] + uniprot_id} target="_blank" title={'UniProtKB page for ' + uniprot_id + ' in a new window'}>UniProtKB</a></dd> */ }
                         </dl>
                     </div>
