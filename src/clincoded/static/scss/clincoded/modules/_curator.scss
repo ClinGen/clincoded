@@ -1210,12 +1210,24 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     margin-top: -5px;
 }
 
-.panel.panel-info .panel-title {
-    font-weight: bold;
+.panel.panel-info {
+    .panel-title {
+        font-weight: bold;
 
-    a {
-        font-weight: normal;
-        margin-left: 20px;
+        a {
+            font-weight: normal;
+            margin-left: 20px;
+        }
+    }
+
+    .panel-subtitle {
+        a {
+            font-weight: normal;
+        }
+    }
+
+    .pull-right {
+        float: right;
     }
 }
 
