@@ -329,7 +329,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </tbody>
                         </table>
                         :
-                        <table className="table"><tbody><tr><td>Not known in ClinVar</td></tr></tbody></table>
+                        <table className="table"><tbody><tr><td>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</td></tr></tbody></table>
                     }
                 </div>
 
@@ -350,7 +350,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </tbody>
                         </table>
                         :
-                        <table className="table"><tbody><tr><td>Not known in ClinVar</td></tr></tbody></table>
+                        <table className="table"><tbody><tr><td>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</td></tr></tbody></table>
                     }
                 </div>
 
@@ -372,7 +372,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </tbody>
                         </table>
                         :
-                         <table className="table"><tbody><tr><td>Unable to find transcripts</td></tr></tbody></table>
+                         <table className="table"><tbody><tr><td>No data was found for this allele in Ensembl. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank">Search Ensembl</a> for this variant.</td></tr></tbody></table>
                     }
                 </div>
 
