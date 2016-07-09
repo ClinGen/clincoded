@@ -334,7 +334,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 </div>
 
                 <div className="panel panel-info">
-                    <div className="panel-heading"><h3 className="panel-title">RefSeq Transcripts</h3></div>
+                    <div className="panel-heading"><h3 className="panel-title">ClinVar Transcripts</h3></div>
                     {(clinvar_id && clinvar_hgvs_names) ?
                         <table className="table">
                             <tbody>
