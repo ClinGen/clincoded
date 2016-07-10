@@ -1,10 +1,12 @@
 'use strict';
 var React = require('react');
 var globals = require('../globals');
+var fetched = require('../fetched');
 var RestMixin = require('../rest').RestMixin;
 var parseAndLogError = require('../mixins').parseAndLogError;
 var form = require('../../libs/bootstrap/form');
 var modal = require('../../libs/bootstrap/modal');
+var CuratorHistory = require('../curator_history');
 
 var Input = form.Input;
 var Form = form.Form;
@@ -15,13 +17,14 @@ var queryKeyValue = globals.queryKeyValue;
 
 // Display the variant curation action bar above the criteria and tabs
 var VariantCurationActions = module.exports.VariantCurationActions = React.createClass({
-    mixins: [RestMixin, ModalMixin],
+    mixins: [RestMixin, ModalMixin, FormMixin, CuratorHistory],
 
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
         session: React.PropTypes.object,
         interpretation: React.PropTypes.object,
-        editKey: React.PropTypes.string
+        editKey: React.PropTypes.string,
+        href_url: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -43,6 +46,9 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         }
         if (this.props.editKey === 'true' && this.props.interpretation) {
             this.setState({isEditMode: true});
+            if (this.props.interpretation.interpretation_disease) {
+                this.setState({hasAssociatedDisease: true});
+            }
         }
     },
 
@@ -76,6 +82,15 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             interpretationButtonTitle = 'Continue Interpretation';
         }
 
+        var associateDiseaseButtonTitle = '', associateDiseaseModalTitle = '';
+        if (!this.state.hasAssociatedDisease) {
+            associateDiseaseButtonTitle = 'Associate with Disease';
+            associateDiseaseModalTitle = 'Associate this interpretation with a disease';
+        } else {
+            associateDiseaseButtonTitle = 'Edit Disease';
+            associateDiseaseModalTitle = 'Associate this interpretation with a different disease';
+        }
+
         return (
             <Form formClassName="form-horizontal form-std">
                 <div className="container curation-actions curation-variant">
@@ -83,9 +98,10 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                         <div className="interpretation-record clearfix">
                             <h2><span>Variant Interpretation Record</span></h2>
                             <div className="btn-group">
-                                <Modal title="Associate with Disease" wrapperClassName="modal-associate-disease">
+                                <Modal title={associateDiseaseModalTitle} wrapperClassName="modal-associate-disease">
                                     <button className="btn btn-primary pull-right"
-                                        modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} interpretation={this.props.interpretation} editKey={this.props.editkey} />}>Associate with Disease</button>
+                                        modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} url={this.props.href_url} session={this.props.session}
+                                            interpretation={this.props.interpretation} editKey={this.props.editkey} />}>{associateDiseaseButtonTitle}</button>
                                 </Modal>
                             </div>
                         </div>
@@ -106,9 +122,11 @@ var AssociateDisease = React.createClass({
 
     propTypes: {
         data: React.PropTypes.object,
+        session: React.PropTypes.object,
         closeModal: React.PropTypes.func, // Function to call to close the modal
         interpretation: React.PropTypes.object,
-        editKey: React.PropTypes.bool
+        editKey: React.PropTypes.bool,
+        url: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -149,7 +167,14 @@ var AssociateDisease = React.createClass({
             ], [
                 function() { this.setFormErrors('orphanetid', 'Orphanet ID not found'); }.bind(this)
             ]).then(data => {
-                this.props.closeModal();
+                var interpretationObj = this.props.interpretation;
+                if (interpretationObj) {
+                    interpretationObj.interpretation_disease = data.term;
+                    this.putRestData(this.props.interpretation['@id'], {'interpretation_disease': data.term}).then(response => {
+                        console.log("updated obj response is === " + JSON.stringify(response));
+                    });
+                }
+                // this.props.closeModal();
             }).catch(e => {
                 // Some unexpected error happened
                 parseAndLogError.bind(undefined, 'fetchedRequest');
@@ -160,6 +185,7 @@ var AssociateDisease = React.createClass({
     // Called when the modal 'Cancel' button is clicked
     cancelAction: function(e) {
         this.props.closeModal();
+        window.location.replace(this.props.url);
     },
 
     render: function() {
