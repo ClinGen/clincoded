@@ -642,10 +642,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 var criteriaGroup1 = function() {
     return (
         <div>
-            <Input type="checkbox" ref="ba1-value" label="BA1 Criterion Met?:" handleChange={this.handleCheckboxChange}
+            <Input type="checkbox" ref="ba1-value" label="BA1 Met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['ba1-value'] ? this.state.checkboxes['ba1-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="checkbox" ref="pm2-value" label="PM2 Criterion Met?:" handleChange={this.handleCheckboxChange}
+            <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
+            <Input type="checkbox" ref="pm2-value" label="PM2 Met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['pm2-value'] ? this.state.checkboxes['pm2-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="ba1-description" label="Explain criteria selection:" rows="5" placeholder="e.g. free text"
@@ -653,7 +654,7 @@ var criteriaGroup1 = function() {
             <Input type="textarea" ref="pm2-description" label="Explain criteria selection (PM2):" rows="5" placeholder="e.g. free text"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
 
-            <Input type="checkbox" ref="bs1-value" label="BS1 Criterion Met? (Disease dependent):" handleChange={this.handleCheckboxChange}
+            <Input type="checkbox" ref="bs1-value" label="BS1 Met? (Disease dependent):" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['bs1-value'] ? this.state.checkboxes['bs1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="bs1-description" label="Explain criteria selection:" rows="5" placeholder="e.g. free text" inputDisabled={!this.state.diseaseAssociated}
