@@ -39,6 +39,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             submitDisabled: false, // disabled for now due to uncertain/non-universal logic
             evidenceData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
             interpretation: null, // parent interpretation object
+            diseaseAssociated: false, // flag to define whether or not the interpretation has a disease associated with it
             checkboxes: {}, // store any checkbox values
             updateMsg: null // specifies what html to display next to button after press
         };
@@ -49,7 +50,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // update the interpretation object when loaded
         if (this.props.interpretation) {
             this.setState({interpretation: this.props.interpretation});
-
+            // check to see if the interpretation has a disease associated with it
+            if (this.props.interpretation.interpretation_disease && this.props.interpretation.interpretation_disease !== '') {
+                this.setState({diseaseAssociated: true});
+            }
             // update the form if needed
             if (this.props.formDataUpdater) {
                 this.props.formDataUpdater.call(this, this.props);

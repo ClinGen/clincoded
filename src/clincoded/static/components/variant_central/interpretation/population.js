@@ -654,9 +654,9 @@ var criteriaGroup1 = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
 
             <Input type="checkbox" ref="bs1-value" label="BS1 Criterion Met? (Disease dependent):" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['bs1-value'] ? this.state.checkboxes['bs1-value'] : false}
+                checked={this.state.checkboxes['bs1-value'] ? this.state.checkboxes['bs1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="bs1-description" label="Explain criteria selection:" rows="5" placeholder="e.g. free text"
+            <Input type="textarea" ref="bs1-description" label="Explain criteria selection:" rows="5" placeholder="e.g. free text" inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
         </div>
     );
