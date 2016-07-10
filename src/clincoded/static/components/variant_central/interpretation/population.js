@@ -673,14 +673,17 @@ var criteriaGroup1Update = function(nextProps) {
                     case 'ba1':
                         tempCheckboxes['ba1-value'] = evaluation.value === 'true';
                         this.refs['ba1-description'].setValue(evaluation.description);
-                        this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
                         break;
                     case 'pm2':
                         tempCheckboxes['pm2-value'] = evaluation.value === 'true';
                         this.refs['pm2-description'].setValue(evaluation.description);
-                        this.setState({submitDisabled: false});
+                        break;
+                    case 'bs1':
+                        tempCheckboxes['bs1-value'] = evaluation.value === 'true';
+                        this.refs['bs1-description'].setValue(evaluation.description);
                         break;
                 }
+                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
             });
         }
     }
