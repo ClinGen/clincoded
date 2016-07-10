@@ -21,46 +21,65 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         variantData: React.PropTypes.object, // ClinVar data payload
         session: React.PropTypes.object,
         interpretation: React.PropTypes.object,
-        editKey: React.PropTypes.bool
+        editKey: React.PropTypes.string
     },
 
     getInitialState: function() {
         return {
             variantUuid: null,
-            editKey: queryKeyValue('edit', this.props.href)
+            hasExistingInterpretation: false,
+            isEditMode: false,
+            hasAssociatedDisease: false
         };
     },
 
-    // handler for 'Start new interpreation' button click event
-    handleNewInterpretation: function(e) {
+    componentWillReceiveProps: function(nextProps) {
+        if (nextProps.variantData && this.props.variantData) {
+            if (this.props.variantData.associatedInterpretations) {
+                if (this.props.variantData.associatedInterpretations.length && this.props.variantData.submitted_by['@id'] === this.props.session.user_properties['@id']) {
+                    this.setState({hasExistingInterpretation: true});
+                }
+            }
+        }
+        if (this.props.editKey === 'true' && this.props.interpretation) {
+            this.setState({isEditMode: true});
+        }
+    },
+
+    // handler for 'Start new interpretation' & 'Continue interpretation' button click events
+    handleInterpretationEvent: function(e) {
         e.preventDefault(); e.stopPropagation();
         var variantObj = this.props.variantData;
         var newInterpretationObj;
-        if (variantObj) {
-            this.setState({variantUuid: variantObj.uuid});
-            // Put together a new interpretation object
-            newInterpretationObj = {variant: variantObj.uuid};
+        if (!this.state.hasExistingInterpretation) {
+            if (variantObj) {
+                this.setState({variantUuid: variantObj.uuid});
+                // Put together a new interpretation object
+                newInterpretationObj = {variant: variantObj.uuid};
+            }
+            // Post new interpretation to the DB. Once promise returns, go to /curation-variant page with
+            // the new interpretation UUID in the query string.
+            this.postRestData('/interpretations/', newInterpretationObj).then(data => {
+                var newInterpretationUuid = data['@graph'][0].uuid;
+                window.location.href = '/variant-central/?edit=true&variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid;
+            }).catch(e => {parseAndLogError.bind(undefined, 'postRequest')});
+        } else if (this.state.hasExistingInterpretation && !this.isEditMode) {
+            window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + variantObj.associatedInterpretations[0].uuid;
         }
-        // Post new interpretation to the DB. Once promise returns, go to /curation-variant page with
-        // the new interpretation UUID in the query string.
-        this.postRestData('/interpretations/', newInterpretationObj).then(data => {
-            var newInterpretationUuid = data['@graph'][0].uuid;
-            window.location.href = '/variant-central/?variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid;
-        }).catch(e => {parseAndLogError.bind(undefined, 'postRequest')});
-    },
-
-    // handler for 'Continue interpretation' button click event
-    handleExistingInterpretation: function(e) {
-        e.preventDefault(); e.stopPropagation();
-        var variantObj = this.props.variantData;
-        window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + variantObj.associatedInterpretations[0].uuid;
     },
 
     render: function() {
+        var interpretationButtonTitle = '';
+        if (!this.state.hasExistingInterpretation) {
+            interpretationButtonTitle = 'Start New Interpretation';
+        } else if (this.state.hasExistingInterpretation && !this.isEditMode) {
+            interpretationButtonTitle = 'Continue Interpretation';
+        }
+
         return (
             <Form formClassName="form-horizontal form-std">
                 <div className="container curation-actions curation-variant">
-                    {((this.props.editKey || this.state.editKey) && this.props.interpretation) ?
+                    {(this.state.isEditMode) ?
                         <div className="interpretation-record clearfix">
                             <h2><span>Variant Interpretation Record</span></h2>
                             <div className="btn-group">
@@ -71,49 +90,12 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                             </div>
                         </div>
                         :
-                        <RenderInterpretationButton data={this.props.variantData} session={this.props.session} 
-                            handleExistingInterpretation={this.handleExistingInterpretation} handleNewInterpretation={this.handleNewInterpretation} />
+                        <div className="evidence-only clearfix">
+                            <Input type="button-button" inputClassName="btn btn-primary pull-right" title={interpretationButtonTitle} clickHandler={this.handleInterpretationEvent} />
+                        </div>
                     }
                 </div>
             </Form>
-        );
-    }
-});
-
-// Render 'Start new interpretation' or 'Continue interpretation' button
-var RenderInterpretationButton = React.createClass({
-    propTypes: {
-        data: React.PropTypes.object,
-        session: React.PropTypes.object,
-        handleExistingInterpretation: React.PropTypes.func,
-        handleNewInterpretation: React.PropTypes.func
-    },
-
-    getInitialState: function() {
-        return {
-            hasExistingInterpretation: false
-        };
-    },
-
-    componentWillReceiveProps: function(nextProps) {
-        if (nextProps.data && this.props.data) {
-            if (this.props.data.associatedInterpretations) {
-                if (this.props.data.associatedInterpretations.length && this.props.data.submitted_by['@id'] === this.props.session.user_properties['@id']) {
-                    this.setState({hasExistingInterpretation: true});
-                }
-            }
-        }
-    },
-
-    render: function() {
-        return (
-            <div className="evidence-only clearfix">
-                {(this.state.hasExistingInterpretation) ?
-                    <Input type="button-button" inputClassName="btn-primary pull-right" title="Continue interpretation" clickHandler={this.props.handleExistingInterpretation} />
-                    :
-                    <Input type="button-button" inputClassName="btn-primary pull-right" title="Start new interpretation" clickHandler={this.props.handleNewInterpretation} />
-                }
-            </div>
         );
     }
 });
