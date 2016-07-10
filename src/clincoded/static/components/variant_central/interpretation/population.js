@@ -470,7 +470,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="col-sm-12">
                         <CurationInterpretationForm formTitle={"Population Criteria Evaluation"} renderedFormContent={criteriaGroup1}
                             evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
-                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['ba1', 'pm2']}
+                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['ba1', 'pm2', 'bs1']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
                 </div>
@@ -652,6 +652,12 @@ var criteriaGroup1 = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <Input type="textarea" ref="pm2-description" label="Explain criteria selection (PM2):" rows="5" placeholder="e.g. free text"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
+
+            <Input type="checkbox" ref="bs1-value" label="BS1 Criterion Met? (Disease dependent):" handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['bs1-value'] ? this.state.checkboxes['bs1-value'] : false}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="textarea" ref="bs1-description" label="Explain criteria selection:" rows="5" placeholder="e.g. free text"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
         </div>
     );
 };
