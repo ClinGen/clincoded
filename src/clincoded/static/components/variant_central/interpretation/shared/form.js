@@ -23,7 +23,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from evidenceData
         formChangeHandler: React.PropTypes.func, // function that will take care of any in-form logic that needs to be taken in to account
         variantUuid: React.PropTypes.string, // UUID of the parent variant
-        criteria: React.PropTypes.array, // array of criteria codes being handled by this form
+        criteria: React.PropTypes.array, // array of criteria codes (non-disease-specific) being handled by this form
+        criteriaDisease: React.PropTypes.array, // array of criteria codes (disease-specific) being handled by this form
         interpretation: React.PropTypes.object, // parent interpretation object
         updateInterpretationObj: React.PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
     },
@@ -105,15 +106,19 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         var flatInterpretation = null;
         var freshInterpretation = null;
         var evidenceObjectId = null;
+        var submittedCriteria = this.props.criteria;
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
             freshInterpretation = interpretation;
             // get fresh update of interpretation object so we have newest evaluation list, then flatten it
             flatInterpretation = curator.flatten(freshInterpretation);
-
+            // lets do the disease check for saving criteria code here
+            if (flatInterpretation.disease && flatInterpretation.disease !== '' && this.props.criteriaDisease && this.props.criteriaDisease.length > 0) {
+                submittedCriteria = submittedCriteria.concat(this.props.criteriaDisease);
+            }
             // check existing evaluations and map their UUIDs if they match the criteria in this form
             if (freshInterpretation.evaluations) {
                 freshInterpretation.evaluations.map(freshEvaluation => {
-                    if (this.props.criteria.indexOf(freshEvaluation.criteria) > -1) {
+                    if (submittedCriteria.indexOf(freshEvaluation.criteria) > -1) {
                         existingEvaluationUuids[freshEvaluation.criteria] = freshEvaluation.uuid;
                         // save the evidence object's id in case we can re-use it
                         if (freshEvaluation[this.state.evidenceType]) {
@@ -145,7 +150,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             // generate individual promises for each evaluation. PUTs if the evaluation for the criteria code
             // already exists, and POSTs if not
             var evaluationPromises = [];
-            this.props.criteria.map(criterion => {
+            submittedCriteria.map(criterion => {
                 evaluations[criterion] = {
                     variant: this.props.variantUuid,
                     criteria: criterion,
