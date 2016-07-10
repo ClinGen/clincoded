@@ -1120,12 +1120,19 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     .interpretation-record {
         padding: 20px 0;
 
-        h2 {
-            margin-top: 0;
-            margin-bottom: 0;
-            position: absolute;
+         h2 {
+            left: 0;
+            margin: 0;
             text-align: center;
-            width: 1128px;
+            width: 100%;
+        }
+
+        .btn-group {
+            left: 0;
+            padding: 0 15px;
+            position: absolute;
+            top: 20px;
+            width: 100%;
         }
     }
 }
