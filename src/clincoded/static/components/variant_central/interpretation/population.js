@@ -465,12 +465,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         return (
             <div className="variant-interpretation population">
-                {(this.state.interpretation) ?
+                {(this.props.data && this.state.interpretation) ?
                 <div className="row">
                     <div className="col-sm-12">
-                        <CurationInterpretationForm formTitle={"Population Demo Criteria Group 1"} renderedFormContent={criteriaGroup1}
+                        <CurationInterpretationForm formTitle={"Population Criteria Evaluation"} renderedFormContent={criteriaGroup1}
                             evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
-                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['pm2']}
+                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['ba1', 'pm2']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
                 </div>
@@ -662,14 +662,15 @@ var criteriaGroup1Update = function(nextProps) {
     if (nextProps.interpretation) {
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
             nextProps.interpretation.evaluations.map(evaluation => {
+                var tempCheckboxes = this.state.checkboxes;
                 switch(evaluation.criteria) {
                     case 'ba1':
-                        this.refs['ba1-value'].setValue(evaluation.value);
+                        tempCheckboxes['ba1-value'] = evaluation.value === 'true';
                         this.refs['ba1-description'].setValue(evaluation.description);
-                        this.setState({submitDisabled: false});
+                        this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
                         break;
                     case 'pm2':
-                        this.refs['pm2-value'].setValue(evaluation.value);
+                        tempCheckboxes['pm2-value'] = evaluation.value === 'true';
                         this.refs['pm2-description'].setValue(evaluation.description);
                         this.setState({submitDisabled: false});
                         break;
