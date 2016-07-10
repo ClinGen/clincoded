@@ -21,6 +21,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
         evidenceDataUpdated: React.PropTypes.bool, // passed in by parent page, which does the comparison of stored and new external data
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from evidenceData
+        formChangeHandler: React.PropTypes.func, // function that will take care of any in-form logic that needs to be taken in to account
         variantUuid: React.PropTypes.string, // UUID of the parent variant
         criteria: React.PropTypes.array, // array of criteria codes being handled by this form
         interpretation: React.PropTypes.object, // parent interpretation object
@@ -71,10 +72,25 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
     },
 
+    // generic wrapper function to pass any form changes to the formChangeHandler function passed
+    // from the parent page, if applicable
+    handleFormChange: function(ref, e) {
+        if (this.props.formChangeHandler) {
+            this.props.formChangeHandler.call(this, ref, e);
+        }
+    },
+
+    // generic wrapper function to properly render checkboxes and pass any changes to the formChangeHandler
+    // functino passed from the parent page, if applicable
     handleCheckboxChange: function(ref, e) {
+        // properly render checking and unchecking of boxes
         let tempCheckboxes = this.state.checkboxes;
         tempCheckboxes[ref] = tempCheckboxes[ref] ? false : true;
         this.setState({checkboxes: tempCheckboxes});
+        // invoke formChangeHandler()
+        if (this.props.formChangeHandler) {
+            this.props.formChangeHandler.call(this, ref, e);
+        }
     },
 
     submitForm: function(e) {

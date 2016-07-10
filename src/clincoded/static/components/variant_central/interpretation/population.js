@@ -468,13 +468,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {(this.state.interpretation) ?
                 <div className="row">
                     <div className="col-sm-12">
-                        <CurationInterpretationForm formTitle={"Population Demo Criteria Group 1"} renderedFormContent={pop_crit_1}
-                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true}
-                            formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"Population Demo Criteria Group 2"} renderedFormContent={pop_crit_2}
-                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true}
-                            formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
+                        <CurationInterpretationForm formTitle={"Population Demo Criteria Group 1"} renderedFormContent={criteriaGroup1}
+                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['pm2']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
                 </div>
@@ -642,33 +638,72 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     }
 });
 
-// FIXME: all functions below here are examples; references to these in above render() should also be removed
+// code for rendering of population tab interpretation forms
 var criteriaGroup1 = function() {
     return (
         <div>
-            <Input type="checkbox" ref="xbox1-value" label="Predictors Demo Criteria 1?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['xbox1-value'] ? this.state.checkboxes['xbox1-value'] : false}
+            <Input type="checkbox" ref="ba1-value" label="BA1 Criterion Met?:" handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['ba1-value'] ? this.state.checkboxes['ba1-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="checkbox" ref="xbox2-value" label="Predictors Demo Criteria 2?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['xbox2-value'] ? this.state.checkboxes['xbox1-value'] : false}
+            <Input type="checkbox" ref="pm2-value" label="PM2 Criterion Met?:" handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['pm2-value'] ? this.state.checkboxes['pm2-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="pm2-description" label="Population Demo Criteria Description:" rows="5" placeholder="e.g. free text"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="textarea" ref="ba1-description" label="Explain criteria selection:" rows="5" placeholder="e.g. free text"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+            <Input type="textarea" ref="pm2-description" label="Explain criteria selection (PM2):" rows="5" placeholder="e.g. free text"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
         </div>
     );
 };
 
+// code for updating the form values of population tab interpretation forms upon receiving
+// existing interpretations and evaluations
 var criteriaGroup1Update = function(nextProps) {
     if (nextProps.interpretation) {
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
             nextProps.interpretation.evaluations.map(evaluation => {
-                if (evaluation.criteria == 'pm2') {
-                    this.refs['pm2-value'].setValue(evaluation.value);
-                    this.refs['pm2-description'].setValue(evaluation.description);
-                    this.setState({submitDisabled: false});
+                switch(evaluation.criteria) {
+                    case 'ba1':
+                        this.refs['ba1-value'].setValue(evaluation.value);
+                        this.refs['ba1-description'].setValue(evaluation.description);
+                        this.setState({submitDisabled: false});
+                        break;
+                    case 'pm2':
+                        this.refs['pm2-value'].setValue(evaluation.value);
+                        this.refs['pm2-description'].setValue(evaluation.description);
+                        this.setState({submitDisabled: false});
+                        break;
                 }
             });
         }
+    }
+};
+
+// code for handling logic within the form
+var criteriaGroup1Change = function(ref, e) {
+    // BA1 and PM2 are exclusive. The following is to ensure that if one of the checkboxes
+    // are checked, the other is un-checked
+    if (ref === 'ba1-value' || ref === 'pm2-value') {
+        let tempCheckboxes = this.state.checkboxes,
+            altCriteriaValue = 'pm2-value';
+        if (ref === 'pm2-value') {
+            altCriteriaValue = 'ba1-value';
+        }
+        if (this.state.checkboxes[ref]) {
+            tempCheckboxes[altCriteriaValue] = false;
+            this.setState({checkboxes: tempCheckboxes});
+        }
+    }
+    // Since BA1 and PM2 'share' the same description box, and the user only sees the BA1 box,
+    // the following is to update the value in the PM2 box to contain the same data on
+    // saving of the evaluation. Handles changes going the other way, too, just in case (although
+    // this should never happen)
+    if (ref === 'ba1-description' || ref === 'pm2-description') {
+        let altCriteriaDescription = 'pm2-description';
+        if (ref === 'pm2-description') {
+            altCriteriaDescription = 'ba1-description';
+        }
+        this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
     }
 };
 
