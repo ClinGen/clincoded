@@ -595,23 +595,22 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 });
 
 // FIXME: all functions below here are examples; references to these in above render() should also be removed
-var pop_crit_1 = function() {
+var criteriaGroup1 = function() {
     return (
         <div>
-            <Input type="select" ref="pm2-value" label="Population Demo Criteria 1?" defaultValue="No Selection"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="No Selection">No Selection</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-                <option value="In Progress">In Progress</option>
-            </Input>
+            <Input type="checkbox" ref="xbox1-value" label="Predictors Demo Criteria 1?:" handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['xbox1-value'] ? this.state.checkboxes['xbox1-value'] : false}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="checkbox" ref="xbox2-value" label="Predictors Demo Criteria 2?:" handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['xbox2-value'] ? this.state.checkboxes['xbox1-value'] : false}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="pm2-description" label="Population Demo Criteria Description:" rows="5" placeholder="e.g. free text"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 };
 
-var pop_crit_1_update = function(nextProps) {
+var criteriaGroup1Update = function(nextProps) {
     if (nextProps.interpretation) {
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
             nextProps.interpretation.evaluations.map(evaluation => {
