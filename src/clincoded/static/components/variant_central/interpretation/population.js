@@ -38,7 +38,7 @@ var populationStatic = {
 
 // Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
-    mixins: [RestMixin, FormMixin],
+    mixins: [RestMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
@@ -457,7 +457,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     changeDesiredCI: function(ref, e) {
         console.log(ref);
         console.log(this.refs);
-        //this.calculateCI(CIp, highestMAF);
+        console.log(this.refs[ref].valueAsNumber);
+        this.calculateCI(this.refs[ref].valueAsNumber, this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null);
     },
 
     // function to calculate confidence intervals (CI). Formula taken from Steven's excel spreadsheet
@@ -552,7 +553,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                 {(this.state.interpretation && highestMAF) ?
                                     <span>
                                         <dt>Desired CI:</dt><dd>
-                                        <Form><input type="number" name="desiredCI" defaultValue={"95"} onChange={this.changeDesiredCI} maxLength="2" /></Form>
+                                        <input type="number" ref="desiredCI" defaultValue={"95"} onChange={this.changeDesiredCI} min="0" max="100" maxLength="2" />
                                         </dd>
                                         <dt>CI - lower: </dt><dd>XXXXXX</dd>
                                         <dt>CI - upper: </dt><dd>XXXXXX</dd>
