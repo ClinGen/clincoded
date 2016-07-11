@@ -660,7 +660,7 @@ var criteriaGroup1 = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="ba1-description" label="Explain criteria selection:" rows="5" placeholder="Explanation"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <Input type="textarea" ref="pm2-description" label="Explain criteria selection (PM2):" rows="5" placeholder="e.g. free text"
+            <Input type="textarea" ref="pm2-description" label="Explain criteria selection (PM2):" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
@@ -670,7 +670,7 @@ var criteriaGroup1 = function() {
             <Input type="checkbox" ref="bs1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['bs1-value'] ? this.state.checkboxes['bs1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="bs1-description" label="Explain criteria selection:" rows="5" placeholder="Explanation" inputDisabled={!this.state.diseaseAssociated}
+            <Input type="textarea" ref="bs1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
         </div>
     );
