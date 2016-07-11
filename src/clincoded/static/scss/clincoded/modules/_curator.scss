@@ -1337,8 +1337,14 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     opacity: 1;
 }
 
-/* set up vertical padding for div */
+/* Vertical padding for div */
 .btn-vertical-space {
     padding-top: 10px;
     padding-bottom: 10px;
+}
+
+
+/* Non-function */
+.non-function {
+    border-left: solid 10px #fed84d;
 }

@@ -26,7 +26,7 @@ var Title = module.exports.Title = React.createClass({
                 {variant && calculatePatho_button ?
                     <div className="btn-vertical-space">
                         <div className="interpretation-record clearfix">
-                            <button type="button-button" className="btn btn-primary pull-right" disabled="disabled">
+                            <button type="button-button" className="btn btn-primary pull-right non-function">
                                 Calculate Pathogenicity
                             </button>
                         </div>
