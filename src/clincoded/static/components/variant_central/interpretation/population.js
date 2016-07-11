@@ -470,7 +470,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="col-sm-12">
                         <CurationInterpretationForm formTitle={"Population Criteria Evaluation"} renderedFormContent={criteriaGroup1}
                             evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
-                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['ba1', 'pm2']} criteriaDisease={['bs1']}
+                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
                 </div>
@@ -651,26 +651,26 @@ var criteriaGroup1 = function() {
                         CI – lower must be ~0%; CI – upper must stay below (0.05%)
                 </p>
             </div>
-            <Input type="checkbox" ref="ba1-value" label="BA1 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['ba1-value'] ? this.state.checkboxes['ba1-value'] : false}
+            <Input type="checkbox" ref="BA1-value" label="BA1 met?:" handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['BA1-value'] ? this.state.checkboxes['BA1-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
-            <Input type="checkbox" ref="pm2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['pm2-value'] ? this.state.checkboxes['pm2-value'] : false}
+            <Input type="checkbox" ref="PM2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="ba1-description" label="Explain criteria selection:" rows="5" placeholder="Explanation"
+            <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="5" placeholder="Explanation"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <Input type="textarea" ref="pm2-description" label="Explain criteria selection (PM2):" rows="5"
+            <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
                     <strong>BS1 (Benign):</strong> Allele frequency greater than expected due to disorder
                 </p>
             </div>
-            <Input type="checkbox" ref="bs1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['bs1-value'] ? this.state.checkboxes['bs1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
+            <Input type="checkbox" ref="BS1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['BS1-value'] ? this.state.checkboxes['BS1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="bs1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
+            <Input type="textarea" ref="BS1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
         </div>
     );
@@ -684,17 +684,17 @@ var criteriaGroup1Update = function(nextProps) {
             nextProps.interpretation.evaluations.map(evaluation => {
                 var tempCheckboxes = this.state.checkboxes;
                 switch(evaluation.criteria) {
-                    case 'ba1':
-                        tempCheckboxes['ba1-value'] = evaluation.value === 'true';
-                        this.refs['ba1-description'].setValue(evaluation.description);
+                    case 'BA1':
+                        tempCheckboxes['BA1-value'] = evaluation.value === 'true';
+                        this.refs['BA1-description'].setValue(evaluation.description);
                         break;
-                    case 'pm2':
-                        tempCheckboxes['pm2-value'] = evaluation.value === 'true';
-                        this.refs['pm2-description'].setValue(evaluation.description);
+                    case 'PM2':
+                        tempCheckboxes['PM2-value'] = evaluation.value === 'true';
+                        this.refs['PM2-description'].setValue(evaluation.description);
                         break;
-                    case 'bs1':
-                        tempCheckboxes['bs1-value'] = evaluation.value === 'true';
-                        this.refs['bs1-description'].setValue(evaluation.description);
+                    case 'BS1':
+                        tempCheckboxes['BS1-value'] = evaluation.value === 'true';
+                        this.refs['BS1-description'].setValue(evaluation.description);
                         break;
                 }
                 this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
@@ -707,11 +707,11 @@ var criteriaGroup1Update = function(nextProps) {
 var criteriaGroup1Change = function(ref, e) {
     // BA1 and PM2 are exclusive. The following is to ensure that if one of the checkboxes
     // are checked, the other is un-checked
-    if (ref === 'ba1-value' || ref === 'pm2-value') {
+    if (ref === 'BA1-value' || ref === 'PM2-value') {
         let tempCheckboxes = this.state.checkboxes,
-            altCriteriaValue = 'pm2-value';
-        if (ref === 'pm2-value') {
-            altCriteriaValue = 'ba1-value';
+            altCriteriaValue = 'PM2-value';
+        if (ref === 'PM2-value') {
+            altCriteriaValue = 'BA1-value';
         }
         if (this.state.checkboxes[ref]) {
             tempCheckboxes[altCriteriaValue] = false;
@@ -722,10 +722,10 @@ var criteriaGroup1Change = function(ref, e) {
     // the following is to update the value in the PM2 box to contain the same data on
     // saving of the evaluation. Handles changes going the other way, too, just in case (although
     // this should never happen)
-    if (ref === 'ba1-description' || ref === 'pm2-description') {
-        let altCriteriaDescription = 'pm2-description';
-        if (ref === 'pm2-description') {
-            altCriteriaDescription = 'ba1-description';
+    if (ref === 'BA1-description' || ref === 'PM2-description') {
+        let altCriteriaDescription = 'PM2-description';
+        if (ref === 'PM2-description') {
+            altCriteriaDescription = 'BA1-description';
         }
         this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
     }
