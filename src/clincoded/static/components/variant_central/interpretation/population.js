@@ -121,7 +121,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
             var NC_genomic = hgvs_GRCh37 ? hgvs_GRCh37.substr(0, hgvs_GRCh37.indexOf(':')) : null;
             // 'genomic_chr_mapping' is defined via requiring external mapping file
-            var found = genomic_chr_mapping.find((entry) => entry.GenomicRefSeq === NC_genomic);
+            var found = genomic_chr_mapping.GRCh37.find((entry) => entry.GenomicRefSeq === NC_genomic);
             // Format variant_id for use of myvariant.info REST API
             var variant_id = (hgvs_GRCh37 && found) ? found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':')) : null;
             if (variant_id && variant_id.indexOf('del') > 0) {
@@ -521,16 +521,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         return (
             <div className="variant-interpretation population">
-                {(this.state.interpretation) ?
+                {(this.props.data && this.state.interpretation) ?
                 <div className="row">
                     <div className="col-sm-12">
-                        <CurationInterpretationForm formTitle={"Population Demo Criteria Group 1"} renderedFormContent={pop_crit_1}
-                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true}
-                            formDataUpdater={pop_crit_1_update} variantUuid={this.props.data['@id']} criteria={['pm2']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"Population Demo Criteria Group 2"} renderedFormContent={pop_crit_2}
-                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true}
-                            formDataUpdater={pop_crit_2_update} variantUuid={this.props.data['@id']} criteria={['ps4', 'ps5']}
+                        <CurationInterpretationForm formTitle={"Population Criteria Evaluation"} renderedFormContent={criteriaGroup1}
+                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
                 </div>
@@ -701,78 +697,95 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     }
 });
 
-// FIXME: all functions below here are examples; references to these in above render() should also be removed
-var pop_crit_1 = function() {
+// code for rendering of population tab interpretation forms
+var criteriaGroup1 = function() {
     return (
         <div>
-            <Input type="select" ref="pm2-value" label="Population Demo Criteria 1?" defaultValue="No Selection"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="No Selection">No Selection</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-                <option value="In Progress">In Progress</option>
-            </Input>
-            <Input type="textarea" ref="pm2-description" label="Population Demo Criteria Description:" rows="5" placeholder="e.g. free text"
+            <div className="col-sm-7 col-sm-offset-5 input-note-top">
+                <p className="alert alert-info">
+                    <strong>BA1 (Benign):</strong> &gt;0.1% with a 99% CI<br />
+                        CI – lower must be &gt;0.1%
+                    <br /><br />
+                    <strong>PM2 (Rare Enough to be Absent):</strong> &lt;0.5% with a 95% CI<br />
+                        CI – lower must be ~0%; CI – upper must stay below (0.05%)
+                </p>
+            </div>
+            <Input type="checkbox" ref="BA1-value" label="BA1 met?:" handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['BA1-value'] ? this.state.checkboxes['BA1-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
+            <Input type="checkbox" ref="PM2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="5" placeholder="Explanation"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+            <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="5"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
+            <div className="col-sm-7 col-sm-offset-5 input-note-top">
+                <p className="alert alert-info">
+                    <strong>BS1 (Benign):</strong> Allele frequency greater than expected due to disorder
+                </p>
+            </div>
+            <Input type="checkbox" ref="BS1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['BS1-value'] ? this.state.checkboxes['BS1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="textarea" ref="BS1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
         </div>
     );
 };
 
-var pop_crit_1_update = function(nextProps) {
+// code for updating the form values of population tab interpretation forms upon receiving
+// existing interpretations and evaluations
+var criteriaGroup1Update = function(nextProps) {
     if (nextProps.interpretation) {
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
             nextProps.interpretation.evaluations.map(evaluation => {
-                if (evaluation.criteria == 'pm2') {
-                    this.refs['pm2-value'].setValue(evaluation.value);
-                    this.refs['pm2-description'].setValue(evaluation.description);
-                    this.setState({submitDisabled: false});
-                }
-            });
-        }
-    }
-};
-
-var pop_crit_2 = function() {
-    return (
-        <div>
-            <Input type="select" ref="ps4-value" label="Population Demo Criteria 2?" defaultValue="No Selection"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="No Selection">No Selection</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-                <option value="In Progress">In Progress</option>
-            </Input>
-            <Input type="text" ref="ps4-description" label="Population Demo Criteria 2 Description:" rows="5" placeholder="e.g. free text" inputDisabled={true}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="ps5-value" label="Population Demo Criteria 3?" defaultValue="No Selection"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="No Selection">No Selection</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-                <option value="In Progress">In Progress</option>
-            </Input>
-        </div>
-    );
-};
-
-var pop_crit_2_update = function(nextProps) {
-    if (nextProps.interpretation) {
-        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaluation => {
+                var tempCheckboxes = this.state.checkboxes;
                 switch(evaluation.criteria) {
-                    case 'ps4':
-                        this.refs['ps4-value'].setValue(evaluation.value);
-                        this.setState({submitDisabled: false});
+                    case 'BA1':
+                        tempCheckboxes['BA1-value'] = evaluation.value === 'true';
+                        this.refs['BA1-description'].setValue(evaluation.description);
                         break;
-                    case 'ps5':
-                        this.refs['ps5-value'].setValue(evaluation.value);
-                        this.setState({submitDisabled: false});
+                    case 'PM2':
+                        tempCheckboxes['PM2-value'] = evaluation.value === 'true';
+                        this.refs['PM2-description'].setValue(evaluation.description);
+                        break;
+                    case 'BS1':
+                        tempCheckboxes['BS1-value'] = evaluation.value === 'true';
+                        this.refs['BS1-description'].setValue(evaluation.description);
                         break;
                 }
+                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
             });
         }
     }
-    if (nextProps.extraData) {
-        this.refs['ps4-description'].setValue(nextProps.extraData.test2);
+};
+
+// code for handling logic within the form
+var criteriaGroup1Change = function(ref, e) {
+    // BA1 and PM2 are exclusive. The following is to ensure that if one of the checkboxes
+    // are checked, the other is un-checked
+    if (ref === 'BA1-value' || ref === 'PM2-value') {
+        let tempCheckboxes = this.state.checkboxes,
+            altCriteriaValue = 'PM2-value';
+        if (ref === 'PM2-value') {
+            altCriteriaValue = 'BA1-value';
+        }
+        if (this.state.checkboxes[ref]) {
+            tempCheckboxes[altCriteriaValue] = false;
+            this.setState({checkboxes: tempCheckboxes});
+        }
+    }
+    // Since BA1 and PM2 'share' the same description box, and the user only sees the BA1 box,
+    // the following is to update the value in the PM2 box to contain the same data on
+    // saving of the evaluation. Handles changes going the other way, too, just in case (although
+    // this should never happen)
+    if (ref === 'BA1-description' || ref === 'PM2-description') {
+        let altCriteriaDescription = 'PM2-description';
+        if (ref === 'PM2-description') {
+            altCriteriaDescription = 'BA1-description';
+        }
+        this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
     }
 };
