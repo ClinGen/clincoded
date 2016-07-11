@@ -7,6 +7,7 @@ var parseAndLogError = require('../mixins').parseAndLogError;
 var form = require('../../libs/bootstrap/form');
 var modal = require('../../libs/bootstrap/modal');
 var CuratorHistory = require('../curator_history');
+var curator = require('../curator');
 
 var Input = form.Input;
 var Form = form.Form;
@@ -159,7 +160,7 @@ var AssociateDisease = React.createClass({
         if (this.validateForm()) {
             // Get the free-text values for the Orphanet ID to check against the DB
             var orphaId = this.getFormValue('orphanetid').match(/^ORPHA([0-9]{1,6})$/i)[1];
-
+            var interpretationDisease;
             // Get the disease orresponding to the given Orphanet ID.
             // If either error out, set the form error fields
             this.getRestDatas([
@@ -167,14 +168,29 @@ var AssociateDisease = React.createClass({
             ], [
                 function() { this.setFormErrors('orphanetid', 'Orphanet ID not found'); }.bind(this)
             ]).then(data => {
-                var interpretationObj = this.props.interpretation;
-                if (interpretationObj) {
-                    interpretationObj.interpretation_disease = data.term;
-                    this.putRestData(this.props.interpretation['@id'], {'interpretation_disease': data.term}).then(response => {
-                        console.log("updated obj response is === " + JSON.stringify(response));
-                    });
-                }
-                // this.props.closeModal();
+                interpretationDisease = data[0]['@id'];
+                this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
+                    var currInterpretation = interpretation;
+                    // get up-to-date copy of interpretation object and flatten it
+                    var flatInterpretation = curator.flatten(currInterpretation);
+                    // if the interpretation object does not have a disease object, create it
+                    if (!('disease' in flatInterpretation)) {
+                        flatInterpretation.disease = '';
+                        // Return the newly flattened interpretation object in a Promise
+                        return Promise.resolve(flatInterpretation);
+                    }
+                }).then(interpretationObj => {
+                    if (interpretationDisease) {
+                        // Set the disease '@id' to the newly flattened interpretation object's 'disease' property
+                        interpretationObj.disease = interpretationDisease;
+                        // Update the intepretation object partially with the new disease property value
+                        return this.putRestData('/interpretation/' + this.props.interpretation.uuid, interpretationObj).then(result => {
+                            return Promise.resolve(result['@graph'][0]);
+                            this.props.closeModal();
+                            window.location.replace(this.props.url);
+                        });
+                    }
+                });
             }).catch(e => {
                 // Some unexpected error happened
                 parseAndLogError.bind(undefined, 'fetchedRequest');
@@ -189,10 +205,12 @@ var AssociateDisease = React.createClass({
     },
 
     render: function() {
+        var disease = this.props.interpretation.interpretation_disease;
+
         return (
             <div className="modal-box">
                 <div className="modal-body">
-                    <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15"
+                    <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" defaultValue={(disease) ? disease : null}
                         error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                         labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
                 </div>
