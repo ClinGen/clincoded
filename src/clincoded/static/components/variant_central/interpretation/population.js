@@ -57,6 +57,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             hasExacData: false, // flag to display ExAC table
             hasTGenomesData: false,
             hasEspData: false, // flag to display ESP table
+            geneENSG: null,
             populationObj: {
                 highestMAF: null,
                 exac: {
@@ -120,7 +121,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
             var NC_genomic = hgvs_GRCh37 ? hgvs_GRCh37.substr(0, hgvs_GRCh37.indexOf(':')) : null;
             // 'genomic_chr_mapping' is defined via requiring external mapping file
-            var found = genomic_chr_mapping.find((entry) => entry.GenomicRefSeq === NC_genomic);
+            var found = genomic_chr_mapping.GRCh37.find((entry) => entry.GenomicRefSeq === NC_genomic);
             // Format variant_id for use of myvariant.info REST API
             var variant_id = (hgvs_GRCh37 && found) ? found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':')) : null;
             if (variant_id && variant_id.indexOf('del') > 0) {
@@ -144,6 +145,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
                         // Calling method to update global object with ExAC Allele Frequency data
                         this.parseAlleleFrequencyData(response);
+                        this.parseGeneConstraintScores(response);
                         this.calculateHighestMAF();
                     }).catch(function(e) {
                         console.log('VEP Allele Frequency Fetch Error=: %o', e);
@@ -172,6 +174,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         populationObj.exac._tot.af = parseFloat(response[0].colocated_variants[0].exac_adj_maf);
 
         this.setState({populationObj: populationObj});
+    },
+
+    // Get gene ENSG value to link out to Gene's page on ExAC, as temporary stop gap for displaying
+    // constraint scores (see #750)
+    parseGeneConstraintScores: function(response) {
+        if (response && response.length > 0 && response[0].transcript_consequences && response[0].transcript_consequences.length > 0) {
+            this.setState({geneENSG: response[0].transcript_consequences[0].gene_id});
+        }
     },
 
     // Method to assign ExAC population data to global population object
@@ -204,12 +214,23 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseTGenomesData: function(response) {
         // not all variants are SNPs. Do nothing if variant is not a SNP
         if (response.var_class && response.var_class == 'SNP') {
+            // FIXME: this GRCh vs gRCh needs to be reconciled in the data model and data import
+            let hgvs_GRCh37 = (this.props.data.hgvsNames.GRCh37) ? this.props.data.hgvsNames.GRCh37 : this.props.data.hgvsNames.gRCh37;
+            let hgvs_GRCh38 = (this.props.data.hgvsNames.GRCh38) ? this.props.data.hgvsNames.GRCh38 : this.props.data.hgvsNames.gRCh38;
             let populationObj = this.state.populationObj;
+            let updated1000GData = false;
             // get extra 1000Genome information
             populationObj.tGenomes._extra.name = response.name;
             populationObj.tGenomes._extra.var_class = response.var_class;
-            populationObj.tGenomes._extra.ref = response.ancestral_allele;
-            populationObj.tGenomes._extra.alt = response.minor_allele;
+            if (hgvs_GRCh37.indexOf('>') > -1 || hgvs_GRCh38.indexOf('>') > -1) {
+                // if SNP variant, extract allele information from hgvs names, preferring grch38
+                populationObj.tGenomes._extra.ref = hgvs_GRCh38 ? hgvs_GRCh38.charAt(hgvs_GRCh38.length - 3) : hgvs_GRCh37.charAt(hgvs_GRCh37.length - 3);
+                populationObj.tGenomes._extra.alt = hgvs_GRCh38 ? hgvs_GRCh38.charAt(hgvs_GRCh38.length - 1) : hgvs_GRCh37.charAt(hgvs_GRCh37.length - 1);
+            } else {
+                // fallback for non-SNP variants
+                populationObj.tGenomes._extra.ref = response.ancestral_allele;
+                populationObj.tGenomes._extra.alt = response.minor_allele;
+            }
             // get the allele count and frequencies...
             if (response.populations) {
                 response.populations.map(population => {
@@ -221,21 +242,25 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         // ... for specific populations =
                         populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes[populationCode].af[population.allele] = parseFloat(population.frequency);
+                        updated1000GData = true;
                     } else if (population.population == '1000GENOMES:phase_3:ALL') {
                         this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and totals
                         populationObj.tGenomes._tot.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes._tot.af[population.allele] = parseFloat(population.frequency);
+                        updated1000GData = true;
                     } else if (population.population == 'ESP6500:African_American') {
                         this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and ESP AA
                         populationObj.tGenomes.espaa.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes.espaa.af[population.allele] = parseFloat(population.frequency);
+                        updated1000GData = true;
                     } else if (population.population == 'ESP6500:European_American') {
                         this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and ESP EA
                         populationObj.tGenomes.espea.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes.espea.af[population.allele] = parseFloat(population.frequency);
+                        updated1000GData = true;
                     }
                 });
             }
@@ -249,23 +274,29 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         // ... for specific populations
                         populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        updated1000GData = true;
                     } else if (population_genotype.population == '1000GENOMES:phase_3:ALL') {
                         // ... and totals
                         populationObj.tGenomes._tot.gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes._tot.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        updated1000GData = true;
                     } else if (population_genotype.population == 'ESP6500:African_American') {
                         // ... and ESP AA
                         populationObj.tGenomes.espaa.gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes.espaa.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        updated1000GData = true;
                     } else if (population_genotype.population == 'ESP6500:European_American') {
                         // ... and ESP EA
                         populationObj.tGenomes.espea.gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes.espea.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        updated1000GData = true;
                     }
                 });
             }
-            // update populationObj, and set flag indicating that we have 1000Genomes data
-            this.setState({hasTGenomesData: true, populationObj: populationObj});
+            if (updated1000GData) {
+                // update populationObj, and set flag indicating that we have 1000Genomes data
+                this.setState({hasTGenomesData: true, populationObj: populationObj});
+            }
         }
     },
 
@@ -334,7 +365,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     highestMAFObj.popLabel = populationStatic.tGenomes._labels[pop];
                     highestMAFObj.ac = populationObj.tGenomes[pop].ac[alt];
                     highestMAFObj.ac_tot = populationObj.tGenomes[pop].ac[ref] + populationObj.tGenomes[pop].ac[alt];
-                    highestMAFObj.source = '1000Genomes';
+                    highestMAFObj.source = '1000 Genomes';
                     highestMAFObj.af = populationObj.tGenomes[pop].af[alt];
                 }
             }
@@ -472,6 +503,15 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </dl>
                         </div>
                     </div>
+                    {this.state.geneENSG ?
+                        <div>
+                            <br />
+                            <h4>ExAC Constraint Score</h4>
+                            <div className="clearfix">
+                                <div className="bs-callout-content-container"><a href={external_url_map['ExACGene'] + this.state.geneENSG} target="_blank">View pLI in ExAC <i className="icon icon-external-link"></i></a></div>
+                            </div>
+                        </div>
+                    : null}
                 </div>
 
                 {(this.state.interpretationUuid) ?
@@ -484,7 +524,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
                 {this.state.hasExacData ?
                     <div className="panel panel-info datasource-ExAC">
-                        <div className="panel-heading"><h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}<a href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">(See ExAC data)</a></h3></div>
+                        <div className="panel-heading">
+                            <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}
+                                <a className="panel-subtitle pull-right" href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
+                            </h3>
+                        </div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -511,17 +555,19 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Variant information could not be found.</th>
+                                    <th>No population data was found for this allele in ExAC. <a href={external_url_map['EXACHome']}>Search ExAC</a> for this variant.</th>
                                 </tr>
                             </thead>
                         </table>
                     </div>
-                    // FIXME: below URL is dependent on a response, but this block is executed on lack of a response
-                    //Please see <a href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">variant data</a> at ExAC.
                 }
                 {this.state.hasTGenomesData ?
                     <div className="panel panel-info datasource-1000G">
-                        <div className="panel-heading"><h3 className="panel-title">1000G: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}</h3></div>
+                        <div className="panel-heading">
+                            <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}
+                                <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
+                            </h3>
+                        </div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -540,11 +586,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </div>
                 :
                     <div className="panel panel-info datasource-1000G">
-                        <div className="panel-heading"><h3 className="panel-title">1000G</h3></div>
+                        <div className="panel-heading"><h3 className="panel-title">1000 Genomes</h3></div>
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Variant information could not be found.</th>
+                                    <th>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']}>Search 1000 Genomes</a> for this variant.</th>
                                 </tr>
                             </thead>
                         </table>
@@ -552,7 +598,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
                 {this.state.hasEspData ?
                     <div className="panel panel-info datasource-ESP">
-                        <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}<a href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">(See ESP data)</a></h3></div>
+                        <div className="panel-heading">
+                            <h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}
+                                <a className="panel-subtitle pull-right" href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
+                            </h3>
+                        </div>
                         <table className="table">
                             <thead>
                                 <tr>
@@ -581,13 +631,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Variant information could not be found.</th>
+                                    <th>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']}>Search ESP</a> for this variant.</th>
                                 </tr>
                             </thead>
                         </table>
                     </div>
-                    // FIXME: below URL is dependent on a response, but this block is executed on lack of a response
-                    // Please see <a href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">variant data</a> at ESP.
                 }
             </div>
         );

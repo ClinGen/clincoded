@@ -182,11 +182,17 @@ module.exports.external_url_map = {
     'CAR-test': 'http://reg.test.genome.network/site/registry',
     'CARallele-test': '//reg.test.genome.network/allele/',
     'EnsemblVEP': '//rest.ensembl.org/vep/human/id/',
+    'EnsemblHgvsVEP': '//rest.ensembl.org/vep/human/hgvs/',
     'EnsemblVariation': '//rest.ensembl.org/variation/human/',
+    'EnsemblPopulationPage': 'http://ensembl.org/Homo_sapiens/Variation/Population?db=core;v=',
     'UCSCGenomeBrowser': '//genome.ucsc.edu/cgi-bin/hgTracks',
     'NCBIVariationViewer': '//www.ncbi.nlm.nih.gov/variation/view/',
     'MyVariantInfo': '//myvariant.info/v1/variant/',
     'EXAC': '//exac.broadinstitute.org/variant/',
+    'EXACHome': 'http://exac.broadinstitute.org/',
+    'ExACGene': 'http://exac.broadinstitute.org/gene/',
+    'ESPHome': 'http://evs.gs.washington.edu/EVS/',
+    '1000GenomesHome': 'http://browser.1000genomes.org/',
     'mutalyzer': 'https://mutalyzer.nl/',
     'mutalyzerSnpConverter': 'https://mutalyzer.nl/snp-converter'
 };
