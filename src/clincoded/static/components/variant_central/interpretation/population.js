@@ -642,19 +642,32 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 var criteriaGroup1 = function() {
     return (
         <div>
-            <Input type="checkbox" ref="ba1-value" label="BA1 Met?:" handleChange={this.handleCheckboxChange}
+            <div className="col-sm-7 col-sm-offset-5">
+                <p className="alert alert-info">
+                    <strong>BA1 (Benign):</strong> &gt;0.1% with a 99% CI<br />
+                        CI – lower must be &gt;0.1%
+                    <br /><br />
+                    <strong>PM2 (Rare Enough to be Absent):</strong> &lt;0.5% with a 95% CI<br />
+                        CI – lower must be ~0%; CI – upper must stay below (0.05%)
+                </p>
+            </div>
+            <Input type="checkbox" ref="ba1-value" label="BA1 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['ba1-value'] ? this.state.checkboxes['ba1-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
-            <Input type="checkbox" ref="pm2-value" label="PM2 Met?:" handleChange={this.handleCheckboxChange}
+            <Input type="checkbox" ref="pm2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['pm2-value'] ? this.state.checkboxes['pm2-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="ba1-description" label="Explain criteria selection:" rows="5" placeholder="e.g. free text"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <Input type="textarea" ref="pm2-description" label="Explain criteria selection (PM2):" rows="5" placeholder="e.g. free text"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
-
-            <Input type="checkbox" ref="bs1-value" label="BS1 Met? (Disease dependent):" handleChange={this.handleCheckboxChange}
+            <div className="col-sm-7 col-sm-offset-5">
+                <p className="alert alert-info">
+                    <strong>BS1 (Benign):</strong> Allele frequency greater than expected due to disorder
+                </p>
+            </div>
+            <Input type="checkbox" ref="bs1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['bs1-value'] ? this.state.checkboxes['bs1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="bs1-description" label="Explain criteria selection:" rows="5" placeholder="e.g. free text" inputDisabled={!this.state.diseaseAssociated}
