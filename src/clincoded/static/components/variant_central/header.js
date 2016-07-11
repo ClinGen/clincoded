@@ -12,19 +12,21 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
         interpretationUuid: React.PropTypes.string,
+        interpretation: React.PropTypes.object,
         session: React.PropTypes.object
     },
 
     render: function() {
         var variant = this.props.variantData;
         var interpretationUuid = this.props.interpretationUuid;
+        var interpretation = this.props.interpretation;
         var session = this.props.session;
 
         return (
             <div>
                 <div className="curation-data-title">
                     <div className="container">
-                        <Title data={variant} />
+                        <Title data={variant} interpretation={interpretation} />
                     </div>
                 </div>
                 <div className="container curation-data curation-variant">
