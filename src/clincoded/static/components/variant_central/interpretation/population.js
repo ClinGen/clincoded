@@ -468,7 +468,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {(this.props.data && this.state.interpretation) ?
                 <div className="row">
                     <div className="col-sm-12">
-                        <CurationInterpretationForm renderedFormContent={criteriaGroup1}
+                        <CurationInterpretationForm formTitle={"Population Criteria Evaluation"} renderedFormContent={criteriaGroup1}
                             evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
                             formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['ba1', 'pm2']} criteriaDisease={['bs1']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
