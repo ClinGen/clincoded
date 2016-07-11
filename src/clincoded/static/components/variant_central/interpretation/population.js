@@ -60,8 +60,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             geneENSG: null,
             CILow: null,
             CIhigh: null,
+            desiredCIDisplay: null,
             populationObj: {
                 highestMAF: null,
+                desiredCI: null,
                 exac: {
                     afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
@@ -88,10 +90,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     componentDidMount: function() {
         this.setState({interpretation: this.props.interpretation});
+        this.getPrevSetDesiredCI(this.props.interpretation);
     },
 
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretation: nextProps.interpretation});
+        this.getPrevSetDesiredCI(nextProps.interpretation);
         if (nextProps.data && this.props.data) {
             if (!this.state.hasExacData || !this.state.hasEspData) {
                 this.fetchExternalData('myVariantInfo');
@@ -166,6 +170,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
+    // helper function to shorten display of imported float values to 5 decimal places
     parseFloatShort: function(float) {
         return +parseFloat(float).toFixed(5);
     },
@@ -397,6 +402,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         // embed highest MAF and related data into population obj, and update to state
         populationObj.highestMAF = highestMAFObj;
         this.setState({populationObj: populationObj});
+        this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
     },
 
     // method to render a row of data for the ExAC table
@@ -460,9 +466,28 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         );
     },
 
+    // method to determine desired CI value from previously saved interpretation
+    getPrevSetDesiredCI: function(interpretation) {
+        if (interpretation && interpretation.evaluations && interpretation.evaluations.length > 0) {
+            for (var i = 0; i < interpretation.evaluations.length; i++) {
+                if (interpretation.evaluations[i].criteria == 'BA1') {
+                    this.setState({desiredCIDisplay: interpretation.evaluations[i].population.populationData.desiredCI});
+                    //this.refs.desiredCI.setValue(this.state.interpretation.evaluations[i].population.populationData.desiredCI);
+                    break;
+                }
+            }
+        }
+        if (!this.state.desiredCIDisplay) {
+            this.setState({desiredCIDisplay: 95});
+        }
+        this.changeDesiredCI();
+    },
+
     // wrapper function to calculateCI on value change
-    changeDesiredCI: function(ref, e) {
-        this.calculateCI(parseInt(this.refs.desiredCI.getValue()), this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null);
+    changeDesiredCI: function() {
+        if (this.refs && this.refs.desiredCI) {
+            this.calculateCI(parseInt(this.refs.desiredCI.getValue()), this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null);
+        }
     },
 
     // function to calculate confidence intervals (CI). Formula taken from Steven's excel spreadsheet
@@ -470,8 +495,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         //let CIp = this.refs[ref].getValue();
         if (highestMAF) {
             if (isNaN(CIp) || CIp < 0 || CIp > 100) {
+                // make sure we have valid value
                 this.setState({CILow: null, CIHigh: null});
             } else {
+                // store user-input desired CI value
+                let populationObj = this.state.populationObj;
+                populationObj.desiredCI = CIp;
+                // calculate CI
                 let xp = highestMAF.ac,
                     np = highestMAF.ac_tot;
                 let zp = -this.normSInv((1 - CIp / 100) / 2),
@@ -479,7 +509,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     qp = 1 - pp;
                 let CILow = this.parseFloatShort(((2 * np * pp) + (zp * zp) - zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp)))),
                     CIHigh = this.parseFloatShort(((2 * np * pp) + (zp * zp) + zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp))));
-                this.setState({CILow: CILow, CIHigh: CIHigh});
+                this.setState({populationObj: populationObj, CILow: CILow, CIHigh: CIHigh});
             }
         }
     },
@@ -523,6 +553,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             exac = this.state.populationObj && this.state.populationObj.exac ? this.state.populationObj.exac : null, // Get ExAC data from global population object
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
+        var desiredCIDisplay = this.state.desiredCIDisplay ? this.state.desiredCIDisplay : null;
 
         return (
             <div className="variant-interpretation population">
@@ -554,7 +585,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                 {(this.state.interpretation && highestMAF) ?
                                     <span>
                                         <dt className="dtFormLabel">Desired CI:</dt>
-                                        <dd className="ddFormInput"><Input type="number" ref="desiredCI" value="95" handleChange={this.changeDesiredCI} min="0" max="100" maxLength="2" /></dd>
+                                        <dd className="ddFormInput"><Input type="number" ref="desiredCI" value={desiredCIDisplay} handleChange={this.changeDesiredCI} min="0" max="100" maxLength="2" /></dd>
                                         <dt>CI - lower: </dt><dd>{this.state.CILow ? this.state.CILow : ''}</dd>
                                         <dt>CI - upper: </dt><dd>{this.state.CIHigh ? this.state.CIHigh : ''}</dd>
                                     </span>
