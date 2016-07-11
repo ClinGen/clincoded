@@ -100,6 +100,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             }
             // Extract genomic substring from HGVS name whose assembly is GRCh37 or GRCh38
             // Both of "GRCh37" and "gRCh37" (same for GRCh38) instances are possibly present in the variant object
+            // FIXME: this GRCh vs gRCh needs to be reconciled in the data model and data import
             var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
             if (hgvs_GRCh37) {
                 this.setState({

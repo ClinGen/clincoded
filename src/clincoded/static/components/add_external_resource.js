@@ -387,7 +387,7 @@ function clinvarRenderResourceResult() {
                         <span className="col-sm-5 col-md-3 control-label"><label>ClinVar Variant ID</label></span>
                         <span className="col-sm-7 col-md-9 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
                     </div>
-                    {this.state.tempResource.hgvsNames.others && this.state.tempResource.hgvsNames.others.length > 0 ?
+                    {this.state.tempResource.hgvsNames ?
                         <div className="row">
                             <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
                             <span className="col-sm-7 col-md-9 text-no-input">
@@ -550,7 +550,7 @@ function carRenderResourceResult() {
                             <span className="col-sm-7 col-md-9 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
                         </div>
                     : null}
-                    {this.state.tempResource.hgvsNames.others && this.state.tempResource.hgvsNames.others.length > 0 ?
+                    {this.state.tempResource.hgvsNames ?
                         <div className="row">
                             <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
                             <span className="col-sm-7 col-md-9 text-no-input">
