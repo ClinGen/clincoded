@@ -1349,7 +1349,10 @@ div.react-tabs .ReactTabs__TabPanel--selected {
 }
 
 
-/* Non-function */
+/* Non-function button */
 .non-function {
     border-left: solid 10px #fed84d;
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
 }
