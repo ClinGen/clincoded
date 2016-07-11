@@ -21,8 +21,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
         evidenceDataUpdated: React.PropTypes.bool, // passed in by parent page, which does the comparison of stored and new external data
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from evidenceData
+        formChangeHandler: React.PropTypes.func, // function that will take care of any in-form logic that needs to be taken in to account
         variantUuid: React.PropTypes.string, // UUID of the parent variant
-        criteria: React.PropTypes.array, // array of criteria codes being handled by this form
+        criteria: React.PropTypes.array, // array of criteria codes (non-disease-specific) being handled by this form
+        criteriaDisease: React.PropTypes.array, // array of criteria codes (disease-specific) being handled by this form
         interpretation: React.PropTypes.object, // parent interpretation object
         updateInterpretationObj: React.PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
     },
@@ -37,6 +39,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             submitDisabled: false, // disabled for now due to uncertain/non-universal logic
             evidenceData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
             interpretation: null, // parent interpretation object
+            diseaseAssociated: false, // flag to define whether or not the interpretation has a disease associated with it
             checkboxes: {}, // store any checkbox values
             updateMsg: null // specifies what html to display next to button after press
         };
@@ -47,7 +50,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // update the interpretation object when loaded
         if (this.props.interpretation) {
             this.setState({interpretation: this.props.interpretation});
-
+            // check to see if the interpretation has a disease associated with it
+            if (this.props.interpretation.interpretation_disease && this.props.interpretation.interpretation_disease !== '') {
+                this.setState({diseaseAssociated: true});
+            }
             // update the form if needed
             if (this.props.formDataUpdater) {
                 this.props.formDataUpdater.call(this, this.props);
@@ -71,10 +77,25 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
     },
 
+    // generic wrapper function to pass any form changes to the formChangeHandler function passed
+    // from the parent page, if applicable
+    handleFormChange: function(ref, e) {
+        if (this.props.formChangeHandler) {
+            this.props.formChangeHandler.call(this, ref, e);
+        }
+    },
+
+    // generic wrapper function to properly render checkboxes and pass any changes to the formChangeHandler
+    // functino passed from the parent page, if applicable
     handleCheckboxChange: function(ref, e) {
+        // properly render checking and unchecking of boxes
         let tempCheckboxes = this.state.checkboxes;
         tempCheckboxes[ref] = tempCheckboxes[ref] ? false : true;
         this.setState({checkboxes: tempCheckboxes});
+        // invoke formChangeHandler()
+        if (this.props.formChangeHandler) {
+            this.props.formChangeHandler.call(this, ref, e);
+        }
     },
 
     submitForm: function(e) {
@@ -89,15 +110,19 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         var flatInterpretation = null;
         var freshInterpretation = null;
         var evidenceObjectId = null;
+        var submittedCriteria = this.props.criteria;
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
             freshInterpretation = interpretation;
             // get fresh update of interpretation object so we have newest evaluation list, then flatten it
             flatInterpretation = curator.flatten(freshInterpretation);
-
+            // lets do the disease check for saving criteria code here
+            if (flatInterpretation.disease && flatInterpretation.disease !== '' && this.props.criteriaDisease && this.props.criteriaDisease.length > 0) {
+                submittedCriteria = submittedCriteria.concat(this.props.criteriaDisease);
+            }
             // check existing evaluations and map their UUIDs if they match the criteria in this form
             if (freshInterpretation.evaluations) {
                 freshInterpretation.evaluations.map(freshEvaluation => {
-                    if (this.props.criteria.indexOf(freshEvaluation.criteria) > -1) {
+                    if (submittedCriteria.indexOf(freshEvaluation.criteria) > -1) {
                         existingEvaluationUuids[freshEvaluation.criteria] = freshEvaluation.uuid;
                         // save the evidence object's id in case we can re-use it
                         if (freshEvaluation[this.state.evidenceType]) {
@@ -129,7 +154,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             // generate individual promises for each evaluation. PUTs if the evaluation for the criteria code
             // already exists, and POSTs if not
             var evaluationPromises = [];
-            this.props.criteria.map(criterion => {
+            submittedCriteria.map(criterion => {
                 evaluations[criterion] = {
                     variant: this.props.variantUuid,
                     criteria: criterion,
@@ -187,7 +212,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             }
         }).then(interpretation => {
             // REST handling is done. Re-enable Save button, and send the interpretation object back to index.js
-            this.setState({submitBusy: false, updateMsg: <span className="text-success">Evaluation saved successfully!</span>});
+            this.setState({submitBusy: false, updateMsg: <span className="text-success">Evaluations for {submittedCriteria.join(', ')} saved successfully!</span>});
             this.props.updateInterpretationObj(interpretation);
         }).catch(error => {
             this.setState({submitBusy: false, updateMsg: <span className="text-danger">Evaluation could not be saved successfully!</span>});
@@ -200,7 +225,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <div className="evaluation">
                     {this.props.formTitle ?
-                        <h4>{this.props.formTitle}</h4>
+                        <h3>{this.props.formTitle}</h3>
                     : null}
                     {this.props.renderedFormContent.call(this)}
                 </div>
