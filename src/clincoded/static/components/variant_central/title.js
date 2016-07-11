@@ -11,7 +11,7 @@ var Title = module.exports.Title = React.createClass({
         var variant = this.props.data;
         var variantTitle = (variant && variant.clinvarVariantTitle) ? variant.clinvarVariantTitle : null;
         if (variant && !variantTitle && variant.hgvsNames && variant.hgvsNames != {}) {
-            variantTitle = variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38+' (GRCh38)': (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37+' (GRCh37)' : variant.hgvsNames.others[0]);
+            variantTitle = variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38+' (GRCh38)': (variant.carId ? variant.carId : null);
         } else if (!variantTitle) {
             variantTitle = 'A preferred title is not available';
         }
