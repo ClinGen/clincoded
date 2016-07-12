@@ -90,12 +90,16 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentDidMount: function() {
-        this.setState({interpretation: this.props.interpretation});
         this.getPrevSetDesiredCI(this.props.interpretation);
     },
 
     componentWillReceiveProps: function(nextProps) {
-        this.setState({interpretation: nextProps.interpretation});
+        // this block is for handling props and states when props (external data) is updated after the initial load/rendering
+        // when props are updated, update the parent interpreatation object, if applicable
+        if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
+            this.setState({interpretation: nextProps.interpretation});
+        }
+
         this.getPrevSetDesiredCI(nextProps.interpretation);
         if (nextProps.data && this.props.data) {
             if (!this.state.hasExacData || !this.state.hasEspData) {
@@ -584,7 +588,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                         <dt className="dtFormLabel">Desired CI:</dt>
                                         <dd className="ddFormInput">
                                             <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCIDisplay} handleChange={this.changeDesiredCI}
-                                                onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT} />
+                                                onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT.toString()} />
                                         </dd>
                                         <dt>CI - lower: </dt><dd>{this.state.CILow ? this.state.CILow : ''}</dd>
                                         <dt>CI - upper: </dt><dd>{this.state.CIHigh ? this.state.CIHigh : ''}</dd>
@@ -755,7 +759,7 @@ var criteriaGroup1 = function() {
             <Input type="checkbox" ref="PM2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="5" placeholder="Explanation"
+            <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
