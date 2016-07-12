@@ -387,9 +387,9 @@ var criteriaGroup4 = function() {
                 </p>
             </div>
             <Input type="checkbox" ref="BP3-value" label="BP3 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BP3-value'] ? this.state.checkboxes['BP3-value'] : false} inputDisabled={!this.state.diseaseAssociated}
+                checked={this.state.checkboxes['BP3-value'] ? this.state.checkboxes['BP3-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BP3-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
+            <Input type="textarea" ref="BP3-description" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
@@ -397,9 +397,9 @@ var criteriaGroup4 = function() {
                 </p>
             </div>
             <Input type="checkbox" ref="PM4-value" label="PM4 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['PM4-value'] ? this.state.checkboxes['PM4-value'] : false} inputDisabled={!this.state.diseaseAssociated}
+                checked={this.state.checkboxes['PM4-value'] ? this.state.checkboxes['PM4-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="PM4-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
+            <Input type="textarea" ref="PM4-description" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
         </div>
     );
