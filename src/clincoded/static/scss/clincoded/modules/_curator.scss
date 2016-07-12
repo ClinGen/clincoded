@@ -1341,3 +1341,19 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
     opacity: 1;
 }
+
+/* Vertical padding for div */
+.btn-vertical-space {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+
+/* Non-function button */
+.non-function {
+    border-left: solid 5px #fed84d;
+    border-top: solid 1px #c0c0c0;
+    border-right: solid 1px #c0c0c0;
+    border-bottom: solid 1px #c0c0c0;
+
+}
