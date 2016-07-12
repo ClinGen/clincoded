@@ -607,7 +607,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     : null}
                 </div>
 
-
                 {(this.props.data && this.state.interpretation) ?
                 <div className="row">
                     <div className="col-sm-12">
