@@ -385,7 +385,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     highestMAFObj.popLabel = populationStatic.tGenomes._labels[pop];
                     highestMAFObj.ac = populationObj.tGenomes[pop].ac[alt];
                     highestMAFObj.ac_tot = populationObj.tGenomes[pop].ac[ref] + populationObj.tGenomes[pop].ac[alt];
-                    highestMAFObj.source = '1000 Genomes';
+                    highestMAFObj.source = (pop == 'espaa' || pop == 'espea') ? 'ESP (provided by 1000 Genomes)' : '1000 Genomes';
                     highestMAFObj.af = populationObj.tGenomes[pop].af[alt];
                 }
             }
