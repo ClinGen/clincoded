@@ -367,22 +367,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
         });
-        // check against 1000g data
-        populationStatic.tGenomes._order.map(pop => {
-            let ref = populationObj.tGenomes._extra.ref,
-                alt = populationObj.tGenomes._extra.alt;
-            if (populationObj.tGenomes[pop].af && populationObj.tGenomes[pop].af[alt]) {
-                if (populationObj.tGenomes[pop].af[alt] > highestMAFObj.af) {
-                    highestMAFObj.pop = pop;
-                    highestMAFObj.popLabel = populationStatic.tGenomes._labels[pop];
-                    highestMAFObj.ac = populationObj.tGenomes[pop].ac[alt];
-                    highestMAFObj.ac_tot = populationObj.tGenomes[pop].ac[ref] + populationObj.tGenomes[pop].ac[alt];
-                    highestMAFObj.source = '1000 Genomes';
-                    highestMAFObj.af = populationObj.tGenomes[pop].af[alt];
-                }
-            }
-        });
-        // check against esp data
+        // check against esp data - done before 1000g's so that it takes precedence in case of tie
+        // due to 1000g also carrying esp data
         populationStatic.esp._order.map(pop => {
             let alt = populationObj.esp._extra.alt;
             if (populationObj.esp[pop].ac) {
@@ -397,6 +383,21 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     highestMAFObj.ac_tot = populationObj.esp[pop].ac[ref] + populationObj.esp[pop].ac[alt];
                     highestMAFObj.source = 'ESP';
                     highestMAFObj.af = tempMAF;
+                }
+            }
+        });
+        // check against 1000g data
+        populationStatic.tGenomes._order.map(pop => {
+            let ref = populationObj.tGenomes._extra.ref,
+                alt = populationObj.tGenomes._extra.alt;
+            if (populationObj.tGenomes[pop].af && populationObj.tGenomes[pop].af[alt]) {
+                if (populationObj.tGenomes[pop].af[alt] > highestMAFObj.af) {
+                    highestMAFObj.pop = pop;
+                    highestMAFObj.popLabel = populationStatic.tGenomes._labels[pop];
+                    highestMAFObj.ac = populationObj.tGenomes[pop].ac[alt];
+                    highestMAFObj.ac_tot = populationObj.tGenomes[pop].ac[ref] + populationObj.tGenomes[pop].ac[alt];
+                    highestMAFObj.source = '1000 Genomes';
+                    highestMAFObj.af = populationObj.tGenomes[pop].af[alt];
                 }
             }
         });
@@ -567,17 +568,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         return (
             <div className="variant-interpretation population">
-                {(this.props.data && this.state.interpretation) ?
-                <div className="row">
-                    <div className="col-sm-12">
-                        <CurationInterpretationForm formTitle={"Population Criteria Evaluation"} renderedFormContent={criteriaGroup1}
-                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
-                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                    </div>
-                </div>
-                : null}
-
                 <div className="bs-callout bs-callout-info clearfix">
                     <h4>Highest Minor Allele Frequency</h4>
                     <div className="clearfix">
@@ -617,12 +607,16 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     : null}
                 </div>
 
-                {(this.state.interpretationUuid) ?
-                <ul className="section-criteria-evaluation clearfix">
-                    <li className="col-xs-12 gutter-exc">
-                        <CurationInterpretationForm />
-                    </li>
-                </ul>
+
+                {(this.props.data && this.state.interpretation) ?
+                <div className="row">
+                    <div className="col-sm-12">
+                        <CurationInterpretationForm formTitle={"Population Criteria Evaluation"} renderedFormContent={criteriaGroup1}
+                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    </div>
+                </div>
                 : null}
 
                 {this.state.hasExacData ?
