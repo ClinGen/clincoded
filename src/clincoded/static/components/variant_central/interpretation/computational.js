@@ -181,7 +181,7 @@ var criteriaGroup1 = function() {
                     <strong>BP7:</strong> A synonymous (silent) variant for which splicing prediction algorithms predict no impact to the splice site consensus sequence nor the creation of a new splice site AND the nucleotide is not highly conserved
                 </p>
             </div>
-            <Input type="checkbox" ref="BP7-value" label={<span>BP7 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
+            <Input type="checkbox" ref="BP7-value" label={<span>BP7 met?:</span>} handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['BP7-value'] ? this.state.checkboxes['BP7-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="BP7-description" label="Explain criteria selection:" rows="5"
@@ -310,11 +310,11 @@ var criteriaGroup3 = function() {
                     <strong>PP2:</strong> Missense variant in a gene that has a low rate of benign missense variation and in which missense variants are a common mechanism of disease
                 </p>
             </div>
-            <Input type="checkbox" ref="BP1-value" label="BP1 met?:" handleChange={this.handleCheckboxChange}
+            <Input type="checkbox" ref="BP1-value" label={<span>BP1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['BP1-value'] ? this.state.checkboxes['BP1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
-            <Input type="checkbox" ref="PP2-value" label="PP2 met?:" handleChange={this.handleCheckboxChange}
+            <Input type="checkbox" ref="PP2-value" label={<span>PP2 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PP2-value'] ? this.state.checkboxes['PP2-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="BP1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
@@ -386,7 +386,7 @@ var criteriaGroup4 = function() {
                     <strong>BP3:</strong> In-frame deletions/insertions in a repetitive region without a known function
                 </p>
             </div>
-            <Input type="checkbox" ref="BP3-value" label={<span>BP3 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
+            <Input type="checkbox" ref="BP3-value" label="BP3 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['BP3-value'] ? this.state.checkboxes['BP3-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="BP3-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
@@ -396,7 +396,7 @@ var criteriaGroup4 = function() {
                     <strong>PM4:</strong> Protein length changes as a result of in-frame deletions/insertions in a nonrepeat region or stop-loss variant
                 </p>
             </div>
-            <Input type="checkbox" ref="PM4-value" label={<span>PM4 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
+            <Input type="checkbox" ref="PM4-value" label="PM4 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PM4-value'] ? this.state.checkboxes['PM4-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="PM4-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
