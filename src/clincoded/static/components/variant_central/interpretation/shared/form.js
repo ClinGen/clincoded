@@ -1,10 +1,13 @@
 'use strict';
 var React = require('react');
 var _ = require('underscore');
+var panel = require('../../../../libs/bootstrap/panel');
 var form = require('../../../../libs/bootstrap/form');
 var RestMixin = require('../../../rest').RestMixin;
 var curator = require('../../../curator');
 
+var PanelGroup = panel.PanelGroup;
+var Panel = panel.Panel;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
@@ -222,6 +225,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
     render: function() {
         return (
+            <PanelGroup accordion><Panel title={". Biochemical Function"} open>
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <div className="evaluation">
                     {this.props.formTitle ?
@@ -236,7 +240,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                     : null}
                 </div>
-            </Form>
+            </Form></Panel>
+            </PanelGroup>
         );
     }
 });
