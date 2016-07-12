@@ -35,6 +35,7 @@ var populationStatic = {
         _labels: {ea: 'EA Allele', aa: 'AA Allele'}
     }
 };
+var CI_DEFAULT = 95;
 
 // Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
@@ -478,7 +479,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             }
         }
         if (!this.state.desiredCIDisplay) {
-            this.setState({desiredCIDisplay: 95});
+            this.setState({desiredCIDisplay: CI_DEFAULT});
         }
         this.changeDesiredCI();
     },
@@ -486,7 +487,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // wrapper function to calculateCI on value change
     changeDesiredCI: function(forceDefault) {
         if (this.refs && this.refs.desiredCI) {
-            this.calculateCI(forceDefault ? 95 : parseInt(this.refs.desiredCI.getValue()), this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null);
+            this.calculateCI(forceDefault ? CI_DEFAULT : parseInt(this.refs.desiredCI.getValue()), this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null);
         }
     },
 
@@ -495,8 +496,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         let desiredCI = parseInt(this.refs.desiredCI.getValue());
         if (desiredCI == '' || isNaN(desiredCI)) {
             // display does not update; use 'placeholder' text as fallback
-            this.refs.desiredCI.setValue(95);
-            this.setState({desiredCIDisplay: 95});
+            this.refs.desiredCI.setValue(CI_DEFAULT);
+            this.setState({desiredCIDisplay: CI_DEFAULT});
             this.changeDesiredCI(true);
         }
     },
@@ -596,7 +597,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                         <dt className="dtFormLabel">Desired CI:</dt>
                                         <dd className="ddFormInput">
                                             <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCIDisplay} handleChange={this.changeDesiredCI}
-                                                onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder="95" />
+                                                onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT} />
                                         </dd>
                                         <dt>CI - lower: </dt><dd>{this.state.CILow ? this.state.CILow : ''}</dd>
                                         <dt>CI - upper: </dt><dd>{this.state.CIHigh ? this.state.CIHigh : ''}</dd>
