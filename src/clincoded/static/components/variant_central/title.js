@@ -11,9 +11,11 @@ var Title = module.exports.Title = React.createClass({
     render: function() {
         var variant = this.props.data;
         var disease_term = '';
-        if (this.props.interpretation) {
-            if (this.props.interpretation.disease) {
-                disease_term = this.props.interpretation.disease.term;
+        if (variant) {
+            if (variant.associatedInterpretations.length) {
+                if (variant.associatedInterpretations[0].disease) {
+                    disease_term = variant.associatedInterpretations[0].disease.term;
+                }
             }
         }
 
