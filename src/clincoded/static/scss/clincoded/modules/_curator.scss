@@ -1351,8 +1351,9 @@ div.react-tabs .ReactTabs__TabPanel--selected {
 
 /* Non-function button */
 .non-function {
-    border-left: solid 10px #fed84d;
-    border-top: none;
-    border-right: none;
-    border-bottom: none;
+    border-left: solid 5px #fed84d;
+    border-top: solid 1px #c0c0c0;
+    border-right: solid 1px #c0c0c0;
+    border-bottom: solid 1px #c0c0c0;
+
 }
