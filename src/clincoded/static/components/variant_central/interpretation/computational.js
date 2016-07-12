@@ -317,7 +317,7 @@ var criteriaGroup3 = function() {
             <Input type="checkbox" ref="PP2-value" label="PP2 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PP2-value'] ? this.state.checkboxes['PP2-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BP1-description" label="Explain criteria selection:" rows="5" placeholder="Explanation" inputDisabled={!this.state.diseaseAssociated}
+            <Input type="textarea" ref="BP1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <Input type="textarea" ref="PP2-description" label="Explain criteria selection (PP2):" rows="5" inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
