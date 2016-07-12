@@ -250,25 +250,21 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     let populationCode = population.population.substring(20).toLowerCase();
                     if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
                         populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
-                        this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... for specific populations =
                         populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes[populationCode].af[population.allele] = this.parseFloatShort(population.frequency);
                         updated1000GData = true;
                     } else if (population.population == '1000GENOMES:phase_3:ALL') {
-                        this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and totals
                         populationObj.tGenomes._tot.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes._tot.af[population.allele] = this.parseFloatShort(population.frequency);
                         updated1000GData = true;
                     } else if (population.population == 'ESP6500:African_American') {
-                        this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and ESP AA
                         populationObj.tGenomes.espaa.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes.espaa.af[population.allele] = this.parseFloatShort(population.frequency);
                         updated1000GData = true;
                     } else if (population.population == 'ESP6500:European_American') {
-                        this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and ESP EA
                         populationObj.tGenomes.espea.ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes.espea.af[population.allele] = this.parseFloatShort(population.frequency);
@@ -310,13 +306,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 this.setState({hasTGenomesData: true, populationObj: populationObj});
             }
         }
-    },
-
-    parseTGenomesDataAltAllele: function(populationObj, population) {
-        if (!populationObj.tGenomes._extra.alt && population.allele != populationObj.tGenomes._extra.ref) {
-            populationObj.tGenomes._extra.alt = population.allele;
-        }
-        return populationObj;
     },
 
     // Method to assign ESP population data to global population object
@@ -407,6 +396,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
     },
 
+    /* the following methods are related to the rendering of population data tables */
     // method to render a row of data for the ExAC table
     renderExacRow: function(key, exac, exacStatic, rowNameCustom, className) {
         let rowName = exacStatic._labels[key];
@@ -468,6 +458,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         );
     },
 
+    /* the following methods are related to the desired CI field and its related calculated values */
     // method to determine desired CI value from previously saved interpretation
     getPrevSetDesiredCI: function(interpretation) {
         if (interpretation && interpretation.evaluations && interpretation.evaluations.length > 0) {
@@ -480,15 +471,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             }
         }
         if (!this.state.desiredCIDisplay) {
+            // previously saved value does not exist for some reason... set it to default value
             this.setState({desiredCIDisplay: CI_DEFAULT});
         }
+        // update CI low and high values
         this.changeDesiredCI();
     },
 
     // wrapper function to calculateCI on value change
-    changeDesiredCI: function(forceDefault) {
+    changeDesiredCI: function() {
         if (this.refs && this.refs.desiredCI) {
-            this.calculateCI(forceDefault ? CI_DEFAULT : parseInt(this.refs.desiredCI.getValue()), this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null);
+            this.calculateCI(parseInt(this.refs.desiredCI.getValue()), this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null);
         }
     },
 
@@ -496,10 +489,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     onBlurDesiredCI: function(event) {
         let desiredCI = parseInt(this.refs.desiredCI.getValue());
         if (desiredCI == '' || isNaN(desiredCI)) {
-            // display does not update; use 'placeholder' text as fallback
+            // if the user clicks away from the desired CI field, but it is blank/filled with
+            // bad input, re-set it to the default value
             this.refs.desiredCI.setValue(CI_DEFAULT);
             this.setState({desiredCIDisplay: CI_DEFAULT});
-            this.changeDesiredCI(true);
+            this.changeDesiredCI();
         }
     },
 
@@ -507,9 +501,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     calculateCI: function(CIp, highestMAF) {
         if (highestMAF) {
             if (isNaN(CIp) || CIp < 0 || CIp > 100) {
+                // the field is blank... clear CI low and high values
+                // note that the user did not necessary navigate away from field just yet, so do not
+                // automatically set value to default here
                 this.setState({CILow: null, CIHigh: null});
             } else {
-                // store user-input desired CI value
+                // store user-input desired CI value into population object
                 let populationObj = this.state.populationObj;
                 populationObj.desiredCI = CIp;
                 // calculate CI
@@ -520,7 +517,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     qp = 1 - pp;
                 let CILow = this.parseFloatShort(((2 * np * pp) + (zp * zp) - zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp)))),
                     CIHigh = this.parseFloatShort(((2 * np * pp) + (zp * zp) + zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp))));
-                this.setState({populationObj: populationObj, desiredCIDisplay: CIp, CILow: CILow, CIHigh: CIHigh});
+                this.setState({populationObj: populationObj, CILow: CILow, CIHigh: CIHigh});
             }
         }
     },
