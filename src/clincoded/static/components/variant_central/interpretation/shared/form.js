@@ -110,7 +110,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         var flatInterpretation = null;
         var freshInterpretation = null;
         var evidenceObjectId = null;
-        var submittedCriteria = this.props.criteria;
+        var submittedCriteria = this.props.criteria ? this.props.criteria : [];
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
             freshInterpretation = interpretation;
             // get fresh update of interpretation object so we have newest evaluation list, then flatten it
@@ -230,7 +230,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     {this.props.renderedFormContent.call(this)}
                 </div>
                 <div className="curation-submit clearfix">
-                    <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} inputDisabled={this.state.submitDisabled} />
+                    <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
+                        submitBusy={this.state.submitBusy} inputDisabled={(!this.props.criteria || this.props.criteria.length == 0) && !this.state.diseaseAssociated} />
                     {this.state.updateMsg ?
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                     : null}
