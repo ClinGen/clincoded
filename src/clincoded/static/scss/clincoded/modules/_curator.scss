@@ -998,13 +998,13 @@
 .curation-variant-tab-group {
     margin-bottom: 20px;
 
-    .react-tabs [role=tablist] {
+    .ReactTabs ul[role=tablist] {
         border: none;
         margin: 0;
         padding: 0;
     }
 
-    .react-tabs [role=tab] {
+    .ReactTabs li[role=tab] {
         background-color: #1b75bc;
         border-top: none;
         border-left: none;
@@ -1020,30 +1020,30 @@
         text-align: center;
     }
 
-    .react-tabs [role=tab][aria-selected=true] {
+    .ReactTabs li[role=tab][aria-selected=true] {
         background-color: #fff;
         border: solid 1px #1b75bc;
         border-bottom: solid 1px #fff;
         color: #000;
     }
 
-    .react-tabs [role=tab][aria-selected=true] ~ li {
+    .ReactTabs li[role=tab][aria-selected=true] ~ li {
         border-right: none;
         border-left: solid 1px #fff;
     }
 
-    .react-tabs [role=tab][aria-disabled=true] {
+    .ReactTabs li[role=tab][aria-disabled=true] {
         color: GrayText;
         cursor: default;
     }
 
-    .react-tabs [role=tab]:focus {
+    .ReactTabs li[role=tab]:focus {
         box-shadow: 0 0 5px hsl(208, 99%, 50%);
         border-color: hsl(208, 99%, 50%);
         outline: none;
     }
 
-    .react-tabs [role=tab]:focus:after {
+    .ReactTabs li[role=tab]:focus:after {
         background: #fff;
         content: "";
         position: absolute;

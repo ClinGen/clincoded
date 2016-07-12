@@ -225,12 +225,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
     render: function() {
         return (
-            <PanelGroup accordion><Panel title={". Biochemical Function"} open>
+
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+            <PanelGroup accordion><Panel title={this.props.formTitle} open>
                 <div className="evaluation">
-                    {this.props.formTitle ?
-                        <h3>{this.props.formTitle}</h3>
-                    : null}
                     {this.props.renderedFormContent.call(this)}
                 </div>
                 <div className="curation-submit clearfix">
@@ -239,9 +237,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     {this.state.updateMsg ?
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                     : null}
-                </div>
-            </Form></Panel>
+                </div></Panel>
             </PanelGroup>
+            </Form>
         );
     }
 });
