@@ -159,14 +159,6 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                 GRCh38 =  variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.hgvsNames.gRCh38 ? variant.hgvsNames.gRCh38 : null);
                 GRCh37 =  variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : (variant.hgvsNames.gRCh37 ? variant.hgvsNames.gRCh37 : null);
             }
-
-            //if (variant.clinvarVariantId && variant.clinvarVariantId !== '' && !this.state.hasRefseqData) {
-            //    this.getSequenceLocation(variant);
-            //}
-
-            //if (GRCh38 && !this.state.hasEnsemblData) {
-            //    this.getEnsemblId(GRCh38);
-            //}
         }
 
         return (
