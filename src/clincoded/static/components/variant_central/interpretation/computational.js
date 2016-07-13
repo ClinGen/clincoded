@@ -35,9 +35,9 @@ var computationStatic = {
             'mutationassessor': 'MutationAssessor',
             'fathmm': 'FATHMM',
             'provean': 'PROVEAN',
-            'metasvm': 'MetaSVM',
-            'metalr': 'MetaLR',
-            'cadd': 'CADD',
+            'metasvm': 'MetaSVM (meta-predictor)',
+            'metalr': 'MetaLR (meta-predictor)',
+            'cadd': 'CADD (meta-predictor)',
             'fathmm_mkl': 'FATHMM-MKL',
             'fitcons': 'fitCons',
         }
@@ -308,7 +308,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><a href="https://sites.google.com/site/revelgenomics/home" target="_blank">REVEL meta-predictor</a></td>
+                                        <td><a href="https://sites.google.com/site/revelgenomics/home" target="_blank">REVEL (meta-predictor)</a></td>
                                         <td>0 to 1</td>
                                         <td>0.7</td>
                                         <td>higher score = higher pathogenicity</td>
@@ -545,20 +545,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
                 <div>
                     <h2 className="page-header">Repetitive Region</h2>
-                    {this.props.data ?
-                        <div className="panel panel-info">
-                            <div className="panel-heading"><h3 className="panel-title">External resources for this variant</h3></div>
-                            <div className="panel-body">
-                                <dl className="inline-dl clearfix">
-                                    <dd><a href="#" target="_blank">View Variant in UCSC Browser</a></dd>
-
-                                    <dd><a href="#" target="_blank">View Variant in Variation Viewer</a></dd>
-
-                                    <dd><a href="#" target="_blank">View genomic location in ExAC</a></dd>
-                                </dl>
-                            </div>
-                        </div>
-                    : null}
                 </div>
 
             </div>
