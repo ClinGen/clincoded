@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var _ = require('underscore');
 var globals = require('../globals');
 
 var queryKeyValue = globals.queryKeyValue;
@@ -46,8 +47,17 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     getInitialState: function() {
         return {
+            interpretation: this.props.interpretation,
             selectedTab: (this.props.href_url.href ? tabList.indexOf(queryKeyValue('tab', this.props.href_url.href)) : 0) // set selectedTab to whatever is defined in the address; default to first tab if not set
         };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        // this block is for handling props and states when props (external data) is updated after the initial load/rendering
+        // when props are updated, update the parent interpreatation object, if applicable
+        if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
+            this.setState({interpretation: nextProps.interpretation});
+        }
     },
 
     // set selectedTab to whichever tab the user switches to, and update the address accordingly
@@ -62,7 +72,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     render: function() {
         var variant = this.props.variantData;
-        var interpretation = this.props.interpretation;
+        var interpretation = this.state.interpretation;
 
         // The ordering of TabPanels are corresponding to that of tabs
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted

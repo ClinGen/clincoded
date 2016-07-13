@@ -1359,3 +1359,13 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     border-left: 5px solid #fed84d;
     border-radius: 2px;
 }
+
+dl.inline-dl {
+    dt.dtFormLabel {
+        line-height: 4.5;
+    }
+
+    dd.ddFormInput {
+        margin-top: 15px;
+    }
+}
