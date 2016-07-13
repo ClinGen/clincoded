@@ -1073,6 +1073,10 @@ div.react-tabs .ReactTabs__TabPanel--selected {
 
             dd {
                 margin-right: 20px;
+
+                &.pull-right {
+                    margin-right: 0;
+                }
             }
         }
 
@@ -1101,10 +1105,45 @@ div.react-tabs .ReactTabs__TabPanel--selected {
         .population .datasource-ESP .table tfoot td {
             width: 16.66%;
         }
+
+        .computational .datasource-clingen .table th,
+        .computational .datasource-clingen .table td,
+        .computational .datasource-other .table th,
+        .computational .datasource-other .table td,
+        .computational .datasource-splice .table th,
+        .computational .datasource-splice .table td {
+            width: 25%;
+        }
+
+        .computational .datasource-conservation .table th,
+        .computational .datasource-conservation .table td,
+        .computational .datasource-additional .table th {
+            width: 50%;
+        }
+
+        .computational .datasource-clinvar dt {
+            margin-right: 15px;
+        }
+
+        .computational .page-header:first-child {
+            margin-top: 20px;
+        }
+
+        .computational .datasource-splice .table {
+            .row-span {
+                border-left: 1px solid #ddd;
+                border-right: 1px solid #ddd;
+                font-weight: bold;
+            }
+
+            tfoot td {
+                font-weight: bold;
+            }
+        }
     }
 }
 
-/* FIXME - temp styles for placeholders */
+/* FIXME: ** begin ** temp placeholder style. Will be removed. */
 .react-tabs .tab-panel {
     .population li>div,
     .computational li>div,
@@ -1115,6 +1154,17 @@ div.react-tabs .ReactTabs__TabPanel--selected {
         margin: 0 15px 10px 0;
     }
 }
+
+.wip {
+    background-color: #ccc;
+    border-radius: 4px;
+    color: white;
+    display: inline-block;
+    font-size: 10px;
+    font-weight: normal;
+    padding: 3px 8px;
+}
+/* FIXME: ** end ** temp placeholder style. Will be removed. */
 
 /* variant curation interface - interpretation action bar */
 .curation-actions {
@@ -1220,6 +1270,7 @@ div.react-tabs .ReactTabs__TabPanel--selected {
         font-weight: bold;
 
         a {
+            font-size: 85%;
             font-weight: normal;
             margin-left: 20px;
         }
@@ -1233,6 +1284,14 @@ div.react-tabs .ReactTabs__TabPanel--selected {
 
     .pull-right {
         float: right;
+    }
+
+    .panel-body {
+        padding-bottom: 12px;
+
+        .pull-right a {
+            margin-left: 20px;
+        }
     }
 }
 
@@ -1340,6 +1399,24 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
     filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
     opacity: 1;
+}
+
+/* Vertical padding for div */
+.btn-vertical-space {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.feature-in-development {
+    border: none;
+    border-left: 5px solid #fed84d;
+    border-radius: 2px;
+}
+
+.feature-in-development:hover {
+    border: none;
+    border-left: 5px solid #fed84d;
+    border-radius: 2px;
 }
 
 dl.inline-dl {
