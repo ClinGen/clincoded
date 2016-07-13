@@ -65,6 +65,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             populationObj: {
                 highestMAF: null,
                 desiredCI: null,
+                mafCutoff: null,
                 exac: {
                     afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
@@ -759,6 +760,8 @@ var criteriaGroup1 = function() {
             <Input type="checkbox" ref="PM2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="number" ref="maf-cutoff" label="MAF cutoff (%):" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
             <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="5"
@@ -788,6 +791,7 @@ var criteriaGroup1Update = function(nextProps) {
                     case 'BA1':
                         tempCheckboxes['BA1-value'] = evaluation.value === 'true';
                         this.refs['BA1-description'].setValue(evaluation.description);
+                        this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
                         break;
                     case 'PM2':
                         tempCheckboxes['PM2-value'] = evaluation.value === 'true';
@@ -829,5 +833,22 @@ var criteriaGroup1Change = function(ref, e) {
             altCriteriaDescription = 'BA1-description';
         }
         this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
+    }
+    if (ref === 'maf-cutoff') {
+        let tempEvidenceData = this.state.evidenceData;
+        tempEvidenceData.mafCutoff = parseInt(this.refs[ref].getValue());
+        this.setState({evidenceData: tempEvidenceData});
+    }
+};
+
+var mafCutoffBlur = function(event) {
+    let mafCutoff = parseInt(this.refs['maf-cutoff'].getValue());
+    if (mafCutoff == '' || isNaN(mafCutoff)) {
+        let tempEvidenceData = this.state.evidenceData;
+        // if the user clicks away from the MAF cutoff field, but it is blank/filled with
+        // bad input, re-set it to the default value of 5
+        this.refs['maf-cutoff'].setValue(5);
+        tempEvidenceData.mafCutoff = 5;
+        this.setState({evidenceData: tempEvidenceData});
     }
 };
