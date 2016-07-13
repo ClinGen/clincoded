@@ -841,6 +841,7 @@ var criteriaGroup1Change = function(ref, e) {
         }
         this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
     }
+    // if the MAF cutoff field is changed, update the populationObj payload with the updated value
     if (ref === 'maf-cutoff') {
         let tempEvidenceData = this.state.evidenceData;
         tempEvidenceData.mafCutoff = parseInt(this.refs[ref].getValue());
@@ -848,6 +849,7 @@ var criteriaGroup1Change = function(ref, e) {
     }
 };
 
+// special function to handle the MAF cutoff % field
 var mafCutoffBlur = function(event) {
     let mafCutoff = parseInt(this.refs['maf-cutoff'].getValue());
     if (mafCutoff == '' || isNaN(mafCutoff)) {
