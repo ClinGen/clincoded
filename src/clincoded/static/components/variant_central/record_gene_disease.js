@@ -23,6 +23,12 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
         };
     },
 
+    getInitialState: function() {
+        return {
+            sequence_location: null
+        };
+    },
+
     // Construct LinkOut URLs to UCSC Viewer
     // For both GRCh38/hg38 and GRCh37/hg19
     ucscViewerURL: function(array, db, assembly) {
@@ -35,12 +41,30 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
         return url;
     },
 
+    getSequenceLocation: function(variant) {
+        if (variant && variant.clinvarVariantId) {
+            var url = this.props.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId;
+            this.getRestDataXml(url).then(xml => {
+                // Passing 'true' option to invoke 'mixin' function
+                // To extract more ClinVar data for 'Basic Information' tab
+                var variantData = parseClinvar(xml, true);
+                if (variantData.allele.SequenceLocation) {
+                    this.setState({
+                        sequence_location: variantData.allele.SequenceLocation
+                    });
+                }
+            }).catch(function(e) {
+                console.log('RefSeq Fetch Error=: %o', e);
+            });
+        }
+    },
+
     render: function() {
         var variant = this.props.data;
-        var grch38 = null;
-        var grch37 = null;
-        var sequence_location = null;
         var recordHeader = this.props.recordHeader;
+        var GRCh38 = null;
+        var GRCh37 = null;
+        var sequence_location = this.state.sequence_location;
         if (variant) {
             var geneSymbol = (variant.symbol) ? variant.symbol : 'Unknown';
             var uniprotId = (variant.uniprotId) ? variant.uniprotId : 'Unknown';
@@ -52,19 +76,13 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                 dbSNPId = 'rs' + dbSNPId;
             }
 
-            if (variant.clinvarVariantId) {
-                grch38 =  variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.hgvsNames.gRCh38 ? variant.hgvsNames.gRCh38 : null);
-                grch37 =  variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : (variant.hgvsNames.gRCh37 ? variant.hgvsNames.gRCh37 : null);
+            if (variant.hgvsNames) {
+                GRCh38 =  variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.hgvsNames.gRCh38 ? variant.hgvsNames.gRCh38 : null);
+                GRCh37 =  variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : (variant.hgvsNames.gRCh37 ? variant.hgvsNames.gRCh37 : null);
+            }
 
-                var url = this.props.protocol + external_url_map['ClinVarEutils'];
-                this.getRestDataXml(url + variant.clinvarVariantId).then(xml => {
-                    // Passing 'true' option to invoke 'mixin' function
-                    // To extract more ClinVar data for 'Basic Information' tab
-                    var variantData = parseClinvar(xml, true);
-                    sequence_location = variantData.allele.SequenceLocation ? variantData.allele.SequenceLocation : null;
-                }).catch(function(e) {
-                    console.log('RefSeq Fetch Error=: %o', e);
-                });
+            if (variant.clinvarVariantId && variant.clinvarVariantId !== '') {
+                this.getSequenceLocation(variant);
             }
         }
 
@@ -74,24 +92,20 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                     <h4>{recordHeader}</h4>
                     {variant && variant.clinvarVariantId ?
                         <dl className="inline-dl clearfix">
-                            {(sequence_location && sequence_location.length) ?
+                            {sequence_location && sequence_location.length > 0 ?
                                 <dd>UCSC [
                                         <a href={this.ucscViewerURL(sequence_location, 'hg38', 'GRCh38')} target="_blank" title={'UCSC Genome Browser for ' + GRCh38 + ' in a new window'}>GRCh38/hg38</a>
                                         &nbsp;-&nbsp;
                                         <a href={this.ucscViewerURL(sequence_location, 'hg19', 'GRCh37')} target="_blank" title={'UCSC Genome Browser for ' + GRCh37 + ' in a new window'}>GRCh37/hg19</a>
                                     ]
                                 </dd>
-                                <dd>Variation Viewer [
-                                    <a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh38')} target="_blank" title={'Variation Viewer page for ' + GRCh38 + ' in a new window'}>GRCh38</a>
-                                    &nbsp;-&nbsp;
-                                    <a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh37')} target="_blank" title={'Variation Viewer page for ' + GRCh37 + ' in a new window'}>GRCh37</a>
-                                    ]
-                                </dd>
                                 :
                                 null
                             }
                         </dl>
-                    : null}
+                        :
+                        null
+                    }
                 </div>
             </div>
         );
