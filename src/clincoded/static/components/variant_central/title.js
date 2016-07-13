@@ -24,7 +24,7 @@ var Title = module.exports.Title = React.createClass({
         if (this.props.interpretationUuid) {
             calculatePatho_button = true;
         }
-
+        
         return (
             <div>
                 <h1>{variantTitle}{this.props.children}</h1>
@@ -32,9 +32,13 @@ var Title = module.exports.Title = React.createClass({
                 {variant && calculatePatho_button ?
                     <div className="btn-vertical-space">
                         <div className="interpretation-record clearfix">
-                            <button type="button-button" className="btn btn-primary pull-right non-function">
-                                Calculate Pathogenicity
-                            </button>
+                            <div className="feature-in-development pull-right"> {/* FIXME div for temp yellow UI display */}
+
+                                <button type="button-button" className="btn btn-primary pull-right">
+                                    Calculate Pathogenicity
+                                </button>
+
+                            </div> {/* /FIXME div for temp yellow UI display */}
                         </div>
                     </div>
                     :
