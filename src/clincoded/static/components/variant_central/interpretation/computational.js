@@ -337,6 +337,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                         <th>Prediction</th>
                                     </tr>
                                 </thead>
+                                {/* FIXME: Need real data */}
                                 <tbody>
                                     <tr>
                                         <td><a href="https://sites.google.com/site/revelgenomics/about" target="_blank">REVEL</a> (meta-predictor)</td>
