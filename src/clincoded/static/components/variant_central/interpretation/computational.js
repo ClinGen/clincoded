@@ -176,28 +176,28 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         if (response.dbnsfp) {
             let dbnsfp = response.dbnsfp;
             // get scores from dbnsfp
-            computationObj.other_predictors.sift.score = parseFloat(dbnsfp.sift.converted_rankscore);
-            computationObj.other_predictors.sift.prediction = dbnsfp.sift.pred[0];
-            computationObj.other_predictors.polyphen2_hdiv.score = parseFloat(dbnsfp.polyphen2.hdiv.rankscore);
-            computationObj.other_predictors.polyphen2_hdiv.prediction = dbnsfp.polyphen2.hdiv.pred;
-            computationObj.other_predictors.polyphen2_hvar.score = parseFloat(dbnsfp.polyphen2.hvar.rankscore);
-            computationObj.other_predictors.polyphen2_hvar.prediction = dbnsfp.polyphen2.hvar.pred;
-            computationObj.other_predictors.lrt.score = parseFloat(dbnsfp.lrt.converted_rankscore);
-            computationObj.other_predictors.lrt.prediction = dbnsfp.lrt.pred;
-            computationObj.other_predictors.mutationtaster.score = parseFloat(dbnsfp.mutationtaster.converted_rankscore);
-            computationObj.other_predictors.mutationtaster.prediction = dbnsfp.mutationtaster.pred[0];
-            computationObj.other_predictors.mutationassessor.score = parseFloat(dbnsfp.mutationassessor.rankscore);
-            computationObj.other_predictors.mutationassessor.prediction = dbnsfp.mutationassessor.pred;
-            computationObj.other_predictors.fathmm.score = parseFloat(dbnsfp.fathmm.rankscore);
-            computationObj.other_predictors.fathmm.prediction = dbnsfp.fathmm.pred[0];
-            computationObj.other_predictors.provean.score = parseFloat(dbnsfp.provean.rankscore);
-            computationObj.other_predictors.provean.prediction = dbnsfp.provean.pred[0];
-            computationObj.other_predictors.metasvm.score = parseFloat(dbnsfp.metasvm.rankscore);
-            computationObj.other_predictors.metasvm.prediction = dbnsfp.metasvm.pred;
-            computationObj.other_predictors.metalr.score = parseFloat(dbnsfp.metalr.rankscore);
-            computationObj.other_predictors.metalr.prediction = dbnsfp.metalr.pred;
-            computationObj.other_predictors.fathmm_mkl.score = parseFloat(dbnsfp['fathmm-mkl'].coding_rankscore);
-            computationObj.other_predictors.fathmm_mkl.prediction = dbnsfp['fathmm-mkl'].coding_pred;
+            computationObj.other_predictors.sift.score = this.handleScoreObj(dbnsfp.sift.score);
+            computationObj.other_predictors.sift.prediction = this.handlePredObj(dbnsfp.sift.pred);
+            computationObj.other_predictors.polyphen2_hdiv.score = this.handleScoreObj(dbnsfp.polyphen2.hdiv.score);
+            computationObj.other_predictors.polyphen2_hdiv.prediction = this.handlePredObj(dbnsfp.polyphen2.hdiv.pred);
+            computationObj.other_predictors.polyphen2_hvar.score = this.handleScoreObj(dbnsfp.polyphen2.hvar.score);
+            computationObj.other_predictors.polyphen2_hvar.prediction = this.handlePredObj(dbnsfp.polyphen2.hvar.pred);
+            computationObj.other_predictors.lrt.score = this.handleScoreObj(dbnsfp.lrt.score);
+            computationObj.other_predictors.lrt.prediction = this.handlePredObj(dbnsfp.lrt.pred);
+            computationObj.other_predictors.mutationtaster.score = this.handleScoreObj(dbnsfp.mutationtaster.score);
+            computationObj.other_predictors.mutationtaster.prediction = this.handlePredObj(dbnsfp.mutationtaster.pred);
+            computationObj.other_predictors.mutationassessor.score = this.handleScoreObj(dbnsfp.mutationassessor.score);
+            computationObj.other_predictors.mutationassessor.prediction = this.handlePredObj(dbnsfp.mutationassessor.pred);
+            computationObj.other_predictors.fathmm.score = this.handleScoreObj(dbnsfp.fathmm.score);
+            computationObj.other_predictors.fathmm.prediction = this.handlePredObj(dbnsfp.fathmm.pred);
+            computationObj.other_predictors.provean.score = this.handleScoreObj(dbnsfp.provean.score);
+            computationObj.other_predictors.provean.prediction = this.handlePredObj(dbnsfp.provean.pred);
+            computationObj.other_predictors.metasvm.score = this.handleScoreObj(dbnsfp.metasvm.score);
+            computationObj.other_predictors.metasvm.prediction = this.handlePredObj(dbnsfp.metasvm.pred);
+            computationObj.other_predictors.metalr.score = this.handleScoreObj(dbnsfp.metalr.score);
+            computationObj.other_predictors.metalr.prediction = this.handlePredObj(dbnsfp.metalr.pred);
+            computationObj.other_predictors.fathmm_mkl.score = this.handleScoreObj(dbnsfp['fathmm-mkl'].coding_score);
+            computationObj.other_predictors.fathmm_mkl.prediction = this.handlePredObj(dbnsfp['fathmm-mkl'].coding_pred);
             // update computationObj, and set flag indicating that we have other predictors data
             this.setState({hasOtherPredData: true, computationObj: computationObj});
         }
@@ -212,6 +212,39 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         }
     },
 
+    // Method to convert prediction array to string
+    handlePredObj: function(obj) {
+        var newArr = [], newStr = '';
+        if (Array.isArray(obj)) {
+            for (let value of obj.values()) {
+                var letterPattern = /^[a-z]+$/i;
+                if (value.match(letterPattern)) {
+                    newArr.push(value);
+                }
+            };
+            newStr = newArr.join(', ');
+        } else {
+            newStr = obj;
+        }
+        return newStr;
+    },
+
+    // Method to convert score array to string
+    handleScoreObj: function(obj) {
+        var newArr = [], newStr = '';
+        if (Array.isArray(obj)) {
+            for (let value of obj.values()) {
+                if (!isNaN(value) && value !== null) {
+                    newArr.push(value);
+                }
+            };
+            newStr = newArr.join(', ');
+        } else {
+            newStr = obj;
+        }
+        return newStr;
+    },
+
     // Method to assign conservation scores data to global computation object
     parseConservationData: function(response) {
         // Not all variants return the dbnsfp{...} object from myvariant.info
@@ -219,12 +252,12 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             let computationObj = this.state.computationObj;
             let dbnsfp = response.dbnsfp;
             // get scores from dbnsfp
-            computationObj.conservation.phylop7way = parseFloat(dbnsfp.phylo.p7way.vertebrate_rankscore);
-            computationObj.conservation.phylop20way = parseFloat(dbnsfp.phylo.p20way.mammalian_rankscore);
-            computationObj.conservation.phastconsp7way = parseFloat(dbnsfp.phastcons['7way'].vertebrate_rankscore);
-            computationObj.conservation.phastconsp20way = parseFloat(dbnsfp.phastcons['20way'].mammalian_rankscore);
-            computationObj.conservation.gerp = parseFloat(dbnsfp['gerp++'].rs_rankscore);
-            computationObj.conservation.siphy = parseFloat(dbnsfp.siphy_29way.logodds_rankscore);
+            computationObj.conservation.phylop7way = parseFloat(dbnsfp.phylo.p7way.vertebrate);
+            computationObj.conservation.phylop20way = parseFloat(dbnsfp.phylo.p20way.mammalian);
+            computationObj.conservation.phastconsp7way = parseFloat(dbnsfp.phastcons['7way'].vertebrate);
+            computationObj.conservation.phastconsp20way = parseFloat(dbnsfp.phastcons['20way'].mammalian);
+            computationObj.conservation.gerp = parseFloat(dbnsfp['gerp++'].rs);
+            computationObj.conservation.siphy = parseFloat(dbnsfp.siphy_29way.logodds);
             // update computationObj, and set flag indicating that we have conservation analysis data
             this.setState({hasConservationData: true, computationObj: computationObj});
         }
@@ -239,7 +272,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 <td>{rowName}</td>
                 <td>{otherPred[key].score_range}</td>
                 <td>{otherPred[key].score ? otherPred[key].score : '--'}</td>
-                <td>{otherPred[key].prediction ? this.mapPredictionName(otherPred[key].prediction) : '--'}</td>
+                <td>{otherPred[key].prediction ? otherPred[key].prediction : '--'}</td>
             </tr>
         );
     },
