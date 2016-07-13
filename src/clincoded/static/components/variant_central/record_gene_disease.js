@@ -35,7 +35,8 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
 
     getSequenceLocation: function(variant) {
         if (variant && variant.clinvarVariantId) {
-            var url = this.props.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId;
+            var url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=' + variant.clinvarVariantId;
+            //var url = this.props.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId;
             this.getRestDataXml(url).then(xml => {
                 // Passing 'true' option to invoke 'mixin' function
                 // To extract more ClinVar data for 'Basic Information' tab
@@ -65,7 +66,9 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
             if (hgvs_notation.indexOf('del') > 0) {
                 hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
             }
-            this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+            //debugger;
+            //this.getRestData('http://uswest.ensembl.org/Homo_sapiens/Gene/Summary?g=' + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+            this.getRestData(external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
                 this.setState({
                     ensembl_transcripts: response[0].transcript_consequences
                 });
