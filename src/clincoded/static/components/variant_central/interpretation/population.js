@@ -61,7 +61,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             geneENSG: null,
             CILow: null,
             CIhigh: null,
-            desiredCIDisplay: null,
             populationObj: {
                 highestMAF: null,
                 desiredCI: 95,
@@ -469,15 +468,18 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (interpretation && interpretation.evaluations && interpretation.evaluations.length > 0) {
             for (var i = 0; i < interpretation.evaluations.length; i++) {
                 if (interpretation.evaluations[i].criteria == 'BA1') {
-                    this.setState({desiredCIDisplay: interpretation.evaluations[i].population.populationData.desiredCI});
-                    //this.refs.desiredCI.setValue(this.state.interpretation.evaluations[i].population.populationData.desiredCI);
+                    let tempPopulationObj = this.state.populationObj;
+                    tempPopulationObj.desiredCI = interpretation.evaluations[i].population.populationData.desiredCI;
+                    this.setState({populationObj: tempPopulationObj});
                     break;
                 }
             }
         }
-        if (!this.state.desiredCIDisplay) {
+        if (!this.state.populationObj.desiredCI) {
             // previously saved value does not exist for some reason... set it to default value
-            this.setState({desiredCIDisplay: CI_DEFAULT});
+            let tempPopulationObj = this.state.populationObj;
+            tempPopulationObj.desiredCI = CI_DEFAULT;
+            this.setState({populationObj: tempPopulationObj});
         }
         // update CI low and high values
         this.changeDesiredCI();
@@ -496,24 +498,27 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (desiredCI == '' || isNaN(desiredCI)) {
             // if the user clicks away from the desired CI field, but it is blank/filled with
             // bad input, re-set it to the default value
+            let tempPopulationObj = this.state.populationObj;
             this.refs.desiredCI.setValue(CI_DEFAULT);
-            this.setState({desiredCIDisplay: CI_DEFAULT});
+            tempPopulationObj.desiredCI = CI_DEFAULT;
+            this.setState({populationObj: tempPopulationObj});
             this.changeDesiredCI();
         }
     },
 
     // function to calculate confidence intervals (CI). Formula taken from Steven's excel spreadsheet
     calculateCI: function(CIp, highestMAF) {
+        let populationObj = this.state.populationObj;
+        populationObj.desiredCI = CIp;
         if (highestMAF) {
             if (isNaN(CIp) || CIp < 0 || CIp > 100) {
                 // the field is blank... clear CI low and high values
                 // note that the user did not necessary navigate away from field just yet, so do not
                 // automatically set value to default here
-                this.setState({CILow: null, CIHigh: null});
-            } else {
+                this.setState({populationObj: populationObj, CILow: null, CIHigh: null});
+            } else if (highestMAF.ac && highestMAF.ac_tot) {
                 // store user-input desired CI value into population object
-                let populationObj = this.state.populationObj;
-                populationObj.desiredCI = CIp;
+
                 // calculate CI
                 let xp = highestMAF.ac,
                     np = highestMAF.ac_tot;
@@ -523,7 +528,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 let CILow = this.parseFloatShort(((2 * np * pp) + (zp * zp) - zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp)))),
                     CIHigh = this.parseFloatShort(((2 * np * pp) + (zp * zp) + zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp))));
                 this.setState({populationObj: populationObj, CILow: CILow, CIHigh: CIHigh});
+            } else {
+                this.setState({populationObj: populationObj, CILow: 'N/A', CIHigh: 'N/A'});
             }
+        } else {
+            this.setState({populationObj: populationObj, CILow: 'N/A', CIHigh: 'N/A'});
         }
     },
 
@@ -566,7 +575,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             exac = this.state.populationObj && this.state.populationObj.exac ? this.state.populationObj.exac : null, // Get ExAC data from global population object
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
-        var desiredCIDisplay = this.state.desiredCIDisplay ? this.state.desiredCIDisplay : null;
+        var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
 
         return (
             <div className="variant-interpretation population">
@@ -588,7 +597,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                     <span>
                                         <dt className="dtFormLabel">Desired CI:</dt>
                                         <dd className="ddFormInput">
-                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCIDisplay} handleChange={this.changeDesiredCI}
+                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI}
                                                 onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT.toString()} />
                                         </dd>
                                         <dt>CI - lower: </dt><dd>{this.state.CILow ? this.state.CILow : ''}</dd>
@@ -761,9 +770,8 @@ var criteriaGroup1 = function() {
                 checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="number" ref="maf-cutoff" label="MAF cutoff (%):" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
-                value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : 5}
+                value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
-            }
             <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="5"
