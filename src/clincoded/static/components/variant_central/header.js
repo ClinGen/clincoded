@@ -24,7 +24,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
             <div>
                 <div className="curation-data-title">
                     <div className="container">
-                        <Title data={variant} />
+                        <Title data={variant} interpretationUuid={interpretationUuid} />
                     </div>
                 </div>
                 <div className="container curation-data curation-variant">
