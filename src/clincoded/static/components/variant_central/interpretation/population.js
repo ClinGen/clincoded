@@ -754,11 +754,9 @@ var criteriaGroup1 = function() {
         <div>
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
-                    <strong>BA1 (Benign):</strong> &gt;0.1% with a 99% CI<br />
-                        CI – lower must be &gt;0.1%
+                    <strong>BA1:</strong> Allele frequence is > 5% in ExAC, 1000 Genomes, or ESP
                     <br /><br />
-                    <strong>PM2 (Rare Enough to be Absent):</strong> &lt;0.5% with a 95% CI<br />
-                        CI – lower must be ~0%; CI – upper must stay below (0.05%)
+                    <strong>PM2:</strong> Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP
                 </p>
             </div>
             <Input type="checkbox" ref="BA1-value" label="BA1 met?:" handleChange={this.handleCheckboxChange}
@@ -777,7 +775,7 @@ var criteriaGroup1 = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
-                    <strong>BS1 (Benign):</strong> Allele frequency greater than expected due to disorder
+                    <strong>BS1:</strong> Allele frequency greater than expected due to disorder
                 </p>
             </div>
             <Input type="checkbox" ref="BS1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
