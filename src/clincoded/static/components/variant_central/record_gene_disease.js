@@ -29,11 +29,32 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
         return {
             sequence_location: null,
             gene_symbol: null,
-            ensembl_transcripts: null
+            ensembl_transcripts: null,
+            hasRefseqData: false,
+            hasEnsemblData: false
         };
     },
 
-    getSequenceLocation: function(variant) {
+    componentWillReceiveProps: function(nextProps) {
+        if (nextProps.data && this.props.data) {
+            if (!this.state.hasRefseqData) {
+                this.getSequenceLocation();
+            }
+            if (!this.state.hasEnsemblData) {
+                this.getEnsemblId();
+            }
+        }
+    },
+
+    componentWillUnmount: function() {
+        this.setState({
+            hasRefseqData: false,
+            hasEnsemblData: false
+        });
+    },
+
+    getSequenceLocation: function() {
+        var variant = this.props.data;
         if (variant && variant.clinvarVariantId) {
             var url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=' + variant.clinvarVariantId;
             //var url = this.props.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId;
@@ -44,7 +65,8 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                 if (variantData.allele.SequenceLocation) {
                     this.setState({
                         sequence_location: variantData.allele.SequenceLocation,
-                        gene_symbol: variantData.gene.symbol
+                        gene_symbol: variantData.gene.symbol,
+                        hasRefseqData: true
                     });
                 }
             }).catch(function(e) {
@@ -54,27 +76,30 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
     },
 
     // Retrieve variant data from Ensembl REST API
-    getEnsemblId: function(grch38) {
-        var NC_genomic = grch38.substr(0, grch38.indexOf(':'));
-        // 'genomic_chr_mapping' is defined via requiring external mapping file
-        var found = genomic_chr_mapping.GRCh38.find((entry) => entry.GenomicRefSeq === NC_genomic);
-        // Can't simply filter alpha letters due to the presence of 'chrX' and 'chrY'
-        var chrosome = (found.ChrFormat) ? found.ChrFormat.substr(3) : '';
-        // Format hgvs_notation for vep/:species/hgvs/:hgvs_notation api
-        var hgvs_notation = chrosome + grch38.slice(grch38.indexOf(':'));
-        if (hgvs_notation) {
-            if (hgvs_notation.indexOf('del') > 0) {
-                hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
-            }
-            //debugger;
-            //this.getRestData('http://uswest.ensembl.org/Homo_sapiens/Gene/Summary?g=' + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
-            this.getRestData(external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
-                this.setState({
-                    ensembl_transcripts: response[0].transcript_consequences
+    getEnsemblId: function() {
+        var variant = this.props.data;
+        if (variant && variant.hgvsNames && (variant.hgvsNames.GRCh38 || variant.hgvsNames.gRCh38)) {
+            var grch38 = variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
+            var NC_genomic = grch38.substr(0, grch38.indexOf(':'));
+            // 'genomic_chr_mapping' is defined via requiring external mapping file
+            var found = genomic_chr_mapping.GRCh38.find((entry) => entry.GenomicRefSeq === NC_genomic);
+            // Can't simply filter alpha letters due to the presence of 'chrX' and 'chrY'
+            var chrosome = (found.ChrFormat) ? found.ChrFormat.substr(3) : '';
+            // Format hgvs_notation for vep/:species/hgvs/:hgvs_notation api
+            var hgvs_notation = chrosome + grch38.slice(grch38.indexOf(':'));
+            if (hgvs_notation) {
+                if (hgvs_notation.indexOf('del') > 0) {
+                    hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
+                }
+                this.getRestData(external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+                    this.setState({
+                        ensembl_transcripts: response[0].transcript_consequences,
+                        hasEnsemblData: true
+                    });
+                }).catch(function(e) {
+                    console.log('Ensembl Fetch Error=: %o', e);
                 });
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
+            }
         }
     },
 
@@ -135,13 +160,13 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                 GRCh37 =  variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : (variant.hgvsNames.gRCh37 ? variant.hgvsNames.gRCh37 : null);
             }
 
-            if (variant.clinvarVariantId && variant.clinvarVariantId !== '') {
-                this.getSequenceLocation(variant);
-            }
+            //if (variant.clinvarVariantId && variant.clinvarVariantId !== '' && !this.state.hasRefseqData) {
+            //    this.getSequenceLocation(variant);
+            //}
 
-            if (GRCh38) {
-                this.getEnsemblId(GRCh38);
-            }
+            //if (GRCh38 && !this.state.hasEnsemblData) {
+            //    this.getEnsemblId(GRCh38);
+            //}
         }
 
         return (
