@@ -508,6 +508,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     // function to calculate confidence intervals (CI). Formula taken from Steven's excel spreadsheet
     calculateCI: function(CIp, highestMAF) {
+        // store user-input desired CI value into population object
         let populationObj = this.state.populationObj;
         populationObj.desiredCI = CIp;
         if (highestMAF) {
@@ -517,8 +518,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 // automatically set value to default here
                 this.setState({populationObj: populationObj, CILow: null, CIHigh: null});
             } else if (highestMAF.ac && highestMAF.ac_tot) {
-                // store user-input desired CI value into population object
-
                 // calculate CI
                 let xp = highestMAF.ac,
                     np = highestMAF.ac_tot;
