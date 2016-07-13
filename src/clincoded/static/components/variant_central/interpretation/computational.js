@@ -49,11 +49,11 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true}
                             formDataUpdater={criteriaGroup2Update} variantUuid={this.props.data['@id']} criteriaDisease={['PM5', 'PS1']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"Missense Variant"} renderedFormContent={criteriaGroup3}
+                        <CurationInterpretationForm formTitle={"Molecular Consequence: Missense"} renderedFormContent={criteriaGroup3}
                             evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true} formChangeHandler={criteriaGroup3Change}
                             formDataUpdater={criteriaGroup3Update} variantUuid={this.props.data['@id']} criteriaDisease={['BP1', 'PP2']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"Repetetive Regions"} renderedFormContent={criteriaGroup4}
+                        <CurationInterpretationForm formTitle={"Molecular Consequence: Inframe indel"} renderedFormContent={criteriaGroup4}
                             evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true}
                             formDataUpdater={criteriaGroup4Update} variantUuid={this.props.data['@id']} criteria={['BP3', 'PM4']}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
