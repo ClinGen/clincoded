@@ -615,8 +615,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </tbody>
                             <tfoot>
                                 <tr className="count">
-                                    <td>Average Sample Read Depth</td>
-                                    <td colSpan="5">{esp._extra.avg_sample_read}</td>
+                                    <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
                                 </tr>
                             </tfoot>
                         </table>
