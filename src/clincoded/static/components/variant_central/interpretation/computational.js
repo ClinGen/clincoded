@@ -154,7 +154,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     }).then(clinvar => {
                         var term = clinvar.protein_change.substr(0, clinvar.protein_change.length-1);
                         var symbol = clinvar.gene_symbol;
-                        this.getRestData(this.props.protocol + '//eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=clinvar&term=' + term + '*+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
+                        this.getRestData(this.props.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '*+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
                             var codonObj = {};
                             codonObj.count = result.esearchresult.count;
                             codonObj.term = term;
@@ -400,6 +400,14 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     {this.state.hasConservationData ?
                         <div className="panel panel-info datasource-splice">
                             <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
+                            <div className="panel-body">
+                                <span className="pull-right">
+                                    <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
+                                    <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
+                                    <a href="http://www.cbcb.umd.edu/software/GeneSplicer/gene_spl.shtml" target="_blank">See data in GeneSplicer <i className="icon icon-external-link"></i></a>
+                                    <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
+                                </span>
+                            </div>
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -524,7 +532,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             {this.state.hasClinVarData && codon ?
                                 <dl className="inline-dl clearfix">
                                     <dt>Number of variants at codon: <span className="condon-variant-count">{codon.count}</span></dt>
-                                    <dd>[ <a href={this.props.protocol + '//www.ncbi.nlm.nih.gov/clinvar/?term=' + codon.term + '*+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">Search ClinVar</a> ]</dd>
+                                    <dd className="pull-right"><a href={external_url_map['ClinVar'] + '?term=' + codon.term + '*+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">See data in ClinVar <i className="icon icon-external-link"></i></a></dd>
                                 </dl>
                             :
                                 <dl className="inline-dl clearfix">
