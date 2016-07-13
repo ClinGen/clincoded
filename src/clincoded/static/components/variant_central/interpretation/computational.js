@@ -176,37 +176,35 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         if (response.dbnsfp) {
             let dbnsfp = response.dbnsfp;
             // get scores from dbnsfp
-            computationObj.other_predictors.sift.score = this.handleScoreObj(dbnsfp.sift.score);
-            computationObj.other_predictors.sift.prediction = this.handlePredObj(dbnsfp.sift.pred);
-            computationObj.other_predictors.polyphen2_hdiv.score = this.handleScoreObj(dbnsfp.polyphen2.hdiv.score);
-            computationObj.other_predictors.polyphen2_hdiv.prediction = this.handlePredObj(dbnsfp.polyphen2.hdiv.pred);
-            computationObj.other_predictors.polyphen2_hvar.score = this.handleScoreObj(dbnsfp.polyphen2.hvar.score);
-            computationObj.other_predictors.polyphen2_hvar.prediction = this.handlePredObj(dbnsfp.polyphen2.hvar.pred);
-            computationObj.other_predictors.lrt.score = this.handleScoreObj(dbnsfp.lrt.score);
-            computationObj.other_predictors.lrt.prediction = this.handlePredObj(dbnsfp.lrt.pred);
-            computationObj.other_predictors.mutationtaster.score = this.handleScoreObj(dbnsfp.mutationtaster.score);
-            computationObj.other_predictors.mutationtaster.prediction = this.handlePredObj(dbnsfp.mutationtaster.pred);
-            computationObj.other_predictors.mutationassessor.score = this.handleScoreObj(dbnsfp.mutationassessor.score);
-            computationObj.other_predictors.mutationassessor.prediction = this.handlePredObj(dbnsfp.mutationassessor.pred);
-            computationObj.other_predictors.fathmm.score = this.handleScoreObj(dbnsfp.fathmm.score);
-            computationObj.other_predictors.fathmm.prediction = this.handlePredObj(dbnsfp.fathmm.pred);
-            computationObj.other_predictors.provean.score = this.handleScoreObj(dbnsfp.provean.score);
-            computationObj.other_predictors.provean.prediction = this.handlePredObj(dbnsfp.provean.pred);
-            computationObj.other_predictors.metasvm.score = this.handleScoreObj(dbnsfp.metasvm.score);
-            computationObj.other_predictors.metasvm.prediction = this.handlePredObj(dbnsfp.metasvm.pred);
-            computationObj.other_predictors.metalr.score = this.handleScoreObj(dbnsfp.metalr.score);
-            computationObj.other_predictors.metalr.prediction = this.handlePredObj(dbnsfp.metalr.pred);
-            computationObj.other_predictors.fathmm_mkl.score = this.handleScoreObj(dbnsfp['fathmm-mkl'].coding_score);
-            computationObj.other_predictors.fathmm_mkl.prediction = this.handlePredObj(dbnsfp['fathmm-mkl'].coding_pred);
+            computationObj.other_predictors.sift.score = (dbnsfp.sift && dbnsfp.sift.score) ? this.handleScoreObj(dbnsfp.sift.score) : null;
+            computationObj.other_predictors.sift.prediction = (dbnsfp.sift && dbnsfp.sift.pred) ? this.handlePredObj(dbnsfp.sift.pred) : null;
+            computationObj.other_predictors.polyphen2_hdiv.score = (dbnsfp.polyphen2 && dbnsfp.polyphen2.hdiv.score) ? this.handleScoreObj(dbnsfp.polyphen2.hdiv.score) : null;
+            computationObj.other_predictors.polyphen2_hdiv.prediction = (dbnsfp.polyphen2 && dbnsfp.polyphen2.hdiv.pred) ? this.handlePredObj(dbnsfp.polyphen2.hdiv.pred) : null;
+            computationObj.other_predictors.polyphen2_hvar.score = (dbnsfp.polyphen2 && dbnsfp.polyphen2.hvar.score) ? this.handleScoreObj(dbnsfp.polyphen2.hvar.score) : null;
+            computationObj.other_predictors.polyphen2_hvar.prediction = (dbnsfp.polyphen2 && dbnsfp.polyphen2.hvar.pred) ? this.handlePredObj(dbnsfp.polyphen2.hvar.pred) : null;
+            computationObj.other_predictors.lrt.score = (dbnsfp.lrt && dbnsfp.lrt.score) ? this.handleScoreObj(dbnsfp.lrt.score) : null;
+            computationObj.other_predictors.lrt.prediction = (dbnsfp.lrt && dbnsfp.lrt.pred) ? this.handlePredObj(dbnsfp.lrt.pred) : null;
+            computationObj.other_predictors.mutationtaster.score = (dbnsfp.mutationtaster && dbnsfp.mutationtaster.score) ? this.handleScoreObj(dbnsfp.mutationtaster.score) : null;
+            computationObj.other_predictors.mutationtaster.prediction = (dbnsfp.mutationtaster && dbnsfp.mutationtaster.pred) ? this.handlePredObj(dbnsfp.mutationtaster.pred) : null;
+            computationObj.other_predictors.mutationassessor.score = (dbnsfp.mutationassessor && dbnsfp.mutationassessor.score) ? this.handleScoreObj(dbnsfp.mutationassessor.score) : null;
+            computationObj.other_predictors.mutationassessor.prediction = (dbnsfp.mutationassessor && dbnsfp.mutationassessor.pred) ? this.handlePredObj(dbnsfp.mutationassessor.pred) : null;
+            computationObj.other_predictors.fathmm.score = (dbnsfp.fathmm && dbnsfp.fathmm.score) ? this.handleScoreObj(dbnsfp.fathmm.score) : null;
+            computationObj.other_predictors.fathmm.prediction = (dbnsfp.fathmm && dbnsfp.fathmm.pred) ? this.handlePredObj(dbnsfp.fathmm.pred) : null;
+            computationObj.other_predictors.provean.score = (dbnsfp.provean && dbnsfp.provean.score) ? this.handleScoreObj(dbnsfp.provean.score) : null;
+            computationObj.other_predictors.provean.prediction = (dbnsfp.provean && dbnsfp.provean.pred) ? this.handlePredObj(dbnsfp.provean.pred) : null;
+            computationObj.other_predictors.metasvm.score = (dbnsfp.metasvm && dbnsfp.metasvm.score) ? this.handleScoreObj(dbnsfp.metasvm.score) : null;
+            computationObj.other_predictors.metasvm.prediction = (dbnsfp.metasvm && dbnsfp.metasvm.pred) ? this.handlePredObj(dbnsfp.metasvm.pred) : null;
+            computationObj.other_predictors.metalr.score = (dbnsfp.metalr && dbnsfp.metalr.score) ? this.handleScoreObj(dbnsfp.metalr.score) : null;
+            computationObj.other_predictors.metalr.prediction = (dbnsfp.metalr && dbnsfp.metalr.pred) ? this.handlePredObj(dbnsfp.metalr.pred) : null;
+            computationObj.other_predictors.fathmm_mkl.score = (dbnsfp['fathmm-mkl'] && dbnsfp['fathmm-mkl'].coding_score) ? this.handleScoreObj(dbnsfp['fathmm-mkl'].coding_score) : null;
+            computationObj.other_predictors.fathmm_mkl.prediction = (dbnsfp['fathmm-mkl'] && dbnsfp['fathmm-mkl'].coding_pred) ? this.handlePredObj(dbnsfp['fathmm-mkl'].coding_pred) : null;
+            computationObj.other_predictors.fitcons.score = (dbnsfp.integrated && dbnsfp.integrated.fitcons_score) ? this.handleScoreObj(dbnsfp.integrated.fitcons_score) : null;
             // update computationObj, and set flag indicating that we have other predictors data
             this.setState({hasOtherPredData: true, computationObj: computationObj});
         }
         if (response.cadd) {
             let cadd = response.cadd;
-            computationObj.other_predictors.cadd.score = parseFloat(cadd.consscore);
-            //computationObj.other_predictors.cadd.prediction = cadd.pred;
-            computationObj.other_predictors.fitcons.score = parseFloat(cadd.fitcons);
-            //computationObj.other_predictors.fitcons.prediction = cadd.fitcons.pred;
+            computationObj.other_predictors.cadd.score = parseFloat(cadd.rawscore);
             // update computationObj, and set flag indicating that we have other predictors data
             this.setState({hasOtherPredData: true, computationObj: computationObj});
         }
@@ -341,7 +339,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><a href="https://sites.google.com/site/revelgenomics/home" target="_blank">REVEL (meta-predictor)</a></td>
+                                        <td><a href="https://sites.google.com/site/revelgenomics/about" target="_blank">REVEL</a> (meta-predictor)</td>
                                         <td>0 to 1</td>
                                         <td>0.7</td>
                                         <td>higher score = higher pathogenicity</td>
@@ -565,7 +563,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             {this.state.hasClinVarData && codon ?
                                 <dl className="inline-dl clearfix">
                                     <dt>Number of variants at codon: <span className="condon-variant-count">{codon.count}</span></dt>
-                                    <dd className="pull-right"><a href={external_url_map['ClinVar'] + '?term=' + codon.term + '*+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">See data in ClinVar <i className="icon icon-external-link"></i></a></dd>
+                                    <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '*+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">See data in ClinVar <i className="icon icon-external-link"></i></a>)</dd>
                                 </dl>
                             :
                                 <dl className="inline-dl clearfix">
