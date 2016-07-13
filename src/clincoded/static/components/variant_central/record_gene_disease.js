@@ -5,8 +5,10 @@ var moment = require('moment');
 var globals = require('../globals');
 var parseClinvar = require('../../libs/parse-resources').parseClinvar;
 var RestMixin = require('../rest').RestMixin;
+var genomic_chr_mapping = require('./interpretation/mapping/NC_genomic_chr_format.json');
 
 var external_url_map = globals.external_url_map;
+var dbxref_prefix_map = globals.dbxref_prefix_map;
 
 // Display the curator data of the curation data
 var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React.createClass({
@@ -26,8 +28,60 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
     getInitialState: function() {
         return {
             sequence_location: null,
-            gene_symbol: null
+            gene_symbol: null,
+            ensembl_transcripts: null
         };
+    },
+
+    getSequenceLocation: function(variant) {
+        if (variant && variant.clinvarVariantId) {
+            var url = this.props.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId;
+            this.getRestDataXml(url).then(xml => {
+                // Passing 'true' option to invoke 'mixin' function
+                // To extract more ClinVar data for 'Basic Information' tab
+                var variantData = parseClinvar(xml, true);
+                if (variantData.allele.SequenceLocation) {
+                    this.setState({
+                        sequence_location: variantData.allele.SequenceLocation,
+                        gene_symbol: variantData.gene.symbol
+                    });
+                }
+            }).catch(function(e) {
+                console.log('RefSeq Fetch Error=: %o', e);
+            });
+        }
+    },
+
+    // Retrieve variant data from Ensembl REST API
+    getEnsemblId: function(grch38) {
+        var NC_genomic = grch38.substr(0, grch38.indexOf(':'));
+        // 'genomic_chr_mapping' is defined via requiring external mapping file
+        var found = genomic_chr_mapping.GRCh38.find((entry) => entry.GenomicRefSeq === NC_genomic);
+        // Can't simply filter alpha letters due to the presence of 'chrX' and 'chrY'
+        var chrosome = (found.ChrFormat) ? found.ChrFormat.substr(3) : '';
+        // Format hgvs_notation for vep/:species/hgvs/:hgvs_notation api
+        var hgvs_notation = chrosome + grch38.slice(grch38.indexOf(':'));
+        if (hgvs_notation) {
+            if (hgvs_notation.indexOf('del') > 0) {
+                hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
+            }
+            this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+                this.setState({
+                    ensembl_transcripts: response[0].transcript_consequences
+                });
+            }).catch(function(e) {
+                console.log('Ensembl Fetch Error=: %o', e);
+            });
+        }
+    },
+
+    // Get Ensembl gene id
+    getGeneId: function(array) {
+        var gene_id = '';
+        if (array && array.length && array[0].gene_id) {
+            gene_id = array[0].gene_id;
+        }
+        return gene_id;
     },
 
     // Construct LinkOut URLs to UCSC Viewer
@@ -54,24 +108,6 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
         return url;
     },
 
-    getSequenceLocation: function(variant) {
-        if (variant && variant.clinvarVariantId) {
-            var url = this.props.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId;
-            this.getRestDataXml(url).then(xml => {
-                // Passing 'true' option to invoke 'mixin' function
-                // To extract more ClinVar data for 'Basic Information' tab
-                var variantData = parseClinvar(xml, true);
-                if (variantData.allele.SequenceLocation) {
-                    this.setState({
-                        sequence_location: variantData.allele.SequenceLocation,
-                        gene_symbol: variantData.gene.symbol
-                    });
-                }
-            }).catch(function(e) {
-                console.log('RefSeq Fetch Error=: %o', e);
-            });
-        }
-    },
 
     render: function() {
         var variant = this.props.data;
@@ -80,13 +116,13 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
         var GRCh37 = null;
         var sequence_location = this.state.sequence_location;
         var gene_symbol = this.state.gene_symbol;
+        var ensembl_data = this.state.ensembl_transcripts;
         if (variant) {
             var geneSymbol = (variant.symbol) ? variant.symbol : 'Unknown';
             var uniprotId = (variant.uniprotId) ? variant.uniprotId : 'Unknown';
             var associatedDisease = (variant.disease) ? variant.disease : 'Unknown';
             var omimId = (variant.omimId) ? variant.omimId : 'Unknown';
-            //var dbSNPId = (variant.dbSNPIds.length) ? variant.dbSNPIds[0] : 'Unknown';
-            var dbSNPId = (variant.dbSNPIds.length) ? variant.dbSNPIds[0] : null;
+            var dbSNPId = (variant.dbSNPIds && variant.dbSNPIds.length) ? variant.dbSNPIds[0] : null;
             if (dbSNPId && dbSNPId.indexOf('rs') == -1) {
                 dbSNPId = 'rs' + dbSNPId;
             }
@@ -99,13 +135,17 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
             if (variant.clinvarVariantId && variant.clinvarVariantId !== '') {
                 this.getSequenceLocation(variant);
             }
+
+            if (GRCh38) {
+                this.getEnsemblId(GRCh38);
+            }
         }
 
         return (
             <div className="col-xs-12 col-sm-3 gutter-exc">
                 <div className="curation-data-disease">
                     <h4>{recordHeader}</h4>
-                    {variant && variant.clinvarVariantId ?
+                    {variant ?
                         <dl className="inline-dl clearfix">
                             {(sequence_location && sequence_location.length) ?
                                 <dd>UCSC [
@@ -123,6 +163,13 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                                      &nbsp;-&nbsp;
                                      <a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh37')} target="_blank" title={'Variation Viewer page for ' + GRCh37 + ' in a new window'}>GRCh37</a>
                                     ]
+                                </dd>
+                                :
+                                null
+                            }
+                            {ensembl_data && ensembl_data.length ?
+                                <dd>Ensembl Browser [
+                                    <a href={dbxref_prefix_map['ENSEMBL'] + this.getGeneId(ensembl_data)} target="_blank" title={'Ensembl Browser page for ' + this.getGeneId(ensembl_data) + ' in a new window'}>GRCh38</a>]
                                 </dd>
                                 :
                                 null
