@@ -221,6 +221,7 @@ var Input = module.exports.Input = React.createClass({
         submitHandler: React.PropTypes.func, // Called to handle submit button click
         cancelHandler: React.PropTypes.func, // Called to handle cancel button click
         submitBusy: React.PropTypes.bool, //
+        onBlur: React.PropTypes.func,
         minVal: React.PropTypes.number, // Minimum value for a number formatted input
         maxVal: React.PropTypes.number // Maximum value for a number formatted input
     },
@@ -255,7 +256,7 @@ var Input = module.exports.Input = React.createClass({
 
     // Set the value of an input
     setValue: function(val) {
-        if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
+        if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea' || this.props.type === 'number') {
             ReactDOM.findDOMNode(this.refs.input).value = val;
             this.setState({value: val});
         } else if (this.props.type === 'select') {
@@ -338,7 +339,7 @@ var Input = module.exports.Input = React.createClass({
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 var innerInput = (
                     <span>
-                        <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} maxLength={this.props.maxLength} disabled={this.props.inputDisabled} />
+                        <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} maxLength={this.props.maxLength} disabled={this.props.inputDisabled} />
                         <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                     </span>
                 );

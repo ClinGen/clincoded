@@ -1143,7 +1143,7 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     }
 }
 
-/* FIXME - temp styles for placeholders */
+/* FIXME: ** begin ** temp placeholder style. Will be removed. */
 .react-tabs .tab-panel {
     .population li>div,
     .computational li>div,
@@ -1154,6 +1154,17 @@ div.react-tabs .ReactTabs__TabPanel--selected {
         margin: 0 15px 10px 0;
     }
 }
+
+.wip {
+    background-color: #ccc;
+    border-radius: 4px;
+    color: white;
+    display: inline-block;
+    font-size: 10px;
+    font-weight: normal;
+    padding: 3px 8px;
+}
+/* FIXME: ** end ** temp placeholder style. Will be removed. */
 
 /* variant curation interface - interpretation action bar */
 .curation-actions {
@@ -1390,13 +1401,12 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     opacity: 1;
 }
 
-/* FIXME: placeholder style. Will be removed. */
-.wip {
-    background-color: #ccc;
-    border-radius: 4px;
-    color: white;
-    display: inline-block;
-    font-size: 10px;
-    font-weight: normal;
-    padding: 3px 8px;
+dl.inline-dl {
+    dt.dtFormLabel {
+        line-height: 4.5;
+    }
+
+    dd.ddFormInput {
+        margin-top: 15px;
+    }
 }
