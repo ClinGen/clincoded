@@ -17,7 +17,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         session: React.PropTypes.object,
         interpretationUuid: React.PropTypes.string,
         editKey: React.PropTypes.bool,
-        pageURL: React.PropTypes.string
+        href_url: React.PropTypes.object
     },
 
     getInitialState: function() {
@@ -41,6 +41,11 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         e.preventDefault(); e.stopPropagation();
         var variantObj = this.props.variantData;
         var newInterpretationObj;
+        var tab = null;
+        var page_url = window.location.href;
+        if (page_url.indexOf('tab=') > -1 ) {
+            tab = '&tab=' + page_url.split('tab=').pop();
+        }
         if (variantObj) {
             this.setState({variantUuid: variantObj.uuid});
             // Put together a new interpretation object
@@ -51,7 +56,12 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         this.postRestData('/interpretations/', newInterpretationObj).then(data => {
             var newInterpretationUuid = data['@graph'][0].uuid;
             // this.setState({interpretationUuid: newInterpretationUuid});
-            window.location.href = '/variant-central/?variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid;
+            //window.location.href = '/variant-central/?variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid;
+            var new_url = '/variant-central/?variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid;
+            if (tab) {
+                new_url = new_url + tab;
+            }
+            window.location.href =  new_url;
         }).catch(e => {parseAndLogError.bind(undefined, 'postRequest')});
     },
 
@@ -64,7 +74,6 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         */
         return (
             <div>
-                <span>{this.props.pageURL}</span>
                 <div className="container curation-actions curation-variant">
                 {((this.props.interpretationUuid && this.props.interpretationUuid.length > 0) || (this.props.editKey && this.props.interpretationUuid.length > 0)) ?
                     <div className="interpretation-record clearfix">
