@@ -16,7 +16,8 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         variantData: React.PropTypes.object, // ClinVar data payload
         session: React.PropTypes.object,
         interpretationUuid: React.PropTypes.string,
-        editKey: React.PropTypes.bool
+        editKey: React.PropTypes.bool,
+        pageURL: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -63,6 +64,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         */
         return (
             <div>
+                <span>{this.props.pageURL}</span>
                 <div className="container curation-actions curation-variant">
                 {((this.props.interpretationUuid && this.props.interpretationUuid.length > 0) || (this.props.editKey && this.props.interpretationUuid.length > 0)) ?
                     <div className="interpretation-record clearfix">
