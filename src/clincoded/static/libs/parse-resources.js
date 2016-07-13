@@ -58,6 +58,7 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset) {
     variant.gene = {};
     variant.allele = {};
     variant.allele.SequenceLocation = [];
+    variant.allele.ProteinChange = '';
     // Group transcripts by RefSeq nucleotide change, molecular consequence, and protein change
     variant.RefSeqTranscripts.NucleotideChangeList = [];
     variant.RefSeqTranscripts.MolecularConsequenceList = [];
@@ -102,6 +103,8 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset) {
     var geneNode = geneList.getElementsByTagName('Gene')[0];
     variant.gene.symbol = geneNode.getAttribute('Symbol');
     variant.gene.full_name = geneNode.getAttribute('FullName');
+    var protein_change = allele.getElementsByTagName('ProteinChange')[0];
+    variant.allele.ProteinChange = protein_change.textContent;
     // Parse <SequenceLocation> nodes
     var SequenceLocationNodes = allele.getElementsByTagName('SequenceLocation');
     for(let y of SequenceLocationNodes) {
