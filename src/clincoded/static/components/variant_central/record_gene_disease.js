@@ -56,8 +56,7 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
     getSequenceLocation: function() {
         var variant = this.props.data;
         if (variant && variant.clinvarVariantId) {
-            var url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=' + variant.clinvarVariantId;
-            //var url = this.props.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId;
+            var url = this.props.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId;
             this.getRestDataXml(url).then(xml => {
                 // Passing 'true' option to invoke 'mixin' function
                 // To extract more ClinVar data for 'Basic Information' tab
@@ -145,6 +144,8 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
         var sequence_location = this.state.sequence_location;
         var gene_symbol = this.state.gene_symbol;
         var ensembl_data = this.state.ensembl_transcripts;
+
+        var dbSNPId = null;
         if (variant) {
             var geneSymbol = (variant.symbol) ? variant.symbol : 'Unknown';
             var uniprotId = (variant.uniprotId) ? variant.uniprotId : 'Unknown';
@@ -187,9 +188,9 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                                 :
                                 null
                             }
-                            {ensembl_data && ensembl_data.length ?
+                            {dbSNPId ?
                                 <dd>Ensembl Browser [
-                                    <a href={dbxref_prefix_map['ENSEMBL'] + this.getGeneId(ensembl_data)} target="_blank" title={'Ensembl Browser page for ' + this.getGeneId(ensembl_data) + ' in a new window'}>GRCh38</a>]
+                                    <a href={'http://www.ensembl.org/Homo_sapiens/Variation/Explore?v=' + dbSNPId} target="_blank" title={'Ensembl Browser page for ' + dbSNPId + ' in a new window'}>{dbSNPId}</a>]
                                 </dd>
                                 :
                                 null
