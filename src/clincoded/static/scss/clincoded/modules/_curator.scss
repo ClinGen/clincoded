@@ -1401,6 +1401,24 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     opacity: 1;
 }
 
+/* Vertical padding for div */
+.btn-vertical-space {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.feature-in-development {
+    border: none;
+    border-left: 5px solid #fed84d;
+    border-radius: 2px;
+}
+
+.feature-in-development:hover {
+    border: none;
+    border-left: 5px solid #fed84d;
+    border-radius: 2px;
+}
+
 dl.inline-dl {
     dt.dtFormLabel {
         line-height: 4.5;
