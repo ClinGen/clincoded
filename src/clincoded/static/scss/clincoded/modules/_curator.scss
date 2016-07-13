@@ -1073,6 +1073,10 @@ div.react-tabs .ReactTabs__TabPanel--selected {
 
             dd {
                 margin-right: 20px;
+
+                &.pull-right {
+                    margin-right: 0;
+                }
             }
         }
 
@@ -1255,6 +1259,7 @@ div.react-tabs .ReactTabs__TabPanel--selected {
         font-weight: bold;
 
         a {
+            font-size: 85%;
             font-weight: normal;
             margin-left: 20px;
         }
@@ -1268,6 +1273,14 @@ div.react-tabs .ReactTabs__TabPanel--selected {
 
     .pull-right {
         float: right;
+    }
+
+    .panel-body {
+        padding-bottom: 12px;
+
+        .pull-right a {
+            margin-left: 20px;
+        }
     }
 }
 
