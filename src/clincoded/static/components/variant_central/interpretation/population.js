@@ -64,8 +64,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             desiredCIDisplay: null,
             populationObj: {
                 highestMAF: null,
-                desiredCI: null,
-                mafCutoff: null,
+                desiredCI: 95,
+                mafCutoff: 5,
                 exac: {
                     afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
@@ -761,7 +761,9 @@ var criteriaGroup1 = function() {
                 checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="number" ref="maf-cutoff" label="MAF cutoff (%):" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
+                value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : 5}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
+            }
             <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="5"
