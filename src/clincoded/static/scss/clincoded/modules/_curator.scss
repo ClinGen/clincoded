@@ -1101,6 +1101,41 @@ div.react-tabs .ReactTabs__TabPanel--selected {
         .population .datasource-ESP .table tfoot td {
             width: 16.66%;
         }
+
+        .computational .datasource-clingen .table th,
+        .computational .datasource-clingen .table td,
+        .computational .datasource-other .table th,
+        .computational .datasource-other .table td,
+        .computational .datasource-splice .table th,
+        .computational .datasource-splice .table td {
+            width: 25%;
+        }
+
+        .computational .datasource-conservation .table th,
+        .computational .datasource-conservation .table td,
+        .computational .datasource-additional .table th {
+            width: 50%;
+        }
+
+        .computational .datasource-clinvar dt {
+            margin-right: 15px;
+        }
+
+        .computational .page-header:first-child {
+            margin-top: 20px;
+        }
+
+        .computational .datasource-splice .table {
+            .row-span {
+                border-left: 1px solid #ddd;
+                border-right: 1px solid #ddd;
+                font-weight: bold;
+            }
+
+            tfoot td {
+                font-weight: bold;
+            }
+        }
     }
 }
 
@@ -1340,4 +1375,15 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
     filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
     opacity: 1;
+}
+
+/* FIXME: placeholder style. Will be removed. */
+.wip {
+    background-color: #ccc;
+    border-radius: 4px;
+    color: white;
+    display: inline-block;
+    font-size: 10px;
+    font-weight: normal;
+    padding: 3px 8px;
 }
