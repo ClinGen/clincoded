@@ -39,7 +39,7 @@ var computationStatic = {
             'metalr': 'MetaLR (meta-predictor)',
             'cadd': 'CADD (meta-predictor)',
             'fathmm_mkl': 'FATHMM-MKL',
-            'fitcons': 'fitCons',
+            'fitcons': 'fitCons'
         }
     }
 };
@@ -160,7 +160,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             codonObj.term = term;
                             codonObj.symbol = symbol;
                             this.setState({hasClinVarData: true, codonObj: codonObj});
-                        })
+                        });
                     }).catch(function(e) {
                         console.log('ClinVar Fetch Error=: %o', e);
                     });
@@ -235,7 +235,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 if (!isNaN(value) && value !== null) {
                     newArr.push(value);
                 }
-            };
+            }
             newStr = newArr.join(', ');
         } else {
             newStr = obj;
@@ -451,7 +451,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td colSpan="4">WT Sequence</td>
+                                        <th colSpan="4">WT Sequence</th>
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
@@ -476,7 +476,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
                                     <tr>
-                                        <td colSpan="4">Variant Sequence</td>
+                                        <th colSpan="4">Variant Sequence</th>
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
@@ -557,13 +557,13 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </div>
 
                 <div>
-                    <h2 className="page-header">Other Variants in Codon</h2>
+                    <h2 className="page-header">Variants in Same Codon</h2>
                     <div className="panel panel-info datasource-clinvar">
                         <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
                         <div className="panel-body">
                             {this.state.hasClinVarData && codon ?
                                 <dl className="inline-dl clearfix">
-                                    <dt>Number of variants at codon: <span className="condon-variant-count">{codon.count}</span></dt>
+                                    <dt>Number of variants in codon: <span className="condon-variant-count">{codon.count}</span></dt>
                                     <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '*+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">See data in ClinVar <i className="icon icon-external-link"></i></a>)</dd>
                                 </dl>
                             :
