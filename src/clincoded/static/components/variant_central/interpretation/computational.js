@@ -44,6 +44,10 @@ var computationStatic = {
             'fathmm_mkl': 'FATHMM-MKL',
             'fitcons': 'fitCons'
         }
+    },
+    clingen: {
+        _order: ['revel', 'cftr'],
+        _labels: {'revel': 'REVEL', 'cftr': 'CFTR'}
     }
 };
 
@@ -65,6 +69,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             hasConservationData: false,
             hasOtherPredData: false,
             hasClinVarData: false,
+            hasBustamanteData: false,
             codonObj: {},
             computationObj: {
                 conservation: {
@@ -84,6 +89,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     cadd: {score_range: '-7.535 to 35.789', score: null, prediction: null},
                     fathmm_mkl: {score_range: '--', score: null, prediction: null},
                     fitcons: {score_range: '0 to 1', score: null, prediction: null}
+                },
+                clingen: {
+                    revel: {score_range: '0 to 1', score: null, prediction: 'higher score = higher pathogenicity', visible: true},
+                    cftr: {score_range: '--', score: null, prediction: '--', visible: false}
                 }
             }
         };
@@ -98,6 +107,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             if (!this.state.hasClinVarData) {
                 this.fetchExternalData('clinvar');
             }
+            if (!this.state.hasBustamanteData) {
+                this.fetchExternalData('bustemante');
+            }
         }
     },
 
@@ -105,7 +117,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         this.setState({
             hasConservationData: false,
             hasOtherPredData: false,
-            hasClinVarData: false
+            hasClinVarData: false,
+            hasBustamanteData: false
         });
     },
 
@@ -168,7 +181,41 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         console.log('ClinVar Fetch Error=: %o', e);
                     });
                 }
+            } else if (source === 'bustemante') {
+                var hgvsObj = {};
+                if (variant_id) {
+                    this.getRestData(url + variant_id).then(response => {
+                        if (response.cadd) {
+                            hgvsObj.chrom = (response.cadd.chrom) ? response.cadd.chrom : null;
+                            hgvsObj.pos = (response.cadd.pos) ? response.cadd.pos : null;
+                            hgvsObj.alt = (response.cadd.alt) ? response.cadd.alt : null;
+                            return Promise.resolve(hgvsObj);
+                        }
+                    }).then(data => {
+                        this.getRestData(this.props.protocol + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
+                            // Calling method to update global object with bustemante data (e.g. revel)
+                            this.parseClingenPredData(response);
+                        });
+                    }).catch(function(e) {
+                        console.log('MyVariant Fetch Error=: %o', e);
+                    });
+                }
             }
+        }
+    },
+
+    // Method to assign clingen predictors data to global computation object
+    parseClingenPredData: function(response) {
+        let computationObj = this.state.computationObj;
+        if (response.results) {
+            if (response.results.predictions) {
+                let predictions = response.results.predictions;
+                computationObj.clingen.revel.score = (predictions.revel) ? parseFloat(predictions.revel.score) : null;
+                computationObj.clingen.cftr.score = (predictions.CFTR) ? parseFloat(predictions.CFTR.score): null;
+                computationObj.clingen.cftr.visible = (predictions.CFTR) ? true : false;
+            }
+            // update computationObj, and set flag indicating that we have clingen predictors data
+            this.setState({hasBustamanteData: true, computationObj: computationObj});
         }
     },
 
@@ -264,6 +311,22 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         }
     },
 
+    // method to render a row of data for the clingen predictors table
+    renderClingenPredRow: function(key, clingenPred, clingenPredStatic) {
+        let rowName = clingenPredStatic._labels[key];
+        // The 'source name', 'score range' and 'prediction' fields have static values
+        if (clingenPred[key].visible === true) {
+            return (
+                <tr key={key}>
+                    <td>{(rowName === 'REVEL') ? <span><a href="https://sites.google.com/site/revelgenomics/about" target="_blank">REVEL</a> (meta-predictor)</span> : rowName}</td>
+                    <td>{clingenPred[key].score_range}</td>
+                    <td>{clingenPred[key].score ? clingenPred[key].score : 'No data found'}</td>
+                    <td>{clingenPred[key].prediction}</td>
+                </tr>
+            );
+        }
+    },
+
     // method to render a row of data for the other predictors table
     renderOtherPredRow: function(key, otherPred, otherPredStatic) {
         let rowName = otherPredStatic._labels[key];
@@ -308,9 +371,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     },
 
     render: function() {
-        var conservationStatic = computationStatic.conservation, otherPredStatic = computationStatic.other_predictors;
+        var conservationStatic = computationStatic.conservation, otherPredStatic = computationStatic.other_predictors, clingenPredStatic = computationStatic.clingen;
         var conservation = (this.state.computationObj && this.state.computationObj.conservation) ? this.state.computationObj.conservation : null;
         var otherPred = (this.state.computationObj && this.state.computationObj.other_predictors) ? this.state.computationObj.other_predictors : null;
+        var clingenPred = (this.state.computationObj && this.state.computationObj.clingen) ? this.state.computationObj.clingen : null;
         var codon = (this.state.codonObj) ? this.state.codonObj : null;
 
         return (
@@ -326,7 +390,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         </div>
                     </div>
                     : null}
-                    {this.props.data ?
+                    {clingenPred ?
                         <div className="panel panel-info datasource-clingen">
                             <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
                             <table className="table">
@@ -338,20 +402,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                         <th>Prediction</th>
                                     </tr>
                                 </thead>
-                                {/* FIXME: Need real data */}
                                 <tbody>
-                                    <tr>
-                                        <td><a href="https://sites.google.com/site/revelgenomics/about" target="_blank">REVEL</a> (meta-predictor)</td>
-                                        <td>0 to 1</td>
-                                        <td>0.7</td>
-                                        <td>higher score = higher pathogenicity</td>
-                                    </tr>
-                                    <tr>
-                                        <td>CFTR</td>
-                                        <td>--</td>
-                                        <td>--</td>
-                                        <td>--</td>
-                                    </tr>
+                                    {clingenPredStatic._order.map(key => {
+                                        return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
+                                    })}
                                 </tbody>
                             </table>
                         </div>
