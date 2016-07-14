@@ -40,6 +40,14 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         e.preventDefault(); e.stopPropagation();
         var variantObj = this.props.variantData;
         var newInterpretationObj;
+
+        // get tab from current window href. If get one, it will be added into the new url
+        var tab = null;
+        var page_url = window.location.href;
+        if (page_url.indexOf('tab=') > -1 ) {
+            tab = '&tab=' + page_url.split('tab=').pop();
+        }
+
         if (variantObj) {
             this.setState({variantUuid: variantObj.uuid});
             // Put together a new interpretation object
@@ -49,8 +57,12 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         // the new interpretation UUID in the query string.
         this.postRestData('/interpretations/', newInterpretationObj).then(data => {
             var newInterpretationUuid = data['@graph'][0].uuid;
-            // this.setState({interpretationUuid: newInterpretationUuid});
-            window.location.href = '/variant-central/?variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid;
+            var new_url = '/variant-central/?variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid;
+            // add tab
+            if (tab) {
+                new_url = new_url + tab;
+            }
+            window.location.href =  new_url;
         }).catch(e => {parseAndLogError.bind(undefined, 'postRequest')});
     },
 

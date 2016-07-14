@@ -215,7 +215,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }).then(interpretation => {
             // REST handling is done. Re-enable Save button, and send the interpretation object back to index.js
             this.setState({submitBusy: false, updateMsg: <span className="text-success">Evaluations for {submittedCriteria.join(', ')} saved successfully!</span>});
-            this.props.updateInterpretationObj(interpretation);
+            this.props.updateInterpretationObj();
         }).catch(error => {
             this.setState({submitBusy: false, updateMsg: <span className="text-danger">Evaluation could not be saved successfully!</span>});
             console.log(error);
