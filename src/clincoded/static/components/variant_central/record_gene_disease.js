@@ -68,40 +68,12 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
             gRCh38 =  variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.hgvsNames.gRCh38 ? variant.hgvsNames.gRCh38 : null);
             gRCh37 =  variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : (variant.hgvsNames.gRCh37 ? variant.hgvsNames.gRCh37 : null);
 
-            // get Chromosome
-            if (gRCh38 || gRCh37) {
-                var hgvs_term = gRCh38 ? gRCh38 : gRCh37;
-                chr = hgvs_term.substr(7, 2);
-                if (chr.indexOf('0') === 0) {
-                    chr = chr.substr(1, 1);
-                } else if (chr === '23') {
-                    chr = 'x';
-                } else if (chr === '24') {
-                    chr = 'y';
-                }
-            }
-
-            // set start and stop points for +/- 60 bp length and generate links
-            var start_38 = null;
-            var end_38 = null;
-            var start_37 = null;
-            var end_37 = null;
-            var re = /:[g].(\d+)\D/;
+            // get context links for each NC_
             if (gRCh38) {
-                var point_38 = gRCh38.match(re)[1];
-                start_38 = parseInt(point_38) - 30;
-                end_38 = parseInt(point_38) + 30;
-                ucsc_url_38 = external_url_map['UCSCGRCh38'] + chr + '%3A' + start_38.toString() + '-' + end_38.toString();
-                viewer_url_38 = external_url_map['VariationViewerGRCh38'] + chr + '&assm=GCF_000001405.28&from=' + start_38.toString() + '&to=' + end_38.toString();
-                ensembl_url_38 = external_url_map['EnsemblGRCh38'] + chr + ':' + start_38.toString() + '-' + end_38.toString();
+                links_38 = externalLinks.setContextLinks(gRCh38, 'GRCh38');
             }
             if (gRCh37) {
-                var point_37 = gRCh37.match(re)[1];
-                start_37 = parseInt(point_37) - 30;
-                end_37 = parseInt(point_37) + 30;
-                ucsc_url_37 = external_url_map['UCSCGRCh37'] + chr + '%3A' + start_37.toString() + '-' + end_37.toString();
-                viewer_url_37 = external_url_map['VariationViewerGRCh37'] + chr + '&assm=GCF_000001405.25&from=' + start_37.toString() + '&to=' + end_37.toString();
-                ensembl_url_37 = external_url_map['EnsemblGRCh37'] + chr + ':' + start_37.toString() + '-' + end_37.toString();
+                links_37 = externalLinks.setContextLinks(gRCh37, 'GRCh37');
             }
         }
 
