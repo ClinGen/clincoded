@@ -30,7 +30,7 @@ var Title = module.exports.Title = React.createClass({
             if (interpretation.disease && interpretation.disease.term) {
                 associatedDisease = <span>This interpretation is associated with the disease <strong>{interpretation.disease.term}</strong></span>;
             } else {
-                associatedDisease = 'This interpretation is not yet associated with a diasese';
+                associatedDisease = 'This interpretation is not yet associated with a disease';
             }
         }
         return associatedDisease;
