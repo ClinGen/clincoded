@@ -55,7 +55,7 @@ var Panel = module.exports.Panel = React.createClass({
 
     render: function() {
         var panelWrapperClasses = 'panel panel-default' + (this.props.panelClassName ? ' ' + this.props.panelClassName : '');
-        var panelClasses = 'panel-body panel-std' + ((!this.state.open && this.props.accordion) ? ' panel-closed' : '') + (this.props.panelBodyClassName ? ' ' + this.props.panelBodyClassName : ' panel-bg-std');
+        var panelClasses = 'panel-body' + ((!this.state.open && this.props.accordion) ? ' panel-closed' : '') + (this.props.panelBodyClassName ? ' ' + this.props.panelBodyClassName : ' panel-std panel-bg-std');
         var indicatorClasses = 'icon panel-header-indicator ' + (this.props.accordion ? (this.state.open ? 'icon-chevron-up' : 'icon-chevron-down') : '');
         var children = (this.props.children instanceof Array && this.props.children.length === 0) ? null : this.props.children;
         var title;
