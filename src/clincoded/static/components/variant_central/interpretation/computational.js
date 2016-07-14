@@ -194,9 +194,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             return Promise.resolve(hgvsObj);
                         }
                     }).then(data => {
-                        this.getRestData(this.props.protocol + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
+                        this.getRestData('https:' + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
                             // Calling method to update global object with bustemante data (e.g. revel)
-                            this.parseClingenPredData(response);
+                            this.parseClingenPredData(result);
                         });
                     }).catch(function(e) {
                         console.log('MyVariant Fetch Error=: %o', e);
@@ -209,9 +209,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     // Method to assign clingen predictors data to global computation object
     parseClingenPredData: function(response) {
         let computationObj = this.state.computationObj;
-        if (response.results) {
-            if (response.results.predictions) {
-                let predictions = response.results.predictions;
+        if (response.results[0]) {
+            if (response.results[0].predictions) {
+                let predictions = response.results[0].predictions;
                 computationObj.clingen.revel.score = (predictions.revel) ? parseFloat(predictions.revel.score) : null;
                 computationObj.clingen.cftr.score = (predictions.CFTR) ? parseFloat(predictions.CFTR.score): null;
                 computationObj.clingen.cftr.visible = (predictions.CFTR) ? true : false;
