@@ -58,7 +58,7 @@ var VariantCurationHub = React.createClass({
             this.fetchRefseqData();
             this.fetchExternalData2('clinvar');
         }).catch(function(e) {
-            console.log('GETGDM ERROR=: %o', e);
+            console.log('FETCH CLINVAR ERROR=: %o', e);
         });
     },
 
@@ -304,8 +304,9 @@ var VariantCurationHub = React.createClass({
 
         return (
             <div>
-                <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} />
-                <VariantCurationActions variantData={variantData} interpretationUuid={interpretationUuid} eidtKey={editKey} session={session} />
+                <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} interpretation={interpretation} />
+                <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
+                    href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
                 <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                     ext_myVariantInfo={this.state.ext_myVariantInfo}
                     ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}

@@ -13,6 +13,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
         interpretationUuid: React.PropTypes.string,
+        interpretation: React.PropTypes.object,
         session: React.PropTypes.object
     },
 
@@ -24,12 +25,17 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
 
     getInitialState: function() {
         return {
-            interpretationUuid: this.props.interpretationUuid
+            interpretationUuid: this.props.interpretationUuid,
+            interpretation: null // parent interpretation object
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
-        this.setState({interpretationUuid: nextProps.interpretationUuid});
+        // this block is for handling props and states when props (external data) is updated after the initial load/rendering
+        // when props are updated, update the parent interpreatation object, if applicable
+        if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
+            this.setState({interpretation: nextProps.interpretation, interpretationUuid: nextProps.interpretationUuid});
+        }
     },
 
     // Create 2 arrays of interpretations: one associated with current user
