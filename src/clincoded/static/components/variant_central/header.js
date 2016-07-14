@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var _ = require('underscore');
 var globals = require('../globals');
 
 var Title = require('./title').Title;
@@ -16,10 +17,24 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
         session: React.PropTypes.object
     },
 
+    getInitialState: function() {
+        return {
+            interpretation: null // parent interpretation object
+        };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        // this block is for handling props and states when props (external data) is updated after the initial load/rendering
+        // when props are updated, update the parent interpreatation object, if applicable
+        if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
+            this.setState({interpretation: nextProps.interpretation});
+        }
+    },
+
     render: function() {
         var variant = this.props.variantData;
         var interpretationUuid = this.props.interpretationUuid;
-        var interpretation = this.props.interpretation;
+        var interpretation = this.state.interpretation;
         var session = this.props.session;
 
         return (
@@ -33,7 +48,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
                     <div className="row equal-height">
                         <CurationRecordVariant data={variant} />
                         <CurationRecordGeneDisease data={variant} />
-                        <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} session={session} />
+                        <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} interpretation={interpretation} session={session} />
                     </div>
                     {variant && !variant.hgvsNames.GRCh37 ?
                         <div className="alert alert-warning">
