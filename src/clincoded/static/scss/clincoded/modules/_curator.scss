@@ -1175,12 +1175,18 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     .interpretation-record {
         padding: 20px 0;
 
-        h2 {
+         h2 {
             left: 0;
-            margin-top: 0;
-            margin-bottom: 0;
-            position: absolute;
+            margin: 0;
             text-align: center;
+            width: 100%;
+        }
+
+        .btn-group {
+            left: 0;
+            padding: 0 15px;
+            position: absolute;
+            top: 20px;
             width: 100%;
         }
     }
@@ -1371,7 +1377,8 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     color: #fff;
     content: attr(data-tooltip);
     text-align: center;
-    font-size: 14px;
+    font-size: 12px;
+    font-weight: normal;
     line-height: 1.2;
     white-space: normal;
 }

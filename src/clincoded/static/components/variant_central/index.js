@@ -41,7 +41,7 @@ var VariantCurationHub = React.createClass({
             this.setState({variantObj: response});
             this.setState({isLoadingComplete: true});
         }).catch(function(e) {
-            console.log('GETGDM ERROR=: %o', e);
+            console.log('FETCH CLINVAR ERROR=: %o', e);
         });
     },
 
@@ -62,8 +62,9 @@ var VariantCurationHub = React.createClass({
 
         return (
             <div>
-                <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} />
-                <VariantCurationActions variantData={variantData} interpretationUuid={interpretationUuid} eidtKey={editKey} session={session} />
+                <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} interpretation={interpretation} />
+                <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
+                    href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
                 <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                     href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} />
             </div>
