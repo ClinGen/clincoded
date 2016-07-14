@@ -104,9 +104,7 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset) {
     variant.gene.symbol = geneNode.getAttribute('Symbol');
     variant.gene.full_name = geneNode.getAttribute('FullName');
     var protein_change = allele.getElementsByTagName('ProteinChange')[0];
-    if (protein_change) {
-        variant.allele.ProteinChange = protein_change.textContent;
-    }
+    variant.allele.ProteinChange = protein_change ? protein_change.textContent : null;
     // Parse <SequenceLocation> nodes
     var SequenceLocationNodes = allele.getElementsByTagName('SequenceLocation');
     for(let y of SequenceLocationNodes) {

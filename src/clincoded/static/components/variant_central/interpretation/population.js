@@ -717,7 +717,7 @@ var criteriaGroup1 = function() {
         <div>
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
-                    <strong>BA1:</strong> Allele frequence is > 5% in ExAC, 1000 Genomes, or ESP
+                    <strong>BA1:</strong> Allele frequency is > 5% in ExAC, 1000 Genomes, or ESP
                     <br /><br />
                     <strong>PM2:</strong> Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP
                 </p>
