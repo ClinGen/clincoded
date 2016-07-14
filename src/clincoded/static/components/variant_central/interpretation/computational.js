@@ -559,16 +559,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
-                    <div className="row">
-                        <div className="col-sm-12">
-                            <CurationInterpretationForm renderedFormContent={criteriaGroup2}
-                                evidenceType={'computational'} evidenceDataUpdated={true}
-                                formDataUpdater={criteriaGroup2Update} variantUuid={this.props.data['@id']} criteriaDisease={['PM5', 'PS1']}
-                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        </div>
-                    </div>
-                    : null}
                     <div className="panel panel-info datasource-clinvar">
                         <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
                         <div className="panel-body">
@@ -584,6 +574,16 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             }
                         </div>
                     </div>
+                    {(this.props.data && this.state.interpretation) ?
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <CurationInterpretationForm renderedFormContent={criteriaGroup2}
+                                evidenceType={'computational'} evidenceDataUpdated={true}
+                                formDataUpdater={criteriaGroup2Update} variantUuid={this.props.data['@id']} criteriaDisease={['PM5', 'PS1']}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
+                    </div>
+                    : null}
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Molecular Consequence: Missense" panelBodyClassName="panel-wide-content" open>
