@@ -68,6 +68,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // when props are updated, update the parent interpreatation object, if applicable
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
             this.setState({interpretation: nextProps.interpretation});
+            // check to see if the interpretation has a disease associated with it
+            if (nextProps.interpretation.interpretation_disease && nextProps.interpretation.interpretation_disease !== '') {
+                this.setState({diseaseAssociated: true});
+            }
         }
         // when props are updated, update the form with new extra data, if applicable
         if (typeof nextProps.evidenceData !== undefined && nextProps.evidenceData != this.props.evidenceData) {

@@ -155,15 +155,17 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             return Promise.resolve(clinVarObj);
                         }
                     }).then(clinvar => {
-                        var term = clinvar.protein_change.substr(0, clinvar.protein_change.length-1);
-                        var symbol = clinvar.gene_symbol;
-                        this.getRestData(this.props.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '*+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
-                            var codonObj = {};
-                            codonObj.count = result.esearchresult.count;
-                            codonObj.term = term;
-                            codonObj.symbol = symbol;
-                            this.setState({hasClinVarData: true, codonObj: codonObj});
-                        });
+                        if (clinvar.protein_change) {
+                            var term = clinvar.protein_change.substr(0, clinvar.protein_change.length-1);
+                            var symbol = clinvar.gene_symbol;
+                            this.getRestData(this.props.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '*+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
+                                var codonObj = {};
+                                codonObj.count = result.esearchresult.count;
+                                codonObj.term = term;
+                                codonObj.symbol = symbol;
+                                this.setState({hasClinVarData: true, codonObj: codonObj});
+                            });
+                        }
                     }).catch(function(e) {
                         console.log('ClinVar Fetch Error=: %o', e);
                     });
@@ -557,16 +559,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
-                    <div className="row">
-                        <div className="col-sm-12">
-                            <CurationInterpretationForm renderedFormContent={criteriaGroup2}
-                                evidenceType={'computational'} evidenceDataUpdated={true}
-                                formDataUpdater={criteriaGroup2Update} variantUuid={this.props.data['@id']} criteriaDisease={['PM5', 'PS1']}
-                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        </div>
-                    </div>
-                    : null}
                     <div className="panel panel-info datasource-clinvar">
                         <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
                         <div className="panel-body">
@@ -582,6 +574,16 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             }
                         </div>
                     </div>
+                    {(this.props.data && this.state.interpretation) ?
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <CurationInterpretationForm renderedFormContent={criteriaGroup2}
+                                evidenceType={'computational'} evidenceDataUpdated={true}
+                                formDataUpdater={criteriaGroup2Update} variantUuid={this.props.data['@id']} criteriaDisease={['PM5', 'PS1']}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
+                    </div>
+                    : null}
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Molecular Consequence: Missense" panelBodyClassName="panel-wide-content" open>
