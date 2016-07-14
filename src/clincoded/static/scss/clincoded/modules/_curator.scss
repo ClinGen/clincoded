@@ -1318,7 +1318,8 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     color: #fff;
     content: attr(data-tooltip);
     text-align: center;
-    font-size: 14px;
+    font-size: 12px;
+    font-weight: normal;
     line-height: 1.2;
     white-space: normal;
 }
