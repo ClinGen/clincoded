@@ -26,8 +26,9 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                 <ul className="section-gene-specific-interpretation clearfix">
                     <li className="col-xs-12 gutter-exc">
                         <div>
-                            <h4>Gene-specific Interpretation</h4>
-                            <div>Gene-specific Data placeholder</div>
+                            <span className="wip">IN PROGRESS</span>
+                            <br /><br />
+                            <div>This tab will include information about the gene with which this variant is associated, including gene-specific links, ExAC constraint scores for the gene, domain information, hotspots, etc.</div>
                         </div>
                     </li>
                 </ul>

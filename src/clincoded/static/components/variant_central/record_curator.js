@@ -81,7 +81,9 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                 return (
                                                     <div key={i}>
                                                         <span className="my-interpretation">
-                                                            {(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}{item.interpretation_status}, (last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}) <button type="button" className="btn btn-link" onClick={handleEditEvent.bind(this, '/interpretations/' + item.uuid)}>View</button> | <button type="button" className="btn btn-link" onClick={handleEditEvent.bind(this, '/variant-central/?edit=true&variant=' + variant.uuid + '&interpretation=' + item.uuid)}>Edit</button>
+                                                            {(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}
+                                                            {item.interpretation_status},&nbsp;
+                                                            (last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')})
                                                         </span>
                                                         {(item.uuid === interpretationUuid) ?
                                                             <span className="current-interpretation"> &#x02713;</span>
@@ -97,12 +99,16 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                 <div className="other-users-interpretations">
                                     <dl className="inline-dl clearfix">
                                         <dt>Other interpretations:</dt>
+                                        <br />
                                         <dd>
                                             {otherInterpretations.map(function(item, i) {
                                                 return (
                                                     <div key={i}>
                                                         <span className="other-interpretation">
-                                                            {item.submitted_by.title}, {item.interpretation_status}, {(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}(last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')}) <button type="button" className="btn btn-link"  onClick={handleEditEvent.bind(this, '/interpretations/' + item.uuid)}>View</button>
+                                                            {otherInterpretations[0].submitted_by.title + ', '}
+                                                            {(otherInterpretations[0].interpretation_disease !== '') ? otherInterpretations[0].interpretation_disease + ', ' : null}
+                                                            {otherInterpretations[0].interpretation_status + ', '}
+                                                            (last edited {moment(otherInterpretations[0].last_modified).format('YYYY MMM DD, h:mm a')})
                                                         </span>
                                                     </div>
                                                 );
