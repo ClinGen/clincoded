@@ -35,6 +35,7 @@ var populationStatic = {
         _labels: {ea: 'EA Allele', aa: 'AA Allele'}
     }
 };
+var CI_DEFAULT = 95;
 
 // Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
@@ -58,8 +59,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             hasTGenomesData: false,
             hasEspData: false, // flag to display ESP table
             geneENSG: null,
+            CILow: null,
+            CIhigh: null,
             populationObj: {
                 highestMAF: null,
+                desiredCI: 95,
+                mafCutoff: 5,
                 exac: {
                     afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
@@ -85,11 +90,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentDidMount: function() {
-        this.setState({interpretation: this.props.interpretation});
+        this.getPrevSetDesiredCI(this.props.interpretation);
     },
 
     componentWillReceiveProps: function(nextProps) {
-        this.setState({interpretation: nextProps.interpretation});
+        // this block is for handling props and states when props (external data) is updated after the initial load/rendering
+        // when props are updated, update the parent interpreatation object, if applicable
+        if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
+            this.setState({interpretation: nextProps.interpretation});
+        }
+
+        this.getPrevSetDesiredCI(nextProps.interpretation);
         if (nextProps.data && this.props.data) {
             if (!this.state.hasExacData || !this.state.hasEspData) {
                 this.fetchExternalData('myVariantInfo');
@@ -164,14 +175,19 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
+    // helper function to shorten display of imported float values to 5 decimal places
+    parseFloatShort: function(float) {
+        return +parseFloat(float).toFixed(5);
+    },
+
     // Get ExAC allele frequency from Ensembl (VEP) directly
     // Because myvariant.info doesn't always return ExAC allele frequency data
     parseAlleleFrequencyData: function(response) {
         let populationObj = this.state.populationObj;
         populationStatic.exac._order.map(key => {
-            populationObj.exac[key].af = parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
+            populationObj.exac[key].af = this.parseFloatShort(response[0].colocated_variants[0]['exac_' + key + '_maf']);
         });
-        populationObj.exac._tot.af = parseFloat(response[0].colocated_variants[0].exac_adj_maf);
+        populationObj.exac._tot.af = this.parseFloatShort(response[0].colocated_variants[0].exac_adj_maf);
 
         this.setState({populationObj: populationObj});
     },
@@ -238,28 +254,24 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     let populationCode = population.population.substring(20).toLowerCase();
                     if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
                         populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
-                        this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... for specific populations =
                         populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
-                        populationObj.tGenomes[populationCode].af[population.allele] = parseFloat(population.frequency);
+                        populationObj.tGenomes[populationCode].af[population.allele] = this.parseFloatShort(population.frequency);
                         updated1000GData = true;
                     } else if (population.population == '1000GENOMES:phase_3:ALL') {
-                        this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and totals
                         populationObj.tGenomes._tot.ac[population.allele] = parseInt(population.allele_count);
-                        populationObj.tGenomes._tot.af[population.allele] = parseFloat(population.frequency);
+                        populationObj.tGenomes._tot.af[population.allele] = this.parseFloatShort(population.frequency);
                         updated1000GData = true;
                     } else if (population.population == 'ESP6500:African_American') {
-                        this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and ESP AA
                         populationObj.tGenomes.espaa.ac[population.allele] = parseInt(population.allele_count);
-                        populationObj.tGenomes.espaa.af[population.allele] = parseFloat(population.frequency);
+                        populationObj.tGenomes.espaa.af[population.allele] = this.parseFloatShort(population.frequency);
                         updated1000GData = true;
                     } else if (population.population == 'ESP6500:European_American') {
-                        this.parseTGenomesDataAltAllele(populationObj, population);
                         // ... and ESP EA
                         populationObj.tGenomes.espea.ac[population.allele] = parseInt(population.allele_count);
-                        populationObj.tGenomes.espea.af[population.allele] = parseFloat(population.frequency);
+                        populationObj.tGenomes.espea.af[population.allele] = this.parseFloatShort(population.frequency);
                         updated1000GData = true;
                     }
                 });
@@ -273,22 +285,22 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
                         // ... for specific populations
                         populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = parseInt(population_genotype.count);
-                        populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = this.parseFloatShort(population_genotype.frequency);
                         updated1000GData = true;
                     } else if (population_genotype.population == '1000GENOMES:phase_3:ALL') {
                         // ... and totals
                         populationObj.tGenomes._tot.gc[population_genotype.genotype] = parseInt(population_genotype.count);
-                        populationObj.tGenomes._tot.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        populationObj.tGenomes._tot.gf[population_genotype.genotype] = this.parseFloatShort(population_genotype.frequency);
                         updated1000GData = true;
                     } else if (population_genotype.population == 'ESP6500:African_American') {
                         // ... and ESP AA
                         populationObj.tGenomes.espaa.gc[population_genotype.genotype] = parseInt(population_genotype.count);
-                        populationObj.tGenomes.espaa.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        populationObj.tGenomes.espaa.gf[population_genotype.genotype] = this.parseFloatShort(population_genotype.frequency);
                         updated1000GData = true;
                     } else if (population_genotype.population == 'ESP6500:European_American') {
                         // ... and ESP EA
                         populationObj.tGenomes.espea.gc[population_genotype.genotype] = parseInt(population_genotype.count);
-                        populationObj.tGenomes.espea.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
+                        populationObj.tGenomes.espea.gf[population_genotype.genotype] = this.parseFloatShort(population_genotype.frequency);
                         updated1000GData = true;
                     }
                 });
@@ -298,13 +310,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 this.setState({hasTGenomesData: true, populationObj: populationObj});
             }
         }
-    },
-
-    parseTGenomesDataAltAllele: function(populationObj, population) {
-        if (!populationObj.tGenomes._extra.alt && population.allele != populationObj.tGenomes._extra.ref) {
-            populationObj.tGenomes._extra.alt = population.allele;
-        }
-        return populationObj;
     },
 
     // Method to assign ESP population data to global population object
@@ -355,29 +360,15 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
         });
-        // check against 1000g data
-        populationStatic.tGenomes._order.map(pop => {
-            let ref = populationObj.tGenomes._extra.ref,
-                alt = populationObj.tGenomes._extra.alt;
-            if (populationObj.tGenomes[pop].af && populationObj.tGenomes[pop].af[alt]) {
-                if (populationObj.tGenomes[pop].af[alt] > highestMAFObj.af) {
-                    highestMAFObj.pop = pop;
-                    highestMAFObj.popLabel = populationStatic.tGenomes._labels[pop];
-                    highestMAFObj.ac = populationObj.tGenomes[pop].ac[alt];
-                    highestMAFObj.ac_tot = populationObj.tGenomes[pop].ac[ref] + populationObj.tGenomes[pop].ac[alt];
-                    highestMAFObj.source = '1000 Genomes';
-                    highestMAFObj.af = populationObj.tGenomes[pop].af[alt];
-                }
-            }
-        });
-        // check against esp data
+        // check against esp data - done before 1000g's so that it takes precedence in case of tie
+        // due to 1000g also carrying esp data
         populationStatic.esp._order.map(pop => {
             let alt = populationObj.esp._extra.alt;
             if (populationObj.esp[pop].ac) {
                 let ref = populationObj.esp._extra.ref,
                     alt = populationObj.esp._extra.alt;
                 // esp does not report back frequencies, so we have to calculate it off counts
-                let tempMAF = populationObj.esp[pop].ac[alt] / (populationObj.esp[pop].ac[ref] + populationObj.esp[pop].ac[alt]);
+                let tempMAF = this.parseFloatShort(populationObj.esp[pop].ac[alt] / (populationObj.esp[pop].ac[ref] + populationObj.esp[pop].ac[alt]));
                 if (tempMAF > highestMAFObj.af) {
                     highestMAFObj.pop = pop;
                     highestMAFObj.popLabel = populationStatic.esp._labels[pop];
@@ -388,11 +379,28 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
         });
+        // check against 1000g data
+        populationStatic.tGenomes._order.map(pop => {
+            let ref = populationObj.tGenomes._extra.ref,
+                alt = populationObj.tGenomes._extra.alt;
+            if (populationObj.tGenomes[pop].af && populationObj.tGenomes[pop].af[alt]) {
+                if (populationObj.tGenomes[pop].af[alt] > highestMAFObj.af) {
+                    highestMAFObj.pop = pop;
+                    highestMAFObj.popLabel = populationStatic.tGenomes._labels[pop];
+                    highestMAFObj.ac = populationObj.tGenomes[pop].ac[alt];
+                    highestMAFObj.ac_tot = populationObj.tGenomes[pop].ac[ref] + populationObj.tGenomes[pop].ac[alt];
+                    highestMAFObj.source = (pop == 'espaa' || pop == 'espea') ? 'ESP (provided by 1000 Genomes)' : '1000 Genomes';
+                    highestMAFObj.af = populationObj.tGenomes[pop].af[alt];
+                }
+            }
+        });
         // embed highest MAF and related data into population obj, and update to state
         populationObj.highestMAF = highestMAFObj;
         this.setState({populationObj: populationObj});
+        this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
     },
 
+    /* the following methods are related to the rendering of population data tables */
     // method to render a row of data for the ExAC table
     renderExacRow: function(key, exac, exacStatic, rowNameCustom, className) {
         let rowName = exacStatic._labels[key];
@@ -454,6 +462,110 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         );
     },
 
+    /* the following methods are related to the desired CI field and its related calculated values */
+    // method to determine desired CI value from previously saved interpretation
+    getPrevSetDesiredCI: function(interpretation) {
+        if (interpretation && interpretation.evaluations && interpretation.evaluations.length > 0) {
+            for (var i = 0; i < interpretation.evaluations.length; i++) {
+                if (interpretation.evaluations[i].criteria == 'BA1') {
+                    let tempPopulationObj = this.state.populationObj;
+                    tempPopulationObj.desiredCI = interpretation.evaluations[i].population.populationData.desiredCI;
+                    this.setState({populationObj: tempPopulationObj});
+                    break;
+                }
+            }
+        }
+        if (!this.state.populationObj.desiredCI) {
+            // previously saved value does not exist for some reason... set it to default value
+            let tempPopulationObj = this.state.populationObj;
+            tempPopulationObj.desiredCI = CI_DEFAULT;
+            this.setState({populationObj: tempPopulationObj});
+        }
+        // update CI low and high values
+        this.changeDesiredCI();
+    },
+
+    // wrapper function to calculateCI on value change
+    changeDesiredCI: function() {
+        if (this.refs && this.refs.desiredCI) {
+            this.calculateCI(parseInt(this.refs.desiredCI.getValue()), this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null);
+        }
+    },
+
+    // checking for empty text when clicking away from desired CI field
+    onBlurDesiredCI: function(event) {
+        let desiredCI = parseInt(this.refs.desiredCI.getValue());
+        if (desiredCI == '' || isNaN(desiredCI)) {
+            // if the user clicks away from the desired CI field, but it is blank/filled with
+            // bad input, re-set it to the default value
+            let tempPopulationObj = this.state.populationObj;
+            this.refs.desiredCI.setValue(CI_DEFAULT);
+            tempPopulationObj.desiredCI = CI_DEFAULT;
+            this.setState({populationObj: tempPopulationObj});
+            this.changeDesiredCI();
+        }
+    },
+
+    // function to calculate confidence intervals (CI). Formula taken from Steven's excel spreadsheet
+    calculateCI: function(CIp, highestMAF) {
+        // store user-input desired CI value into population object
+        let populationObj = this.state.populationObj;
+        populationObj.desiredCI = CIp;
+        if (highestMAF) {
+            if (isNaN(CIp) || CIp < 0 || CIp > 100) {
+                // the field is blank... clear CI low and high values
+                // note that the user did not necessary navigate away from field just yet, so do not
+                // automatically set value to default here
+                this.setState({populationObj: populationObj, CILow: null, CIHigh: null});
+            } else if (highestMAF.ac && highestMAF.ac_tot) {
+                // calculate CI
+                let xp = highestMAF.ac,
+                    np = highestMAF.ac_tot;
+                let zp = -this.normSInv((1 - CIp / 100) / 2),
+                    pp = xp / np,
+                    qp = 1 - pp;
+                let CILow = this.parseFloatShort(((2 * np * pp) + (zp * zp) - zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp)))),
+                    CIHigh = this.parseFloatShort(((2 * np * pp) + (zp * zp) + zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp))));
+                this.setState({populationObj: populationObj, CILow: CILow, CIHigh: CIHigh});
+            } else {
+                this.setState({populationObj: populationObj, CILow: 'N/A', CIHigh: 'N/A'});
+            }
+        } else {
+            this.setState({populationObj: populationObj, CILow: 'N/A', CIHigh: 'N/A'});
+        }
+    },
+
+    // NORMSINV implementation taken from http://stackoverflow.com/a/8843728
+    // used for CI calculation
+    normSInv: function (p) {
+        let a1 = -39.6968302866538, a2 = 220.946098424521, a3 = -275.928510446969;
+        let a4 = 138.357751867269, a5 = -30.6647980661472, a6 = 2.50662827745924;
+        let b1 = -54.4760987982241, b2 = 161.585836858041, b3 = -155.698979859887;
+        let b4 = 66.8013118877197, b5 = -13.2806815528857, c1 = -7.78489400243029E-03;
+        let c2 = -0.322396458041136, c3 = -2.40075827716184, c4 = -2.54973253934373;
+        let c5 = 4.37466414146497, c6 = 2.93816398269878, d1 = 7.78469570904146E-03;
+        let d2 = 0.32246712907004, d3 = 2.445134137143, d4 = 3.75440866190742;
+        let p_low = 0.02425, p_high = 1 - p_low;
+        let q, r;
+        let retVal;
+
+        if ((p < 0) || (p > 1)) {
+            alert("NormSInv: Argument out of range.");
+            retVal = 0;
+        } else if (p < p_low) {
+            q = Math.sqrt(-2 * Math.log(p));
+            retVal = (((((c1 * q + c2) * q + c3) * q + c4) * q + c5) * q + c6) / ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+        } else if (p <= p_high) {
+            q = p - 0.5;
+            r = q * q;
+            retVal = (((((a1 * r + a2) * r + a3) * r + a4) * r + a5) * r + a6) * q / (((((b1 * r + b2) * r + b3) * r + b4) * r + b5) * r + 1);
+        } else {
+            q = Math.sqrt(-2 * Math.log(1 - p));
+            retVal = -(((((c1 * q + c2) * q + c3) * q + c4) * q + c5) * q + c6) / ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+        }
+        return retVal;
+    },
+
     render: function() {
         var exacStatic = populationStatic.exac,
             tGenomesStatic = populationStatic.tGenomes,
@@ -462,20 +574,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             exac = this.state.populationObj && this.state.populationObj.exac ? this.state.populationObj.exac : null, // Get ExAC data from global population object
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
+        var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
 
         return (
             <div className="variant-interpretation population">
-                {(this.props.data && this.state.interpretation) ?
-                <div className="row">
-                    <div className="col-sm-12">
-                        <CurationInterpretationForm formTitle={"Population Criteria Evaluation"} renderedFormContent={criteriaGroup1}
-                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
-                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                    </div>
-                </div>
-                : null}
-
                 <div className="bs-callout bs-callout-info clearfix">
                     <h4>Highest Minor Allele Frequency</h4>
                     <div className="clearfix">
@@ -490,10 +592,15 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             <dl className="inline-dl clearfix">
                                 <dt>Source: </dt><dd>{highestMAF && highestMAF.source ? highestMAF.source : 'N/A'}</dd>
                                 <dt>Allele Frequency: </dt><dd>{highestMAF && highestMAF.af ? highestMAF.af : 'N/A'}</dd>
-                                {(this.state.interpretation) ?
+                                {(this.state.interpretation && highestMAF) ?
                                     <span>
-                                        <dt>CI - lower: </dt><dd>XXXXXX</dd>
-                                        <dt>CI - upper: </dt><dd>XXXXXX</dd>
+                                        <dt className="dtFormLabel">Desired CI:</dt>
+                                        <dd className="ddFormInput">
+                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI}
+                                                onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT.toString()} />
+                                        </dd>
+                                        <dt>CI - lower: </dt><dd>{this.state.CILow ? this.state.CILow : ''}</dd>
+                                        <dt>CI - upper: </dt><dd>{this.state.CIHigh ? this.state.CIHigh : ''}</dd>
                                     </span>
                                 : null}
                             </dl>
@@ -510,12 +617,15 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     : null}
                 </div>
 
-                {(this.state.interpretationUuid) ?
-                <ul className="section-criteria-evaluation clearfix">
-                    <li className="col-xs-12 gutter-exc">
-                        <CurationInterpretationForm />
-                    </li>
-                </ul>
+                {(this.props.data && this.state.interpretation) ?
+                <div className="row">
+                    <div className="col-sm-12">
+                        <CurationInterpretationForm formTitle={"Population Criteria Evaluation"} renderedFormContent={criteriaGroup1}
+                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    </div>
+                </div>
                 : null}
 
                 {this.state.hasExacData ?
@@ -615,8 +725,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </tbody>
                             <tfoot>
                                 <tr className="count">
-                                    <td>Average Sample Read Depth</td>
-                                    <td colSpan="5">{esp._extra.avg_sample_read}</td>
+                                    <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -644,11 +753,9 @@ var criteriaGroup1 = function() {
         <div>
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
-                    <strong>BA1 (Benign):</strong> &gt;0.1% with a 99% CI<br />
-                        CI – lower must be &gt;0.1%
+                    <strong>BA1:</strong> Allele frequence is > 5% in ExAC, 1000 Genomes, or ESP
                     <br /><br />
-                    <strong>PM2 (Rare Enough to be Absent):</strong> &lt;0.5% with a 95% CI<br />
-                        CI – lower must be ~0%; CI – upper must stay below (0.05%)
+                    <strong>PM2:</strong> Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP
                 </p>
             </div>
             <Input type="checkbox" ref="BA1-value" label="BA1 met?:" handleChange={this.handleCheckboxChange}
@@ -658,13 +765,16 @@ var criteriaGroup1 = function() {
             <Input type="checkbox" ref="PM2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="5" placeholder="Explanation"
+            <Input type="number" ref="maf-cutoff" label="MAF cutoff (%):" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
+                value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
+            <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
-                    <strong>BS1 (Benign):</strong> Allele frequency greater than expected due to disorder
+                    <strong>BS1:</strong> Allele frequency greater than expected due to disorder
                 </p>
             </div>
             <Input type="checkbox" ref="BS1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
@@ -687,6 +797,7 @@ var criteriaGroup1Update = function(nextProps) {
                     case 'BA1':
                         tempCheckboxes['BA1-value'] = evaluation.value === 'true';
                         this.refs['BA1-description'].setValue(evaluation.description);
+                        this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
                         break;
                     case 'PM2':
                         tempCheckboxes['PM2-value'] = evaluation.value === 'true';
@@ -728,5 +839,24 @@ var criteriaGroup1Change = function(ref, e) {
             altCriteriaDescription = 'BA1-description';
         }
         this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
+    }
+    // if the MAF cutoff field is changed, update the populationObj payload with the updated value
+    if (ref === 'maf-cutoff') {
+        let tempEvidenceData = this.state.evidenceData;
+        tempEvidenceData.mafCutoff = parseInt(this.refs[ref].getValue());
+        this.setState({evidenceData: tempEvidenceData});
+    }
+};
+
+// special function to handle the MAF cutoff % field
+var mafCutoffBlur = function(event) {
+    let mafCutoff = parseInt(this.refs['maf-cutoff'].getValue());
+    if (mafCutoff == '' || isNaN(mafCutoff)) {
+        let tempEvidenceData = this.state.evidenceData;
+        // if the user clicks away from the MAF cutoff field, but it is blank/filled with
+        // bad input, re-set it to the default value of 5
+        this.refs['maf-cutoff'].setValue(5);
+        tempEvidenceData.mafCutoff = 5;
+        this.setState({evidenceData: tempEvidenceData});
     }
 };

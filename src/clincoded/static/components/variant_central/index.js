@@ -45,6 +45,7 @@ var VariantCurationHub = React.createClass({
         });
     },
 
+    // method to update the interpretation object and send it down to child components on demand
     updateInterpretationObj: function() {
         this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
             this.setState({interpretation: interpretation});

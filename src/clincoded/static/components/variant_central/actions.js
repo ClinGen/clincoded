@@ -26,7 +26,6 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         session: React.PropTypes.object,
         interpretation: React.PropTypes.object,
         editKey: React.PropTypes.string,
-        href_url: React.PropTypes.string,
         updateInterpretationObj: React.PropTypes.func
     },
 
@@ -71,7 +70,15 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     handleInterpretationEvent: function(e) {
         e.preventDefault(); e.stopPropagation();
         var variantObj = this.props.variantData;
-        var newInterpretationObj, href_url;
+        var newInterpretationObj;
+
+        // get tab from current window href. If get one, it will be added into the new url
+        var tab = null, href_url;
+        var page_url = window.location.href;
+        if (page_url.indexOf('tab=') > -1 ) {
+            tab = '&tab=' + page_url.split('tab=').pop();
+        }
+
         if (!this.state.hasExistingInterpretation) {
             if (variantObj) {
                 this.setState({variantUuid: variantObj.uuid});
@@ -82,10 +89,20 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             // the new interpretation UUID in the query string.
             this.postRestData('/interpretations/', newInterpretationObj).then(data => {
                 var newInterpretationUuid = data['@graph'][0].uuid;
-                window.location.href = '/variant-central/?edit=true&variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid;
+                var new_url = '/variant-central/?edit=true&variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid;
+                // add tab
+                if (tab) {
+                    href_url = new_url + tab;
+                }
+                window.location.href =  href_url;
             }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
         } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
-            window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + variantObj.associatedInterpretations[0].uuid;
+            var new_url = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + variantObj.associatedInterpretations[0].uuid;
+            // add tab
+            if (tab) {
+                href_url = new_url + tab;
+            }
+            window.location.href =  href_url;
         }
     },
 

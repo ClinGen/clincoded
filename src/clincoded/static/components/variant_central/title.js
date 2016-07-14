@@ -6,6 +6,7 @@ var _ = require('underscore');
 var Title = module.exports.Title = React.createClass({
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
+        interpretationUuid: React.PropTypes.string,
         interpretation: React.PropTypes.object
     },
 
@@ -55,10 +56,28 @@ var Title = module.exports.Title = React.createClass({
             variantTitle = 'A preferred title is not available';
         }
 
+        var calculatePatho_button = false;
+        if (this.props.interpretationUuid) {
+            calculatePatho_button = true;
+        }
+        
         return (
             <div>
                 <h1>{variantTitle}{this.props.children}</h1>
                 <h2>{this.renderSubtitle(interpretation, variant)}</h2>
+                {variant && calculatePatho_button ?
+                    <div className="btn-vertical-space">
+                        <div className="interpretation-record clearfix">
+                            <div className="feature-in-development pull-right"> {/* FIXME div for temp yellow UI display */}
+
+                                <button type="button-button" className="btn btn-primary pull-right">
+                                    Calculate Pathogenicity
+                                </button>
+
+                            </div> {/* /FIXME div for temp yellow UI display */}
+                        </div>
+                    </div>
+                : null}
             </div>
         );
     }
