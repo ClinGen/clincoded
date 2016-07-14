@@ -12,8 +12,11 @@ var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
 var external_url_map = globals.external_url_map;
 var dbxref_prefix_map = globals.dbxref_prefix_map;
 
+var panel = require('../../../libs/bootstrap/panel');
 var form = require('../../../libs/bootstrap/form');
 
+var PanelGroup = panel.PanelGroup;
+var Panel = panel.Panel;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
@@ -312,12 +315,11 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
         return (
             <div className="variant-interpretation computational">
-                <div>
-                    <h2 className="page-header">Computational Tools</h2>
+                <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" open>
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
-                            <CurationInterpretationForm formTitle={"Functional, Conservation, and Splicing Predictors"} renderedFormContent={criteriaGroup1}
+                            <CurationInterpretationForm renderedFormContent={criteriaGroup1}
                                 evidenceType={'computational'} evidenceData={this.state.computationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
                                 formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BP4', 'PP3', 'BP7']}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
@@ -552,15 +554,13 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </table>
                         </div>
                     }
+                </Panel></PanelGroup>
 
-                </div>
-
-                <div>
-                    <h2 className="page-header">Variants in Same Codon</h2>
+                <PanelGroup accordion><Panel title="Variants in Same Codon" open>
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
-                            <CurationInterpretationForm formTitle={"Alternate Changes in Codon"} renderedFormContent={criteriaGroup2}
+                            <CurationInterpretationForm renderedFormContent={criteriaGroup2}
                                 evidenceType={'computational'} evidenceDataUpdated={true}
                                 formDataUpdater={criteriaGroup2Update} variantUuid={this.props.data['@id']} criteriaDisease={['PM5', 'PS1']}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
@@ -582,34 +582,33 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             }
                         </div>
                     </div>
-                </div>
+                </Panel></PanelGroup>
 
-                <div>
+                <PanelGroup accordion><Panel title="Molecular Consequence: Missense" open>
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
-                            <CurationInterpretationForm formTitle={"Molecular Consequence: Missense"} renderedFormContent={criteriaGroup3}
+                            <CurationInterpretationForm renderedFormContent={criteriaGroup3}
                                 evidenceType={'computational'} evidenceDataUpdated={true} formChangeHandler={criteriaGroup3Change}
                                 formDataUpdater={criteriaGroup3Update} variantUuid={this.props.data['@id']} criteriaDisease={['BP1', 'PP2']}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
                     : null}
-                </div>
+                </Panel></PanelGroup>
 
-                <div>
-                    <h2 className="page-header">Repetitive Region</h2>
+                <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" open>
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
-                            <CurationInterpretationForm formTitle={"Molecular Consequence: Inframe indel"} renderedFormContent={criteriaGroup4}
+                            <CurationInterpretationForm renderedFormContent={criteriaGroup4}
                                 evidenceType={'computational'} evidenceDataUpdated={true}
                                 formDataUpdater={criteriaGroup4Update} variantUuid={this.props.data['@id']} criteria={['BP3', 'PM4']}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
                     : null}
-                </div>
+                </Panel></PanelGroup>
 
             </div>
         );

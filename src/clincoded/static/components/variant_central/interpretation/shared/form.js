@@ -1,13 +1,10 @@
 'use strict';
 var React = require('react');
 var _ = require('underscore');
-var panel = require('../../../../libs/bootstrap/panel');
 var form = require('../../../../libs/bootstrap/form');
 var RestMixin = require('../../../rest').RestMixin;
 var curator = require('../../../curator');
 
-var PanelGroup = panel.PanelGroup;
-var Panel = panel.Panel;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
@@ -18,7 +15,6 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     mixins: [RestMixin, FormMixin],
 
     propTypes: {
-        formTitle: React.PropTypes.string, // the title of this form section
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
         evidenceType: React.PropTypes.string, // specified what type of evidence object is created
         evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
@@ -224,9 +220,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
     render: function() {
         return (
-
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-            <PanelGroup accordion><Panel title={this.props.formTitle} open>
                 <div className="evaluation">
                     {this.props.renderedFormContent.call(this)}
                 </div>
@@ -236,8 +230,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     {this.state.updateMsg ?
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                     : null}
-                </div></Panel>
-            </PanelGroup>
+                </div>
             </Form>
         );
     }

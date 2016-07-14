@@ -14,8 +14,11 @@ var external_url_map = globals.external_url_map;
 var dbxref_prefix_map = globals.dbxref_prefix_map;
 var queryKeyValue = globals.queryKeyValue;
 
+var panel = require('../../../libs/bootstrap/panel');
 var form = require('../../../libs/bootstrap/form');
 
+var PanelGroup = panel.PanelGroup;
+var Panel = panel.Panel;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
@@ -617,131 +620,133 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     : null}
                 </div>
 
-                {(this.props.data && this.state.interpretation) ?
-                <div className="row">
-                    <div className="col-sm-12">
-                        <CurationInterpretationForm formTitle={"Population Criteria Evaluation"} renderedFormContent={criteriaGroup1}
-                            evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
-                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                <PanelGroup accordion><Panel title="Population Criteria Evaluation" open>
+                    {(this.props.data && this.state.interpretation) ?
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <CurationInterpretationForm renderedFormContent={criteriaGroup1}
+                                evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                                formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
                     </div>
-                </div>
-                : null}
+                    : null}
 
-                {this.state.hasExacData ?
-                    <div className="panel panel-info datasource-ExAC">
-                        <div className="panel-heading">
-                            <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}
-                                <a className="panel-subtitle pull-right" href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
-                            </h3>
+                    {this.state.hasExacData ?
+                        <div className="panel panel-info datasource-ExAC">
+                            <div className="panel-heading">
+                                <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}
+                                    <a className="panel-subtitle pull-right" href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
+                                </h3>
+                            </div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Population</th>
+                                        <th>Allele Count</th>
+                                        <th>Allele Number</th>
+                                        <th>Number of Homozygotes</th>
+                                        <th>Allele Frequency</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {exacStatic._order.map(key => {
+                                        return (this.renderExacRow(key, exac, exacStatic));
+                                    })}
+                                </tbody>
+                                <tfoot>
+                                    {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
+                                </tfoot>
+                            </table>
                         </div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Population</th>
-                                    <th>Allele Count</th>
-                                    <th>Allele Number</th>
-                                    <th>Number of Homozygotes</th>
-                                    <th>Allele Frequency</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {exacStatic._order.map(key => {
-                                    return (this.renderExacRow(key, exac, exacStatic));
-                                })}
-                            </tbody>
-                            <tfoot>
-                                {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
-                            </tfoot>
-                        </table>
-                    </div>
-                :
-                    <div className="panel panel-info datasource-ExAC">
-                        <div className="panel-heading"><h3 className="panel-title">ExAC</h3></div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>No population data was found for this allele in ExAC. <a href={external_url_map['EXACHome']}>Search ExAC</a> for this variant.</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                }
-                {this.state.hasTGenomesData ?
-                    <div className="panel panel-info datasource-1000G">
-                        <div className="panel-heading">
-                            <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}
-                                <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
-                            </h3>
+                    :
+                        <div className="panel panel-info datasource-ExAC">
+                            <div className="panel-heading"><h3 className="panel-title">ExAC</h3></div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>No population data was found for this allele in ExAC. <a href={external_url_map['EXACHome']}>Search ExAC</a> for this variant.</th>
+                                    </tr>
+                                </thead>
+                            </table>
                         </div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Population</th>
-                                    <th colSpan="2">Allele Frequency (count)</th>
-                                    <th colSpan="3">Genotype Frequency (count)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {this.renderTGenomesRow('_tot', tGenomes, tGenomesStatic, 'ALL')}
-                                {tGenomesStatic._order.map(key => {
-                                    return (this.renderTGenomesRow(key, tGenomes, tGenomesStatic));
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                :
-                    <div className="panel panel-info datasource-1000G">
-                        <div className="panel-heading"><h3 className="panel-title">1000 Genomes</h3></div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']}>Search 1000 Genomes</a> for this variant.</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                }
-                {this.state.hasEspData ?
-                    <div className="panel panel-info datasource-ESP">
-                        <div className="panel-heading">
-                            <h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}
-                                <a className="panel-subtitle pull-right" href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
-                            </h3>
+                    }
+                    {this.state.hasTGenomesData ?
+                        <div className="panel panel-info datasource-1000G">
+                            <div className="panel-heading">
+                                <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}
+                                    <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
+                                </h3>
+                            </div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Population</th>
+                                        <th colSpan="2">Allele Frequency (count)</th>
+                                        <th colSpan="3">Genotype Frequency (count)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.renderTGenomesRow('_tot', tGenomes, tGenomesStatic, 'ALL')}
+                                    {tGenomesStatic._order.map(key => {
+                                        return (this.renderTGenomesRow(key, tGenomes, tGenomesStatic));
+                                    })}
+                                </tbody>
+                            </table>
                         </div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Population</th>
-                                    <th colSpan="2">Allele Count</th>
-                                    <th colSpan="3">Genotype Count</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {espStatic._order.map(key => {
-                                    return (this.renderEspRow(key, esp, espStatic));
-                                })}
-                                {this.renderEspRow('_tot', esp, espStatic, 'All Allele', 'count')}
-                            </tbody>
-                            <tfoot>
-                                <tr className="count">
-                                    <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                :
-                    <div className="panel panel-info datasource-ESP">
-                        <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP)</h3></div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']}>Search ESP</a> for this variant.</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                }
+                    :
+                        <div className="panel panel-info datasource-1000G">
+                            <div className="panel-heading"><h3 className="panel-title">1000 Genomes</h3></div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']}>Search 1000 Genomes</a> for this variant.</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    }
+                    {this.state.hasEspData ?
+                        <div className="panel panel-info datasource-ESP">
+                            <div className="panel-heading">
+                                <h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}
+                                    <a className="panel-subtitle pull-right" href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
+                                </h3>
+                            </div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Population</th>
+                                        <th colSpan="2">Allele Count</th>
+                                        <th colSpan="3">Genotype Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {espStatic._order.map(key => {
+                                        return (this.renderEspRow(key, esp, espStatic));
+                                    })}
+                                    {this.renderEspRow('_tot', esp, espStatic, 'All Allele', 'count')}
+                                </tbody>
+                                <tfoot>
+                                    <tr className="count">
+                                        <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    :
+                        <div className="panel panel-info datasource-ESP">
+                            <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP)</h3></div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']}>Search ESP</a> for this variant.</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    }
+                </Panel></PanelGroup>
             </div>
         );
     }
