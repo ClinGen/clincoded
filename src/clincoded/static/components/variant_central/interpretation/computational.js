@@ -318,7 +318,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm formTitle={"Functional, Conservation, and Splicing Predictors"} renderedFormContent={criteriaGroup1}
-                                evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                                evidenceType={'computational'} evidenceData={this.state.computationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
                                 formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BP4', 'PP3', 'BP7']}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
@@ -561,7 +561,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm formTitle={"Alternate Changes in Codon"} renderedFormContent={criteriaGroup2}
-                                evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true}
+                                evidenceType={'computational'} evidenceDataUpdated={true}
                                 formDataUpdater={criteriaGroup2Update} variantUuid={this.props.data['@id']} criteriaDisease={['PM5', 'PS1']}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
@@ -589,7 +589,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm formTitle={"Molecular Consequence: Missense"} renderedFormContent={criteriaGroup3}
-                                evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true} formChangeHandler={criteriaGroup3Change}
+                                evidenceType={'computational'} evidenceDataUpdated={true} formChangeHandler={criteriaGroup3Change}
                                 formDataUpdater={criteriaGroup3Update} variantUuid={this.props.data['@id']} criteriaDisease={['BP1', 'PP2']}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
@@ -603,7 +603,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm formTitle={"Molecular Consequence: Inframe indel"} renderedFormContent={criteriaGroup4}
-                                evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true}
+                                evidenceType={'computational'} evidenceDataUpdated={true}
                                 formDataUpdater={criteriaGroup4Update} variantUuid={this.props.data['@id']} criteria={['BP3', 'PM4']}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
