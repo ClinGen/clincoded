@@ -1750,5 +1750,80 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "splon@bcm.edu",
+        "first_name": "Sharon",
+        "last_name": "Plon",
+        "uuid": "97a0d114-531c-41af-b31c-218eb514e724",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "bizon@renci.org",
+        "first_name": "Chris",
+        "last_name": "Bizon",
+        "uuid": "fdd5ce02-15f8-43ea-a4c7-2ba781850c1c",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "dazzariti@partners.org",
+        "first_name": "Danielle",
+        "last_name": "Azzariti",
+        "uuid": "9dc67631-ed40-44ab-a530-14b02e38542a",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "asu@scripps.edu",
+        "first_name": "Andrew",
+        "last_name": "Su",
+        "uuid": "c80b7231-5ce5-4bbb-9584-dfcc854edca8",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "cwu@scripps.edu",
+        "first_name": "Chunlei",
+        "last_name": "Wu",
+        "uuid": "7dcd068d-4ce5-4fa5-9ae3-2c720d543245",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
