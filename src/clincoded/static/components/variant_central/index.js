@@ -28,6 +28,7 @@ var VariantCurationHub = React.createClass({
             variantObj: null,
             isLoadingComplete: false,
             ext_myVariantInfo: null,
+            ext_ensemblHgvsVEP: null,
             ext_ensemblVEP: null,
             ext_ensemblVariation: null,
             ext_clinvarEutils: null,
@@ -183,6 +184,42 @@ var VariantCurationHub = React.createClass({
         }
     },
 
+        // Retrieve variant data from Ensembl REST API
+    fetchEnsemblData: function() {
+        var variant = this.state.data;
+        if (variant) {
+            // Due to GRCh38 HGVS notations being used at Ensembl for their VEP API
+            // We are extracting genomic substring from HGVS name whose assembly is GRCh38
+            // Both of "GRCh38" and "gRCh38" instances are possibly present in the variant object
+            var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
+            if (hgvs_GRCh38) {
+                var NC_genomic = hgvs_GRCh38.substr(0, hgvs_GRCh38.indexOf(':'));
+                // 'genomic_chr_mapping' is defined via requiring external mapping file
+                var found = genomic_chr_mapping.GRCh38.find((entry) => entry.GenomicRefSeq === NC_genomic);
+                // Can't simply filter alpha letters due to the presence of 'chrX' and 'chrY'
+                var chrosome = (found.ChrFormat) ? found.ChrFormat.substr(3) : '';
+                // Format hgvs_notation for vep/:species/hgvs/:hgvs_notation api
+                var hgvs_notation = chrosome + hgvs_GRCh38.slice(hgvs_GRCh38.indexOf(':'));
+                if (hgvs_notation) {
+                    if (hgvs_notation.indexOf('del') > 0) {
+                        hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
+                    }
+                    this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+                        /*
+                        this.setState({
+                            hasEnsemblData: true,
+                            ensembl_transcripts: response[0].transcript_consequences
+                        });
+                        */
+                        this.setState({ext_ensemblHgvsVEP: response});
+                    }).catch(function(e) {
+                        console.log('Ensembl Fetch Error=: %o', e);
+                    });
+                }
+            }
+        }
+    },
+
         // Retrieve predictors data from myvariant.info
     fetchExternalData2: function(source) {
         var variant = this.state.data;
@@ -271,7 +308,9 @@ var VariantCurationHub = React.createClass({
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} />
                 <VariantCurationActions variantData={variantData} interpretationUuid={interpretationUuid} eidtKey={editKey} session={session} />
                 <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
-                    ext_myVariantInfo={this.state.ext_myVariantInfo} ext_ensemblVEP={this.state.ext_ensemblVEP}
+                    ext_myVariantInfo={this.state.ext_myVariantInfo}
+                    ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
+                    ext_ensemblVEP={this.state.ext_ensemblVEP}
                     ext_ensemblVariation={this.state.ext_ensemblVariation} ext_clinvarEutils={this.state.ext_clinvarEutils}
                     ext_clinVarEsearch={this.state.ext_clinVarEsearch}
                     href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} />

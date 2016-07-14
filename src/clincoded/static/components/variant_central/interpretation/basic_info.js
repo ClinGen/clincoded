@@ -18,7 +18,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
         protocol: React.PropTypes.string,
-        ext_clinvarEutils: React.PropTypes.object
+        ext_clinvarEutils: React.PropTypes.object,
+        ext_ensemblHgvsVEP: React.PropTypes.object
     },
 
     getInitialState: function() {
@@ -52,6 +53,12 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (nextProps.ext_clinvarEutils) {
             this.setState({ext_clinvarEutils: nextProps.ext_clinvarEutils});
             this.parseClinVarEutils(nextProps.ext_clinvarEutils);
+        }
+        if (nextProps.ext_ensemblHgvsVEP) {
+            this.setState({
+                hasEnsemblData: true,
+                ensembl_transcripts: nextProps.ext_ensemblHgvsVEP[0].transcript_consequences
+            });
         }
     },
 
@@ -131,39 +138,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             };
         }
         this.setState({primary_transcript: transcript});
-    },
-
-    // Retrieve variant data from Ensembl REST API
-    fetchEnsemblData: function() {
-        var variant = this.props.data;
-        if (variant) {
-            // Due to GRCh38 HGVS notations being used at Ensembl for their VEP API
-            // We are extracting genomic substring from HGVS name whose assembly is GRCh38
-            // Both of "GRCh38" and "gRCh38" instances are possibly present in the variant object
-            var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
-            if (hgvs_GRCh38) {
-                var NC_genomic = hgvs_GRCh38.substr(0, hgvs_GRCh38.indexOf(':'));
-                // 'genomic_chr_mapping' is defined via requiring external mapping file
-                var found = genomic_chr_mapping.GRCh38.find((entry) => entry.GenomicRefSeq === NC_genomic);
-                // Can't simply filter alpha letters due to the presence of 'chrX' and 'chrY'
-                var chrosome = (found.ChrFormat) ? found.ChrFormat.substr(3) : '';
-                // Format hgvs_notation for vep/:species/hgvs/:hgvs_notation api
-                var hgvs_notation = chrosome + hgvs_GRCh38.slice(hgvs_GRCh38.indexOf(':'));
-                if (hgvs_notation) {
-                    if (hgvs_notation.indexOf('del') > 0) {
-                        hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
-                    }
-                    this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
-                        this.setState({
-                            hasEnsemblData: true,
-                            ensembl_transcripts: response[0].transcript_consequences
-                        });
-                    }).catch(function(e) {
-                        console.log('Ensembl Fetch Error=: %o', e);
-                    });
-                }
-            }
-        }
     },
 
     //Render Ensembl transcripts table rows

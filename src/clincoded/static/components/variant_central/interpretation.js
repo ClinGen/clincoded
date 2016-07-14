@@ -44,6 +44,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         href_url: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
+        ext_ensemblHgvsVEP: React.PropTypes.object,
         ext_ensemblVEP: React.PropTypes.array,
         ext_ensemblVariation: React.PropTypes.object,
         ext_clinvarEutils: React.PropTypes.object,
@@ -54,6 +55,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         return {
             interpretation: this.props.interpretation,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
+            ext_ensemblHgvsVEP: this.props.ext_ensemblHgvsVEP,
             ext_ensemblVEP: this.props.ext_ensemblVEP,
             ext_ensemblVariation: this.props.ext_ensemblVariation,
             ext_clinvarEutils: this.props.ext_clinvarEutils,
@@ -70,6 +72,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         if (nextProps.ext_myVariantInfo) {
             this.setState({ext_myVariantInfo: nextProps.ext_myVariantInfo});
+        }
+        if (nextProps.ext_ensemblHgvsVEP) {
+            this.setState({ext_ensemblHgvsVEP: nextProps.ext_ensemblHgvsVEP});
         }
         if (nextProps.ext_ensemblVEP) {
             this.setState({ext_ensemblVEP: nextProps.ext_ensemblVEP});
@@ -116,7 +121,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <TabPanel>
                         <div className="tab-panel">
                             <CurationInterpretationBasicInfo data={variant} protocol={this.props.href_url.protocol}
-                                ext_clinvarEutils={this.state.ext_clinvarEutils}
+                                ext_clinvarEutils={this.state.ext_clinvarEutils} ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
