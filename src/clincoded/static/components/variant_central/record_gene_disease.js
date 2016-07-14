@@ -75,7 +75,7 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
             }
             if (gRCh37) {
                 links_37 = externalLinks.setContextLinks(gRCh37, 'GRCh37');
-                //links_37 = this.setContextLinks(gRCh37, 'GRCh37');
+
             }
         }
 

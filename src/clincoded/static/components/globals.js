@@ -201,7 +201,7 @@ module.exports.external_url_map = {
     'VariationViewerGRCh38': 'https://www.ncbi.nlm.nih.gov/variation/view/?chr=',
     'VariationViewerGRCh37': 'https://www.ncbi.nlm.nih.gov/variation/view/?chr=',
     'EnsemblGRCh38': 'http://uswest.ensembl.org/Homo_sapiens/Location/View?db=core;r=',
-    'EnsemblGRCh37': 'http://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r='
+    'EnsemblGRCh37': 'http://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r=',
 };
 
 
