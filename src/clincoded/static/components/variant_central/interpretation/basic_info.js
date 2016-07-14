@@ -19,7 +19,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         data: React.PropTypes.object, // ClinVar data payload
         protocol: React.PropTypes.string,
         ext_clinvarEutils: React.PropTypes.object,
-        ext_ensemblHgvsVEP: React.PropTypes.object
+        ext_ensemblHgvsVEP: React.PropTypes.array
     },
 
     getInitialState: function() {
@@ -41,8 +41,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             gene_symbol: null,
             uniprot_id: null,
             hasRefseqData: false,
-            hasEnsemblData: false,
-            ext_clinvarEutils: this.props.ext_clinvarEutils
+            hasEnsemblData: false
         };
     },
 
@@ -51,8 +50,22 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             this.parseData(nextProps.data);
         }
         if (nextProps.ext_clinvarEutils) {
-            this.setState({ext_clinvarEutils: nextProps.ext_clinvarEutils});
-            this.parseClinVarEutils(nextProps.ext_clinvarEutils);
+            //this.setState({ext_clinvarEutils: nextProps.ext_clinvarEutils});
+            //this.parseClinVarEutils(nextProps.ext_clinvarEutils);
+            this.setState({
+                hasRefseqData: true,
+                clinvar_hgvs_names: this.parseHgvsNames(nextProps.ext_clinvarEutils.hgvsNames),
+                nucleotide_change: nextProps.ext_clinvarEutils.RefSeqTranscripts.NucleotideChangeList,
+                protein_change: nextProps.ext_clinvarEutils.RefSeqTranscripts.ProteinChangeList,
+                molecular_consequence: nextProps.ext_clinvarEutils.RefSeqTranscripts.MolecularConsequenceList,
+                sequence_location: nextProps.ext_clinvarEutils.allele.SequenceLocation,
+                gene_symbol: nextProps.ext_clinvarEutils.gene.symbol
+            });
+            // Calling method to get uniprot id for LinkOut link
+            this.getUniprotId(this.state.gene_symbol);
+            // Calling method to identify nucleotide change, protein change and molecular consequence
+            // Used for UI display in the Primary Transcript table
+            this.getPrimaryTranscript(nextProps.ext_clinvarEutils.clinvarVariantTitle, this.state.nucleotide_change, this.state.protein_change, this.state.molecular_consequence);
         }
         if (nextProps.ext_ensemblHgvsVEP) {
             this.setState({
@@ -70,6 +83,15 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     parseData: function(variant) {
+        if (variant.clinvarVariantId) {
+            this.setState({clinvar_id: variant.clinvarVariantId});
+        }
+        if (variant.carId) {
+            this.setState({car_id: variant.carId});
+        }
+        if (variant.dbSNPIds.length) {
+            this.setState({dbSNP_id: variant.dbSNPIds[0]});
+        }
         var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
         if (hgvs_GRCh37) {
             this.setState({
@@ -87,20 +109,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     parseClinVarEutils: function(variantData) {
-        this.setState({
-            hasRefseqData: true,
-            clinvar_hgvs_names: this.parseHgvsNames(variantData.hgvsNames),
-            nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
-            protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
-            molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
-            sequence_location: variantData.allele.SequenceLocation,
-            gene_symbol: variantData.gene.symbol
-        });
-        // Calling method to get uniprot id for LinkOut link
-        this.getUniprotId(this.state.gene_symbol);
-        // Calling method to identify nucleotide change, protein change and molecular consequence
-        // Used for UI display in the Primary Transcript table
-        this.getPrimaryTranscript(variantData.clinvarVariantTitle, this.state.nucleotide_change, this.state.protein_change, this.state.molecular_consequence);
+
     },
 
     // Return all non NC_ genomic hgvsNames in an array

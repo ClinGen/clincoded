@@ -44,7 +44,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         href_url: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
-        ext_ensemblHgvsVEP: React.PropTypes.object,
+        ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_ensemblVEP: React.PropTypes.array,
         ext_ensemblVariation: React.PropTypes.object,
         ext_clinvarEutils: React.PropTypes.object,

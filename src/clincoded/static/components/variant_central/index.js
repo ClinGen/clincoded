@@ -54,6 +54,7 @@ var VariantCurationHub = React.createClass({
 
             this.fetchExternalData('myVariantInfo');
             this.fetchExternalData('Ensembl');
+            this.fetchEnsemblData();
             this.fetchRefseqData();
             this.fetchExternalData2('clinvar');
         }).catch(function(e) {
@@ -126,7 +127,6 @@ var VariantCurationHub = React.createClass({
         var variant = this.state.data;
         var url = this.props.href_url.protocol + external_url_map['ClinVarEutils'];
         if (variant) {
-            console.log(variant);
             if (variant.clinvarVariantId) {
                 this.setState({clinvar_id: variant.clinvarVariantId});
                 // Get ClinVar data via the parseClinvar method defined in parse-resources.js
@@ -134,7 +134,6 @@ var VariantCurationHub = React.createClass({
                     // Passing 'true' option to invoke 'mixin' function
                     // To extract more ClinVar data for 'Basic Information' tab
                     var variantData = parseClinvar(xml, true);
-                    console.log(variantData);
                     this.setState({ext_clinvarEutils: variantData});
                     /*
                     this.setState({
@@ -204,7 +203,7 @@ var VariantCurationHub = React.createClass({
                     if (hgvs_notation.indexOf('del') > 0) {
                         hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
                     }
-                    this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
+                    this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
                         /*
                         this.setState({
                             hasEnsemblData: true,
