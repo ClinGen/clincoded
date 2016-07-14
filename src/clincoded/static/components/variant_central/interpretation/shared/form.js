@@ -15,7 +15,6 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     mixins: [RestMixin, FormMixin],
 
     propTypes: {
-        formTitle: React.PropTypes.string, // the title of this form section
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
         evidenceType: React.PropTypes.string, // specified what type of evidence object is created
         evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
@@ -109,7 +108,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         var flatInterpretation = null;
         var freshInterpretation = null;
         var evidenceObjectId = null;
-        var submittedCriteria = this.props.criteria;
+        var submittedCriteria = this.props.criteria ? this.props.criteria : [];
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
             freshInterpretation = interpretation;
             // get fresh update of interpretation object so we have newest evaluation list, then flatten it
@@ -223,13 +222,11 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         return (
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <div className="evaluation">
-                    {this.props.formTitle ?
-                        <h3>{this.props.formTitle}</h3>
-                    : null}
                     {this.props.renderedFormContent.call(this)}
                 </div>
                 <div className="curation-submit clearfix">
-                    <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} inputDisabled={this.state.submitDisabled} />
+                    <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
+                        submitBusy={this.state.submitBusy} inputDisabled={(!this.props.criteria || this.props.criteria.length == 0) && !this.state.diseaseAssociated} />
                     {this.state.updateMsg ?
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                     : null}
