@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var _ = require('underscore');
 var globals = require('../globals');
 var fetched = require('../fetched');
 var RestMixin = require('../rest').RestMixin;
@@ -20,14 +21,6 @@ var queryKeyValue = globals.queryKeyValue;
 var VariantCurationActions = module.exports.VariantCurationActions = React.createClass({
     mixins: [RestMixin, ModalMixin, FormMixin, CuratorHistory],
 
-    childContextTypes: {
-        handleStateChange: React.PropTypes.func
-    },
-
-    getChildContext: function() {
-        return {handleStateChange: this.handleStateChange};
-    },
-
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
         session: React.PropTypes.object,
@@ -40,6 +33,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     getInitialState: function() {
         return {
             variantUuid: null,
+            interpretation: null,
             hasExistingInterpretation: false,
             isInterpretationActive: false,
             hasAssociatedDisease: false
@@ -49,20 +43,27 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     componentWillReceiveProps: function(nextProps) {
         if (this.props.variantData) {
             if (this.props.variantData.associatedInterpretations) {
-                if (this.props.variantData.associatedInterpretations.length && this.props.variantData.submitted_by['@id'] === this.props.session.user_properties['@id']) {
-                    this.setState({hasExistingInterpretation: true});
+                if (this.props.variantData.associatedInterpretations.length) {
+                    var associatedInterpretations = this.props.variantData.associatedInterpretations;
+                    associatedInterpretations.forEach(associatedInterpretation => {
+                        if (associatedInterpretation.submitted_by['@id'] === this.props.session.user_properties['@id']) {
+                            this.setState({hasExistingInterpretation: true});
+                        }
+                    });
                 }
             }
         }
         if (this.props.editKey === 'true' && this.props.interpretation) {
             this.setState({isInterpretationActive: true});
-            if (this.props.interpretation.interpretation_disease) {
-                this.setState({hasAssociatedDisease: true});
+            if (this.props.interpretation) {
+                if (this.props.interpretation.interpretation_disease) {
+                    this.setState({hasAssociatedDisease: true});
+                }
             }
         }
     },
 
-    handleStateChange: function() {
+    updateParentState: function() {
         this.setState({hasAssociatedDisease: true});
     },
 
@@ -82,7 +83,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             this.postRestData('/interpretations/', newInterpretationObj).then(data => {
                 var newInterpretationUuid = data['@graph'][0].uuid;
                 window.location.href = '/variant-central/?edit=true&variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid;
-            }).catch(e => {parseAndLogError.bind(undefined, 'postRequest')});
+            }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
         } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
             window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + variantObj.associatedInterpretations[0].uuid;
         }
@@ -97,35 +98,32 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         }
 
         var associateDiseaseButtonTitle = '', associateDiseaseModalTitle = '';
-        if (!this.state.hasAssociatedDisease) {
-            associateDiseaseButtonTitle = 'Associate with Disease';
-            associateDiseaseModalTitle = 'Associate this interpretation with a disease';
-        } else {
+        if (this.state.hasAssociatedDisease) {
             associateDiseaseButtonTitle = 'Edit Disease';
             associateDiseaseModalTitle = 'Associate this interpretation with a different disease';
+        } else {
+            associateDiseaseButtonTitle = 'Associate with Disease';
+            associateDiseaseModalTitle = 'Associate this interpretation with a disease';
         }
 
         return (
-            <Form formClassName="form-horizontal form-std">
-                <div className="container curation-actions curation-variant">
-                    {(this.state.isInterpretationActive) ?
-                        <div className="interpretation-record clearfix">
-                            <h2><span>Variant Interpretation Record</span></h2>
-                            <div className="btn-group">
-                                <Modal title={associateDiseaseModalTitle} wrapperClassName="modal-associate-disease">
-                                    <button className="btn btn-primary pull-right"
-                                        modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} url={this.props.href_url} session={this.props.session}
-                                            interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateDiseaseButtonTitle}</button>
-                                </Modal>
-                            </div>
+            <div className="container curation-actions curation-variant">
+                {(this.state.isInterpretationActive) ?
+                    <div className="interpretation-record clearfix">
+                        <h2><span>Variant Interpretation Record</span></h2>
+                        <div className="btn-group">
+                            <Modal title={associateDiseaseModalTitle} wrapperClassName="modal-associate-disease">
+                                <button className="btn btn-primary pull-right" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState}
+                                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateDiseaseButtonTitle}</button>
+                            </Modal>
                         </div>
-                        :
-                        <div className="evidence-only clearfix">
-                            <Input type="button-button" inputClassName="btn btn-primary pull-right" title={interpretationButtonTitle} clickHandler={this.handleInterpretationEvent} />
-                        </div>
-                    }
-                </div>
-            </Form>
+                    </div>
+                :
+                    <div className="evidence-only clearfix">
+                        <Input type="button-button" inputClassName="btn btn-primary pull-right" title={interpretationButtonTitle} clickHandler={this.handleInterpretationEvent} />
+                    </div>
+                }
+            </div>
         );
     }
 });
@@ -144,8 +142,8 @@ var AssociateDisease = React.createClass({
         closeModal: React.PropTypes.func, // Function to call to close the modal
         interpretation: React.PropTypes.object,
         editKey: React.PropTypes.bool,
-        url: React.PropTypes.string,
-        updateInterpretationObj: React.PropTypes.func
+        updateInterpretationObj: React.PropTypes.func,
+        updateParentState: React.PropTypes.func
     },
 
     getInitialState: function() {
@@ -205,9 +203,9 @@ var AssociateDisease = React.createClass({
                         interpretationObj.disease = interpretationDisease;
                         // Update the intepretation object partially with the new disease property value
                         return this.putRestData('/interpretation/' + this.props.interpretation.uuid, interpretationObj).then(result => {
-                            this.props.updateInterpretationObj(result);
+                            this.props.updateInterpretationObj();
+                            this.props.updateParentState();
                             this.props.closeModal();
-                            window.history.replaceState(window.state, '', this.props.url);
                         });
                     }
                 });
@@ -221,7 +219,6 @@ var AssociateDisease = React.createClass({
     // Called when the modal 'Cancel' button is clicked
     cancelAction: function(e) {
         this.props.closeModal();
-        window.history.replaceState(window.state, '', this.props.url);
     },
 
     render: function() {
@@ -233,17 +230,19 @@ var AssociateDisease = React.createClass({
         }
 
         return (
-            <div className="modal-box">
-                <div className="modal-body">
-                    <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
-                        error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
-                        labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+            <Form submitHandler={this.submitForm} formClassName="form-std">
+                <div className="modal-box">
+                    <div className="modal-body clearfix">
+                        <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
+                            error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
+                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                    </div>
+                    <div className='modal-footer'>
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
+                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />
+                    </div>
                 </div>
-                <div className='modal-footer'>
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
-                    <Input type="button" inputClassName="btn-primary btn-inline-spacer" clickHandler={this.submitForm} title="OK" submitBusy={this.state.submitResourceBusy} />
-                </div>
-            </div>
+            </Form>
         );
     }
 });
