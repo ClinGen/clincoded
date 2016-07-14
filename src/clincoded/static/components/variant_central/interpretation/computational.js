@@ -155,15 +155,17 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             return Promise.resolve(clinVarObj);
                         }
                     }).then(clinvar => {
-                        var term = clinvar.protein_change.substr(0, clinvar.protein_change.length-1);
-                        var symbol = clinvar.gene_symbol;
-                        this.getRestData(this.props.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '*+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
-                            var codonObj = {};
-                            codonObj.count = result.esearchresult.count;
-                            codonObj.term = term;
-                            codonObj.symbol = symbol;
-                            this.setState({hasClinVarData: true, codonObj: codonObj});
-                        });
+                        if (clinvar.protein_change) {
+                            var term = clinvar.protein_change.substr(0, clinvar.protein_change.length-1);
+                            var symbol = clinvar.gene_symbol;
+                            this.getRestData(this.props.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '*+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
+                                var codonObj = {};
+                                codonObj.count = result.esearchresult.count;
+                                codonObj.term = term;
+                                codonObj.symbol = symbol;
+                                this.setState({hasClinVarData: true, codonObj: codonObj});
+                            });
+                        }
                     }).catch(function(e) {
                         console.log('ClinVar Fetch Error=: %o', e);
                     });
