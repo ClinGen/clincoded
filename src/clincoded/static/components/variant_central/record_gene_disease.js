@@ -3,20 +3,14 @@ var React = require('react');
 var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../globals');
-var parseClinvar = require('../../libs/parse-resources').parseClinvar;
-var RestMixin = require('../rest').RestMixin;
-var genomic_chr_mapping = require('./interpretation/mapping/NC_genomic_chr_format.json');
 
 var external_url_map = globals.external_url_map;
-var dbxref_prefix_map = globals.dbxref_prefix_map;
 
 // Display the curator data of the curation data
 var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React.createClass({
-    mixins: [RestMixin],
 
     propTypes: {
-        data: React.PropTypes.object, // ClinVar data payload
-        protocol: React.PropTypes.string
+        data: React.PropTypes.object // ClinVar data payload
     },
 
     getDefaultProps: function() {
@@ -37,16 +31,12 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
         var viewer_url_37 = null;
         var ensembl_url_38 = null;
         var ensembl_url_37 = null;
-
-        //var sequence_location = this.state.sequence_location;
-        //var gene_symbol = this.state.gene_symbol;
-        //var ensembl_data = this.state.ensembl_transcripts;
-        //var dbSNPId = null;
-
         if (variant && variant.hgvsNames) {
+            // get GRCh38 and GRCh37 NC_ terms from local db
             gRCh38 =  variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.hgvsNames.gRCh38 ? variant.hgvsNames.gRCh38 : null);
             gRCh37 =  variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : (variant.hgvsNames.gRCh37 ? variant.hgvsNames.gRCh37 : null);
 
+            // get Chromosome
             if (gRCh38 || gRCh37) {
                 var hgvs_term = gRCh38 ? gRCh38 : gRCh37;
                 chr = hgvs_term.substr(7, 2);
@@ -58,6 +48,8 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                     chr = 'y';
                 }
             }
+
+            // set start and stop points for +/- 60 dp length and generate links
             var start_38 = null;
             var end_38 = null;
             var start_37 = null;

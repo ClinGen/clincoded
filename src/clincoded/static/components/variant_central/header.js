@@ -12,8 +12,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
         interpretationUuid: React.PropTypes.string,
-        session: React.PropTypes.object,
-        protocol: React.PropTypes.string
+        session: React.PropTypes.object
     },
 
     render: function() {
@@ -31,7 +30,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
                 <div className="container curation-data curation-variant">
                     <div className="row equal-height">
                         <CurationRecordVariant data={variant} />
-                        <CurationRecordGeneDisease data={variant} protocol={this.props.protocol} />
+                        <CurationRecordGeneDisease data={variant} />
                         <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} session={session} />
                     </div>
                     {variant && !variant.hgvsNames.GRCh37 ?
