@@ -219,7 +219,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 if (value.match(letterPattern)) {
                     newArr.push(value);
                 }
-            };
+            }
             newStr = newArr.join(', ');
         } else {
             newStr = obj;
@@ -312,31 +312,18 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
         return (
             <div className="variant-interpretation computational">
-                {(this.state.interpretation) ?
-                <div className="row">
-                    <div className="col-sm-12">
-                        <CurationInterpretationForm formTitle={"Functional, Conservation, and Splicing Predictors"} renderedFormContent={criteriaGroup1}
-                            evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
-                            formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BP4', 'PP3', 'BP7']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"Alternate Changes in Codon"} renderedFormContent={criteriaGroup2}
-                            evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true}
-                            formDataUpdater={criteriaGroup2Update} variantUuid={this.props.data['@id']} criteriaDisease={['PM5', 'PS1']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"Molecular Consequence: Missense"} renderedFormContent={criteriaGroup3}
-                            evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true} formChangeHandler={criteriaGroup3Change}
-                            formDataUpdater={criteriaGroup3Update} variantUuid={this.props.data['@id']} criteriaDisease={['BP1', 'PP2']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        <CurationInterpretationForm formTitle={"Molecular Consequence: Inframe indel"} renderedFormContent={criteriaGroup4}
-                            evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true}
-                            formDataUpdater={criteriaGroup4Update} variantUuid={this.props.data['@id']} criteria={['BP3', 'PM4']}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                    </div>
-                </div>
-                : null}
-
                 <div>
                     <h2 className="page-header">Computational Tools</h2>
+                    {(this.props.data && this.state.interpretation) ?
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <CurationInterpretationForm formTitle={"Functional, Conservation, and Splicing Predictors"} renderedFormContent={criteriaGroup1}
+                                evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                                formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BP4', 'PP3', 'BP7']}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
+                    </div>
+                    : null}
                     {this.props.data ?
                         <div className="panel panel-info datasource-clingen">
                             <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
@@ -570,6 +557,16 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
                 <div>
                     <h2 className="page-header">Variants in Same Codon</h2>
+                    {(this.props.data && this.state.interpretation) ?
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <CurationInterpretationForm formTitle={"Alternate Changes in Codon"} renderedFormContent={criteriaGroup2}
+                                evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true}
+                                formDataUpdater={criteriaGroup2Update} variantUuid={this.props.data['@id']} criteriaDisease={['PM5', 'PS1']}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
+                    </div>
+                    : null}
                     <div className="panel panel-info datasource-clinvar">
                         <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
                         <div className="panel-body">
@@ -588,91 +585,36 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </div>
 
                 <div>
+                    {(this.props.data && this.state.interpretation) ?
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <CurationInterpretationForm formTitle={"Molecular Consequence: Missense"} renderedFormContent={criteriaGroup3}
+                                evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true} formChangeHandler={criteriaGroup3Change}
+                                formDataUpdater={criteriaGroup3Update} variantUuid={this.props.data['@id']} criteriaDisease={['BP1', 'PP2']}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
+                    </div>
+                    : null}
+                </div>
+
+                <div>
                     <h2 className="page-header">Repetitive Region</h2>
+                    {(this.props.data && this.state.interpretation) ?
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <CurationInterpretationForm formTitle={"Molecular Consequence: Inframe indel"} renderedFormContent={criteriaGroup4}
+                                evidenceType={'computational'} evidenceData={this.state.data} evidenceDataUpdated={true}
+                                formDataUpdater={criteriaGroup4Update} variantUuid={this.props.data['@id']} criteria={['BP3', 'PM4']}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
+                    </div>
+                    : null}
                 </div>
 
             </div>
         );
     }
 });
-
-// FIXME: all functions below here are examples; references to these in above render() should also be removed
-var comp_crit_1 = function() {
-    return (
-        <div>
-            <Input type="checkbox" ref="xbox1-value" label="Predictors Demo Criteria 1?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['xbox1-value'] ? this.state.checkboxes['xbox1-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="checkbox" ref="xbox2-value" label="Predictors Demo Criteria 2?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['xbox2-value'] ? this.state.checkboxes['xbox1-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-        </div>
-    );
-};
-
-var comp_crit_1_update = function(nextProps) {
-    if (nextProps.interpretation) {
-        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaluation => {
-                if (evaluation.criteria == 'xbox1') {
-                    let tempCheckboxes = this.state.checkboxes;
-                    tempCheckboxes['xbox1-value'] = evaluation.value === 'true';
-                    this.setState({checkboxes: tempCheckboxes});
-                }
-                if (evaluation.criteria == 'xbox2') {
-                    let tempCheckboxes = this.state.checkboxes;
-                    tempCheckboxes['xbox2-value'] = evaluation.value === 'true';
-                    this.setState({checkboxes: tempCheckboxes});
-                }
-            });
-        }
-    }
-};
-
-var pop_crit_2 = function() {
-    return (
-        <div>
-            <Input type="select" ref="ps4-value" label="Population Demo Criteria 2?" defaultValue="No Selection"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="No Selection">No Selection</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-                <option value="In Progress">In Progress</option>
-            </Input>
-            <Input type="text" ref="ps4-description" label="Population Demo Criteria 2 Description:" rows="5" placeholder="e.g. free text" inputDisabled={true}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="ps5-value" label="Population Demo Criteria 3?" defaultValue="No Selection"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="No Selection">No Selection</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-                <option value="In Progress">In Progress</option>
-            </Input>
-        </div>
-    );
-};
-
-var pop_crit_2_update = function(nextProps) {
-    if (nextProps.interpretation) {
-        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaluation => {
-                switch(evaluation.criteria) {
-                    case 'ps4':
-                        this.refs['ps4-value'].setValue(evaluation.value);
-                        this.setState({submitDisabled: false});
-                        break;
-                    case 'ps5':
-                        this.refs['ps5-value'].setValue(evaluation.value);
-                        this.setState({submitDisabled: false});
-                        break;
-                }
-            });
-        }
-    }
-    if (nextProps.extraData) {
-        this.refs['ps4-description'].setValue(nextProps.extraData.test2);
-    }
-};
 
 // code for rendering of computational tab interpretation forms, first group:
 // functional, conservation, and splicing predictors
@@ -682,7 +624,6 @@ var criteriaGroup1 = function() {
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
                     <strong>BP4:</strong> Multiple lines of computational evidence suggest no impact on gene or gene product (conservation, evolutionary, splicing impact, etc.)
-
                     <br /><br />
                     <strong>PP3:</strong> Multiple lines of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc.)
                 </p>
