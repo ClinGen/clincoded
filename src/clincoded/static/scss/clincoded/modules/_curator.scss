@@ -1310,7 +1310,8 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     background-color: #ddd;
     color: #555;
     cursor: default;
-    padding: 5px 0.725em;
+    padding: 5px 0.72em;
+    font-size: 12px;
     font-weight: bold;
 
     &.benign-strong {
