@@ -315,7 +315,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
         return (
             <div className="variant-interpretation computational">
-                <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" open>
+                <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
@@ -556,7 +556,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     }
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Variants in Same Codon" open>
+                <PanelGroup accordion><Panel title="Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
@@ -584,7 +584,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     </div>
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Molecular Consequence: Missense" open>
+                <PanelGroup accordion><Panel title="Molecular Consequence: Missense" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
@@ -597,7 +597,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" open>
+                <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">

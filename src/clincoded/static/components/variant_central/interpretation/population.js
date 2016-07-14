@@ -620,7 +620,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     : null}
                 </div>
 
-                <PanelGroup accordion><Panel title="Population Criteria Evaluation" open>
+                <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
