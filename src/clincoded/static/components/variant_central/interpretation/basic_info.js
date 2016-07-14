@@ -194,7 +194,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (item.hgvsc) {
             return (
                 <tr key={key}>
-                    <td>{item.hgvsc}</td>
+                    <td><span className="ellipsis">{item.hgvsc}</span></td>
                     <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
                     <td>
                         {(item.consequence_terms) ? this.handleSOTerms(item.consequence_terms) : '--'}
@@ -302,8 +302,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="bs-callout-content-container">
                         <h4>Genomic</h4>
                         <ul>
-                            {(GRCh38) ? <li><span>{GRCh38 + ' (GRCh38)'}</span></li> : null}
-                            {(GRCh37) ? <li><span>{GRCh37 + ' (GRCh37)'}</span></li> : null}
+                            {(GRCh38) ? <li><span className="ellipsis">{GRCh38}</span><span> (GRCh38)</span></li> : null}
+                            {(GRCh37) ? <li><span className="ellipsis">{GRCh37}</span><span> (GRCh37)</span></li> : null}
                         </ul>
                     </div>
                 </div>
