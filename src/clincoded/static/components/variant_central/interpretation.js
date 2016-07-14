@@ -42,12 +42,22 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         variantData: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
         href_url: React.PropTypes.object,
-        updateInterpretationObj: React.PropTypes.func
+        updateInterpretationObj: React.PropTypes.func,
+        ext_myVariantInfo: React.PropTypes.object,
+        ext_ensemblVEP: React.PropTypes.array,
+        ext_ensemblVariation: React.PropTypes.object,
+        ext_clinvarEutils: React.PropTypes.object,
+        ext_clinVarEsearch: React.PropTypes.object
     },
 
     getInitialState: function() {
         return {
             interpretation: this.props.interpretation,
+            ext_myVariantInfo: this.props.ext_myVariantInfo,
+            ext_ensemblVEP: this.props.ext_ensemblVEP,
+            ext_ensemblVariation: this.props.ext_ensemblVariation,
+            ext_clinvarEutils: this.props.ext_clinvarEutils,
+            ext_clinVarEsearch: this.props.ext_clinVarEsearch,
             selectedTab: (this.props.href_url.href ? tabList.indexOf(queryKeyValue('tab', this.props.href_url.href)) : 0) // set selectedTab to whatever is defined in the address; default to first tab if not set
         };
     },
@@ -57,6 +67,21 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         // when props are updated, update the parent interpreatation object, if applicable
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
             this.setState({interpretation: nextProps.interpretation});
+        }
+        if (nextProps.ext_myVariantInfo) {
+            this.setState({ext_myVariantInfo: nextProps.ext_myVariantInfo});
+        }
+        if (nextProps.ext_ensemblVEP) {
+            this.setState({ext_ensemblVEP: nextProps.ext_ensemblVEP});
+        }
+        if (nextProps.ext_ensemblVariation) {
+            this.setState({ext_ensemblVariation: nextProps.ext_ensemblVariation});
+        }
+        if (nextProps.ext_clinvarEutils) {
+            this.setState({ext_clinvarEutils: nextProps.ext_clinvarEutils});
+        }
+        if (nextProps.ext_clinVarEsearch) {
+            this.setState({ext_clinVarEsearch: nextProps.ext_clinVarEsearch});
         }
     },
 
@@ -91,18 +116,23 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <TabPanel>
                         <div className="tab-panel">
                             <CurationInterpretationBasicInfo data={variant} protocol={this.props.href_url.protocol}
+                                ext_clinvarEutils={this.state.ext_clinvarEutils}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
                             <CurationInterpretationPopulation data={variant} protocol={this.props.href_url.protocol}
+                                ext_myVariantInfo={this.state.ext_myVariantInfo} ext_ensemblVEP={this.state.ext_ensemblVEP}
+                                ext_ensemblVariation={this.state.ext_ensemblVariation}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
                             <CurationInterpretationComputational data={variant} protocol={this.props.href_url.protocol}
+                                ext_myVariantInfo={this.state.ext_myVariantInfo} ext_clinvarEutils={this.state.ext_clinvarEutils}
+                                ext_clinVarEsearch={this.state.ext_clinVarEsearch}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>
