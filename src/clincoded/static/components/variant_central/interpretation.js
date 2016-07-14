@@ -111,10 +111,36 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                 <CurationInterpretationCriteria interpretation={interpretation} />
                 <Tabs onSelect={this.handleSelect} selectedIndex={this.state.selectedTab} forceRenderTabPanel={true}>
                     <TabList className="tab-label-list">
+                        <Tab className="tab-label col-sm-2">Basic Information</Tab>
+                        <Tab className="tab-label col-sm-2">Population</Tab>
+                        <Tab className="tab-label col-sm-2">Predictors</Tab>
                         <Tab className="tab-label col-sm-2">Functional</Tab>
                         <Tab className="tab-label col-sm-2">Segregation/Case</Tab>
                         <Tab className="tab-label col-sm-2">Gene-specific</Tab>
                     </TabList>
+                    <TabPanel>
+                        <div className="tab-panel">
+                            <CurationInterpretationBasicInfo data={variant} protocol={this.props.href_url.protocol}
+                                ext_clinvarEutils={this.state.ext_clinvarEutils} ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
+                                interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
+                    </TabPanel>
+                    <TabPanel>
+                        <div className="tab-panel">
+                            <CurationInterpretationPopulation data={variant} protocol={this.props.href_url.protocol}
+                                ext_myVariantInfo={this.state.ext_myVariantInfo} ext_ensemblVEP={this.state.ext_ensemblVEP}
+                                ext_ensemblVariation={this.state.ext_ensemblVariation}
+                                interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
+                    </TabPanel>
+                    <TabPanel>
+                        <div className="tab-panel">
+                            <CurationInterpretationComputational data={variant} protocol={this.props.href_url.protocol}
+                                ext_myVariantInfo={this.state.ext_myVariantInfo} ext_clinvarEutils={this.state.ext_clinvarEutils}
+                                ext_clinVarEsearch={this.state.ext_clinVarEsearch}
+                                interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
+                    </TabPanel>
                     <TabPanel>
                         <div className="tab-panel">
                             <CurationInterpretationFunctional data={variant} protocol={this.props.href_url.protocol}
