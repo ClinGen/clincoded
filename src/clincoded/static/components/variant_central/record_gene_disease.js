@@ -69,7 +69,7 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                 end_38 = parseInt(point_38) + 30;
 
                 ucsc_url_38 = 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr' + chr + '%3A' + start_38.toString() + '-' + end_38.toString();
-                viewer_url_38 = 'https://www.ncbi.nlm.nih.gov/variation/view/?chr=' + chr + '&from=' + start_38.toString() + '&to=' + end_38.toString();
+                viewer_url_38 = 'https://www.ncbi.nlm.nih.gov/variation/view/?chr=' + chr + '&assm=GCF_000001405.28&from=' + start_38.toString() + '&to=' + end_38.toString();
                 ensembl_url_38 = 'http://uswest.ensembl.org/Homo_sapiens/Location/View?db=core;r=' + chr + ':' + start_38.toString() + '-' + end_38.toString();
             }
             if (gRCh37) {
