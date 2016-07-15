@@ -15,6 +15,8 @@ var dbxref_prefix_map = globals.dbxref_prefix_map;
 var panel = require('../../../libs/bootstrap/panel');
 var form = require('../../../libs/bootstrap/form');
 
+var externalLinks = require('./shared/externalLinks');
+
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
 var Form = form.Form;
@@ -315,6 +317,22 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         var otherPred = (this.state.computationObj && this.state.computationObj.other_predictors) ? this.state.computationObj.other_predictors : null;
         var codon = (this.state.codonObj) ? this.state.codonObj : null;
 
+        var variant = this.props.data;
+        var gRCh38 = null;
+        var gRCh37 = null;
+        var links_38 = null;
+        var links_37 = null;
+        if (variant && variant.hgvsNames) {
+            gRCh38 = variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.hgvsNames.gRCh38 ? variant.hgvsNames.gRCh38 : null);
+            gRCh37 = variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : (variant.hgvsNames.gRCh37 ? variant.hgvsNames.gRCh37 : null);
+        }
+        if (gRCh38) {
+            links_38 = externalLinks.setContextLinks(gRCh38, 'GRCh38');
+        }
+        if (gRCh37) {
+            links_37 = externalLinks.setContextLinks(gRCh37, 'GRCh37');
+        }
+
         return (
             <div className="variant-interpretation computational">
                 <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
@@ -600,6 +618,43 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
+                    <div className="panel panel-info">
+                        <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
+                        <div className="panel-body">
+                            <dl className="inline-dl clearfix">
+                                {(links_38 || links_37) ?
+                                    <dd>UCSC [
+                                        {links_38 ? <a href={links_38.ucsc_url_38} target="_blank" title={'UCSC Genome Browser for ' + gRCh38 + ' in a new window'}>GRCh38/hg38</a> : null }
+                                        {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                        {links_37 ? <a href={links_37.ucsc_url_37} target="_blank" title={'UCSC Genome Browser for ' + gRCh37 + ' in a new window'}>GRCh37/hg19</a> : null }
+                                        ]
+                                    </dd>
+                                    :
+                                    null
+                                }
+                                {(links_38 || links_37) ?
+                                    <dd>Variation Viewer [
+                                        {links_38 ? <a href={links_38.viewer_url_38} target="_blank" title={'Variation Viewer page for ' + gRCh38 + ' in a new window'}>GRCh38</a> : null }
+                                        {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                        {links_37 ? <a href={links_37.viewer_url_37} target="_blank" title={'Variation Viewer page for ' + gRCh37 + ' in a new window'}>GRCh37</a> : null }
+                                        ]
+                                    </dd>
+                                    :
+                                    null
+                                }
+                                {(links_38 || links_37) ?
+                                    <dd>Ensembl Browser [
+                                        {links_38 ? <a href={links_38.ensembl_url_38} target="_blank" title={'Ensembl Browser page for ' + gRCh38 + ' in a new window'}>GRCh38</a> : null }
+                                        {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                        {links_37 ? <a href={links_37.ensembl_url_37} target="_blank" title={'Ensembl Browser page for ' + gRCh37 + ' in a new window'}>GRCh37</a> : null }
+                                        ]
+                                    </dd>
+                                    :
+                                    null
+                                }
+                            </dl>
+                        </div>
+                    </div>
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
