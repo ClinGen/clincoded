@@ -178,9 +178,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
-    // helper function to shorten display of imported float values to 5 decimal places
+    // helper function to shorten display of imported float values to 5 decimal places;
+    // if float being displayed has less than 5 decimal places, just show the value with no changes
     parseFloatShort: function(float) {
-        return +parseFloat(float).toFixed(5);
+        if (float.toString().length > 5) {
+            return float.toFixed(5) + '';
+        } else {
+            return float.toString();
+        }
     },
 
     // Get ExAC allele frequency from Ensembl (VEP) directly
@@ -188,9 +193,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseAlleleFrequencyData: function(response) {
         let populationObj = this.state.populationObj;
         populationStatic.exac._order.map(key => {
-            populationObj.exac[key].af = this.parseFloatShort(response[0].colocated_variants[0]['exac_' + key + '_maf']);
+            populationObj.exac[key].af = parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
         });
-        populationObj.exac._tot.af = this.parseFloatShort(response[0].colocated_variants[0].exac_adj_maf);
+        populationObj.exac._tot.af = parseFloat(response[0].colocated_variants[0].exac_adj_maf);
 
         this.setState({populationObj: populationObj});
     },
@@ -259,22 +264,22 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
                         // ... for specific populations =
                         populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
-                        populationObj.tGenomes[populationCode].af[population.allele] = this.parseFloatShort(population.frequency);
+                        populationObj.tGenomes[populationCode].af[population.allele] = parseFloat(population.frequency);
                         updated1000GData = true;
                     } else if (population.population == '1000GENOMES:phase_3:ALL') {
                         // ... and totals
                         populationObj.tGenomes._tot.ac[population.allele] = parseInt(population.allele_count);
-                        populationObj.tGenomes._tot.af[population.allele] = this.parseFloatShort(population.frequency);
+                        populationObj.tGenomes._tot.af[population.allele] = parseFloat(population.frequency);
                         updated1000GData = true;
                     } else if (population.population == 'ESP6500:African_American') {
                         // ... and ESP AA
                         populationObj.tGenomes.espaa.ac[population.allele] = parseInt(population.allele_count);
-                        populationObj.tGenomes.espaa.af[population.allele] = this.parseFloatShort(population.frequency);
+                        populationObj.tGenomes.espaa.af[population.allele] = parseFloat(population.frequency);
                         updated1000GData = true;
                     } else if (population.population == 'ESP6500:European_American') {
                         // ... and ESP EA
                         populationObj.tGenomes.espea.ac[population.allele] = parseInt(population.allele_count);
-                        populationObj.tGenomes.espea.af[population.allele] = this.parseFloatShort(population.frequency);
+                        populationObj.tGenomes.espea.af[population.allele] = parseFloat(population.frequency);
                         updated1000GData = true;
                     }
                 });
@@ -288,22 +293,22 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
                         // ... for specific populations
                         populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = parseInt(population_genotype.count);
-                        populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = this.parseFloatShort(population_genotype.frequency);
+                        populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
                         updated1000GData = true;
                     } else if (population_genotype.population == '1000GENOMES:phase_3:ALL') {
                         // ... and totals
                         populationObj.tGenomes._tot.gc[population_genotype.genotype] = parseInt(population_genotype.count);
-                        populationObj.tGenomes._tot.gf[population_genotype.genotype] = this.parseFloatShort(population_genotype.frequency);
+                        populationObj.tGenomes._tot.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
                         updated1000GData = true;
                     } else if (population_genotype.population == 'ESP6500:African_American') {
                         // ... and ESP AA
                         populationObj.tGenomes.espaa.gc[population_genotype.genotype] = parseInt(population_genotype.count);
-                        populationObj.tGenomes.espaa.gf[population_genotype.genotype] = this.parseFloatShort(population_genotype.frequency);
+                        populationObj.tGenomes.espaa.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
                         updated1000GData = true;
                     } else if (population_genotype.population == 'ESP6500:European_American') {
                         // ... and ESP EA
                         populationObj.tGenomes.espea.gc[population_genotype.genotype] = parseInt(population_genotype.count);
-                        populationObj.tGenomes.espea.gf[population_genotype.genotype] = this.parseFloatShort(population_genotype.frequency);
+                        populationObj.tGenomes.espea.gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
                         updated1000GData = true;
                     }
                 });
@@ -371,7 +376,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 let ref = populationObj.esp._extra.ref,
                     alt = populationObj.esp._extra.alt;
                 // esp does not report back frequencies, so we have to calculate it off counts
-                let tempMAF = this.parseFloatShort(populationObj.esp[pop].ac[alt] / (populationObj.esp[pop].ac[ref] + populationObj.esp[pop].ac[alt]));
+                let tempMAF = parseFloat(populationObj.esp[pop].ac[alt] / (populationObj.esp[pop].ac[ref] + populationObj.esp[pop].ac[alt]));
                 if (tempMAF > highestMAFObj.af) {
                     highestMAFObj.pop = pop;
                     highestMAFObj.popLabel = populationStatic.esp._labels[pop];
@@ -416,7 +421,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 <td>{exac[key].ac ? exac[key].ac : '--'}</td>
                 <td>{exac[key].an ? exac[key].an : '--'}</td>
                 <td>{exac[key].hom ? exac[key].hom : '--'}</td>
-                <td>{exac[key].af ? exac[key].af : '--'}</td>
+                <td>{exac[key].af || exac[key].af === 0 ? this.parseFloatShort(exac[key].af) : '--'}</td>
             </tr>
         );
     },
@@ -434,11 +439,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{tGenomes[key].af[tGenomes._extra.ref] ? tGenomes._extra.ref + ': ' + tGenomes[key].af[tGenomes._extra.ref] : '--'}{tGenomes[key].ac[tGenomes._extra.ref] ? ' (' + tGenomes[key].ac[tGenomes._extra.ref] + ')' : ''}</td>
-                <td>{tGenomes[key].af[tGenomes._extra.alt] ? tGenomes._extra.alt + ': ' + tGenomes[key].af[tGenomes._extra.alt] : '--'}{tGenomes[key].ac[tGenomes._extra.alt] ? ' (' + tGenomes[key].ac[tGenomes._extra.alt] + ')' : ''}</td>
-                <td>{tGenomes[key].gf[g_ref] ? g_ref + ': ' + tGenomes[key].gf[g_ref] : '--'}{tGenomes[key].gc[g_ref] ? ' (' + tGenomes[key].gc[g_ref] + ')' : ''}</td>
-                <td>{tGenomes[key].gf[g_alt] ? g_alt + ': ' + tGenomes[key].gf[g_alt] : '--'}{tGenomes[key].gc[g_alt] ? ' (' + tGenomes[key].gc[g_alt] + ')' : ''}</td>
-                <td>{tGenomes[key].gf[g_mixed] ? g_mixed + ': ' + tGenomes[key].gf[g_mixed] : '--'}{tGenomes[key].gc[g_mixed] ? ' (' + tGenomes[key].gc[g_mixed] + ')' : ''}</td>
+                <td>{tGenomes[key].af[tGenomes._extra.ref] || tGenomes[key].af[tGenomes._extra.ref] === 0 ? tGenomes._extra.ref + ': ' + this.parseFloatShort(tGenomes[key].af[tGenomes._extra.ref]) : '--'}{tGenomes[key].ac[tGenomes._extra.ref] ? ' (' + tGenomes[key].ac[tGenomes._extra.ref] + ')' : ''}</td>
+                <td>{tGenomes[key].af[tGenomes._extra.alt] || tGenomes[key].af[tGenomes._extra.alt] === 0 ? tGenomes._extra.alt + ': ' + this.parseFloatShort(tGenomes[key].af[tGenomes._extra.alt]) : '--'}{tGenomes[key].ac[tGenomes._extra.alt] ? ' (' + tGenomes[key].ac[tGenomes._extra.alt] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[g_ref] || tGenomes[key].gf[g_ref] === 0 ? g_ref + ': ' + this.parseFloatShort(tGenomes[key].gf[g_ref]) : '--'}{tGenomes[key].gc[g_ref] ? ' (' + tGenomes[key].gc[g_ref] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[g_alt] || tGenomes[key].gf[g_alt] === 0 ? g_alt + ': ' + this.parseFloatShort(tGenomes[key].gf[g_alt]) : '--'}{tGenomes[key].gc[g_alt] ? ' (' + tGenomes[key].gc[g_alt] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[g_mixed] || tGenomes[key].gf[g_mixed] === 0 ? g_mixed + ': ' + this.parseFloatShort(tGenomes[key].gf[g_mixed]) : '--'}{tGenomes[key].gc[g_mixed] ? ' (' + tGenomes[key].gc[g_mixed] + ')' : ''}</td>
             </tr>
         );
     },
@@ -527,8 +532,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 let zp = -this.normSInv((1 - CIp / 100) / 2),
                     pp = xp / np,
                     qp = 1 - pp;
-                let CILow = this.parseFloatShort(((2 * np * pp) + (zp * zp) - zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp)))),
-                    CIHigh = this.parseFloatShort(((2 * np * pp) + (zp * zp) + zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp))));
+                let CILow = ((2 * np * pp) + (zp * zp) - zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp))),
+                    CIHigh = ((2 * np * pp) + (zp * zp) + zp * Math.sqrt((zp * zp) + (4 * np * pp * qp))) / (2 * (np + (zp * zp)));
                 this.setState({populationObj: populationObj, CILow: CILow, CIHigh: CIHigh});
             } else {
                 this.setState({populationObj: populationObj, CILow: 'N/A', CIHigh: 'N/A'});
@@ -594,7 +599,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <div className="bs-callout-content-container">
                             <dl className="inline-dl clearfix">
                                 <dt>Source: </dt><dd>{highestMAF && highestMAF.source ? highestMAF.source : 'N/A'}</dd>
-                                <dt>Allele Frequency: </dt><dd>{highestMAF && highestMAF.af ? highestMAF.af : 'N/A'}</dd>
+                                <dt>Allele Frequency: </dt><dd>{highestMAF && (highestMAF.af || highestMAF.af === 0) ? this.parseFloatShort(highestMAF.af) : 'N/A'}</dd>
                                 {(this.state.interpretation && highestMAF) ?
                                     <span>
                                         <dt className="dtFormLabel">Desired CI:</dt>
@@ -602,8 +607,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                             <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI}
                                                 onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT.toString()} />
                                         </dd>
-                                        <dt>CI - lower: </dt><dd>{this.state.CILow ? this.state.CILow : ''}</dd>
-                                        <dt>CI - upper: </dt><dd>{this.state.CIHigh ? this.state.CIHigh : ''}</dd>
+                                        <dt>CI - lower: </dt><dd>{this.state.CILow || this.state.CILow === 0 ? this.parseFloatShort(this.state.CILow) : ''}</dd>
+                                        <dt>CI - upper: </dt><dd>{this.state.CIHigh || this.state.CIHigh === 0 ? this.parseFloatShort(this.state.CIHigh) : ''}</dd>
                                     </span>
                                 : null}
                             </dl>
