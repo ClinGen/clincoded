@@ -202,6 +202,7 @@ module.exports.external_url_map = {
     'VariationViewerGRCh37': 'https://www.ncbi.nlm.nih.gov/variation/view/?chr=',
     'EnsemblGRCh38': 'http://uswest.ensembl.org/Homo_sapiens/Location/View?db=core;r=',
     'EnsemblGRCh37': 'http://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r=',
+    'Bustamante': '//predictvar.bustamante-lab.net/variant/position/'
 };
 
 
