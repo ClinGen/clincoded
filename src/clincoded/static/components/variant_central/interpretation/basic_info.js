@@ -132,11 +132,13 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (result && molecular_consequence.length) {
             var item = molecular_consequence.find((x) => x.HGVS === result.HGVS);
             // 'SO_terms' is defined via requiring external mapping file
-            var found = SO_terms.find((entry) => entry.SO_id === item.SOid);
-            if (found) {
-                SO_id_term = found.SO_term + ' ' + found.SO_id;
-            } else {
-                SO_id_term = '--';
+            if (item) {
+                var found = SO_terms.find((entry) => entry.SO_id === item.SOid);
+                if (found) {
+                    SO_id_term = found.SO_term + ' ' + found.SO_id;
+                } else {
+                    SO_id_term = '--';
+                }
             }
             // FIXME: temporarily use protein_change[0] due to lack of mapping
             // associated with nucleotide transcript in ClinVar data
