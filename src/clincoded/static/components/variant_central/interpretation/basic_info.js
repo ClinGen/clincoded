@@ -310,7 +310,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         return (
             <div className="variant-interpretation basic-info">
                 <div className="bs-callout bs-callout-info clearfix">
-                    <div className="bs-callout-content-container">
+                    <div className="bs-callout-content-container-fullwidth">
                         <h4>Genomic</h4>
                         <ul>
                             {(GRCh38) ? <li><span className="title-ellipsis title-ellipsis-short">{GRCh38}</span><span> (GRCh38)</span></li> : null}
