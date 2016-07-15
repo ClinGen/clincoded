@@ -122,8 +122,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             this.setState({ext_clinVarEsearch: nextProps.ext_clinVarEsearch});
             var codonObj = {};
             codonObj.count = nextProps.ext_clinVarEsearch.esearchresult.count;
-            //codonObj.term = term;
-            //codonObj.symbol = symbol;
+            codonObj.term = nextProps.ext_clinVarEsearch.vci_term;
+            codonObj.symbol = nextProps.ext_clinVarEsearch.vci_symbol;
             this.setState({hasClinVarData: true, codonObj: codonObj});
         }
         if (nextProps.ext_bustamante) {

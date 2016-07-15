@@ -189,10 +189,13 @@ var VariantCurationHub = React.createClass({
                         return Promise.resolve(clinVarObj);
                     }
                 }).then(clinvar => {
-                    if (clinvar.protein_change && clinvar.symbol) {
+                    if (clinvar.protein_change && clinvar.gene_symbol) {
                         var term = clinvar.protein_change.substr(0, clinvar.protein_change.length-1);
                         var symbol = clinvar.gene_symbol;
                         this.getRestData(this.props.href_url.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '*+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
+                            // pass in these additional values, in case receiving component needs them
+                            result.vci_term = term;
+                            result.vci_symbol = symbol;
                             this.setState({ext_clinVarEsearch: result});
                         });
                     }
