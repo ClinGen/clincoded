@@ -94,41 +94,41 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             <div className="container curation-variant-tab-group">
                 <CurationInterpretationCriteria interpretation={interpretation} />
                 <div className="vci-tabs">
-                    <ul className="tab-label-list" role="tablist">
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={true}>Basic Information</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('population')}>Population</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')}>Predictors</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('functional')}>Functional</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')}>Segregation/Case</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-specific')}>Gene-specific</li>
+                    <ul className="vci-tabs-header tab-label-list" role="tablist">
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('population')} aria-selected={this.state.selectedTab == 'population'}>Population</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')} aria-selected={this.state.selectedTab == 'predictors'}>Predictors</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('functional')} aria-selected={this.state.selectedTab == 'functional'}>Functional</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')} aria-selected={this.state.selectedTab == 'segregation-case'}>Segregation/Case</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-specific')} aria-selected={this.state.selectedTab == 'gene-specific'}>Gene-specific</li>
                     </ul>
 
-                    <div role="tabpanel" className={this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ? '' : 'hidden'}>
+                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ? '' : ' hidden')}>
                         <CurationInterpretationBasicInfo data={variant} protocol={this.props.href_url.protocol}
                             ext_clinvarEutils={this.state.ext_clinvarEutils} ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
-                    <div role="tabpanel" className={this.state.selectedTab == 'population' ? '' : 'hidden'}>
+                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'population' ? '' : ' hidden')}>
                         <CurationInterpretationPopulation data={variant} protocol={this.props.href_url.protocol}
                             ext_myVariantInfo={this.state.ext_myVariantInfo} ext_ensemblVEP={this.state.ext_ensemblVEP}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
-                    <div role="tabpanel" className={this.state.selectedTab == 'predictors' ? '' : 'hidden'}>
+                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'predictors' ? '' : ' hidden')}>
                         <CurationInterpretationComputational data={variant} protocol={this.props.href_url.protocol}
                             ext_myVariantInfo={this.state.ext_myVariantInfo} ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch} ext_bustamante={this.state.ext_bustamante}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
-                    <div role="tabpanel" className={this.state.selectedTab == 'functional' ? '' : 'hidden'}>
+                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'functional' ? '' : ' hidden')}>
                         <CurationInterpretationFunctional data={variant} protocol={this.props.href_url.protocol}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
-                    <div role="tabpanel" className={this.state.selectedTab == 'segregation-case' ? '' : 'hidden'}>
+                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'segregation-case' ? '' : ' hidden')}>
                         <CurationInterpretationSegregation data={variant} protocol={this.props.href_url.protocol}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
-                    <div role="tabpanel" className={this.state.selectedTab == 'gene-specific' ? '' : 'hidden'}>
+                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'gene-specific' ? '' : ' hidden')}>
                         <CurationInterpretationGeneSpecific data={variant} protocol={this.props.href_url.protocol}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>

@@ -998,146 +998,144 @@
 .curation-variant-tab-group {
     margin-bottom: 20px;
 
-    .vci-tabs ul[role=tablist] {
-        border: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    .vci-tabs li[role=tab] {
-        background-color: #1b75bc;
-        border-top: none;
-        border-left: none;
-        border-bottom: solid 1px #fff;
-        border-right: solid 1px #fff;
-        bottom: -1px;
-        color: #fff;
-        cursor: pointer;
-        display: inline-block;
-        list-style: none;
-        padding: 8px 2px;
-        position: relative;
-        text-align: center;
-    }
-
-    .vci-tabs li[role=tab][aria-selected=true] {
-        background-color: #fff;
-        border: solid 1px #1b75bc;
-        border-bottom: solid 1px #fff;
-        color: #000;
-    }
-
-    .vci-tabs li[role=tab][aria-selected=true] ~ li {
-        border-right: none;
-        border-left: solid 1px #fff;
-    }
-
-    .vci-tabs li[role=tab][aria-disabled=true] {
-        color: GrayText;
-        cursor: default;
-    }
-
-    .vci-tabs li[role=tab]:focus {
-        box-shadow: 0 0 5px hsl(208, 99%, 50%);
-        border-color: hsl(208, 99%, 50%);
-        outline: none;
-    }
-
-    .vci-tabs li[role=tab]:focus:after {
-        background: #fff;
-        content: "";
-        position: absolute;
-        height: 5px;
-        left: -4px;
-        right: -4px;
-        bottom: -5px;
-    }
-}
-
-
-div.react-tabs .ReactTabs__TabPanel--selected {
-    clear: both;
-
-    .tab-panel {
-        border: solid 1px #1b75bc;
-        padding: 15px;
-
-        ul, li {
-            list-style: none;
+    .vci-tabs {
+        ul.vci-tabs-header[role=tablist] {
+            border: none;
             margin: 0;
             padding: 0;
+
+            li[role=tab] {
+                background-color: #1b75bc;
+                border-top: none;
+                border-left: none;
+                border-bottom: solid 1px #fff;
+                border-right: solid 1px #fff;
+                bottom: -1px;
+                color: #fff;
+                cursor: pointer;
+                display: inline-block;
+                list-style: none;
+                padding: 8px 2px;
+                position: relative;
+                text-align: center;
+            }
+
+            li[role=tab][aria-selected=true] {
+                background-color: #fff;
+                border: solid 1px #1b75bc;
+                border-bottom: solid 1px #fff;
+                color: #000;
+            }
+
+            li[role=tab][aria-selected=true] ~ li {
+                border-right: none;
+                border-left: solid 1px #fff;
+            }
+
+            li[role=tab][aria-disabled=true] {
+                color: GrayText;
+                cursor: default;
+            }
+
+            li[role=tab]:focus {
+                box-shadow: 0 0 5px hsl(208, 99%, 50%);
+                border-color: hsl(208, 99%, 50%);
+                outline: none;
+            }
+
+            li[role=tab]:focus:after {
+                background: #fff;
+                content: "";
+                position: absolute;
+                height: 5px;
+                left: -4px;
+                right: -4px;
+                bottom: -5px;
+            }
         }
 
-        dl {
-            margin-bottom: 0;
+        .tab-panel {
+            border: solid 1px #1b75bc;
+            padding: 15px;
+            clear: both;
 
-            dd {
-                margin-right: 20px;
+            ul, li {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
 
-                &.pull-right {
-                    margin-right: 0;
+            dl {
+                margin-bottom: 0;
+
+                dd {
+                    margin-right: 20px;
+
+                    &.pull-right {
+                        margin-right: 0;
+                    }
                 }
             }
-        }
 
-        .basic-info .table th,
-        .basic-info .table td {
-            width: 33%;
-        }
+            .basic-info .table th,
+            .basic-info .table td {
+                width: 33%;
+            }
 
-        .population .table tfoot .count:first-child td {
-            border-top: 2px solid #333;
-            color: #333;
-        }
+            .population .table tfoot .count:first-child td {
+                border-top: 2px solid #333;
+                color: #333;
+            }
 
-        .population .datasource-ExAC .table tfoot td {
-            font-weight: bold;
-        }
-
-        .population .datasource-ExAC .table tbody td,
-        .population .datasource-ExAC .table tfoot td {
-            width: 20%;
-        }
-
-        .population .datasource-1000G .table tbody td,
-        .population .datasource-1000G .table tfoot td,
-        .population .datasource-ESP .table tbody td,
-        .population .datasource-ESP .table tfoot td {
-            width: 16.66%;
-        }
-
-        .computational .datasource-clingen .table th,
-        .computational .datasource-clingen .table td,
-        .computational .datasource-other .table th,
-        .computational .datasource-other .table td,
-        .computational .datasource-splice .table th,
-        .computational .datasource-splice .table td {
-            width: 25%;
-        }
-
-        .computational .datasource-conservation .table th,
-        .computational .datasource-conservation .table td,
-        .computational .datasource-additional .table th {
-            width: 50%;
-        }
-
-        .computational .datasource-clinvar dt {
-            margin-right: 15px;
-        }
-
-        .computational .page-header:first-child {
-            margin-top: 20px;
-        }
-
-        .computational .datasource-splice .table {
-            .row-span {
-                border-left: 1px solid #ddd;
-                border-right: 1px solid #ddd;
+            .population .datasource-ExAC .table tfoot td {
                 font-weight: bold;
             }
 
-            tfoot td {
-                font-weight: bold;
+            .population .datasource-ExAC .table tbody td,
+            .population .datasource-ExAC .table tfoot td {
+                width: 20%;
+            }
+
+            .population .datasource-1000G .table tbody td,
+            .population .datasource-1000G .table tfoot td,
+            .population .datasource-ESP .table tbody td,
+            .population .datasource-ESP .table tfoot td {
+                width: 16.66%;
+            }
+
+            .computational .datasource-clingen .table th,
+            .computational .datasource-clingen .table td,
+            .computational .datasource-other .table th,
+            .computational .datasource-other .table td,
+            .computational .datasource-splice .table th,
+            .computational .datasource-splice .table td {
+                width: 25%;
+            }
+
+            .computational .datasource-conservation .table th,
+            .computational .datasource-conservation .table td,
+            .computational .datasource-additional .table th {
+                width: 50%;
+            }
+
+            .computational .datasource-clinvar dt {
+                margin-right: 15px;
+            }
+
+            .computational .page-header:first-child {
+                margin-top: 20px;
+            }
+
+            .computational .datasource-splice .table {
+                .row-span {
+                    border-left: 1px solid #ddd;
+                    border-right: 1px solid #ddd;
+                    font-weight: bold;
+                }
+
+                tfoot td {
+                    font-weight: bold;
+                }
             }
         }
     }
