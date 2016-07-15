@@ -48,7 +48,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_ensemblVEP: React.PropTypes.array,
         ext_ensemblVariation: React.PropTypes.object,
         ext_clinvarEutils: React.PropTypes.object,
-        ext_clinVarEsearch: React.PropTypes.object
+        ext_clinVarEsearch: React.PropTypes.object,
+        ext_bustamante: React.PropTypes.object
     },
 
     getInitialState: function() {
@@ -60,6 +61,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_ensemblVariation: this.props.ext_ensemblVariation,
             ext_clinvarEutils: this.props.ext_clinvarEutils,
             ext_clinVarEsearch: this.props.ext_clinVarEsearch,
+            ext_bustamante: this.props.ext_bustamante,
             selectedTab: (this.props.href_url.href ? tabList.indexOf(queryKeyValue('tab', this.props.href_url.href)) : 0) // set selectedTab to whatever is defined in the address; default to first tab if not set
         };
     },
@@ -87,6 +89,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         if (nextProps.ext_clinVarEsearch) {
             this.setState({ext_clinVarEsearch: nextProps.ext_clinVarEsearch});
+        }
+        if (nextProps.ext_bustamante) {
+            this.setState({ext_bustamante: nextProps.ext_bustamante});
         }
     },
 
@@ -137,7 +142,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <div className="tab-panel">
                             <CurationInterpretationComputational data={variant} protocol={this.props.href_url.protocol}
                                 ext_myVariantInfo={this.state.ext_myVariantInfo} ext_clinvarEutils={this.state.ext_clinvarEutils}
-                                ext_clinVarEsearch={this.state.ext_clinVarEsearch}
+                                ext_clinVarEsearch={this.state.ext_clinVarEsearch} ext_bustamante={this.state.ext_bustamante}
                                 interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </TabPanel>

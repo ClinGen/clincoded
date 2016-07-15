@@ -1265,6 +1265,12 @@ div.react-tabs .ReactTabs__TabPanel--selected {
         float: left;
         margin-right: 10%;
     }
+
+    .bs-callout-content-container-fullwidth {
+        float: left;
+        margin-right: 10%;
+        width: 100%;
+    }
 }
 
 .bs-callout+.bs-callout {
@@ -1310,7 +1316,8 @@ div.react-tabs .ReactTabs__TabPanel--selected {
     background-color: #ddd;
     color: #555;
     cursor: default;
-    padding: 5px 0.725em;
+    padding: 5px 0.72em;
+    font-size: 12px;
     font-weight: bold;
 
     &.benign-strong {

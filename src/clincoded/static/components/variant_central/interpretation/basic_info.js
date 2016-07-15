@@ -7,6 +7,7 @@ var RestMixin = require('../../rest').RestMixin;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var SO_terms = require('./mapping/SO_term.json');
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+var externalLinks = require('./shared/externalLinks');
 
 var external_url_map = globals.external_url_map;
 var dbxref_prefix_map = globals.dbxref_prefix_map;
@@ -155,7 +156,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (item.hgvsc) {
             return (
                 <tr key={key}>
-                    <td>{item.hgvsc}</td>
+                    <td><span className="title-ellipsis" title={item.hgvsc}>{item.hgvsc}</span></td>
                     <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
                     <td>
                         {(item.consequence_terms) ? this.handleSOTerms(item.consequence_terms) : '--'}
@@ -257,14 +258,24 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var clinvar_hgvs_names = this.state.clinvar_hgvs_names;
         var self = this;
 
+        var links_38 = null;
+        var links_37 = null;
+        if (GRCh38) {
+            links_38 = externalLinks.setContextLinks(GRCh38, 'GRCh38');
+        }
+        if (GRCh37) {
+            links_37 = externalLinks.setContextLinks(GRCh37, 'GRCh37');
+        }
+
+
         return (
             <div className="variant-interpretation basic-info">
                 <div className="bs-callout bs-callout-info clearfix">
-                    <div className="bs-callout-content-container">
+                    <div className="bs-callout-content-container-fullwidth">
                         <h4>Genomic</h4>
                         <ul>
-                            {(GRCh38) ? <li><span>{GRCh38 + ' (GRCh38)'}</span></li> : null}
-                            {(GRCh37) ? <li><span>{GRCh37 + ' (GRCh37)'}</span></li> : null}
+                            {(GRCh38) ? <li><span className="title-ellipsis title-ellipsis-short">{GRCh38}</span><span> (GRCh38)</span></li> : null}
+                            {(GRCh37) ? <li><span className="title-ellipsis title-ellipsis-short">{GRCh37}</span><span> (GRCh37)</span></li> : null}
                         </ul>
                     </div>
                 </div>
@@ -283,7 +294,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             <tbody>
                                 <tr>
                                     <td>
-                                        {(primary_transcript) ? primary_transcript.nucleotide : '--'}
+                                        <span className="title-ellipsis">{(primary_transcript) ? primary_transcript.nucleotide : '--'}</span>
                                     </td>
                                     <td>
                                         {(primary_transcript) ? primary_transcript.protein : '--'}
@@ -308,7 +319,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     <td>
                                         <ul>
                                             {clinvar_hgvs_names.map(function(name, index) {
-                                                return <li key={index}>{name}</li>;
+                                                return <li key={index}><span className="title-ellipsis">{name}</span></li>;
                                             })}
                                         </ul>
                                     </td>
@@ -346,16 +357,36 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
                     <div className="panel-body">
                         <dl className="inline-dl clearfix">
-                            {(sequence_location.length && gene_symbol) ?
-                                <dd>Variation Viewer [<a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh38')} target="_blank" title={'Variation Viewer page for ' + GRCh38 + ' in a new window'}>GRCh38</a> - <a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh37')} target="_blank" title={'Variation Viewer page for ' + GRCh37 + ' in a new window'}>GRCh37</a>]</dd>
-                                : null }
-                            {(ensembl_data.length) ?
-                                <dd>Ensembl Browser [<a href={dbxref_prefix_map['ENSEMBL'] + this.getGeneId(ensembl_data)} target="_blank" title={'Ensembl Browser page for ' + this.getGeneId(ensembl_data) + ' in a new window'}>GRCh38</a>]</dd>
-                                : null}
-                            {(sequence_location.length) ?
-                                <dd>UCSC [<a href={this.ucscViewerURL(sequence_location, 'hg38', 'GRCh38')} target="_blank" title={'UCSC Genome Browser for ' + GRCh38 + ' in a new window'}>GRCh38/hg38</a> - <a href={this.ucscViewerURL(sequence_location, 'hg19', 'GRCh37')} target="_blank" title={'UCSC Genome Browser for ' + GRCh37 + ' in a new window'}>GRCh37/hg19</a>]</dd>
-                                : null}
-                            { /* <dd><a href={dbxref_prefix_map['UniProtKB'] + uniprot_id} target="_blank" title={'UniProtKB page for ' + uniprot_id + ' in a new window'}>UniProtKB</a></dd> */ }
+                            {(links_38 || links_37) ?
+                                <dd>UCSC [
+                                    {links_38 ? <a href={links_38.ucsc_url_38} target="_blank" title={'UCSC Genome Browser for ' + GRCh38 + ' in a new window'}>GRCh38/hg38</a> : null }
+                                    {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                    {links_37 ? <a href={links_37.ucsc_url_37} target="_blank" title={'UCSC Genome Browser for ' + GRCh37 + ' in a new window'}>GRCh37/hg19</a> : null }
+                                    ]
+                                </dd>
+                                :
+                                null
+                            }
+                            {(links_38 || links_37) ?
+                                <dd>Variation Viewer [
+                                    {links_38 ? <a href={links_38.viewer_url_38} target="_blank" title={'Variation Viewer page for ' + GRCh38 + ' in a new window'}>GRCh38</a> : null }
+                                    {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                    {links_37 ? <a href={links_37.viewer_url_37} target="_blank" title={'Variation Viewer page for ' + GRCh37 + ' in a new window'}>GRCh37</a> : null }
+                                    ]
+                                </dd>
+                                :
+                                null
+                            }
+                            {(links_38 || links_37) ?
+                                <dd>Ensembl Browser [
+                                    {links_38 ? <a href={links_38.ensembl_url_38} target="_blank" title={'Ensembl Browser page for ' + GRCh38 + ' in a new window'}>GRCh38</a> : null }
+                                    {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                    {links_37 ? <a href={links_37.ensembl_url_37} target="_blank" title={'Ensembl Browser page for ' + GRCh37 + ' in a new window'}>GRCh37</a> : null }
+                                    ]
+                                </dd>
+                                :
+                                null
+                            }
                         </dl>
                     </div>
                 </div>
