@@ -195,7 +195,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (item.hgvsc) {
             return (
                 <tr key={key}>
-                    <td>{item.hgvsc}</td>
+                    <td><span className="title-ellipsis" title={item.hgvsc}>{item.hgvsc}</span></td>
                     <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
                     <td>
                         {(item.consequence_terms) ? this.handleSOTerms(item.consequence_terms) : '--'}
@@ -313,8 +313,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="bs-callout-content-container">
                         <h4>Genomic</h4>
                         <ul>
-                            {(GRCh38) ? <li><span>{GRCh38 + ' (GRCh38)'}</span></li> : null}
-                            {(GRCh37) ? <li><span>{GRCh37 + ' (GRCh37)'}</span></li> : null}
+                            {(GRCh38) ? <li><span className="title-ellipsis title-ellipsis-short">{GRCh38}</span><span> (GRCh38)</span></li> : null}
+                            {(GRCh37) ? <li><span className="title-ellipsis title-ellipsis-short">{GRCh37}</span><span> (GRCh37)</span></li> : null}
                         </ul>
                     </div>
                 </div>
@@ -333,7 +333,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             <tbody>
                                 <tr>
                                     <td>
-                                        {(primary_transcript) ? primary_transcript.nucleotide : '--'}
+                                        <span className="title-ellipsis">{(primary_transcript) ? primary_transcript.nucleotide : '--'}</span>
                                     </td>
                                     <td>
                                         {(primary_transcript) ? primary_transcript.protein : '--'}
@@ -358,7 +358,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     <td>
                                         <ul>
                                             {clinvar_hgvs_names.map(function(name, index) {
-                                                return <li key={index}>{name}</li>;
+                                                return <li key={index}><span className="title-ellipsis">{name}</span></li>;
                                             })}
                                         </ul>
                                     </td>
