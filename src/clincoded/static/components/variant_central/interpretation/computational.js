@@ -189,10 +189,15 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 var hgvsObj = {};
                 if (variant_id) {
                     this.getRestData(url + variant_id).then(response => {
-                        if (response.cadd) {
-                            hgvsObj.chrom = (response.cadd.chrom) ? response.cadd.chrom : null;
-                            hgvsObj.pos = (response.cadd.pos) ? response.cadd.pos : null;
-                            hgvsObj.alt = (response.cadd.alt) ? response.cadd.alt : null;
+                        if (response.dbnsfp) {
+                            hgvsObj.chrom = (response.dbnsfp.chrom) ? response.dbnsfp.chrom : null;
+                            hgvsObj.pos = (response.dbnsfp.hg19.start) ? response.dbnsfp.hg19.start : null;
+                            hgvsObj.alt = (response.dbnsfp.alt) ? response.dbnsfp.alt : null;
+                            return Promise.resolve(hgvsObj);
+                        } else if (response.clinvar) {
+                            hgvsObj.chrom = (response.clinvar.chrom) ? response.clinvar.chrom : null;
+                            hgvsObj.pos = (response.clinvar.hg19.start) ? response.clinvar.hg19.start : null;
+                            hgvsObj.alt = (response.clinvar.alt) ? response.clinvar.alt : null;
                             return Promise.resolve(hgvsObj);
                         }
                     }).then(data => {
