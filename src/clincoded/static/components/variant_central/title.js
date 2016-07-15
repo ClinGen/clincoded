@@ -25,21 +25,12 @@ var Title = module.exports.Title = React.createClass({
     },
 
     renderSubtitle: function(interpretation, variant) {
-        var associatedDisease = 'Not yet associated with a disease';
+        var associatedDisease = 'Evidence View Only';
         if (interpretation) {
-            if (interpretation.disease) {
-                if (interpretation.disease.term) {
-                    associatedDisease = 'This interpretation is associated with disease: ' + interpretation.disease.term;
-                }
-            }
-        }
-        if (variant && !interpretation) {
-            if (variant.associatedInterpretations.length) {
-                if (variant.associatedInterpretations[0].disease) {
-                    if (variant.associatedInterpretations[0].disease.term) {
-                        associatedDisease = 'This interpretation is associated with disease: ' + variant.associatedInterpretations[0].disease.term;
-                    }
-                }
+            if (interpretation.disease && interpretation.disease.term) {
+                associatedDisease = <span>This interpretation is associated with the disease <strong>{interpretation.disease.term}</strong></span>;
+            } else {
+                associatedDisease = 'This interpretation is not yet associated with a disease';
             }
         }
         return associatedDisease;
@@ -60,7 +51,7 @@ var Title = module.exports.Title = React.createClass({
         if (this.props.interpretationUuid) {
             calculatePatho_button = true;
         }
-        
+
         return (
             <div>
                 <h1>{variantTitle}{this.props.children}</h1>
