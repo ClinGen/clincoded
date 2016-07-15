@@ -182,7 +182,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // if float being displayed has less than 5 decimal places, just show the value with no changes
     // Returns a string for display purposes.
     parseFloatShort: function(float) {
-        if (float.toString().length > 5) {
+        let splitFloat = (float + "").split('.');
+        if (splitFloat.length > 1 && splitFloat[1].length > 5) {
             return float.toFixed(5) + '';
         } else {
             return float.toString();
