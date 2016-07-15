@@ -189,11 +189,13 @@ var VariantCurationHub = React.createClass({
                         return Promise.resolve(clinVarObj);
                     }
                 }).then(clinvar => {
-                    var term = clinvar.protein_change.substr(0, clinvar.protein_change.length-1);
-                    var symbol = clinvar.gene_symbol;
-                    this.getRestData(this.props.href_url.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '*+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
-                        this.setState({ext_clinVarEsearch: result});
-                    });
+                    if (clinvar.protein_change && clinvar.symbol) {
+                        var term = clinvar.protein_change.substr(0, clinvar.protein_change.length-1);
+                        var symbol = clinvar.gene_symbol;
+                        this.getRestData(this.props.href_url.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '*+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
+                            this.setState({ext_clinVarEsearch: result});
+                        });
+                    }
                 }).catch(function(e) {
                     console.log('ClinVarEutils or ClinVarEsearch Fetch Error=: %o', e);
                 });
