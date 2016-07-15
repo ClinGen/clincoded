@@ -51,21 +51,20 @@ var VariantCurationHub = React.createClass({
             // The variant object successfully retrieved
             this.setState({variantObj: response});
             this.setState({isLoadingComplete: true});
-            // ping out external resources
-            this.fetchMyVariantInfo();
+            // ping out external resources (all async)
+            this.fetchMyVariantInfoAndBustamante();
             this.fetchEnsemblVEP();
             this.fetchEnsemblVariation();
             this.fetchEnsemblHGVSVEP();
             this.fetchRefseqData();
             this.fetchClinvarESearch();
-            this.fetchBustamante();
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
     },
 
-    // Retrieve data from MyVariantInfo
-    fetchMyVariantInfo: function() {
+    // Retrieve data from MyVariantInfo and Bustamante data
+    fetchMyVariantInfoAndBustamante: function() {
         var variant = this.state.variantObj;
         var url = this.props.href_url.protocol + external_url_map['MyVariantInfo'];
         if (variant) {
@@ -83,6 +82,23 @@ var VariantCurationHub = React.createClass({
             if (variant_id) {
                 this.getRestData(url + variant_id).then(response => {
                     this.setState({ext_myVariantInfo: response});
+                    // check dbsnfp data for bustamante query
+                    var hgvsObj = {};
+                    if (response.dbnsfp) {
+                        hgvsObj.chrom = (response.dbnsfp.chrom) ? response.dbnsfp.chrom : null;
+                        hgvsObj.pos = (response.dbnsfp.hg19.start) ? response.dbnsfp.hg19.start : null;
+                        hgvsObj.alt = (response.dbnsfp.alt) ? response.dbnsfp.alt : null;
+                        return Promise.resolve(hgvsObj);
+                    } else if (response.clinvar) {
+                        hgvsObj.chrom = (response.clinvar.chrom) ? response.clinvar.chrom : null;
+                        hgvsObj.pos = (response.clinvar.hg19.start) ? response.clinvar.hg19.start : null;
+                        hgvsObj.alt = (response.clinvar.alt) ? response.clinvar.alt : null;
+                        return Promise.resolve(hgvsObj);
+                    }
+                }).then(data => {
+                    this.getRestData('https:' + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
+                        this.setState({ext_bustamante: result});
+                    });
                 }).catch(function(e) {
                     console.log('MyVariant Fetch Error=: %o', e);
                 });
@@ -200,47 +216,6 @@ var VariantCurationHub = React.createClass({
                     });
                 }).catch(function(e) {
                     console.log('ClinVar Fetch Error=: %o', e);
-                });
-            }
-        }
-    },
-
-    // Retrieve data from Bustamante
-    fetchBustamante: function() {
-        var variant = this.state.variantObj;
-        var url = this.props.href_url.protocol + external_url_map['MyVariantInfo'];
-        if (variant) {
-            // Extract genomic substring from HGVS name whose assembly is GRCh37
-            // Both of "GRCh37" and "gRCh37" instances are possibly present in the variant object
-            var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
-            var NC_genomic = hgvs_GRCh37 ? hgvs_GRCh37.substr(0, hgvs_GRCh37.indexOf(':')) : null;
-            // 'genomic_chr_mapping' is defined via requiring external mapping file
-            var found = genomic_chr_mapping.GRCh37.find((entry) => entry.GenomicRefSeq === NC_genomic);
-            // Format variant_id for use of myvariant.info REST API
-            var variant_id = (hgvs_GRCh37 && found) ? found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':')) : null;
-            if (variant_id && variant_id.indexOf('del') > 0) {
-                variant_id = variant_id.substring(0, variant_id.indexOf('del') + 3);
-            }
-            var hgvsObj = {};
-            if (variant_id) {
-                this.getRestData(url + variant_id).then(response => {
-                    if (response.dbnsfp) {
-                        hgvsObj.chrom = (response.dbnsfp.chrom) ? response.dbnsfp.chrom : null;
-                        hgvsObj.pos = (response.dbnsfp.hg19.start) ? response.dbnsfp.hg19.start : null;
-                        hgvsObj.alt = (response.dbnsfp.alt) ? response.dbnsfp.alt : null;
-                        return Promise.resolve(hgvsObj);
-                    } else if (response.clinvar) {
-                        hgvsObj.chrom = (response.clinvar.chrom) ? response.clinvar.chrom : null;
-                        hgvsObj.pos = (response.clinvar.hg19.start) ? response.clinvar.hg19.start : null;
-                        hgvsObj.alt = (response.clinvar.alt) ? response.clinvar.alt : null;
-                        return Promise.resolve(hgvsObj);
-                    }
-                }).then(data => {
-                    this.getRestData('https:' + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
-                        this.setState({ext_bustamante: result});
-                    });
-                }).catch(function(e) {
-                    console.log('MyVariant Fetch Error=: %o', e);
                 });
             }
         }
