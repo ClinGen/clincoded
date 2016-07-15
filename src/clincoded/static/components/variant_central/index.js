@@ -56,8 +56,7 @@ var VariantCurationHub = React.createClass({
             this.fetchEnsemblVEP();
             this.fetchEnsemblVariation();
             this.fetchEnsemblHGVSVEP();
-            this.fetchRefseqData();
-            this.fetchClinvarESearch();
+            this.fetchClinVarEutilsEsearch();
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
@@ -66,7 +65,6 @@ var VariantCurationHub = React.createClass({
     // Retrieve data from MyVariantInfo and Bustamante data
     fetchMyVariantInfoAndBustamante: function() {
         var variant = this.state.variantObj;
-        var url = this.props.href_url.protocol + external_url_map['MyVariantInfo'];
         if (variant) {
             // Extract genomic substring from HGVS name whose assembly is GRCh37
             // Both of "GRCh37" and "gRCh37" instances are possibly present in the variant object
@@ -80,7 +78,7 @@ var VariantCurationHub = React.createClass({
                 variant_id = variant_id.substring(0, variant_id.indexOf('del') + 3);
             }
             if (variant_id) {
-                this.getRestData(url + variant_id).then(response => {
+                this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfo'] + variant_id).then(response => {
                     this.setState({ext_myVariantInfo: response});
                     // check dbsnfp data for bustamante query
                     var hgvsObj = {};
@@ -172,36 +170,18 @@ var VariantCurationHub = React.createClass({
         }
     },
 
-    // Retrieve data from Refseq
-    fetchRefseqData: function() {
+    // Retrieve data from ClinVar Eutils and Esearch
+    fetchClinVarEutilsEsearch: function() {
         var variant = this.state.variantObj;
-        var url = this.props.href_url.protocol + external_url_map['ClinVarEutils'];
         if (variant) {
             if (variant.clinvarVariantId) {
                 this.setState({clinvar_id: variant.clinvarVariantId});
                 // Get ClinVar data via the parseClinvar method defined in parse-resources.js
-                this.getRestDataXml(url + variant.clinvarVariantId).then(xml => {
+                this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
                     // Passing 'true' option to invoke 'mixin' function
                     // To extract more ClinVar data for 'Basic Information' tab
                     var variantData = parseClinvar(xml, true);
                     this.setState({ext_clinvarEutils: variantData});
-                }).catch(function(e) {
-                    console.log('RefSeq Fetch Error=: %o', e);
-                });
-            }
-        }
-    },
-
-    // Retrieve data from ClinVar Eutils
-    fetchClinvarESearch: function() {
-        var variant = this.state.variantObj;
-        if (variant) {
-            if (variant.clinvarVariantId) {
-                // Get ClinVar data via the parseClinvar method defined in parse-resources.js
-                this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
-                    // Passing 'true' option to invoke 'mixin' function
-                    // To extract more ClinVar data for codon data
-                    var variantData = parseClinvar(xml, true);
                     var clinVarObj = {};
                     clinVarObj.protein_change = variantData.allele.ProteinChange;
                     clinVarObj.gene_symbol = variantData.gene.symbol;
@@ -215,7 +195,7 @@ var VariantCurationHub = React.createClass({
                         this.setState({ext_clinVarEsearch: result});
                     });
                 }).catch(function(e) {
-                    console.log('ClinVar Fetch Error=: %o', e);
+                    console.log('ClinVarEutils or ClinVarEsearch Fetch Error=: %o', e);
                 });
             }
         }
