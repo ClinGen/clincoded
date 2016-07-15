@@ -100,7 +100,7 @@ var VariantCurationHub = React.createClass({
                         this.setState({ext_bustamante: result});
                     });
                 }).catch(function(e) {
-                    console.log('MyVariant Fetch Error=: %o', e);
+                    console.log('MyVariant or Bustamante Fetch Error=: %o', e);
                 });
             }
         }
