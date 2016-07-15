@@ -636,7 +636,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <div className="panel panel-info datasource-ExAC">
                             <div className="panel-heading">
                                 <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}
-                                    <a className="panel-subtitle pull-right" href={this.props.protocol + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
+                                    <a className="panel-subtitle pull-right" href={'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
                                 </h3>
                             </div>
                             <table className="table">
