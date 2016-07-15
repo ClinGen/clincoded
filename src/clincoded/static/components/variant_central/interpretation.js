@@ -6,16 +6,6 @@ var globals = require('../globals');
 var queryKeyValue = globals.queryKeyValue;
 var editQueryValue = globals.editQueryValue;
 
-// Import react-tabs npm to create tabs
-var ReactTabs = require('react-tabs');
-var Tab = ReactTabs.Tab;
-var Tabs = ReactTabs.Tabs;
-var TabList = ReactTabs.TabList;
-var TabPanel = ReactTabs.TabPanel;
-
-// Prevent react-tabs default styles being used on tabs
-Tabs.setUseDefaultStyles(false);
-
 // Import individual tab components
 var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
 var CurationInterpretationBasicInfo = require('./interpretation/basic_info').CurationInterpretationBasicInfo;
@@ -24,17 +14,6 @@ var CurationInterpretationComputational = require('./interpretation/computationa
 var CurationInterpretationFunctional = require('./interpretation/functional').CurationInterpretationFunctional;
 var CurationInterpretationSegregation = require('./interpretation/segregation').CurationInterpretationSegregation;
 var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific').CurationInterpretationGeneSpecific;
-
-// list of tabs, in order of how they appear on the tab list
-// these values will be appended to the address as you switch tabs
-var tabList = [
-    'basic-info',
-    'population',
-    'computational',
-    'functional',
-    'segregation-case',
-    'gene-specific'
-];
 
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
@@ -114,41 +93,45 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         return (
             <div className="container curation-variant-tab-group">
                 <CurationInterpretationCriteria interpretation={interpretation} />
-                <span onClick={() => this.handleSelect('basic-info')}>Basic Information</span><br />
-                <span onClick={() => this.handleSelect('population')}>Population</span><br />
-                <span onClick={() => this.handleSelect('predictors')}>Predictors</span><br />
-                <span onClick={() => this.handleSelect('functional')}>Functional</span><br />
-                <span onClick={() => this.handleSelect('segregation-case')}>Segregation/Case</span><br />
-                <span onClick={() => this.handleSelect('gene-specific')}>Gene-specific</span>
+                <div className="vci-tabs">
+                    <ul className="tab-label-list" role="tablist">
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={true}>Basic Information</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('population')}>Population</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')}>Predictors</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('functional')}>Functional</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')}>Segregation/Case</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-specific')}>Gene-specific</li>
+                    </ul>
 
-                <div className={this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ? '' : 'hidden'}>
-                    <CurationInterpretationBasicInfo data={variant} protocol={this.props.href_url.protocol}
-                        ext_clinvarEutils={this.state.ext_clinvarEutils} ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
-                        interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                </div>
-                <div className={this.state.selectedTab == 'population' ? '' : 'hidden'}>
-                    <CurationInterpretationPopulation data={variant} protocol={this.props.href_url.protocol}
-                        ext_myVariantInfo={this.state.ext_myVariantInfo} ext_ensemblVEP={this.state.ext_ensemblVEP}
-                        ext_ensemblVariation={this.state.ext_ensemblVariation}
-                        interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                </div>
-                <div className={this.state.selectedTab == 'predictors' ? '' : 'hidden'}>
-                    <CurationInterpretationComputational data={variant} protocol={this.props.href_url.protocol}
-                        ext_myVariantInfo={this.state.ext_myVariantInfo} ext_clinvarEutils={this.state.ext_clinvarEutils}
-                        ext_clinVarEsearch={this.state.ext_clinVarEsearch} ext_bustamante={this.state.ext_bustamante}
-                        interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                </div>
-                <div className={this.state.selectedTab == 'functional' ? '' : 'hidden'}>
-                    <CurationInterpretationFunctional data={variant} protocol={this.props.href_url.protocol}
-                        interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                </div>
-                <div className={this.state.selectedTab == 'segregation-case' ? '' : 'hidden'}>
-                    <CurationInterpretationSegregation data={variant} protocol={this.props.href_url.protocol}
-                        interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                </div>
-                <div className={this.state.selectedTab == 'gene-specific' ? '' : 'hidden'}>
-                    <CurationInterpretationGeneSpecific data={variant} protocol={this.props.href_url.protocol}
-                        interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    <div role="tabpanel" className={this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ? '' : 'hidden'}>
+                        <CurationInterpretationBasicInfo data={variant} protocol={this.props.href_url.protocol}
+                            ext_clinvarEutils={this.state.ext_clinvarEutils} ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    </div>
+                    <div role="tabpanel" className={this.state.selectedTab == 'population' ? '' : 'hidden'}>
+                        <CurationInterpretationPopulation data={variant} protocol={this.props.href_url.protocol}
+                            ext_myVariantInfo={this.state.ext_myVariantInfo} ext_ensemblVEP={this.state.ext_ensemblVEP}
+                            ext_ensemblVariation={this.state.ext_ensemblVariation}
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    </div>
+                    <div role="tabpanel" className={this.state.selectedTab == 'predictors' ? '' : 'hidden'}>
+                        <CurationInterpretationComputational data={variant} protocol={this.props.href_url.protocol}
+                            ext_myVariantInfo={this.state.ext_myVariantInfo} ext_clinvarEutils={this.state.ext_clinvarEutils}
+                            ext_clinVarEsearch={this.state.ext_clinVarEsearch} ext_bustamante={this.state.ext_bustamante}
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    </div>
+                    <div role="tabpanel" className={this.state.selectedTab == 'functional' ? '' : 'hidden'}>
+                        <CurationInterpretationFunctional data={variant} protocol={this.props.href_url.protocol}
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    </div>
+                    <div role="tabpanel" className={this.state.selectedTab == 'segregation-case' ? '' : 'hidden'}>
+                        <CurationInterpretationSegregation data={variant} protocol={this.props.href_url.protocol}
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    </div>
+                    <div role="tabpanel" className={this.state.selectedTab == 'gene-specific' ? '' : 'hidden'}>
+                        <CurationInterpretationGeneSpecific data={variant} protocol={this.props.href_url.protocol}
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    </div>
                 </div>
             </div>
         );
