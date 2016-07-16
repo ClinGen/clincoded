@@ -173,7 +173,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         if (clinvar.protein_change) {
                             var term = clinvar.protein_change.substr(0, clinvar.protein_change.length-1);
                             var symbol = clinvar.gene_symbol;
-                            this.getRestData(this.props.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '*+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
+                            this.getRestData(this.props.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
                                 var codonObj = {};
                                 codonObj.count = result.esearchresult.count;
                                 codonObj.term = term;
@@ -642,7 +642,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             {this.state.hasClinVarData && codon ?
                                 <dl className="inline-dl clearfix">
                                     <dt>Number of variants in codon: <span className="condon-variant-count">{codon.count}</span></dt>
-                                    <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '*+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">See data in ClinVar <i className="icon icon-external-link"></i></a>)</dd>
+                                    <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">See data in ClinVar <i className="icon icon-external-link"></i></a>)</dd>
                                 </dl>
                             :
                                 <dl className="inline-dl clearfix">
