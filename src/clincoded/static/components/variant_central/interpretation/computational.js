@@ -642,7 +642,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             {this.state.hasClinVarData && codon ?
                                 <dl className="inline-dl clearfix">
                                     <dt>Number of variants in codon: <span className="condon-variant-count">{codon.count}</span></dt>
-                                    <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '*+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">See data in ClinVar <i className="icon icon-external-link"></i></a>)</dd>
+                                    <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">See data in ClinVar <i className="icon icon-external-link"></i></a>)</dd>
                                 </dl>
                             :
                                 <dl className="inline-dl clearfix">
