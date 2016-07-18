@@ -210,6 +210,7 @@ var AssociateDisease = React.createClass({
                             this.props.updateInterpretationObj();
                             this.props.updateParentState();
                             this.setState({submitResourceBusy: false});
+                            // Need 'submitResourceBusy' state to proceed closing modal
                             return Promise.resolve(this.state.submitResourceBusy);
                         }).then(submitState => {
                             // Close modal after 'submitResourceBusy' is completed
