@@ -19,8 +19,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
         protocol: React.PropTypes.string,
-        ext_clinvarEutils: React.PropTypes.object,
-        ext_ensemblHgvsVEP: React.PropTypes.array
+        ext_ensemblHgvsVEP: React.PropTypes.array,
+        ext_clinvarEutils: React.PropTypes.object
     },
 
     getInitialState: function() {
@@ -51,14 +51,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             this.parseData(nextProps.data);
         }
         // update data based on api call results
-        if (nextProps.ext_clinvarEutils) {
-            this.parseClinVarEutils(nextProps.ext_clinvarEutils);
-        }
         if (nextProps.ext_ensemblHgvsVEP) {
             this.setState({
                 hasEnsemblData: true,
                 ensembl_transcripts: nextProps.ext_ensemblHgvsVEP[0].transcript_consequences
             });
+        }
+        if (nextProps.ext_clinvarEutils) {
+            this.parseClinVarEutils(nextProps.ext_clinvarEutils);
         }
     },
 

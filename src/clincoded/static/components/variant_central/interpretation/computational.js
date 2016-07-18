@@ -63,8 +63,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         updateInterpretationObj: React.PropTypes.func,
         protocol: React.PropTypes.string,
         ext_myVariantInfo: React.PropTypes.object,
-        ext_clinVarEsearch: React.PropTypes.object,
-        ext_bustamante: React.PropTypes.object
+        ext_bustamante: React.PropTypes.object,
+        ext_clinVarEsearch: React.PropTypes.object
     },
 
     getInitialState: function() {
@@ -110,15 +110,15 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             this.parseOtherPredData(nextProps.ext_myVariantInfo);
             this.parseConservationData(nextProps.ext_myVariantInfo);
         }
+        if (nextProps.ext_bustamante) {
+            this.parseClingenPredData(nextProps.ext_bustamante);
+        }
         if (nextProps.ext_clinVarEsearch) {
             var codonObj = {};
             codonObj.count = nextProps.ext_clinVarEsearch.esearchresult.count;
             codonObj.term = nextProps.ext_clinVarEsearch.vci_term;
             codonObj.symbol = nextProps.ext_clinVarEsearch.vci_symbol;
             this.setState({hasClinVarData: true, codonObj: codonObj});
-        }
-        if (nextProps.ext_bustamante) {
-            this.parseClingenPredData(nextProps.ext_bustamante);
         }
     },
 

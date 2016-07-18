@@ -23,24 +23,24 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         href_url: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
-        ext_ensemblHgvsVEP: React.PropTypes.array,
+        ext_bustamante: React.PropTypes.object,
         ext_ensemblVEP: React.PropTypes.array,
         ext_ensemblVariation: React.PropTypes.object,
+        ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_clinvarEutils: React.PropTypes.object,
-        ext_clinVarEsearch: React.PropTypes.object,
-        ext_bustamante: React.PropTypes.object
+        ext_clinVarEsearch: React.PropTypes.object
     },
 
     getInitialState: function() {
         return {
             interpretation: this.props.interpretation,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
-            ext_ensemblHgvsVEP: this.props.ext_ensemblHgvsVEP,
+            ext_bustamante: this.props.ext_bustamante,
             ext_ensemblVEP: this.props.ext_ensemblVEP,
             ext_ensemblVariation: this.props.ext_ensemblVariation,
+            ext_ensemblHgvsVEP: this.props.ext_ensemblHgvsVEP,
             ext_clinvarEutils: this.props.ext_clinvarEutils,
             ext_clinVarEsearch: this.props.ext_clinVarEsearch,
-            ext_bustamante: this.props.ext_bustamante,
             selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info')  : 'basic-info') // set selectedTab to whatever is defined in the address; default to first tab if not set
         };
     },
@@ -54,8 +54,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (nextProps.ext_myVariantInfo) {
             this.setState({ext_myVariantInfo: nextProps.ext_myVariantInfo});
         }
-        if (nextProps.ext_ensemblHgvsVEP) {
-            this.setState({ext_ensemblHgvsVEP: nextProps.ext_ensemblHgvsVEP});
+        if (nextProps.ext_bustamante) {
+            this.setState({ext_bustamante: nextProps.ext_bustamante});
         }
         if (nextProps.ext_ensemblVEP) {
             this.setState({ext_ensemblVEP: nextProps.ext_ensemblVEP});
@@ -63,14 +63,14 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (nextProps.ext_ensemblVariation) {
             this.setState({ext_ensemblVariation: nextProps.ext_ensemblVariation});
         }
+        if (nextProps.ext_ensemblHgvsVEP) {
+            this.setState({ext_ensemblHgvsVEP: nextProps.ext_ensemblHgvsVEP});
+        }
         if (nextProps.ext_clinvarEutils) {
             this.setState({ext_clinvarEutils: nextProps.ext_clinvarEutils});
         }
         if (nextProps.ext_clinVarEsearch) {
             this.setState({ext_clinVarEsearch: nextProps.ext_clinVarEsearch});
-        }
-        if (nextProps.ext_bustamante) {
-            this.setState({ext_bustamante: nextProps.ext_bustamante});
         }
     },
 
@@ -105,20 +105,23 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ? '' : ' hidden')}>
                         <CurationInterpretationBasicInfo data={variant} protocol={this.props.href_url.protocol}
-                            ext_clinvarEutils={this.state.ext_clinvarEutils} ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                            ext_clinvarEutils={this.state.ext_clinvarEutils}
+                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP} />
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'population' ? '' : ' hidden')}>
                         <CurationInterpretationPopulation data={variant} protocol={this.props.href_url.protocol}
-                            ext_myVariantInfo={this.state.ext_myVariantInfo} ext_ensemblVEP={this.state.ext_ensemblVEP}
-                            ext_ensemblVariation={this.state.ext_ensemblVariation}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            ext_myVariantInfo={this.state.ext_myVariantInfo}
+                            ext_ensemblVEP={this.state.ext_ensemblVEP}
+                            ext_ensemblVariation={this.state.ext_ensemblVariation} />
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'predictors' ? '' : ' hidden')}>
                         <CurationInterpretationComputational data={variant} protocol={this.props.href_url.protocol}
-                            ext_myVariantInfo={this.state.ext_myVariantInfo} ext_clinvarEutils={this.state.ext_clinvarEutils}
-                            ext_clinVarEsearch={this.state.ext_clinVarEsearch} ext_bustamante={this.state.ext_bustamante}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                            ext_myVariantInfo={this.state.ext_myVariantInfo}
+                            ext_bustamante={this.state.ext_bustamante}
+                            ext_clinvarEutils={this.state.ext_clinvarEutils}
+                            ext_clinVarEsearch={this.state.ext_clinVarEsearch} />
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'functional' ? '' : ' hidden')}>
                         <CurationInterpretationFunctional data={variant} protocol={this.props.href_url.protocol}

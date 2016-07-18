@@ -27,12 +27,12 @@ var VariantCurationHub = React.createClass({
             variantObj: null,
             isLoadingComplete: false,
             ext_myVariantInfo: null,
-            ext_ensemblHgvsVEP: null,
+            ext_bustamante: null,
             ext_ensemblVEP: null,
             ext_ensemblVariation: null,
+            ext_ensemblHgvsVEP: null,
             ext_clinvarEutils: null,
-            ext_clinVarEsearch: null,
-            ext_bustamante: null
+            ext_clinVarEsearch: null
         };
     },
 
@@ -227,13 +227,14 @@ var VariantCurationHub = React.createClass({
                 <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                     href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
                 <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
+                    href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj}
                     ext_myVariantInfo={this.state.ext_myVariantInfo}
-                    ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
-                    ext_ensemblVEP={this.state.ext_ensemblVEP}
-                    ext_ensemblVariation={this.state.ext_ensemblVariation} ext_clinvarEutils={this.state.ext_clinvarEutils}
-                    ext_clinVarEsearch={this.state.ext_clinVarEsearch}
                     ext_bustamante={this.state.ext_bustamante}
-                    href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} />
+                    ext_ensemblVEP={this.state.ext_ensemblVEP}
+                    ext_ensemblVariation={this.state.ext_ensemblVariation}
+                    ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
+                    ext_clinvarEutils={this.state.ext_clinvarEutils}
+                    ext_clinVarEsearch={this.state.ext_clinVarEsearch} />
             </div>
         );
     }
