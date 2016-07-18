@@ -350,23 +350,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         );
     },
 
-    // Method to map prediction names to their letter codes
-    mapPredictionName: function(pred) {
-        var name = '';
-        let predictionNames = {
-            'B': 'B(enign)',
-            'D': 'D(amaging)',
-            'N': 'N(eutral)',
-            'T': 'T(olerated)'
-        };
-        for (let key in predictionNames) {
-            if (key === pred) {
-                name = predictionNames[key];
-            }
-        }
-        return name;
-    },
-
     // method to render a row of data for the conservation analysis table
     renderConservationRow: function(key, conservation, conservationStatic) {
         let rowName = conservationStatic._labels[key];
