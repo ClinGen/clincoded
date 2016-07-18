@@ -1141,18 +1141,6 @@
     }
 }
 
-/* FIXME: ** begin ** temp placeholder style. Will be removed. */
-.react-tabs .tab-panel {
-    .population li>div,
-    .computational li>div,
-    .functional li>div,
-    .segregation li>div,
-    .gene-specific li>div {
-        background: none;
-        margin: 0 15px 10px 0;
-    }
-}
-
 .wip {
     background-color: #ccc;
     border-radius: 4px;
