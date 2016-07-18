@@ -379,6 +379,40 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         );
     },
 
+    // Method to temporarily render other variant count in same codon and link out to clinvar
+    renderVariantCodon: function(variant, codon, hasClinVarData) {
+        if (variant && variant.clinvarVariantId) {
+            if (codon && hasClinVarData) {
+                if (parseInt(codon.count) > 1) {
+                    return (
+                        <dl className="inline-dl clearfix">
+                            <dt>Number of other variants in codon: <span className="condon-variant-count">{parseInt(codon.count)-1}</span></dt>
+                            <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">See data in ClinVar <i className="icon icon-external-link"></i></a>)</dd>
+                        </dl>
+                    );
+                } else {
+                    return (
+                        <dl className="inline-dl clearfix">
+                            <dd>Current variant is the only variant found at this codon in ClinVar.</dd>
+                        </dl>
+                    );
+                }
+            } else {
+                return (
+                    <dl className="inline-dl clearfix">
+                        <dd>ClinVar variant with no codon data. Search is unavailable.</dd>
+                    </dl>
+                );
+            }
+        } else {
+            return (
+                <dl className="inline-dl clearfix">
+                    <dd>Non-ClinVar variant. Search is unavailable.</dd>
+                </dl>
+            );
+        }
+    },
+
     render: function() {
         var conservationStatic = computationStatic.conservation, otherPredStatic = computationStatic.other_predictors, clingenPredStatic = computationStatic.clingen;
         var conservation = (this.state.computationObj && this.state.computationObj.conservation) ? this.state.computationObj.conservation : null;
@@ -639,16 +673,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     <div className="panel panel-info datasource-clinvar">
                         <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
                         <div className="panel-body">
-                            {this.state.hasClinVarData && codon ?
-                                <dl className="inline-dl clearfix">
-                                    <dt>Number of variants in codon: <span className="condon-variant-count">{codon.count}</span></dt>
-                                    <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">See data in ClinVar <i className="icon icon-external-link"></i></a>)</dd>
-                                </dl>
-                            :
-                                <dl className="inline-dl clearfix">
-                                    <dd>No ClinVar data was found for this variant.</dd>
-                                </dl>
-                            }
+                            {this.renderVariantCodon(variant, codon, this.state.hasClinVarData)}
                         </div>
                     </div>
                     {(this.props.data && this.state.interpretation) ?
