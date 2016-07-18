@@ -63,7 +63,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         updateInterpretationObj: React.PropTypes.func,
         protocol: React.PropTypes.string,
         ext_myVariantInfo: React.PropTypes.object,
-        ext_clinvarEutils: React.PropTypes.object,
         ext_clinVarEsearch: React.PropTypes.object,
         ext_bustamante: React.PropTypes.object
     },
@@ -100,26 +99,18 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     revel: {score_range: '0 to 1', score: null, prediction: 'higher score = higher pathogenicity', visible: true},
                     cftr: {score_range: '--', score: null, prediction: '--', visible: false}
                 }
-            },
-            ext_myVariantInfo: this.props.ext_myVariantInfo,
-            ext_clinvarEutils: this.props.ext_clinvarEutils,
-            ext_clinVarEsearch: this.props.ext_clinVarEsearch,
-            ext_bustamante: this.props.ext_bustamante
+            }
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretation: nextProps.interpretation});
+        // update data based on api call results
         if (nextProps.ext_myVariantInfo) {
-            this.setState({ext_myVariantInfo: nextProps.ext_myVariantInfo});
             this.parseOtherPredData(nextProps.ext_myVariantInfo);
             this.parseConservationData(nextProps.ext_myVariantInfo);
         }
-        if (nextProps.ext_clinvarEutils) {
-            this.setState({ext_clinvarEutils: nextProps.ext_clinvarEutils});
-        }
         if (nextProps.ext_clinVarEsearch) {
-            this.setState({ext_clinVarEsearch: nextProps.ext_clinVarEsearch});
             var codonObj = {};
             codonObj.count = nextProps.ext_clinVarEsearch.esearchresult.count;
             codonObj.term = nextProps.ext_clinVarEsearch.vci_term;
