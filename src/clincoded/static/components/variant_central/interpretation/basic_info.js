@@ -50,6 +50,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (nextProps.data && this.props.data) {
             this.parseData(nextProps.data);
         }
+        // update data based on api call results
         if (nextProps.ext_clinvarEutils) {
             this.parseClinVarEutils(nextProps.ext_clinvarEutils);
         }

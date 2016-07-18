@@ -91,10 +91,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     _tot: {ac: {}, gc: {}},
                     _extra: {}
                 }
-            },
-            ext_myVariantInfo: this.props.ext_myVariantInfo,
-            ext_ensemblVEP: this.props.ext_ensemblVEP,
-            ext_ensemblVariation: this.props.ext_ensemblVariation
+            }
         };
     },
 
@@ -108,22 +105,20 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
             this.setState({interpretation: nextProps.interpretation});
         }
-
+        // set desired CI if previous data for it exists
         this.getPrevSetDesiredCI(nextProps.interpretation);
+        // update data based on api call results
         if (nextProps.ext_myVariantInfo) {
-            this.setState({ext_myVariantInfo: nextProps.ext_myVariantInfo});
             this.parseExacData(nextProps.ext_myVariantInfo);
             this.parseEspData(nextProps.ext_myVariantInfo);
             this.calculateHighestMAF();
         }
         if (nextProps.ext_ensemblVEP) {
-            this.setState({ext_ensemblVEP: nextProps.ext_ensemblVEP});
             this.parseAlleleFrequencyData(nextProps.ext_ensemblVEP);
             this.parseGeneConstraintScores(nextProps.ext_ensemblVEP);
             this.calculateHighestMAF();
         }
         if (nextProps.ext_ensemblVariation) {
-            this.setState({ext_ensemblVariation: nextProps.ext_ensemblVariation});
             this.parseTGenomesData(nextProps.ext_ensemblVariation);
             this.calculateHighestMAF();
         }
