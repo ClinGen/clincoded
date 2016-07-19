@@ -111,6 +111,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'population' ? '' : ' hidden')}>
                         <CurationInterpretationPopulation data={variant} protocol={this.props.href_url.protocol}
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_ensemblVEP={this.state.ext_ensemblVEP}
                             ext_ensemblVariation={this.state.ext_ensemblVariation} />
