@@ -4,7 +4,6 @@ var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
-//var LocalStorageMixin = require('react-localstorage');
 var CurationInterpretationForm = require('./shared/form').CurationInterpretationForm;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
