@@ -18,7 +18,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
-        protocol: React.PropTypes.string
+        protocol: React.PropTypes.string,
+        ext_ensemblHgvsVEP: React.PropTypes.array,
+        ext_clinvarEutils: React.PropTypes.object
     },
 
     getInitialState: function() {
@@ -46,12 +48,17 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
     componentWillReceiveProps: function(nextProps) {
         if (nextProps.data && this.props.data) {
-            if (!this.state.hasRefseqData) {
-                this.fetchRefseqData();
-            }
-            if (!this.state.hasEnsemblData) {
-                this.fetchEnsemblData();
-            }
+            this.parseData(nextProps.data);
+        }
+        // update data based on api call results
+        if (nextProps.ext_ensemblHgvsVEP) {
+            this.setState({
+                hasEnsemblData: true,
+                ensembl_transcripts: nextProps.ext_ensemblHgvsVEP[0].transcript_consequences
+            });
+        }
+        if (nextProps.ext_clinvarEutils) {
+            this.parseClinVarEutils(nextProps.ext_clinvarEutils);
         }
     },
 
@@ -62,61 +69,47 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         });
     },
 
-    // Retrieve the variant data from NCBI REST API
-    fetchRefseqData: function() {
-        //var refseq_data = {};
-        var variant = this.props.data;
-        var url = this.props.protocol + external_url_map['ClinVarEutils'];
-        if (variant) {
-            if (variant.clinvarVariantId) {
-                this.setState({clinvar_id: variant.clinvarVariantId});
-                // Get ClinVar data via the parseClinvar method defined in parse-resources.js
-                this.getRestDataXml(url + variant.clinvarVariantId).then(xml => {
-                    // Passing 'true' option to invoke 'mixin' function
-                    // To extract more ClinVar data for 'Basic Information' tab
-                    var variantData = parseClinvar(xml, true);
-                    this.setState({
-                        hasRefseqData: true,
-                        clinvar_hgvs_names: this.parseHgvsNames(variantData.hgvsNames),
-                        nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
-                        protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
-                        molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
-                        sequence_location: variantData.allele.SequenceLocation,
-                        gene_symbol: variantData.gene.symbol
-                    });
-                    // Calling method to get uniprot id for LinkOut link
-                    this.getUniprotId(this.state.gene_symbol);
-                    // Calling method to identify nucleotide change, protein change and molecular consequence
-                    // Used for UI display in the Primary Transcript table
-                    this.getPrimaryTranscript(variantData.clinvarVariantTitle, this.state.nucleotide_change, this.state.protein_change, this.state.molecular_consequence);
-                }).catch(function(e) {
-                    console.log('RefSeq Fetch Error=: %o', e);
-                });
-            }
-            if (variant.carId) {
-                this.setState({car_id: variant.carId});
-            }
-            if (variant.dbSNPIds.length) {
-                this.setState({dbSNP_id: variant.dbSNPIds[0]});
-            }
-            // Extract genomic substring from HGVS name whose assembly is GRCh37 or GRCh38
-            // Both of "GRCh37" and "gRCh37" (same for GRCh38) instances are possibly present in the variant object
-            // FIXME: this GRCh vs gRCh needs to be reconciled in the data model and data import
-            var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
-            if (hgvs_GRCh37) {
-                this.setState({
-                    hgvs_GRCh37: hgvs_GRCh37,
-                    hasHgvsGRCh37: true
-                });
-            }
-            var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
-            if (hgvs_GRCh38) {
-                this.setState({
-                    hgvs_GRCh38: hgvs_GRCh38,
-                    hasHgvsGRCh38: true
-                });
-            }
+    parseData: function(variant) {
+        if (variant.clinvarVariantId) {
+            this.setState({clinvar_id: variant.clinvarVariantId});
         }
+        if (variant.carId) {
+            this.setState({car_id: variant.carId});
+        }
+        if (variant.dbSNPIds.length) {
+            this.setState({dbSNP_id: variant.dbSNPIds[0]});
+        }
+        var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
+        if (hgvs_GRCh37) {
+            this.setState({
+                hgvs_GRCh37: hgvs_GRCh37,
+                hasHgvsGRCh37: true
+            });
+        }
+        var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
+        if (hgvs_GRCh38) {
+            this.setState({
+                hgvs_GRCh38: hgvs_GRCh38,
+                hasHgvsGRCh38: true
+            });
+        }
+    },
+
+    parseClinVarEutils: function(variantData) {
+        this.setState({
+            hasRefseqData: true,
+            clinvar_hgvs_names: this.parseHgvsNames(variantData.hgvsNames),
+            nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
+            protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
+            molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
+            sequence_location: variantData.allele.SequenceLocation,
+            gene_symbol: variantData.gene.symbol
+        });
+        // Calling method to get uniprot id for LinkOut link
+        this.getUniprotId(this.state.gene_symbol);
+        // Calling method to identify nucleotide change, protein change and molecular consequence
+        // Used for UI display in the Primary Transcript table
+        this.getPrimaryTranscript(variantData.clinvarVariantTitle, variantData.RefSeqTranscripts.NucleotideChangeList, variantData.RefSeqTranscripts.ProteinChangeList, variantData.RefSeqTranscripts.MolecularConsequenceList);
     },
 
     // Return all non NC_ genomic hgvsNames in an array
@@ -138,11 +131,13 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (result && molecular_consequence.length) {
             var item = molecular_consequence.find((x) => x.HGVS === result.HGVS);
             // 'SO_terms' is defined via requiring external mapping file
-            var found = SO_terms.find((entry) => entry.SO_id === item.SOid);
-            if (found) {
-                SO_id_term = found.SO_term + ' ' + found.SO_id;
-            } else {
-                SO_id_term = '--';
+            if (item) {
+                var found = SO_terms.find((entry) => entry.SO_id === item.SOid);
+                if (found) {
+                    SO_id_term = found.SO_term + ' ' + found.SO_id;
+                } else {
+                    SO_id_term = '--';
+                }
             }
             // FIXME: temporarily use protein_change[0] due to lack of mapping
             // associated with nucleotide transcript in ClinVar data
@@ -154,39 +149,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             };
         }
         this.setState({primary_transcript: transcript});
-    },
-
-    // Retrieve variant data from Ensembl REST API
-    fetchEnsemblData: function() {
-        var variant = this.props.data;
-        if (variant) {
-            // Due to GRCh38 HGVS notations being used at Ensembl for their VEP API
-            // We are extracting genomic substring from HGVS name whose assembly is GRCh38
-            // Both of "GRCh38" and "gRCh38" instances are possibly present in the variant object
-            var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
-            if (hgvs_GRCh38) {
-                var NC_genomic = hgvs_GRCh38.substr(0, hgvs_GRCh38.indexOf(':'));
-                // 'genomic_chr_mapping' is defined via requiring external mapping file
-                var found = genomic_chr_mapping.GRCh38.find((entry) => entry.GenomicRefSeq === NC_genomic);
-                // Can't simply filter alpha letters due to the presence of 'chrX' and 'chrY'
-                var chrosome = (found.ChrFormat) ? found.ChrFormat.substr(3) : '';
-                // Format hgvs_notation for vep/:species/hgvs/:hgvs_notation api
-                var hgvs_notation = chrosome + hgvs_GRCh38.slice(hgvs_GRCh38.indexOf(':'));
-                if (hgvs_notation) {
-                    if (hgvs_notation.indexOf('del') > 0) {
-                        hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
-                    }
-                    this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
-                        this.setState({
-                            hasEnsemblData: true,
-                            ensembl_transcripts: response[0].transcript_consequences
-                        });
-                    }).catch(function(e) {
-                        console.log('Ensembl Fetch Error=: %o', e);
-                    });
-                }
-            }
-        }
     },
 
     //Render Ensembl transcripts table rows
