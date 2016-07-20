@@ -4,11 +4,10 @@ var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../globals');
 var RestMixin = require('../rest').RestMixin;
-var LocalStorageMixin = require('react-localstorage');
 
 // Display in-progress or provisional interpretations associated with variant
 var CurationRecordCurator = module.exports.CurationRecordCurator = React.createClass({
-    mixins: [RestMixin, LocalStorageMixin],
+    mixins: [RestMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
