@@ -87,7 +87,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     _tot: {ac: {}, gc: {}},
                     _extra: {}
                 }
-            }
+            },
+            populationObjMatch: true
         };
     },
 
@@ -109,6 +110,26 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             }
             if (!this.state.hasTGenomesData) {
                 this.fetchExternalData('Ensembl');
+            }
+        }
+
+        if (this.state.interpretation && this.state.interpretation.evaluations) {
+            this.compareInterpretations(this.state.interpretation.evaluations, this.state.populationObj);
+        }
+    },
+
+    compareInterpretations: function(savedEvals, newData) {
+        console.log('firing compareInterpretations()');
+
+        for (var i = 0; i < savedEvals.length; i++) {
+            if (savedEvals[i].criteria === 'BA1') {
+                console.log(savedEvals[i].population.populationData);
+                console.log(newData);
+                let match = _.isEqual(savedEvals[i].population.populationData, newData);
+                console.log("match:");
+                console.log(match);
+                this.setState({populationObjMatch: match});
+                break;
             }
         }
     },
@@ -584,6 +605,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
         var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
+        var populationObjMatch = this.state.populationObjMatch;
 
         return (
             <div className="variant-interpretation population">
