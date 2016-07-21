@@ -59,7 +59,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         data: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
-        protocol: React.PropTypes.string
+        protocol: React.PropTypes.string,
+        ext_myVariantInfo: React.PropTypes.object,
+        ext_bustamante: React.PropTypes.object,
+        ext_clinVarEsearch: React.PropTypes.object
     },
 
     getInitialState: function() {
@@ -100,16 +103,20 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretation: nextProps.interpretation});
-        if (nextProps.data && this.props.data) {
-            if (!this.state.hasConservationData || !this.state.hasOtherPredData) {
-                this.fetchExternalData('myVariantInfo');
-            }
-            if (!this.state.hasClinVarData) {
-                this.fetchExternalData('clinvar');
-            }
-            if (!this.state.hasBustamanteData) {
-                this.fetchExternalData('bustemante');
-            }
+        // update data based on api call results
+        if (nextProps.ext_myVariantInfo) {
+            this.parseOtherPredData(nextProps.ext_myVariantInfo);
+            this.parseConservationData(nextProps.ext_myVariantInfo);
+        }
+        if (nextProps.ext_bustamante) {
+            this.parseClingenPredData(nextProps.ext_bustamante);
+        }
+        if (nextProps.ext_clinVarEsearch) {
+            var codonObj = {};
+            codonObj.count = nextProps.ext_clinVarEsearch.esearchresult.count;
+            codonObj.term = nextProps.ext_clinVarEsearch.vci_term;
+            codonObj.symbol = nextProps.ext_clinVarEsearch.vci_symbol;
+            this.setState({hasClinVarData: true, codonObj: codonObj});
         }
     },
 
@@ -120,95 +127,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             hasClinVarData: false,
             hasBustamanteData: false
         });
-    },
-
-    // Retrieve predictors data from myvariant.info
-    fetchExternalData: function(source) {
-        var variant = this.props.data;
-        var url = this.props.protocol + external_url_map['MyVariantInfo'];
-        if (variant) {
-            // Extract only the number portion of the dbSNP id
-            var numberPattern = /\d+/g;
-            var rsid = (variant.dbSNPIds && variant.dbSNPIds.length > 0) ? variant.dbSNPIds[0].match(numberPattern) : null;
-            // Extract genomic substring from HGVS name whose assembly is GRCh37
-            // Both of "GRCh37" and "gRCh37" instances are possibly present in the variant object
-            var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
-            var NC_genomic = hgvs_GRCh37 ? hgvs_GRCh37.substr(0, hgvs_GRCh37.indexOf(':')) : null;
-            // 'genomic_chr_mapping' is defined via requiring external mapping file
-            var found = genomic_chr_mapping.GRCh37.find((entry) => entry.GenomicRefSeq === NC_genomic);
-            // Format variant_id for use of myvariant.info REST API
-            var variant_id = (hgvs_GRCh37 && found) ? found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':')) : null;
-            if (variant_id && variant_id.indexOf('del') > 0) {
-                variant_id = variant_id.substring(0, variant_id.indexOf('del') + 3);
-            }
-            if (source === 'myVariantInfo') {
-                if (variant_id) {
-                    this.getRestData(url + variant_id).then(response => {
-                        // Calling methods to update global object with predictors data
-                        // FIXME: Need to create a new copy of the global object with new data
-                        // while leaving the original object with pre-existing data
-                        // for comparison of any potential changed values
-                        this.parseOtherPredData(response);
-                        this.parseConservationData(response);
-                    }).catch(function(e) {
-                        console.log('MyVariant Fetch Error=: %o', e);
-                    });
-                }
-            } else if (source === 'clinvar') {
-                if (variant.clinvarVariantId) {
-                    // Get ClinVar data via the parseClinvar method defined in parse-resources.js
-                    this.getRestDataXml(this.props.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
-                        // Passing 'true' option to invoke 'mixin' function
-                        // To extract more ClinVar data for codon data
-                        var variantData = parseClinvar(xml, true);
-                        var clinVarObj = {};
-                        clinVarObj.protein_change = variantData.allele.ProteinChange;
-                        clinVarObj.gene_symbol = variantData.gene.symbol;
-                        if (clinVarObj) {
-                            return Promise.resolve(clinVarObj);
-                        }
-                    }).then(clinvar => {
-                        if (clinvar.protein_change) {
-                            var term = clinvar.protein_change.substr(0, clinvar.protein_change.length-1);
-                            var symbol = clinvar.gene_symbol;
-                            this.getRestData(this.props.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
-                                var codonObj = {};
-                                codonObj.count = result.esearchresult.count;
-                                codonObj.term = term;
-                                codonObj.symbol = symbol;
-                                this.setState({hasClinVarData: true, codonObj: codonObj});
-                            });
-                        }
-                    }).catch(function(e) {
-                        console.log('ClinVar Fetch Error=: %o', e);
-                    });
-                }
-            } else if (source === 'bustemante') {
-                var hgvsObj = {};
-                if (variant_id) {
-                    this.getRestData(url + variant_id).then(response => {
-                        if (response.dbnsfp) {
-                            hgvsObj.chrom = (response.dbnsfp.chrom) ? response.dbnsfp.chrom : null;
-                            hgvsObj.pos = (response.dbnsfp.hg19.start) ? response.dbnsfp.hg19.start : null;
-                            hgvsObj.alt = (response.dbnsfp.alt) ? response.dbnsfp.alt : null;
-                            return Promise.resolve(hgvsObj);
-                        } else if (response.clinvar) {
-                            hgvsObj.chrom = (response.clinvar.chrom) ? response.clinvar.chrom : null;
-                            hgvsObj.pos = (response.clinvar.hg19.start) ? response.clinvar.hg19.start : null;
-                            hgvsObj.alt = (response.clinvar.alt) ? response.clinvar.alt : null;
-                            return Promise.resolve(hgvsObj);
-                        }
-                    }).then(data => {
-                        this.getRestData('https:' + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
-                            // Calling method to update global object with bustemante data (e.g. revel)
-                            this.parseClingenPredData(result);
-                        });
-                    }).catch(function(e) {
-                        console.log('MyVariant Fetch Error=: %o', e);
-                    });
-                }
-            }
-        }
     },
 
     // Method to assign clingen predictors data to global computation object

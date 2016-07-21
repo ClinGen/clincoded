@@ -173,7 +173,8 @@ var AssociateDisease = React.createClass({
     // When the form is submitted...
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-
+        // Invoke button progress indicator
+        this.setState({submitResourceBusy: true});
         // Get values from form and validate them
         this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
         if (this.validateForm()) {
@@ -208,7 +209,14 @@ var AssociateDisease = React.createClass({
                         return this.putRestData('/interpretation/' + this.props.interpretation.uuid, interpretationObj).then(result => {
                             this.props.updateInterpretationObj();
                             this.props.updateParentState();
-                            this.props.closeModal();
+                            this.setState({submitResourceBusy: false});
+                            // Need 'submitResourceBusy' state to proceed closing modal
+                            return Promise.resolve(this.state.submitResourceBusy);
+                        }).then(submitState => {
+                            // Close modal after 'submitResourceBusy' is completed
+                            if (submitState !== true) {
+                                this.props.closeModal();
+                            }
                         });
                     }
                 });
