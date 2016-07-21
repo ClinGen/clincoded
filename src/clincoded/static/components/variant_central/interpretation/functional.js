@@ -26,8 +26,9 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                 <ul className="section-functional-interpretation clearfix">
                     <li className="col-xs-12 gutter-exc">
                         <div>
-                            <h4>Functional Interpretation</h4>
-                            <div>Functional Data placeholder</div>
+                            <span className="wip">IN PROGRESS</span>
+                            <br /><br />
+                            <div>Experimental evidence associated with this variant as part of gene curation will appear here. Also included will be the ability to add additional functional evidence for this variant.</div>
                         </div>
                     </li>
                 </ul>

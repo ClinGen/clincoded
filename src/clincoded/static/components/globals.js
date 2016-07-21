@@ -167,6 +167,7 @@ module.exports.external_url_map = {
     'ClinVar': 'http://www.ncbi.nlm.nih.gov/clinvar/',
     'ClinVarSearch': 'http://www.ncbi.nlm.nih.gov/clinvar/variation/',
     'ClinVarEutils': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=',
+    'ClinVarEsearch': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?',
     'HPO': 'http://compbio.charite.de/hpoweb/showterm?id=',
     'HPOBrowser': 'http://compbio.charite.de/hpoweb/showterm?id=HP:0000118',
     'Uberon': 'http://uberon.github.io/',
@@ -182,11 +183,26 @@ module.exports.external_url_map = {
     'CAR-test': 'http://reg.test.genome.network/site/registry',
     'CARallele-test': '//reg.test.genome.network/allele/',
     'EnsemblVEP': '//rest.ensembl.org/vep/human/id/',
+    'EnsemblHgvsVEP': '//rest.ensembl.org/vep/human/hgvs/',
     'EnsemblVariation': '//rest.ensembl.org/variation/human/',
+    'EnsemblPopulationPage': 'http://ensembl.org/Homo_sapiens/Variation/Population?db=core;v=',
     'UCSCGenomeBrowser': '//genome.ucsc.edu/cgi-bin/hgTracks',
     'NCBIVariationViewer': '//www.ncbi.nlm.nih.gov/variation/view/',
     'MyVariantInfo': '//myvariant.info/v1/variant/',
-    'EXAC': '//exac.broadinstitute.org/variant/'
+    'EXAC': '//exac.broadinstitute.org/variant/',
+    'EXACHome': 'http://exac.broadinstitute.org/',
+    'ExACGene': 'http://exac.broadinstitute.org/gene/',
+    'ESPHome': 'http://evs.gs.washington.edu/EVS/',
+    '1000GenomesHome': 'http://browser.1000genomes.org/',
+    'mutalyzer': 'https://mutalyzer.nl/',
+    'mutalyzerSnpConverter': 'https://mutalyzer.nl/snp-converter',
+    'UCSCGRCh38': 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr',
+    'UCSCGRCh37': 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr',
+    'VariationViewerGRCh38': 'https://www.ncbi.nlm.nih.gov/variation/view/?chr=',
+    'VariationViewerGRCh37': 'https://www.ncbi.nlm.nih.gov/variation/view/?chr=',
+    'EnsemblGRCh38': 'http://uswest.ensembl.org/Homo_sapiens/Location/View?db=core;r=',
+    'EnsemblGRCh37': 'http://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r=',
+    'Bustamante': '//predictvar.bustamante-lab.net/variant/position/'
 };
 
 

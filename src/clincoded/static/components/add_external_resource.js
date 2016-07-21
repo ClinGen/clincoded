@@ -270,7 +270,7 @@ var AddResourceIdModal = React.createClass({
                         <p>&nbsp;<br />{this.state.txtResourceResponse}</p>
                         {this.renderResourceResult()}
                     </div>
-                    : <span><p className="alert alert-info">{this.state.txtHelpText}</p></span>}
+                    : this.state.txtHelpText}
                 </div>
                 <div className='modal-footer'>
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
@@ -314,7 +314,12 @@ function clinvarTxt(field, extra) {
             txt = 'Retrieve from ClinVar';
             break;
         case 'helpText':
-            txt = <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>;
+            txt =
+                <span>
+                    <p className="alert alert-info">
+                        <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>
+                    </p>
+                </span>;
             break;
         case 'resourceResponse':
             txt = "Below are the data from ClinVar for the VariationID you submitted. Select \"" + extra + "\" below if it is the correct variant, otherwise revise your search above:";
@@ -382,7 +387,7 @@ function clinvarRenderResourceResult() {
                         <span className="col-sm-5 col-md-3 control-label"><label>ClinVar Variant ID</label></span>
                         <span className="col-sm-7 col-md-9 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
                     </div>
-                    {this.state.tempResource.hgvsNames.others && this.state.tempResource.hgvsNames.others.length > 0 ?
+                    {this.state.tempResource.hgvsNames ?
                         <div className="row">
                             <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
                             <span className="col-sm-7 col-md-9 text-no-input">
@@ -451,7 +456,15 @@ function carTxt(field, extra) {
             txt = 'Retrieve from ClinGen Allele Registry';
             break;
         case 'helpText':
-            txt = <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323</a>).</span>;
+            txt =
+                <span>
+                    <p className="alert alert-info">
+                        <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323</a>).</span>
+                    </p>
+                    <p className="alert alert-warning">
+                        <span>Note: Please register your allele with the ClinGen Allele Registry using a <strong>GRCh37</strong> HGVS representation in order to return all possible associated evidence.</span>
+                    </p>
+                </span>;
             break;
         case 'resourceResponse':
             txt = "Below are the data from the ClinGen Allele Registry for the CA ID you submitted. Select \"" + extra + "\" below if it is the correct variant, otherwise revise your search above:";
@@ -537,7 +550,7 @@ function carRenderResourceResult() {
                             <span className="col-sm-7 col-md-9 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
                         </div>
                     : null}
-                    {this.state.tempResource.hgvsNames.others && this.state.tempResource.hgvsNames.others.length > 0 ?
+                    {this.state.tempResource.hgvsNames ?
                         <div className="row">
                             <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
                             <span className="col-sm-7 col-md-9 text-no-input">

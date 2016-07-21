@@ -167,7 +167,7 @@ class Variant(Item):
         return paths_filtered_by_status(request, experimental_associated)
 
     @calculated_property(schema={
-        "title": "Variant Representation",
+        "title": "Variant ID",
         "type": "string"
     })
     def variant_identifier(self, clinvarVariantId='', carId='', otherDescription=''):
@@ -1037,39 +1037,17 @@ class Interpretation(Item):
         return ''
 
     @calculated_property(schema={
-        "title": "Transcripts",
-        "type": "string",
-    })
-    def interpretation_transcripts(self, transcripts=[]):
-        if len(transcripts) == 0:
-            return ''
-        return len(transcripts)
-
-    @calculated_property(schema={
-        "title": "Proteins",
-        "type": "string",
-    })
-    def interpretation_proteins(self, proteins=[]):
-        if len(proteins) == 0:
-            return ''
-        return len(proteins)
-
-    @calculated_property(schema={
         "title": "Evaluations",
-        "type": "string",
+        "type": "number",
     })
     def evaluation_count(self, evaluations=[]):
-        if len(evaluations) == 0:
-            return ''
         return len(evaluations)
 
     @calculated_property(schema={
         "title": "Provisionals",
-        "type": "string",
+        "type": "number",
     })
     def provisional_count(self, provisional_variant=[]):
-        if len(provisional_variant) == 0:
-            return ''
         return len(provisional_variant)
 
 

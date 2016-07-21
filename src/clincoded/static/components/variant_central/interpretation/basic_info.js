@@ -5,8 +5,9 @@ var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
-//var LocalStorageMixin = require('react-localstorage');
 var SO_terms = require('./mapping/SO_term.json');
+var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+var externalLinks = require('./shared/externalLinks');
 
 var external_url_map = globals.external_url_map;
 var dbxref_prefix_map = globals.dbxref_prefix_map;
@@ -17,13 +18,16 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
-        protocol: React.PropTypes.string
+        protocol: React.PropTypes.string,
+        ext_ensemblHgvsVEP: React.PropTypes.array,
+        ext_clinvarEutils: React.PropTypes.object
     },
 
     getInitialState: function() {
         return {
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
+            clinvar_hgvs_names: [],
             dbSNP_id: null,
             nucleotide_change: [],
             molecular_consequence: [],
@@ -33,6 +37,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             primary_transcript: {},
             hgvs_GRCh37: null,
             hgvs_GRCh38: null,
+            hasHgvsGRCh37: false,
+            hasHgvsGRCh38: false,
             gene_symbol: null,
             uniprot_id: null,
             hasRefseqData: false,
@@ -42,12 +48,17 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
     componentWillReceiveProps: function(nextProps) {
         if (nextProps.data && this.props.data) {
-            if (!this.state.hasRefseqData) {
-                this.fetchRefseqData();
-            }
-            if (!this.state.hasEnsemblData) {
-                this.fetchEnsemblData();
-            }
+            this.parseData(nextProps.data);
+        }
+        // update data based on api call results
+        if (nextProps.ext_ensemblHgvsVEP) {
+            this.setState({
+                hasEnsemblData: true,
+                ensembl_transcripts: nextProps.ext_ensemblHgvsVEP[0].transcript_consequences
+            });
+        }
+        if (nextProps.ext_clinvarEutils) {
+            this.parseClinVarEutils(nextProps.ext_clinvarEutils);
         }
     },
 
@@ -58,46 +69,58 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         });
     },
 
-    // Retrieve the variant data from NCBI REST API
-    fetchRefseqData: function() {
-        //var refseq_data = {};
-        var variant = this.props.data;
-        var url = this.props.protocol + external_url_map['ClinVarEutils'];
-        if (variant) {
-            var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
-            // Extract genomic substring from HGVS name whose assembly is GRCh37 or GRCh38
-            // Both of "GRCh37" and "gRCh37" (same for GRCh38) instances are possibly present in the variant object
-            var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
-            var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
+    parseData: function(variant) {
+        if (variant.clinvarVariantId) {
+            this.setState({clinvar_id: variant.clinvarVariantId});
+        }
+        if (variant.carId) {
+            this.setState({car_id: variant.carId});
+        }
+        if (variant.dbSNPIds.length) {
+            this.setState({dbSNP_id: variant.dbSNPIds[0]});
+        }
+        var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
+        if (hgvs_GRCh37) {
             this.setState({
-                clinvar_id: clinVarId,
-                car_id: variant.carId,
-                dbSNP_id: variant.dbSNPIds[0],
                 hgvs_GRCh37: hgvs_GRCh37,
-                hgvs_GRCh38: hgvs_GRCh38,
-            });
-            // Get ClinVar data via the parseClinvar method defined in parse-resources.js
-            this.getRestDataXml(url + clinVarId).then(xml => {
-                // Passing 'true' option to invoke 'mixin' function
-                // To extract more ClinVar data for 'Basic Information' tab
-                var variantData = parseClinvar(xml, true);
-                this.setState({
-                    hasRefseqData: true,
-                    nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
-                    protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
-                    molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
-                    sequence_location: variantData.allele.SequenceLocation,
-                    gene_symbol: variantData.gene.symbol
-                });
-                // Calling method to get uniprot id for LinkOut link
-                this.getUniprotId(this.state.gene_symbol);
-                // Calling method to identify nucleotide change, protein change and molecular consequence
-                // Used for UI display in the Primary Transcript table
-                this.getPrimaryTranscript(variantData.clinvarVariantTitle, this.state.nucleotide_change, this.state.protein_change, this.state.molecular_consequence);
-            }).catch(function(e) {
-                console.log('RefSeq Fetch Error=: %o', e);
+                hasHgvsGRCh37: true
             });
         }
+        var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
+        if (hgvs_GRCh38) {
+            this.setState({
+                hgvs_GRCh38: hgvs_GRCh38,
+                hasHgvsGRCh38: true
+            });
+        }
+    },
+
+    parseClinVarEutils: function(variantData) {
+        this.setState({
+            hasRefseqData: true,
+            clinvar_hgvs_names: this.parseHgvsNames(variantData.hgvsNames),
+            nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
+            protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
+            molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
+            sequence_location: variantData.allele.SequenceLocation,
+            gene_symbol: variantData.gene.symbol
+        });
+        // Calling method to get uniprot id for LinkOut link
+        this.getUniprotId(this.state.gene_symbol);
+        // Calling method to identify nucleotide change, protein change and molecular consequence
+        // Used for UI display in the Primary Transcript table
+        this.getPrimaryTranscript(variantData.clinvarVariantTitle, variantData.RefSeqTranscripts.NucleotideChangeList, variantData.RefSeqTranscripts.ProteinChangeList, variantData.RefSeqTranscripts.MolecularConsequenceList);
+    },
+
+    // Return all non NC_ genomic hgvsNames in an array
+    parseHgvsNames: function(hgvsNames) {
+        var hgvs_names = [];
+        if (hgvsNames) {
+            if (hgvsNames.others) {
+                hgvs_names = hgvsNames.others;
+            }
+        }
+        return hgvs_names;
     },
 
     // Create primary transcript object
@@ -108,8 +131,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (result && molecular_consequence.length) {
             var item = molecular_consequence.find((x) => x.HGVS === result.HGVS);
             // 'SO_terms' is defined via requiring external mapping file
-            var found = SO_terms.find((entry) => entry.SO_id === item.SOid);
-            SO_id_term = found.SO_term + ' ' + found.SO_id;
+            if (item) {
+                var found = SO_terms.find((entry) => entry.SO_id === item.SOid);
+                if (found) {
+                    SO_id_term = found.SO_term + ' ' + found.SO_id;
+                } else {
+                    SO_id_term = '--';
+                }
+            }
             // FIXME: temporarily use protein_change[0] due to lack of mapping
             // associated with nucleotide transcript in ClinVar data
             var protein_hgvs = (typeof protein_change !== 'undefined' && protein_change.length) ? protein_change[0].HGVS : '--';
@@ -122,21 +151,19 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         this.setState({primary_transcript: transcript});
     },
 
-    // Retrieve variant data from Ensembl REST API
-    fetchEnsemblData: function() {
-        var variant = this.props.data;
-        if (variant) {
-            // Extract only the number portion of the dbSNP id
-            var numberPattern = /\d+/g;
-            var rsid = (variant.dbSNPIds) ? variant.dbSNPIds[0].match(numberPattern) : '';
-            this.getRestData(this.props.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
-                this.setState({
-                    hasEnsemblData: true,
-                    ensembl_transcripts: response[0].transcript_consequences
-                });
-            }).catch(function(e) {
-                console.log('Ensembl Fetch Error=: %o', e);
-            });
+    //Render Ensembl transcripts table rows
+    renderEnsemblData: function(item, key) {
+        // Only if nucleotide transcripts exist
+        if (item.hgvsc) {
+            return (
+                <tr key={key}>
+                    <td><span className="title-ellipsis" title={item.hgvsc}>{item.hgvsc}</span></td>
+                    <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
+                    <td>
+                        {(item.consequence_terms) ? this.handleSOTerms(item.consequence_terms) : '--'}
+                    </td>
+                </tr>
+            );
         }
     },
 
@@ -229,90 +256,138 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var GRCh37 = this.state.hgvs_GRCh37;
         var GRCh38 = this.state.hgvs_GRCh38;
         var primary_transcript = this.state.primary_transcript;
+        var clinvar_hgvs_names = this.state.clinvar_hgvs_names;
         var self = this;
+
+        var links_38 = null;
+        var links_37 = null;
+        if (GRCh38) {
+            links_38 = externalLinks.setContextLinks(GRCh38, 'GRCh38');
+        }
+        if (GRCh37) {
+            links_37 = externalLinks.setContextLinks(GRCh37, 'GRCh37');
+        }
+
 
         return (
             <div className="variant-interpretation basic-info">
                 <div className="bs-callout bs-callout-info clearfix">
-                    <div className="bs-callout-content-container">
-                        <h4>IDs</h4>
-                        <ul>
-                            {(clinvar_id) ? <li><span>ClinVar Variation ID: {clinvar_id}</span></li> : null}
-                            {(car_id) ? <li><span>ClinGen Allele ID: {car_id}</span></li> : null}
-                            {(dbSNP_id) ? <li><span>dbSNP ID: {dbSNP_id}</span></li> : null}
-                        </ul>
-                    </div>
-                    {(GRCh37 || GRCh38) ?
-                    <div className="bs-callout-content-container">
+                    <div className="bs-callout-content-container-fullwidth">
                         <h4>Genomic</h4>
                         <ul>
-                            {(GRCh38) ? <li><span>{GRCh38 + ' (GRCh38)'}</span></li> : null}
-                            {(GRCh37) ? <li><span>{GRCh37 + ' (GRCh37)'}</span></li> : null}
+                            {(GRCh38) ? <li><span className="title-ellipsis title-ellipsis-short">{GRCh38}</span><span> (GRCh38)</span></li> : null}
+                            {(GRCh37) ? <li><span className="title-ellipsis title-ellipsis-short">{GRCh37}</span><span> (GRCh37)</span></li> : null}
                         </ul>
                     </div>
-                    : null}
                 </div>
 
                 <div className="panel panel-info">
-                    <div className="panel-heading"><h3 className="panel-title">Primary Transcript</h3></div>
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Nucleotide Change</th>
-                                <th>Protein Change</th>
-                                <th>Molecular Consequence</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    {(primary_transcript) ? primary_transcript.nucleotide : '--'}
-                                </td>
-                                <td>
-                                    {(primary_transcript) ? primary_transcript.protein : '--'}
-                                </td>
-                                <td>
-                                    {(primary_transcript) ? primary_transcript.molecular : '--'}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div className="panel-heading"><h3 className="panel-title">ClinVar Primary Transcript</h3></div>
+                    {(clinvar_id && primary_transcript) ?
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Nucleotide Change</th>
+                                    <th>Protein Change</th>
+                                    <th>Molecular Consequence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <span className="title-ellipsis">{(primary_transcript) ? primary_transcript.nucleotide : '--'}</span>
+                                    </td>
+                                    <td>
+                                        {(primary_transcript) ? primary_transcript.protein : '--'}
+                                    </td>
+                                    <td>
+                                        {(primary_transcript) ? primary_transcript.molecular : '--'}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        :
+                        <table className="table"><tbody><tr><td>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</td></tr></tbody></table>
+                    }
                 </div>
 
                 <div className="panel panel-info">
-                    <div className="panel-heading"><h3 className="panel-title">All Transcripts</h3></div>
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Nucleotide Change</th>
-                                <th>Protein Change</th>
-                                <th>Molecular Consequence</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {ensembl_data.map(function(item, i) {
-                                return (
-                                    <tr key={i}>
-                                        <td>{item.hgvsc}</td>
-                                        <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
-                                        <td>
-                                            {(item.consequence_terms) ? self.handleSOTerms(item.consequence_terms) : '--'}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                    <div className="panel-heading"><h3 className="panel-title">ClinVar Transcripts</h3></div>
+                    {(clinvar_id && clinvar_hgvs_names) ?
+                        <table className="table">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <ul>
+                                            {clinvar_hgvs_names.map(function(name, index) {
+                                                return <li key={index}><span className="title-ellipsis">{name}</span></li>;
+                                            })}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        :
+                        <table className="table"><tbody><tr><td>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</td></tr></tbody></table>
+                    }
+                </div>
+
+                <div className="panel panel-info">
+                    <div className="panel-heading"><h3 className="panel-title">Ensembl Transcripts</h3></div>
+                    {(this.state.hasHgvsGRCh38 && GRCh38) ?
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Nucleotide Change</th>
+                                    <th>Protein Change</th>
+                                    <th>Molecular Consequence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {ensembl_data.map(function(item, i) {
+                                    return (self.renderEnsemblData(item, i));
+                                })}
+                            </tbody>
+                        </table>
+                        :
+                         <table className="table"><tbody><tr><td>No data was found for this allele in Ensembl. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank">Search Ensembl</a> for this variant.</td></tr></tbody></table>
+                    }
                 </div>
 
                 <div className="panel panel-info">
                     <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
                     <div className="panel-body">
                         <dl className="inline-dl clearfix">
-                            <dd>Variation Viewer [<a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh38')} target="_blank" title={'Variation Viewer page for ' + GRCh38 + ' in a new window'}>GRCh38</a> - <a href={this.variationViewerURL(sequence_location, gene_symbol, 'GRCh37')} target="_blank" title={'Variation Viewer page for ' + GRCh37 + ' in a new window'}>GRCh37</a>]</dd>
-                            <dd>Ensembl Browser [<a href={dbxref_prefix_map['ENSEMBL'] + this.getGeneId(ensembl_data)} target="_blank" title={'Ensembl Browser page for ' + this.getGeneId(ensembl_data) + ' in a new window'}>GRCh38</a>]</dd>
-                            <dd>UCSC [<a href={this.ucscViewerURL(sequence_location, 'hg38', 'GRCh38')} target="_blank" title={'UCSC Genome Browser for ' + GRCh38 + ' in a new window'}>GRCh38/hg38</a> - <a href={this.ucscViewerURL(sequence_location, 'hg19', 'GRCh37')} target="_blank" title={'UCSC Genome Browser for ' + GRCh37 + ' in a new window'}>GRCh37/hg19</a>]</dd>
-                            <dd><a href={dbxref_prefix_map['UniProtKB'] + uniprot_id} target="_blank" title={'UniProtKB page for ' + uniprot_id + ' in a new window'}>UniProtKB</a></dd>
+                            {(links_38 || links_37) ?
+                                <dd>UCSC [
+                                    {links_38 ? <a href={links_38.ucsc_url_38} target="_blank" title={'UCSC Genome Browser for ' + GRCh38 + ' in a new window'}>GRCh38/hg38</a> : null }
+                                    {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                    {links_37 ? <a href={links_37.ucsc_url_37} target="_blank" title={'UCSC Genome Browser for ' + GRCh37 + ' in a new window'}>GRCh37/hg19</a> : null }
+                                    ]
+                                </dd>
+                                :
+                                null
+                            }
+                            {(links_38 || links_37) ?
+                                <dd>Variation Viewer [
+                                    {links_38 ? <a href={links_38.viewer_url_38} target="_blank" title={'Variation Viewer page for ' + GRCh38 + ' in a new window'}>GRCh38</a> : null }
+                                    {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                    {links_37 ? <a href={links_37.viewer_url_37} target="_blank" title={'Variation Viewer page for ' + GRCh37 + ' in a new window'}>GRCh37</a> : null }
+                                    ]
+                                </dd>
+                                :
+                                null
+                            }
+                            {(links_38 || links_37) ?
+                                <dd>Ensembl Browser [
+                                    {links_38 ? <a href={links_38.ensembl_url_38} target="_blank" title={'Ensembl Browser page for ' + GRCh38 + ' in a new window'}>GRCh38</a> : null }
+                                    {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                    {links_37 ? <a href={links_37.ensembl_url_37} target="_blank" title={'Ensembl Browser page for ' + GRCh37 + ' in a new window'}>GRCh37</a> : null }
+                                    ]
+                                </dd>
+                                :
+                                null
+                            }
                         </dl>
                     </div>
                 </div>
