@@ -130,16 +130,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
-    compareExternalDatas: function(newData, savedEvals) {
-        for (var i in savedEvals) {
-            if (['BA1', 'PM2', 'BS1'].indexOf(savedEvals[i].criteria) > -1) {
-                var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].population.populationData);
-                this.setState({populationObjDiff: tempCompare[0], populationObjDiffFlag: tempCompare[1]});
-                break;
-            }
-        }
-    },
-
     componentWillUnmount: function() {
         this.setState({
             hasExacData: false,
@@ -157,6 +147,16 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             return float.toFixed(5) + '';
         } else {
             return float.toString();
+        }
+    },
+
+    compareExternalDatas: function(newData, savedEvals) {
+        for (var i in savedEvals) {
+            if (['BA1', 'PM2', 'BS1'].indexOf(savedEvals[i].criteria) > -1) {
+                var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].population.populationData);
+                this.setState({populationObjDiff: tempCompare[0], populationObjDiffFlag: tempCompare[1]});
+                break;
+            }
         }
     },
 
