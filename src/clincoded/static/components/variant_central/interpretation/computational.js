@@ -1,7 +1,5 @@
 'use strict';
 var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
@@ -369,28 +367,28 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 if (parseInt(codon.count) > 1) {
                     return (
                         <dl className="inline-dl clearfix">
-                            <dt>Number of other variants in codon: <span className="condon-variant-count">{parseInt(codon.count)-1}</span></dt>
-                            <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">See data in ClinVar <i className="icon icon-external-link"></i></a>)</dd>
+                            <dt>Additional ClinVar variants found in the same codon: <span className="condon-variant-count">{parseInt(codon.count)-1}</span></dt>
+                            <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">Search ClinVar for variants in this codon <i className="icon icon-external-link"></i></a>)</dd>
                         </dl>
                     );
                 } else {
                     return (
                         <dl className="inline-dl clearfix">
-                            <dd>Current variant is the only variant found at this codon in ClinVar.</dd>
+                            <dd>The current variant is the only variant found at this codon in ClinVar.</dd>
                         </dl>
                     );
                 }
             } else {
                 return (
                     <dl className="inline-dl clearfix">
-                        <dd>ClinVar variant with no codon data. Search is unavailable.</dd>
+                        <dd>This ClinVar variant is in a non-coding region.</dd>
                     </dl>
                 );
             }
         } else {
             return (
                 <dl className="inline-dl clearfix">
-                    <dd>Non-ClinVar variant. Search is unavailable.</dd>
+                    <dd>ClinVar search for this variant is currently not available. <span className="wip">IN PROGRESS</span></dd>
                 </dl>
             );
         }
