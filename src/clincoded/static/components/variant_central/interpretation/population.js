@@ -92,7 +92,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     _extra: {}
                 }
             },
-            populationObjMatch: true
+            populationObjDiff: null,
+            populationObjDiffFlag: true
         };
     },
 
@@ -125,19 +126,15 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
 
         if (this.state.interpretation && this.state.interpretation.evaluations) {
-            this.compareInterpretations(this.state.populationObj, this.state.interpretation.evaluations);
+            this.compareExternalDatas(this.state.populationObj, this.state.interpretation.evaluations);
         }
     },
 
-    compareInterpretations: function(newData, savedEvals) {
-        console.log('firing compareInterpretations()');
-
-        for (var i = 0; i < savedEvals.length; i++) {
-            if (savedEvals[i].criteria === 'BA1') {
-                //console.log(savedEvals[i].population.populationData);
-                //console.log(newData);
+    compareExternalDatas: function(newData, savedEvals) {
+        for (var i in savedEvals) {
+            if (['BA1', 'PM2', 'BS1'].indexOf(savedEvals[i].criteria) > -1) {
                 var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].population.populationData);
-                console.log(tempCompare);
+                this.setState({populationObjDiff: tempCompare[0], populationObjDiffFlag: tempCompare[1]});
                 break;
             }
         }
@@ -558,7 +555,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
         var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
-        var populationObjMatch = this.state.populationObjMatch;
+        var populationObjDiffFlag = this.state.populationObjDiffFlag;
 
         return (
             <div className="variant-interpretation population">
@@ -606,7 +603,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm renderedFormContent={criteriaGroup1}
-                                evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                                evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={populationObjDiffFlag} formChangeHandler={criteriaGroup1Change}
                                 formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
