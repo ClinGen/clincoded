@@ -5,6 +5,7 @@ var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var CurationInterpretationForm = require('./shared/form').CurationInterpretationForm;
+var findDiffKeyValuesMixin = require('./shared/findDiff').findDiffKeyValuesMixin;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
@@ -41,7 +42,7 @@ var CI_DEFAULT = 95;
 
 // Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
-    mixins: [RestMixin],
+    mixins: [RestMixin, findDiffKeyValuesMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
@@ -124,21 +125,19 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
 
         if (this.state.interpretation && this.state.interpretation.evaluations) {
-            this.compareInterpretations(this.state.interpretation.evaluations, this.state.populationObj);
+            this.compareInterpretations(this.state.populationObj, this.state.interpretation.evaluations);
         }
     },
 
-    compareInterpretations: function(savedEvals, newData) {
+    compareInterpretations: function(newData, savedEvals) {
         console.log('firing compareInterpretations()');
 
         for (var i = 0; i < savedEvals.length; i++) {
             if (savedEvals[i].criteria === 'BA1') {
-                console.log(savedEvals[i].population.populationData);
-                console.log(newData);
-                let match = _.isEqual(savedEvals[i].population.populationData, newData);
-                console.log("match:");
-                console.log(match);
-                this.setState({populationObjMatch: match});
+                //console.log(savedEvals[i].population.populationData);
+                //console.log(newData);
+                var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].population.populationData);
+                console.log(tempCompare);
                 break;
             }
         }
