@@ -47,7 +47,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         data: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
-        protocol: React.PropTypes.string,
         ext_myVariantInfo: React.PropTypes.object,
         ext_ensemblVEP: React.PropTypes.array,
         ext_ensemblVariation: React.PropTypes.object

@@ -9,6 +9,9 @@ var CurationInterpretationForm = require('./shared/form').CurationInterpretation
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
 
+var queryKeyValue = globals.queryKeyValue;
+var editQueryValue = globals.editQueryValue;
+
 var external_url_map = globals.external_url_map;
 var dbxref_prefix_map = globals.dbxref_prefix_map;
 
@@ -61,7 +64,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         data: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
-        protocol: React.PropTypes.string,
+        href_url: React.PropTypes.object,
         ext_myVariantInfo: React.PropTypes.object,
         ext_bustamante: React.PropTypes.object,
         ext_clinVarEsearch: React.PropTypes.object
@@ -75,6 +78,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             hasOtherPredData: false,
             hasClinVarData: false,
             hasBustamanteData: false,
+            selectedTab: (this.props.href_url.href ? (queryKeyValue('subtab', this.props.href_url.href) ? queryKeyValue('subtab', this.props.href_url.href) : 'missense')  : 'missense'),
             codonObj: {},
             computationObj: {
                 conservation: {
@@ -123,6 +127,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     },
 
     componentWillUnmount: function() {
+        window.history.replaceState(window.state, '', editQueryValue(this.props.href_url.href, 'subtab', null));
         this.setState({
             hasConservationData: false,
             hasOtherPredData: false,
@@ -295,6 +300,16 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 <td>{conservation[key] ? conservation[key] : '--'}</td>
             </tr>
         );
+    },
+
+    // set selectedTab to whichever tab the user switches to, and update the address accordingly
+    handleSelect: function (tab) {
+        this.setState({selectedTab: tab});
+        if (tab == 'missense') {
+            window.history.replaceState(window.state, '', editQueryValue(this.props.href_url.href, 'subtab', null));
+        } else {
+            window.history.replaceState(window.state, '', editQueryValue(this.props.href_url.href, 'subtab', tab));
+        }
     },
 
     render: function() {
