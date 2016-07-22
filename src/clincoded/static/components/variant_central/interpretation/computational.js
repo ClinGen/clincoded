@@ -668,9 +668,9 @@ var criteriaGroup1 = function() {
             <Input type="checkbox" ref="PP3-value" label="PP3 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PP3-value'] ? this.state.checkboxes['PP3-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BP4-description" label="Explain criteria selection:" rows="5"
+            <Input type="textarea" ref="BP4-explanation" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <Input type="textarea" ref="PP3-description" label="Explain criteria selection (PP3):" rows="5"
+            <Input type="textarea" ref="PP3-explanation" label="Explain criteria selection (PP3):" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
@@ -680,7 +680,7 @@ var criteriaGroup1 = function() {
             <Input type="checkbox" ref="BP7-value" label={<span>BP7 met?:</span>} handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['BP7-value'] ? this.state.checkboxes['BP7-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BP7-description" label="Explain criteria selection:" rows="5"
+            <Input type="textarea" ref="BP7-explanation" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
         </div>
     );
@@ -696,15 +696,15 @@ var criteriaGroup1Update = function(nextProps) {
                 switch(evaluation.criteria) {
                     case 'BP4':
                         tempCheckboxes['BP4-value'] = evaluation.value === 'true';
-                        this.refs['BP4-description'].setValue(evaluation.description);
+                        this.refs['BP4-explanation'].setValue(evaluation.explanation);
                         break;
                     case 'PP3':
                         tempCheckboxes['PP3-value'] = evaluation.value === 'true';
-                        this.refs['PP3-description'].setValue(evaluation.description);
+                        this.refs['PP3-explanation'].setValue(evaluation.explanation);
                         break;
                     case 'BP7':
                         tempCheckboxes['BP7-value'] = evaluation.value === 'true';
-                        this.refs['BP7-description'].setValue(evaluation.description);
+                        this.refs['BP7-explanation'].setValue(evaluation.explanation);
                         break;
                 }
                 this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
@@ -728,16 +728,16 @@ var criteriaGroup1Change = function(ref, e) {
             this.setState({checkboxes: tempCheckboxes});
         }
     }
-    // Since BP4 and PP3 'share' the same description box, and the user only sees the BP4 box,
+    // Since BP4 and PP3 'share' the same explanation box, and the user only sees the BP4 box,
     // the following is to update the value in the PP3 box to contain the same data on
     // saving of the evaluation. Handles changes going the other way, too, just in case (although
     // this should never happen)
-    if (ref === 'BP4-description' || ref === 'PP3-description') {
-        let altCriteriaDescription = 'PP3-description';
-        if (ref === 'PP3-description') {
-            altCriteriaDescription = 'BP4-description';
+    if (ref === 'BP4-explanation' || ref === 'PP3-explanation') {
+        let altCriteriaExplanation = 'PP3-explanation';
+        if (ref === 'PP3-explanation') {
+            altCriteriaExplanation = 'BP4-explanation';
         }
-        this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
+        this.refs[altCriteriaExplanation].setValue(this.refs[ref].getValue());
     }
 };
 
@@ -754,7 +754,7 @@ var criteriaGroup2 = function() {
             <Input type="checkbox" ref="PM5-value" label={<span>PM5 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PM5-value'] ? this.state.checkboxes['PM5-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="PM5-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
+            <Input type="textarea" ref="PM5-explanation" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
@@ -764,7 +764,7 @@ var criteriaGroup2 = function() {
             <Input type="checkbox" ref="PS1-value" label={<span>PS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PS1-value'] ? this.state.checkboxes['PS1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="PS1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
+            <Input type="textarea" ref="PS1-explanation" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
         </div>
     );
@@ -780,11 +780,11 @@ var criteriaGroup2Update = function(nextProps) {
                 switch(evaluation.criteria) {
                     case 'PM5':
                         tempCheckboxes['PM5-value'] = evaluation.value === 'true';
-                        this.refs['PM5-description'].setValue(evaluation.description);
+                        this.refs['PM5-explanation'].setValue(evaluation.explanation);
                         break;
                     case 'PS1':
                         tempCheckboxes['PS1-value'] = evaluation.value === 'true';
-                        this.refs['PS1-description'].setValue(evaluation.description);
+                        this.refs['PS1-explanation'].setValue(evaluation.explanation);
                         break;
                 }
                 this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
@@ -813,9 +813,9 @@ var criteriaGroup3 = function() {
             <Input type="checkbox" ref="PP2-value" label={<span>PP2 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PP2-value'] ? this.state.checkboxes['PP2-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BP1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
+            <Input type="textarea" ref="BP1-explanation" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <Input type="textarea" ref="PP2-description" label="Explain criteria selection (PP2):" rows="5" inputDisabled={!this.state.diseaseAssociated}
+            <Input type="textarea" ref="PP2-explanation" label="Explain criteria selection (PP2):" rows="5" inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
         </div>
     );
@@ -831,11 +831,11 @@ var criteriaGroup3Update = function(nextProps) {
                 switch(evaluation.criteria) {
                     case 'BP1':
                         tempCheckboxes['BP1-value'] = evaluation.value === 'true';
-                        this.refs['BP1-description'].setValue(evaluation.description);
+                        this.refs['BP1-explanation'].setValue(evaluation.explanation);
                         break;
                     case 'PP2':
                         tempCheckboxes['PP2-value'] = evaluation.value === 'true';
-                        this.refs['PP2-description'].setValue(evaluation.description);
+                        this.refs['PP2-explanation'].setValue(evaluation.explanation);
                         break;
                 }
                 this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
@@ -859,16 +859,16 @@ var criteriaGroup3Change = function(ref, e) {
             this.setState({checkboxes: tempCheckboxes});
         }
     }
-    // Since BP1 and PP2 'share' the same description box, and the user only sees the BP4 box,
+    // Since BP1 and PP2 'share' the same explanation box, and the user only sees the BP4 box,
     // the following is to update the value in the PP2 box to contain the same data on
     // saving of the evaluation. Handles changes going the other way, too, just in case (although
     // this should never happen)
-    if (ref === 'BP1-description' || ref === 'PP2-description') {
-        let altCriteriaDescription = 'PP2-description';
-        if (ref === 'PP2-description') {
-            altCriteriaDescription = 'BP1-description';
+    if (ref === 'BP1-explanation' || ref === 'PP2-explanation') {
+        let altCriteriaExplanation = 'PP2-explanation';
+        if (ref === 'PP2-explanation') {
+            altCriteriaExplanation = 'BP1-explanation';
         }
-        this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
+        this.refs[altCriteriaExplanation].setValue(this.refs[ref].getValue());
     }
 };
 
@@ -885,7 +885,7 @@ var criteriaGroup4 = function() {
             <Input type="checkbox" ref="BP3-value" label="BP3 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['BP3-value'] ? this.state.checkboxes['BP3-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BP3-description" label="Explain criteria selection:" rows="5"
+            <Input type="textarea" ref="BP3-explanation" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
@@ -895,7 +895,7 @@ var criteriaGroup4 = function() {
             <Input type="checkbox" ref="PM4-value" label="PM4 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PM4-value'] ? this.state.checkboxes['PM4-value'] : false}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="PM4-description" label="Explain criteria selection:" rows="5"
+            <Input type="textarea" ref="PM4-explanation" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
         </div>
     );
@@ -911,11 +911,11 @@ var criteriaGroup4Update = function(nextProps) {
                 switch(evaluation.criteria) {
                     case 'BP3':
                         tempCheckboxes['BP3-value'] = evaluation.value === 'true';
-                        this.refs['BP3-description'].setValue(evaluation.description);
+                        this.refs['BP3-explanation'].setValue(evaluation.explanation);
                         break;
                     case 'PM4':
                         tempCheckboxes['PM4-value'] = evaluation.value === 'true';
-                        this.refs['PM4-description'].setValue(evaluation.description);
+                        this.refs['PM4-explanation'].setValue(evaluation.explanation);
                         break;
                 }
                 this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
