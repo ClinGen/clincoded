@@ -337,236 +337,246 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
         return (
             <div className="variant-interpretation computational">
-                <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
-                    <div className="row">
-                        <div className="col-sm-12">
-                            <CurationInterpretationForm renderedFormContent={criteriaGroup1}
-                                evidenceType={'computational'} evidenceData={this.state.computationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
-                                formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BP4', 'PP3', 'BP7']}
-                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        </div>
-                    </div>
-                    : null}
-                    {clingenPred ?
-                        <div className="panel panel-info datasource-clingen">
-                            <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Source</th>
-                                        <th>Score Range</th>
-                                        <th>Score</th>
-                                        <th>Prediction</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {clingenPredStatic._order.map(key => {
-                                        return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    :
-                        <div className="panel panel-info datasource-clingen">
-                            <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <td>No predictors were found for this allele.</td>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    }
+                <ul className="vci-tabs-header tab-label-list" role="tablist">
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('missense')} aria-selected={this.state.selectedTab == 'missense'}>Missense</li>
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('lof')} aria-selected={this.state.selectedTab == 'lof'}>Loss of Function</li>
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('silent-intron')} aria-selected={this.state.selectedTab == 'silent-intron'}>Silent & Intron</li>
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('indel')} aria-selected={this.state.selectedTab == 'indel'}>In-frame Indel</li>
+                </ul>
 
-                    {this.state.hasOtherPredData ?
-                        <div className="panel panel-info datasource-other">
-                            <div className="panel-heading"><h3 className="panel-title">Other Predictors</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Source</th>
-                                        <th>Score Range</th>
-                                        <th>Score</th>
-                                        <th>Prediction</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {otherPredStatic._order.map(key => {
-                                        return (this.renderOtherPredRow(key, otherPred, otherPredStatic));
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    :
-                        <div className="panel panel-info datasource-other">
-                            <div className="panel-heading"><h3 className="panel-title">Other Predictors</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <td>No predictors were found for this allele.</td>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    }
 
-                    {this.state.hasConservationData ?
-                        <div className="panel panel-info datasource-conservation">
-                            <div className="panel-heading"><h3 className="panel-title">Conservation Analysis</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Source</th>
-                                        <th>Score</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {conservationStatic._order.map(key => {
-                                        return (this.renderConservationRow(key, conservation, conservationStatic));
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    :
-                        <div className="panel panel-info datasource-conservation">
-                            <div className="panel-heading"><h3 className="panel-title">Conservation Analysis</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <td>No predictors were found for this allele.</td>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    }
-
-                    {this.state.hasConservationData ?
-                        <div className="panel panel-info datasource-splice">
-                            <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
-                            <div className="panel-body">
-                                <span className="pull-right">
-                                    <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
-                                    <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
-                                    <a href="http://www.cbcb.umd.edu/software/GeneSplicer/gene_spl.shtml" target="_blank">See data in GeneSplicer <i className="icon icon-external-link"></i></a>
-                                    <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
-                                </span>
+                <div className={(this.state.selectedTab == '' || this.state.selectedTab == 'missense' ? '' : ' hidden')}>
+                    <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
+                        {(this.props.data && this.state.interpretation) ?
+                        <div className="row">
+                            <div className="col-sm-12">
+                                <CurationInterpretationForm renderedFormContent={criteriaGroup1}
+                                    evidenceType={'computational'} evidenceData={this.state.computationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                                    formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BP4', 'PP3', 'BP7']}
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Source</th>
-                                        <th>5' or 3'</th>
-                                        <th>Score Range</th>
-                                        <th>Score</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th colSpan="4">WT Sequence</th>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">5'</td>
-                                        <td>[0-12]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">3'</td>
-                                        <td>[0-16]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th colSpan="4">Variant Sequence</th>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">5'</td>
-                                        <td>[0-12]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">3'</td>
-                                        <td>[0-16]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colSpan="4">Average Change to Nearest Splice Site: <span className="splice-avg-change wip">IN PROGRESS</span></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
                         </div>
-                    :
-                        <div className="panel panel-info datasource-splice">
-                            <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <td>No predictions were found for this allele.</td>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    }
+                        : null}
+                        {clingenPred ?
+                            <div className="panel panel-info datasource-clingen">
+                                <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Source</th>
+                                            <th>Score Range</th>
+                                            <th>Score</th>
+                                            <th>Prediction</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {clingenPredStatic._order.map(key => {
+                                            return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        :
+                            <div className="panel panel-info datasource-clingen">
+                                <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <td>No predictors were found for this allele.</td>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        }
 
-                    {this.state.hasConservationData ?
-                        <div className="panel panel-info datasource-additional">
-                            <div className="panel-heading"><h3 className="panel-title">Additional Information</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Distance to nearest splice site</th>
-                                        <th><span className="wip">IN PROGRESS</span></th>
-                                    </tr>
-                                    <tr>
-                                        <th>Exon location</th>
-                                        <th><span className="wip">IN PROGRESS</span></th>
-                                    </tr>
-                                    <tr>
-                                        <th>Distance of truncation mutation from end of last exon</th>
-                                        <th><span className="wip">IN PROGRESS</span></th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    :
-                        <div className="panel panel-info datasource-additional">
-                            <div className="panel-heading"><h3 className="panel-title">Additional Information</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <td>No additional information was found for this allele.</td>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    }
-                </Panel></PanelGroup>
+                        {this.state.hasOtherPredData ?
+                            <div className="panel panel-info datasource-other">
+                                <div className="panel-heading"><h3 className="panel-title">Other Predictors</h3></div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Source</th>
+                                            <th>Score Range</th>
+                                            <th>Score</th>
+                                            <th>Prediction</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {otherPredStatic._order.map(key => {
+                                            return (this.renderOtherPredRow(key, otherPred, otherPredStatic));
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        :
+                            <div className="panel panel-info datasource-other">
+                                <div className="panel-heading"><h3 className="panel-title">Other Predictors</h3></div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <td>No predictors were found for this allele.</td>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        }
+
+                        {this.state.hasConservationData ?
+                            <div className="panel panel-info datasource-conservation">
+                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis</h3></div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Source</th>
+                                            <th>Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {conservationStatic._order.map(key => {
+                                            return (this.renderConservationRow(key, conservation, conservationStatic));
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        :
+                            <div className="panel panel-info datasource-conservation">
+                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis</h3></div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <td>No predictors were found for this allele.</td>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        }
+
+                        {this.state.hasConservationData ?
+                            <div className="panel panel-info datasource-splice">
+                                <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
+                                <div className="panel-body">
+                                    <span className="pull-right">
+                                        <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
+                                        <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
+                                        <a href="http://www.cbcb.umd.edu/software/GeneSplicer/gene_spl.shtml" target="_blank">See data in GeneSplicer <i className="icon icon-external-link"></i></a>
+                                        <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
+                                    </span>
+                                </div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Source</th>
+                                            <th>5' or 3'</th>
+                                            <th>Score Range</th>
+                                            <th>Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th colSpan="4">WT Sequence</th>
+                                        </tr>
+                                        <tr>
+                                            <td>MaxEntScan</td>
+                                            <td rowSpan="2" className="row-span">5'</td>
+                                            <td>[0-12]</td>
+                                            <td><span className="wip">IN PROGRESS</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>NNSPLICE</td>
+                                            <td>[0-1]</td>
+                                            <td><span className="wip">IN PROGRESS</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>MaxEntScan</td>
+                                            <td rowSpan="2" className="row-span">3'</td>
+                                            <td>[0-16]</td>
+                                            <td><span className="wip">IN PROGRESS</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>NNSPLICE</td>
+                                            <td>[0-1]</td>
+                                            <td><span className="wip">IN PROGRESS</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th colSpan="4">Variant Sequence</th>
+                                        </tr>
+                                        <tr>
+                                            <td>MaxEntScan</td>
+                                            <td rowSpan="2" className="row-span">5'</td>
+                                            <td>[0-12]</td>
+                                            <td><span className="wip">IN PROGRESS</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>NNSPLICE</td>
+                                            <td>[0-1]</td>
+                                            <td><span className="wip">IN PROGRESS</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>MaxEntScan</td>
+                                            <td rowSpan="2" className="row-span">3'</td>
+                                            <td>[0-16]</td>
+                                            <td><span className="wip">IN PROGRESS</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>NNSPLICE</td>
+                                            <td>[0-1]</td>
+                                            <td><span className="wip">IN PROGRESS</span></td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colSpan="4">Average Change to Nearest Splice Site: <span className="splice-avg-change wip">IN PROGRESS</span></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        :
+                            <div className="panel panel-info datasource-splice">
+                                <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <td>No predictions were found for this allele.</td>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        }
+
+                        {this.state.hasConservationData ?
+                            <div className="panel panel-info datasource-additional">
+                                <div className="panel-heading"><h3 className="panel-title">Additional Information</h3></div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Distance to nearest splice site</th>
+                                            <th><span className="wip">IN PROGRESS</span></th>
+                                        </tr>
+                                        <tr>
+                                            <th>Exon location</th>
+                                            <th><span className="wip">IN PROGRESS</span></th>
+                                        </tr>
+                                        <tr>
+                                            <th>Distance of truncation mutation from end of last exon</th>
+                                            <th><span className="wip">IN PROGRESS</span></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        :
+                            <div className="panel panel-info datasource-additional">
+                                <div className="panel-heading"><h3 className="panel-title">Additional Information</h3></div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <td>No additional information was found for this allele.</td>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        }
+                    </Panel></PanelGroup>
+                </div>
 
                 <PanelGroup accordion><Panel title="Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
                     <div className="panel panel-info datasource-clinvar">
