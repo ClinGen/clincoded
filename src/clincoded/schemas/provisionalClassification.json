@@ -49,14 +49,6 @@
             "title": "Owner",
             "type": "string"
         },
-        "date_created": {
-            "title": "Created Date",
-            "type": "string"
-        },
-        "last_modified": {
-            "title": "Last Modified",
-            "type": "string"
-        },
         "totalScore": {
             "title": "Total Score",
             "type": "number"
@@ -65,17 +57,13 @@
             "title": "Assigned Classification",
             "type": "string"
         },
-        "alteredClassification": {
+        "altered_classification": {
             "title": "Altered Classification",
             "type": "string"
         },
-        "reasons": {
+        "reason_explanation": {
             "title": "Reasons",
             "type": "string"
-        },
-        "active": {
-            "title": "Active",
-            "type": "boolean"
         }
     }
 }
