@@ -77,6 +77,6 @@
         "active": {
             "title": "Active",
             "type": "boolean"
-         }
+        }
     }
 }
