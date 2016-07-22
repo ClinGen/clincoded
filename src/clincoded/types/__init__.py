@@ -909,20 +909,6 @@ class Provisional(Item):
     })
     def gdm_associated(self, request, gdm_associated):
         return paths_filtered_by_status(request, gdm_associated)
-
-    @calculated_property(schema={
-        "title": "Altered Classification",
-        "type": "string"
-    })
-    def altered_classification(self, alteredClassification=''):
-        return alteredClassification
-
-    @calculated_property(schema={
-        "title": "Reasons",
-        "type": "string"
-    })
-    def reason_explanation(self, reasons=''):
-        return reasons
 ### end of new collections for gene curation data
 
 

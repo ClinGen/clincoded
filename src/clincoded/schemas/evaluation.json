@@ -61,8 +61,8 @@
             "title": "Evaluation Value",
             "type": "string"
         },
-        "description": {
-            "title": "Description",
+        "explanation": {
+            "title": "Explanation",
             "description": "The reason to select evaluation value.",
             "type": "string"
         }

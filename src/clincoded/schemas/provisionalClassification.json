@@ -35,7 +35,8 @@
         "reasons": {
             "title": "Reasons",
             "description": "Reasons for changing the classification",
-            "type": "string"
+            "type": "string",
+            "default": ""
         },
         "active": {
             "title": "Active",
@@ -49,6 +50,14 @@
             "title": "Owner",
             "type": "string"
         },
+        "date_created": {
+            "title": "Created Date",
+            "type": "string"
+        },
+        "last_modified": {
+            "title": "Last Modified",
+            "type": "string"
+        },
         "totalScore": {
             "title": "Total Score",
             "type": "number"
@@ -57,13 +66,17 @@
             "title": "Assigned Classification",
             "type": "string"
         },
-        "altered_classification": {
+        "alteredClassification": {
             "title": "Altered Classification",
             "type": "string"
         },
-        "reason_explanation": {
+        "reasons": {
             "title": "Reasons",
             "type": "string"
-        }
+        },
+        "active": {
+            "title": "Active",
+            "type": "boolean"
+         }
     }
 }
