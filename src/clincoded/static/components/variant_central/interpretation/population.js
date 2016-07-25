@@ -158,6 +158,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 break;
             }
         }
+        console.log(this.state.populationObjDiff);
     },
 
     // Get ExAC allele frequency from Ensembl (VEP) directly
@@ -401,7 +402,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // method to render a row of data for the 1000Genomes table
     renderTGenomesRow: function(key, tGenomes, tGenomesStatic, rowNameCustom, className) {
         let rowName = tGenomesStatic._labels[key];
-        let tGenomesDiff = this.state.populationObjDiff && this.state.populationObjDiff.tGenomes ? this.state.populationObjDiff.tGenomes : null;
+        let tGenomesDiff = this.state.populationObjDiff && this.state.populationObjDiff.tGenomes ? this.state.populationObjDiff.tGenomes : null; // this null creates issues when populationObjDiff is not set because it compraes on null later
         // generate genotype strings from reference and alt allele information
         let g_ref = tGenomes._extra.ref + '|' + tGenomes._extra.ref,
             g_alt = tGenomes._extra.alt + '|' + tGenomes._extra.alt,
