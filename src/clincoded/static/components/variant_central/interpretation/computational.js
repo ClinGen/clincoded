@@ -71,7 +71,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             interpretation: this.props.interpretation,
             hasConservationData: false,
             hasOtherPredData: false,
-            hasClinVarData: false,
             hasBustamanteData: false,
             codonObj: {},
             computationObj: {
@@ -116,7 +115,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             codonObj.count = nextProps.ext_clinVarEsearch.esearchresult.count;
             codonObj.term = nextProps.ext_clinVarEsearch.vci_term;
             codonObj.symbol = nextProps.ext_clinVarEsearch.vci_symbol;
-            this.setState({hasClinVarData: true, codonObj: codonObj});
+            this.setState({codonObj: codonObj});
         }
     },
 
@@ -124,7 +123,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         this.setState({
             hasConservationData: false,
             hasOtherPredData: false,
-            hasClinVarData: false,
             hasBustamanteData: false
         });
     },
@@ -279,34 +277,26 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     },
 
     // Method to temporarily render other variant count in same codon and link out to clinvar
-    renderVariantCodon: function(variant, codon, hasClinVarData) {
-        if (variant && variant.clinvarVariantId) {
-            if (codon && hasClinVarData) {
-                if (parseInt(codon.count) > 1) {
-                    return (
-                        <dl className="inline-dl clearfix">
-                            <dt>Additional ClinVar variants found in the same codon: <span className="condon-variant-count">{parseInt(codon.count)-1}</span></dt>
-                            <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">Search ClinVar for variants in this codon <i className="icon icon-external-link"></i></a>)</dd>
-                        </dl>
-                    );
-                } else {
-                    return (
-                        <dl className="inline-dl clearfix">
-                            <dd>The current variant is the only variant found at this codon in ClinVar.</dd>
-                        </dl>
-                    );
-                }
+    renderVariantCodon: function(codon) {
+        if (codon.count > 0 && codon.term) {
+            if (parseInt(codon.count) > 1) {
+                return (
+                    <dl className="inline-dl clearfix">
+                        <dt>Additional ClinVar variants found in the same codon: <span className="condon-variant-count">{parseInt(codon.count)-1}</span></dt>
+                        <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">Search ClinVar for variants in this codon <i className="icon icon-external-link"></i></a>)</dd>
+                    </dl>
+                );
             } else {
                 return (
                     <dl className="inline-dl clearfix">
-                        <dd>This ClinVar variant is in a non-coding region.</dd>
+                        <dd>The current variant is the only variant found at this codon in ClinVar.</dd>
                     </dl>
                 );
             }
         } else {
             return (
                 <dl className="inline-dl clearfix">
-                    <dd>ClinVar search for this variant is currently not available. <span className="wip">IN PROGRESS</span></dd>
+                    <dd>The current variant is in a non-coding region.</dd>
                 </dl>
             );
         }
@@ -435,144 +425,119 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <td>No predictors were found for this allele.</td>
+                                        <td>No conservation analysis data was found for this allele.</td>
                                     </tr>
                                 </thead>
                             </table>
                         </div>
                     }
 
-                    {this.state.hasConservationData ?
-                        <div className="panel panel-info datasource-splice">
-                            <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
-                            <div className="panel-body">
-                                <span className="pull-right">
-                                    <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
-                                    <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
-                                    <a href="http://www.cbcb.umd.edu/software/GeneSplicer/gene_spl.shtml" target="_blank">See data in GeneSplicer <i className="icon icon-external-link"></i></a>
-                                    <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
-                                </span>
-                            </div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Source</th>
-                                        <th>5' or 3'</th>
-                                        <th>Score Range</th>
-                                        <th>Score</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th colSpan="4">WT Sequence</th>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">5'</td>
-                                        <td>[0-12]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">3'</td>
-                                        <td>[0-16]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th colSpan="4">Variant Sequence</th>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">5'</td>
-                                        <td>[0-12]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">3'</td>
-                                        <td>[0-16]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colSpan="4">Average Change to Nearest Splice Site: <span className="splice-avg-change wip">IN PROGRESS</span></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                    <div className="panel panel-info datasource-splice">
+                        <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
+                        <div className="panel-body">
+                            <span className="pull-right">
+                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
+                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
+                                <a href="http://www.cbcb.umd.edu/software/GeneSplicer/gene_spl.shtml" target="_blank">See data in GeneSplicer <i className="icon icon-external-link"></i></a>
+                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
+                            </span>
                         </div>
-                    :
-                        <div className="panel panel-info datasource-splice">
-                            <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <td>No predictions were found for this allele.</td>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    }
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                    <th>5' or 3'</th>
+                                    <th>Score Range</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th colSpan="4">WT Sequence</th>
+                                </tr>
+                                <tr>
+                                    <td>MaxEntScan</td>
+                                    <td rowSpan="2" className="row-span">5'</td>
+                                    <td>[0-12]</td>
+                                    <td><span className="wip">IN PROGRESS</span></td>
+                                </tr>
+                                <tr>
+                                    <td>NNSPLICE</td>
+                                    <td>[0-1]</td>
+                                    <td><span className="wip">IN PROGRESS</span></td>
+                                </tr>
+                                <tr>
+                                    <td>MaxEntScan</td>
+                                    <td rowSpan="2" className="row-span">3'</td>
+                                    <td>[0-16]</td>
+                                    <td><span className="wip">IN PROGRESS</span></td>
+                                </tr>
+                                <tr>
+                                    <td>NNSPLICE</td>
+                                    <td>[0-1]</td>
+                                    <td><span className="wip">IN PROGRESS</span></td>
+                                </tr>
+                                <tr>
+                                    <th colSpan="4">Variant Sequence</th>
+                                </tr>
+                                <tr>
+                                    <td>MaxEntScan</td>
+                                    <td rowSpan="2" className="row-span">5'</td>
+                                    <td>[0-12]</td>
+                                    <td><span className="wip">IN PROGRESS</span></td>
+                                </tr>
+                                <tr>
+                                    <td>NNSPLICE</td>
+                                    <td>[0-1]</td>
+                                    <td><span className="wip">IN PROGRESS</span></td>
+                                </tr>
+                                <tr>
+                                    <td>MaxEntScan</td>
+                                    <td rowSpan="2" className="row-span">3'</td>
+                                    <td>[0-16]</td>
+                                    <td><span className="wip">IN PROGRESS</span></td>
+                                </tr>
+                                <tr>
+                                    <td>NNSPLICE</td>
+                                    <td>[0-1]</td>
+                                    <td><span className="wip">IN PROGRESS</span></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colSpan="4">Average Change to Nearest Splice Site: <span className="splice-avg-change wip">IN PROGRESS</span></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
 
-                    {this.state.hasConservationData ?
-                        <div className="panel panel-info datasource-additional">
-                            <div className="panel-heading"><h3 className="panel-title">Additional Information</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Distance to nearest splice site</th>
-                                        <th><span className="wip">IN PROGRESS</span></th>
-                                    </tr>
-                                    <tr>
-                                        <th>Exon location</th>
-                                        <th><span className="wip">IN PROGRESS</span></th>
-                                    </tr>
-                                    <tr>
-                                        <th>Distance of truncation mutation from end of last exon</th>
-                                        <th><span className="wip">IN PROGRESS</span></th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    :
-                        <div className="panel panel-info datasource-additional">
-                            <div className="panel-heading"><h3 className="panel-title">Additional Information</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <td>No additional information was found for this allele.</td>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    }
+                    <div className="panel panel-info datasource-additional">
+                        <div className="panel-heading"><h3 className="panel-title">Additional Information</h3></div>
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Distance to nearest splice site</th>
+                                    <th><span className="wip">IN PROGRESS</span></th>
+                                </tr>
+                                <tr>
+                                    <th>Exon location</th>
+                                    <th><span className="wip">IN PROGRESS</span></th>
+                                </tr>
+                                <tr>
+                                    <th>Distance of truncation mutation from end of last exon</th>
+                                    <th><span className="wip">IN PROGRESS</span></th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
                     <div className="panel panel-info datasource-clinvar">
                         <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
                         <div className="panel-body">
-                            {this.renderVariantCodon(variant, codon, this.state.hasClinVarData)}
+                            {this.renderVariantCodon(codon)}
                         </div>
                     </div>
                     {(this.props.data && this.state.interpretation) ?
