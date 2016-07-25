@@ -752,9 +752,9 @@ var criteriaGroup1 = function() {
             <Input type="number" ref="maf-cutoff" label="MAF cutoff (%):" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
                 value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
-            <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="5"
+            <Input type="textarea" ref="BA1-explanation" label="Explain criteria selection:" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="5"
+            <Input type="textarea" ref="PM2-explanation" label="Explain criteria selection (PM2):" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
@@ -764,7 +764,7 @@ var criteriaGroup1 = function() {
             <Input type="checkbox" ref="BS1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['BS1-value'] ? this.state.checkboxes['BS1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BS1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
+            <Input type="textarea" ref="BS1-explanation" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
         </div>
     );
@@ -780,16 +780,16 @@ var criteriaGroup1Update = function(nextProps) {
                 switch(evaluation.criteria) {
                     case 'BA1':
                         tempCheckboxes['BA1-value'] = evaluation.value === 'true';
-                        this.refs['BA1-description'].setValue(evaluation.description);
+                        this.refs['BA1-explanation'].setValue(evaluation.explanation);
                         this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
                         break;
                     case 'PM2':
                         tempCheckboxes['PM2-value'] = evaluation.value === 'true';
-                        this.refs['PM2-description'].setValue(evaluation.description);
+                        this.refs['PM2-explanation'].setValue(evaluation.explanation);
                         break;
                     case 'BS1':
                         tempCheckboxes['BS1-value'] = evaluation.value === 'true';
-                        this.refs['BS1-description'].setValue(evaluation.description);
+                        this.refs['BS1-explanation'].setValue(evaluation.explanation);
                         break;
                 }
                 this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
@@ -813,16 +813,16 @@ var criteriaGroup1Change = function(ref, e) {
             this.setState({checkboxes: tempCheckboxes});
         }
     }
-    // Since BA1 and PM2 'share' the same description box, and the user only sees the BA1 box,
+    // Since BA1 and PM2 'share' the same explanation box, and the user only sees the BA1 box,
     // the following is to update the value in the PM2 box to contain the same data on
     // saving of the evaluation. Handles changes going the other way, too, just in case (although
     // this should never happen)
-    if (ref === 'BA1-description' || ref === 'PM2-description') {
-        let altCriteriaDescription = 'PM2-description';
-        if (ref === 'PM2-description') {
-            altCriteriaDescription = 'BA1-description';
+    if (ref === 'BA1-explanation' || ref === 'PM2-explanation') {
+        let altCriteriaExplanation = 'PM2-explanation';
+        if (ref === 'PM2-explanation') {
+            altCriteriaExplanation = 'BA1-explanation';
         }
-        this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
+        this.refs[altCriteriaExplanation].setValue(this.refs[ref].getValue());
     }
     // if the MAF cutoff field is changed, update the populationObj payload with the updated value
     if (ref === 'maf-cutoff') {
