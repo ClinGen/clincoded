@@ -278,18 +278,26 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
     // Method to temporarily render other variant count in same codon and link out to clinvar
     renderVariantCodon: function(codon) {
-        if (codon.count > 0 && codon.term) {
-            if (parseInt(codon.count) > 1) {
-                return (
-                    <dl className="inline-dl clearfix">
-                        <dt>Additional ClinVar variants found in the same codon: <span className="condon-variant-count">{parseInt(codon.count)-1}</span></dt>
-                        <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">Search ClinVar for variants in this codon <i className="icon icon-external-link"></i></a>)</dd>
-                    </dl>
-                );
+        if (codon.term) {
+            if (parseInt(codon.count < 1)) {
+                if (parseInt(codon.count) > 1) {
+                    return (
+                        <dl className="inline-dl clearfix">
+                            <dt>Additional ClinVar variants found in the same codon: <span className="condon-variant-count">{parseInt(codon.count)-1}</span></dt>
+                            <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">Search ClinVar for variants in this codon <i className="icon icon-external-link"></i></a>)</dd>
+                        </dl>
+                    );
+                } else {
+                    return (
+                        <dl className="inline-dl clearfix">
+                            <dd>The current variant is the only variant found at this codon in ClinVar.</dd>
+                        </dl>
+                    );
+                }
             } else {
                 return (
                     <dl className="inline-dl clearfix">
-                        <dd>The current variant is the only variant found at this codon in ClinVar.</dd>
+                        <dd>No variants have been found at this codon in ClinVar.</dd>
                     </dl>
                 );
             }
