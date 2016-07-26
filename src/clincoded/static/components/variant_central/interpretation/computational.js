@@ -290,14 +290,14 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 } else {
                     return (
                         <dl className="inline-dl clearfix">
-                            <dd>The current variant is the only variant found at this codon in ClinVar.</dd>
+                            <dd>The current variant is the only variant found in this codon in ClinVar.</dd>
                         </dl>
                     );
                 }
             } else {
                 return (
                     <dl className="inline-dl clearfix">
-                        <dd>No variants have been found at this codon in ClinVar.</dd>
+                        <dd>No variants have been found in this codon in ClinVar.</dd>
                     </dl>
                 );
             }
