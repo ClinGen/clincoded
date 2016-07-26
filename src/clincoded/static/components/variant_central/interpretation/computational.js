@@ -351,27 +351,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaMissense1}
                                     evidenceType={'computational'} evidenceData={this.state.computationObj} evidenceDataUpdated={true} formChangeHandler={criteriaMissense1Change}
-                                    formDataUpdater={criteriaMissense1Update} variantUuid={this.props.data['@id']} criteria={['BP4', 'PP3']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            </div>
-                        </div>
-                        : null}
-                        {(this.props.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaMissense3}
-                                    evidenceType={'computational'} evidenceDataUpdated={true} formChangeHandler={criteriaMissense3Change}
-                                    formDataUpdater={criteriaMissense3Update} variantUuid={this.props.data['@id']} criteriaDisease={['BP1', 'PP2']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            </div>
-                        </div>
-                        : null}
-                        {(this.props.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaMissense3}
-                                    evidenceType={'computational'} evidenceDataUpdated={true} formChangeHandler={criteriaMissense3Change}
-                                    formDataUpdater={criteriaMissense3Update} variantUuid={this.props.data['@id']} criteriaDisease={['BP1', 'PP2']}
+                                    formDataUpdater={criteriaMissense1Update} variantUuid={this.props.data['@id']} criteria={['BP4', 'PP3']} criteriaDisease={['BP1', 'PP2']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
@@ -734,6 +714,26 @@ var criteriaMissense1 = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
             <Input type="textarea" ref="PP3-description" label="Explain criteria selection (PP3):" rows="5"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
+
+            <div className="col-sm-7 col-sm-offset-5 input-note-top">
+                <p className="alert alert-info">
+                    <strong>BP1:</strong> Missense variant in a gene for which primarily truncating variants are known to cause disease
+
+                    <br /><br />
+                    <strong>PP2:</strong> Missense variant in a gene that has a low rate of benign missense variation and in which missense variants are a common mechanism of disease
+                </p>
+            </div>
+            <Input type="checkbox" ref="BP1-value" label={<span>BP1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['BP1-value'] ? this.state.checkboxes['BP1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
+            <Input type="checkbox" ref="PP2-value" label={<span>PP2 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
+                checked={this.state.checkboxes['PP2-value'] ? this.state.checkboxes['PP2-value'] : false} inputDisabled={!this.state.diseaseAssociated}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="textarea" ref="BP1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+            <Input type="textarea" ref="PP2-description" label="Explain criteria selection (PP2):" rows="5" inputDisabled={!this.state.diseaseAssociated}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
         </div>
     );
 };
@@ -753,6 +753,14 @@ var criteriaMissense1Update = function(nextProps) {
                     case 'PP3':
                         tempCheckboxes['PP3-value'] = evaluation.value === 'true';
                         this.refs['PP3-description'].setValue(evaluation.description);
+                        break;
+                    case 'BP1':
+                        tempCheckboxes['BP1-value'] = evaluation.value === 'true';
+                        this.refs['BP1-description'].setValue(evaluation.description);
+                        break;
+                    case 'PP2':
+                        tempCheckboxes['PP2-value'] = evaluation.value === 'true';
+                        this.refs['PP2-description'].setValue(evaluation.description);
                         break;
                 }
                 this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
@@ -784,6 +792,31 @@ var criteriaMissense1Change = function(ref, e) {
         let altCriteriaDescription = 'PP3-description';
         if (ref === 'PP3-description') {
             altCriteriaDescription = 'BP4-description';
+        }
+        this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
+    }
+
+    // BP1 and PP2 are exclusive. The following is to ensure that if one of the checkboxes
+    // are checked, the other is un-checked
+    if (ref === 'BP1-value' || ref === 'PP2-value') {
+        let tempCheckboxes = this.state.checkboxes,
+            altCriteriaValue = 'PP2-value';
+        if (ref === 'PP2-value') {
+            altCriteriaValue = 'BP1-value';
+        }
+        if (this.state.checkboxes[ref]) {
+            tempCheckboxes[altCriteriaValue] = false;
+            this.setState({checkboxes: tempCheckboxes});
+        }
+    }
+    // Since BP1 and PP2 'share' the same description box, and the user only sees the BP4 box,
+    // the following is to update the value in the PP2 box to contain the same data on
+    // saving of the evaluation. Handles changes going the other way, too, just in case (although
+    // this should never happen)
+    if (ref === 'BP1-description' || ref === 'PP2-description') {
+        let altCriteriaDescription = 'PP2-description';
+        if (ref === 'PP2-description') {
+            altCriteriaDescription = 'BP1-description';
         }
         this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
     }
@@ -838,85 +871,6 @@ var criteriaMissense2Update = function(nextProps) {
                 this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
             });
         }
-    }
-};
-
-// code for rendering of computational tab interpretation forms, third group:
-// missense variants
-var criteriaMissense3 = function() {
-    return (
-        <div>
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>BP1:</strong> Missense variant in a gene for which primarily truncating variants are known to cause disease
-
-                    <br /><br />
-                    <strong>PP2:</strong> Missense variant in a gene that has a low rate of benign missense variation and in which missense variants are a common mechanism of disease
-                </p>
-            </div>
-            <Input type="checkbox" ref="BP1-value" label={<span>BP1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BP1-value'] ? this.state.checkboxes['BP1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
-            <Input type="checkbox" ref="PP2-value" label={<span>PP2 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['PP2-value'] ? this.state.checkboxes['PP2-value'] : false} inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BP1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <Input type="textarea" ref="PP2-description" label="Explain criteria selection (PP2):" rows="5" inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
-        </div>
-    );
-};
-
-// code for updating the form values of computational tab interpretation forms upon receiving
-// existing interpretations and evaluations
-var criteriaMissense3Update = function(nextProps) {
-    if (nextProps.interpretation) {
-        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaluation => {
-                var tempCheckboxes = this.state.checkboxes;
-                switch(evaluation.criteria) {
-                    case 'BP1':
-                        tempCheckboxes['BP1-value'] = evaluation.value === 'true';
-                        this.refs['BP1-description'].setValue(evaluation.description);
-                        break;
-                    case 'PP2':
-                        tempCheckboxes['PP2-value'] = evaluation.value === 'true';
-                        this.refs['PP2-description'].setValue(evaluation.description);
-                        break;
-                }
-                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
-            });
-        }
-    }
-};
-
-// code for handling logic within the form
-var criteriaMissense3Change = function(ref, e) {
-    // BP1 and PP2 are exclusive. The following is to ensure that if one of the checkboxes
-    // are checked, the other is un-checked
-    if (ref === 'BP1-value' || ref === 'PP2-value') {
-        let tempCheckboxes = this.state.checkboxes,
-            altCriteriaValue = 'PP2-value';
-        if (ref === 'PP2-value') {
-            altCriteriaValue = 'BP1-value';
-        }
-        if (this.state.checkboxes[ref]) {
-            tempCheckboxes[altCriteriaValue] = false;
-            this.setState({checkboxes: tempCheckboxes});
-        }
-    }
-    // Since BP1 and PP2 'share' the same description box, and the user only sees the BP4 box,
-    // the following is to update the value in the PP2 box to contain the same data on
-    // saving of the evaluation. Handles changes going the other way, too, just in case (although
-    // this should never happen)
-    if (ref === 'BP1-description' || ref === 'PP2-description') {
-        let altCriteriaDescription = 'PP2-description';
-        if (ref === 'PP2-description') {
-            altCriteriaDescription = 'BP1-description';
-        }
-        this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
     }
 };
 
