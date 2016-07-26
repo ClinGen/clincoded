@@ -715,37 +715,48 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 var criteriaGroup1 = function() {
     return (
         <div>
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
+            <div className="col-sm-5 input-note-top">
                 <p className="alert alert-info">
                     <strong>BA1:</strong> Allele frequency is > 5% in ExAC, 1000 Genomes, or ESP
                     <br /><br />
                     <strong>PM2:</strong> Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP
                 </p>
             </div>
-            <Input type="checkbox" ref="BA1-value" label="BA1 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BA1-value'] ? this.state.checkboxes['BA1-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
-            <Input type="checkbox" ref="PM2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="maf-cutoff" label="MAF cutoff (%):" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
-                value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
-            <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="5"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="5"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
+            <div className="col-sm-3">
+                <Input type="checkbox" ref="BA1-value" label="BA1 met?:" handleChange={this.handleCheckboxChange}
+                    checked={this.state.checkboxes['BA1-value'] ? this.state.checkboxes['BA1-value'] : false}
+                    labelClassName="col-sm-8 control-label" wrapperClassName="col-sm-4" groupClassName="form-group" />
+                <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
+                <Input type="checkbox" ref="PM2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
+                    checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
+                    labelClassName="col-sm-8 control-label" wrapperClassName="col-sm-4" groupClassName="form-group" />
+            </div>
+            <div className="col-sm-4">
+                <Input type="number" ref="maf-cutoff" label="MAF cutoff (%):" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
+                    value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
+                <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="2"
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+                <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="2"
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
+            </div>
+            <div className="clear"></div>
+
+            <div className="col-sm-5 input-note-top">
                 <p className="alert alert-info">
                     <strong>BS1:</strong> Allele frequency greater than expected due to disorder
                 </p>
             </div>
-            <Input type="checkbox" ref="BS1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BS1-value'] ? this.state.checkboxes['BS1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BS1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+            <div className="col-sm-3">
+                <Input type="checkbox" ref="BS1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
+                    checked={this.state.checkboxes['BS1-value'] ? this.state.checkboxes['BS1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
+                    labelClassName="col-sm-8 control-label" wrapperClassName="col-sm-4" groupClassName="form-group" />
+            </div>
+            <div className="col-sm-4">
+                <Input type="textarea" ref="BS1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+            </div>
+            <div className="clear"></div>
         </div>
     );
 };

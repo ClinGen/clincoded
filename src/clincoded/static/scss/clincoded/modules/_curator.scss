@@ -981,6 +981,19 @@
     }
 }
 
+.evaluation {
+    .form-group {
+        background-color: #fff;
+        margin: 0;
+    }
+    .form-group:after {
+        clear: none;
+    }
+    .clear {
+        clear: both;
+    }
+}
+
 .panel-data {
     .variant-view-panel {
         dt {
