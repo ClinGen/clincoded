@@ -337,7 +337,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
         return (
             <div className="variant-interpretation computational">
-                <ul className="vci-tabs-header tab-label-list" role="tablist">
+                <ul className="vci-tabs-header tab-label-list vci-subtabs" role="tablist">
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('missense')} aria-selected={this.state.selectedTab == 'missense'}>Missense</li>
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('lof')} aria-selected={this.state.selectedTab == 'lof'}>Loss of Function</li>
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('silent-intron')} aria-selected={this.state.selectedTab == 'silent-intron'}>Silent & Intron</li>
@@ -506,7 +506,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         }
                     </Panel></PanelGroup>
 
-                    <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
+                    <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
                         <div className="panel panel-info datasource-clinvar">
                             <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
                             <div className="panel-body">

@@ -1054,6 +1054,13 @@
             }
         }
 
+        ul.vci-tabs-header[role=tablist].vci-subtabs {
+            li[role=tab] {
+                background-color: #fff;
+                color: #1b75bc;
+            }
+        }
+
         .tab-panel {
             border: solid 1px #1b75bc;
             padding: 15px;
