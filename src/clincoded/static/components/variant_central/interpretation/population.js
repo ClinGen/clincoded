@@ -715,46 +715,59 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 var criteriaGroup1 = function() {
     return (
         <div>
-            <div className="col-sm-5 input-note-top">
+            <div className="col-sm-4 input-note-top">
                 <p className="alert alert-info">
                     <strong>BA1:</strong> Allele frequency is > 5% in ExAC, 1000 Genomes, or ESP
                     <br /><br />
                     <strong>PM2:</strong> Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP
                 </p>
             </div>
-            <div className="col-sm-3">
-                <Input type="checkbox" ref="BA1-value" label="BA1 met?:" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['BA1-value'] ? this.state.checkboxes['BA1-value'] : false}
-                    labelClassName="col-sm-8 control-label" wrapperClassName="col-sm-4" groupClassName="form-group" />
-                <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
-                <Input type="checkbox" ref="PM2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
+            <div className="col-sm-4 eval-pad-top">
+                <span className="col-sm-offset-5 col-sm-2 center">Met:</span><span className="col-sm-5 center">Not met:</span>
+                <div className="clear"></div>
+                <Input type="checkbox" ref="BA1-met" label="BA1:" handleChange={this.handleCheckboxChange}
+                    checked={this.state.checkboxes['BA1-met'] ? this.state.checkboxes['BA1-met'] : false}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-2 center" groupClassName="form-group" />
+                <Input type="checkbox" ref="BA1-notmet" handleChange={this.handleCheckboxChange}
+                    checked={this.state.checkboxes['BA1-notmet'] ? this.state.checkboxes['BA1-notmet'] : false}
+                    labelClassName="control-label" wrapperClassName="col-sm-5 center" groupClassName="form-group" />
+                <div className="clear"></div>
+                <Input type="checkbox" ref="PM2-value" label="PM2:" handleChange={this.handleCheckboxChange}
                     checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
-                    labelClassName="col-sm-8 control-label" wrapperClassName="col-sm-4" groupClassName="form-group" />
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-2 center" groupClassName="form-group" />
+                <Input type="checkbox" ref="PM2-notmet" handleChange={this.handleCheckboxChange}
+                    checked={this.state.checkboxes['PM2-notmet'] ? this.state.checkboxes['PM2-notmet'] : false}
+                    labelClassName="control-label" wrapperClassName="col-sm-5 center" groupClassName="form-group" />
             </div>
-            <div className="col-sm-4">
+            <div className="col-sm-4 eval-pad-top">
                 <Input type="number" ref="maf-cutoff" label="MAF cutoff (%):" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
                     value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
-                <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="2"
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-                <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="2"
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
+                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
+                <Input type="textarea" ref="BA1-description" label="Explain criteria selection:" rows="3"
+                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" handleChange={this.handleFormChange} />
+                <Input type="textarea" ref="PM2-description" label="Explain criteria selection (PM2):" rows="3"
+                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="hidden" handleChange={this.handleFormChange} />
             </div>
             <div className="clear"></div>
 
-            <div className="col-sm-5 input-note-top">
+            <div className="col-sm-4 input-note-top">
                 <p className="alert alert-info">
                     <strong>BS1:</strong> Allele frequency greater than expected due to disorder
                 </p>
             </div>
-            <div className="col-sm-3">
-                <Input type="checkbox" ref="BS1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
+            <div className="col-sm-4 eval-pad-top">
+                <span className="col-sm-offset-5 col-sm-2 center">Met:</span><span className="col-sm-5 center">Not met:</span>
+                <div className="clear"></div>
+                <Input type="checkbox" ref="BS1-value" label={<span>BS1:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
                     checked={this.state.checkboxes['BS1-value'] ? this.state.checkboxes['BS1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
-                    labelClassName="col-sm-8 control-label" wrapperClassName="col-sm-4" groupClassName="form-group" />
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-2 center" groupClassName="form-group" />
+                <Input type="checkbox" ref="BS1-notmet" handleChange={this.handleCheckboxChange}
+                    checked={this.state.checkboxes['BS1-notmet'] ? this.state.checkboxes['BS1-notmet'] : false}
+                    labelClassName="control-label" wrapperClassName="col-sm-5 center" groupClassName="form-group" />
             </div>
-            <div className="col-sm-4">
-                <Input type="textarea" ref="BS1-description" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+            <div className="col-sm-4 eval-pad-top">
+                <Input type="textarea" ref="BS1-description" label="Explain criteria selection:" rows="3" inputDisabled={!this.state.diseaseAssociated}
+                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" handleChange={this.handleFormChange} />
             </div>
             <div className="clear"></div>
         </div>
