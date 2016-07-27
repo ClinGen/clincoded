@@ -989,14 +989,21 @@
     .form-group:after {
         clear: none;
     }
-    .eval-pad-top {
-        padding-top: 20px;
+    .pad-top {
+        padding: 20px 0 0 0;
+
+    }
+    .pad-top-more {
+        padding: 30px 0 0 0;
     }
     .center {
         text-align: center;
     }
     .clear {
         clear: both;
+    }
+    .divider {
+        border-bottom: 1px solid #ddd;
     }
 }
 
