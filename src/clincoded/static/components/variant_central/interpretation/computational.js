@@ -112,7 +112,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         }
         if (nextProps.ext_clinVarEsearch) {
             var codonObj = {};
-            codonObj.count = nextProps.ext_clinVarEsearch.esearchresult.count;
+            codonObj.count = parseInt(nextProps.ext_clinVarEsearch.esearchresult.count);
             codonObj.term = nextProps.ext_clinVarEsearch.vci_term;
             codonObj.symbol = nextProps.ext_clinVarEsearch.vci_symbol;
             this.setState({codonObj: codonObj});
@@ -279,8 +279,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     // Method to temporarily render other variant count in same codon and link out to clinvar
     renderVariantCodon: function(codon) {
         if (codon.term) {
-            if (parseInt(codon.count < 1)) {
-                if (parseInt(codon.count) > 1) {
+            if (codon.count > 0) {
+                if (codon.count > 1) {
                     return (
                         <dl className="inline-dl clearfix">
                             <dt>Additional ClinVar variants found in the same codon: <span className="condon-variant-count">{parseInt(codon.count)-1}</span></dt>
