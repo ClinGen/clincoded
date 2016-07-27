@@ -1300,36 +1300,118 @@
 
 .criteria-group.btn-group-sm .btn {
     background-color: #ddd;
-    color: #555;
+    color: #fff;
     cursor: default;
-    padding: 5px 0.72em;
+    padding: 5px 0.665em;
     font-size: 12px;
     font-weight: bold;
+}
 
-    &.benign-strong {
-        color: #62387e;
+.criteria-group.btn-group-sm {
+    .benign-strong {
+        &.not-disease-dependent,
+        &.disease-dependent[data-status='disease-associated'] {
+            background-color: #fff;
+            color: $benign-strong;
+
+            &[data-evaluation='met'] {
+                background-color: $benign-strong;
+                color: #fff;
+            }
+        }
     }
 
-    &.benign-supporting {
-        color: #2b67a0;
+    .benign-supporting {
+        &.not-disease-dependent,
+        &.disease-dependent[data-status='disease-associated'] {
+            background-color: #fff;
+            color: $benign-supporting;
+
+            &[data-evaluation='met'] {
+                background-color: $benign-supporting;
+                color: #fff;
+            }
+        }
     }
 
-    &.pathogenic-supporting  {
-        color: #728b42;
+    .pathogenic-supporting {
+        &.not-disease-dependent,
+        &.disease-dependent[data-status='disease-associated'] {
+            background-color: #fff;
+            color: $pathogenic-supporting;
+
+            &[data-evaluation='met'] {
+                background-color: $pathogenic-supporting;
+                color: #fff;
+            }
+        }
     }
 
-    &.pathogenic-moderate {
-        color: #d36735;
+    .pathogenic-moderate {
+        &.not-disease-dependent,
+        &.disease-dependent[data-status='disease-associated'] {
+            background-color: #fff;
+            color: $pathogenic-moderate;
+
+            &[data-evaluation='met'] {
+                background-color: $pathogenic-moderate;
+                color: #fff;
+            }
+        }
     }
 
-    &.pathogenic-strong {
-        color: #d33535;
+    .pathogenic-strong {
+        &.not-disease-dependent,
+        &.disease-dependent[data-status='disease-associated'] {
+            background-color: #fff;
+            color: $pathogenic-strong;
+
+            &[data-evaluation='met'] {
+                background-color: $pathogenic-strong;
+                color: #fff;
+            }
+        }
     }
 
-    &.pathogenic-very-strong {
-        color: #d33535;
-    }
+    .pathogenic-very-strong {
+        &.not-disease-dependent,
+        &.disease-dependent[data-status='disease-associated'] {
+            background-color: #fff;
+            color: $pathogenic-very-strong;
 
+            &[data-evaluation='met'] {
+                background-color: $pathogenic-very-strong;
+                color: #fff;
+            }
+        }
+    }
+}
+
+/**
+ * Criteria code colors
+ */
+.benign-strong {
+    color: $benign-strong;
+}
+
+.benign-supporting {
+    color: $benign-supporting;
+}
+
+.pathogenic-supporting {
+    color: $pathogenic-supporting;
+}
+
+.pathogenic-moderate {
+    color: $pathogenic-moderate;
+}
+
+.pathogenic-strong {
+    color: $pathogenic-strong;
+}
+
+.pathogenic-very-strong {
+    color: $pathogenic-very-strong;
 }
 
 /**
