@@ -24,50 +24,50 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
         }
     },
 
-    // FIXME: fake data attribute to flag criteria that can be evaluated but not yet evaluated
-    // after associating a disease with interpretation.
-    // Shall be removed when actual functionality is implemented.
-    handleCriteria: function(criteria_code) {
-        var status;
-        var evaluated = ["BS1", "BS2", "BP1", "BP3", "BP7", "PP3", "PM2", "PM4", "PM5", "PS1", "PS4"];
-        var not_evaluated = ["BS3", "BS4", "BP2", "BP4", "PP1", "PP2", "PM1", "PS3"];
-        for (let x of evaluated) {
-            if (x === criteria_code) {
-                status = "evaluated";
+    // Method to render individual criteria codes and their respective tooltip
+    // 'data-status' attribute flags whether an interpretation is associated with disease
+    // 'data-evaluation' attribute flags whether a criterion is met
+    renderCriteriaBar: function(key, evidence, interpretation) {
+        // Flag disease-dependent criteria via @class
+        let isDiseaseDependent = (evidence[key]['disease-dependent']) ? 'disease-dependent' : 'not-disease-dependent';
+        let status = 'not-disease-associated',
+            evaluation = 'not-met';
+        // Flag disease-associated interpretation via [data-status]
+        if (interpretation.interpretation_disease) {
+            status = 'disease-associated';
+        }
+        // Flag 'met' criteria via [data-evaluation]
+        let evalArray = interpretation.evaluations;
+        if (evalArray) {
+            if (evalArray.length) {
+                evalArray.forEach(entry => {
+                    if (typeof entry.criteria !== 'undefined' && entry.criteria === key) {
+                        evaluation = (entry.value === 'true') ? 'met' : 'not-met';
+                    }
+                });
             }
         }
-        for (let y of not_evaluated) {
-            if (y === criteria_code) {
-                status = "not_evaluated";
-            }
-        }
-        return status;
+        return (
+            <button className={'btn btn-default ' + evidence[key].class + ' ' + evidence[key].category + ' ' + isDiseaseDependent}
+                type="button" key={key} data-status={status} data-evaluation={evaluation}
+                data-toggle="tooltip" data-placement="top" data-tooltip={evidence[key].definition}>
+                <span>{key}</span>
+            </button>
+        );
     },
 
     render: function() {
-        var self =this;
+        var keys = Object.keys(evidenceCodes);
+        var interpretation = this.state.interpretation;
 
         return (
             <div className="curation-criteria curation-variant">
-                {(this.state.interpretation) ?
+                {(interpretation) ?
                     <div className="criteria-bar btn-toolbar" role="toolbar" aria-label="Criteria bar with code buttons">
                         <div className="criteria-group btn-group btn-group-sm" role="group" aria-label="Criteria code button group">
-                            
-                            <div className="feature-in-development"> {/* FIXME div for temp yellow UI display */}
-
-                                {/* FIXME: Remove 'data-status' attribute when actual functionality is implemented to handle 'met' criteria */}
-                                {evidenceCodes.map(function(evidence, i) {
-                                    return (
-                                        <button type="button" className={'btn btn-default ' + evidence.class} key={i} data-status={self.handleCriteria(evidence.code)}
-                                            data-toggle="tooltip" data-placement="top" data-tooltip={evidence.definition}>
-                                            <span>{evidence.code}</span>
-                                        </button>
-                                    );
-                                })}
-
-                               
-                            </div> {/* /FIXME div for temp yellow UI display */}
-
+                            {keys.map(key => {
+                                return (this.renderCriteriaBar(key, evidenceCodes, interpretation));
+                            })}
                         </div>                       
                     </div>
                     : null
