@@ -994,10 +994,16 @@
 
     }
     .pad-top-more {
-        padding: 30px 0 0 0;
+        padding: 28px 0 0 0;
     }
     .center {
         text-align: center;
+    }
+    .input-right input {
+        text-align: right;
+    }
+    .after-input {
+        padding: 7px 0 0 0;
     }
     .clear {
         clear: both;

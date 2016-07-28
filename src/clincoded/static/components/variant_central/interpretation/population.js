@@ -732,7 +732,7 @@ var criteriaGroup1 = function() {
                     checked={this.state.checkboxes['BA1-notmet'] ? this.state.checkboxes['BA1-notmet'] : false}
                     labelClassName="control-label" wrapperClassName="col-xs-5 center" groupClassName="form-group" />
                 <div className="clear"></div>
-                <span className="col-xs-12 center">- or -</span>
+                <span className="col-xs-3"><span className="pull-right">- or -</span></span>
                 <div className="clear"></div>
                 <Input type="checkbox" ref="PM2-met" label="PM2:" handleChange={this.handleCheckboxChange}
                     checked={this.state.checkboxes['PM2-met'] ? this.state.checkboxes['PM2-met'] : false}
@@ -742,9 +742,10 @@ var criteriaGroup1 = function() {
                     labelClassName="control-label" wrapperClassName="col-xs-5 center" groupClassName="form-group" />
             </div>
             <div className="col-sm-4 pad-top">
-                <Input type="number" ref="maf-cutoff" label="MAF cutoff (%):" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
+                <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
                     value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
-                    labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-3" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
+                    labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-3 input-right" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
+                <span className="col-xs-5 after-input">%</span>
                 <div className="clear"></div>
                 <Input type="textarea" ref="BA1-description" rows="3" label="Explanation:"
                     labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName="form-group" handleChange={this.handleFormChange} />
@@ -788,16 +789,19 @@ var criteriaGroup1Update = function(nextProps) {
                 var tempCheckboxes = this.state.checkboxes;
                 switch(evaluation.criteria) {
                     case 'BA1':
-                        tempCheckboxes['BA1-value'] = evaluation.value === 'true';
+                        tempCheckboxes['BA1-met'] = evaluation.value === 'true';
+                        tempCheckboxes['BA1-notmet'] = evaluation.value === 'false';
                         this.refs['BA1-description'].setValue(evaluation.description);
                         this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
                         break;
                     case 'PM2':
-                        tempCheckboxes['PM2-value'] = evaluation.value === 'true';
+                        tempCheckboxes['PM2-met'] = evaluation.value === 'true';
+                        tempCheckboxes['PM2-notmet'] = evaluation.value === 'false';
                         this.refs['PM2-description'].setValue(evaluation.description);
                         break;
                     case 'BS1':
-                        tempCheckboxes['BS1-value'] = evaluation.value === 'true';
+                        tempCheckboxes['BS1-met'] = evaluation.value === 'true';
+                        tempCheckboxes['BS1-notmet'] = evaluation.value === 'false';
                         this.refs['BS1-description'].setValue(evaluation.description);
                         break;
                 }
@@ -811,15 +815,23 @@ var criteriaGroup1Update = function(nextProps) {
 var criteriaGroup1Change = function(ref, e) {
     // BA1 and PM2 are exclusive. The following is to ensure that if one of the checkboxes
     // are checked, the other is un-checked
-    if (ref === 'BA1-value' || ref === 'PM2-value') {
+    if (ref === 'BA1-met' || ref === 'PM2-met') {
         let tempCheckboxes = this.state.checkboxes,
-            altCriteriaValue = 'PM2-value';
-        if (ref === 'PM2-value') {
-            altCriteriaValue = 'BA1-value';
-        }
+            criteria = ref.substring(0,3),
+            altCriteria = criteria === 'PM2' ? 'BA1' : 'PM2';
         if (this.state.checkboxes[ref]) {
-            tempCheckboxes[altCriteriaValue] = false;
+            tempCheckboxes[criteria + '-notmet'] = false;
+            tempCheckboxes[altCriteria + '-met'] = false;
+            tempCheckboxes[altCriteria + '-notmet'] = true;
             this.setState({checkboxes: tempCheckboxes});
+        }
+    }
+    if (ref === 'BA1-notmet' || ref === 'PM2-notmet') {
+        let tempCheckboxes = this.state.checkboxes,
+            criteria = ref.substring(0,3),
+            altCriteria = criteria === 'PM2' ? 'BA1' : 'PM2';
+        if (this.state.checkboxes[ref]) {
+            tempCheckboxes[criteria + '-met'] = false;
         }
     }
     // Since BA1 and PM2 'share' the same description box, and the user only sees the BA1 box,
