@@ -35,7 +35,8 @@
         "reasons": {
             "title": "Reasons",
             "description": "Reasons for changing the classification",
-            "type": "string"
+            "type": "string",
+            "default": ""
         },
         "active": {
             "title": "Active",

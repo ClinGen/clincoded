@@ -748,9 +748,9 @@ var criteriaGroup1 = function() {
                     labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-3 input-right" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
                 <span className="col-xs-5 after-input">%</span>
                 <div className="clear"></div>
-                <Input type="textarea" ref="BA1-description" rows="3" label="Explanation:"
+                <Input type="textarea" ref="BA1-explanation" rows="3" label="Explanation:"
                     labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName="form-group" handleChange={this.handleFormChange} />
-                <Input type="textarea" ref="PM2-description" rows="3" label="Explanation:"
+                <Input type="textarea" ref="PM2-explanation" rows="3" label="Explanation:"
                     labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName="hidden" handleChange={this.handleFormChange} />
             </div>
             <div className="clear divider"></div>
@@ -773,7 +773,7 @@ var criteriaGroup1 = function() {
                     labelClassName="control-label" wrapperClassName="col-xs-5 center" groupClassName="form-group" />
             </div>
             <div className="col-sm-4 pad-top">
-                <Input type="textarea" ref="BS1-description" rows="3" inputDisabled={!this.state.diseaseAssociated} label="Explanation:"
+                <Input type="textarea" ref="BS1-explanation" rows="3" inputDisabled={!this.state.diseaseAssociated} label="Explanation:"
                     labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName="form-group" handleChange={this.handleFormChange} />
             </div>
             <div className="clear"></div>
@@ -790,20 +790,17 @@ var criteriaGroup1Update = function(nextProps) {
                 var tempCheckboxes = this.state.checkboxes;
                 switch(evaluation.criteria) {
                     case 'BA1':
-                        tempCheckboxes['BA1-met'] = evaluation.value === 'met';
-                        tempCheckboxes['BA1-not-met'] = evaluation.value === 'not-met';
-                        this.refs['BA1-description'].setValue(evaluation.description);
+                        tempCheckboxes['BA1-value'] = evaluation.value === 'true';
+                        this.refs['BA1-explanation'].setValue(evaluation.explanation);
                         this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
                         break;
                     case 'PM2':
-                        tempCheckboxes['PM2-met'] = evaluation.value === 'met';
-                        tempCheckboxes['PM2-not-met'] = evaluation.value === 'not-met';
-                        this.refs['PM2-description'].setValue(evaluation.description);
+                        tempCheckboxes['PM2-value'] = evaluation.value === 'true';
+                        this.refs['PM2-explanation'].setValue(evaluation.explanation);
                         break;
                     case 'BS1':
-                        tempCheckboxes['BS1-met'] = evaluation.value === 'met';
-                        tempCheckboxes['BS1-not-met'] = evaluation.value === 'not-met';
-                        this.refs['BS1-description'].setValue(evaluation.description);
+                        tempCheckboxes['BS1-value'] = evaluation.value === 'true';
+                        this.refs['BS1-explanation'].setValue(evaluation.explanation);
                         break;
                 }
                 this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
