@@ -244,16 +244,22 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
 /* Below code is for use in 'Update' portions of VCI eval forms */
 
+// helper function for going through interpretation object received from nextProps and updating
+// the forms for criteria defined by criteriaList (array of criteria code) with values from previous
+// evaluation(s). customActions is a dictionary of criteria-specific logic for updating non-standard
+// form fields for a criteria. The key for this dict is the crtieria to which the custom action should
+// be applied to, and the value is an anonymous function with the desired logic
 var updateEvalForm = module.exports.updateEvalForm = function(nextProps, criteriaList, customActions) {
     if (nextProps.interpretation) {
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
             nextProps.interpretation.evaluations.map(evaluation => {
-                var tempCheckboxes = this.state.checkboxes;
+                let tempCheckboxes = this.state.checkboxes;
                 if (criteriaList.indexOf(evaluation.criteria) > -1) {
+                    // set the met/not met checkboxes and explanation textboxes
                     tempCheckboxes[evaluation.criteria + '-met'] = evaluation.value === 'met';
                     tempCheckboxes[evaluation.criteria + '-not-met'] = evaluation.value === 'not-met';
                     this.refs[evaluation.criteria + '-explanation'].setValue(evaluation.explanation);
-
+                    // apply custom anonymous function logic if applicable
                     if (evaluation.criteria in customActions) {
                         customActions[evaluation.criteria].call(this, evaluation);
                     }

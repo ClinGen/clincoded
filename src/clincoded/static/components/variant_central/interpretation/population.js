@@ -784,13 +784,14 @@ var criteriaGroup1 = function() {
 // code for updating the form values of population tab interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaGroup1Update = function(nextProps) {
+    // define custom form update function for MAF Cutoff field in BA1
     let mafCutoffUpdate = function(evaluation) {
         this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
     };
+    // add custom form update functions into customActions dictionary
     let customActions = {
         'BA1': mafCutoffUpdate
     };
-
     vciFormHelper.updateEvalForm.apply(this, [nextProps, ['BA1', 'PM2', 'BS1'], customActions]);
 };
 
