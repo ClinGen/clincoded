@@ -163,12 +163,13 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     explanation: this.getFormValue(criterion + '-explanation')
                 };
                 // check whether or not criterion value is a checkbox and handle accordingly
-                if (this.refs[criterion + '-value'].getValue() === true) {
-                    evaluations[criterion]['value'] = 'true';
-                } else if (this.refs[criterion + '-value'].getValue() === false) {
-                    evaluations[criterion]['value'] = 'false';
+                if (this.refs[criterion + '-met'].getValue() === true) {
+                    evaluations[criterion]['value'] = 'met';
+                } else if (this.refs[criterion + '-not-met'].getValue() === true) {
+                    evaluations[criterion]['value'] = 'not-met';
                 } else {
-                    evaluations[criterion]['value'] = this.refs[criterion + '-value'].getValue();
+                    //evaluations[criterion]['value'] = this.refs[criterion + '-value'].getValue();
+                    evaluations[criterion]['value'] = 'not-evaluated';
                 }
                 // make link to evidence object, if applicable
                 if (evidenceResult) {
@@ -251,26 +252,11 @@ var updateEvalForm = module.exports.updateEvalForm = function(nextProps, criteri
                 if (criteriaList.indexOf(evaluation.criteria) > -1) {
                     tempCheckboxes[evaluation.criteria + '-met'] = evaluation.value === 'met';
                     tempCheckboxes[evaluation.criteria + '-not-met'] = evaluation.value === 'not-met';
-                    this.refs[evaluation.criteria + '-explanation'].setValue(evaluation.description);
-                }
+                    this.refs[evaluation.criteria + '-explanation'].setValue(evaluation.explanation);
 
-                switch(evaluation.criteria) {
-                    case 'BA1':
-                        tempCheckboxes['BA1-met'] = evaluation.value === 'met';
-                        tempCheckboxes['BA1-not-met'] = evaluation.value === 'not-met';
-                        this.refs['BA1-description'].setValue(evaluation.description);
-                        this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
-                        break;
-                    case 'PM2':
-                        tempCheckboxes['PM2-met'] = evaluation.value === 'met';
-                        tempCheckboxes['PM2-not-met'] = evaluation.value === 'not-met';
-                        this.refs['PM2-description'].setValue(evaluation.description);
-                        break;
-                    case 'BS1':
-                        tempCheckboxes['BS1-met'] = evaluation.value === 'met';
-                        tempCheckboxes['BS1-not-met'] = evaluation.value === 'not-met';
-                        this.refs['BS1-description'].setValue(evaluation.description);
-                        break;
+                    if (evaluation.criteria in customActions) {
+                        customActions[evaluation.criteria].call(this, evaluation);
+                    }
                 }
                 this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
             });
@@ -284,8 +270,7 @@ var updateEvalForm = module.exports.updateEvalForm = function(nextProps, criteri
 // logic for ensuring that Met and Not Met of a criteria are not both checked at all times.
 var switchCheckboxes = module.exports.switchCheckboxes = function(ref, criteria) {
     if (ref === criteria + '-met' || ref === criteria + '-not-met') {
-        let tempCheckboxes = this.state.checkboxes,
-            altCriteria = criteria === 'PM2' ? 'BA1' : 'PM2';
+        let tempCheckboxes = this.state.checkboxes;
         if (this.state.checkboxes[ref]) {
             if (ref === criteria + '-met') {
                 tempCheckboxes[criteria + '-not-met'] = false;
@@ -298,7 +283,7 @@ var switchCheckboxes = module.exports.switchCheckboxes = function(ref, criteria)
 
 // logic for ensuring that two mutually exclusive criteria do not both have Met values.
 var switchCrossCheckboxes = module.exports.switchCrossCheckboxes = function(ref, criteria1, criteria2) {
-    if (ref === criteria1 + '-met' || ref === criteria2 + '-not-met') {
+    if (ref === criteria1 + '-met' || ref === criteria2 + '-met') {
         let tempCheckboxes = this.state.checkboxes,
             refCriteria = ref.substring(0,3),
             altCriteria = refCriteria === criteria1 ? criteria2 : criteria1;
@@ -310,9 +295,9 @@ var switchCrossCheckboxes = module.exports.switchCrossCheckboxes = function(ref,
 
 // logic for ensuring that two 'shared' criteria have the same explanation values at all times. Usually one is hidden.
 var shareExplanation = module.exports.shareExplanation = function(ref, criteria1, criteria2) {
-    if (ref === criteria1 + '-description' || ref === criteria2 + '-description') {
+    if (ref === criteria1 + '-explanation' || ref === criteria2 + '-explanation') {
         let refCriteria = ref.substring(0,3),
             altCriteria = refCriteria === criteria1 ? criteria2 : criteria1;
-        this.refs[altCriteria + '-description'].setValue(this.refs[ref].getValue());
+        this.refs[altCriteria + '-explanation'].setValue(this.refs[ref].getValue());
     }
 };

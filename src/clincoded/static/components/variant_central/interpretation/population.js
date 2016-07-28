@@ -784,29 +784,14 @@ var criteriaGroup1 = function() {
 // code for updating the form values of population tab interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaGroup1Update = function(nextProps) {
-    if (nextProps.interpretation) {
-        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaluation => {
-                var tempCheckboxes = this.state.checkboxes;
-                switch(evaluation.criteria) {
-                    case 'BA1':
-                        tempCheckboxes['BA1-value'] = evaluation.value === 'true';
-                        this.refs['BA1-explanation'].setValue(evaluation.explanation);
-                        this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
-                        break;
-                    case 'PM2':
-                        tempCheckboxes['PM2-value'] = evaluation.value === 'true';
-                        this.refs['PM2-explanation'].setValue(evaluation.explanation);
-                        break;
-                    case 'BS1':
-                        tempCheckboxes['BS1-value'] = evaluation.value === 'true';
-                        this.refs['BS1-explanation'].setValue(evaluation.explanation);
-                        break;
-                }
-                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
-            });
-        }
-    }
+    let mafCutoffUpdate = function(evaluation) {
+        this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
+    };
+    let customActions = {
+        'BA1': mafCutoffUpdate
+    };
+
+    vciFormHelper.updateEvalForm.apply(this, [nextProps, ['BA1', 'PM2', 'BS1'], customActions]);
 };
 
 // code for handling logic within the form
