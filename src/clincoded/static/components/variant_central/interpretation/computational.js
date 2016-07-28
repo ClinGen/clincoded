@@ -718,7 +718,6 @@ var criteriaMissense1 = function() {
             <div className="col-sm-7 col-sm-offset-5 input-note-top">
                 <p className="alert alert-info">
                     <strong>BP1:</strong> Missense variant in a gene for which primarily truncating variants are known to cause disease
-
                     <br /><br />
                     <strong>PP2:</strong> Missense variant in a gene that has a low rate of benign missense variation and in which missense variants are a common mechanism of disease
                 </p>

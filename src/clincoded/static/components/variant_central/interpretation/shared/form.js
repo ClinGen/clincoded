@@ -239,3 +239,42 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         );
     }
 });
+
+// logic for ensuring that Met and Not Met of a criteria are not both checked at all times.
+// for use in 'Change' portions of VCI eval forms
+var switchCheckboxes = module.exports.switchCheckboxes = function(ref, criteria) {
+    if (ref === criteria + '-met' || ref === criteria + '-not-met') {
+        let tempCheckboxes = this.state.checkboxes,
+            altCriteria = criteria === 'PM2' ? 'BA1' : 'PM2';
+        if (this.state.checkboxes[ref]) {
+            if (ref === criteria + '-met') {
+                tempCheckboxes[criteria + '-not-met'] = false;
+            } else if (ref === criteria + '-not-met') {
+                tempCheckboxes[criteria + '-met'] = false;
+            }
+        }
+    }
+};
+
+// logic for ensuring that two mutually exclusive criteria do not both have Met values.
+// for use in 'Change' portions of VCI eval forms
+var switchCrossCheckboxes = module.exports.switchCrossCheckboxes = function(ref, criteria1, criteria2) {
+    if (ref === criteria1 + '-met' || ref === criteria2 + '-not-met') {
+        let tempCheckboxes = this.state.checkboxes,
+            refCriteria = ref.substring(0,3),
+            altCriteria = refCriteria === criteria1 ? criteria2 : criteria1;
+        if (this.state.checkboxes[ref]) {
+            tempCheckboxes[altCriteria + '-met'] = false;
+        }
+    }
+};
+
+// logic for ensuring that two 'shared' criteria have the same explanation values at all times. Usually one is hidden.
+// for use in 'Change' portion of VCI eval forms
+var shareExplanation = module.exports.shareExplanation = function(ref, criteria1, criteria2) {
+    if (ref === criteria1 + '-description' || ref === criteria2 + '-description') {
+        let refCriteria = ref.substring(0,3),
+            altCriteria = refCriteria === criteria1 ? criteria2 : criteria1;
+        this.refs[altCriteria + '-description'].setValue(this.refs[ref].getValue());
+    }
+};

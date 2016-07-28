@@ -4,7 +4,8 @@ var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
-var CurationInterpretationForm = require('./shared/form').CurationInterpretationForm;
+var vciFormHelper = require('./shared/form');
+var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
@@ -813,46 +814,14 @@ var criteriaGroup1Update = function(nextProps) {
 
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
-    // BA1 and PM2 are exclusive. The following is to ensure that if one of the checkboxes
-    // are checked, the other is un-checked
-    if (ref === 'BA1-met' || ref === 'PM2-met') {
-        let tempCheckboxes = this.state.checkboxes,
-            criteria = ref.substring(0,3),
-            altCriteria = criteria === 'PM2' ? 'BA1' : 'PM2';
-        if (this.state.checkboxes[ref]) {
-            tempCheckboxes[criteria + '-not-met'] = false;
-            tempCheckboxes[altCriteria + '-met'] = false;
-            this.setState({checkboxes: tempCheckboxes});
-        }
-    }
-    if (ref === 'BA1-not-met' || ref === 'PM2-not-met') {
-        let tempCheckboxes = this.state.checkboxes,
-            criteria = ref.substring(0,3),
-            altCriteria = criteria === 'PM2' ? 'BA1' : 'PM2';
-        if (this.state.checkboxes[ref]) {
-            tempCheckboxes[criteria + '-met'] = false;
-        }
-    }
-    if (ref === 'BS1-met' || ref === 'BS1-not-met') {
-        let tempCheckboxes = this.state.checkboxes,
-            criteria = ref.substring(0,3),
-            metNotmet = ref.substring(3),
-            altmetNotmet = metNotmet === '-met' ? '-not-met' : '-met';
-        if (this.state.checkboxes[ref]) {
-            tempCheckboxes[criteria + altmetNotmet] = false;
-        }
-    }
-    // Since BA1 and PM2 'share' the same description box, and the user only sees the BA1 box,
-    // the following is to update the value in the PM2 box to contain the same data on
-    // saving of the evaluation. Handles changes going the other way, too, just in case (although
-    // this should never happen)
-    if (ref === 'BA1-description' || ref === 'PM2-description') {
-        let altCriteriaDescription = 'PM2-description';
-        if (ref === 'PM2-description') {
-            altCriteriaDescription = 'BA1-description';
-        }
-        this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
-    }
+    // Met and Not Met are exclusive for the following criteria
+    vciFormHelper.switchCheckboxes.apply(this, [ref, 'BA1']);
+    vciFormHelper.switchCheckboxes.apply(this, [ref, 'PM2']);
+    vciFormHelper.switchCheckboxes.apply(this, [ref, 'BS1']);
+    // Both criteria of each group below cannot both be Met
+    vciFormHelper.switchCrossCheckboxes.apply(this, [ref, 'BA1', 'PM2']);
+    // Both explanation boxes for both criteria of each group must be the same
+    vciFormHelper.shareExplanation.apply(this, [ref, 'BA1', 'PM2']);
     // if the MAF cutoff field is changed, update the populationObj payload with the updated value
     if (ref === 'maf-cutoff') {
         let tempEvidenceData = this.state.evidenceData;
