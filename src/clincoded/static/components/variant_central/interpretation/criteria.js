@@ -31,7 +31,7 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
         // Flag disease-dependent criteria via @class
         let isDiseaseDependent = (evidence[key]['disease-dependent']) ? 'disease-dependent' : 'not-disease-dependent';
         let status = 'not-disease-associated',
-            evaluation = 'not-met';
+            evaluation = 'not-evaluated';
         // Flag disease-associated interpretation via [data-status]
         if (interpretation.interpretation_disease) {
             status = 'disease-associated';
@@ -42,7 +42,7 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
             if (evalArray.length) {
                 evalArray.forEach(entry => {
                     if (typeof entry.criteria !== 'undefined' && entry.criteria === key) {
-                        evaluation = (entry.value === 'true') ? 'met' : 'not-met';
+                        evaluation = entry.value;
                     }
                 });
             }
