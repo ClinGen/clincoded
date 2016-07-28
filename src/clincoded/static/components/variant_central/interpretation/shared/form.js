@@ -240,8 +240,48 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     }
 });
 
+
+/* Below code is for use in 'Update' portions of VCI eval forms */
+
+var updateEvalForm = module.exports.updateEvalForm = function(nextProps, criteriaList, customActions) {
+    if (nextProps.interpretation) {
+        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
+            nextProps.interpretation.evaluations.map(evaluation => {
+                var tempCheckboxes = this.state.checkboxes;
+                if (criteriaList.indexOf(evaluation.criteria) > -1) {
+                    tempCheckboxes[evaluation.criteria + '-met'] = evaluation.value === 'met';
+                    tempCheckboxes[evaluation.criteria + '-not-met'] = evaluation.value === 'not-met';
+                    this.refs[evaluation.criteria + '-explanation'].setValue(evaluation.description);
+                }
+
+                switch(evaluation.criteria) {
+                    case 'BA1':
+                        tempCheckboxes['BA1-met'] = evaluation.value === 'met';
+                        tempCheckboxes['BA1-not-met'] = evaluation.value === 'not-met';
+                        this.refs['BA1-description'].setValue(evaluation.description);
+                        this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
+                        break;
+                    case 'PM2':
+                        tempCheckboxes['PM2-met'] = evaluation.value === 'met';
+                        tempCheckboxes['PM2-not-met'] = evaluation.value === 'not-met';
+                        this.refs['PM2-description'].setValue(evaluation.description);
+                        break;
+                    case 'BS1':
+                        tempCheckboxes['BS1-met'] = evaluation.value === 'met';
+                        tempCheckboxes['BS1-not-met'] = evaluation.value === 'not-met';
+                        this.refs['BS1-description'].setValue(evaluation.description);
+                        break;
+                }
+                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
+            });
+        }
+    }
+};
+
+
+/* Below code is for use in 'Change' portions of VCI eval forms */
+
 // logic for ensuring that Met and Not Met of a criteria are not both checked at all times.
-// for use in 'Change' portions of VCI eval forms
 var switchCheckboxes = module.exports.switchCheckboxes = function(ref, criteria) {
     if (ref === criteria + '-met' || ref === criteria + '-not-met') {
         let tempCheckboxes = this.state.checkboxes,
@@ -257,7 +297,6 @@ var switchCheckboxes = module.exports.switchCheckboxes = function(ref, criteria)
 };
 
 // logic for ensuring that two mutually exclusive criteria do not both have Met values.
-// for use in 'Change' portions of VCI eval forms
 var switchCrossCheckboxes = module.exports.switchCrossCheckboxes = function(ref, criteria1, criteria2) {
     if (ref === criteria1 + '-met' || ref === criteria2 + '-not-met') {
         let tempCheckboxes = this.state.checkboxes,
@@ -270,7 +309,6 @@ var switchCrossCheckboxes = module.exports.switchCrossCheckboxes = function(ref,
 };
 
 // logic for ensuring that two 'shared' criteria have the same explanation values at all times. Usually one is hidden.
-// for use in 'Change' portion of VCI eval forms
 var shareExplanation = module.exports.shareExplanation = function(ref, criteria1, criteria2) {
     if (ref === criteria1 + '-description' || ref === criteria2 + '-description') {
         let refCriteria = ref.substring(0,3),
