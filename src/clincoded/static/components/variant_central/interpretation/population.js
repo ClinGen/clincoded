@@ -728,8 +728,8 @@ var criteriaGroup1 = function() {
                 <Input type="checkbox" ref="BA1-met" label="BA1:" handleChange={this.handleCheckboxChange}
                     checked={this.state.checkboxes['BA1-met'] ? this.state.checkboxes['BA1-met'] : false}
                     labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-4 center" groupClassName="form-group" />
-                <Input type="checkbox" ref="BA1-notmet" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['BA1-notmet'] ? this.state.checkboxes['BA1-notmet'] : false}
+                <Input type="checkbox" ref="BA1-not-met" handleChange={this.handleCheckboxChange}
+                    checked={this.state.checkboxes['BA1-not-met'] ? this.state.checkboxes['BA1-not-met'] : false}
                     labelClassName="control-label" wrapperClassName="col-xs-5 center" groupClassName="form-group" />
                 <div className="clear"></div>
                 <span className="col-xs-3"><span className="pull-right">- or -</span></span>
@@ -737,8 +737,8 @@ var criteriaGroup1 = function() {
                 <Input type="checkbox" ref="PM2-met" label="PM2:" handleChange={this.handleCheckboxChange}
                     checked={this.state.checkboxes['PM2-met'] ? this.state.checkboxes['PM2-met'] : false}
                     labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-4 center" groupClassName="form-group" />
-                <Input type="checkbox" ref="PM2-notmet" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['PM2-notmet'] ? this.state.checkboxes['PM2-notmet'] : false}
+                <Input type="checkbox" ref="PM2-not-met" handleChange={this.handleCheckboxChange}
+                    checked={this.state.checkboxes['PM2-not-met'] ? this.state.checkboxes['PM2-not-met'] : false}
                     labelClassName="control-label" wrapperClassName="col-xs-5 center" groupClassName="form-group" />
             </div>
             <div className="col-sm-4 pad-top">
@@ -767,8 +767,8 @@ var criteriaGroup1 = function() {
                 <Input type="checkbox" ref="BS1-met" label="BS1:" handleChange={this.handleCheckboxChange}
                     checked={this.state.checkboxes['BS1-met'] ? this.state.checkboxes['BS1-met'] : false} inputDisabled={!this.state.diseaseAssociated}
                     labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-4 center" groupClassName="form-group" />
-                <Input type="checkbox" ref="BS1-notmet" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['BS1-notmet'] ? this.state.checkboxes['BS1-notmet'] : false} inputDisabled={!this.state.diseaseAssociated}
+                <Input type="checkbox" ref="BS1-not-met" handleChange={this.handleCheckboxChange}
+                    checked={this.state.checkboxes['BS1-not-met'] ? this.state.checkboxes['BS1-not-met'] : false} inputDisabled={!this.state.diseaseAssociated}
                     labelClassName="control-label" wrapperClassName="col-xs-5 center" groupClassName="form-group" />
             </div>
             <div className="col-sm-4 pad-top">
@@ -789,19 +789,19 @@ var criteriaGroup1Update = function(nextProps) {
                 var tempCheckboxes = this.state.checkboxes;
                 switch(evaluation.criteria) {
                     case 'BA1':
-                        tempCheckboxes['BA1-met'] = evaluation.value === 'true';
-                        tempCheckboxes['BA1-notmet'] = evaluation.value === 'false';
+                        tempCheckboxes['BA1-met'] = evaluation.value === 'met';
+                        tempCheckboxes['BA1-not-met'] = evaluation.value === 'not-met';
                         this.refs['BA1-description'].setValue(evaluation.description);
                         this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
                         break;
                     case 'PM2':
-                        tempCheckboxes['PM2-met'] = evaluation.value === 'true';
-                        tempCheckboxes['PM2-notmet'] = evaluation.value === 'false';
+                        tempCheckboxes['PM2-met'] = evaluation.value === 'met';
+                        tempCheckboxes['PM2-not-met'] = evaluation.value === 'not-met';
                         this.refs['PM2-description'].setValue(evaluation.description);
                         break;
                     case 'BS1':
-                        tempCheckboxes['BS1-met'] = evaluation.value === 'true';
-                        tempCheckboxes['BS1-notmet'] = evaluation.value === 'false';
+                        tempCheckboxes['BS1-met'] = evaluation.value === 'met';
+                        tempCheckboxes['BS1-not-met'] = evaluation.value === 'not-met';
                         this.refs['BS1-description'].setValue(evaluation.description);
                         break;
                 }
@@ -820,18 +820,26 @@ var criteriaGroup1Change = function(ref, e) {
             criteria = ref.substring(0,3),
             altCriteria = criteria === 'PM2' ? 'BA1' : 'PM2';
         if (this.state.checkboxes[ref]) {
-            tempCheckboxes[criteria + '-notmet'] = false;
+            tempCheckboxes[criteria + '-not-met'] = false;
             tempCheckboxes[altCriteria + '-met'] = false;
-            tempCheckboxes[altCriteria + '-notmet'] = true;
             this.setState({checkboxes: tempCheckboxes});
         }
     }
-    if (ref === 'BA1-notmet' || ref === 'PM2-notmet') {
+    if (ref === 'BA1-not-met' || ref === 'PM2-not-met') {
         let tempCheckboxes = this.state.checkboxes,
             criteria = ref.substring(0,3),
             altCriteria = criteria === 'PM2' ? 'BA1' : 'PM2';
         if (this.state.checkboxes[ref]) {
             tempCheckboxes[criteria + '-met'] = false;
+        }
+    }
+    if (ref === 'BS1-met' || ref === 'BS1-not-met') {
+        let tempCheckboxes = this.state.checkboxes,
+            criteria = ref.substring(0,3),
+            metNotmet = ref.substring(3),
+            altmetNotmet = metNotmet === '-met' ? '-not-met' : '-met';
+        if (this.state.checkboxes[ref]) {
+            tempCheckboxes[criteria + altmetNotmet] = false;
         }
     }
     // Since BA1 and PM2 'share' the same description box, and the user only sees the BA1 box,
