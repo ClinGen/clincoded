@@ -245,14 +245,20 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
 /* Below code is for use in structuring/rendering the VCI eval forms */
 
-var evalFormSectionWrapper = module.exports.evalFormSectionWrapper = function(noteContent, valueContent, explanationContent, divider) {
+// master wrapper for rendering a eval form 'group' (denoted by a single blue note box). Call from tab page where the forms should be rendered,
+// in the function to pass into the CurationInterpretationObject object.
+// noteContent should be a call to evalFormNoteSectionWrapper() - see below
+// dropdownContent should be a call to evalFormDropdownSectionWrapper() - see below
+// explanationContent should be a call to evalFormExplanationSectionWrapper() - see below
+// divider is a boolean to indicate whether or not a gray divider bar should be rendered at the bottom of the group (for use if there is a subsequent form group before the Save button)
+var evalFormSectionWrapper = module.exports.evalFormSectionWrapper = function(noteContent, dropdownContent, explanationContent, divider) {
     return (
         <div>
             <div className="col-sm-4">
                 {noteContent}
             </div>
             <div className="col-sm-4 pad-top">
-                {valueContent}
+                {dropdownContent}
             </div>
             <div className="col-sm-4 pad-top">
                 {explanationContent}
@@ -262,6 +268,8 @@ var evalFormSectionWrapper = module.exports.evalFormSectionWrapper = function(no
     );
 };
 
+// wrapper for rendering the note section of eval form group. criteriaList should be an array of criteria codes being handled in the section.
+// description and disease-dependency are ascertained from evidence_codes.json
 var evalFormNoteSectionWrapper = module.exports.evalFormNoteSectionWrapper = function(criteriaList) {
     return (
         <p className="alert alert-info">
@@ -278,6 +286,8 @@ var evalFormNoteSectionWrapper = module.exports.evalFormNoteSectionWrapper = fun
     );
 };
 
+// wrapper for rendering the dropdown section of eval form group. criteriaList should be an array of criteria codes being handled in the section.
+// calls evalFormValueDropdown() to render a dropdown for each criteria
 var evalFormDropdownSectionWrapper = module.exports.evalFormDropdownSectionWrapper = function(criteriaList) {
     return (
         <div>
@@ -294,6 +304,7 @@ var evalFormDropdownSectionWrapper = module.exports.evalFormDropdownSectionWrapp
     );
 };
 
+// helper function for evalFormDropdownSectionWrapper() to generate the dropdown for each criteria
 function evalFormValueDropdown(criteria) {
     return (
         <Input type="select" ref={criteria + "-value"} label={criteria + ":"} defaultValue="not-evaluated"
@@ -312,6 +323,12 @@ function evalFormValueDropdown(criteria) {
     );
 }
 
+// wrapper for rendering the explanation section of eval form group
+// criteriaList should be an array of criteria codes being handled in the section
+// hiddenList should be an array of booleans mirroring the size and order of criteriaList, with the booleans indicating whether or not the explanation input for
+//      that criteria should be visible. this should generally be used with shareExplanation()
+// customContentBefore should be HTML for any elements to render before the explanation inputs, in that column (optional)
+// customContentAfter should be HTML for any elements to render after the explanation inputs, in that column (optional)
 var evalFormExplanationSectionWrapper = module.exports.evalFormExplanationSectionWrapper = function(criteriaList, hiddenList, customContentBefore, customContentAfter) {
     return (
         <div>
@@ -324,6 +341,7 @@ var evalFormExplanationSectionWrapper = module.exports.evalFormExplanationSectio
     );
 };
 
+// helper function for evalFormExplanationSectionWrapper() to generate the explanation input for each criteria
 function evalFormExplanationDefaultInput(criteria, hidden) {
     return (
         <Input type="textarea" ref={criteria + "-explanation"} rows="3" label="Explanation:"
@@ -360,6 +378,7 @@ var updateEvalForm = module.exports.updateEvalForm = function(nextProps, criteri
 /* Below code is for use in 'Change' portions of VCI eval forms */
 
 // logic for ensuring that multiple 'shared' criteria have the same explanation values at all times. Usually only one is visible.
+// criteriaList should be an array of criteria codes
 var shareExplanation = module.exports.shareExplanation = function(ref, criteriaList) {
     let refCriteria = ref.substring(0, ref.indexOf("-")),
         refType = ref.substring(ref.indexOf("-") + 1);
