@@ -143,10 +143,19 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 if (this.state.evidenceDataUpdated) {
                     let evidenceObject = {variant: this.props.variantUuid};
                     evidenceObject[this.state.evidenceType + 'Data'] = this.state.evidenceData;
-                    return this.postRestData('/' + this.props.evidenceType + '/', evidenceObject).then(evidenceResult => {
-                        return Promise.resolve(evidenceResult['@graph'][0]['@id']);
-                    });
+                    if (evidenceObjectId) {
+                        // previous evidence object exists; update it
+                        return this.putRestData(evidenceObjectId, evidenceObject).then(evidenceResult => {
+                            return Promise.resolve(evidenceResult['@graph'][0]['@id']);
+                        });
+                    } else {
+                        // previous evidence object not found; create a new one
+                        return this.postRestData('/' + this.props.evidenceType + '/', evidenceObject).then(evidenceResult => {
+                            return Promise.resolve(evidenceResult['@graph'][0]['@id']);
+                        });
+                    }
                 } else {
+                    // previous evidence object found, but the object does not need to be updated
                     return Promise.resolve(evidenceObjectId);
                 }
             } else {
