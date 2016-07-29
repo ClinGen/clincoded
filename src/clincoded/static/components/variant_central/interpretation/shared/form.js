@@ -273,34 +273,30 @@ get list of criteria code, defs, and whether they're disease dependent or not?? 
 var evalFormValueSectionWrapper = module.exports.evalFormValueSectionWrapper = function(criteriaList) {
     return (
         <div>
-            <span className="col-xs-offset-3 col-xs-4 center">Met:</span><span className="col-xs-5 center">Not met:</span>
-            <div className="clear"></div>
             {criteriaList.map(criteria => {
-
+                return evalFormValueDropdown.call(this, criteria);
             })}
         </div>
     );
 };
 
-/*
-                <span className="col-xs-offset-3 col-xs-4 center">Met:</span><span className="col-xs-5 center">Not met:</span>
-                <div className="clear"></div>
-                <Input type="checkbox" ref="BA1-met" label="BA1:" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['BA1-met'] ? this.state.checkboxes['BA1-met'] : false}
-                    labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-4 center" groupClassName="form-group" />
-                <Input type="checkbox" ref="BA1-not-met" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['BA1-not-met'] ? this.state.checkboxes['BA1-not-met'] : false}
-                    labelClassName="control-label" wrapperClassName="col-xs-5 center" groupClassName="form-group" />
-                <div className="clear"></div>
-                <span className="col-xs-3"><span className="pull-right">- or -</span></span>
-                <div className="clear"></div>
-                <Input type="checkbox" ref="PM2-met" label="PM2:" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['PM2-met'] ? this.state.checkboxes['PM2-met'] : false}
-                    labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-4 center" groupClassName="form-group" />
-                <Input type="checkbox" ref="PM2-not-met" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['PM2-not-met'] ? this.state.checkboxes['PM2-not-met'] : false}
-                    labelClassName="control-label" wrapperClassName="col-xs-5 center" groupClassName="form-group" />
-*/
+function evalFormValueDropdown(criteria) {
+    return (
+        <Input type="select" ref={criteria + "-value"} label={criteria + ":"} defaultValue="not-evaluated"
+            error={this.getFormError(criteria + "-value")} clearError={this.clrFormErrors.bind(null, criteria + "-value")}
+            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group"
+            handleChange={this.handleChange}>
+            <option value="not-evaluated">{criteria} Not Evaluated</option>
+            <option disabled="disabled"></option>
+            <option value="met">{criteria} Met</option>
+            <option value="not-met">{criteria} Not Met</option>
+            <option value="supporting">{criteria} Supporting</option>
+            <option value="moderate">{criteria} Moderate</option>
+            <option value="strong">{criteria} Strong</option>
+            <option value="very-strong">{criteria} Very Strong</option>
+        </Input>
+    );
+}
 
 
 /*
@@ -327,18 +323,14 @@ var updateEvalForm = module.exports.updateEvalForm = function(nextProps, criteri
     if (nextProps.interpretation) {
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
             nextProps.interpretation.evaluations.map(evaluation => {
-                let tempCheckboxes = this.state.checkboxes;
                 if (criteriaList.indexOf(evaluation.criteria) > -1) {
-                    // set the met/not met checkboxes and explanation textboxes
-                    tempCheckboxes[evaluation.criteria + '-met'] = evaluation.value === 'met';
-                    tempCheckboxes[evaluation.criteria + '-not-met'] = evaluation.value === 'not-met';
-                    this.refs[evaluation.criteria + '-explanation'].setValue(evaluation.explanation);
+                    this.refs[evaluation.criteria + '-value'].setValue(evaluation.value);
                     // apply custom anonymous function logic if applicable
                     if (evaluation.criteria in customActions) {
                         customActions[evaluation.criteria].call(this, evaluation);
                     }
                 }
-                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
+                this.setState({submitDisabled: false});
             });
         }
     }

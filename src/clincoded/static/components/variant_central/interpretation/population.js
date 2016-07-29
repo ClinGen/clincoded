@@ -714,46 +714,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
 // code for rendering of population tab interpretation forms
 var criteriaGroup1 = function() {
-    return (
-        <div>
-            <div className="col-sm-4 input-note-top">
-                <p className="alert alert-info">
+    let temp =                 <p className="alert alert-info">
                     <strong>BA1:</strong> Allele frequency is > 5% in ExAC, 1000 Genomes, or ESP
                     <br /><br />
                     <strong>PM2:</strong> Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP
-                </p>
-            </div>
-            <div className="col-sm-4 pad-top-more">
-                <span className="col-xs-offset-3 col-xs-4 center">Met:</span><span className="col-xs-5 center">Not met:</span>
-                <div className="clear"></div>
-                <Input type="checkbox" ref="BA1-met" label="BA1:" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['BA1-met'] ? this.state.checkboxes['BA1-met'] : false}
-                    labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-4 center" groupClassName="form-group" />
-                <Input type="checkbox" ref="BA1-not-met" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['BA1-not-met'] ? this.state.checkboxes['BA1-not-met'] : false}
-                    labelClassName="control-label" wrapperClassName="col-xs-5 center" groupClassName="form-group" />
-                <div className="clear"></div>
-                <span className="col-xs-3"><span className="pull-right">- or -</span></span>
-                <div className="clear"></div>
-                <Input type="checkbox" ref="PM2-met" label="PM2:" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['PM2-met'] ? this.state.checkboxes['PM2-met'] : false}
-                    labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-4 center" groupClassName="form-group" />
-                <Input type="checkbox" ref="PM2-not-met" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['PM2-not-met'] ? this.state.checkboxes['PM2-not-met'] : false}
-                    labelClassName="control-label" wrapperClassName="col-xs-5 center" groupClassName="form-group" />
-            </div>
-            <div className="col-sm-4 pad-top">
-                <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
-                    value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
-                    labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-3 input-right" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
-                <span className="col-xs-5 after-input">%</span>
-                <div className="clear"></div>
-                <Input type="textarea" ref="BA1-explanation" rows="3" label="Explanation:"
-                    labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName="form-group" handleChange={this.handleFormChange} />
-                <Input type="textarea" ref="PM2-explanation" rows="3" label="Explanation:"
-                    labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName="hidden" handleChange={this.handleFormChange} />
-            </div>
-            <div className="clear divider"></div>
+                </p>;
+    return (
+        <div>
+            {vciFormHelper.evalFormSectionWrapper.apply(this, [temp, vciFormHelper.evalFormValueSectionWrapper.call(this, ['BA1', 'PM2', 'BS1']), ''])}
 
             <div className="col-sm-4 input-note-top">
                 <p className="alert alert-info">
