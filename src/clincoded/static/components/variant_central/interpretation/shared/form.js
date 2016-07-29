@@ -248,10 +248,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 var evalFormSectionWrapper = module.exports.evalFormSectionWrapper = function(noteContent, valueContent, explanationContent, divider) {
     return (
         <div>
-            <div className="col-sm-4 input-note-top">
+            <div className="col-sm-4">
                 {noteContent}
             </div>
-            <div className="col-sm-4 pad-top-more">
+            <div className="col-sm-4 pad-top">
                 {valueContent}
             </div>
             <div className="col-sm-4 pad-top">
@@ -267,7 +267,7 @@ var evalFormNoteSectionWrapper = module.exports.evalFormNoteSectionWrapper = fun
         <p className="alert alert-info">
             {criteriaList.map((criteria, i) => {
                 return (
-                    <span>
+                    <span key={i}>
                         <strong>{criteria}:</strong> {evidenceCodes[criteria].definitionLong}
                         {evidenceCodes[criteria].diseaseDependent ? <span><br /><span className="label label-warning pull-right">Disease dependent</span></span> : null}
                         {i < criteriaList.length - 1 ? <span><br /><br /></span> : null}
@@ -283,7 +283,7 @@ var evalFormDropdownSectionWrapper = module.exports.evalFormDropdownSectionWrapp
         <div>
             {criteriaList.map((criteria, i) => {
                 return (
-                    <span>
+                    <span key={i}>
                         {evalFormValueDropdown.call(this, criteria)}
                         {i < criteriaList.length - 1 ? <span className="col-xs-3 pad-bottom"><span className="pull-right">- or -</span></span> : null}
                         <div className="clear"></div>
@@ -317,7 +317,7 @@ var evalFormExplanationSectionWrapper = module.exports.evalFormExplanationSectio
         <div>
             {customContentBefore ? customContentBefore : null}
             {criteriaList.map((criteria, i) => {
-                return (<span>{evalFormExplanationDefaultInput.call(this, criteria, hiddenList[i])}</span>);
+                return (<span key={i}>{evalFormExplanationDefaultInput.call(this, criteria, hiddenList[i])}</span>);
             })}
             {customContentAfter ? customContentAfter : null}
         </div>
