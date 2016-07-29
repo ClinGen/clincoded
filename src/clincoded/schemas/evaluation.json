@@ -81,7 +81,7 @@
             "type": "string"
         },
         "criteriaStatus": {
-            "title": "Evaluation Value",
+            "title": "Criteria Status",
             "type": "string"
         },
         "modifier": {
