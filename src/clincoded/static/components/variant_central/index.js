@@ -75,6 +75,7 @@ var VariantCurationHub = React.createClass({
                     // To extract more ClinVar data for 'Basic Information' tab
                     var variantData = parseClinvar(xml, true);
                     this.setState({ext_clinvarEutils: variantData});
+                    this.handleCodonEsearch(variantData);
                 }).catch(function(e) {
                     console.log('ClinVarEutils Fetch Error=: %o', e);
                 });
@@ -155,7 +156,6 @@ var VariantCurationHub = React.createClass({
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then(response => {
                     this.setState({ext_ensemblHgvsVEP: response});
-                    this.handleCodonEsearch(response);
                 }).catch(function(e) {
                     console.log('Ensembl Fetch Error=: %o', e);
                 });
@@ -163,24 +163,12 @@ var VariantCurationHub = React.createClass({
         }
     },
 
-    // Retrieve codon data from ClinVar Esearch given Ensembl VEP response
+    // Retrieve codon data from ClinVar Esearch given Eutils/ClinVar response
     handleCodonEsearch: function(response) {
-        let primaryTranscript = setPrimaryTranscript(response);
-        if (primaryTranscript) {
-            let amino_acid = '',
-                term = null;
-            // Get amino acid
-            if (primaryTranscript.amino_acids) {
-                let amino_acids = primaryTranscript.amino_acids;
-                amino_acid = amino_acids.substr(0, amino_acids.indexOf('/'));
-            }
-            // Get protein location
-            let protein_start = (primaryTranscript.protein_start) ? primaryTranscript.protein_start : null;
-            // Construct NCBI Esearch query
-            if (amino_acid.length && protein_start) {
-                term = amino_acid + protein_start;
-            }
-            let symbol = primaryTranscript.gene_symbol;
+        let aminoAcidLocation = response.allele.ProteinChange;
+        let symbol = response.gene.symbol;
+        if (aminoAcidLocation && symbol) {
+            let term = aminoAcidLocation.substr(0, aminoAcidLocation.length-1);
             this.getRestData(this.props.href_url.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
                 // pass in these additional values, in case receiving component needs them
                 result.vci_term = term;
