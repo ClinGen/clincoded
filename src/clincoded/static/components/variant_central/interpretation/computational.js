@@ -726,7 +726,7 @@ var criteriaMissense1 = function() {
                 checked={this.state.checkboxes['BP1-value'] ? this.state.checkboxes['BP1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
-            <Input type="checkbox" ref="PP2-value" label={<span>PP2 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
+            <Input type="checkbox" ref="PP2-value" label={<span>PP2 met? (Disease dependent):</span>} handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PP2-value'] ? this.state.checkboxes['PP2-value'] : false} inputDisabled={!this.state.diseaseAssociated}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="BP1-explanation" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
