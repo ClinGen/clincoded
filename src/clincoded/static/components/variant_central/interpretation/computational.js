@@ -705,7 +705,7 @@ var criteriaMissense1 = function() {
             </div>
             <Input type="checkbox" ref="BP4-value" label="BP4 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['BP4-value'] ? this.state.checkboxes['BP4-value'] : false}
-                labelClassName="col-sm-2 control-label" wrapperClassName="col-sm-2" groupClassName="form-group" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
             <Input type="checkbox" ref="PP3-value" label="PP3 met?:" handleChange={this.handleCheckboxChange}
                 checked={this.state.checkboxes['PP3-value'] ? this.state.checkboxes['PP3-value'] : false}
