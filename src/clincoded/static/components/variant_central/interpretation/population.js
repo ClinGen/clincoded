@@ -730,31 +730,9 @@ var criteriaGroup1 = function() {
             {vciFormHelper.evalFormSectionWrapper.call(this,
                 vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList),
                 vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList, hiddenList, mafCutoffInput, null)
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList, hiddenList, mafCutoffInput, null),
+                false
             )}
-
-            <div className="col-sm-4 input-note-top">
-                <p className="alert alert-info">
-                    <strong>BS1:</strong> Allele frequency greater than expected due to disorder
-                    <br />
-                    <span className="label label-warning pull-right">Disease dependent</span>
-                </p>
-            </div>
-            <div className="col-sm-4 pad-top-more">
-                <span className="col-xs-offset-3 col-xs-4 center">Met:</span><span className="col-xs-5 center">Not met:</span>
-                <div className="clear"></div>
-                <Input type="checkbox" ref="BS1-met" label="BS1:" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['BS1-met'] ? this.state.checkboxes['BS1-met'] : false} inputDisabled={!this.state.diseaseAssociated}
-                    labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-4 center" groupClassName="form-group" />
-                <Input type="checkbox" ref="BS1-not-met" handleChange={this.handleCheckboxChange}
-                    checked={this.state.checkboxes['BS1-not-met'] ? this.state.checkboxes['BS1-not-met'] : false} inputDisabled={!this.state.diseaseAssociated}
-                    labelClassName="control-label" wrapperClassName="col-xs-5 center" groupClassName="form-group" />
-            </div>
-            <div className="col-sm-4 pad-top">
-                <Input type="textarea" ref="BS1-explanation" rows="3" inputDisabled={!this.state.diseaseAssociated} label="Explanation:"
-                    labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName="form-group" handleChange={this.handleFormChange} />
-            </div>
-            <div className="clear"></div>
         </div>
     );
 };
@@ -770,19 +748,13 @@ var criteriaGroup1Update = function(nextProps) {
     let customActions = {
         'BA1': mafCutoffUpdate
     };
-    vciFormHelper.updateEvalForm.apply(this, [nextProps, ['BA1', 'PM2', 'BS1'], customActions]);
+    vciFormHelper.updateEvalForm.call(this, nextProps, ['BA1', 'PM2', 'BS1'], customActions);
 };
 
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
-    // Met and Not Met are exclusive for the following criteria
-    vciFormHelper.switchCheckboxes.apply(this, [ref, 'BA1']);
-    vciFormHelper.switchCheckboxes.apply(this, [ref, 'PM2']);
-    vciFormHelper.switchCheckboxes.apply(this, [ref, 'BS1']);
-    // Both criteria of each group below cannot both be Met
-    vciFormHelper.switchCrossCheckboxes.apply(this, [ref, 'BA1', 'PM2']);
     // Both explanation boxes for both criteria of each group must be the same
-    vciFormHelper.shareExplanation.apply(this, [ref, 'BA1', 'PM2']);
+    vciFormHelper.shareExplanation.call(this, ref, ['BA1', 'PM2', 'BS1']);
     // if the MAF cutoff field is changed, update the populationObj payload with the updated value
     if (ref === 'maf-cutoff') {
         let tempEvidenceData = this.state.evidenceData;
