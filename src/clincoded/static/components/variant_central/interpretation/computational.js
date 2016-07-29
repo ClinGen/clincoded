@@ -760,6 +760,7 @@ var criteriaMissense1Update = function(nextProps) {
                     case 'PP2':
                         tempCheckboxes['PP2-value'] = evaluation.value === 'true';
                         this.refs['PP2-explanation'].setValue(evaluation.explanation);
+                        break;
                     case 'BP7':
                         tempCheckboxes['BP7-value'] = evaluation.value === 'true';
                         this.refs['BP7-explanation'].setValue(evaluation.explanation);

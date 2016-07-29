@@ -4,6 +4,7 @@ var _ = require('underscore');
 var form = require('../../../../libs/bootstrap/form');
 var RestMixin = require('../../../rest').RestMixin;
 var curator = require('../../../curator');
+var evidenceCodes = require('./mapping/evidence_code.json');
 
 var Form = form.Form;
 var FormMixin = form.FormMixin;
@@ -269,6 +270,20 @@ get list of criteria code, defs, and whether they're disease dependent or not?? 
                     <strong>PM2:</strong> Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP
                 </p>
 */
+
+var evalFormNoteWrapper = module.exports.evalFormNoteWrapper = function(criteriaList) {
+    return (
+        <p className="alert alert-info">
+            {criteriaList.map(criteria => {
+                return (
+                    <span>
+                        <strong>{criteria}:</strong> {evidenceCodes[criteria].definitionLong}
+                    </span>
+                );
+            })}
+        </p>
+    );
+};
 
 var evalFormValueSectionWrapper = module.exports.evalFormValueSectionWrapper = function(criteriaList) {
     return (
