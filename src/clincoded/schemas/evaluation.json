@@ -76,6 +76,10 @@
             "title": "Criteria",
             "type": "string"
         },
+        "criteriaModifier": {
+            "title": "Criteria Modifier",
+            "type": "string"
+        },
         "evidence_type": {
             "title": "Evidence Type",
             "type": "string"
