@@ -277,34 +277,47 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     },
 
     // Method to temporarily render other variant count in same codon and link out to clinvar
-    renderVariantCodon: function(codon) {
-        if (codon.term) {
-            if (codon.count > 0) {
-                if (codon.count > 1) {
-                    return (
-                        <dl className="inline-dl clearfix">
-                            <dt>Additional ClinVar variants found in the same codon: <span className="condon-variant-count">{parseInt(codon.count)-1}</span></dt>
-                            <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">Search ClinVar for variants in this codon <i className="icon icon-external-link"></i></a>)</dd>
-                        </dl>
-                    );
+    renderVariantCodon: function(variant, codon) {
+        if (variant && variant.clinvarVariantId) {
+            if (codon.term) {
+                if (codon.count > 0) {
+                    if (codon.count > 1) {
+                        // Esearch returns more than 1 counts from ClinVar
+                        return (
+                            <dl className="inline-dl clearfix">
+                                <dt>Additional ClinVar variants found in the same codon: <span className="condon-variant-count">{codon.count-1}</span></dt>
+                                <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">Search ClinVar for variants in this codon <i className="icon icon-external-link"></i></a>)</dd>
+                            </dl>
+                        );
+                    } else {
+                        // Esearch returns 1 count from ClinVar
+                        return (
+                            <dl className="inline-dl clearfix">
+                                <dd>The current variant is the only variant found in this codon in ClinVar.</dd>
+                            </dl>
+                        );
+                    }
                 } else {
+                    // Esearch returns 0 count from ClinVar
                     return (
                         <dl className="inline-dl clearfix">
-                            <dd>The current variant is the only variant found in this codon in ClinVar.</dd>
+                            <dd>No variants have been found in this codon in ClinVar.</dd>
                         </dl>
                     );
                 }
             } else {
+                // Variant exists in ClinVar but has no <ProteinChange> data (e.g. amino acid, location)
                 return (
                     <dl className="inline-dl clearfix">
-                        <dd>No variants have been found in this codon in ClinVar.</dd>
+                        <dd>The current variant is in a non-coding region.</dd>
                     </dl>
                 );
             }
         } else {
+            // Variant does not exist in ClinVar
             return (
                 <dl className="inline-dl clearfix">
-                    <dd>The current variant is in a non-coding region.</dd>
+                    <dd>ClinVar search for this variant is currently not available.</dd>
                 </dl>
             );
         }
@@ -545,7 +558,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     <div className="panel panel-info datasource-clinvar">
                         <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
                         <div className="panel-body">
-                            {this.renderVariantCodon(codon)}
+                            {this.renderVariantCodon(variant, codon)}
                         </div>
                     </div>
                     {(this.props.data && this.state.interpretation) ?
