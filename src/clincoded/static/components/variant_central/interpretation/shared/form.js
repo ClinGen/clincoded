@@ -4,7 +4,7 @@ var _ = require('underscore');
 var form = require('../../../../libs/bootstrap/form');
 var RestMixin = require('../../../rest').RestMixin;
 var curator = require('../../../curator');
-var evidenceCodes = require('./mapping/evidence_code.json');
+var evidenceCodes = require('../mapping/evidence_code.json');
 
 var Form = form.Form;
 var FormMixin = form.FormMixin;
@@ -262,22 +262,15 @@ var evalFormSectionWrapper = module.exports.evalFormSectionWrapper = function(no
     );
 };
 
-/*
-get list of criteria code, defs, and whether they're disease dependent or not?? get it from json?
-                <p className="alert alert-info">
-                    <strong>BA1:</strong> Allele frequency is > 5% in ExAC, 1000 Genomes, or ESP
-                    <br /><br />
-                    <strong>PM2:</strong> Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP
-                </p>
-*/
-
-var evalFormNoteWrapper = module.exports.evalFormNoteWrapper = function(criteriaList) {
+var evalFormNoteSectionWrapper = module.exports.evalFormNoteSectionWrapper = function(criteriaList) {
     return (
         <p className="alert alert-info">
-            {criteriaList.map(criteria => {
+            {criteriaList.map((criteria, i) => {
                 return (
                     <span>
                         <strong>{criteria}:</strong> {evidenceCodes[criteria].definitionLong}
+                        {evidenceCodes[criteria].diseaseDependent ? <span><br /><span className="label label-warning pull-right">Disease dependent</span></span> : null}
+                        {i < criteriaList.length - 1 ? <span><br /><br /></span> : null}
                     </span>
                 );
             })}
@@ -285,11 +278,17 @@ var evalFormNoteWrapper = module.exports.evalFormNoteWrapper = function(criteria
     );
 };
 
-var evalFormValueSectionWrapper = module.exports.evalFormValueSectionWrapper = function(criteriaList) {
+var evalFormDropdownSectionWrapper = module.exports.evalFormDropdownSectionWrapper = function(criteriaList) {
     return (
         <div>
-            {criteriaList.map(criteria => {
-                return evalFormValueDropdown.call(this, criteria);
+            {criteriaList.map((criteria, i) => {
+                return (
+                    <span>
+                        {evalFormValueDropdown.call(this, criteria)}
+                        {i < criteriaList.length - 1 ? <span className="col-xs-3 pad-bottom"><span className="pull-right">- or -</span></span> : null}
+                        <div className="clear"></div>
+                    </span>
+                );
             })}
         </div>
     );
@@ -313,18 +312,24 @@ function evalFormValueDropdown(criteria) {
     );
 }
 
+var evalFormExplanationSectionWrapper = module.exports.evalFormExplanationSectionWrapper = function(criteriaList, hiddenList, customContentBefore, customContentAfter) {
+    return (
+        <div>
+            {customContentBefore ? customContentBefore : null}
+            {criteriaList.map((criteria, i) => {
+                return (<span>{evalFormExplanationDefaultInput.call(this, criteria, hiddenList[i])}</span>);
+            })}
+            {customContentAfter ? customContentAfter : null}
+        </div>
+    );
+};
 
-/*
-<Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
-                    value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
-                    labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-3 input-right" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
-                <span className="col-xs-5 after-input">%</span>
-                <div className="clear"></div>
-                <Input type="textarea" ref="BA1-explanation" rows="3" label="Explanation:"
-                    labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName="form-group" handleChange={this.handleFormChange} />
-                <Input type="textarea" ref="PM2-explanation" rows="3" label="Explanation:"
-                    labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName="hidden" handleChange={this.handleFormChange} />
-*/
+function evalFormExplanationDefaultInput(criteria, hidden) {
+    return (
+        <Input type="textarea" ref={criteria + "-explanation"} rows="3" label="Explanation:"
+            labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName={hidden ? "hidden" : "form-group"} handleChange={this.handleFormChange} />
+    );
+}
 
 
 /* Below code is for use in 'Update' portions of VCI eval forms */

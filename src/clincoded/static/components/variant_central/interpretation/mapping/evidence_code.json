@@ -130,7 +130,7 @@
         "definition": "Absent in population databases",
         "definitionLong": "Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP",
         "category": "population",
-        "diseaseDependent": false
+        "diseaseDependent": true
     },
     "PM3": {
         "class": "pathogenic-moderate",

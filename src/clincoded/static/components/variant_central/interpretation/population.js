@@ -714,14 +714,24 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
 // code for rendering of population tab interpretation forms
 var criteriaGroup1 = function() {
-    let temp =                 <p className="alert alert-info">
-                    <strong>BA1:</strong> Allele frequency is > 5% in ExAC, 1000 Genomes, or ESP
-                    <br /><br />
-                    <strong>PM2:</strong> Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP
-                </p>;
+    let criteriaList = ['BA1', 'PM2', 'BS1'], // array of criteria code handled in this section
+        hiddenList = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let mafCutoffInput = (
+        <span>
+            <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
+                value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
+                labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-3 input-right" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
+            <span className="col-xs-5 after-input">%</span>
+            <div className="clear"></div>
+        </span>
+    );
     return (
         <div>
-            {vciFormHelper.evalFormSectionWrapper.apply(this, [temp, vciFormHelper.evalFormValueSectionWrapper.call(this, ['BA1', 'PM2', 'BS1']), ''])}
+            {vciFormHelper.evalFormSectionWrapper.call(this,
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList, hiddenList, mafCutoffInput, null)
+            )}
 
             <div className="col-sm-4 input-note-top">
                 <p className="alert alert-info">
