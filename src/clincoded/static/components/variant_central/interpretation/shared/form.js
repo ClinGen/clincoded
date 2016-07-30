@@ -17,7 +17,6 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
     propTypes: {
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
-        //evidenceType: React.PropTypes.string, // specified what type of evidence object is created - MOVE TO EVIDENCECODES
         evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
         evidenceDataUpdated: React.PropTypes.bool, // passed in by parent page, which does the comparison of stored and new external data
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from evidenceData
@@ -37,6 +36,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         return {
             submitBusy: false, // spinner for Save button
             submitDisabled: false, // disabled for now due to uncertain/non-universal logic
+            evidenceType: evidenceCodes[this.props.criteria[0].category], // specifies what type of evidence object is created; ascertained from first criteria that is passed to this.props.criteria
             evidenceData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
             interpretation: this.props.interpretation, // parent interpretation object
             diseaseCriteria: [], // array of criteria codes that are disease-dependent
@@ -61,7 +61,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
         // update the form when extra data is loaded
         if (this.props.evidenceData) {
-            this.setState({evidenceType: this.props.evidenceType, evidenceData: this.props.evidenceData, evidenceDataUpdated: this.props.evidenceDataUpdated});
+            this.setState({evidenceData: this.props.evidenceData, evidenceDataUpdated: this.props.evidenceDataUpdated});
         }
         // ascertain which criteria code are disease dependent
         let tempDiseaseCriteria = [];
@@ -85,7 +85,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
         // when props are updated, update the form with new extra data, if applicable
         if (typeof nextProps.evidenceData !== undefined && nextProps.evidenceData != this.props.evidenceData) {
-            this.setState({evidenceType: nextProps.evidenceType, evidenceData: nextProps.evidenceData, evidenceDataUpdated: nextProps.evidenceDataUpdated});
+            this.setState({evidenceData: nextProps.evidenceData, evidenceDataUpdated: nextProps.evidenceDataUpdated});
         }
     },
 
@@ -169,7 +169,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                         });
                     } else {
                         // previous evidence object not found; create a new one
-                        return this.postRestData('/' + this.props.evidenceType + '/', evidenceObject).then(evidenceResult => {
+                        return this.postRestData('/' + this.state.evidenceType + '/', evidenceObject).then(evidenceResult => {
                             return Promise.resolve(evidenceResult['@graph'][0]['@id']);
                         });
                     }
@@ -195,7 +195,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 evaluations[criterion]['value'] = this.refs[criterion + '-value'].getValue();
                 // make link to evidence object, if applicable
                 if (evidenceResult) {
-                    evaluations[criterion][this.props.evidenceType] = evidenceResult;
+                    evaluations[criterion][this.state.evidenceType] = evidenceResult;
                 }
                 if (criterion in existingEvaluationUuids) {
                     evaluationPromises.push(this.putRestData('/evaluation/' + existingEvaluationUuids[criterion], evaluations[criterion]));
