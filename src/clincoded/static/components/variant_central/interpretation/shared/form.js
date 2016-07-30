@@ -164,11 +164,12 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 };
                 // check whether or not criterion value is a checkbox and handle accordingly
                 if (this.refs[criterion + '-value'].getValue() === true) {
-                    evaluations[criterion]['value'] = 'true';
+                    evaluations[criterion]['criteriaStatus'] = 'met';
                 } else if (this.refs[criterion + '-value'].getValue() === false) {
-                    evaluations[criterion]['value'] = 'false';
+                    evaluations[criterion]['criteriaStatus'] = 'not-met';
                 } else {
-                    evaluations[criterion]['value'] = this.refs[criterion + '-value'].getValue();
+                    //evaluations[criterion]['criteriaStatus'] = this.refs[criterion + '-value'].getValue();
+                    evaluations[criterion]['criteriaStatus'] = 'not-evaluated';
                 }
                 // make link to evidence object, if applicable
                 if (evidenceResult) {
