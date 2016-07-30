@@ -17,14 +17,14 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
     propTypes: {
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
-        evidenceType: React.PropTypes.string, // specified what type of evidence object is created
+        //evidenceType: React.PropTypes.string, // specified what type of evidence object is created - MOVE TO EVIDENCECODES
         evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
         evidenceDataUpdated: React.PropTypes.bool, // passed in by parent page, which does the comparison of stored and new external data
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from evidenceData
         formChangeHandler: React.PropTypes.func, // function that will take care of any in-form logic that needs to be taken in to account
         variantUuid: React.PropTypes.string, // UUID of the parent variant
-        criteria: React.PropTypes.array, // array of criteria codes (non-disease-specific) being handled by this form
-        criteriaDisease: React.PropTypes.array, // array of criteria codes (disease-specific) being handled by this form
+        criteria: React.PropTypes.array, // array of criteria codes being handled by this form
+        criteriaCrossCheck: React.PropTypes.array, // an array of arrays of criteria codes that are to be checked upon submitForm to make sure there are no more than one 'Met'
         interpretation: React.PropTypes.object, // parent interpretation object
         updateInterpretationObj: React.PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
     },
@@ -39,6 +39,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             submitDisabled: false, // disabled for now due to uncertain/non-universal logic
             evidenceData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
             interpretation: this.props.interpretation, // parent interpretation object
+            diseaseCriteria: [], // array of criteria codes that are disease-dependent
             diseaseAssociated: false, // flag to define whether or not the interpretation has a disease associated with it
             checkboxes: {}, // store any checkbox values
             updateMsg: null // specifies what html to display next to button after press
@@ -62,6 +63,14 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         if (this.props.evidenceData) {
             this.setState({evidenceType: this.props.evidenceType, evidenceData: this.props.evidenceData, evidenceDataUpdated: this.props.evidenceDataUpdated});
         }
+        // ascertain which criteria code are disease dependent
+        let tempDiseaseCriteria = [];
+        this.props.criteria.map(criterion => {
+            if (evidenceCodes[criterion].diseaseDependent) {
+                tempDiseaseCriteria.push(criterion);
+            }
+        });
+        this.setState({diseaseCriteria: tempDiseaseCriteria});
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -113,15 +122,25 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         var flatInterpretation = null;
         var freshInterpretation = null;
         var evidenceObjectId = null;
-        var submittedCriteria = this.props.criteria ? this.props.criteria : [];
+        var submittedCriteria = [];
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
             freshInterpretation = interpretation;
             // get fresh update of interpretation object so we have newest evaluation list, then flatten it
             flatInterpretation = curator.flatten(freshInterpretation);
             // lets do the disease check for saving criteria code here
-            if (flatInterpretation.disease && flatInterpretation.disease !== '' && this.props.criteriaDisease && this.props.criteriaDisease.length > 0) {
-                submittedCriteria = submittedCriteria.concat(this.props.criteriaDisease);
-            }
+            this.props.criteria.map(criterion => {
+                if (evidenceCodes[criterion].diseaseDependent) {
+                    // criteria is disease-dependent
+                    if (flatInterpretation.disease && flatInterpretation.disease !== '') {
+                        // criteria is disease-dependent and there is a disease associated with the interpretation
+                        // add criteria to list of criteria to save
+                        submittedCriteria.push(criterion);
+                    }
+                } else {
+                    // criteria is not disease-dependent, so add it to list of criteria to
+                    submittedCriteria.push(criterion);
+                }
+            });
             // check existing evaluations and map their UUIDs if they match the criteria in this form
             if (freshInterpretation.evaluations) {
                 freshInterpretation.evaluations.map(freshEvaluation => {
@@ -234,7 +253,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 </div>
                 <div className="curation-submit clearfix">
                     <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                        submitBusy={this.state.submitBusy} inputDisabled={(!this.props.criteria || this.props.criteria.length == 0) && !this.state.diseaseAssociated} />
+                        submitBusy={this.state.submitBusy} inputDisabled={this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated} />
                     {this.state.updateMsg ?
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                     : null}

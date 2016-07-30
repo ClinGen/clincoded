@@ -585,8 +585,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm renderedFormContent={criteriaGroup1}
-                                evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
-                                formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
+                                evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                                formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']}
+                                criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
