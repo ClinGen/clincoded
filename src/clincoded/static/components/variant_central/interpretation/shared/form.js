@@ -122,28 +122,37 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         var criteriaEvalConflictValues = ['met', 'supporting', 'moderate', 'strong', 'very-strong'];
         var criteriaConflicting = [];
         var errorMsgCriteria = '';
-        if (this.props.criteriaCrossCheck && this.props.criteriaCrossCheck.length > 1) {
-            this.props.criteriaCrossCheck.map((criterion, i) => {
-                if (criteriaEvalConflictValues.indexOf(this.refs[criterion + '-value'].getValue()) > -1) {
-                    criteriaMetNum += 1;
-                    criteriaConflicting.push(criterion);
-                }
-                // build the error mesage, just in case
-                if (i < this.props.criteriaCrossCheck.length) {
-                    errorMsgCriteria += criterion;
-                    if (i < this.props.criteriaCrossCheck.length - 1) {
-                        errorMsgCriteria += ', ';
+        if (this.props.criteriaCrossCheck && this.props.criteriaCrossCheck.length > 0) {
+            for (var i = 0; i < this.props.criteriaCrossCheck.length; i++) {
+                if (this.props.criteriaCrossCheck[i].length > 1) {
+                    // per criteria cross check group...
+                    this.props.criteriaCrossCheck[i].map((criterion, i) => {
+                        // ... check the values...
+                        if (criteriaEvalConflictValues.indexOf(this.refs[criterion + '-value'].getValue()) > -1) {
+                            criteriaMetNum += 1;
+                            criteriaConflicting.push(criterion);
+                        }
+                        // ... while building the error mesage, just in case
+                        if (i < this.props.criteriaCrossCheck.length) {
+                            errorMsgCriteria += criterion;
+                            if (i < this.props.criteriaCrossCheck.length - 1) {
+                                errorMsgCriteria += ', ';
+                            }
+                            if (i == this.props.criteriaCrossCheck.length -2) {
+                                errorMsgCriteria += 'or ';
+                            }
+                        }
+                    });
+                    // after checking a group, if we have an error, throw an error and stop the submitForm action
+                    if (criteriaMetNum > 1) {
+                        criteriaConflicting.map(criterion => {
+                            this.setFormErrors(criterion + "-value", "*");
+                        });
+                        this.setState({submitBusy: false, updateMsg: <span className="text-danger">Only one of the criteria ({errorMsgCriteria}) can have a value other than "Not Met" or "Not Evaluated"</span>});
+                        return false;
                     }
-                    if (i == this.props.criteriaCrossCheck.length -2) {
-                        errorMsgCriteria += 'or ';
-                    }
                 }
-            });
-        }
-        // stop and set error message as needed
-        if (criteriaMetNum > 1) {
-            this.setState({submitBusy: false, updateMsg: <span className="text-danger">Only one of the criteria ({errorMsgCriteria}) can have a value other than "Not Met" or "Not Evaluated"</span>});
-            return false;
+            }
         }
 
         // passed cross check, so begin saving data
