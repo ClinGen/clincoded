@@ -16,7 +16,7 @@
         "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
         "disease": "788e024f-16a6-11e5-a0b5-60f81dc5b05a",
         "computational": "63727d93-0d51-44b2-a568-d042ba10e8af",
-        "criteria": "PVS1",
+        "criteria": "PM1",
         "criteriaStatus": "met",
         "criteriaModifier": "very strong",
         "explanation": "description here.",
