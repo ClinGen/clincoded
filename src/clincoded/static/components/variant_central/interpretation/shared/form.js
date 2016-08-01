@@ -133,7 +133,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     // per criteria cross check group...
                     this.props.criteriaCrossCheck[i].map((criterion, j) => {
                         // ... check the values...
-                        if (criteriaEvalConflictValues.indexOf(this.refs[criterion + '-value'].getValue()) > -1) {
+                        if (criteriaEvalConflictValues.indexOf(this.refs[criterion + '-status'].getValue()) > -1) {
                             criteriaMetNum += 1;
                             criteriaConflicting.push(criterion);
                         }
@@ -151,7 +151,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     // after checking a group, if we have an error, throw an error and stop the submitForm action
                     if (criteriaMetNum > 1) {
                         criteriaConflicting.map(criterion => {
-                            this.setFormErrors(criterion + "-value", "*");
+                            this.setFormErrors(criterion + "-status", "*");
                         });
                         this.setState({submitBusy: false, updateMsg: <span className="text-danger">Only one of the criteria ({errorMsgCriteria}) can have a value other than "Not Met" or "Not Evaluated"</span>});
                         return false;
@@ -236,20 +236,18 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     criteria: criterion,
                     explanation: this.getFormValue(criterion + '-explanation')
                 };
-<<<<<<< HEAD
-                // get criterion value
-                evaluations[criterion]['value'] = this.refs[criterion + '-value'].getValue();
-=======
-                // check whether or not criterion value is a checkbox and handle accordingly
-                if (this.refs[criterion + '-value'].getValue() === true) {
+
+                // set criterion status and modifiers
+                if (['supporting', 'moderate', 'strong', 'very-strong'].indexOf(this.refs[criterion + '-status'].getValue()) > -1) {
+                    // if dropdown selection is a modifier to met, set status to met, and set modifier as needed...
                     evaluations[criterion]['criteriaStatus'] = 'met';
-                } else if (this.refs[criterion + '-value'].getValue() === false) {
-                    evaluations[criterion]['criteriaStatus'] = 'not-met';
+                    evaluations[criterion]['criteriaModifier'] = this.refs[criterion + '-status'].getValue();
                 } else {
-                    //evaluations[criterion]['criteriaStatus'] = this.refs[criterion + '-value'].getValue();
-                    evaluations[criterion]['criteriaStatus'] = 'not-evaluated';
+                    // ... otherwise, set status as dropdown value, and blank out modifier
+                    evaluations[criterion]['criteriaStatus'] = this.refs[criterion + '-status'].getValue();
+                    evaluations[criterion]['criteriaModifier'] = '';
                 }
->>>>>>> origin/dev
+
                 // make link to evidence object, if applicable
                 if (evidenceResult) {
                     evaluations[criterion][this.state.evidenceType] = evidenceResult;
@@ -385,8 +383,8 @@ var evalFormDropdownSectionWrapper = module.exports.evalFormDropdownSectionWrapp
 // helper function for evalFormDropdownSectionWrapper() to generate the dropdown for each criteria
 function evalFormValueDropdown(criteria) {
     return (
-        <Input type="select" ref={criteria + "-value"} label={criteria + ":"} defaultValue="not-evaluated" handleChange={this.handleDropdownChange}
-            error={this.getFormError(criteria + "-value")} clearError={this.clrFormErrors.bind(null, criteria + "-value")}
+        <Input type="select" ref={criteria + "-status"} label={criteria + ":"} defaultValue="not-evaluated" handleChange={this.handleDropdownChange}
+            error={this.getFormError(criteria + "-status")} clearError={this.clrFormErrors.bind(null, criteria + "-status")}
             labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group">
             <option value="not-evaluated">Not Evaluated</option>
             <option disabled="disabled"></option>
@@ -439,7 +437,12 @@ var updateEvalForm = module.exports.updateEvalForm = function(nextProps, criteri
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
             nextProps.interpretation.evaluations.map(evaluation => {
                 if (criteriaList.indexOf(evaluation.criteria) > -1) {
-                    this.refs[evaluation.criteria + '-value'].setValue(evaluation.value);
+                    if (evaluation.criteriaModifier) {
+                        this.refs[evaluation.criteria + '-status'].setValue(evaluation.criteriaModifier);
+                    } else {
+                        this.refs[evaluation.criteria + '-status'].setValue(evaluation.criteriaStatus);
+                    }
+                    this.refs[evaluation.criteria + '-explanation'].setValue(evaluation.explanation);
                     // apply custom anonymous function logic if applicable
                     if (evaluation.criteria in customActions) {
                         customActions[evaluation.criteria].call(this, evaluation);
