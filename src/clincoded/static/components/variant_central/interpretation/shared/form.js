@@ -362,14 +362,14 @@ function evalFormValueDropdown(criteria) {
             error={this.getFormError(criteria + "-value")} clearError={this.clrFormErrors.bind(null, criteria + "-value")}
             labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group"
             handleChange={this.handleChange}>
-            <option value="not-evaluated">{criteria} Not Evaluated</option>
+            <option value="not-evaluated">Not Evaluated</option>
             <option disabled="disabled"></option>
-            <option value="met">{criteria} Met</option>
-            <option value="not-met">{criteria} Not Met</option>
-            <option value="supporting">{criteria} Supporting</option>
-            <option value="moderate">{criteria} Moderate</option>
-            <option value="strong">{criteria} Strong</option>
-            <option value="very-strong">{criteria} Very Strong</option>
+            <option value="met">Met</option>
+            <option value="not-met">Not Met</option>
+            <option value="supporting">Supporting</option>
+            <option value="moderate">Moderate</option>
+            <option value="strong">Strong</option>
+            <option value="very-strong">Very Strong</option>
         </Input>
     );
 }
