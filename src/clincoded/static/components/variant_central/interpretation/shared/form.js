@@ -236,8 +236,20 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     criteria: criterion,
                     explanation: this.getFormValue(criterion + '-explanation')
                 };
+<<<<<<< HEAD
                 // get criterion value
                 evaluations[criterion]['value'] = this.refs[criterion + '-value'].getValue();
+=======
+                // check whether or not criterion value is a checkbox and handle accordingly
+                if (this.refs[criterion + '-value'].getValue() === true) {
+                    evaluations[criterion]['criteriaStatus'] = 'met';
+                } else if (this.refs[criterion + '-value'].getValue() === false) {
+                    evaluations[criterion]['criteriaStatus'] = 'not-met';
+                } else {
+                    //evaluations[criterion]['criteriaStatus'] = this.refs[criterion + '-value'].getValue();
+                    evaluations[criterion]['criteriaStatus'] = 'not-evaluated';
+                }
+>>>>>>> origin/dev
                 // make link to evidence object, if applicable
                 if (evidenceResult) {
                     evaluations[criterion][this.state.evidenceType] = evidenceResult;

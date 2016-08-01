@@ -1092,6 +1092,16 @@ class Evaluation(Item):
         return paths_filtered_by_status(request, interpretation_associated)
 
     @calculated_property(schema={
+        "title": "Modified Value",
+        "type": "string"
+    })
+    def modifier(self, criteriaModifier=''):
+        if criteriaModifier == '':
+            return ''
+        else:
+            return criteriaModifier
+
+    @calculated_property(schema={
         "title": "Evidence Type",
         "type": "string"
     })
