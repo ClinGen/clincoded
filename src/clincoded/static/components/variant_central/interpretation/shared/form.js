@@ -97,6 +97,11 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
     },
 
+    // generic wrapper function for the dropdowns; only function is to reset form errors, just in case
+    handleDropdownChange: function(ref, e) {
+        this.clrAllFormErrors();
+    },
+
     // generic wrapper function to properly render checkboxes and pass any changes to the formChangeHandler
     // functino passed from the parent page, if applicable
     handleCheckboxChange: function(ref, e) {
@@ -146,7 +151,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     // after checking a group, if we have an error, throw an error and stop the submitForm action
                     if (criteriaMetNum > 1) {
                         criteriaConflicting.map(criterion => {
-                            this.setFormErrors(criterion + "-value", "&nbsp;");
+                            this.setFormErrors(criterion + "-value", "*");
                         });
                         this.setState({submitBusy: false, updateMsg: <span className="text-danger">Only one of the criteria ({errorMsgCriteria}) can have a value other than "Not Met" or "Not Evaluated"</span>});
                         return false;
@@ -368,10 +373,9 @@ var evalFormDropdownSectionWrapper = module.exports.evalFormDropdownSectionWrapp
 // helper function for evalFormDropdownSectionWrapper() to generate the dropdown for each criteria
 function evalFormValueDropdown(criteria) {
     return (
-        <Input type="select" ref={criteria + "-value"} label={criteria + ":"} defaultValue="not-evaluated"
+        <Input type="select" ref={criteria + "-value"} label={criteria + ":"} defaultValue="not-evaluated" handleChange={this.handleDropdownChange}
             error={this.getFormError(criteria + "-value")} clearError={this.clrFormErrors.bind(null, criteria + "-value")}
-            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group"
-            handleChange={this.handleChange}>
+            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group">
             <option value="not-evaluated">Not Evaluated</option>
             <option disabled="disabled"></option>
             <option value="met">Met</option>
