@@ -36,7 +36,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         return {
             submitBusy: false, // spinner for Save button
             submitDisabled: false, // disabled for now due to uncertain/non-universal logic
-            evidenceType: evidenceCodes[this.props.criteria[0].category], // specifies what type of evidence object is created; ascertained from first criteria that is passed to this.props.criteria
+            evidenceType: evidenceCodes[this.props.criteria[0]].category, // specifies what type of evidence object is created; ascertained from first criteria that is passed to this.props.criteria
             evidenceData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
             interpretation: this.props.interpretation, // parent interpretation object
             diseaseCriteria: [], // array of criteria codes that are disease-dependent
@@ -117,6 +117,36 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
+        // cross check criteria values here (no more than one met per cross-check group)
+        var criteriaMetNum = 0;
+        var criteriaEvalConflictValues = ['met', 'supporting', 'moderate', 'strong', 'very-strong'];
+        var criteriaConflicting = [];
+        var errorMsgCriteria = '';
+        if (this.props.criteriaCrossCheck && this.props.criteriaCrossCheck.length > 1) {
+            this.props.criteriaCrossCheck.map((criterion, i) => {
+                if (criteriaEvalConflictValues.indexOf(this.refs[criterion + '-value'].getValue()) > -1) {
+                    criteriaMetNum += 1;
+                    criteriaConflicting.push(criterion);
+                }
+                // build the error mesage, just in case
+                if (i < this.props.criteriaCrossCheck.length) {
+                    errorMsgCriteria += criterion;
+                    if (i < this.props.criteriaCrossCheck.length - 1) {
+                        errorMsgCriteria += ', ';
+                    }
+                    if (i == this.props.criteriaCrossCheck.length -2) {
+                        errorMsgCriteria += 'or ';
+                    }
+                }
+            });
+        }
+        // stop and set error message as needed
+        if (criteriaMetNum > 1) {
+            this.setState({submitBusy: false, updateMsg: <span className="text-danger">Only one of the criteria ({errorMsgCriteria}) can have a value other than "Not Met" or "Not Evaluated"</span>});
+            return false;
+        }
+
+        // passed cross check, so begin saving data
         var evaluations = {};
         var existingEvaluationUuids = {};
         var flatInterpretation = null;
@@ -253,7 +283,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 </div>
                 <div className="curation-submit clearfix">
                     <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                        submitBusy={this.state.submitBusy} inputDisabled={this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated} />
+                        submitBusy={this.state.submitBusy} inputDisabled={this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated} />
                     {this.state.updateMsg ?
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                     : null}

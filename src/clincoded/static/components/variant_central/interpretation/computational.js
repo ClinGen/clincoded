@@ -351,7 +351,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaMissense1}
                                     evidenceType={'computational'} evidenceData={this.state.computationObj} evidenceDataUpdated={true} formChangeHandler={criteriaMissense1Change}
-                                    formDataUpdater={criteriaMissense1Update} variantUuid={this.props.data['@id']} criteria={['BP4', 'PP3']} criteriaDisease={['BP1', 'PP2']}
+                                    formDataUpdater={criteriaMissense1Update} variantUuid={this.props.data['@id']} criteria={['BP4', 'PP3']} diseaseCriteria={['BP1', 'PP2']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
@@ -507,7 +507,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaMissense2}
                                     evidenceType={'computational'} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaMissense2Update} variantUuid={this.props.data['@id']} criteriaDisease={['PM5', 'PS1']}
+                                    formDataUpdater={criteriaMissense2Update} variantUuid={this.props.data['@id']} criteria={['PM5', 'PS1']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
