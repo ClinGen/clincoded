@@ -146,7 +146,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     // after checking a group, if we have an error, throw an error and stop the submitForm action
                     if (criteriaMetNum > 1) {
                         criteriaConflicting.map(criterion => {
-                            this.setFormErrors(criterion + "-value", "*");
+                            this.setFormErrors(criterion + "-value", "&nbsp;");
                         });
                         this.setState({submitBusy: false, updateMsg: <span className="text-danger">Only one of the criteria ({errorMsgCriteria}) can have a value other than "Not Met" or "Not Evaluated"</span>});
                         return false;
@@ -156,6 +156,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
 
         // passed cross check, so begin saving data
+        this.clrAllFormErrors(); // reset form errors too, just in case
         var evaluations = {};
         var existingEvaluationUuids = {};
         var flatInterpretation = null;

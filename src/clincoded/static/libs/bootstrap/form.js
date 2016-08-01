@@ -141,6 +141,17 @@ var FormMixin = module.exports.FormMixin = {
         this.setState({formErrors: errors});
     },
 
+    // clears errors form all form inputs
+    clrAllFormErrors: function() {
+        var errors = this.state.formErrors;
+        if (this.refs && Object.keys(this.refs).length) {
+            Object.keys(this.refs).map(ref => {
+                errors[ref] = '';
+            });
+        }
+        this.setState({formErrors: errors});
+    },
+
     // Return true if the form's current state shows any Input errors. Return false if no
     // errors are indicated. This should be called in the render function so that the submit
     // form function will have had a chance to record any errors.
