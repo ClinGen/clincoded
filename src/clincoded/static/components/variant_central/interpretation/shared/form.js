@@ -131,19 +131,19 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             for (var i = 0; i < this.props.criteriaCrossCheck.length; i++) {
                 if (this.props.criteriaCrossCheck[i].length > 1) {
                     // per criteria cross check group...
-                    this.props.criteriaCrossCheck[i].map((criterion, i) => {
+                    this.props.criteriaCrossCheck[i].map((criterion, j) => {
                         // ... check the values...
                         if (criteriaEvalConflictValues.indexOf(this.refs[criterion + '-value'].getValue()) > -1) {
                             criteriaMetNum += 1;
                             criteriaConflicting.push(criterion);
                         }
                         // ... while building the error mesage, just in case
-                        if (i < this.props.criteriaCrossCheck.length) {
+                        if (j < this.props.criteriaCrossCheck[i].length) {
                             errorMsgCriteria += criterion;
-                            if (i < this.props.criteriaCrossCheck.length - 1) {
+                            if (j < this.props.criteriaCrossCheck[i].length - 1) {
                                 errorMsgCriteria += ', ';
                             }
-                            if (i == this.props.criteriaCrossCheck.length -2) {
+                            if (j == this.props.criteriaCrossCheck[i].length - 2) {
                                 errorMsgCriteria += 'or ';
                             }
                         }
