@@ -13,6 +13,8 @@ var external_url_map = globals.external_url_map;
 var dbxref_prefix_map = globals.dbxref_prefix_map;
 var queryKeyValue = globals.queryKeyValue;
 var parseClinvar = require('../../libs/parse-resources').parseClinvar;
+import { getHgvsNotation } from './helpers/hgvs_notation';
+import { setPrimaryTranscript } from './helpers/primary_transcript';
 
 // Variant Curation Hub
 var VariantCurationHub = React.createClass({
@@ -52,33 +54,41 @@ var VariantCurationHub = React.createClass({
             this.setState({variantObj: response});
             this.setState({isLoadingComplete: true});
             // ping out external resources (all async)
-            this.fetchMyVariantInfoAndBustamante();
-            this.fetchEnsemblVEP();
-            this.fetchEnsemblVariation();
-            this.fetchEnsemblHGVSVEP();
-            this.fetchClinVarEutilsEsearch();
+            this.fetchClinVarEutils(this.state.variantObj);
+            this.fetchMyVariantInfoAndBustamante(this.state.variantObj);
+            this.fetchEnsemblVEP(this.state.variantObj);
+            this.fetchEnsemblVariation(this.state.variantObj);
+            this.fetchEnsemblHGVSVEP(this.state.variantObj);
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
     },
 
-    // Retrieve data from MyVariantInfo and Bustamante data
-    fetchMyVariantInfoAndBustamante: function() {
-        var variant = this.state.variantObj;
+    // Retrieve ClinVar data from Eutils
+    fetchClinVarEutils: function(variant) {
         if (variant) {
-            // Extract genomic substring from HGVS name whose assembly is GRCh37
-            // Both of "GRCh37" and "gRCh37" instances are possibly present in the variant object
-            var hgvs_GRCh37 = (variant.hgvsNames.GRCh37) ? variant.hgvsNames.GRCh37 : variant.hgvsNames.gRCh37;
-            var NC_genomic = hgvs_GRCh37 ? hgvs_GRCh37.substr(0, hgvs_GRCh37.indexOf(':')) : null;
-            // 'genomic_chr_mapping' is defined via requiring external mapping file
-            var found = genomic_chr_mapping.GRCh37.find((entry) => entry.GenomicRefSeq === NC_genomic);
-            // Format variant_id for use of myvariant.info REST API
-            var variant_id = (hgvs_GRCh37 && found) ? found.ChrFormat + hgvs_GRCh37.slice(hgvs_GRCh37.indexOf(':')) : null;
-            if (variant_id && variant_id.indexOf('del') > 0) {
-                variant_id = variant_id.substring(0, variant_id.indexOf('del') + 3);
+            if (variant.clinvarVariantId) {
+                this.setState({clinvar_id: variant.clinvarVariantId});
+                // Get ClinVar data via the parseClinvar method defined in parse-resources.js
+                this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
+                    // Passing 'true' option to invoke 'mixin' function
+                    // To extract more ClinVar data for 'Basic Information' tab
+                    var variantData = parseClinvar(xml, true);
+                    this.setState({ext_clinvarEutils: variantData});
+                    this.handleCodonEsearch(variantData);
+                }).catch(function(e) {
+                    console.log('ClinVarEutils Fetch Error=: %o', e);
+                });
             }
-            if (variant_id) {
-                this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfo'] + variant_id).then(response => {
+        }
+    },
+
+    // Retrieve data from MyVariantInfo and Bustamante data
+    fetchMyVariantInfoAndBustamante: function(variant) {
+        if (variant) {
+            let hgvs_notation = getHgvsNotation(variant, 'GRCh37');
+            if (hgvs_notation) {
+                this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfo'] + hgvs_notation).then(response => {
                     this.setState({ext_myVariantInfo: response});
                     // check dbsnfp data for bustamante query
                     var hgvsObj = {};
@@ -105,8 +115,7 @@ var VariantCurationHub = React.createClass({
     },
 
     // Retrieve data from Ensembl VEP
-    fetchEnsemblVEP: function() {
-        var variant = this.state.variantObj;
+    fetchEnsemblVEP: function(variant) {
         if (variant) {
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
@@ -122,8 +131,7 @@ var VariantCurationHub = React.createClass({
     },
 
     // Retrieve data from Ensembl Variation
-    fetchEnsemblVariation: function() {
-        var variant = this.state.variantObj;
+    fetchEnsemblVariation: function(variant) {
         if (variant) {
             // Extract only the number portion of the dbSNP id
             var numberPattern = /\d+/g;
@@ -141,68 +149,34 @@ var VariantCurationHub = React.createClass({
     },
 
     // Retrieve data from Ensembl HGVS VEP
-    fetchEnsemblHGVSVEP: function() {
-        var variant = this.state.variantObj;
+    fetchEnsemblHGVSVEP: function(variant) {
         if (variant) {
-            // Due to GRCh38 HGVS notations being used at Ensembl for their VEP API
-            // We are extracting genomic substring from HGVS name whose assembly is GRCh38
-            // Both of "GRCh38" and "gRCh38" instances are possibly present in the variant object
-            var hgvs_GRCh38 = (variant.hgvsNames.GRCh38) ? variant.hgvsNames.GRCh38 : variant.hgvsNames.gRCh38;
-            if (hgvs_GRCh38) {
-                var NC_genomic = hgvs_GRCh38.substr(0, hgvs_GRCh38.indexOf(':'));
-                // 'genomic_chr_mapping' is defined via requiring external mapping file
-                var found = genomic_chr_mapping.GRCh38.find((entry) => entry.GenomicRefSeq === NC_genomic);
-                // Can't simply filter alpha letters due to the presence of 'chrX' and 'chrY'
-                var chrosome = (found.ChrFormat) ? found.ChrFormat.substr(3) : '';
-                // Format hgvs_notation for vep/:species/hgvs/:hgvs_notation api
-                var hgvs_notation = chrosome + hgvs_GRCh38.slice(hgvs_GRCh38.indexOf(':'));
-                if (hgvs_notation) {
-                    if (hgvs_notation.indexOf('del') > 0) {
-                        hgvs_notation = hgvs_notation.substring(0, hgvs_notation.indexOf('del') + 3);
-                    }
-                    this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&domains=1').then(response => {
-                        this.setState({ext_ensemblHgvsVEP: response});
-                    }).catch(function(e) {
-                        console.log('Ensembl Fetch Error=: %o', e);
-                    });
-                }
+            let hgvs_notation = getHgvsNotation(variant, 'GRCh38', true);
+            let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&canonical=1&merged=1';
+            if (hgvs_notation) {
+                this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then(response => {
+                    this.setState({ext_ensemblHgvsVEP: response});
+                }).catch(function(e) {
+                    console.log('Ensembl Fetch Error=: %o', e);
+                });
             }
         }
     },
 
-    // Retrieve data from ClinVar Eutils and Esearch
-    fetchClinVarEutilsEsearch: function() {
-        var variant = this.state.variantObj;
-        if (variant) {
-            if (variant.clinvarVariantId) {
-                this.setState({clinvar_id: variant.clinvarVariantId});
-                // Get ClinVar data via the parseClinvar method defined in parse-resources.js
-                this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
-                    // Passing 'true' option to invoke 'mixin' function
-                    // To extract more ClinVar data for 'Basic Information' tab
-                    var variantData = parseClinvar(xml, true);
-                    this.setState({ext_clinvarEutils: variantData});
-                    var clinVarObj = {};
-                    clinVarObj.protein_change = variantData.allele.ProteinChange;
-                    clinVarObj.gene_symbol = variantData.gene.symbol;
-                    if (clinVarObj) {
-                        return Promise.resolve(clinVarObj);
-                    }
-                }).then(clinvar => {
-                    if (clinvar.protein_change && clinvar.gene_symbol) {
-                        var term = clinvar.protein_change.substr(0, clinvar.protein_change.length-1);
-                        var symbol = clinvar.gene_symbol;
-                        this.getRestData(this.props.href_url.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
-                            // pass in these additional values, in case receiving component needs them
-                            result.vci_term = term;
-                            result.vci_symbol = symbol;
-                            this.setState({ext_clinVarEsearch: result});
-                        });
-                    }
-                }).catch(function(e) {
-                    console.log('ClinVarEutils or ClinVarEsearch Fetch Error=: %o', e);
-                });
-            }
+    // Retrieve codon data from ClinVar Esearch given Eutils/ClinVar response
+    handleCodonEsearch: function(response) {
+        let aminoAcidLocation = response.allele.ProteinChange;
+        let symbol = response.gene.symbol;
+        if (aminoAcidLocation && symbol) {
+            let term = aminoAcidLocation.substr(0, aminoAcidLocation.length-1);
+            this.getRestData(this.props.href_url.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
+                // pass in these additional values, in case receiving component needs them
+                result.vci_term = term;
+                result.vci_symbol = symbol;
+                this.setState({ext_clinVarEsearch: result});
+            }).catch(function(e) {
+                console.log('ClinVarEsearch Fetch Error=: %o', e);
+            });
         }
     },
 
