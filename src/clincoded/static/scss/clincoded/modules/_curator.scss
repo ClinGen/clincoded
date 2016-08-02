@@ -1079,7 +1079,11 @@
 
             .basic-info .table th,
             .basic-info .table td {
-                width: 33%;
+                width: 25%;
+            }
+
+            .basic-info .table .primary-transcript {
+                background-color: #fff4f4;
             }
 
             .population .table tfoot .count:first-child td {
