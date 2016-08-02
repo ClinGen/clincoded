@@ -57,8 +57,12 @@
             "description": "ACMG criteria to be evaluated. Must be one of the 28 codes",
             "type": "string"
         },
-        "value": {
+        "criteriaStatus": {
             "title": "Evaluation Value",
+            "type": "string"
+        },
+        "criteriaModifier": {
+            "title": "Modified Value",
             "type": "string"
         },
         "explanation": {
@@ -74,6 +78,14 @@
         },
         "criteria": {
             "title": "Criteria",
+            "type": "string"
+        },
+        "criteriaStatus": {
+            "title": "Criteria Status",
+            "type": "string"
+        },
+        "modifier": {
+            "title": "Modified Value",
             "type": "string"
         },
         "evidence_type": {
