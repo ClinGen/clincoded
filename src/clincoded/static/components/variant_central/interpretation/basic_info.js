@@ -295,6 +295,36 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     </div>
                 </div>
 
+                <div className="panel panel-info datasource-clinvar-interpretaions">
+                    <div className="panel-heading"><h3 className="panel-title">ClinVar Interpretations</h3></div>
+                    {(clinvar_id) ?
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Disease [Orphanet]</th>
+                                    <th>Clinical Significance</th>
+                                    <th>ClinVar Reference Accession</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <span className="wip">IN PROGRESS</span>
+                                    </td>
+                                    <td>
+                                        <span className="wip">IN PROGRESS</span>
+                                    </td>
+                                    <td>
+                                        <span className="wip">IN PROGRESS</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        :
+                        <table className="table"><tbody><tr><td>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</td></tr></tbody></table>
+                    }
+                </div>
+
                 <div className="panel panel-info">
                     <div className="panel-heading"><h3 className="panel-title">ClinVar Primary Transcript</h3></div>
                     {(clinvar_id && primary_transcript) ?
