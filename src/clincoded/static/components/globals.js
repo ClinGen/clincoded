@@ -166,6 +166,7 @@ module.exports.external_url_map = {
     'OMIM': 'http://omim.org/',
     'ClinVar': 'http://www.ncbi.nlm.nih.gov/clinvar/',
     'ClinVarSearch': 'http://www.ncbi.nlm.nih.gov/clinvar/variation/',
+    'ClinVarEfetch': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar',
     'ClinVarEutils': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=',
     'ClinVarEsearch': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?',
     'HPO': 'http://compbio.charite.de/hpoweb/showterm?id=',
