@@ -981,6 +981,38 @@
     }
 }
 
+.evaluation {
+    .form-group {
+        background-color: #fff;
+        margin: 0;
+    }
+    .form-group:after {
+        clear: none;
+    }
+    .pad-top {
+        padding: 20px 0 0 0;
+
+    }
+    .pad-bottom {
+        padding-bottom: 15px;
+    }
+    .center {
+        text-align: center;
+    }
+    .input-right input {
+        text-align: right;
+    }
+    .after-input {
+        padding: 7px 0 0 0;
+    }
+    .clear {
+        clear: both;
+    }
+    .divider {
+        border-bottom: 1px solid #ddd;
+    }
+}
+
 .panel-data {
     .variant-view-panel {
         dt {
@@ -1051,6 +1083,13 @@
                 left: -4px;
                 right: -4px;
                 bottom: -5px;
+            }
+        }
+
+        ul.vci-tabs-header[role=tablist].vci-subtabs {
+            li[role=tab] {
+                background-color: #fff;
+                color: #1b75bc;
             }
         }
 

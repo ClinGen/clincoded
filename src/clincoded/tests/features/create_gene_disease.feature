@@ -10,6 +10,6 @@ Feature: Create Gene Disease
         When I visit "/create-gene-disease/"
         And I fill in "hgncgene" with "DICER1"
         And I fill in "orphanetid" with "ORPHA15"
-        And I select "Other" from dropdown "form-control"
+        And I select "Other" from dropdown "form-control hpo"
         And I click the element with the css selector ".btn-default"
         Then I should not see "Required"

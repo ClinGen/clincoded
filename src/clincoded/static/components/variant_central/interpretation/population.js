@@ -4,7 +4,8 @@ var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
-var CurationInterpretationForm = require('./shared/form').CurationInterpretationForm;
+var vciFormHelper = require('./shared/form');
+var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
@@ -47,7 +48,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         data: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
-        protocol: React.PropTypes.string,
         ext_myVariantInfo: React.PropTypes.object,
         ext_ensemblVEP: React.PropTypes.array,
         ext_ensemblVariation: React.PropTypes.object
@@ -585,8 +585,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm renderedFormContent={criteriaGroup1}
-                                evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
-                                formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
+                                evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                                formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']}
+                                criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
@@ -714,39 +715,25 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
 // code for rendering of population tab interpretation forms
 var criteriaGroup1 = function() {
+    let criteriaList = ['BA1', 'PM2', 'BS1'], // array of criteria code handled in this section
+        hiddenList = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let mafCutoffInput = (
+        <span>
+            <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
+                value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"} inputDisabled={true}
+                labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-3 input-right" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
+            <span className="col-xs-5 after-input">%</span>
+            <div className="clear"></div>
+        </span>
+    );
     return (
         <div>
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>BA1:</strong> Allele frequency is > 5% in ExAC, 1000 Genomes, or ESP
-                    <br /><br />
-                    <strong>PM2:</strong> Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP
-                </p>
-            </div>
-            <Input type="checkbox" ref="BA1-value" label="BA1 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BA1-value'] ? this.state.checkboxes['BA1-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
-            <Input type="checkbox" ref="PM2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="maf-cutoff" label="MAF cutoff (%):" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
-                value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
-            <Input type="textarea" ref="BA1-explanation" label="Explain criteria selection:" rows="5"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <Input type="textarea" ref="PM2-explanation" label="Explain criteria selection (PM2):" rows="5"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>BS1:</strong> Allele frequency greater than expected due to disorder
-                </p>
-            </div>
-            <Input type="checkbox" ref="BS1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BS1-value'] ? this.state.checkboxes['BS1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BS1-explanation" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+            {vciFormHelper.evalFormSectionWrapper.call(this,
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList, hiddenList, mafCutoffInput, null),
+                false
+            )}
         </div>
     );
 };
@@ -754,57 +741,21 @@ var criteriaGroup1 = function() {
 // code for updating the form values of population tab interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaGroup1Update = function(nextProps) {
-    if (nextProps.interpretation) {
-        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaluation => {
-                var tempCheckboxes = this.state.checkboxes;
-                switch(evaluation.criteria) {
-                    case 'BA1':
-                        tempCheckboxes['BA1-value'] = evaluation.value === 'true';
-                        this.refs['BA1-explanation'].setValue(evaluation.explanation);
-                        this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
-                        break;
-                    case 'PM2':
-                        tempCheckboxes['PM2-value'] = evaluation.value === 'true';
-                        this.refs['PM2-explanation'].setValue(evaluation.explanation);
-                        break;
-                    case 'BS1':
-                        tempCheckboxes['BS1-value'] = evaluation.value === 'true';
-                        this.refs['BS1-explanation'].setValue(evaluation.explanation);
-                        break;
-                }
-                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
-            });
-        }
-    }
+    // define custom form update function for MAF Cutoff field in BA1
+    let mafCutoffUpdate = function(evaluation) {
+        this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
+    };
+    // add custom form update functions into customActions dictionary
+    let customActions = {
+        'BA1': mafCutoffUpdate
+    };
+    vciFormHelper.updateEvalForm.call(this, nextProps, ['BA1', 'PM2', 'BS1'], customActions);
 };
 
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
-    // BA1 and PM2 are exclusive. The following is to ensure that if one of the checkboxes
-    // are checked, the other is un-checked
-    if (ref === 'BA1-value' || ref === 'PM2-value') {
-        let tempCheckboxes = this.state.checkboxes,
-            altCriteriaValue = 'PM2-value';
-        if (ref === 'PM2-value') {
-            altCriteriaValue = 'BA1-value';
-        }
-        if (this.state.checkboxes[ref]) {
-            tempCheckboxes[altCriteriaValue] = false;
-            this.setState({checkboxes: tempCheckboxes});
-        }
-    }
-    // Since BA1 and PM2 'share' the same explanation box, and the user only sees the BA1 box,
-    // the following is to update the value in the PM2 box to contain the same data on
-    // saving of the evaluation. Handles changes going the other way, too, just in case (although
-    // this should never happen)
-    if (ref === 'BA1-explanation' || ref === 'PM2-explanation') {
-        let altCriteriaExplanation = 'PM2-explanation';
-        if (ref === 'PM2-explanation') {
-            altCriteriaExplanation = 'BA1-explanation';
-        }
-        this.refs[altCriteriaExplanation].setValue(this.refs[ref].getValue());
-    }
+    // Both explanation boxes for both criteria of each group must be the same
+    vciFormHelper.shareExplanation.call(this, ref, ['BA1', 'PM2', 'BS1']);
     // if the MAF cutoff field is changed, update the populationObj payload with the updated value
     if (ref === 'maf-cutoff') {
         let tempEvidenceData = this.state.evidenceData;
