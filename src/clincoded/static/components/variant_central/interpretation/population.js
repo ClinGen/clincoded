@@ -4,13 +4,9 @@ var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
-<<<<<<< HEAD
-var CurationInterpretationForm = require('./shared/form').CurationInterpretationForm;
-var findDiffKeyValuesMixin = require('./shared/findDiff').findDiffKeyValuesMixin;
-=======
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
->>>>>>> origin/dev
+var findDiffKeyValuesMixin = require('./shared/findDiff').findDiffKeyValuesMixin;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
