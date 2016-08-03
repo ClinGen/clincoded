@@ -402,7 +402,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // method to render a row of data for the 1000Genomes table
     renderTGenomesRow: function(key, tGenomes, tGenomesStatic, rowNameCustom, className) {
         let rowName = tGenomesStatic._labels[key];
-        let tGenomesDiff = this.state.populationObjDiff && this.state.populationObjDiff.tGenomes ? this.state.populationObjDiff.tGenomes : null; // this null creates issues when populationObjDiff is not set because it compraes on null later
+        // for when generating difference object:
+        //let tGenomesDiff = this.state.populationObjDiff && this.state.populationObjDiff.tGenomes ? this.state.populationObjDiff.tGenomes : null; // this null creates issues when populationObjDiff is not set because it compraes on null later
         // generate genotype strings from reference and alt allele information
         let g_ref = tGenomes._extra.ref + '|' + tGenomes._extra.ref,
             g_alt = tGenomes._extra.alt + '|' + tGenomes._extra.alt,
@@ -413,11 +414,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td className={tGenomesDiff[key].af[tGenomes._extra.ref] ? 'diff' : ''}>{tGenomes[key].af[tGenomes._extra.ref] || tGenomes[key].af[tGenomes._extra.ref] === 0 ? tGenomes._extra.ref + ': ' + this.parseFloatShort(tGenomes[key].af[tGenomes._extra.ref]) : '--'}{tGenomes[key].ac[tGenomes._extra.ref] ? ' (' + tGenomes[key].ac[tGenomes._extra.ref] + ')' : ''}</td>
-                <td className={tGenomesDiff[key].af[tGenomes._extra.alt] ? 'diff' : ''}>{tGenomes[key].af[tGenomes._extra.alt] || tGenomes[key].af[tGenomes._extra.alt] === 0 ? tGenomes._extra.alt + ': ' + this.parseFloatShort(tGenomes[key].af[tGenomes._extra.alt]) : '--'}{tGenomes[key].ac[tGenomes._extra.alt] ? ' (' + tGenomes[key].ac[tGenomes._extra.alt] + ')' : ''}</td>
-                <td className={tGenomesDiff[key].gf[g_ref] ? 'diff' : ''}>{tGenomes[key].gf[g_ref] || tGenomes[key].gf[g_ref] === 0 ? g_ref + ': ' + this.parseFloatShort(tGenomes[key].gf[g_ref]) : '--'}{tGenomes[key].gc[g_ref] ? ' (' + tGenomes[key].gc[g_ref] + ')' : ''}</td>
-                <td className={tGenomesDiff[key].gf[g_alt] ? 'diff' : ''}>{tGenomes[key].gf[g_alt] || tGenomes[key].gf[g_alt] === 0 ? g_alt + ': ' + this.parseFloatShort(tGenomes[key].gf[g_alt]) : '--'}{tGenomes[key].gc[g_alt] ? ' (' + tGenomes[key].gc[g_alt] + ')' : ''}</td>
-                <td className={tGenomesDiff[key].gf[g_mixed] ? 'diff' : ''}>{tGenomes[key].gf[g_mixed] || tGenomes[key].gf[g_mixed] === 0 ? g_mixed + ': ' + this.parseFloatShort(tGenomes[key].gf[g_mixed]) : '--'}{tGenomes[key].gc[g_mixed] ? ' (' + tGenomes[key].gc[g_mixed] + ')' : ''}</td>
+                <td>{tGenomes[key].af[tGenomes._extra.ref] || tGenomes[key].af[tGenomes._extra.ref] === 0 ? tGenomes._extra.ref + ': ' + this.parseFloatShort(tGenomes[key].af[tGenomes._extra.ref]) : '--'}{tGenomes[key].ac[tGenomes._extra.ref] ? ' (' + tGenomes[key].ac[tGenomes._extra.ref] + ')' : ''}</td>
+                <td>{tGenomes[key].af[tGenomes._extra.alt] || tGenomes[key].af[tGenomes._extra.alt] === 0 ? tGenomes._extra.alt + ': ' + this.parseFloatShort(tGenomes[key].af[tGenomes._extra.alt]) : '--'}{tGenomes[key].ac[tGenomes._extra.alt] ? ' (' + tGenomes[key].ac[tGenomes._extra.alt] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[g_ref] || tGenomes[key].gf[g_ref] === 0 ? g_ref + ': ' + this.parseFloatShort(tGenomes[key].gf[g_ref]) : '--'}{tGenomes[key].gc[g_ref] ? ' (' + tGenomes[key].gc[g_ref] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[g_alt] || tGenomes[key].gf[g_alt] === 0 ? g_alt + ': ' + this.parseFloatShort(tGenomes[key].gf[g_alt]) : '--'}{tGenomes[key].gc[g_alt] ? ' (' + tGenomes[key].gc[g_alt] + ')' : ''}</td>
+                <td>{tGenomes[key].gf[g_mixed] || tGenomes[key].gf[g_mixed] === 0 ? g_mixed + ': ' + this.parseFloatShort(tGenomes[key].gf[g_mixed]) : '--'}{tGenomes[key].gc[g_mixed] ? ' (' + tGenomes[key].gc[g_mixed] + ')' : ''}</td>
             </tr>
         );
     },
