@@ -1475,3 +1475,19 @@ dl.inline-dl {
 .hidden {
     display: none;
 }
+
+.progress-bar {
+    padding: 0 0 10px 0;
+
+    .benign-box {
+        border: solid 2px #8bcd9c;
+    }
+
+    .pathogenic-box {
+        border: solid 2px #d78;
+    }
+
+    .assertion-box {
+        border: solid 2px #1b75bc;
+    }
+}

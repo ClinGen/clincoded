@@ -22,7 +22,8 @@ var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific
 // Import pathogenicity calculator
 var calculator = require('./interpretation/shared/calculator');
 var PathogenicityCalculator = calculator.PathogenicityCalculator;
-var calculateAssertion = calculator.calculateAssertion;
+//var calculateAssertion = calculator.calculateAssertion; // for test only
+
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
     propTypes: {
@@ -72,7 +73,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             BP5: false,
             BP6: false,
             BP7: false,
-            // Test onlu above
+            // Test above
 
             interpretation: this.props.interpretation,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
@@ -125,7 +126,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
     },
 
-    // Function for test pathogeinicity calculator only
+    // Function for test pathogeinicity calculator only, will be removed later.
     handleChange: function(ref, e) {
         var critObj = {};
         critObj[ref] = !this.state[ref];
@@ -156,31 +157,14 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         var variant = this.props.variantData;
         var interpretation = this.state.interpretation;
 
-        // get calculated pathogenicity and criteria summary
-        var result = this.state.criteriaList && this.state.criteriaList.length ? calculateAssertion(this.state.criteriaList) : null;
+        // get calculated pathogenicity and criteria summary, test only, will be removed.
+        //var result = this.state.criteriaList && this.state.criteriaList.length ? calculateAssertion(this.state.criteriaList) : null;
 
         // The ordering of TabPanels are corresponding to that of tabs
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
         return (
             <div className="container curation-variant-tab-group">
-                {interpretation ?
-                    <div className="col-lg-12 col-md-12 col-sm-12"  style={{'padding':'0 0 10px 0'}}>
-                        <div className="col-lg-4 col-md-4 col-sm-4" style={{'border':'solid 2px #8bcd9c'}}>
-                            <dt>Benign:</dt>
-                            {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
-                        </div>
-                        <div className="col-lg-4 col-md-4 col-sm-4" style={{'border':'solid 2px #d78'}}>
-                            <dt>Pathogenic:</dt>
-                            {result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }
-                        </div>
-                        <div className="col-lg-4 col-md-4 col-sm-4" style={{'border':'solid 2px #1b75bc'}}>
-                            <dt>Calculated Pathogenicity:</dt>
-                            {result && result.assertion ? result.assertion : 'None'}
-                        </div>
-                    </div>
-                    :
-                    null
-                }
+                <PathogenicityCalculator interpretation={interpretation} />
                 <div className="vci-tabs">
                     <ul className="vci-tabs-header tab-label-list" role="tablist">
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
@@ -195,7 +179,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <CurationInterpretationBasicInfo data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
-                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP} />
+                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
+                            calculator={PathogenicityCalculator.calculator} />
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'population' ? '' : ' hidden')}>
                         <CurationInterpretationPopulation data={variant}
