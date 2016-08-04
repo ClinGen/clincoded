@@ -191,24 +191,26 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 }
             });
             // do hard-coded check for PM2 vs PS4
-            if (this.props.criteria.indexOf('PM2') > -1) {
-                if (criteriaEvalConflictValues.indexOf(this.refs['PM2-status'].getValue()) > -1) {
-                    manualCheck1 = 'PM2';
-                    manualCheck2 = 'PS4';
+            if (interpretation.evaluations && interpretation.evaluations.length > 0) {
+                if (this.props.criteria.indexOf('PM2') > -1) {
+                    if (criteriaEvalConflictValues.indexOf(this.refs['PM2-status'].getValue()) > -1) {
+                        manualCheck1 = 'PM2';
+                        manualCheck2 = 'PS4';
+                    }
+                } else if (this.props.criteria.indexOf('PS4') > -1) {
+                    if (criteriaEvalConflictValues.indexOf(this.refs['PS4-status'].getValue()) > -1) {
+                        manualCheck1 = 'PM4';
+                        manualCheck2 = 'PM2';
+                    }
                 }
-            } else if (this.props.criteria.indexOf('PS4') > -1) {
-                if (criteriaEvalConflictValues.indexOf(this.refs['PS4-status'].getValue()) > -1) {
-                    manualCheck1 = 'PM4';
-                    manualCheck2 = 'PM2';
-                }
-            }
-            if (manualCheck1 && manualCheck2) {
-                for (var i = 0; i < interpretation.evaluations.length; i++) {
-                    if (interpretation.evaluations[i].criteria == manualCheck2) {
-                        if (interpretation.evaluations[i].criteriaStatus == 'met') {
-                            throw 'crossCheckError';
-                        } else {
-                            break;
+                if (manualCheck1 && manualCheck2) {
+                    for (var i = 0; i < interpretation.evaluations.length; i++) {
+                        if (interpretation.evaluations[i].criteria == manualCheck2) {
+                            if (interpretation.evaluations[i].criteriaStatus == 'met') {
+                                throw 'crossCheckError';
+                            } else {
+                                break;
+                            }
                         }
                     }
                 }
@@ -325,7 +327,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             if (error == 'crossCheckError') {
                 this.setState({submitBusy: false, updateMsg: <span className="text-danger">{manualCheck1} cannot have a value other than "Not Met" or "Not Evaluated" because {manualCheck2} has already been evaluated as being Met</span>});
             } else {
-                this.setsState({submitBusy: false, updateMsg: <span className="text-danger">Evaluation could not be saved successfully!</span>});
+                this.setState({submitBusy: false, updateMsg: <span className="text-danger">Evaluation could not be saved successfully!</span>});
                 console.log(error);
             }
         });
