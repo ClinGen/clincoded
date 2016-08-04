@@ -30,8 +30,13 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
 
     getInitialState: function() {
         return {
-            clinvar_id: null
+            clinvar_id: null,
+            interpretation: this.props.interpretation
         };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        this.setState({interpretation: nextProps.interpretation});
     },
 
     render: function() {

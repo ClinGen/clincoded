@@ -125,15 +125,15 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch} />
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'functional' ? '' : ' hidden')}>
-                        <CurationInterpretationFunctional data={variant} protocol={this.props.href_url.protocol}
+                        <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'segregation-case' ? '' : ' hidden')}>
-                        <CurationInterpretationSegregation data={variant} protocol={this.props.href_url.protocol}
+                        <CurationInterpretationSegregation data={variant} data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'gene-specific' ? '' : ' hidden')}>
-                        <CurationInterpretationGeneSpecific data={variant} protocol={this.props.href_url.protocol}
+                        <CurationInterpretationGeneSpecific data={variant} data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
                 </div>

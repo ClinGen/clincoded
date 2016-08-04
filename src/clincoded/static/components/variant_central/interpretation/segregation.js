@@ -10,8 +10,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     mixins: [RestMixin],
 
     propTypes: {
-        data: React.PropTypes.object,
-        protocol: React.PropTypes.string
+        data: React.PropTypes.object, // ClinVar data payload
+        interpretation: React.PropTypes.object,
+        updateInterpretationObj: React.PropTypes.func,
+        href_url: React.PropTypes.object
     },
 
     getInitialState: function() {
