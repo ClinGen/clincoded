@@ -71,9 +71,10 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     }
 });
 
-// code for rendering of population tab interpretation forms
+
+// code for rendering of this group of interpretation forms
 var criteriaGroup1 = function() {
-    let criteriaList1 = ['PM1'], // array of criteria code handled in this section
+    let criteriaList1 = ['PM1'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
@@ -86,17 +87,16 @@ var criteriaGroup1 = function() {
         </div>
     );
 };
-
-// code for updating the form values of population tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaGroup1Update = function(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['PM1'], null);
 };
 
 
-// code for rendering of population tab interpretation forms
+// code for rendering of this group of interpretation forms
 var criteriaGroup2 = function() {
-    let criteriaList1 = ['BS3', 'PS3'], // array of criteria code handled in this section
+    let criteriaList1 = ['BS3', 'PS3'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
@@ -109,13 +109,11 @@ var criteriaGroup2 = function() {
         </div>
     );
 };
-
-// code for updating the form values of population tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaGroup2Update = function(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['BS3', 'PS3'], null);
 };
-
 // code for handling logic within the form
 var criteriaGroup2Change = function(ref, e) {
     // Both explanation boxes for both criteria of each group must be the same

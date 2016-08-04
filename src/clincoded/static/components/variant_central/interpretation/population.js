@@ -713,13 +713,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     }
 });
 
-// code for rendering of population tab interpretation forms
+
+// code for rendering of this group of interpretation forms
 var criteriaGroup1 = function() {
-    let criteriaList1 = ['BA1', 'PM2', 'BS1'], // array of criteria code handled in this section
+    let criteriaList1 = ['BA1', 'PM2', 'BS1'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false, true, true], // array indicating hidden status of explanation boxes for above list of criteria codes
-        criteriaList2 = ['BS2'], // array of criteria code handled in this section
+        criteriaList2 = ['BS2'], // array of criteria code handled subgroup of this section
         hiddenList2 = [false], // array indicating hidden status of explanation boxes for above list of criteria codes
-        criteriaList3 = ['PS4'], // array of criteria code handled in this section
+        criteriaList3 = ['PS4'], // array of criteria code handled subgroup of this section
         hiddenList3 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     let mafCutoffInput = (
         <span>
@@ -753,8 +754,7 @@ var criteriaGroup1 = function() {
         </div>
     );
 };
-
-// code for updating the form values of population tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaGroup1Update = function(nextProps) {
     // define custom form update function for MAF Cutoff field in BA1
@@ -767,7 +767,6 @@ var criteriaGroup1Update = function(nextProps) {
     };
     vciFormHelper.updateEvalForm.call(this, nextProps, ['BA1', 'PM2', 'BS1', 'BS2', 'PS4'], customActions);
 };
-
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
     // Both explanation boxes for both criteria of each group must be the same
@@ -779,7 +778,6 @@ var criteriaGroup1Change = function(ref, e) {
         this.setState({evidenceData: tempEvidenceData});
     }
 };
-
 // special function to handle the MAF cutoff % field
 var mafCutoffBlur = function(event) {
     let mafCutoff = parseInt(this.refs['maf-cutoff'].getValue());

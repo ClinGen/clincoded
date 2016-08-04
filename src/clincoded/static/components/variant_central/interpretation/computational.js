@@ -687,11 +687,11 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     }
 });
 
-// code for rendering of population tab interpretation forms
+// code for rendering of this group of interpretation forms
 var criteriaMissense1 = function() {
-    let criteriaList1 = ['PP3', 'BP4'], // array of criteria code handled in this section
+    let criteriaList1 = ['PP3', 'BP4'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false, true], // array indicating hidden status of explanation boxes for above list of criteria codes
-        criteriaList2 = ['BP1', 'PP2'], // array of criteria code handled in this section
+        criteriaList2 = ['BP1', 'PP2'], // array of criteria code handled subgroup of this section
         hiddenList2 = [false, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
@@ -711,12 +711,12 @@ var criteriaMissense1 = function() {
     );
 };
 
-// code for updating the form values of population tab interpretation forms upon receiving
+
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaMissense1Update = function(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['PP3', 'BP4', 'BP1', 'PP2'], null);
 };
-
 // code for handling logic within the form
 var criteriaMissense1Change = function(ref, e) {
     // Both explanation boxes for both criteria of each group must be the same
@@ -725,11 +725,11 @@ var criteriaMissense1Change = function(ref, e) {
 };
 
 
-// code for rendering of population tab interpretation forms
+// code for rendering of this group of interpretation forms
 var criteriaMissense2 = function() {
-    let criteriaList1 = ['PM5'], // array of criteria code handled in this section
+    let criteriaList1 = ['PM5'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false], // array indicating hidden status of explanation boxes for above list of criteria codes
-        criteriaList2 = ['PS1'], // array of criteria code handled in this section
+        criteriaList2 = ['PS1'], // array of criteria code handled subgroup of this section
         hiddenList2 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
@@ -748,17 +748,16 @@ var criteriaMissense2 = function() {
         </div>
     );
 };
-
-// code for updating the form values of population tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaMissense2Update = function(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['PM5', 'PS1'], null);
 };
 
 
-// code for rendering of population tab interpretation forms
+// code for rendering of this group of interpretation forms
 var criteriaLof1 = function() {
-    let criteriaList1 = ['PVS1'], // array of criteria code handled in this section
+    let criteriaList1 = ['PVS1'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
@@ -771,18 +770,16 @@ var criteriaLof1 = function() {
         </div>
     );
 };
-
-// code for updating the form values of population tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaLof1Update = function(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['PVS1'], null);
 };
 
 
-
-// code for rendering of population tab interpretation forms
+// code for rendering of this group of interpretation forms
 var criteriaSilentIntron1 = function() {
-    let criteriaList1 = ['BP7'], // array of criteria code handled in this section
+    let criteriaList1 = ['BP7'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
@@ -795,17 +792,16 @@ var criteriaSilentIntron1 = function() {
         </div>
     );
 };
-
-// code for updating the form values of population tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaSilentIntron1Update = function(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['BP7'], null);
 };
 
 
-// code for rendering of population tab interpretation forms
+// code for rendering of this group of interpretation forms
 var criteriaIndel1 = function() {
-    let criteriaList1 = ['BP3', 'PM4'], // array of criteria code handled in this section
+    let criteriaList1 = ['BP3', 'PM4'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
@@ -818,13 +814,11 @@ var criteriaIndel1 = function() {
         </div>
     );
 };
-
-// code for updating the form values of population tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaIndel1Update = function(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['BP3', 'PM4'], null);
 };
-
 // code for handling logic within the form
 var criteriaIndel1Change = function(ref, e) {
     // Both explanation boxes for both criteria of each group must be the same
