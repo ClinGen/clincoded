@@ -122,28 +122,28 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
-        // cross check criteria values here (no more than one met per cross-check group)
+        // cross check criteria values here (no more than one met per cross-check group); for cross checking within the same form group
         var criteriaMetNum = 0;
         var criteriaEvalConflictValues = ['met', 'supporting', 'moderate', 'strong', 'very-strong'];
         var criteriaConflicting = [];
         var errorMsgCriteria = '';
         if (this.props.criteriaCrossCheck && this.props.criteriaCrossCheck.length > 0) {
-            for (var i = 0; i < this.props.criteriaCrossCheck.length; i++) {
-                if (this.props.criteriaCrossCheck[i].length > 1) {
+            this.props.criteriaCrossCheck.map((crossCheckGroup, i) => {
+                if (crossCheckGroup.length > 1) {
                     // per criteria cross check group...
-                    this.props.criteriaCrossCheck[i].map((criterion, j) => {
+                    crossCheckGroup.map((criterion, j) => {
                         // ... check the values...
                         if (criteriaEvalConflictValues.indexOf(this.refs[criterion + '-status'].getValue()) > -1) {
                             criteriaMetNum += 1;
                             criteriaConflicting.push(criterion);
                         }
                         // ... while building the error mesage, just in case
-                        if (j < this.props.criteriaCrossCheck[i].length) {
+                        if (j < crossCheckGroup.length) {
                             errorMsgCriteria += criterion;
-                            if (j < this.props.criteriaCrossCheck[i].length - 1) {
+                            if (j < crossCheckGroup.length - 1) {
                                 errorMsgCriteria += ', ';
                             }
-                            if (j == this.props.criteriaCrossCheck[i].length - 2) {
+                            if (j == crossCheckGroup.length - 2) {
                                 errorMsgCriteria += 'or ';
                             }
                         }
@@ -157,7 +157,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                         return false;
                     }
                 }
-            }
+            });
         }
 
         // passed cross check, so begin saving data
@@ -168,6 +168,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         var freshInterpretation = null;
         var evidenceObjectId = null;
         var submittedCriteria = [];
+        // for hard-coded crosschecks
+        var manualCheck1 = null,
+            manualCheck2 = null;
+        // begin promise chain
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
             freshInterpretation = interpretation;
             // get fresh update of interpretation object so we have newest evaluation list, then flatten it
@@ -186,6 +190,29 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     submittedCriteria.push(criterion);
                 }
             });
+            // do hard-coded check for PM2 vs PS4
+            if (this.props.criteria.indexOf('PM2') > -1) {
+                if (criteriaEvalConflictValues.indexOf(this.refs['PM2-status'].getValue()) > -1) {
+                    manualCheck1 = 'PM2';
+                    manualCheck2 = 'PS4';
+                }
+            } else if (this.props.criteria.indexOf('PS4') > -1) {
+                if (criteriaEvalConflictValues.indexOf(this.refs['PS4-status'].getValue()) > -1) {
+                    manualCheck1 = 'PM4';
+                    manualCheck2 = 'PM2';
+                }
+            }
+            if (manualCheck1 && manualCheck2) {
+                for (var i = 0; i < interpretation.evaluations.length; i++) {
+                    if (interpretation.evaluations[i].criteria == manualCheck2) {
+                        if (interpretation.evaluations[i].criteriaStatus == 'met') {
+                            throw 'crossCheckError';
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
             // check existing evaluations and map their UUIDs if they match the criteria in this form
             if (freshInterpretation.evaluations) {
                 freshInterpretation.evaluations.map(freshEvaluation => {
@@ -295,8 +322,12 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             this.setState({submitBusy: false, updateMsg: <span className="text-success">Evaluations for {submittedCriteria.join(', ')} saved successfully!</span>});
             this.props.updateInterpretationObj();
         }).catch(error => {
-            this.setState({submitBusy: false, updateMsg: <span className="text-danger">Evaluation could not be saved successfully!</span>});
-            console.log(error);
+            if (error == 'crossCheckError') {
+                this.setState({submitBusy: false, updateMsg: <span className="text-danger">{manualCheck1} cannot have a value other than "Not Met" or "Not Evaluated" because {manualCheck2} has already been evaluated as being Met</span>});
+            } else {
+                this.setsState({submitBusy: false, updateMsg: <span className="text-danger">Evaluation could not be saved successfully!</span>});
+                console.log(error);
+            }
         });
     },
 
