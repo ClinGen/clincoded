@@ -128,10 +128,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     // Function for test pathogeinicity calculator only, will be removed later.
     handleChange: function(ref, e) {
-        //var critObj = {};
-        //critObj[ref] = !this.state[ref];
-        //this.setState(critObj);
-
         var criteria_value = this.refs[ref].getValue();
         if (!this.state.ref || this.state.ref !== criteria_value) {
             var critObj = {};
@@ -172,9 +168,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     render: function() {
         var variant = this.props.variantData;
         var interpretation = this.state.interpretation;
-
-        // get calculated pathogenicity and criteria summary, test only, will be removed.
-        //var result = this.state.criteriaList && this.state.criteriaList.length ? calculateAssertion(this.state.criteriaList) : null;
 
         // The ordering of TabPanels are corresponding to that of tabs
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
@@ -233,16 +226,12 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     // Function to add UI for testing pathogenic calculator. Will be removed later.
     pathCalculatorUI: function() {
-        var ps_criterion = ['PS1','PS2','PS3','PS4'];
-        var pm_number = 6;
-        var pp_number = 5;
-        var bs_number = 4;
         var result = testCalculator(this.state.criteria_evaluated);
 
         return (
             <div style={{'marginTop':'30px','paddingTop':'10px','borderTop':'solid 1px #aaa'}}>
                 <span style={{'fontSize':'18px'}}><b>Test Pathogenicity Calculator</b></span>
-                <div className="col-lg-12 col-md-12 col-sm-12 progress-bar">
+                <div className="col-lg-12 col-md-12 col-sm-12 progress-bar" style={{'paddingTop':'10px'}}>
                     <div className="col-lg-4 col-md-4 col-sm-4 benign-box">
                         <dt>Benign:</dt>
                         {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
@@ -260,7 +249,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                 <Form>
                     <table style={{'width':'100%', 'marginTop':'20px'}}>
                         <tbody>
-                            <tr style={{'backgroundColor':'#f9d7d7'}}>
+                            <tr style={{'backgroundColor':'#f9d8d8'}}>
                                 <td style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
                                     {this.setDropdown('PVS1')}
                                 </td>
