@@ -22,7 +22,7 @@ var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific
 // Import pathogenicity calculator
 var calculator = require('./interpretation/shared/calculator');
 var PathogenicityCalculator = calculator.PathogenicityCalculator;
-//var calculateAssertion = calculator.calculateAssertion; // for test only
+var testCalculator = calculator.testCalculator; // for test only
 
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
@@ -44,7 +44,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         return {
             // For test pathogenicity calculator only
             criteriaList: null,
-            criteria_met: null,
+            criteria_evaluated: null,
             PVS1: false,
             PS1: false,
             PS2: false,
@@ -128,28 +128,44 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     // Function for test pathogeinicity calculator only, will be removed later.
     handleChange: function(ref, e) {
-        var critObj = {};
-        critObj[ref] = !this.state[ref];
-        this.setState(critObj);
+        //var critObj = {};
+        //critObj[ref] = !this.state[ref];
+        //this.setState(critObj);
 
-        var criteria_met = this.state.criteria_met ? this.state.criteria_met : [];
-        var i = criteria_met.indexOf(ref);
-        if (i !== -1) {
-            criteria_met.splice(i, 1);
+        var criteria_value = this.refs[ref].getValue();
+        if (!this.state.ref || this.state.ref !== criteria_value) {
+            var critObj = {};
+            critObj[ref] = criteria_value;
+            this.setState(critObj);
+        }
+
+        var criteria_evaluated = this.state.criteria_evaluated ? this.state.criteria_evaluated : [];
+        var criteriaObj = {};
+        criteriaObj.criteria = ref;
+        if (criteria_value === 'not-met' || criteria_value === 'met') {
+            criteriaObj.criteriaStatus = criteria_value;
+            criteriaObj.criteriaModifier = '';
         } else {
-            criteria_met.push(ref);
+            criteriaObj.criteriaStatus = 'met';
+            criteriaObj.criteriaModifier = criteria_value;
         }
 
-        var criteria_list = [];
-        for (var crit of criteria_met) {
-            var criteriaObj = {};
-            criteriaObj.criteria = crit;
-            criteriaObj.criteriaStatus = 'met';
-            criteria_list.push(criteriaObj);
+        var criteria_index = -1;
+        criteria_evaluated.map((ct, i) => {
+            if (ct.criteria === ref) {
+                criteria_index = i;
+            }
+        });
+        if (criteria_index > -1 && criteria_value === 'not-evaluated') {
+            criteria_evaluated.splice(criteria_index, 1);
+        } else if (criteria_index > -1 ) {
+            criteria_evaluated[criteria_index] = criteriaObj;
+        } else if (criteria_value !== 'not-evaluated') {
+            criteria_evaluated.push(criteriaObj);
         }
+
         this.setState({
-            criteria_met: criteria_met,
-            criteriaList: criteria_list
+            criteria_evaluated: criteria_evaluated
         });
     },
 
@@ -217,106 +233,79 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     // Function to add UI for testing pathogenic calculator. Will be removed later.
     pathCalculatorUI: function() {
+        var ps_criterion = ['PS1','PS2','PS3','PS4'];
+        var pm_number = 6;
+        var pp_number = 5;
+        var bs_number = 4;
+        var result = testCalculator(this.state.criteria_evaluated);
+
         return (
             <div style={{'marginTop':'30px','paddingTop':'10px','borderTop':'solid 1px #aaa'}}>
                 <span style={{'fontSize':'18px'}}><b>Test Pathogenicity Calculator</b></span>
+                <div className="col-lg-12 col-md-12 col-sm-12 progress-bar">
+                    <div className="col-lg-4 col-md-4 col-sm-4 benign-box">
+                        <dt>Benign:</dt>
+                        {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
+                    </div>
+                    <div className="col-lg-4 col-md-4 col-sm-4 pathogenic-box">
+                        <dt>Pathogenic:</dt>
+                        {result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }
+                    </div>
+                    <div className="col-lg-4 col-md-4 col-sm-4 assertion-box">
+                        <dt>Calculated Pathogenicity:</dt>
+                        {result && result.assertion ? result.assertion : 'None'}
+                    </div>
+                </div>
                 <br />
                 <Form>
                     <table style={{'width':'100%', 'marginTop':'20px'}}>
                         <tbody>
-                            <tr>
-                                <td style={{'verticalAlign':'top','width':'13%'}}>
-                                    <Input type="checkbox" ref="PVS1" label="PVS1" checked={this.state.PVS1} defaultChecked="false" handleChange={this.handleChange}
-                                        labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
+                            <tr style={{'backgroundColor':'#f9d7d7'}}>
+                                <td style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
+                                    {this.setDropdown('PVS1')}
                                 </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'13%'}}>
-                                        <Input type="checkbox" ref="PS1" label="PS1" checked={this.state.PS1} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <be />
-                                        <Input type="checkbox" ref="PS2" label="PS2" checked={this.state.PS2} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="PS3" label="PS3" checked={this.state.PS3} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <be />
-                                        <Input type="checkbox" ref="PS4" label="PS4" checked={this.state.PS4} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
+                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
+                                    {this.setDropdown('PS1')}
+                                    {this.setDropdown('PS2')}
+                                    {this.setDropdown('PS3')}
+                                    {this.setDropdown('PS4')}
                                 </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'13%'}}>
-                                        <Input type="checkbox" ref="PM1" label="PM1" checked={this.state.PM1} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="PM2" label="PM2" checked={this.state.PM2} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="PM3" label="PM3" checked={this.state.PM3} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="PM4" label="PM4" checked={this.state.PM4} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="PM5" label="PM5" checked={this.state.PM5} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="PM6" label="PM6" checked={this.state.PM6} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
+                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%', 'paddingTop':'20px'}}>
+                                    {this.setDropdown('PM1')}
+                                    {this.setDropdown('PM2')}
+                                    {this.setDropdown('PM3')}
+                                    {this.setDropdown('PM4')}
+                                    {this.setDropdown('PM5')}
+                                    {this.setDropdown('PM6')}
                                 </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'13%'}}>
-                                        <Input type="checkbox" ref="PP1" label="PP1" checked={this.state.PP1} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="PP2" label="PP2" checked={this.state.PP2} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="PP3" label="PP3" checked={this.state.PP3} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="PP4" label="PP4" checked={this.state.PP4} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="PP5" label="PP5" checked={this.state.PP5} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
+                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
+                                    {this.setDropdown('PP1')}
+                                    {this.setDropdown('PP2')}
+                                    {this.setDropdown('PP3')}
+                                    {this.setDropdown('PP4')}
+                                    {this.setDropdown('PP5')}
                                 </td>
-                                <td>&nbsp;</td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'13%'}}>
-                                    <Input type="checkbox" ref="BA1" label="BA1" checked={this.state.BA1} defaultChecked="false" handleChange={this.handleChange}
-                                        labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
+                            </tr>
+                            <tr style={{'backgroundColor':'#c7e9c7'}}>
+                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
+                                    {this.setDropdown('BA1')}
                                 </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'13%'}}>
-                                        <Input type="checkbox" ref="BS1" label="BS1" checked={this.state.BS1} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="BS2" label="BS2" checked={this.state.BS2} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="BS3" label="BS3" checked={this.state.BS3} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="BS4" label="BS4" checked={this.state.BS4} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
+                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
+                                    {this.setDropdown('BS1')}
+                                    {this.setDropdown('BS2')}
+                                    {this.setDropdown('BS3')}
+                                    {this.setDropdown('BS4')}
                                 </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'13%'}}>
-                                        <Input type="checkbox" ref="BP1" label="BP1" checked={this.state.BP1} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="BP2" label="BP2" checked={this.state.BP2} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="BP3" label="BP3" checked={this.state.BP3} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="BP4" label="BP4" checked={this.state.BP4} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="BP5" label="BP5" checked={this.state.BP5} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="BP6" label="BP6" checked={this.state.BP6} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
-                                    <br />
-                                        <Input type="checkbox" ref="BP7" label="BP7" checked={this.state.BP7} defaultChecked="false" handleChange={this.handleChange}
-                                            labelClassName="col-lg-3 pull-left" wrapperClassName="col-lg-7" />
+                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
+                                    {this.setDropdown('BP1')}
+                                    {this.setDropdown('BP2')}
+                                    {this.setDropdown('BP3')}
+                                    {this.setDropdown('BP4')}
+                                    {this.setDropdown('BP5')}
+                                    {this.setDropdown('BP6')}
+                                    {this.setDropdown('BP7')}
                                 </td>
+                                <td></td>
                             </tr>
                         </tbody>
                     </table>
@@ -324,4 +313,19 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             </div>
         );
     },
+
+    setDropdown: function(criteria) {
+        return (
+            <Input type="select" ref={criteria} label={criteria + ':'} defaultValue="not-evaluated" handleChange={this.handleChange} labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-9">
+                <option value="not-evaluated">Not Evaluated</option>
+                <option disabled="disabled"></option>
+                <option value="met">Met</option>
+                <option value="not-met">Not Met</option>
+                {criteria.indexOf('P') === 1 ? null : <option value="supporting">Supporting</option>}
+                {criteria.indexOf('M') === 1 ? null : (criteria.indexOf('P') === 0 ? <option value="moderate">Moderate</option> : null)}
+                {criteria.indexOf('S') === 1 ? null : <option value="strong">Strong</option>}
+                {criteria.indexOf('VS') === 1 ? null : (criteria.indexOf('P') === 0 ? <option value="very-strong">Very Strong</option> : null)}
+            </Input>
+        );
+    }
 });
