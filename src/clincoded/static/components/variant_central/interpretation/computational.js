@@ -599,19 +599,21 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </div>
 
                 <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'lof' ? '' : ' hidden')}>
-                    {(this.props.data && this.state.interpretation) ?
-                        <div className="panel panel-info">
-                            <div className="panel-body">
+                    <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
+                        {(this.props.data && this.state.interpretation) ?
+                        <div className="row">
+                            <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaLof1} criteria={['PVS1']}
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaLof1Update} variantUuid={this.props.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
-                    : null}
-                    <PanelGroup accordion><Panel title="Does variant result in LOF?" panelBodyClassName="panel-wide-content" open>
-                    </Panel></PanelGroup>
-                    <PanelGroup accordion><Panel title="Is LOF known mechanism for disease of interest?" panelBodyClassName="panel-wide-content" open>
+                        : null}
+                        <PanelGroup accordion><Panel title="Does variant result in LOF?" panelBodyClassName="panel-wide-content" open>
+                        </Panel></PanelGroup>
+                        <PanelGroup accordion><Panel title="Is LOF known mechanism for disease of interest?" panelBodyClassName="panel-wide-content" open>
+                        </Panel></PanelGroup>
                     </Panel></PanelGroup>
                 </div>
 

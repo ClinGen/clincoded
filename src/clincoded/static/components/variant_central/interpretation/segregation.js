@@ -81,7 +81,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                     : null}
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="<i>de novo</i> occurrence" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title={<h4><i>de novo</i> occurrence</h4>} panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -94,7 +94,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                     : null}
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Allele data (<i>cis/trans</i>)" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title={<h4>Allele data (<i>cis/trans</i>)</h4>} panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -197,14 +197,22 @@ var criteriaGroup2Update = function(nextProps) {
 
 // code for rendering of this group of interpretation forms
 var criteriaGroup3 = function() {
-    let criteriaList1 = ['BS4', 'PP1'], // array of criteria code handled subgroup of this section
-        hiddenList1 = [false, false]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let criteriaList1 = ['BS4'], // array of criteria code handled subgroup of this section
+        hiddenList1 = [false], // array indicating hidden status of explanation boxes for above list of criteria codes
+        criteriaList2 = ['PP1'], // array of criteria code handled subgroup of this section
+        hiddenList2 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
             {vciFormHelper.evalFormSectionWrapper.call(this,
                 vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
                 vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
                 vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
+                true
+            )}
+            {vciFormHelper.evalFormSectionWrapper.call(this,
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList2),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList2),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList2, hiddenList2, null, null),
                 false
             )}
         </div>
