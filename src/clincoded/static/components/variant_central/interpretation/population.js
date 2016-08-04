@@ -717,7 +717,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 // code for rendering of this group of interpretation forms
 var criteriaGroup1 = function() {
     let criteriaList1 = ['BA1', 'PM2', 'BS1'], // array of criteria code handled subgroup of this section
-        hiddenList1 = [false, true, true], // array indicating hidden status of explanation boxes for above list of criteria codes
+        hiddenList1 = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
     let mafCutoffInput = (
         <span>
             <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
