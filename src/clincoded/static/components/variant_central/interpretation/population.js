@@ -771,7 +771,7 @@ var criteriaGroup1Update = function(nextProps) {
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
     // Both explanation boxes for both criteria of each group must be the same
-    vciFormHelper.shareExplanation.call(this, ref, ['BA1', 'PM2', 'BS1', 'BS2', 'PS4']);
+    vciFormHelper.shareExplanation.call(this, ref, ['BA1', 'PM2', 'BS1']);
     // if the MAF cutoff field is changed, update the populationObj payload with the updated value
     if (ref === 'maf-cutoff') {
         let tempEvidenceData = this.state.evidenceData;

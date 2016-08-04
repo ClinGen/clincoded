@@ -385,7 +385,8 @@ function evalFormValueDropdown(criteria) {
     return (
         <Input type="select" ref={criteria + "-status"} label={criteria + ":"} defaultValue="not-evaluated" handleChange={this.handleDropdownChange}
             error={this.getFormError(criteria + "-status")} clearError={this.clrFormErrors.bind(null, criteria + "-status")}
-            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group">
+            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group"
+            inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated}>
             <option value="not-evaluated">Not Evaluated</option>
             <option disabled="disabled"></option>
             <option value="met">Met</option>
@@ -420,7 +421,8 @@ var evalFormExplanationSectionWrapper = module.exports.evalFormExplanationSectio
 function evalFormExplanationDefaultInput(criteria, hidden) {
     return (
         <Input type="textarea" ref={criteria + "-explanation"} rows="3" label="Explanation:"
-            labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName={hidden ? "hidden" : "form-group"} handleChange={this.handleFormChange} />
+            labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName={hidden ? "hidden" : "form-group"} handleChange={this.handleFormChange}
+            inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated} />
     );
 }
 
