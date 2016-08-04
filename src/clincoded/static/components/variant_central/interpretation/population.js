@@ -587,7 +587,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             <CurationInterpretationForm renderedFormContent={criteriaGroup1}
                                 evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
                                 formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']}
-                                criteria={['BA1', 'PM2', 'BS1', 'BS2', 'PS4']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
+                                criteria={['BA1', 'PM2', 'BS1', 'BS2']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
@@ -719,9 +719,7 @@ var criteriaGroup1 = function() {
     let criteriaList1 = ['BA1', 'PM2', 'BS1'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false, true, true], // array indicating hidden status of explanation boxes for above list of criteria codes
         criteriaList2 = ['BS2'], // array of criteria code handled subgroup of this section
-        hiddenList2 = [false], // array indicating hidden status of explanation boxes for above list of criteria codes
-        criteriaList3 = ['PS4'], // array of criteria code handled subgroup of this section
-        hiddenList3 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
+        hiddenList2 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     let mafCutoffInput = (
         <span>
             <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
@@ -743,12 +741,6 @@ var criteriaGroup1 = function() {
                 vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList2),
                 vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList2),
                 vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList2, hiddenList2, null, null),
-                true
-            )}
-            {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList3),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList3),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList3, hiddenList3, null, null),
                 false
             )}
         </div>
@@ -765,7 +757,7 @@ var criteriaGroup1Update = function(nextProps) {
     let customActions = {
         'BA1': mafCutoffUpdate
     };
-    vciFormHelper.updateEvalForm.call(this, nextProps, ['BA1', 'PM2', 'BS1', 'BS2', 'PS4'], customActions);
+    vciFormHelper.updateEvalForm.call(this, nextProps, ['BA1', 'PM2', 'BS1', 'BS2'], customActions);
 };
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
