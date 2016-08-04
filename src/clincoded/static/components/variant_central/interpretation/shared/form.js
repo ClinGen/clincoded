@@ -446,7 +446,7 @@ var updateEvalForm = module.exports.updateEvalForm = function(nextProps, criteri
                     }
                     this.refs[evaluation.criteria + '-explanation'].setValue(evaluation.explanation);
                     // apply custom anonymous function logic if applicable
-                    if (evaluation.criteria in customActions) {
+                    if (customActions && evaluation.criteria in customActions) {
                         customActions[evaluation.criteria].call(this, evaluation);
                     }
                 }
