@@ -158,7 +158,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 break;
             }
         }
-        console.log(this.state.populationObjDiff);
     },
 
     // Get ExAC allele frequency from Ensembl (VEP) directly
@@ -602,6 +601,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 </div>
 
                 <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
+                    {populationObjDiffFlag ?
+                        <div className="row">
+                            <p className="alert alert-warning">
+                                <strong>Notice:</strong> The data retrieved below has changed since the last time you created an evaluated. Please update your evaluation as needed.
+                            </p>
+                        </div>
+                    : null}
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
