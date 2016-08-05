@@ -419,7 +419,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <div className="panel panel-info">
                     <div className="panel-heading">
                         <h3 className="panel-title">RefSeq Transcripts
-                            <span className="help-note panel-subtitle pull-right"><i className="icon icon-info-circle"></i> Canonical transcript</span>
+                            <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                         </h3>
                     </div>
                     {(clinvar_id && clinvar_hgvs_names) ?
@@ -446,7 +446,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <div className="panel panel-info">
                     <div className="panel-heading">
                         <h3 className="panel-title">Ensembl Transcripts
-                            <span className="help-note panel-subtitle pull-right"><i className="icon icon-info-circle"></i> Canonical transcript</span>
+                            <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                         </h3>
                     </div>
                     {(this.state.hasHgvsGRCh38 && GRCh38) ?
