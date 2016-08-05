@@ -20,7 +20,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         data: React.PropTypes.object, // ClinVar data payload
         protocol: React.PropTypes.string,
         ext_ensemblHgvsVEP: React.PropTypes.array,
-        ext_clinvarEutils: React.PropTypes.object
+        ext_clinvarEutils: React.PropTypes.object,
+        ext_clinVarRCV: React.PropTypes.array
     },
 
     getInitialState: function() {
@@ -35,6 +36,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             ensembl_transcripts: [],
             sequence_location: [],
             primary_transcript: {},
+            clinVarRCV: [],
             hgvs_GRCh37: null,
             hgvs_GRCh38: null,
             hasHgvsGRCh37: false,
@@ -59,6 +61,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
         if (nextProps.ext_clinvarEutils) {
             this.parseClinVarEutils(nextProps.ext_clinvarEutils);
+        }
+        if (nextProps.ext_clinVarRCV) {
+            this.setState({clinVarRCV: nextProps.ext_clinVarRCV});
         }
     },
 
@@ -173,12 +178,70 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <td><span className="title-ellipsis" title={item.hgvsc}>{item.hgvsc}</span></td>
                     <td>{(item.exon) ? item.exon : '--'}</td>
                     <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
-                    <td>
+                    <td className="clearfix">
                         {(item.consequence_terms) ? this.handleSOTerms(item.consequence_terms) : '--'}
                     </td>
                 </tr>
             );
         }
+    },
+
+    // Render ClinVar Interpretations table rows
+    renderClinvarInterpretations: function(item, key) {
+        let self = this;
+        return (
+            <tr key={key} className="clinvar-interpretation">
+                <td className="accession"><a href={external_url_map['ClinVar'] + item.RCV} target="_blank">{item.RCV}</a></td>
+                <td className="review-status">{item.reviewStatus}</td>
+                <td className="clinical-significance">{item.clinicalSignificance}</td>
+                <td className="disease">
+                    {item.conditions.map(function(condition, i) {
+                        return (self.handleCondition(condition, i));
+                    })}
+                </td>
+            </tr>
+        );
+    },
+
+    // Method to render each associated condition, which also consists of multiple identifiers
+    handleCondition: function(condition, key) {
+        let self = this;
+        return (
+            <div key={condition.name}>
+                <span className="condition-name">{condition.name}</span>
+                <span className="identifiers"> [<ul className="clearfix">
+                    {condition.identifiers.map(function(identifier, i) {
+                        return (
+                            <li key={i} className="xref-linkout">
+                                <a href={self.handleLinkOuts(identifier.id, identifier.db)} target="_blank">{identifier.db}</a>
+                            </li>
+                        );
+                    })}
+                </ul>]</span>
+            </div>
+        );
+    },
+
+    // Method to return linkout url given a db name
+    handleLinkOuts: function(id, db) {
+        let url;
+        switch (db) {
+            case "MedGen":
+                url = external_url_map['MedGen'] + id;
+                break;
+            case "Orphanet":
+                url = external_url_map['OrphaNet'] + id;
+                break;
+            case "OMIM":
+                url = external_url_map['OMIMEntry'] + id;
+                break;
+            case "Gene":
+                url = external_url_map['Entrez'] + id;
+                break;
+            default:
+                url = '#';
+        }
+        return url;
     },
 
     // Use Ensembl consequence_terms to find matching SO_id and SO_term pair
@@ -271,6 +334,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var GRCh38 = this.state.hgvs_GRCh38;
         var primary_transcript = this.state.primary_transcript;
         var clinvar_hgvs_names = this.state.clinvar_hgvs_names;
+        var clinVarRCV = this.state.clinVarRCV;
         var self = this;
 
         var links_38 = null;
@@ -297,27 +361,20 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info datasource-clinvar-interpretaions">
                     <div className="panel-heading"><h3 className="panel-title">ClinVar Interpretations</h3></div>
-                    {(clinvar_id) ?
+                    {(clinVarRCV) ?
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Disease [Orphanet]</th>
+                                    <th>Reference Accession</th>
+                                    <th>Review Status</th>
                                     <th>Clinical Significance</th>
-                                    <th>ClinVar Reference Accession</th>
+                                    <th>Disease [Source]</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>
-                                        <span className="wip">IN PROGRESS</span>
-                                    </td>
-                                    <td>
-                                        <span className="wip">IN PROGRESS</span>
-                                    </td>
-                                    <td>
-                                        <span className="wip">IN PROGRESS</span>
-                                    </td>
-                                </tr>
+                                {clinVarRCV.map(function(item, i) {
+                                    return (self.renderClinvarInterpretations(item, i));
+                                })}
                             </tbody>
                         </table>
                         :
@@ -360,7 +417,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 </div>
 
                 <div className="panel panel-info">
-                    <div className="panel-heading"><h3 className="panel-title">RefSeq Transcripts</h3></div>
+                    <div className="panel-heading">
+                        <h3 className="panel-title">RefSeq Transcripts
+                            <span className="help-note panel-subtitle pull-right"><i className="icon icon-info-circle"></i> Canonical transcript</span>
+                        </h3>
+                    </div>
                     {(clinvar_id && clinvar_hgvs_names) ?
                         <table className="table">
                             <thead>
@@ -383,7 +444,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 </div>
 
                 <div className="panel panel-info">
-                    <div className="panel-heading"><h3 className="panel-title">Ensembl Transcripts</h3></div>
+                    <div className="panel-heading">
+                        <h3 className="panel-title">Ensembl Transcripts
+                            <span className="help-note panel-subtitle pull-right"><i className="icon icon-info-circle"></i> Canonical transcript</span>
+                        </h3>
+                    </div>
                     {(this.state.hasHgvsGRCh38 && GRCh38) ?
                         <table className="table">
                             <thead>
