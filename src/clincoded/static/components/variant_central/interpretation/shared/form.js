@@ -424,10 +424,11 @@ function evalFormValueDropdown(criteria) {
             <option disabled="disabled"></option>
             <option value="met">Met</option>
             <option value="not-met">Not Met</option>
-            {criteria.indexOf('P') === 1 ? null : <option value="supporting">Supporting</option>}
-            {criteria.indexOf('M') === 1 ? null : <option value="moderate">Moderate</option>}
-            {criteria.indexOf('S') === 1 ? null : <option value="strong">Strong</option>}
-            {criteria.indexOf('VS') === 1 ? null : <option value="very-strong">Very Strong</option>}
+            {criteria.indexOf('P') === 1 ? null : <option value="supporting">{criteria}_P</option>}
+            {criteria.indexOf('M') === 1 ? null : <option value="moderate">{criteria}_M</option>}
+            {criteria.indexOf('S') === 1 ? null : <option value="strong">{criteria}_S</option>}
+            {criteria.indexOf('VS') === 1 ? null : <option value="very-strong">{criteria}_stand alone</option>}
+            {criteria.indexOf('VS') === 1 ? null : <option value="very-strong">{criteria}_VS</option>}
         </Input>
     );
 }

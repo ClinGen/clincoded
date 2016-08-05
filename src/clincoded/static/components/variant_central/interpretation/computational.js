@@ -599,7 +599,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </div>
 
                 <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'lof' ? '' : ' hidden')}>
-                    <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
+                    <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -610,10 +610,24 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         </div>
                         : null}
-                        <PanelGroup accordion><Panel title="Does variant result in LOF?" panelBodyClassName="panel-wide-content" open>
-                        </Panel></PanelGroup>
-                        <PanelGroup accordion><Panel title="Is LOF known mechanism for disease of interest?" panelBodyClassName="panel-wide-content" open>
-                        </Panel></PanelGroup>
+                        <div className="panel panel-info">
+                            <div className="panel-heading"><h3 className="panel-title">Does variant result in LOF?</h3></div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div className="panel panel-info">
+                            <div className="panel-heading"><h3 className="panel-title">Is LOF known mechanism for disease of interest?</h3></div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
                     </Panel></PanelGroup>
                 </div>
 
