@@ -230,10 +230,11 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
         return (
             <div style={{'marginTop':'30px','paddingTop':'10px','borderTop':'solid 1px #aaa'}}>
-                <span style={{'fontSize':'18px'}}>
-                    <b>Test Pathogenicity Calculator</b>&nbsp;
-                    <i style={{'fintSize':'14px'}}>Criteria met list (Benign, Pathogenic) and Calculated Pathogeinicity are displayed in Progress Bar below</i>
-                </span>
+                <div>
+                    <span style={{'fontSize':'18px'}}><b>Test Pathogenicity Calculator</b></span>
+                    <br />
+                    <span style={{'paddingLeft':'10px','fontSize':'16px'}}><i>Select option values for any combination of criteria and check result in <b>propress bar below</b>.</i></span>
+                </div>
                 <div className="col-lg-12 col-md-12 col-sm-12 progress-bar" style={{'paddingTop':'10px'}}>
                     <div className="col-lg-4 col-md-4 col-sm-4 benign-box">
                         <dt>Benign:</dt>
