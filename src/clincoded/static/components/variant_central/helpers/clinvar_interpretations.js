@@ -4,11 +4,8 @@
 // # Dependency: ClinVar API response
 
 'use strict';
-import { _ } from 'underscore';
-import { globals } '../../globals';
 
-export function getClinvarInterpretations(xml) {
-    let interpretations = [];
+export function getClinvarRCVs(xml) {
     // Make sure we have at least one RCV node to work with
     // Then put each RCV id into an array
     let RCVs = [];
@@ -23,80 +20,92 @@ export function getClinvarInterpretations(xml) {
                 if (ObservationNode) {
                     let RCV_Nodes = ObservationNode.getElementsByTagName('RCV');
                     if (RCV_Nodes.length) {
-                        RCV_Nodes.forEach(RCV => {
-                            RCVs.push(RCV.textContent);
-                        });
+                        for(let RCV_Node of RCV_Nodes) {
+                            RCVs.push(RCV_Node.textContent);
+                        }
                     }
                 }
             }
         }
     }
-    // If RCVs is not an empty array,
-    // parse associated disease and clinical significance for each id
-    if (RCVs.length) {
-        parseRCV(RCVs, interpretations);
-    }
-
-    return interpretations;
+    return RCVs;
 }
 
-// Method to parse XML data for the most recent version of an RCV accession
-function parseRCV(RCVs, interpretations) {
+// Method to parse conditions data for the most recent version of individual RCV accession
+export function parseClinvarInterpretation(RCV, result) {
+    // Define 'interpretation' object model
     let interpretation = {
         'RCV': '',
+        'reviewStatus': '',
         'clinicalSignificance': '',
         'conditions': []
     };
-    let condition = {
-        'name': '',
-        'identifiers': []
-    };
-    let identifier = {
-        'db': '',
-        'id': ''
-    };
-    RCVs.forEach(RCV => {
-        this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV).then(result => {
-            // Passing 'true' option to invoke 'mixin' function
-            let resultSet = new DOMParser().parseFromString(result, 'text/xml');
-            let ClinVarResultSet = resultSet.getElementsByTagName('ClinVarResult-Set')[0];
-            if (ClinVarResultSet) {
-                let ClinVarSet = ClinVarResultSet.getElementsByTagName('ClinVarSet')[0];
-                if (ClinVarSet) {
-                    let ReferenceClinVarAssertion = ClinVarSet.getElementsByTagName('ReferenceClinVarAssertion')[0];
-                    if (ReferenceClinVarAssertion) {
-                        // Get clinical significance description
-                        let ClinicalSignificance = ReferenceClinVarAssertion.getElementsByTagName('ClinicalSignificance')[0];
-                        if (ClinicalSignificance) {
-                            let Description = ClinicalSignificance.getElementsByTagName('Description')[0];
-                            interpretation['RCV'] = RCV;
-                            interpretation['clinicalSignificance'] = Description.textContent;
-                        }
-                        // Get conditions/disease
-                        let TraitSet = ReferenceClinVarAssertion.getElementsByTagName('TraitSet')[0];
-                        if (TraitSet) {
-                            let Traits = TraitSet.getElementsByTagName('Trait');
-                            let nameNodes = [];
-                            Traits.forEach(Trait => {
-                                if (Trait.getAttribute('Type') === 'Disease') {
-                                    nameNodes = Trait.getElementsByTagName('Name');
-                                    let nameNode = nameNodes.find((n) => n.getElementsByTagName('ElementValue')[0].getAttribute('Type') === 'Preferred');
+    // Find the <ReferenceClinVarAssertion> node in the returned XML
+    let resultSet = new DOMParser().parseFromString(result, 'text/xml');
+    let ClinVarResultSet = resultSet.getElementsByTagName('ClinVarResult-Set')[0];
+    if (ClinVarResultSet) {
+        let ClinVarSet = ClinVarResultSet.getElementsByTagName('ClinVarSet')[0];
+        if (ClinVarSet) {
+            let ReferenceClinVarAssertion = ClinVarSet.getElementsByTagName('ReferenceClinVarAssertion')[0];
+            if (ReferenceClinVarAssertion) {
+                // Get clinical significance description if <ReferenceClinVarAssertion> node is found
+                let ClinicalSignificance = ReferenceClinVarAssertion.getElementsByTagName('ClinicalSignificance')[0];
+                if (ClinicalSignificance) {
+                    // Expect only 1 <ReviewStatus> node and 1 <Description> node within <ClinicalSignificance>
+                    let ReviewStatus = ClinicalSignificance.getElementsByTagName('ReviewStatus')[0];
+                    let Description = ClinicalSignificance.getElementsByTagName('Description')[0];
+                    // Set 'RCV' and 'clinicalSignificance' property values of the 'interpretation' object
+                    interpretation['RCV'] = RCV;
+                    interpretation['reviewStatus'] = ReviewStatus.textContent;
+                    interpretation['clinicalSignificance'] = Description.textContent;
+                }
+                // Get conditions/disease if <ReferenceClinVarAssertion> node is found
+                let TraitSet = ReferenceClinVarAssertion.getElementsByTagName('TraitSet')[0];
+                if (TraitSet) {
+                    let Traits = TraitSet.getElementsByTagName('Trait');
+                    // Handle one <Trait> node (e.g. each associated condition) at a time
+                    for(let Trait of Traits) {
+                        let nameNodes = [],
+                            xRefNodes = [],
+                            identifiers = [],
+                            disease = '';
+                        if (Trait.getAttribute('Type') === 'Disease') {
+                            nameNodes = Trait.getElementsByTagName('Name');
+                            // Expect to find the only one <ElementValue> node in each <Name> node
+                            for(let nameNode of nameNodes) {
+                                let ElementValueNode = nameNode.getElementsByTagName('ElementValue')[0];
+                                if (ElementValueNode.getAttribute('Type') === 'Preferred') {
+                                    // Set disease name property value for each associated condition
+                                    disease = ElementValueNode.textContent;
                                 }
-                            });
-                            nameNodes.forEach(node => {
-                                let ElementValue = node.getElementsByTagName('ElementValue')[0];
-                                if (ElementValue.getAttribute('Type') === 'Preferred') {
-                                    nameNodes = Trait.getElementsByTagName('Name');
+                            }
+                            // Expect to find multiple <XRef> nodes in each <Trait> node
+                            // Filter & find only the <XRef> nodes that are immediate children of <Trait> node
+                            for (var i=0; i<Trait.childNodes.length; i++) {
+                                if (Trait.childNodes[i].nodeName === 'XRef') {
+                                    xRefNodes.push(Trait.childNodes[i]);
                                 }
-                            })
+                            }
+                            // Set identifiers property value for each associated condition
+                            if (xRefNodes) {
+                                for(let xRef of xRefNodes) {
+                                    let identifier = {
+                                        'db': xRef.getAttribute('DB'),
+                                        'id': xRef.getAttribute('ID')
+                                    };
+                                    identifiers.push(identifier);
+                                }
+                            }
                         }
+                        let condition = {
+                            'name': disease,
+                            'identifiers': identifiers
+                        };
+                        interpretation['conditions'].push(condition);
                     }
                 }
             }
-
-        }).catch(function(e) {
-            console.log('ClinVarEfetch for RCV Error=: %o', e);
-        });
-    });
-    
+        }
+    }
+    return interpretation;
 }
