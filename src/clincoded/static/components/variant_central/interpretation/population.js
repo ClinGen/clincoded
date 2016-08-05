@@ -93,7 +93,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             },
             populationObjDiff: null,
-            populationObjDiffFlag: true
+            populationObjDiffFlag: false
         };
     },
 
@@ -604,7 +604,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     {populationObjDiffFlag ?
                         <div className="row">
                             <p className="alert alert-warning">
-                                <strong>Notice:</strong> The data retrieved below has changed since the last time you created an evaluated. Please update your evaluation as needed.
+                                <strong>Notice:</strong> The data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed
                             </p>
                         </div>
                     : null}
