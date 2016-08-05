@@ -22,7 +22,7 @@ var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific
 // Import pathogenicity calculator
 var calculator = require('./interpretation/shared/calculator');
 var PathogenicityCalculator = calculator.PathogenicityCalculator;
-var testCalculator = calculator.testCalculator; // for test only
+var calculatePathogenicity = calculator.calculatePathogenicity; // for test only
 
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
@@ -226,11 +226,14 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     // Function to add UI for testing pathogenic calculator. Will be removed later.
     pathCalculatorUI: function() {
-        var result = testCalculator(this.state.criteria_evaluated);
+        var result = calculatePathogenicity(this.state.criteria_evaluated);
 
         return (
             <div style={{'marginTop':'30px','paddingTop':'10px','borderTop':'solid 1px #aaa'}}>
-                <span style={{'fontSize':'18px'}}><b>Test Pathogenicity Calculator</b></span>
+                <span style={{'fontSize':'18px'}}>
+                    <b>Test Pathogenicity Calculator</b>&nbsp;
+                    <i style={{'fintSize':'14px'}}>Criteria met list (Benign, Pathogenic) and Calculated Pathogeinicity are displayed in Progress Bar below</i>
+                </span>
                 <div className="col-lg-12 col-md-12 col-sm-12 progress-bar" style={{'paddingTop':'10px'}}>
                     <div className="col-lg-4 col-md-4 col-sm-4 benign-box">
                         <dt>Benign:</dt>
@@ -310,7 +313,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                 <option disabled="disabled"></option>
                 <option value="met">Met</option>
                 <option value="not-met">Not Met</option>
-                {criteria.indexOf('P') === 1 ? null : <option value="supporting">Supporting</option>}
+                {(criteria.indexOf('PP') === 0 || criteria.indexOf('BP') === 0) ? null : <option value="supporting">Supporting</option>}
                 {criteria.indexOf('M') === 1 ? null : (criteria.indexOf('P') === 0 ? <option value="moderate">Moderate</option> : null)}
                 {criteria.indexOf('S') === 1 ? null : <option value="strong">Strong</option>}
                 {criteria.indexOf('VS') === 1 ? null : (criteria.indexOf('P') === 0 ? <option value="very-strong">Very Strong</option> : null)}

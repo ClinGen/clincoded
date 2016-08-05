@@ -16,7 +16,7 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
         //criteriaList: React.PropTypes.array // for test only
     },
 
-    calculate: function(evaluationObjList) {
+    calculatePathogenicity: function(evaluationObjList) {
         // setup count values
         var MET = 'met';
         var NOT_MET = 'not-met';
@@ -144,7 +144,7 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
                 result.path_summary.push('Moderate: ' + pm_count.toString());
             }
             if (pp_count > 0) {
-                result.path_summary.push('Spporting: ' + pp_count.toString());
+                result.path_summary.push('Supporting: ' + pp_count.toString());
             }
             if (ba_count > 0) {
                 result.benign_summary.push('Stand alone: ' + ba_count.toString());
@@ -153,7 +153,7 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
                 result.benign_summary.push('Strong: ' + bs_count.toString());
             }
             if (bp_count > 0) {
-                result.benign_summary.push('Spporting: ' + bp_count.toString());;
+                result.benign_summary.push('Supporting: ' + bp_count.toString());;
             }
 
             //this.setState({result: result});
@@ -165,8 +165,8 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
     render: function() {
         var interpretation = this.props.interpretation;
         var evaluations = interpretation && interpretation.evaluations && interpretation.evaluations.length ? interpretation.evaluations : null;
-        var result = evaluations ? this.calculate(evaluations) : null;
-        //var result = this.state.result;
+        var result = evaluations ? this.calculatePathogenicity(evaluations) : null;
+        //var result = evaluations ? calculatePathogenicity(evaluations) : null;
 
         return (
             <div>
@@ -174,11 +174,11 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
                     <div className="col-lg-12 col-md-12 col-sm-12 progress-bar">
                         <div className="col-lg-4 col-md-4 col-sm-4 benign-box">
                             <dt>Benign:</dt>
-                            {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
+                            {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(', ') : 'No criteria met' }
                         </div>
                         <div className="col-lg-4 col-md-4 col-sm-4 pathogenic-box">
                             <dt>Pathogenic:</dt>
-                            {result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }
+                            {result && result.path_summary && result.path_summary.length ? result.path_summary.join(', ') : 'No criteria met' }
                         </div>
                         <div className="col-lg-4 col-md-4 col-sm-4 assertion-box">
                             <dt>Calculated Pathogenicity:</dt>
@@ -193,7 +193,8 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
     },
 });
 
-var testCalculator = module.exports.testCalculator = function(evaluationObjList) {
+var calculatePathogenicity = module.exports.calculatePathogenicity = function(evaluationObjList) {
+//var calculatePathogenicity = function(evaluationObjList) {
         // setup count values
         var MET = 'met';
         var NOT_MET = 'not-met';
@@ -321,7 +322,7 @@ var testCalculator = module.exports.testCalculator = function(evaluationObjList)
                 result.path_summary.push('Moderate: ' + pm_count.toString());
             }
             if (pp_count > 0) {
-                result.path_summary.push('Spporting: ' + pp_count.toString());
+                result.path_summary.push('Supporting: ' + pp_count.toString());
             }
             if (ba_count > 0) {
                 result.benign_summary.push('Stand alone: ' + ba_count.toString());
@@ -330,7 +331,7 @@ var testCalculator = module.exports.testCalculator = function(evaluationObjList)
                 result.benign_summary.push('Strong: ' + bs_count.toString());
             }
             if (bp_count > 0) {
-                result.benign_summary.push('Spporting: ' + bp_count.toString());;
+                result.benign_summary.push('Supporting: ' + bp_count.toString());;
             }
 
             //this.setState({result: result});
