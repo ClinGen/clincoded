@@ -18,7 +18,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
-        protocol: React.PropTypes.string,
+        href_url: React.PropTypes.object,
         ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_clinvarEutils: React.PropTypes.object,
         ext_clinVarRCV: React.PropTypes.array
@@ -285,7 +285,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (gene_symbol) {
             // FIXME: Use hardcoded uniprot id for now until we find an alternate API to address SSL issue
             /*
-            this.getRestData(this.props.protocol + external_url_map['HGNCFetch'] + gene_symbol).then(result => {
+            this.getRestData(this.props.href_url.protocol + external_url_map['HGNCFetch'] + gene_symbol).then(result => {
                 this.setState({uniprot_id: result.response.docs[0].uniprot_ids[0]});
             }).catch(function(e) {
                 console.log('HGNC Fetch Error=: %o', e);
@@ -301,7 +301,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var url = '';
         array.forEach(SequenceLocationObj => {
             if (SequenceLocationObj.Assembly === assembly) {
-                url = this.props.protocol + external_url_map['UCSCGenomeBrowser'] + '?db=' + db + '&position=Chr' + SequenceLocationObj.Chr + '%3A' + SequenceLocationObj.start + '-' + SequenceLocationObj.stop;
+                url = this.props.href_url.protocol + external_url_map['UCSCGenomeBrowser'] + '?db=' + db + '&position=Chr' + SequenceLocationObj.Chr + '%3A' + SequenceLocationObj.start + '-' + SequenceLocationObj.stop;
             }
         });
         return url;
@@ -313,7 +313,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var url = '';
         array.forEach(SequenceLocationObj => {
             if (SequenceLocationObj.Assembly === assembly) {
-                url = this.props.protocol + external_url_map['NCBIVariationViewer'] + '?chr=' + SequenceLocationObj.Chr + '&q=' + gene_symbol + '&assm=' + SequenceLocationObj.AssemblyAccessionVersion + '&from=' + SequenceLocationObj.start + '&to=' + SequenceLocationObj.stop;
+                url = this.props.href_url.protocol + external_url_map['NCBIVariationViewer'] + '?chr=' + SequenceLocationObj.Chr + '&q=' + gene_symbol + '&assm=' + SequenceLocationObj.AssemblyAccessionVersion + '&from=' + SequenceLocationObj.start + '&to=' + SequenceLocationObj.stop;
             }
         });
         return url;

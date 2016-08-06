@@ -4,6 +4,7 @@ var _ = require('underscore');
 var form = require('../../../../libs/bootstrap/form');
 var RestMixin = require('../../../rest').RestMixin;
 var curator = require('../../../curator');
+var evidenceCodes = require('../mapping/evidence_code.json');
 
 var Form = form.Form;
 var FormMixin = form.FormMixin;
@@ -16,14 +17,13 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
     propTypes: {
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
-        evidenceType: React.PropTypes.string, // specified what type of evidence object is created
         evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
         evidenceDataUpdated: React.PropTypes.bool, // passed in by parent page, which does the comparison of stored and new external data
         formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from evidenceData
         formChangeHandler: React.PropTypes.func, // function that will take care of any in-form logic that needs to be taken in to account
         variantUuid: React.PropTypes.string, // UUID of the parent variant
-        criteria: React.PropTypes.array, // array of criteria codes (non-disease-specific) being handled by this form
-        criteriaDisease: React.PropTypes.array, // array of criteria codes (disease-specific) being handled by this form
+        criteria: React.PropTypes.array, // array of criteria codes being handled by this form
+        criteriaCrossCheck: React.PropTypes.array, // an array of arrays of criteria codes that are to be checked upon submitForm to make sure there are no more than one 'Met'
         interpretation: React.PropTypes.object, // parent interpretation object
         updateInterpretationObj: React.PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
     },
@@ -36,8 +36,10 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         return {
             submitBusy: false, // spinner for Save button
             submitDisabled: false, // disabled for now due to uncertain/non-universal logic
+            evidenceType: evidenceCodes[this.props.criteria[0]].category, // specifies what type of evidence object is created; ascertained from first criteria that is passed to this.props.criteria
             evidenceData: null, // any extra data (external sources or otherwise) that will be passed into the evaluation evidence object
             interpretation: this.props.interpretation, // parent interpretation object
+            diseaseCriteria: [], // array of criteria codes that are disease-dependent
             diseaseAssociated: false, // flag to define whether or not the interpretation has a disease associated with it
             checkboxes: {}, // store any checkbox values
             updateMsg: null // specifies what html to display next to button after press
@@ -59,8 +61,16 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
         // update the form when extra data is loaded
         if (this.props.evidenceData) {
-            this.setState({evidenceType: this.props.evidenceType, evidenceData: this.props.evidenceData, evidenceDataUpdated: this.props.evidenceDataUpdated});
+            this.setState({evidenceData: this.props.evidenceData, evidenceDataUpdated: this.props.evidenceDataUpdated});
         }
+        // ascertain which criteria code are disease dependent
+        let tempDiseaseCriteria = [];
+        this.props.criteria.map(criterion => {
+            if (evidenceCodes[criterion].diseaseDependent) {
+                tempDiseaseCriteria.push(criterion);
+            }
+        });
+        this.setState({diseaseCriteria: tempDiseaseCriteria});
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -75,7 +85,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         }
         // when props are updated, update the form with new extra data, if applicable
         if (typeof nextProps.evidenceData !== undefined && nextProps.evidenceData != this.props.evidenceData) {
-            this.setState({evidenceType: nextProps.evidenceType, evidenceData: nextProps.evidenceData, evidenceDataUpdated: nextProps.evidenceDataUpdated});
+            this.setState({evidenceData: nextProps.evidenceData, evidenceDataUpdated: nextProps.evidenceDataUpdated});
         }
     },
 
@@ -85,6 +95,11 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         if (this.props.formChangeHandler) {
             this.props.formChangeHandler.call(this, ref, e);
         }
+    },
+
+    // generic wrapper function for the dropdowns; only function is to reset form errors, just in case
+    handleDropdownChange: function(ref, e) {
+        this.clrAllFormErrors();
     },
 
     // generic wrapper function to properly render checkboxes and pass any changes to the formChangeHandler
@@ -107,20 +122,70 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
+        // cross check criteria values here (no more than one met per cross-check group)
+        var criteriaMetNum = 0;
+        var criteriaEvalConflictValues = ['met', 'supporting', 'moderate', 'strong', 'very-strong'];
+        var criteriaConflicting = [];
+        var errorMsgCriteria = '';
+        if (this.props.criteriaCrossCheck && this.props.criteriaCrossCheck.length > 0) {
+            for (var i = 0; i < this.props.criteriaCrossCheck.length; i++) {
+                if (this.props.criteriaCrossCheck[i].length > 1) {
+                    // per criteria cross check group...
+                    this.props.criteriaCrossCheck[i].map((criterion, j) => {
+                        // ... check the values...
+                        if (criteriaEvalConflictValues.indexOf(this.refs[criterion + '-status'].getValue()) > -1) {
+                            criteriaMetNum += 1;
+                            criteriaConflicting.push(criterion);
+                        }
+                        // ... while building the error mesage, just in case
+                        if (j < this.props.criteriaCrossCheck[i].length) {
+                            errorMsgCriteria += criterion;
+                            if (j < this.props.criteriaCrossCheck[i].length - 1) {
+                                errorMsgCriteria += ', ';
+                            }
+                            if (j == this.props.criteriaCrossCheck[i].length - 2) {
+                                errorMsgCriteria += 'or ';
+                            }
+                        }
+                    });
+                    // after checking a group, if we have an error, throw an error and stop the submitForm action
+                    if (criteriaMetNum > 1) {
+                        criteriaConflicting.map(criterion => {
+                            this.setFormErrors(criterion + "-status", "*");
+                        });
+                        this.setState({submitBusy: false, updateMsg: <span className="text-danger">Only one of the criteria ({errorMsgCriteria}) can have a value other than "Not Met" or "Not Evaluated"</span>});
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // passed cross check, so begin saving data
+        this.clrAllFormErrors(); // reset form errors too, just in case
         var evaluations = {};
         var existingEvaluationUuids = {};
         var flatInterpretation = null;
         var freshInterpretation = null;
         var evidenceObjectId = null;
-        var submittedCriteria = this.props.criteria ? this.props.criteria : [];
+        var submittedCriteria = [];
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
             freshInterpretation = interpretation;
             // get fresh update of interpretation object so we have newest evaluation list, then flatten it
             flatInterpretation = curator.flatten(freshInterpretation);
             // lets do the disease check for saving criteria code here
-            if (flatInterpretation.disease && flatInterpretation.disease !== '' && this.props.criteriaDisease && this.props.criteriaDisease.length > 0) {
-                submittedCriteria = submittedCriteria.concat(this.props.criteriaDisease);
-            }
+            this.props.criteria.map(criterion => {
+                if (evidenceCodes[criterion].diseaseDependent) {
+                    // criteria is disease-dependent
+                    if (flatInterpretation.disease && flatInterpretation.disease !== '') {
+                        // criteria is disease-dependent and there is a disease associated with the interpretation
+                        // add criteria to list of criteria to save
+                        submittedCriteria.push(criterion);
+                    }
+                } else {
+                    // criteria is not disease-dependent, so add it to list of criteria to
+                    submittedCriteria.push(criterion);
+                }
+            });
             // check existing evaluations and map their UUIDs if they match the criteria in this form
             if (freshInterpretation.evaluations) {
                 freshInterpretation.evaluations.map(freshEvaluation => {
@@ -142,10 +207,19 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 if (this.state.evidenceDataUpdated) {
                     let evidenceObject = {variant: this.props.variantUuid};
                     evidenceObject[this.state.evidenceType + 'Data'] = this.state.evidenceData;
-                    return this.postRestData('/' + this.props.evidenceType + '/', evidenceObject).then(evidenceResult => {
-                        return Promise.resolve(evidenceResult['@graph'][0]['@id']);
-                    });
+                    if (evidenceObjectId) {
+                        // previous evidence object exists; update it
+                        return this.putRestData(evidenceObjectId, evidenceObject).then(evidenceResult => {
+                            return Promise.resolve(evidenceResult['@graph'][0]['@id']);
+                        });
+                    } else {
+                        // previous evidence object not found; create a new one
+                        return this.postRestData('/' + this.state.evidenceType + '/', evidenceObject).then(evidenceResult => {
+                            return Promise.resolve(evidenceResult['@graph'][0]['@id']);
+                        });
+                    }
                 } else {
+                    // previous evidence object found, but the object does not need to be updated
                     return Promise.resolve(evidenceObjectId);
                 }
             } else {
@@ -162,18 +236,21 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     criteria: criterion,
                     explanation: this.getFormValue(criterion + '-explanation')
                 };
-                // check whether or not criterion value is a checkbox and handle accordingly
-                if (this.refs[criterion + '-value'].getValue() === true) {
+
+                // set criterion status and modifiers
+                if (['supporting', 'moderate', 'strong', 'very-strong'].indexOf(this.refs[criterion + '-status'].getValue()) > -1) {
+                    // if dropdown selection is a modifier to met, set status to met, and set modifier as needed...
                     evaluations[criterion]['criteriaStatus'] = 'met';
-                } else if (this.refs[criterion + '-value'].getValue() === false) {
-                    evaluations[criterion]['criteriaStatus'] = 'not-met';
+                    evaluations[criterion]['criteriaModifier'] = this.refs[criterion + '-status'].getValue();
                 } else {
-                    //evaluations[criterion]['criteriaStatus'] = this.refs[criterion + '-value'].getValue();
-                    evaluations[criterion]['criteriaStatus'] = 'not-evaluated';
+                    // ... otherwise, set status as dropdown value, and blank out modifier
+                    evaluations[criterion]['criteriaStatus'] = this.refs[criterion + '-status'].getValue();
+                    evaluations[criterion]['criteriaModifier'] = '';
                 }
+
                 // make link to evidence object, if applicable
                 if (evidenceResult) {
-                    evaluations[criterion][this.props.evidenceType] = evidenceResult;
+                    evaluations[criterion][this.state.evidenceType] = evidenceResult;
                 }
                 if (criterion in existingEvaluationUuids) {
                     evaluationPromises.push(this.putRestData('/evaluation/' + existingEvaluationUuids[criterion], evaluations[criterion]));
@@ -231,7 +308,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 </div>
                 <div className="curation-submit clearfix">
                     <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                        submitBusy={this.state.submitBusy} inputDisabled={(!this.props.criteria || this.props.criteria.length == 0) && !this.state.diseaseAssociated} />
+                        submitBusy={this.state.submitBusy} inputDisabled={this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated} />
                     {this.state.updateMsg ?
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                     : null}
@@ -240,3 +317,155 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         );
     }
 });
+
+
+/* Below code is for use in structuring/rendering the VCI eval forms */
+
+// master wrapper for rendering a eval form 'group' (denoted by a single blue note box). Call from tab page where the forms should be rendered,
+// in the function to pass into the CurationInterpretationObject object.
+// noteContent should be a call to evalFormNoteSectionWrapper() - see below
+// dropdownContent should be a call to evalFormDropdownSectionWrapper() - see below
+// explanationContent should be a call to evalFormExplanationSectionWrapper() - see below
+// divider is a boolean to indicate whether or not a gray divider bar should be rendered at the bottom of the group (for use if there is a subsequent form group before the Save button)
+var evalFormSectionWrapper = module.exports.evalFormSectionWrapper = function(noteContent, dropdownContent, explanationContent, divider) {
+    return (
+        <div>
+            <div className="col-sm-4">
+                {noteContent}
+            </div>
+            <div className="col-sm-4 pad-top">
+                {dropdownContent}
+            </div>
+            <div className="col-sm-4 pad-top">
+                {explanationContent}
+            </div>
+            <div className={"clear" + (divider ? " divider" : "")}></div>
+        </div>
+    );
+};
+
+// wrapper for rendering the note section of eval form group. criteriaList should be an array of criteria codes being handled in the section.
+// description and disease-dependency are ascertained from evidence_codes.json
+var evalFormNoteSectionWrapper = module.exports.evalFormNoteSectionWrapper = function(criteriaList) {
+    return (
+        <p className="alert alert-info">
+            {criteriaList.map((criteria, i) => {
+                return (
+                    <span key={i}>
+                        <strong>{criteria}:</strong> {evidenceCodes[criteria].definitionLong}
+                        {evidenceCodes[criteria].diseaseDependent ? <span><br /><span className="label label-warning pull-right">Disease dependent</span></span> : null}
+                        {i < criteriaList.length - 1 ? <span><br /><br /></span> : null}
+                    </span>
+                );
+            })}
+        </p>
+    );
+};
+
+// wrapper for rendering the dropdown section of eval form group. criteriaList should be an array of criteria codes being handled in the section.
+// calls evalFormValueDropdown() to render a dropdown for each criteria
+var evalFormDropdownSectionWrapper = module.exports.evalFormDropdownSectionWrapper = function(criteriaList) {
+    return (
+        <div>
+            {criteriaList.map((criteria, i) => {
+                return (
+                    <span key={i}>
+                        {evalFormValueDropdown.call(this, criteria)}
+                        {i < criteriaList.length - 1 ? <span className="col-xs-3 pad-bottom"><span className="pull-right">- or -</span></span> : null}
+                        <div className="clear"></div>
+                    </span>
+                );
+            })}
+        </div>
+    );
+};
+
+// helper function for evalFormDropdownSectionWrapper() to generate the dropdown for each criteria
+function evalFormValueDropdown(criteria) {
+    return (
+        <Input type="select" ref={criteria + "-status"} label={criteria + ":"} defaultValue="not-evaluated" handleChange={this.handleDropdownChange}
+            error={this.getFormError(criteria + "-status")} clearError={this.clrFormErrors.bind(null, criteria + "-status")}
+            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group">
+            <option value="not-evaluated">Not Evaluated</option>
+            <option disabled="disabled"></option>
+            <option value="met">Met</option>
+            <option value="not-met">Not Met</option>
+            {criteria.indexOf('P') === 1 ? null : <option value="supporting">Supporting</option>}
+            {criteria.indexOf('M') === 1 ? null : <option value="moderate">Moderate</option>}
+            {criteria.indexOf('S') === 1 ? null : <option value="strong">Strong</option>}
+            {criteria.indexOf('VS') === 1 ? null : <option value="very-strong">Very Strong</option>}
+        </Input>
+    );
+}
+
+// wrapper for rendering the explanation section of eval form group
+// criteriaList should be an array of criteria codes being handled in the section
+// hiddenList should be an array of booleans mirroring the size and order of criteriaList, with the booleans indicating whether or not the explanation input for
+//      that criteria should be visible. this should generally be used with shareExplanation()
+// customContentBefore should be HTML for any elements to render before the explanation inputs, in that column (optional)
+// customContentAfter should be HTML for any elements to render after the explanation inputs, in that column (optional)
+var evalFormExplanationSectionWrapper = module.exports.evalFormExplanationSectionWrapper = function(criteriaList, hiddenList, customContentBefore, customContentAfter) {
+    return (
+        <div>
+            {customContentBefore ? customContentBefore : null}
+            {criteriaList.map((criteria, i) => {
+                return (<span key={i}>{evalFormExplanationDefaultInput.call(this, criteria, hiddenList[i])}</span>);
+            })}
+            {customContentAfter ? customContentAfter : null}
+        </div>
+    );
+};
+
+// helper function for evalFormExplanationSectionWrapper() to generate the explanation input for each criteria
+function evalFormExplanationDefaultInput(criteria, hidden) {
+    return (
+        <Input type="textarea" ref={criteria + "-explanation"} rows="3" label="Explanation:"
+            labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName={hidden ? "hidden" : "form-group"} handleChange={this.handleFormChange} />
+    );
+}
+
+
+/* Below code is for use in 'Update' portions of VCI eval forms */
+
+// helper function for going through interpretation object received from nextProps and updating
+// the forms for criteria defined by criteriaList (array of criteria code) with values from previous
+// evaluation(s). customActions is a dictionary of criteria-specific logic for updating non-standard
+// form fields for a criteria. The key for this dict is the crtieria to which the custom action should
+// be applied to, and the value is an anonymous function with the desired logic
+var updateEvalForm = module.exports.updateEvalForm = function(nextProps, criteriaList, customActions) {
+    if (nextProps.interpretation) {
+        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
+            nextProps.interpretation.evaluations.map(evaluation => {
+                if (criteriaList.indexOf(evaluation.criteria) > -1) {
+                    if (evaluation.criteriaModifier) {
+                        this.refs[evaluation.criteria + '-status'].setValue(evaluation.criteriaModifier);
+                    } else {
+                        this.refs[evaluation.criteria + '-status'].setValue(evaluation.criteriaStatus);
+                    }
+                    this.refs[evaluation.criteria + '-explanation'].setValue(evaluation.explanation);
+                    // apply custom anonymous function logic if applicable
+                    if (evaluation.criteria in customActions) {
+                        customActions[evaluation.criteria].call(this, evaluation);
+                    }
+                }
+                this.setState({submitDisabled: false});
+            });
+        }
+    }
+};
+
+
+/* Below code is for use in 'Change' portions of VCI eval forms */
+
+// logic for ensuring that multiple 'shared' criteria have the same explanation values at all times. Usually only one is visible.
+// criteriaList should be an array of criteria codes
+var shareExplanation = module.exports.shareExplanation = function(ref, criteriaList) {
+    let refCriteria = ref.substring(0, ref.indexOf("-")),
+        refType = ref.substring(ref.indexOf("-") + 1);
+    if (criteriaList.indexOf(refCriteria) > -1 && refType === "explanation") {
+        criteriaList.splice(criteriaList.indexOf(refCriteria), 1);
+        criteriaList.map(criteria => {
+            this.refs[criteria + '-explanation'].setValue(this.refs[ref].getValue());
+        });
+    }
+};
