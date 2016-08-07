@@ -123,12 +123,14 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         this.saveAllFormValues();
 
         // cross check criteria values here (no more than one met per cross-check group); for cross checking within the same form group
-        var criteriaMetNum = 0;
-        var criteriaEvalConflictValues = ['met', 'supporting', 'moderate', 'strong', 'very-strong'];
-        var criteriaConflicting = [];
-        var errorMsgCriteria = '';
         if (this.props.criteriaCrossCheck && this.props.criteriaCrossCheck.length > 0) {
-            this.props.criteriaCrossCheck.map((crossCheckGroup, i) => {
+            var criteriaMetNum = 0,
+                criteriaEvalConflictValues = ['met', 'supporting', 'moderate', 'strong', 'very-strong'],
+                criteriaConflicting = [],
+                errorMsgCriteria = '',
+                crossCheckGroup;
+            for (var i = 0; i < this.props.criteriaCrossCheck.length; i++) {
+                crossCheckGroup = this.props.criteriaCrossCheck[i];
                 if (crossCheckGroup.length > 1) {
                     // per criteria cross check group...
                     crossCheckGroup.map((criterion, j) => {
@@ -157,7 +159,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                         return false;
                     }
                 }
-            });
+            }
         }
 
         // passed cross check, so begin saving data
