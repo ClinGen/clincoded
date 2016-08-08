@@ -708,7 +708,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
-                                    evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'BP4']]}
+                                    evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
                                     formDataUpdater={criteriaIndel1Update} variantUuid={this.props.data['@id']} formChangeHandler={criteriaIndel1Change}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
