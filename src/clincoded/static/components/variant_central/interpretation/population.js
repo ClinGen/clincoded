@@ -168,17 +168,20 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         // Not all variants can be found in ExAC
         // Do nothing if the exac{...} object is not returned from myvariant.info
         if (response.exac) {
+            console.log(response.exac);
             let populationObj = this.state.populationObj;
             // get the allele count, allele number, and homozygote count for desired populations
             populationStatic.exac._order.map(key => {
                 populationObj.exac[key].ac = parseInt(response.exac.ac['ac_' + key]);
                 populationObj.exac[key].an = parseInt(response.exac.an['an_' + key]);
                 populationObj.exac[key].hom = parseInt(response.exac.hom['hom_' + key]);
+                populationObj.exac[key].af = parseInt(response.exac.ac['ac_' + key]) / parseInt(response.exac.hom['hom_' + key]);
             });
             // get the allele count, allele number, and homozygote count totals
             populationObj.exac._tot.ac = parseInt(response.exac.ac.ac_adj);
             populationObj.exac._tot.an = parseInt(response.exac.an.an_adj);
             populationObj.exac._tot.hom = parseInt(response.exac.hom.ac_hom);
+            populationObj.exac._tot.af = parseInt(response.exac.ac.ac_adj) / parseInt(response.exac.an.an_adj);
             // get extra ExAC information
             populationObj.exac._extra.chrom = response.exac.chrom + ''; // ensure that the chromosome is stored as a String
             populationObj.exac._extra.pos = parseInt(response.exac.pos);
@@ -193,6 +196,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseTGenomesData: function(response) {
         // not all variants are SNPs. Do nothing if variant is not a SNP
         if (response.var_class && response.var_class == 'SNP') {
+            console.log(response);
             // FIXME: this GRCh vs gRCh needs to be reconciled in the data model and data import
             let hgvs_GRCh37 = (this.props.data.hgvsNames.GRCh37) ? this.props.data.hgvsNames.GRCh37 : this.props.data.hgvsNames.gRCh37;
             let hgvs_GRCh38 = (this.props.data.hgvsNames.GRCh38) ? this.props.data.hgvsNames.GRCh38 : this.props.data.hgvsNames.gRCh38;
@@ -373,9 +377,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{exac[key].ac ? exac[key].ac : '--'}</td>
-                <td>{exac[key].an ? exac[key].an : '--'}</td>
-                <td>{exac[key].hom ? exac[key].hom : '--'}</td>
+                <td>{exac[key].ac || exac[key].ac === 0 ? exac[key].ac : '--'}</td>
+                <td>{exac[key].an || exac[key].an === 0 ? exac[key].an : '--'}</td>
+                <td>{exac[key].hom || exac[key].hom === 0 ? exac[key].hom : '--'}</td>
                 <td>{exac[key].af || exac[key].af === 0 ? this.parseFloatShort(exac[key].af) : '--'}</td>
             </tr>
         );
@@ -416,11 +420,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{esp[key].ac[esp._extra.ref] ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
-                <td>{esp[key].ac[esp._extra.alt] ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
-                <td>{esp[key].gc[g_ref] ? g_ref + ': ' + esp[key].gc[g_ref] : '--'}</td>
-                <td>{esp[key].gc[g_alt] ? g_alt + ': ' + esp[key].gc[g_alt] : '--'}</td>
-                <td>{esp[key].gc[g_mixed] ? g_mixed + ': ' + esp[key].gc[g_mixed] : '--'}</td>
+                <td>{esp[key].ac[esp._extra.ref] || esp[key].ac[esp._extra.ref] === 0 ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
+                <td>{esp[key].ac[esp._extra.alt] || esp[key].ac[esp._extra.alt] === 0 ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
+                <td>{esp[key].gc[g_ref] || esp[key].gc[g_ref] ? g_ref + ': ' + esp[key].gc[g_ref] : '--'}</td>
+                <td>{esp[key].gc[g_alt] || esp[key].gc[g_alt] ? g_alt + ': ' + esp[key].gc[g_alt] : '--'}</td>
+                <td>{esp[key].gc[g_mixed] || esp[key].gc[g_mixed] ? g_mixed + ': ' + esp[key].gc[g_mixed] : '--'}</td>
             </tr>
         );
     },
