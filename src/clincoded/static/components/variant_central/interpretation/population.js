@@ -168,14 +168,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         // Not all variants can be found in ExAC
         // Do nothing if the exac{...} object is not returned from myvariant.info
         if (response.exac) {
-            console.log(response.exac);
             let populationObj = this.state.populationObj;
             // get the allele count, allele number, and homozygote count for desired populations
             populationStatic.exac._order.map(key => {
                 populationObj.exac[key].ac = parseInt(response.exac.ac['ac_' + key]);
                 populationObj.exac[key].an = parseInt(response.exac.an['an_' + key]);
                 populationObj.exac[key].hom = parseInt(response.exac.hom['hom_' + key]);
-                populationObj.exac[key].af = parseInt(response.exac.ac['ac_' + key]) / parseInt(response.exac.hom['hom_' + key]);
+                populationObj.exac[key].af = parseInt(response.exac.ac['ac_' + key]) / parseInt(response.exac.hom['an_' + key]);
             });
             // get the allele count, allele number, and homozygote count totals
             populationObj.exac._tot.ac = parseInt(response.exac.ac.ac_adj);
@@ -196,7 +195,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseTGenomesData: function(response) {
         // not all variants are SNPs. Do nothing if variant is not a SNP
         if (response.var_class && response.var_class == 'SNP') {
-            console.log(response);
             // FIXME: this GRCh vs gRCh needs to be reconciled in the data model and data import
             let hgvs_GRCh37 = (this.props.data.hgvsNames.GRCh37) ? this.props.data.hgvsNames.GRCh37 : this.props.data.hgvsNames.gRCh37;
             let hgvs_GRCh38 = (this.props.data.hgvsNames.GRCh38) ? this.props.data.hgvsNames.GRCh38 : this.props.data.hgvsNames.gRCh38;
@@ -220,7 +218,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     // extract 20 characters and forward to get population code (not always relevant)
                     let populationCode = population.population.substring(20).toLowerCase();
                     if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
-                        populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                        populationStatic.tGenomes._order.indexOf(populationCode) > -1) {
                         // ... for specific populations =
                         populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes[populationCode].af[population.allele] = parseFloat(population.frequency);
@@ -249,7 +247,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     // extract 20 characters and forward to get population code (not always relevant)
                     let populationCode = population_genotype.population.substring(20).toLowerCase();
                     if (population_genotype.population.indexOf('1000GENOMES:phase_3:') == 0 &&
-                        populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                        populationStatic.tGenomes._order.indexOf(populationCode) > -1) {
                         // ... for specific populations
                         populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
