@@ -125,7 +125,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // cross check criteria values here (no more than one met per cross-check group); for cross checking within the same form group
         if (this.props.criteriaCrossCheck && this.props.criteriaCrossCheck.length > 0) {
             var criteriaMetNum = 0,
-                criteriaEvalConflictValues = ['met', 'supporting', 'moderate', 'strong', 'very-strong'],
+                criteriaEvalConflictValues = ['met', 'supporting', 'moderate', 'strong', 'stand-alone', 'very-strong'],
                 criteriaConflicting = [],
                 errorMsgCriteria = '',
                 crossCheckGroup;
