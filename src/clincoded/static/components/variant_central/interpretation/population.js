@@ -26,7 +26,7 @@ var InputMixin = form.InputMixin;
 
 var populationStatic = {
     exac: {
-        _order: ['afr', 'oth', 'amr', 'sas', 'nfe', 'eas', 'fin'],
+        _order: ['afr', 'amr', 'sas', 'nfe', 'eas', 'fin', 'oth'],
         _labels: {afr: 'African', amr: 'Latino', eas: 'East Asian', fin: 'European (Finnish)', nfe: 'European (Non-Finnish)', oth: 'Other', sas: 'South Asian'}
     },
     tGenomes: {
