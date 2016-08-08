@@ -601,13 +601,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 </div>
 
                 <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
-                    {populationObjDiffFlag ?
-                        <div className="row">
-                            <p className="alert alert-warning">
-                                <strong>Notice:</strong> The data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
-                            </p>
-                        </div>
-                    : null}
                     {(this.props.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
@@ -619,7 +612,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     </div>
                     : null}
-
+                    {populationObjDiffFlag ?
+                        <div className="row">
+                            <p className="alert alert-warning">
+                                <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
+                            </p>
+                        </div>
+                    : null}
                     {this.state.hasExacData ?
                         <div className="panel panel-info datasource-ExAC">
                             <div className="panel-heading">
