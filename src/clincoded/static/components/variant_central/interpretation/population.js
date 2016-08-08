@@ -148,9 +148,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseAlleleFrequencyData: function(response) {
         let populationObj = this.state.populationObj;
         populationStatic.exac._order.map(key => {
-            populationObj.exac[key].af = parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
+            populationObj.exac[key].af = typeof populationObj.exac[key].af !== 'undefined' ? populationObj.exac[key].af : parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
         });
-        populationObj.exac._tot.af = parseFloat(response[0].colocated_variants[0].exac_adj_maf);
+        populationObj.exac._tot.af = typeof populationObj.exac._tot.af !== 'undefined' ? populationObj.exac._tot.af : parseFloat(response[0].colocated_variants[0].exac_adj_maf);
 
         this.setState({populationObj: populationObj});
     },
@@ -174,13 +174,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 populationObj.exac[key].ac = parseInt(response.exac.ac['ac_' + key]);
                 populationObj.exac[key].an = parseInt(response.exac.an['an_' + key]);
                 populationObj.exac[key].hom = parseInt(response.exac.hom['hom_' + key]);
-                populationObj.exac[key].af = parseInt(response.exac.ac['ac_' + key]) / parseInt(response.exac.hom['an_' + key]);
+                populationObj.exac[key].af = populationObj.exac[key].ac / populationObj.exac[key].an;
             });
             // get the allele count, allele number, and homozygote count totals
             populationObj.exac._tot.ac = parseInt(response.exac.ac.ac_adj);
             populationObj.exac._tot.an = parseInt(response.exac.an.an_adj);
             populationObj.exac._tot.hom = parseInt(response.exac.hom.ac_hom);
-            populationObj.exac._tot.af = parseInt(response.exac.ac.ac_adj) / parseInt(response.exac.an.an_adj);
+            populationObj.exac._tot.af = populationObj.exac._tot.ac / populationObj.exac._tot.an;
             // get extra ExAC information
             populationObj.exac._extra.chrom = response.exac.chrom + ''; // ensure that the chromosome is stored as a String
             populationObj.exac._extra.pos = parseInt(response.exac.pos);
