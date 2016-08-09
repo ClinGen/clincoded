@@ -1118,7 +1118,56 @@
 
             .basic-info .table th,
             .basic-info .table td {
-                width: 33%;
+                width: 25%;
+            }
+
+            .basic-info .datasource-clinvar-interpretaions .table th,
+            .basic-info .datasource-clinvar-interpretaions .table td {
+                width: 16.67%;
+            }
+
+            .basic-info .datasource-clinvar-interpretaions {
+                margin-bottom: 20px;
+            }
+
+            .basic-info .datasource-clinvar-interpretaions .table th:last-child,
+            .basic-info .datasource-clinvar-interpretaions .table td:last-child {
+                width: 50%;
+            }
+
+            .basic-info .clinvar-interpretation .review-status:first-letter,
+            .basic-info .clinvar-interpretation .clinical-significance:first-letter {
+                text-transform: capitalize;
+            }
+
+            .basic-info .clinvar-interpretation .disease .identifiers ul {
+                display: inline-block;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                vertical-align: bottom;
+            }
+
+            .basic-info .clinvar-interpretation .disease .identifiers li {
+                float: left;
+            }
+
+            .basic-info .clinvar-interpretation .disease .identifiers li + li:before {
+                content: "-";
+                margin: 0 4px;
+            }
+
+            .basic-info .table .primary-transcript {
+                background-color: #fff4f4;
+            }
+
+            .basic-info .table .primary-transcript td:last-child:after {
+                content: "\f069";
+                font-family: 'FontAwesome';
+                color: #31708f;
+                float: right;
+                position: relative;
+                right: 0;
             }
 
             .population .table tfoot .count:first-child td {
@@ -1189,7 +1238,6 @@
     font-weight: normal;
     padding: 3px 8px;
 }
-/* FIXME: ** end ** temp placeholder style. Will be removed. */
 
 /* variant curation interface - interpretation action bar */
 .curation-actions {
@@ -1306,10 +1354,15 @@
     .panel-title {
         font-weight: bold;
 
-        a {
+        a, .help-note {
             font-size: 85%;
             font-weight: normal;
+            line-height: 17.5px;
             margin-left: 20px;
+        }
+
+        .help-note span {
+            font-style: italic;
         }
     }
 
@@ -1373,7 +1426,7 @@
 }
 
 /**
- * Tooltip Styles
+ * Tooltip Styles for criteria bar
  */
 
 /* Add this attribute to the element that needs a tooltip */
