@@ -179,6 +179,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         return (
             <div className="container curation-variant-tab-group">
                 <PathogenicityCalculator interpretation={interpretation} />
+                <br /><br />
                 <div className="vci-tabs">
                     <ul className="vci-tabs-header tab-label-list" role="tablist">
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
@@ -194,7 +195,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
-                            calculator={PathogenicityCalculator.calculator}
                             ext_clinVarRCV={this.state.ext_clinVarRCV} />
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'population' ? '' : ' hidden')}>
