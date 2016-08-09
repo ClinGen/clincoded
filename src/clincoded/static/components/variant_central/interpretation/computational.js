@@ -482,7 +482,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 <span className="pull-right">
                                     <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
                                     <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
-                                    <a href="http://www.cbcb.umd.edu/software/GeneSplicer/gene_spl.shtml" target="_blank">See data in GeneSplicer <i className="icon icon-external-link"></i></a>
                                     <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
                                 </span>
                             </div>
@@ -501,7 +500,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">5'</td>
+                                        <td rowSpan="3" className="row-span">5'</td>
                                         <td>[0-12]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
@@ -511,14 +510,24 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
                                     <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">3'</td>
+                                        <td rowSpan="3" className="row-span">3'</td>
                                         <td>[0-16]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
                                     <tr>
                                         <td>NNSPLICE</td>
                                         <td>[0-1]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
                                     <tr>
@@ -526,7 +535,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">5'</td>
+                                        <td rowSpan="3" className="row-span">5'</td>
                                         <td>[0-12]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
@@ -536,14 +545,24 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
                                     <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="2" className="row-span">3'</td>
+                                        <td rowSpan="3" className="row-span">3'</td>
                                         <td>[0-16]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
                                     <tr>
                                         <td>NNSPLICE</td>
                                         <td>[0-1]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
                                 </tbody>

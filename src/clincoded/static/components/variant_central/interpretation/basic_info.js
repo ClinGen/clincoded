@@ -20,7 +20,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         data: React.PropTypes.object, // ClinVar data payload
         href_url: React.PropTypes.object,
         ext_ensemblHgvsVEP: React.PropTypes.array,
-        ext_clinvarEutils: React.PropTypes.object
+        ext_clinvarEutils: React.PropTypes.object,
+        ext_clinVarRCV: React.PropTypes.array
     },
 
     getInitialState: function() {
@@ -35,6 +36,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             ensembl_transcripts: [],
             sequence_location: [],
             primary_transcript: {},
+            clinVarRCV: [],
             hgvs_GRCh37: null,
             hgvs_GRCh38: null,
             hasHgvsGRCh37: false,
@@ -59,6 +61,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
         if (nextProps.ext_clinvarEutils) {
             this.parseClinVarEutils(nextProps.ext_clinvarEutils);
+        }
+        if (nextProps.ext_clinVarRCV) {
+            this.setState({clinVarRCV: nextProps.ext_clinVarRCV});
         }
     },
 
@@ -109,7 +114,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         this.getUniprotId(this.state.gene_symbol);
         // Calling method to identify nucleotide change, protein change and molecular consequence
         // Used for UI display in the Primary Transcript table
-        this.getPrimaryTranscript(variantData.clinvarVariantTitle, variantData.RefSeqTranscripts.NucleotideChangeList, variantData.RefSeqTranscripts.ProteinChangeList, variantData.RefSeqTranscripts.MolecularConsequenceList);
+        this.getPrimaryTranscript(variantData.clinvarVariantTitle, variantData.RefSeqTranscripts.NucleotideChangeList, variantData.RefSeqTranscripts.MolecularConsequenceList);
     },
 
     // Return all non NC_ genomic hgvsNames in an array
@@ -123,27 +128,40 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         return hgvs_names;
     },
 
-    // Create primary transcript object
-    // Called in the "fetchRefseqData" method after various states are set
-    getPrimaryTranscript: function(str, nucleotide_change, protein_change, molecular_consequence) {
-        var transcript = {}, SO_id_term = '';
-        var result = nucleotide_change.find((n) => str.indexOf(n.AccessionVersion) > -1);
+    // Create ClinVar primary transcript object
+    // Called in the "parseClinVarEutils" method after various states are set
+    getPrimaryTranscript: function(str, nucleotide_change, molecular_consequence) {
+        // Get the primary RefSeq transcript from VEP response
+        let ensemblTranscripts = this.state.ensembl_transcripts;
+        let transcript = {},
+            exon = '--',
+            protein_hgvs = '--',
+            SO_id_term = '--';
+        let result = nucleotide_change.find((n) => str.indexOf(n.AccessionVersion) > -1);
         if (result && molecular_consequence.length) {
-            var item = molecular_consequence.find((x) => x.HGVS === result.HGVS);
+            let item = molecular_consequence.find((x) => x.HGVS === result.HGVS);
             // 'SO_terms' is defined via requiring external mapping file
             if (item) {
-                var found = SO_terms.find((entry) => entry.SO_id === item.SOid);
+                let found = SO_terms.find((entry) => entry.SO_id === item.SOid);
                 if (found) {
                     SO_id_term = found.SO_term + ' ' + found.SO_id;
-                } else {
-                    SO_id_term = '--';
                 }
             }
-            // FIXME: temporarily use protein_change[0] due to lack of mapping
-            // associated with nucleotide transcript in ClinVar data
-            var protein_hgvs = (typeof protein_change !== 'undefined' && protein_change.length) ? protein_change[0].HGVS : '--';
+            // Find RefSeq transcript (from VEP) whose nucleotide HGVS matches ClinVar's
+            // and map the Exon and Protein HGVS of the found RefSeq transcript to ClinVar
+            // Filter RefSeq transcripts by 'source' and 'hgvsc' flags
+            ensemblTranscripts.forEach(refseqTranscript => {
+                if (refseqTranscript.source === 'RefSeq') {
+                    if (refseqTranscript.hgvsc && refseqTranscript.hgvsc === result.HGVS) {
+                        exon = refseqTranscript.exon ? refseqTranscript.exon : '--';
+                        protein_hgvs = refseqTranscript.hgvsp ? refseqTranscript.hgvsp : '--';
+                    }
+                }
+            });
+            // Set transcript object properties
             transcript = {
                 "nucleotide": result.HGVS,
+                "exon": exon,
                 "protein": protein_hgvs,
                 "molecular": SO_id_term
             };
@@ -151,20 +169,79 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         this.setState({primary_transcript: transcript});
     },
 
-    //Render Ensembl transcripts table rows
-    renderEnsemblData: function(item, key) {
+    //Render RefSeq or Ensembl transcripts table rows
+    renderRefSeqEnsemblTranscripts: function(item, key, source) {
         // Only if nucleotide transcripts exist
-        if (item.hgvsc) {
+        if (item.hgvsc && item.source === source) {
             return (
-                <tr key={key}>
+                <tr key={key} className={(item.canonical && item.canonical === 1) ? 'primary-transcript' : null}>
                     <td><span className="title-ellipsis" title={item.hgvsc}>{item.hgvsc}</span></td>
+                    <td>{(item.exon) ? item.exon : '--'}</td>
                     <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
-                    <td>
+                    <td className="clearfix">
                         {(item.consequence_terms) ? this.handleSOTerms(item.consequence_terms) : '--'}
                     </td>
                 </tr>
             );
         }
+    },
+
+    // Render ClinVar Interpretations table rows
+    renderClinvarInterpretations: function(item, key) {
+        let self = this;
+        return (
+            <tr key={key} className="clinvar-interpretation">
+                <td className="accession"><a href={external_url_map['ClinVar'] + item.RCV} target="_blank">{item.RCV}</a></td>
+                <td className="review-status">{item.reviewStatus}</td>
+                <td className="clinical-significance">{item.clinicalSignificance}</td>
+                <td className="disease">
+                    {item.conditions.map(function(condition, i) {
+                        return (self.handleCondition(condition, i));
+                    })}
+                </td>
+            </tr>
+        );
+    },
+
+    // Method to render each associated condition, which also consists of multiple identifiers
+    handleCondition: function(condition, key) {
+        let self = this;
+        return (
+            <div key={condition.name}>
+                <span className="condition-name">{condition.name}</span>
+                <span className="identifiers"> [<ul className="clearfix">
+                    {condition.identifiers.map(function(identifier, i) {
+                        return (
+                            <li key={i} className="xref-linkout">
+                                <a href={self.handleLinkOuts(identifier.id, identifier.db)} target="_blank">{identifier.db}</a>
+                            </li>
+                        );
+                    })}
+                </ul>]</span>
+            </div>
+        );
+    },
+
+    // Method to return linkout url given a db name
+    handleLinkOuts: function(id, db) {
+        let url;
+        switch (db) {
+            case "MedGen":
+                url = external_url_map['MedGen'] + id;
+                break;
+            case "Orphanet":
+                url = external_url_map['OrphaNet'] + id;
+                break;
+            case "OMIM":
+                url = external_url_map['OMIMEntry'] + id;
+                break;
+            case "Gene":
+                url = external_url_map['Entrez'] + id;
+                break;
+            default:
+                url = '#';
+        }
+        return url;
     },
 
     // Use Ensembl consequence_terms to find matching SO_id and SO_term pair
@@ -257,6 +334,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var GRCh38 = this.state.hgvs_GRCh38;
         var primary_transcript = this.state.primary_transcript;
         var clinvar_hgvs_names = this.state.clinvar_hgvs_names;
+        var clinVarRCV = this.state.clinVarRCV;
         var self = this;
 
         var links_38 = null;
@@ -281,6 +359,29 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     </div>
                 </div>
 
+                <div className="panel panel-info datasource-clinvar-interpretaions">
+                    <div className="panel-heading"><h3 className="panel-title">ClinVar Interpretations</h3></div>
+                    {(clinVarRCV) ?
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Reference Accession</th>
+                                    <th>Review Status</th>
+                                    <th>Clinical Significance</th>
+                                    <th>Disease [Source]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {clinVarRCV.map(function(item, i) {
+                                    return (self.renderClinvarInterpretations(item, i));
+                                })}
+                            </tbody>
+                        </table>
+                        :
+                        <table className="table"><tbody><tr><td>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</td></tr></tbody></table>
+                    }
+                </div>
+
                 <div className="panel panel-info">
                     <div className="panel-heading"><h3 className="panel-title">ClinVar Primary Transcript</h3></div>
                     {(clinvar_id && primary_transcript) ?
@@ -288,6 +389,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             <thead>
                                 <tr>
                                     <th>Nucleotide Change</th>
+                                    <th>Exon</th>
                                     <th>Protein Change</th>
                                     <th>Molecular Consequence</th>
                                 </tr>
@@ -298,7 +400,10 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                         <span className="title-ellipsis">{(primary_transcript) ? primary_transcript.nucleotide : '--'}</span>
                                     </td>
                                     <td>
-                                        {(primary_transcript) ? primary_transcript.protein : '--'}
+                                        {primary_transcript.exon}
+                                    </td>
+                                    <td>
+                                        {primary_transcript.protein}
                                     </td>
                                     <td>
                                         {(primary_transcript) ? primary_transcript.molecular : '--'}
@@ -312,40 +417,51 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 </div>
 
                 <div className="panel panel-info">
-                    <div className="panel-heading"><h3 className="panel-title">ClinVar Transcripts</h3></div>
+                    <div className="panel-heading">
+                        <h3 className="panel-title">RefSeq Transcripts
+                            <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
+                        </h3>
+                    </div>
                     {(clinvar_id && clinvar_hgvs_names) ?
-                        <table className="table">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <ul>
-                                            {clinvar_hgvs_names.map(function(name, index) {
-                                                return <li key={index}><span className="title-ellipsis">{name}</span></li>;
-                                            })}
-                                        </ul>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        :
-                        <table className="table"><tbody><tr><td>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</td></tr></tbody></table>
-                    }
-                </div>
-
-                <div className="panel panel-info">
-                    <div className="panel-heading"><h3 className="panel-title">Ensembl Transcripts</h3></div>
-                    {(this.state.hasHgvsGRCh38 && GRCh38) ?
                         <table className="table">
                             <thead>
                                 <tr>
                                     <th>Nucleotide Change</th>
+                                    <th>Exon</th>
                                     <th>Protein Change</th>
                                     <th>Molecular Consequence</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {ensembl_data.map(function(item, i) {
-                                    return (self.renderEnsemblData(item, i));
+                                    return (self.renderRefSeqEnsemblTranscripts(item, i, 'RefSeq'));
+                                })}
+                            </tbody>
+                        </table>
+                        :
+                        <table className="table"><tbody><tr><td>No data was found for this allele in RefSeq. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</td></tr></tbody></table>
+                    }
+                </div>
+
+                <div className="panel panel-info">
+                    <div className="panel-heading">
+                        <h3 className="panel-title">Ensembl Transcripts
+                            <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
+                        </h3>
+                    </div>
+                    {(this.state.hasHgvsGRCh38 && GRCh38) ?
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Nucleotide Change</th>
+                                    <th>Exon</th>
+                                    <th>Protein Change</th>
+                                    <th>Molecular Consequence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {ensembl_data.map(function(item, i) {
+                                    return (self.renderRefSeqEnsemblTranscripts(item, i, 'Ensembl'));
                                 })}
                             </tbody>
                         </table>
