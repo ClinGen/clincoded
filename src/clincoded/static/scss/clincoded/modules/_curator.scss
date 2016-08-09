@@ -1478,18 +1478,28 @@ dl.inline-dl {
 }
 
 .progress-bar {
+    width: 100%;
     padding: 0 0 10px 0;
     background-color: #fff;
 
     .benign-box {
         border: solid 2px #8bcd9c;
+        padding-left: 10px;
+        width: 32%;
+        float: left;
     }
 
     .pathogenic-box {
         border: solid 2px #d78;
+        padding-left: 10px;
+        width: 34%;
+        float: left;
     }
 
     .assertion-box {
         border: solid 2px #1b75bc;
+        padding-left: 10px;
+        width: 34%;
+        float: left;
     }
 }

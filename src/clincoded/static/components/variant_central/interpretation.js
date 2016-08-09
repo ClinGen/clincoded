@@ -235,16 +235,16 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <br />
                     <span style={{'paddingLeft':'10px','fontSize':'16px'}}><i>Select option values for any combination of criteria and check result in <b>propress bar below</b>.</i></span>
                 </div>
-                <div className="col-lg-12 col-md-12 col-sm-12 progress-bar" style={{'paddingTop':'10px'}}>
-                    <div className="col-lg-4 col-md-4 col-sm-4 benign-box">
+                <div className="progress-bar">
+                    <div className="benign-box">
                         <dt>Benign:</dt>
                         {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
                     </div>
-                    <div className="col-lg-4 col-md-4 col-sm-4 pathogenic-box">
+                    <div className="pathogenic-box">
                         <dt>Pathogenic:</dt>
                         {result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }
                     </div>
-                    <div className="col-lg-4 col-md-4 col-sm-4 assertion-box">
+                    <div className="assertion-box">
                         <dt>Calculated Pathogenicity:</dt>
                         {result && result.assertion ? result.assertion : 'None'}
                     </div>

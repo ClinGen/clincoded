@@ -83,14 +83,14 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
                 path_pvs1_pp2: (pvs_count === 1 && pp_count >= 2) ? true : false,
                 path_ps2: ps_count >= 2 ? true : false,
                 path_ps1_pm3: (ps_count === 1 && pm_count >= 3) ? true : false,
-                path_ps1_pm2_pp2: (ps_count === 1 && pm_count === 2 && pp_count === 2) ? true : false,
-                path_ps1_pm1_pp4: (pvs_count === 1 && pm_count === 1 && pp_count >= 4) ? true : false,
+                path_ps1_pm2_pp2: (ps_count === 1 && pm_count === 2 && pp_count >= 2) ? true : false,
+                path_ps1_pm1_pp4: (ps_count === 1 && pm_count === 1 && pp_count >= 4) ? true : false,
 
                 likelyPath_pvs1_pm1: (pvs_count === 1 && pm_count === 1) ? true : false,
                 likelyPath_ps1_pm1: (ps_count === 1 && (pm_count === 1 || pm_count === 2)) ? true : false,
-                likelyPath_ps1_pp2: (ps_count === 1 && pp_count >= 3) ? true : false,
+                likelyPath_ps1_pp2: (ps_count === 1 && pp_count >= 2) ? true : false,
                 likelyPath_pm3: pm_count >= 3 ? true : false,
-                likelyPath_pm2_pp2: (pm_count === 2 && pp_count >= 3) ? true : false,
+                likelyPath_pm2_pp2: (pm_count === 2 && pp_count >= 2) ? true : false,
                 likelyPath_pm1_pp4: (pm_count === 1 && pp_count >= 4) ? true : false,
 
                 benign_ba1: ba_count === 1 ? true : false,
@@ -171,16 +171,16 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
         return (
             <div>
                 {interpretation ?
-                    <div className="col-lg-12 col-md-12 col-sm-12 progress-bar">
-                        <div className="col-lg-4 col-md-4 col-sm-4 benign-box">
+                    <div className="progress-bar">
+                        <div className="benign-box">
                             <dt>Benign:</dt>
                             {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(', ') : 'No criteria met' }
                         </div>
-                        <div className="col-lg-4 col-md-4 col-sm-4 pathogenic-box">
+                        <div className="pathogenic-box">
                             <dt>Pathogenic:</dt>
                             {result && result.path_summary && result.path_summary.length ? result.path_summary.join(', ') : 'No criteria met' }
                         </div>
-                        <div className="col-lg-4 col-md-4 col-sm-4 assertion-box">
+                        <div className="assertion-box">
                             <dt>Calculated Pathogenicity:</dt>
                             {result && result.assertion ? result.assertion : 'None'}
                         </div>
@@ -261,14 +261,14 @@ var calculatePathogenicity = module.exports.calculatePathogenicity = function(ev
                 path_pvs1_pp2: (pvs_count === 1 && pp_count >= 2) ? true : false,
                 path_ps2: ps_count >= 2 ? true : false,
                 path_ps1_pm3: (ps_count === 1 && pm_count >= 3) ? true : false,
-                path_ps1_pm2_pp2: (ps_count === 1 && pm_count === 2 && pp_count === 2) ? true : false,
-                path_ps1_pm1_pp4: (pvs_count === 1 && pm_count === 1 && pp_count >= 4) ? true : false,
+                path_ps1_pm2_pp2: (ps_count === 1 && pm_count === 2 && pp_count >= 2) ? true : false,
+                path_ps1_pm1_pp4: (ps_count === 1 && pm_count === 1 && pp_count >= 4) ? true : false,
 
                 likelyPath_pvs1_pm1: (pvs_count === 1 && pm_count === 1) ? true : false,
                 likelyPath_ps1_pm1: (ps_count === 1 && (pm_count === 1 || pm_count === 2)) ? true : false,
-                likelyPath_ps1_pp2: (ps_count === 1 && pp_count >= 3) ? true : false,
+                likelyPath_ps1_pp2: (ps_count === 1 && pp_count >= 2) ? true : false,
                 likelyPath_pm3: pm_count >= 3 ? true : false,
-                likelyPath_pm2_pp2: (pm_count === 2 && pp_count >= 3) ? true : false,
+                likelyPath_pm2_pp2: (pm_count === 2 && pp_count >= 2) ? true : false,
                 likelyPath_pm1_pp4: (pm_count === 1 && pp_count >= 4) ? true : false,
 
                 benign_ba1: ba_count === 1 ? true : false,
