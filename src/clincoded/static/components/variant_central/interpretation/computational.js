@@ -124,7 +124,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     },
 
     componentWillUnmount: function() {
-        window.history.replaceState(window.state, '', editQueryValue(window.location, 'subtab', null));
         this.setState({
             hasConservationData: false,
             hasOtherPredData: false,

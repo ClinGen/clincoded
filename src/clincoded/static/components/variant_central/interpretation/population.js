@@ -26,7 +26,7 @@ var InputMixin = form.InputMixin;
 
 var populationStatic = {
     exac: {
-        _order: ['afr', 'oth', 'amr', 'sas', 'nfe', 'eas', 'fin'],
+        _order: ['afr', 'amr', 'sas', 'nfe', 'eas', 'fin', 'oth'],
         _labels: {afr: 'African', amr: 'Latino', eas: 'East Asian', fin: 'European (Finnish)', nfe: 'European (Non-Finnish)', oth: 'Other', sas: 'South Asian'}
     },
     tGenomes: {
@@ -148,9 +148,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseAlleleFrequencyData: function(response) {
         let populationObj = this.state.populationObj;
         populationStatic.exac._order.map(key => {
-            populationObj.exac[key].af = parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
+            populationObj.exac[key].af = typeof populationObj.exac[key].af !== 'undefined' ? populationObj.exac[key].af : parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
         });
-        populationObj.exac._tot.af = parseFloat(response[0].colocated_variants[0].exac_adj_maf);
+        populationObj.exac._tot.af = typeof populationObj.exac._tot.af !== 'undefined' ? populationObj.exac._tot.af : parseFloat(response[0].colocated_variants[0].exac_adj_maf);
 
         this.setState({populationObj: populationObj});
     },
@@ -174,11 +174,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 populationObj.exac[key].ac = parseInt(response.exac.ac['ac_' + key]);
                 populationObj.exac[key].an = parseInt(response.exac.an['an_' + key]);
                 populationObj.exac[key].hom = parseInt(response.exac.hom['hom_' + key]);
+                populationObj.exac[key].af = populationObj.exac[key].ac / populationObj.exac[key].an;
             });
             // get the allele count, allele number, and homozygote count totals
             populationObj.exac._tot.ac = parseInt(response.exac.ac.ac_adj);
             populationObj.exac._tot.an = parseInt(response.exac.an.an_adj);
             populationObj.exac._tot.hom = parseInt(response.exac.hom.ac_hom);
+            populationObj.exac._tot.af = populationObj.exac._tot.ac / populationObj.exac._tot.an;
             // get extra ExAC information
             populationObj.exac._extra.chrom = response.exac.chrom + ''; // ensure that the chromosome is stored as a String
             populationObj.exac._extra.pos = parseInt(response.exac.pos);
@@ -216,7 +218,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     // extract 20 characters and forward to get population code (not always relevant)
                     let populationCode = population.population.substring(20).toLowerCase();
                     if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
-                        populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                        populationStatic.tGenomes._order.indexOf(populationCode) > -1) {
                         // ... for specific populations =
                         populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes[populationCode].af[population.allele] = parseFloat(population.frequency);
@@ -245,7 +247,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     // extract 20 characters and forward to get population code (not always relevant)
                     let populationCode = population_genotype.population.substring(20).toLowerCase();
                     if (population_genotype.population.indexOf('1000GENOMES:phase_3:') == 0 &&
-                        populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                        populationStatic.tGenomes._order.indexOf(populationCode) > -1) {
                         // ... for specific populations
                         populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
@@ -373,9 +375,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{exac[key].ac ? exac[key].ac : '--'}</td>
-                <td>{exac[key].an ? exac[key].an : '--'}</td>
-                <td>{exac[key].hom ? exac[key].hom : '--'}</td>
+                <td>{exac[key].ac || exac[key].ac === 0 ? exac[key].ac : '--'}</td>
+                <td>{exac[key].an || exac[key].an === 0 ? exac[key].an : '--'}</td>
+                <td>{exac[key].hom || exac[key].hom === 0 ? exac[key].hom : '--'}</td>
                 <td>{exac[key].af || exac[key].af === 0 ? this.parseFloatShort(exac[key].af) : '--'}</td>
             </tr>
         );
@@ -416,11 +418,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{esp[key].ac[esp._extra.ref] ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
-                <td>{esp[key].ac[esp._extra.alt] ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
-                <td>{esp[key].gc[g_ref] ? g_ref + ': ' + esp[key].gc[g_ref] : '--'}</td>
-                <td>{esp[key].gc[g_alt] ? g_alt + ': ' + esp[key].gc[g_alt] : '--'}</td>
-                <td>{esp[key].gc[g_mixed] ? g_mixed + ': ' + esp[key].gc[g_mixed] : '--'}</td>
+                <td>{esp[key].ac[esp._extra.ref] || esp[key].ac[esp._extra.ref] === 0 ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
+                <td>{esp[key].ac[esp._extra.alt] || esp[key].ac[esp._extra.alt] === 0 ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
+                <td>{esp[key].gc[g_ref] || esp[key].gc[g_ref] ? g_ref + ': ' + esp[key].gc[g_ref] : '--'}</td>
+                <td>{esp[key].gc[g_alt] || esp[key].gc[g_alt] ? g_alt + ': ' + esp[key].gc[g_alt] : '--'}</td>
+                <td>{esp[key].gc[g_mixed] || esp[key].gc[g_mixed] ? g_mixed + ': ' + esp[key].gc[g_mixed] : '--'}</td>
             </tr>
         );
     },
