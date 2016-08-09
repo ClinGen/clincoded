@@ -28,7 +28,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_ensemblVariation: React.PropTypes.object,
         ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_clinvarEutils: React.PropTypes.object,
-        ext_clinVarEsearch: React.PropTypes.object
+        ext_clinVarEsearch: React.PropTypes.object,
+        ext_clinVarRCV: React.PropTypes.array
     },
 
     getInitialState: function() {
@@ -41,6 +42,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_ensemblHgvsVEP: this.props.ext_ensemblHgvsVEP,
             ext_clinvarEutils: this.props.ext_clinvarEutils,
             ext_clinVarEsearch: this.props.ext_clinVarEsearch,
+            ext_clinVarRCV: this.props.ext_clinVarRCV,
             selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info')  : 'basic-info') // set selectedTab to whatever is defined in the address; default to first tab if not set
         };
     },
@@ -71,6 +73,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         if (nextProps.ext_clinVarEsearch) {
             this.setState({ext_clinVarEsearch: nextProps.ext_clinVarEsearch});
+        }
+        if (nextProps.ext_clinVarRCV) {
+            this.setState({ext_clinVarRCV: nextProps.ext_clinVarRCV});
         }
     },
 
@@ -107,7 +112,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <CurationInterpretationBasicInfo data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
-                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP} />
+                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
+                            ext_clinVarRCV={this.state.ext_clinVarRCV} />
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'population' ? '' : ' hidden')}>
                         <CurationInterpretationPopulation data={variant}
