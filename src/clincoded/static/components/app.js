@@ -21,9 +21,9 @@ var routes = {
 var portal = {
     portal_title: 'ClinGen',
     navUser: [
-        {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
+        {id: 'loginout', title: 'Login'},
+        {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'}
         //{id: 'account', title: 'Account', url: '/account/'},
-        {id: 'loginout', title: 'Login'}
     ]
 };
 
@@ -234,30 +234,39 @@ var NavbarUser = React.createClass({
         var session = this.props.session;
 
         return (
-            <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
-                {this.props.portal.navUser.map(function(menu) {
-                    if (menu.url) {
-                        // Normal menu item; disabled if user is not logged in
-                        if (session && session['auth.userid']) {
-                            return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title}>{menu.title}</NavItem>;
-                        }
-                    } else {
-                        // Trigger menu item; set <a> data attribute to login or logout
-                        var attrs = {};
-
-                        // Item with trigger; e.g. login/logout
-                        if (!(session && session['auth.userid'])) {
-                            // Logged out; render signin trigger
-                            attrs['data-trigger'] = 'login';
-                            return <NavItem {...attrs} key={menu.id}>{menu.title}</NavItem>;
+            <div>
+                <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
+                    {this.props.portal.navUser.map(function(menu) {
+                        if (menu.url) {
+                            // Normal menu item; disabled if user is not logged in
+                            if (session && session['auth.userid']) {
+                                return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title}>{menu.title}</NavItem>;
+                            }
                         } else {
-                            var fullname = (session.user_properties && session.user_properties.title) || 'unknown';
-                            attrs['data-trigger'] = 'logout';
-                            return <NavItem {...attrs} key={menu.id}>{'Logout ' + fullname}</NavItem>;
+                            // Trigger menu item; set <a> data attribute to login or logout
+                            var attrs = {};
+
+                            // Item with trigger; e.g. login/logout
+                            if (!(session && session['auth.userid'])) {
+                                // Logged out; render signin trigger
+                                attrs['data-trigger'] = 'login';
+                                return <NavItem {...attrs} key={menu.id}>{menu.title}</NavItem>;
+                            } else {
+                                var fullname = (session.user_properties && session.user_properties.title) || 'unknown';
+                                attrs['data-trigger'] = 'logout';
+                                return <NavItem {...attrs} key={menu.id}>{'Logout ' + fullname}</NavItem>;
+                            }
                         }
-                    }
-                })}
-            </Nav>
+                    })}
+                </Nav>
+                {session && session['auth.userid'] ? // link to variant curation
+                    <div className="curation-link-box">
+                        <a className="curation-link" href={'/select-variant/'}>Select Variant for Variant Curation</a>
+                    </div>
+                    :
+                    null
+                }
+            </div>
         );
     }
 });
