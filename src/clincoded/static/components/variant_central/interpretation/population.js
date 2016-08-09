@@ -66,6 +66,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             geneENSG: null,
             CILow: null,
             CIhigh: null,
+            exacVariantLink: null,
             populationObj: {
                 highestMAF: null,
                 desiredCI: 95,
@@ -186,6 +187,32 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             populationObj.exac._extra.alt = response.exac.alt;
             // update populationObj, and set flag indicating that we have ExAC data
             this.setState({hasExacData: true, populationObj: populationObj});
+        } else {
+            let chrom = response.chrom,
+                pos = response.hg19.start,
+                regionStart = parseInt(response.hg19.start) - 30,
+                regionEnd = parseInt(response.hg19.end) + 30,
+                exacVariantLink;
+            if (response.clinvar) {
+                // Try 'clinvar' as primary data object
+                let clinvar = response.clinvar;
+                // Applies to substitution variant (e.g. C>T in which '>' means 'changes to')
+                if (clinvar.type && clinvar.type === 'single nucleotide variant') {
+                    exacVariantLink = 'http://exac.broadinstitute.org/variant/' + chrom + '-' + pos + '-' + clinvar.ref + '-' + clinvar.alt;
+                } else {
+                    // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
+                    exacVariantLink = 'http://exac.broadinstitute.org/region/' + chrom + '-' + regionStart + '-' + regionEnd;
+                }
+            } else if (response.cadd) {
+                // Fallback to 'cadd' as alternative data object
+                let cadd = response.cadd;
+                if (cadd.type && cadd.type === 'SNV') {
+                    exacVariantLink = 'http://exac.broadinstitute.org/variant/' + chrom + '-' + pos + '-' + cadd.ref + '-' + cadd.alt;
+                } else {
+                    exacVariantLink = 'http://exac.broadinstitute.org/region/' + chrom + '-' + regionStart + '-' + regionEnd;
+                }
+            }
+            this.setState({exacVariantLink: exacVariantLink});
         }
     },
 
@@ -626,7 +653,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th>No population data was found for this allele in ExAC. <a href={external_url_map['EXACHome']}>Search ExAC</a> for this variant.</th>
+                                        <th>No population data was found for this allele in ExAC. <a href={this.state.exacVariantLink} target="_blank">Search ExAC</a> for this variant.</th>
                                     </tr>
                                 </thead>
                             </table>
