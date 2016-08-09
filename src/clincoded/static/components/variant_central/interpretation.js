@@ -251,7 +251,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         {result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }
                     </div>
                     <div className="assertion-box">
-                        <dt>Calculated Pathogenicity:</dt>
+                        <dt>Calculated Pathogenicity (ACMG 2015):</dt>
                         {result && result.assertion ? result.assertion : 'None'}
                     </div>
                 </div>

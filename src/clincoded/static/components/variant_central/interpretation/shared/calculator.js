@@ -7,6 +7,8 @@ var Form = form.Form;
 var Input = form.Input;
 var FormMixin = form.FormMixin;
 
+var ROLES = 'ACMG 2015';
+
 //module.exports.pathogenicityCalculator = function(evaluationObjList) {
 var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.createClass({
     mixins: [FormMixin, RestMixin],
@@ -14,6 +16,12 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
     propTypes: {
         interpretation: React.PropTypes.object,
         //criteriaList: React.PropTypes.array // for test only
+    },
+
+    getInitialState: function() {
+        return {
+            roles: 'ACMG 2015' // Default role for calculation
+        };
     },
 
     calculatePathogenicity: function(evaluationObjList) {
@@ -166,7 +174,7 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
         var interpretation = this.props.interpretation;
         var evaluations = interpretation && interpretation.evaluations && interpretation.evaluations.length ? interpretation.evaluations : null;
         var result = evaluations ? this.calculatePathogenicity(evaluations) : null;
-        //var result = evaluations ? calculatePathogenicity(evaluations) : null;
+        var roles = this.state.roles;
 
         return (
             <div>
@@ -181,7 +189,7 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
                             {result && result.path_summary && result.path_summary.length ? result.path_summary.join(', ') : 'No criteria met' }
                         </div>
                         <div className="assertion-box">
-                            <dt>Calculated Pathogenicity:</dt>
+                            <dt>Calculated Pathogenicity {'(' + roles +')'}:</dt>
                             {result && result.assertion ? result.assertion : 'None'}
                         </div>
                     </div>
