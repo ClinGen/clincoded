@@ -28,7 +28,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         return {
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
-            clinvar_hgvs_names: [],
             dbSNP_id: null,
             nucleotide_change: [],
             molecular_consequence: [],
@@ -103,7 +102,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     parseClinVarEutils: function(variantData) {
         this.setState({
             hasRefseqData: true,
-            clinvar_hgvs_names: this.parseHgvsNames(variantData.hgvsNames),
             nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
             protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
             molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
@@ -115,17 +113,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         // Calling method to identify nucleotide change, protein change and molecular consequence
         // Used for UI display in the Primary Transcript table
         this.getPrimaryTranscript(variantData.clinvarVariantTitle, variantData.RefSeqTranscripts.NucleotideChangeList, variantData.RefSeqTranscripts.MolecularConsequenceList);
-    },
-
-    // Return all non NC_ genomic hgvsNames in an array
-    parseHgvsNames: function(hgvsNames) {
-        var hgvs_names = [];
-        if (hgvsNames) {
-            if (hgvsNames.others) {
-                hgvs_names = hgvsNames.others;
-            }
-        }
-        return hgvs_names;
     },
 
     // Create ClinVar primary transcript object
@@ -333,7 +320,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var GRCh37 = this.state.hgvs_GRCh37;
         var GRCh38 = this.state.hgvs_GRCh38;
         var primary_transcript = this.state.primary_transcript;
-        var clinvar_hgvs_names = this.state.clinvar_hgvs_names;
         var clinVarRCV = this.state.clinVarRCV;
         var self = this;
 
@@ -422,7 +408,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                         </h3>
                     </div>
-                    {(clinvar_id && clinvar_hgvs_names) ?
+                    {(this.state.hasHgvsGRCh38 && GRCh38) ?
                         <table className="table">
                             <thead>
                                 <tr>
