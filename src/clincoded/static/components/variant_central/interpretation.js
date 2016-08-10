@@ -143,7 +143,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'functional' ? '' : ' hidden')}>
                         <CurationInterpretationFunctional data={variant} protocol={this.props.href_url.protocol}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        {interpretation ? <TestCalculator interpretation={interpretation} /> : null}
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'segregation-case' ? '' : ' hidden')}>
                         <CurationInterpretationSegregation data={variant} protocol={this.props.href_url.protocol}
