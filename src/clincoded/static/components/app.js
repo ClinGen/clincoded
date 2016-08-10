@@ -21,9 +21,16 @@ var routes = {
 var portal = {
     portal_title: 'ClinGen',
     navUser: [
+        {id: 'variant', title: 'New Variant Curation', url: '/select-variant/'},
+        {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'},
+        {id: 'spance', title: 'space'},
         {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
         {id: 'loginout', title: 'Login'}
         //{id: 'account', title: 'Account', url: '/account/'},
+    ],
+    navLinks: [
+        {id: 'variant', title: 'New Variant Curation', url: '/select-variant/'},
+        {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'}
     ]
 };
 
@@ -237,7 +244,7 @@ var NavbarUser = React.createClass({
             <div>
                 <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
                     {this.props.portal.navUser.map(function(menu) {
-                        if (menu.url) {
+                        if (menu.url || menu.title === 'space') {
                             // Normal menu item; disabled if user is not logged in
                             if (session && session['auth.userid']) {
                                 return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title}>{menu.title}</NavItem>;
@@ -259,13 +266,6 @@ var NavbarUser = React.createClass({
                         }
                     })}
                 </Nav>
-                {session && session['auth.userid'] ? // link to variant curation
-                    <div className="curation-link-box">
-                        <a className="curation-link" href={'/select-variant/'}>Select Variant for Variant Curation</a>
-                    </div>
-                    :
-                    null
-                }
             </div>
         );
     }
