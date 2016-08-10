@@ -22,7 +22,7 @@ var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific
 // Import pathogenicity calculator
 var calculator = require('./interpretation/shared/calculator');
 var PathogenicityCalculator = calculator.PathogenicityCalculator;
-var calculatePathogenicity = calculator.calculatePathogenicity; // for test only
+var TestCalculator = calculator.TestCalculator; // UI and handler for testing pathogeicity calculator
 
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
@@ -43,39 +43,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     getInitialState: function() {
         return {
-            // For test pathogenicity calculator only
-            criteriaList: null,
-            criteria_evaluated: null,
-            PVS1: false,
-            PS1: false,
-            PS2: false,
-            PS3: false,
-            PS4: false,
-            PM1: false,
-            PM2: false,
-            PM3: false,
-            PM4: false,
-            PM5: false,
-            PM6: false,
-            PP1: false,
-            PP2: false,
-            PP3: false,
-            PP4: false,
-            PP5: false,
-            BA1: false,
-            BS1: false,
-            BS2: false,
-            BS3: false,
-            BS4: false,
-            BP1: false,
-            BP2: false,
-            BP3: false,
-            BP4: false,
-            BP5: false,
-            BP6: false,
-            BP7: false,
-            // Test above
-
             interpretation: this.props.interpretation,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
             ext_bustamante: this.props.ext_bustamante,
@@ -131,45 +98,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
     },
 
-    // Function for test pathogeinicity calculator only, will be removed later.
-    handleChange: function(ref, e) {
-        var criteria_value = this.refs[ref].getValue();
-        if (!this.state.ref || this.state.ref !== criteria_value) {
-            var critObj = {};
-            critObj[ref] = criteria_value;
-            this.setState(critObj);
-        }
-
-        var criteria_evaluated = this.state.criteria_evaluated ? this.state.criteria_evaluated : [];
-        var criteriaObj = {};
-        criteriaObj.criteria = ref;
-        if (criteria_value === 'not-met' || criteria_value === 'met') {
-            criteriaObj.criteriaStatus = criteria_value;
-            criteriaObj.criteriaModifier = '';
-        } else {
-            criteriaObj.criteriaStatus = 'met';
-            criteriaObj.criteriaModifier = criteria_value;
-        }
-
-        var criteria_index = -1;
-        criteria_evaluated.map((ct, i) => {
-            if (ct.criteria === ref) {
-                criteria_index = i;
-            }
-        });
-        if (criteria_index > -1 && criteria_value === 'not-evaluated') {
-            criteria_evaluated.splice(criteria_index, 1);
-        } else if (criteria_index > -1 ) {
-            criteria_evaluated[criteria_index] = criteriaObj;
-        } else if (criteria_value !== 'not-evaluated') {
-            criteria_evaluated.push(criteriaObj);
-        }
-
-        this.setState({
-            criteria_evaluated: criteria_evaluated
-        });
-    },
-
     render: function() {
         var variant = this.props.variantData;
         var interpretation = this.state.interpretation;
@@ -215,7 +143,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'functional' ? '' : ' hidden')}>
                         <CurationInterpretationFunctional data={variant} protocol={this.props.href_url.protocol}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                        {this.state.interpretation ? this.pathCalculatorUI() : null}
+                        {interpretation ? <TestCalculator interpretation={interpretation} /> : null}
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'segregation-case' ? '' : ' hidden')}>
                         <CurationInterpretationSegregation data={variant} protocol={this.props.href_url.protocol}
@@ -229,102 +157,4 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             </div>
         );
     },
-
-    // Function to add UI for testing pathogenic calculator. Will be removed later.
-    pathCalculatorUI: function() {
-        var result = calculatePathogenicity(this.state.criteria_evaluated);
-
-        return (
-            <div style={{'marginTop':'30px','paddingTop':'10px','borderTop':'solid 1px #aaa'}}>
-                <div>
-                    <span style={{'fontSize':'18px'}}><b>Test Pathogenicity Calculator</b></span>
-                    <br />
-                    <span style={{'paddingLeft':'10px','fontSize':'16px'}}><i>Select option values for any combination of criteria and check result in <b>propress bar below</b>.</i></span>
-                </div>
-                <div className="progress-bar">
-                    <div className="benign-box">
-                        <dt>Benign:</dt>
-                        {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
-                    </div>
-                    <div className="pathogenic-box">
-                        <dt>Pathogenic:</dt>
-                        {result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }
-                    </div>
-                    <div className="assertion-box">
-                        <dt>Calculated Pathogenicity (ACMG 2015):</dt>
-                        {result && result.assertion ? result.assertion : 'None'}
-                    </div>
-                </div>
-                <br />
-                <Form>
-                    <table style={{'width':'100%', 'marginTop':'20px'}}>
-                        <tbody>
-                            <tr style={{'backgroundColor':'#f9d8d8'}}>
-                                <td style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('PVS1')}
-                                </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('PS1')}
-                                    {this.setDropdown('PS2')}
-                                    {this.setDropdown('PS3')}
-                                    {this.setDropdown('PS4')}
-                                </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%', 'paddingTop':'20px'}}>
-                                    {this.setDropdown('PM1')}
-                                    {this.setDropdown('PM2')}
-                                    {this.setDropdown('PM3')}
-                                    {this.setDropdown('PM4')}
-                                    {this.setDropdown('PM5')}
-                                    {this.setDropdown('PM6')}
-                                </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('PP1')}
-                                    {this.setDropdown('PP2')}
-                                    {this.setDropdown('PP3')}
-                                    {this.setDropdown('PP4')}
-                                    {this.setDropdown('PP5')}
-                                </td>
-                            </tr>
-                            <tr style={{'backgroundColor':'#c7e9c7'}}>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('BA1')}
-                                </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('BS1')}
-                                    {this.setDropdown('BS2')}
-                                    {this.setDropdown('BS3')}
-                                    {this.setDropdown('BS4')}
-                                </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('BP1')}
-                                    {this.setDropdown('BP2')}
-                                    {this.setDropdown('BP3')}
-                                    {this.setDropdown('BP4')}
-                                    {this.setDropdown('BP5')}
-                                    {this.setDropdown('BP6')}
-                                    {this.setDropdown('BP7')}
-                                </td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </Form>
-            </div>
-        );
-    },
-
-    setDropdown: function(criteria) {
-        return (
-            <Input type="select" ref={criteria} label={criteria + ':'} defaultValue="not-evaluated" handleChange={this.handleChange} labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-9">
-                <option value="not-evaluated">Not Evaluated</option>
-                <option disabled="disabled"></option>
-                <option value="met">Met</option>
-                <option value="not-met">Not Met</option>
-                {(criteria.indexOf('PP') === 0 || criteria.indexOf('BP') === 0) ? null : <option value="supporting">Supporting</option>}
-                {criteria.indexOf('M') === 1 ? null : (criteria.indexOf('P') === 0 ? <option value="moderate">Moderate</option> : null)}
-                {criteria.indexOf('S') === 1 ? null : <option value="strong">Strong</option>}
-                {criteria.indexOf('VS') === 1 ? null : (criteria.indexOf('P') === 0 ? <option value="very-strong">Very Strong</option> : null)}
-            </Input>
-        );
-    }
 });
