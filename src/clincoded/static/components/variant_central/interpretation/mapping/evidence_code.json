@@ -1,6 +1,6 @@
 {
     "BA1": {
-        "class": "benign-stand-alone",
+        "class": "benign-strong",
         "definition": "MAF is too high for disorder",
         "definitionLong": "Allele frequency is > 5% in ExAC, 1000 Genomes, or ESP",
         "category": "population",

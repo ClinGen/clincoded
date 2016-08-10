@@ -22,7 +22,6 @@ var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific
 // Import pathogenicity calculator
 var calculator = require('./interpretation/shared/calculator');
 var PathogenicityCalculator = calculator.PathogenicityCalculator;
-var TestCalculator = calculator.TestCalculator; // UI and handler for testing pathogeicity calculator
 
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
