@@ -1119,6 +1119,10 @@
             .basic-info .table th,
             .basic-info .table td {
                 width: 25%;
+
+                .title-ellipsis {
+                    max-width: 250px;
+                }
             }
 
             .basic-info .datasource-clinvar-interpretaions .table th,
