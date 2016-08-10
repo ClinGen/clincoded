@@ -105,6 +105,25 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         };
     },
 
+    componentDidMount: function() {
+        this.setState({interpretation: this.props.interpretation});
+        // update data based on api call results
+        if (this.props.ext_myVariantInfo) {
+            this.parseOtherPredData(this.props.ext_myVariantInfo);
+            this.parseConservationData(this.props.ext_myVariantInfo);
+        }
+        if (this.props.ext_bustamante) {
+            this.parseClingenPredData(this.props.ext_bustamante);
+        }
+        if (this.props.ext_clinVarEsearch) {
+            var codonObj = {};
+            codonObj.count = parseInt(this.props.ext_clinVarEsearch.esearchresult.count);
+            codonObj.term = this.props.ext_clinVarEsearch.vci_term;
+            codonObj.symbol = this.props.ext_clinVarEsearch.vci_symbol;
+            this.setState({codonObj: codonObj});
+        }
+    },
+
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretation: nextProps.interpretation});
         // update data based on api call results
@@ -369,8 +388,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('silent-intron')} aria-selected={this.state.selectedTab == 'silent-intron'}>Silent & Intron</li>
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('indel')} aria-selected={this.state.selectedTab == 'indel'}>In-frame Indel</li>
                 </ul>
-
-                <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'missense' ? '' : ' hidden')}>
+                {this.state.selectedTab == '' || this.state.selectedTab == 'missense' ?
+                <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                         <div className="row">
@@ -615,8 +634,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         : null}
                     </Panel></PanelGroup>
                 </div>
-
-                <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'lof' ? '' : ' hidden')}>
+                : null}
+                {this.state.selectedTab == 'lof' ?
+                <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                         <div className="row">
@@ -648,8 +668,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         </div>
                     </Panel></PanelGroup>
                 </div>
-
-                <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'silent-intron' ? '' : ' hidden')}>
+                : null}
+                {this.state.selectedTab == 'silent-intron' ?
+                <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                             <div className="row">
@@ -663,8 +684,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         : null}
                     </Panel></PanelGroup>
                 </div>
-
-                <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'indel' ? '' : ' hidden')}>
+                : null}
+                {this.state.selectedTab == 'indel' ?
+                <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
                         <div className="panel panel-info">
                             <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
@@ -715,7 +737,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         : null}
                     </Panel></PanelGroup>
                 </div>
-
+                : null}
             </div>
         );
     }

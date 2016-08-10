@@ -95,7 +95,26 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentDidMount: function() {
+        if (typeof this.props.interpretation !== undefined && !_.isEqual(this.props.interpretation, this.props.interpretation)) {
+            this.setState({interpretation: this.props.interpretation});
+        }
+        // set desired CI if previous data for it exists
         this.getPrevSetDesiredCI(this.props.interpretation);
+        // update data based on api call results
+        if (this.props.ext_myVariantInfo) {
+            this.parseExacData(this.props.ext_myVariantInfo);
+            this.parseEspData(this.props.ext_myVariantInfo);
+            this.calculateHighestMAF();
+        }
+        if (this.props.ext_ensemblVEP) {
+            this.parseAlleleFrequencyData(this.props.ext_ensemblVEP);
+            this.parseGeneConstraintScores(this.props.ext_ensemblVEP);
+            this.calculateHighestMAF();
+        }
+        if (this.props.ext_ensemblVariation) {
+            this.parseTGenomesData(this.props.ext_ensemblVariation);
+            this.calculateHighestMAF();
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -361,8 +380,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         });
         // embed highest MAF and related data into population obj, and update to state
         populationObj.highestMAF = highestMAFObj;
-        this.setState({populationObj: populationObj});
-        this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
+        this.setState({populationObj: populationObj}, () => {
+            this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
+        });
     },
 
     /* the following methods are related to the rendering of population data tables */

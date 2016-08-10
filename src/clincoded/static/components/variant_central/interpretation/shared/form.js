@@ -132,6 +132,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             for (var i = 0; i < this.props.criteriaCrossCheck.length; i++) {
                 crossCheckGroup = this.props.criteriaCrossCheck[i];
                 // reset criteria conflicting array and message when moving to next cross check group
+                criteriaMetNum = 0;
                 criteriaConflicting = [];
                 errorMsgCriteria = '';
                 if (crossCheckGroup.length > 1) {

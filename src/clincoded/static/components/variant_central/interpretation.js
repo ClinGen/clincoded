@@ -108,21 +108,26 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-specific')} aria-selected={this.state.selectedTab == 'gene-specific'}>Gene-specific</li>
                     </ul>
 
-                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ? '' : ' hidden')}>
+                    {this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ?
+                    <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationBasicInfo data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_clinVarRCV={this.state.ext_clinVarRCV} />
                     </div>
-                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'population' ? '' : ' hidden')}>
+                    : null}
+                    {this.state.selectedTab == 'population' ?
+                    <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationPopulation data={variant}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_ensemblVEP={this.state.ext_ensemblVEP}
                             ext_ensemblVariation={this.state.ext_ensemblVariation} />
                     </div>
-                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'predictors' ? '' : ' hidden')}>
+                    : null}
+                    {this.state.selectedTab == 'predictors' ?
+                    <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationComputational data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
@@ -130,18 +135,25 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch} />
                     </div>
-                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'functional' ? '' : ' hidden')}>
+                    : null}
+                    {this.state.selectedTab == 'functional' ?
+                    <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
-                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'segregation-case' ? '' : ' hidden')}>
+                    : null}
+                    {this.state.selectedTab == 'segregation-case' ?
+                    <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationSegregation data={variant} data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
-                    <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'gene-specific' ? '' : ' hidden')}>
+                    : null}
+                    {this.state.selectedTab == 'gene-specific' ?
+                    <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationGeneSpecific data={variant} data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
+                    : null}
                 </div>
             </div>
         );
