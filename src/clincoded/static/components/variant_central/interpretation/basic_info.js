@@ -134,25 +134,25 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     SO_id_term = found.SO_term + ' ' + found.SO_id;
                 }
             }
-            // Find RefSeq transcript (from VEP) whose nucleotide HGVS matches ClinVar's
-            // and map the Exon and Protein HGVS of the found RefSeq transcript to ClinVar
-            // Filter RefSeq transcripts by 'source' and 'hgvsc' flags
-            ensemblTranscripts.forEach(refseqTranscript => {
-                if (refseqTranscript.source === 'RefSeq') {
-                    if (refseqTranscript.hgvsc && refseqTranscript.hgvsc === result.HGVS) {
-                        exon = refseqTranscript.exon ? refseqTranscript.exon : '--';
-                        protein_hgvs = refseqTranscript.hgvsp ? refseqTranscript.hgvsp : '--';
-                    }
-                }
-            });
-            // Set transcript object properties
-            transcript = {
-                "nucleotide": result.HGVS,
-                "exon": exon,
-                "protein": protein_hgvs,
-                "molecular": SO_id_term
-            };
         }
+        // Find RefSeq transcript (from VEP) whose nucleotide HGVS matches ClinVar's
+        // and map the Exon and Protein HGVS of the found RefSeq transcript to ClinVar
+        // Filter RefSeq transcripts by 'source' and 'hgvsc' flags
+        ensemblTranscripts.forEach(refseqTranscript => {
+            if (refseqTranscript.source === 'RefSeq') {
+                if (refseqTranscript.hgvsc && refseqTranscript.hgvsc === result.HGVS) {
+                    exon = refseqTranscript.exon ? refseqTranscript.exon : '--';
+                    protein_hgvs = refseqTranscript.hgvsp ? refseqTranscript.hgvsp : '--';
+                }
+            }
+        });
+        // Set transcript object properties
+        transcript = {
+            "nucleotide": result.HGVS,
+            "exon": exon,
+            "protein": protein_hgvs,
+            "molecular": SO_id_term
+        };
         this.setState({primary_transcript: transcript});
     },
 
@@ -332,7 +332,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             links_37 = externalLinks.setContextLinks(GRCh37, 'GRCh37');
         }
 
-
         return (
             <div className="variant-interpretation basic-info">
                 <div className="bs-callout bs-callout-info clearfix">
@@ -425,7 +424,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </tbody>
                         </table>
                         :
-                        <table className="table"><tbody><tr><td>No data was found for this allele in RefSeq. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</td></tr></tbody></table>
+                        <table className="table"><tbody><tr><td>No data was found for this allele in RefSeq. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank">Search RefSeq</a> for this variant.</td></tr></tbody></table>
                     }
                 </div>
 
