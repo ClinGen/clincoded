@@ -105,7 +105,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')} aria-selected={this.state.selectedTab == 'predictors'}>Predictors</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('functional')} aria-selected={this.state.selectedTab == 'functional'}>Functional</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')} aria-selected={this.state.selectedTab == 'segregation-case'}>Segregation/Case</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-specific')} aria-selected={this.state.selectedTab == 'gene-specific'}>Gene-specific</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-specific')} aria-selected={this.state.selectedTab == 'gene-specific'}>Gene-centric</li>
                     </ul>
 
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ? '' : ' hidden')}>
@@ -140,7 +140,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     </div>
                     <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == 'gene-specific' ? '' : ' hidden')}>
                         <CurationInterpretationGeneSpecific data={variant} protocol={this.props.href_url.protocol}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                            ext_clinvarEutils={this.state.ext_clinvarEutils}
+                            ext_myVariantInfo={this.state.ext_myVariantInfo}
+                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP} />
                     </div>
                 </div>
             </div>
