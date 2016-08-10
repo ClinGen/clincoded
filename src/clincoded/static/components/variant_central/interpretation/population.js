@@ -95,12 +95,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentDidMount: function() {
-        if (typeof this.props.interpretation !== undefined && !_.isEqual(this.props.interpretation, this.props.interpretation)) {
+        if (this.props.interpretation) {
             this.setState({interpretation: this.props.interpretation});
+            // set desired CI if previous data for it exists
+            this.getPrevSetDesiredCI(this.props.interpretation);
         }
-        // set desired CI if previous data for it exists
-        this.getPrevSetDesiredCI(this.props.interpretation);
-        // update data based on api call results
         if (this.props.ext_myVariantInfo) {
             this.parseExacData(this.props.ext_myVariantInfo);
             this.parseEspData(this.props.ext_myVariantInfo);

@@ -49,8 +49,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     componentDidMount: function() {
-        this.parseData(this.props.data);
-        // update data based on api call results
+        if (this.props.data) {
+            this.parseData(this.props.data);
+        }
         if (this.props.ext_ensemblHgvsVEP) {
             this.setState({
                 hasEnsemblData: true,

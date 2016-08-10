@@ -106,8 +106,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     },
 
     componentDidMount: function() {
-        this.setState({interpretation: this.props.interpretation});
-        // update data based on api call results
+        if (this.props.interpretation) {
+            this.setState({interpretation: this.props.interpretation});
+        }
         if (this.props.ext_myVariantInfo) {
             this.parseOtherPredData(this.props.ext_myVariantInfo);
             this.parseConservationData(this.props.ext_myVariantInfo);
