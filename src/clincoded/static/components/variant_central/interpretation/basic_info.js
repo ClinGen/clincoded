@@ -346,7 +346,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info datasource-clinvar-interpretaions">
                     <div className="panel-heading"><h3 className="panel-title">ClinVar Interpretations</h3></div>
-                    {(clinVarRCV) ?
+                    {(clinVarRCV.length > 0) ?
                         <table className="table">
                             <thead>
                                 <tr>
