@@ -21,8 +21,8 @@ var routes = {
 var portal = {
     portal_title: 'ClinGen',
     navUser: [
-        {id: 'loginout', title: 'Login'},
-        {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'}
+        {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
+        {id: 'loginout', title: 'Login'}
         //{id: 'account', title: 'Account', url: '/account/'},
     ]
 };
