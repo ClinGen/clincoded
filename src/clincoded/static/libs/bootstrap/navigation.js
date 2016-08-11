@@ -111,13 +111,13 @@ var NavItem = module.exports.NavItem = React.createClass({
         var title = this.props.title;
 
         return (
-            <li className={this.props.styles}>
-                {title !== 'space' ?
+            <li className={title === 'space' ? 'white-space' : 'link'}>
+                {title === 'space' ?
+                    <span>&nbsp;</span>
+                    :
                     <a {...this.props} href={url} className={iconClass}>
                         <span className={contentClass}>{this.props.children}</span>
                     </a>
-                    :
-                    <span>&nbsp;</span>
                 }
             </li>
         );

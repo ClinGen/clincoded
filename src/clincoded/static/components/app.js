@@ -21,16 +21,12 @@ var routes = {
 var portal = {
     portal_title: 'ClinGen',
     navUser: [
-        {id: 'variant', title: 'New Variant Curation', url: '/select-variant/'}, // link to VCI
-        {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'}, // link to GCI
-        {id: 'spance', title: 'space'},
+        {id: 'variant', title: 'New Variant Curation', url: '/select-variant/'}, // link to VCI page /select-variant/
+        {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'}, // link to GCI page /create-gene-disease/
+        {id: 'spance', title: 'space'}, // white space between
         {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
         {id: 'loginout', title: 'Login'}
         //{id: 'account', title: 'Account', url: '/account/'},
-    ],
-    navLinks: [
-        {id: 'variant', title: 'New Variant Curation', url: '/select-variant/'},
-        {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'}
     ]
 };
 
