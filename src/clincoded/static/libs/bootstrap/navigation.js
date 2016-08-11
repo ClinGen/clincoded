@@ -117,7 +117,7 @@ var NavItem = module.exports.NavItem = React.createClass({
                         <span className={contentClass}>{this.props.children}</span>
                     </a>
                     :
-                    <span>&nbsp;&nbsp;</span>
+                    <span>&nbsp;</span>
                 }
             </li>
         );

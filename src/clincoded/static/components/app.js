@@ -21,8 +21,8 @@ var routes = {
 var portal = {
     portal_title: 'ClinGen',
     navUser: [
-        {id: 'variant', title: 'New Variant Curation', url: '/select-variant/'},
-        {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'},
+        {id: 'variant', title: 'New Variant Curation', url: '/select-variant/'}, // link to VCI
+        {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'}, // link to GCI
         {id: 'spance', title: 'space'},
         {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
         {id: 'loginout', title: 'Login'}
