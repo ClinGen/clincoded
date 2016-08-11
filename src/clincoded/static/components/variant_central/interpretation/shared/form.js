@@ -364,7 +364,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     {this.props.renderedFormContent.call(this)}
                 </div>
                 <div className="curation-submit clearfix">
-                    <Input type="submit" inputClassName={(this.state.evaluationExists ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"} id="submit" title={this.state.evaluationExists ? "Edit" : "Save"}
+                    <Input type="submit" inputClassName={(this.state.evaluationExists ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"} id="submit" title={this.state.evaluationExists ? "Update" : "Save"}
                         submitBusy={this.state.submitBusy} inputDisabled={this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated} />
                     {this.state.updateMsg ?
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
