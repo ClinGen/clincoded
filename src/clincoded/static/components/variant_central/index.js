@@ -182,6 +182,47 @@ var VariantCurationHub = React.createClass({
         }
     },
 
+    // Method to fetch Gene-centric data from mygene.info
+    // and pass the data object to child component
+    handleGeneData: function(myVariantInfo, ensemblHgvsVEP) {
+        let geneSymbol, geneId, synonyms, geneObj;
+        if (myVariantInfo) {
+            if (myVariantInfo.clinvar) {
+                geneSymbol = myVariantInfo.clinvar.gene.symbol;
+                geneId = myVariantInfo.clinvar.gene.id;
+            } else if (myVariantInfo.dbsnp) {
+                geneSymbol = myVariantInfo.dbsnp.gene.symbol;
+                geneId = myVariantInfo.dbsnp.gene.geneid;
+            } else if (myVariantInfo.cadd) {
+                geneSymbol = myVariantInfo.cadd.gene.genename;
+                geneId = myVariantInfo.cadd.gene.gene_id;
+            }
+        } else if (ensemblHgvsVEP) {
+            let primaryTranscript = setPrimaryTranscript(ensemblHgvsVEP);
+            if (primaryTranscript) {
+                geneSymbol = primaryTranscript.gene_symbol;
+                geneId = primaryTranscript.gene_id;
+            }
+        }
+        if (geneSymbol) {
+            this.getRestData('/genes/' + geneSymbol).then(response => {
+                synonyms = response.synonyms;
+            }).catch(function(e) {
+                console.log('Local Gene Fetch ERROR=: %o', e);
+            });
+        }
+        if (geneId) {
+            let fields = 'fields=entrezgene,HGNC,MIM,homologene.id,interpro,name,pathway.kegg,pathway.netpath,pathway.pid,pdb,pfam,pharmgkb,prosite,uniprot.Swiss-Prot,summary,symbol';
+            this.getRestData(this.props.href_url.protocol + external_url_map['MyGeneInfo'] + geneId + '&species=human&' + fields).then(result => {
+                geneObj = result.hits[0];
+                geneObj.synonyms = synonyms;
+            }).catch(function(e) {
+                console.log('MyGeneInfo Fetch Error=: %o', e);
+            });
+        }
+        return geneObj;
+    },
+
     // Retrieve codon data from ClinVar Esearch given Eutils/ClinVar response
     handleCodonEsearch: function(response) {
         let aminoAcidLocation = response.allele.ProteinChange;
@@ -221,6 +262,7 @@ var VariantCurationHub = React.createClass({
                     href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
                 <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                     href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj}
+                    geneObj={this.handleGeneData(this.state.ext_myVariantInfo, this.state.ext_ensemblHgvsVEP)}
                     ext_myVariantInfo={this.state.ext_myVariantInfo}
                     ext_bustamante={this.state.ext_bustamante}
                     ext_ensemblVEP={this.state.ext_ensemblVEP}
