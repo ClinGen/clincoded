@@ -237,32 +237,30 @@ var NavbarUser = React.createClass({
         var session = this.props.session;
 
         return (
-            <div>
-                <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
-                    {this.props.portal.navUser.map(function(menu) {
-                        if (menu.url || menu.title === 'space') {
-                            // Normal menu item; disabled if user is not logged in
-                            if (session && session['auth.userid']) {
-                                return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title}>{menu.title}</NavItem>;
-                            }
-                        } else {
-                            // Trigger menu item; set <a> data attribute to login or logout
-                            var attrs = {};
-
-                            // Item with trigger; e.g. login/logout
-                            if (!(session && session['auth.userid'])) {
-                                // Logged out; render signin trigger
-                                attrs['data-trigger'] = 'login';
-                                return <NavItem {...attrs} key={menu.id}>{menu.title}</NavItem>;
-                            } else {
-                                var fullname = (session.user_properties && session.user_properties.title) || 'unknown';
-                                attrs['data-trigger'] = 'logout';
-                                return <NavItem {...attrs} key={menu.id}>{'Logout ' + fullname}</NavItem>;
-                            }
+            <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
+                {this.props.portal.navUser.map(function(menu) {
+                    if (menu.url || menu.title === 'space') {
+                        // Normal menu item; disabled if user is not logged in
+                        if (session && session['auth.userid']) {
+                            return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title}>{menu.title}</NavItem>;
                         }
-                    })}
-                </Nav>
-            </div>
+                    } else {
+                        // Trigger menu item; set <a> data attribute to login or logout
+                        var attrs = {};
+
+                        // Item with trigger; e.g. login/logout
+                        if (!(session && session['auth.userid'])) {
+                            // Logged out; render signin trigger
+                            attrs['data-trigger'] = 'login';
+                            return <NavItem {...attrs} key={menu.id}>{menu.title}</NavItem>;
+                        } else {
+                            var fullname = (session.user_properties && session.user_properties.title) || 'unknown';
+                            attrs['data-trigger'] = 'logout';
+                            return <NavItem {...attrs} key={menu.id}>{'Logout ' + fullname}</NavItem>;
+                        }
+                    }
+                })}
+            </Nav>
         );
     }
 });
