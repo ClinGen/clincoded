@@ -13,14 +13,24 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
         data: React.PropTypes.object,
         protocol: React.PropTypes.string,
         ext_clinvarEutils: React.PropTypes.object,
-        ext_myVariantInfo: React.PropTypes.object,
-        ext_ensemblHgvsVEP: React.PropTypes.array
+        geneObj: React.PropTypes.object
     },
 
     getInitialState: function() {
         return {
-            clinvar_id: null
+            clinvar_id: null,
+            geneObj: this.props.geneObj
         };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        // update data based on api call results
+        if (nextProps.ext_clinvarEutils) {
+            // do something
+        }
+        if (nextProps.geneObj) {
+            // do something
+        }
     },
 
     render: function() {
