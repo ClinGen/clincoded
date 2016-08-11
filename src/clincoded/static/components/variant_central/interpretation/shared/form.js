@@ -1,6 +1,7 @@
 'use strict';
 var React = require('react');
 var _ = require('underscore');
+var moment = require('moment');
 var form = require('../../../../libs/bootstrap/form');
 var RestMixin = require('../../../rest').RestMixin;
 var curator = require('../../../curator');
@@ -41,6 +42,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             interpretation: this.props.interpretation, // parent interpretation object
             diseaseCriteria: [], // array of criteria codes that are disease-dependent
             diseaseAssociated: false, // flag to define whether or not the interpretation has a disease associated with it
+            evaluationExists: false, // flag to define whether or not a previous evaluation for this group already exists
             checkboxes: {}, // store any checkbox values
             updateMsg: null // specifies what html to display next to button after press
         };
@@ -58,6 +60,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             if (this.props.formDataUpdater) {
                 this.props.formDataUpdater.call(this, this.props);
             }
+            this.interpretationEvalCheck();
         }
         // update the form when extra data is loaded
         if (this.props.evidenceData) {
@@ -77,7 +80,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // this block is for handling props and states when props (external data) is updated after the initial load/rendering
         // when props are updated, update the parent interpreatation object, if applicable
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
-            this.setState({interpretation: nextProps.interpretation});
+            this.setState({interpretation: nextProps.interpretation}, () => {
+                this.interpretationEvalCheck();
+            });
             // check to see if the interpretation has a disease associated with it
             if (nextProps.interpretation.interpretation_disease && nextProps.interpretation.interpretation_disease !== '') {
                 this.setState({diseaseAssociated: true});
@@ -86,6 +91,19 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         // when props are updated, update the form with new extra data, if applicable
         if (typeof nextProps.evidenceData !== undefined && nextProps.evidenceData != this.props.evidenceData) {
             this.setState({evidenceData: nextProps.evidenceData, evidenceDataUpdated: nextProps.evidenceDataUpdated});
+        }
+    },
+
+    // helper function to go through interpretation object and check for existing evaluation for
+    // rendering on form wrapper
+    interpretationEvalCheck: function() {
+        if (this.state.interpretation && this.state.interpretation.evaluations && this.state.interpretation.evaluations.length > 0) {
+            for (var i = 0; i < this.state.interpretation.evaluations.length; i++) {
+                if (this.props.criteria.indexOf(this.state.interpretation.evaluations[i].criteria) > -1) {
+                    this.setState({evaluationExists: true});
+                    break;
+                }
+            }
         }
     },
 
@@ -346,7 +364,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     {this.props.renderedFormContent.call(this)}
                 </div>
                 <div className="curation-submit clearfix">
-                    <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
+                    <Input type="submit" inputClassName={(this.state.evaluationExists ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"} id="submit" title={this.state.evaluationExists ? "Edit" : "Save"}
                         submitBusy={this.state.submitBusy} inputDisabled={this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated} />
                     {this.state.updateMsg ?
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
