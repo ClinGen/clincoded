@@ -6,6 +6,7 @@ var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+var CompleteSection = require('./shared/complete_section').CompleteSection;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
@@ -543,6 +544,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         return (
             <div className="variant-interpretation population">
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
                 <div className="bs-callout bs-callout-info clearfix">
                     <h4>Highest Minor Allele Frequency</h4>
                     <div className="clearfix">

@@ -85,6 +85,15 @@
                 "type": "string",
                 "linkTo": "provisional_variant"
             }
+        },
+        "completed_sections": {
+            "title": "Completed interpretation sections",
+            "description": "List of interpretation sections/tabs set as having been completed by the user",
+            "type": "array",
+            "items": {
+                "title": "TabName",
+                "type": "string"
+            }
         }
     },
     "columns": {
