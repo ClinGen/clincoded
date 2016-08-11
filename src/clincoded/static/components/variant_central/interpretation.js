@@ -20,6 +20,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
+        geneObj: React.PropTypes.object,
         href_url: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
@@ -35,6 +36,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     getInitialState: function() {
         return {
             interpretation: this.props.interpretation,
+            geneObj: this.props.geneObj,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
             ext_bustamante: this.props.ext_bustamante,
             ext_ensemblVEP: this.props.ext_ensemblVEP,
@@ -52,6 +54,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         // when props are updated, update the parent interpreatation object, if applicable
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
             this.setState({interpretation: nextProps.interpretation});
+        }
+        if (typeof nextProps.geneObj !== undefined && !_.isEqual(nextProps.geneObj, this.props.geneObj)) {
+            this.setState({geneObj: nextProps.geneObj});
         }
         if (nextProps.ext_myVariantInfo) {
             this.setState({ext_myVariantInfo: nextProps.ext_myVariantInfo});
@@ -142,8 +147,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <CurationInterpretationGeneSpecific data={variant} protocol={this.props.href_url.protocol}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
-                            ext_myVariantInfo={this.state.ext_myVariantInfo}
-                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP} />
+                            geneObj={this.state.geneObj} />
                     </div>
                 </div>
             </div>
