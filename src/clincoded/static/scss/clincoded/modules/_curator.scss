@@ -551,6 +551,15 @@
     input[type=checkbox] {
         margin-top: 11px;
     }
+
+    .section-complete-bar {
+        margin: 0 -15px 0 -15px;
+        padding-top: 3px;
+        padding-bottom: 9px;
+        border-left: 0;
+        border-right: 0;
+        border-radius: 0;
+    }
 }
 
 .palette-not-curated {

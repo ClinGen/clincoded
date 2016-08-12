@@ -73,10 +73,8 @@ var CompleteSection = module.exports.CompleteSection = React.createClass({
         console.log(this.props.interpretation['@id']);
         var checked = this.state.interpretation.completed_sections && this.state.interpretation.completed_sections.indexOf(this.props.tabName) > -1 ? true : false;
         return (
-            <div className="notice">
-                Set this section as complete
-                {this.state.submitBusy ? <i className="icon icon-spin icon-cog"></i> : null}
-                <input className="" type="checkbox" onChange={this.setCompleteSection} disabled={this.state.submitBusy} checked={checked} />
+            <div className="alert alert-warning section-complete-bar">
+                Set this evidence category as complete <input type="checkbox" onChange={this.setCompleteSection} disabled={this.state.submitBusy} checked={checked} /> {this.state.submitBusy ? <i className="icon icon-spin icon-cog"></i> : null}
             </div>
         );
     }
