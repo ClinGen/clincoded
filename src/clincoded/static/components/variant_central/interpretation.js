@@ -2,6 +2,10 @@
 var React = require('react');
 var _ = require('underscore');
 var globals = require('../globals');
+var form = require('../../libs/bootstrap/form');
+var Form = form.Form;
+var Input = form.Input;
+var FormMixin = form.FormMixin;
 
 var queryKeyValue = globals.queryKeyValue;
 var editQueryValue = globals.editQueryValue;
@@ -14,6 +18,10 @@ var CurationInterpretationComputational = require('./interpretation/computationa
 var CurationInterpretationFunctional = require('./interpretation/functional').CurationInterpretationFunctional;
 var CurationInterpretationSegregation = require('./interpretation/segregation').CurationInterpretationSegregation;
 var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific').CurationInterpretationGeneSpecific;
+
+// Import pathogenicity calculator
+var calculator = require('./interpretation/shared/calculator');
+var PathogenicityCalculator = calculator.PathogenicityCalculator;
 
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
@@ -97,7 +105,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
         return (
             <div className="container curation-variant-tab-group">
-                <CurationInterpretationCriteria interpretation={interpretation} />
+                <PathogenicityCalculator interpretation={interpretation} />
+                <br /><br />
                 <div className="vci-tabs">
                     <ul className="vci-tabs-header tab-label-list" role="tablist">
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
@@ -157,5 +166,5 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                 </div>
             </div>
         );
-    }
+    },
 });
