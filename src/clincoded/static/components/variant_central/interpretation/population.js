@@ -598,7 +598,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     {this.state.hasExacData ?
                         <div className="panel panel-info datasource-ExAC">
                             <div className="panel-heading">
-                                <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}
+                                <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}<a href="#credit-mvi" className="label label-primary">MVi</a>
                                     <a className="panel-subtitle pull-right" href={'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
                                 </h3>
                             </div>
@@ -624,7 +624,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     :
                         <div className="panel panel-info datasource-ExAC">
-                            <div className="panel-heading"><h3 className="panel-title">ExAC</h3></div>
+                            <div className="panel-heading"><h3 className="panel-title">ExAC<a href="#credit-mvi" className="label label-primary">MVi</a></h3></div>
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -637,7 +637,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     {this.state.hasTGenomesData ?
                         <div className="panel panel-info datasource-1000G">
                             <div className="panel-heading">
-                                <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}
+                                <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}<a href="#credit-vep" className="label label-primary">VEP</a>
                                     <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
                                 </h3>
                             </div>
@@ -659,7 +659,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     :
                         <div className="panel panel-info datasource-1000G">
-                            <div className="panel-heading"><h3 className="panel-title">1000 Genomes</h3></div>
+                            <div className="panel-heading"><h3 className="panel-title">1000 Genomes<a href="#credit-vep" className="label label-primary">VEP</a></h3></div>
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -672,7 +672,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     {this.state.hasEspData ?
                         <div className="panel panel-info datasource-ESP">
                             <div className="panel-heading">
-                                <h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}
+                                <h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}<a href="#credit-mvi" className="label label-primary">MVi</a>
                                     <a className="panel-subtitle pull-right" href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
                                 </h3>
                             </div>
@@ -699,7 +699,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     :
                         <div className="panel panel-info datasource-ESP">
-                            <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP)</h3></div>
+                            <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP)<a href="#credit-mvi" className="label label-primary">MVi</a></h3></div>
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -710,6 +710,26 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     }
                 </Panel></PanelGroup>
+
+                <div className="credits">
+                    <div className="credit credit-mvi" id="credit-mvi"><a name="credit-mvi"></a>
+                    <span className="label label-primary">MVi</span> - The data in this table were retrieved using:
+                        MyVariant.info (<a href="http://myvariant.info" target="_blank">http://myvariant.info</a>)
+                        Xin J, Mark A, Afrasiabi C, Tsueng G, Juchler M, Gopal N, Stupp GS, Putman TE, Ainscough BJ,
+                        Griffith OL, Torkamani A, Whetzel PL, Mungall CJ, Mooney SD, Su AI, Wu C (2016)
+                        High-performance web services for querying gene and variant annotation. Genome Biology 17(1):1-7
+                    </div>
+                </div>
+
+                <div className="credits">
+                    <div className="credit credit-vep" id="credit-vep"><a name="credit-vep"></a>
+                    <span className="label label-primary">VEP</span> - The data in this table were retrieved using:
+                    The Ensembl Variant Effect Predictor (<a href="http://www.ensembl.org/Homo_sapiens/Tools/VEP" target="_blank">www.ensembl.org/Homo_sapiens/Tools/VEP</a>)
+                    McLaren W, Gil L, Hunt SE, Riat HS, Ritchie GR, Thormann A, Flicek P, Cunningham F.
+                    Genome Biol. 2016 Jun 6;17(1):122. doi: 10.1186/s13059-016-0974-4. PMID: 27268795
+                    </div>
+                </div>
+
             </div>
         );
     }
