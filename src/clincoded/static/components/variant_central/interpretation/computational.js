@@ -415,7 +415,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
                         {this.state.hasOtherPredData ?
                             <div className="panel panel-info datasource-other">
-                                <div className="panel-heading"><h3 className="panel-title">Other Predictors</h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Other Predictors<a href="#credit-mvi" className="label label-primary">MVi</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -434,7 +434,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         :
                             <div className="panel panel-info datasource-other">
-                                <div className="panel-heading"><h3 className="panel-title">Other Predictors</h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Other Predictors<a href="#credit-mvi" className="label label-primary">MVi</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -447,7 +447,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
                         {this.state.hasConservationData ?
                             <div className="panel panel-info datasource-conservation">
-                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis</h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis<a href="#credit-mvi" className="label label-primary">MVi</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -464,7 +464,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         :
                             <div className="panel panel-info datasource-conservation">
-                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis</h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis<a href="#credit-mvi" className="label label-primary">MVi</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -686,6 +686,16 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         </div>
                         : null}
                     </Panel></PanelGroup>
+                </div>
+
+                <div className="credits">
+                    <div className="credit credit-mvi" id="credit-mvi"><a name="credit-mvi"></a>
+                    <span className="label label-primary">MVi</span> - The data in this table were retrieved using:
+                        MyVariant.info (<a href="http://myvariant.info" target="_blank">http://myvariant.info</a>)
+                        Xin J, Mark A, Afrasiabi C, Tsueng G, Juchler M, Gopal N, Stupp GS, Putman TE, Ainscough BJ,
+                        Griffith OL, Torkamani A, Whetzel PL, Mungall CJ, Mooney SD, Su AI, Wu C (2016)
+                        High-performance web services for querying gene and variant annotation. Genome Biology 17(1):1-7
+                    </div>
                 </div>
 
             </div>
