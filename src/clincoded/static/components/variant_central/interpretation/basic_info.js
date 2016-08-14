@@ -418,7 +418,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">RefSeq Transcripts
+                        <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="label label-primary">VEP</a>
                             <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                         </h3>
                     </div>
@@ -445,7 +445,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">Ensembl Transcripts
+                        <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="label label-primary">VEP</a>
                             <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                         </h3>
                     </div>
@@ -505,6 +505,12 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                 null
                             }
                         </dl>
+                    </div>
+                </div>
+
+                <div className="credits">
+                    <div className="credit credit-vep" id="credit-vep"><a name="credit-vep"></a>
+                    <span className="label label-primary">VEP</span> - The data in this table were retrieved using: The Ensembl Variant Effect Predictor (<a href="http://www.ensembl.org/Homo_sapiens/Tools/VEP" target="_blank">www.ensembl.org/Homo_sapiens/Tools/VEP</a>) McLaren W, Gil L, Hunt SE, Riat HS, Ritchie GR, Thormann A, Flicek P, Cunningham F. Genome Biol. 2016 Jun 6;17(1):122. doi: 10.1186/s13059-016-0974-4. PMID: 27268795
                     </div>
                 </div>
 
