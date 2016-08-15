@@ -17,6 +17,8 @@ import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
 import { getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
 
+var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
+
 // Variant Curation Hub
 var VariantCurationHub = React.createClass({
     mixins: [RestMixin],
@@ -217,6 +219,7 @@ var VariantCurationHub = React.createClass({
         return (
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} interpretation={interpretation} />
+                <CurationInterpretationCriteria interpretation={interpretation} />
                 <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                     href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
                 <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}

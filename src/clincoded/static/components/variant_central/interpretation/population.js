@@ -95,7 +95,25 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentDidMount: function() {
-        this.getPrevSetDesiredCI(this.props.interpretation);
+        if (this.props.interpretation) {
+            this.setState({interpretation: this.props.interpretation});
+            // set desired CI if previous data for it exists
+            this.getPrevSetDesiredCI(this.props.interpretation);
+        }
+        if (this.props.ext_myVariantInfo) {
+            this.parseExacData(this.props.ext_myVariantInfo);
+            this.parseEspData(this.props.ext_myVariantInfo);
+            this.calculateHighestMAF();
+        }
+        if (this.props.ext_ensemblVEP) {
+            this.parseAlleleFrequencyData(this.props.ext_ensemblVEP);
+            this.parseGeneConstraintScores(this.props.ext_ensemblVEP);
+            this.calculateHighestMAF();
+        }
+        if (this.props.ext_ensemblVariation) {
+            this.parseTGenomesData(this.props.ext_ensemblVariation);
+            this.calculateHighestMAF();
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -361,8 +379,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         });
         // embed highest MAF and related data into population obj, and update to state
         populationObj.highestMAF = highestMAFObj;
-        this.setState({populationObj: populationObj});
-        this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
+        this.setState({populationObj: populationObj}, () => {
+            this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
+        });
     },
 
     // Method to render external ExAC linkout when no ExAC population data found
@@ -752,10 +771,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     }
 });
 
-// code for rendering of population tab interpretation forms
+
+// code for rendering of this group of interpretation forms
 var criteriaGroup1 = function() {
-    let criteriaList = ['BA1', 'PM2', 'BS1'], // array of criteria code handled in this section
-        hiddenList = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let criteriaList1 = ['BA1', 'PM2', 'BS1'], // array of criteria code handled subgroup of this section
+        hiddenList1 = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
     let mafCutoffInput = (
         <span>
             <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
@@ -768,16 +788,15 @@ var criteriaGroup1 = function() {
     return (
         <div>
             {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList, hiddenList, mafCutoffInput, null),
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, mafCutoffInput, null),
                 false
             )}
         </div>
     );
 };
-
-// code for updating the form values of population tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaGroup1Update = function(nextProps) {
     // define custom form update function for MAF Cutoff field in BA1
@@ -790,7 +809,6 @@ var criteriaGroup1Update = function(nextProps) {
     };
     vciFormHelper.updateEvalForm.call(this, nextProps, ['BA1', 'PM2', 'BS1'], customActions);
 };
-
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
     // Both explanation boxes for both criteria of each group must be the same
@@ -802,7 +820,6 @@ var criteriaGroup1Change = function(ref, e) {
         this.setState({evidenceData: tempEvidenceData});
     }
 };
-
 // special function to handle the MAF cutoff % field
 var mafCutoffBlur = function(event) {
     let mafCutoff = parseInt(this.refs['maf-cutoff'].getValue());

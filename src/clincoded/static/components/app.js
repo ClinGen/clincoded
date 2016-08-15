@@ -21,9 +21,12 @@ var routes = {
 var portal = {
     portal_title: 'ClinGen',
     navUser: [
+        {id: 'variant', title: 'New Variant Curation', url: '/select-variant/'}, // link to VCI page /select-variant/
+        {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'}, // link to GCI page /create-gene-disease/
+        {id: 'space', title: 'space'}, // white space between
         {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
-        //{id: 'account', title: 'Account', url: '/account/'},
         {id: 'loginout', title: 'Login'}
+        //{id: 'account', title: 'Account', url: '/account/'},
     ]
 };
 
@@ -236,7 +239,7 @@ var NavbarUser = React.createClass({
         return (
             <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
                 {this.props.portal.navUser.map(function(menu) {
-                    if (menu.url) {
+                    if (menu.url || menu.title === 'space') {
                         // Normal menu item; disabled if user is not logged in
                         if (session && session['auth.userid']) {
                             return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title}>{menu.title}</NavItem>;
