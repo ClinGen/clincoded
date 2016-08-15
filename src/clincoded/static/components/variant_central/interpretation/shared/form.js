@@ -291,7 +291,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 };
 
                 // set criterion status and modifiers
-                if (['supporting', 'moderate', 'strong', 'very-strong'].indexOf(this.refs[criterion + '-status'].getValue()) > -1) {
+                if (['supporting', 'moderate', 'strong', 'very-strong', 'stand-alone'].indexOf(this.refs[criterion + '-status'].getValue()) > -1) {
                     // if dropdown selection is a modifier to met, set status to met, and set modifier as needed...
                     evaluations[criterion]['criteriaStatus'] = 'met';
                     evaluations[criterion]['criteriaModifier'] = this.refs[criterion + '-status'].getValue();
