@@ -5,6 +5,7 @@ var RestMixin = require('../../rest').RestMixin;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+var CompleteSection = require('./shared/complete_section').CompleteSection;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
 
@@ -391,6 +392,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </ul>
                 {this.state.selectedTab == '' || this.state.selectedTab == 'missense' ?
                 <div role="tabpanel" className="tab-panel">
+                    {this.state.interpretation ?
+                        <CompleteSection interpretation={this.state.interpretation} tabName="predictors-missense" updateInterpretationObj={this.props.updateInterpretationObj} />
+                    : null}
                     <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                         <div className="row">
@@ -638,6 +642,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 : null}
                 {this.state.selectedTab == 'lof' ?
                 <div role="tabpanel" className="tab-panel">
+                    {this.state.interpretation ?
+                        <CompleteSection interpretation={this.state.interpretation} tabName="predictors-lof" updateInterpretationObj={this.props.updateInterpretationObj} />
+                    : null}
                     <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                         <div className="row">
@@ -672,6 +679,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 : null}
                 {this.state.selectedTab == 'silent-intron' ?
                 <div role="tabpanel" className="tab-panel">
+                    {this.state.interpretation ?
+                        <CompleteSection interpretation={this.state.interpretation} tabName="predictors-silent-intron" updateInterpretationObj={this.props.updateInterpretationObj} />
+                    : null}
                     <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                             <div className="row">
@@ -688,6 +698,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 : null}
                 {this.state.selectedTab == 'indel' ?
                 <div role="tabpanel" className="tab-panel">
+                    {this.state.interpretation ?
+                        <CompleteSection interpretation={this.state.interpretation} tabName="predictors-indel" updateInterpretationObj={this.props.updateInterpretationObj} />
+                    : null}
                     <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
                         <div className="panel panel-info">
                             <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>

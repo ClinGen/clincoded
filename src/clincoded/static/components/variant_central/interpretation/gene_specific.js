@@ -4,6 +4,7 @@ var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
+var CompleteSection = require('./shared/complete_section').CompleteSection;
 
 // Display the curator data of the curation data
 var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGeneSpecific = React.createClass({
@@ -25,6 +26,9 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
     render: function() {
         return (
             <div className="variant-interpretation gene-specific">
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="gene-specific" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
                 <ul className="section-gene-specific-interpretation clearfix">
                     <li className="col-xs-12 gutter-exc">
                         <div>

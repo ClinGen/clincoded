@@ -70,7 +70,6 @@ var CompleteSection = module.exports.CompleteSection = React.createClass({
     },
 
     render: function() {
-        console.log(this.props.interpretation['@id']);
         var checked = this.state.interpretation.completed_sections && this.state.interpretation.completed_sections.indexOf(this.props.tabName) > -1 ? true : false;
         return (
             <div className="alert alert-warning section-complete-bar">
