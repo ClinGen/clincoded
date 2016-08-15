@@ -150,8 +150,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             this.setState({codonObj: codonObj});
         }
 
-        if (this.state.interpretation && this.state.interpretation.evaluations) {
-            this.compareExternalDatas(this.state.computationObj, this.state.interpretation.evaluations);
+        if (nextProps.interpretation && nextProps.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.computationObj, nextProps.interpretation.evaluations);
         }
     },
 

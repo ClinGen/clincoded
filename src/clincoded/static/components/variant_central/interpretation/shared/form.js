@@ -258,10 +258,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
             // figure out if we need to create a new evidence data object or not
             if (this.state.evidenceData) {
-                console.log('has evidence data');
-                console.log(this.state.evidenceDataUpdated);
                 if (this.state.evidenceDataUpdated || (!this.state.evidenceDataUpdated && !evidenceObjectId)) {
-                    console.log(evidenceObjectId);
                     // only create/update if evidence object has been updated, or if the object data has not been updated
                     // and there is no previous evidence object (new interpretation)
                     let evidenceObject = {variant: this.props.variantUuid};

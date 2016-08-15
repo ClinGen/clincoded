@@ -147,8 +147,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.calculateHighestMAF();
         }
 
-        if (this.state.interpretation && this.state.interpretation.evaluations) {
-            this.compareExternalDatas(this.state.populationObj, this.state.interpretation.evaluations);
+        if (nextProps.interpretation && nextProps.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.populationObj, nextProps.interpretation.evaluations);
         }
     },
 
