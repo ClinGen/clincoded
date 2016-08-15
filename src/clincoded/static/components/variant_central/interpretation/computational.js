@@ -18,6 +18,8 @@ var form = require('../../../libs/bootstrap/form');
 
 var externalLinks = require('./shared/externalLinks');
 
+import { renderDataCredit } from './shared/credit';
+
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
 var Form = form.Form;
@@ -688,15 +690,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     </Panel></PanelGroup>
                 </div>
 
-                <div className="credits">
-                    <div className="credit credit-mvi" id="credit-mvi"><a name="credit-mvi"></a>
-                    <span className="label label-primary">MVi</span> - The data in this table were retrieved using:
-                        MyVariant.info (<a href="http://myvariant.info" target="_blank">http://myvariant.info</a>)
-                        Xin J, Mark A, Afrasiabi C, Tsueng G, Juchler M, Gopal N, Stupp GS, Putman TE, Ainscough BJ,
-                        Griffith OL, Torkamani A, Whetzel PL, Mungall CJ, Mooney SD, Su AI, Wu C (2016)
-                        High-performance web services for querying gene and variant annotation. Genome Biology 17(1):1-7
-                    </div>
-                </div>
+                {renderDataCredit('mvi')}
 
             </div>
         );
