@@ -17,6 +17,8 @@ var queryKeyValue = globals.queryKeyValue;
 var panel = require('../../../libs/bootstrap/panel');
 var form = require('../../../libs/bootstrap/form');
 
+import { renderDataCredit } from './shared/credit';
+
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
 var Form = form.Form;
@@ -711,24 +713,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     }
                 </Panel></PanelGroup>
 
-                <div className="credits">
-                    <div className="credit credit-mvi" id="credit-mvi"><a name="credit-mvi"></a>
-                    <span className="label label-primary">MVi</span> - The data in this table were retrieved using:
-                        MyVariant.info (<a href="http://myvariant.info" target="_blank">http://myvariant.info</a>)
-                        Xin J, Mark A, Afrasiabi C, Tsueng G, Juchler M, Gopal N, Stupp GS, Putman TE, Ainscough BJ,
-                        Griffith OL, Torkamani A, Whetzel PL, Mungall CJ, Mooney SD, Su AI, Wu C (2016)
-                        High-performance web services for querying gene and variant annotation. Genome Biology 17(1):1-7
-                    </div>
-                </div>
+                {renderDataCredit('mvi')}
 
-                <div className="credits">
-                    <div className="credit credit-vep" id="credit-vep"><a name="credit-vep"></a>
-                    <span className="label label-primary">VEP</span> - The data in this table were retrieved using:
-                    The Ensembl Variant Effect Predictor (<a href="http://www.ensembl.org/Homo_sapiens/Tools/VEP" target="_blank">www.ensembl.org/Homo_sapiens/Tools/VEP</a>)
-                    McLaren W, Gil L, Hunt SE, Riat HS, Ritchie GR, Thormann A, Flicek P, Cunningham F.
-                    Genome Biol. 2016 Jun 6;17(1):122. doi: 10.1186/s13059-016-0974-4. PMID: 27268795
-                    </div>
-                </div>
+                {renderDataCredit('vep')}
 
             </div>
         );
