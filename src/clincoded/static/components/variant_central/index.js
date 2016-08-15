@@ -15,6 +15,9 @@ var queryKeyValue = globals.queryKeyValue;
 var parseClinvar = require('../../libs/parse-resources').parseClinvar;
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
+import { getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
+
+var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
 
 // Variant Curation Hub
 var VariantCurationHub = React.createClass({
@@ -34,7 +37,8 @@ var VariantCurationHub = React.createClass({
             ext_ensemblVariation: null,
             ext_ensemblHgvsVEP: null,
             ext_clinvarEutils: null,
-            ext_clinVarEsearch: null
+            ext_clinVarEsearch: null,
+            ext_clinVarRCV: null
         };
     },
 
@@ -76,6 +80,23 @@ var VariantCurationHub = React.createClass({
                     var variantData = parseClinvar(xml, true);
                     this.setState({ext_clinvarEutils: variantData});
                     this.handleCodonEsearch(variantData);
+                    let clinVarRCVs = getClinvarRCVs(xml);
+                    return Promise.resolve(clinVarRCVs);
+                }).then(RCVs => {
+                    // If RCVs is not an empty array,
+                    // parse associated disease and clinical significance for each id
+                    if (RCVs.length) {
+                        let clinvarInterpretations = [];
+                        for (let RCV of RCVs.values()) {
+                            this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV).then(result => {
+                                let clinvarInterpretation = parseClinvarInterpretation(RCV, result);
+                                clinvarInterpretations.push(clinvarInterpretation);
+                                this.setState({ext_clinVarRCV: clinvarInterpretations});
+                            }).catch(function(e) {
+                                console.log('ClinVarEfetch for RCV Error=: %o', e);
+                            });
+                        }
+                    }
                 }).catch(function(e) {
                     console.log('ClinVarEutils Fetch Error=: %o', e);
                 });
@@ -198,6 +219,7 @@ var VariantCurationHub = React.createClass({
         return (
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} interpretation={interpretation} />
+                <CurationInterpretationCriteria interpretation={interpretation} />
                 <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                     href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
                 <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
@@ -208,7 +230,8 @@ var VariantCurationHub = React.createClass({
                     ext_ensemblVariation={this.state.ext_ensemblVariation}
                     ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                     ext_clinvarEutils={this.state.ext_clinvarEutils}
-                    ext_clinVarEsearch={this.state.ext_clinVarEsearch} />
+                    ext_clinVarEsearch={this.state.ext_clinVarEsearch}
+                    ext_clinVarRCV={this.state.ext_clinVarRCV} />
             </div>
         );
     }

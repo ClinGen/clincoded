@@ -27,7 +27,7 @@ var InputMixin = form.InputMixin;
 
 var populationStatic = {
     exac: {
-        _order: ['afr', 'oth', 'amr', 'sas', 'nfe', 'eas', 'fin'],
+        _order: ['afr', 'amr', 'sas', 'nfe', 'eas', 'fin', 'oth'],
         _labels: {afr: 'African', amr: 'Latino', eas: 'East Asian', fin: 'European (Finnish)', nfe: 'European (Non-Finnish)', oth: 'Other', sas: 'South Asian'}
     },
     tGenomes: {
@@ -98,7 +98,25 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentDidMount: function() {
-        this.getPrevSetDesiredCI(this.props.interpretation);
+        if (this.props.interpretation) {
+            this.setState({interpretation: this.props.interpretation});
+            // set desired CI if previous data for it exists
+            this.getPrevSetDesiredCI(this.props.interpretation);
+        }
+        if (this.props.ext_myVariantInfo) {
+            this.parseExacData(this.props.ext_myVariantInfo);
+            this.parseEspData(this.props.ext_myVariantInfo);
+            this.calculateHighestMAF();
+        }
+        if (this.props.ext_ensemblVEP) {
+            this.parseAlleleFrequencyData(this.props.ext_ensemblVEP);
+            this.parseGeneConstraintScores(this.props.ext_ensemblVEP);
+            this.calculateHighestMAF();
+        }
+        if (this.props.ext_ensemblVariation) {
+            this.parseTGenomesData(this.props.ext_ensemblVariation);
+            this.calculateHighestMAF();
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -165,9 +183,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseAlleleFrequencyData: function(response) {
         let populationObj = this.state.populationObj;
         populationStatic.exac._order.map(key => {
-            populationObj.exac[key].af = parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
+            populationObj.exac[key].af = typeof populationObj.exac[key].af !== 'undefined' ? populationObj.exac[key].af : parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
         });
-        populationObj.exac._tot.af = parseFloat(response[0].colocated_variants[0].exac_adj_maf);
+        populationObj.exac._tot.af = typeof populationObj.exac._tot.af !== 'undefined' ? populationObj.exac._tot.af : parseFloat(response[0].colocated_variants[0].exac_adj_maf);
 
         this.setState({populationObj: populationObj});
     },
@@ -191,11 +209,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 populationObj.exac[key].ac = parseInt(response.exac.ac['ac_' + key]);
                 populationObj.exac[key].an = parseInt(response.exac.an['an_' + key]);
                 populationObj.exac[key].hom = parseInt(response.exac.hom['hom_' + key]);
+                populationObj.exac[key].af = populationObj.exac[key].ac / populationObj.exac[key].an;
             });
             // get the allele count, allele number, and homozygote count totals
             populationObj.exac._tot.ac = parseInt(response.exac.ac.ac_adj);
             populationObj.exac._tot.an = parseInt(response.exac.an.an_adj);
             populationObj.exac._tot.hom = parseInt(response.exac.hom.ac_hom);
+            populationObj.exac._tot.af = populationObj.exac._tot.ac / populationObj.exac._tot.an;
             // get extra ExAC information
             populationObj.exac._extra.chrom = response.exac.chrom + ''; // ensure that the chromosome is stored as a String
             populationObj.exac._extra.pos = parseInt(response.exac.pos);
@@ -233,7 +253,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     // extract 20 characters and forward to get population code (not always relevant)
                     let populationCode = population.population.substring(20).toLowerCase();
                     if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
-                        populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                        populationStatic.tGenomes._order.indexOf(populationCode) > -1) {
                         // ... for specific populations =
                         populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes[populationCode].af[population.allele] = parseFloat(population.frequency);
@@ -262,7 +282,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     // extract 20 characters and forward to get population code (not always relevant)
                     let populationCode = population_genotype.population.substring(20).toLowerCase();
                     if (population_genotype.population.indexOf('1000GENOMES:phase_3:') == 0 &&
-                        populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                        populationStatic.tGenomes._order.indexOf(populationCode) > -1) {
                         // ... for specific populations
                         populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
@@ -376,8 +396,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         });
         // embed highest MAF and related data into population obj, and update to state
         populationObj.highestMAF = highestMAFObj;
-        this.setState({populationObj: populationObj});
-        this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
+        this.setState({populationObj: populationObj}, () => {
+            this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
+        });
     },
 
     /* the following methods are related to the rendering of population data tables */
@@ -390,9 +411,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{exac[key].ac ? exac[key].ac : '--'}</td>
-                <td>{exac[key].an ? exac[key].an : '--'}</td>
-                <td>{exac[key].hom ? exac[key].hom : '--'}</td>
+                <td>{exac[key].ac || exac[key].ac === 0 ? exac[key].ac : '--'}</td>
+                <td>{exac[key].an || exac[key].an === 0 ? exac[key].an : '--'}</td>
+                <td>{exac[key].hom || exac[key].hom === 0 ? exac[key].hom : '--'}</td>
                 <td>{exac[key].af || exac[key].af === 0 ? this.parseFloatShort(exac[key].af) : '--'}</td>
             </tr>
         );
@@ -435,11 +456,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{esp[key].ac[esp._extra.ref] ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
-                <td>{esp[key].ac[esp._extra.alt] ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
-                <td>{esp[key].gc[g_ref] ? g_ref + ': ' + esp[key].gc[g_ref] : '--'}</td>
-                <td>{esp[key].gc[g_alt] ? g_alt + ': ' + esp[key].gc[g_alt] : '--'}</td>
-                <td>{esp[key].gc[g_mixed] ? g_mixed + ': ' + esp[key].gc[g_mixed] : '--'}</td>
+                <td>{esp[key].ac[esp._extra.ref] || esp[key].ac[esp._extra.ref] === 0 ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
+                <td>{esp[key].ac[esp._extra.alt] || esp[key].ac[esp._extra.alt] === 0 ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
+                <td>{esp[key].gc[g_ref] || esp[key].gc[g_ref] ? g_ref + ': ' + esp[key].gc[g_ref] : '--'}</td>
+                <td>{esp[key].gc[g_alt] || esp[key].gc[g_alt] ? g_alt + ': ' + esp[key].gc[g_alt] : '--'}</td>
+                <td>{esp[key].gc[g_mixed] || esp[key].gc[g_mixed] ? g_mixed + ': ' + esp[key].gc[g_mixed] : '--'}</td>
             </tr>
         );
     },
@@ -739,10 +760,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     }
 });
 
-// code for rendering of population tab interpretation forms
+
+// code for rendering of this group of interpretation forms
 var criteriaGroup1 = function() {
-    let criteriaList = ['BA1', 'PM2', 'BS1'], // array of criteria code handled in this section
-        hiddenList = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let criteriaList1 = ['BA1', 'PM2', 'BS1'], // array of criteria code handled subgroup of this section
+        hiddenList1 = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
     let mafCutoffInput = (
         <span>
             <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
@@ -755,16 +777,15 @@ var criteriaGroup1 = function() {
     return (
         <div>
             {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList, hiddenList, mafCutoffInput, null),
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, mafCutoffInput, null),
                 false
             )}
         </div>
     );
 };
-
-// code for updating the form values of population tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaGroup1Update = function(nextProps) {
     // define custom form update function for MAF Cutoff field in BA1
@@ -777,7 +798,6 @@ var criteriaGroup1Update = function(nextProps) {
     };
     vciFormHelper.updateEvalForm.call(this, nextProps, ['BA1', 'PM2', 'BS1'], customActions);
 };
-
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
     // Both explanation boxes for both criteria of each group must be the same
@@ -789,7 +809,6 @@ var criteriaGroup1Change = function(ref, e) {
         this.setState({evidenceData: tempEvidenceData});
     }
 };
-
 // special function to handle the MAF cutoff % field
 var mafCutoffBlur = function(event) {
     let mafCutoff = parseInt(this.refs['maf-cutoff'].getValue());
