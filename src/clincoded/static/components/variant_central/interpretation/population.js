@@ -6,7 +6,7 @@ var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
-var findDiffKeyValuesMixin = require('./shared/findDiff').findDiffKeyValuesMixin;
+var findDiffKeyValuesMixin = require('./shared/find_diff').findDiffKeyValuesMixin;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
@@ -117,6 +117,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.parseTGenomesData(this.props.ext_ensemblVariation);
             this.calculateHighestMAF();
         }
+
+        if (this.state.interpretation && this.state.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.populationObj, this.state.interpretation.evaluations);
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -168,6 +172,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
+    // function to compare current external data with external data saved with a previous interpretation
     compareExternalDatas: function(newData, savedEvals) {
         for (var i in savedEvals) {
             if (['BA1', 'PM2', 'BS1'].indexOf(savedEvals[i].criteria) > -1) {
