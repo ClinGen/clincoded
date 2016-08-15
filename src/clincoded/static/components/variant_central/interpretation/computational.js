@@ -167,7 +167,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     compareExternalDatas: function(newData, savedEvals) {
         for (var i in savedEvals) {
             if (['PP3', 'BP4', 'BP1', 'PP2'].indexOf(savedEvals[i].criteria) > -1) {
-                var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].population.computationObj);
+                var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].computational.computationalData);
                 this.setState({computationObjDiff: tempCompare[0], computationObjDiffFlag: tempCompare[1]});
                 break;
             }
@@ -386,6 +386,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         var otherPred = (this.state.computationObj && this.state.computationObj.other_predictors) ? this.state.computationObj.other_predictors : null;
         var clingenPred = (this.state.computationObj && this.state.computationObj.clingen) ? this.state.computationObj.clingen : null;
         var codon = (this.state.codonObj) ? this.state.codonObj : null;
+        var computationObjDiffFlag = this.state.computationObjDiffFlag;
 
         var variant = this.props.data;
         var gRCh38 = null;
@@ -418,12 +419,19 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaMissense1}
-                                    evidenceData={this.state.computationObj} evidenceDataUpdated={true} formChangeHandler={criteriaMissense1Change}
+                                    evidenceData={this.state.computationObj} evidenceDataUpdated={computationObjDiffFlag} formChangeHandler={criteriaMissense1Change}
                                     formDataUpdater={criteriaMissense1Update} variantUuid={this.props.data['@id']}
                                     criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
+                        : null}
+                        {computationObjDiffFlag ?
+                            <div className="row">
+                                <p className="alert alert-warning">
+                                    <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
+                                </p>
+                            </div>
                         : null}
                         {clingenPred ?
                             <div className="panel panel-info datasource-clingen">
