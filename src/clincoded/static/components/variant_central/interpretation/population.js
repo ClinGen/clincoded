@@ -584,7 +584,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                     <span>
                                         <dt className="dtFormLabel">Desired CI:</dt>
                                         <dd className="ddFormInput">
-                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI}
+                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI} inputDisabled={true}
                                                 onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT.toString()} />
                                         </dd>
                                         <dt>CI - lower: </dt><dd>{this.state.CILow || this.state.CILow === 0 ? this.parseFloatShort(this.state.CILow) : ''}</dd>
