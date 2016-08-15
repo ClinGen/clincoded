@@ -11,7 +11,7 @@
         "definition": "MAF is too high for disorder",
         "definitionLong": "Allele frequency greater than expected due to disorder",
         "category": "population",
-        "diseaseDependent": false
+        "diseaseDependent": true
     },
     "BS2": {
         "class": "benign-strong",
