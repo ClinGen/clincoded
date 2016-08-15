@@ -50,6 +50,24 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         };
     },
 
+    componentDidMount: function() {
+        if (this.props.data) {
+            this.parseData(this.props.data);
+        }
+        if (this.props.ext_ensemblHgvsVEP) {
+            this.setState({
+                hasEnsemblData: true,
+                ensembl_transcripts: this.props.ext_ensemblHgvsVEP[0].transcript_consequences
+            });
+        }
+        if (this.props.ext_clinvarEutils) {
+            this.parseClinVarEutils(this.props.ext_clinvarEutils);
+        }
+        if (this.props.ext_clinVarRCV) {
+            this.setState({clinVarRCV: this.props.ext_clinVarRCV});
+        }
+    },
+
     componentWillReceiveProps: function(nextProps) {
         if (nextProps.data && this.props.data) {
             this.parseData(nextProps.data);

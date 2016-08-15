@@ -1009,6 +1009,7 @@
         clear: both;
     }
     .divider {
+        margin-bottom: 20px;
         border-bottom: 1px solid #ddd;
     }
 }
@@ -1395,6 +1396,7 @@
 
 /* variant curation interface - criteria bar */
 .criteria-group.btn-group-sm {
+    padding-top: 10px;
     padding-bottom: 10px;
 }
 
@@ -1402,7 +1404,7 @@
     background-color: #ddd;
     color: #555;
     cursor: default;
-    padding: 5px 0.72em;
+    padding: 5px 0.665em;
     font-size: 12px;
     font-weight: bold;
 
@@ -1544,5 +1546,34 @@ dl.inline-dl {
 
     .label-primary {
         vertical-align: text-top;
+    }
+}
+
+.progress-bar {
+    width: 100%;
+    padding: 0 0 10px 0;
+
+    .benign-box {
+        border: solid 2px #8bcd9c;
+        padding-left: 10px;
+        width: 32%;
+        float: left;
+        background-color: #fff;
+    }
+
+    .pathogenic-box {
+        border: solid 2px #d78;
+        padding-left: 10px;
+        width: 34%;
+        float: left;
+        background-color: #fff;
+    }
+
+    .assertion-box {
+        border: solid 2px #1b75bc;
+        padding-left: 10px;
+        width: 34%;
+        float: left;
+        background-color: #fff;
     }
 }
