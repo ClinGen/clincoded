@@ -26,6 +26,7 @@ var Dashboard = React.createClass({
             userStatus: '',
             lastLogin: '',
             gdmList: [],
+            vciInterpList: [],
             histories: []
         };
     },
@@ -79,11 +80,18 @@ var Dashboard = React.createClass({
 
     getData: function(session) {
         // Retrieve all GDMs and other objects related to user via search
-        this.getRestDatas(['/gdm/', '/search/?type=gdm&limit=10&submitted_by.uuid=' + session.user_properties.uuid], [function() {}, function() {}]).then(data => {
+        this.getRestDatas([
+            '/gdm/',
+            '/search/?type=gdm&limit=10&submitted_by.uuid=' + session.user_properties.uuid,
+            '/search/?type=interpretation&limit=10&submitted_by.uuid=' + session.user_properties.uuid
+        ],
+            [function() {}, function() {}, function() {}])
+        .then(data => {
             // Search objects successfully retrieved; process results
             // GDM results; finds GDMs created by user, and also creates PMID-GDM mapping table
             // (stopgap measure until article -> GDM mapping ability is incorporated)
             var tempGdmList = [], tempRecentHistory = [];
+            var vciInterpList = [];
             var gdmMapping = {};
             for (var i = 0; i < data[0]['@graph'].length; i++) {
                 // loop through GDMs
@@ -101,7 +109,22 @@ var Dashboard = React.createClass({
                 if (gdm.annotations) gdmMapping = this.gdmMappingLoop(gdmMapping, gdm.annotations, gdm.uuid,
                     gdm.gene.symbol, gdm.disease.term, gdm.modeInheritance, null);
             }
-
+            console.log(data[2]['@graph']);
+            var temp = data[2]['@graph'].map(res => { return res['@id']; });
+            console.log(temp);
+            this.getRestDatas(temp, null, true).then(vciInterpResults => {
+                vciInterpResults.map(vciInterpResult => {
+                    vciInterpList.push({
+                        uuid: vciInterpResult.uuid,
+                        variantUuid: vciInterpResult.variant.uuid,
+                        carId: vciInterpResult.variant.carId,
+                        clinvarVariantId: vciInterpResult.variant.clinvarVariantId,
+                        clinvarVariantTitle: vciInterpResult.variant.clinvarVariantTitle,
+                        date_created: vciInterpResult.date_created
+                    });
+                });
+                this.setState({vciInterpList: vciInterpList});
+            });
             // Set states for cleaned results
             this.setState({gdmList: tempGdmList});
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
@@ -162,6 +185,25 @@ var Dashboard = React.createClass({
                         </Panel>
                     </div>
                     <div className="col-md-6">
+                        <Panel panelClassName="panel-dashboard">
+                            <h3>Your Variant Interpretations</h3>
+                            {this.state.vciInterpList.length > 0 ?
+                            <ul>
+                                {this.state.vciInterpList.map(function(item) {
+                                    return (
+                                    <a key={item.uuid} className="block-link" href={"/variant-central/?variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
+                                    <li key={item.uuid}>
+                                        <span className="block-link-color"><strong>{item.carId}</strong> // <i>{item.clinvarVariantId}</i></span><br />
+                                        <span className="block-link-no-color">{item.clinvarVariantTitle}<br />
+                                        <strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                                    </li>
+                                    </a>
+                                    );
+                                })}
+                            </ul>
+                            : <li>You have not created any variant interpretations.</li>}
+                        </Panel>
+
                         <Panel panelClassName="panel-dashboard">
                             <h3>Your Gene-Disease Records</h3>
                             {this.state.gdmList.length > 0 ?
