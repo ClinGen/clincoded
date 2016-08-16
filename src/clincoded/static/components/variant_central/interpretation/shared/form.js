@@ -291,7 +291,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 };
 
                 // set criterion status and modifiers
-                if (['supporting', 'moderate', 'strong', 'very-strong'].indexOf(this.refs[criterion + '-status'].getValue()) > -1) {
+                if (['supporting', 'moderate', 'strong', 'very-strong', 'stand-alone'].indexOf(this.refs[criterion + '-status'].getValue()) > -1) {
                     // if dropdown selection is a modifier to met, set status to met, and set modifier as needed...
                     evaluations[criterion]['criteriaStatus'] = 'met';
                     evaluations[criterion]['criteriaModifier'] = this.refs[criterion + '-status'].getValue();
@@ -451,7 +451,7 @@ function evalFormValueDropdown(criteria) {
             {criteria[1] === 'P' ? null : <option value="supporting">{criteria}_P</option>}
             {criteria[0] === 'P' && criteria[1] !== 'M' ? <option value="moderate">{criteria}_M</option> : null}
             {criteria[1] === 'S' ? null : <option value="strong">{criteria}_S</option>}
-            {criteria[0] === 'B' ? <option value="stand-alone">{criteria}_stand alone</option> : null}
+            {(criteria[0] === 'B' && criteria[1] !== 'A') ? <option value="stand-alone">{criteria}_stand alone</option> : null}
             {criteria[0] === 'P' && criteria[1] !== 'V' ? <option value="very-strong">{criteria}_VS</option> : null}
         </Input>
     );
