@@ -6,6 +6,8 @@ var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+var findDiffKeyValuesMixin = require('./shared/find_diff').findDiffKeyValuesMixin;
+var CompleteSection = require('./shared/complete_section').CompleteSection;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
@@ -42,7 +44,7 @@ var CI_DEFAULT = 95;
 
 // Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
-    mixins: [RestMixin],
+    mixins: [RestMixin, findDiffKeyValuesMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
@@ -90,12 +92,36 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     _tot: {ac: {}, gc: {}},
                     _extra: {}
                 }
-            }
+            },
+            populationObjDiff: null,
+            populationObjDiffFlag: false
         };
     },
 
     componentDidMount: function() {
-        this.getPrevSetDesiredCI(this.props.interpretation);
+        if (this.props.interpretation) {
+            this.setState({interpretation: this.props.interpretation});
+            // set desired CI if previous data for it exists
+            this.getPrevSetDesiredCI(this.props.interpretation);
+        }
+        if (this.props.ext_myVariantInfo) {
+            this.parseExacData(this.props.ext_myVariantInfo);
+            this.parseEspData(this.props.ext_myVariantInfo);
+            this.calculateHighestMAF();
+        }
+        if (this.props.ext_ensemblVEP) {
+            this.parseAlleleFrequencyData(this.props.ext_ensemblVEP);
+            this.parseGeneConstraintScores(this.props.ext_ensemblVEP);
+            this.calculateHighestMAF();
+        }
+        if (this.props.ext_ensemblVariation) {
+            this.parseTGenomesData(this.props.ext_ensemblVariation);
+            this.calculateHighestMAF();
+        }
+
+        if (this.state.interpretation && this.state.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.populationObj, this.state.interpretation.evaluations);
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -121,6 +147,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.parseTGenomesData(nextProps.ext_ensemblVariation);
             this.calculateHighestMAF();
         }
+
+        if (nextProps.interpretation && nextProps.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.populationObj, nextProps.interpretation.evaluations);
+        }
     },
 
     componentWillUnmount: function() {
@@ -140,6 +170,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             return float.toFixed(5) + '';
         } else {
             return float.toString();
+        }
+    },
+
+    // function to compare current external data with external data saved with a previous interpretation
+    compareExternalDatas: function(newData, savedEvals) {
+        for (var i in savedEvals) {
+            if (['BA1', 'PM2', 'BS1'].indexOf(savedEvals[i].criteria) > -1) {
+                var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].population.populationData);
+                this.setState({populationObjDiff: tempCompare[0], populationObjDiffFlag: tempCompare[1]});
+                break;
+            }
         }
     },
 
@@ -361,8 +402,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         });
         // embed highest MAF and related data into population obj, and update to state
         populationObj.highestMAF = highestMAFObj;
-        this.setState({populationObj: populationObj});
-        this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
+        this.setState({populationObj: populationObj}, () => {
+            this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
+        });
     },
 
     /* the following methods are related to the rendering of population data tables */
@@ -386,6 +428,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // method to render a row of data for the 1000Genomes table
     renderTGenomesRow: function(key, tGenomes, tGenomesStatic, rowNameCustom, className) {
         let rowName = tGenomesStatic._labels[key];
+        // for when generating difference object:
+        //let tGenomesDiff = this.state.populationObjDiff && this.state.populationObjDiff.tGenomes ? this.state.populationObjDiff.tGenomes : null; // this null creates issues when populationObjDiff is not set because it compraes on null later
         // generate genotype strings from reference and alt allele information
         let g_ref = tGenomes._extra.ref + '|' + tGenomes._extra.ref,
             g_alt = tGenomes._extra.alt + '|' + tGenomes._extra.alt,
@@ -540,9 +584,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
         var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
+        var populationObjDiffFlag = this.state.populationObjDiffFlag;
 
         return (
             <div className="variant-interpretation population">
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
                 <div className="bs-callout bs-callout-info clearfix">
                     <h4>Highest Minor Allele Frequency</h4>
                     <div className="clearfix">
@@ -561,7 +609,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                     <span>
                                         <dt className="dtFormLabel">Desired CI:</dt>
                                         <dd className="ddFormInput">
-                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI}
+                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI} inputDisabled={true}
                                                 onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT.toString()} />
                                         </dd>
                                         <dt>CI - lower: </dt><dd>{this.state.CILow || this.state.CILow === 0 ? this.parseFloatShort(this.state.CILow) : ''}</dd>
@@ -587,14 +635,20 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm renderedFormContent={criteriaGroup1}
-                                evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                                evidenceData={this.state.populationObj} evidenceDataUpdated={populationObjDiffFlag} formChangeHandler={criteriaGroup1Change}
                                 formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']}
                                 criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
                     : null}
-
+                    {populationObjDiffFlag ?
+                        <div className="row">
+                            <p className="alert alert-warning">
+                                <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
+                            </p>
+                        </div>
+                    : null}
                     {this.state.hasExacData ?
                         <div className="panel panel-info datasource-ExAC">
                             <div className="panel-heading">
@@ -715,10 +769,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     }
 });
 
-// code for rendering of population tab interpretation forms
+
+// code for rendering of this group of interpretation forms
 var criteriaGroup1 = function() {
-    let criteriaList = ['BA1', 'PM2', 'BS1'], // array of criteria code handled in this section
-        hiddenList = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let criteriaList1 = ['BA1', 'PM2', 'BS1'], // array of criteria code handled subgroup of this section
+        hiddenList1 = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
     let mafCutoffInput = (
         <span>
             <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
@@ -731,16 +786,15 @@ var criteriaGroup1 = function() {
     return (
         <div>
             {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList, hiddenList, mafCutoffInput, null),
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, mafCutoffInput, null),
                 false
             )}
         </div>
     );
 };
-
-// code for updating the form values of population tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaGroup1Update = function(nextProps) {
     // define custom form update function for MAF Cutoff field in BA1
@@ -753,7 +807,6 @@ var criteriaGroup1Update = function(nextProps) {
     };
     vciFormHelper.updateEvalForm.call(this, nextProps, ['BA1', 'PM2', 'BS1'], customActions);
 };
-
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
     // Both explanation boxes for both criteria of each group must be the same
@@ -765,7 +818,6 @@ var criteriaGroup1Change = function(ref, e) {
         this.setState({evidenceData: tempEvidenceData});
     }
 };
-
 // special function to handle the MAF cutoff % field
 var mafCutoffBlur = function(event) {
     let mafCutoff = parseInt(this.refs['maf-cutoff'].getValue());

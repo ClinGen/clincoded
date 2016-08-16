@@ -551,6 +551,15 @@
     input[type=checkbox] {
         margin-top: 11px;
     }
+
+    .section-complete-bar {
+        margin: 0 -15px 15px -15px;
+        padding-top: 3px;
+        padding-bottom: 9px;
+        border-left: 0;
+        border-right: 0;
+        border-radius: 0;
+    }
 }
 
 .palette-not-curated {
@@ -1009,6 +1018,7 @@
         clear: both;
     }
     .divider {
+        margin-bottom: 20px;
         border-bottom: 1px solid #ddd;
     }
 }
@@ -1387,6 +1397,7 @@
 
 /* variant curation interface - criteria bar */
 .criteria-group.btn-group-sm {
+    padding-top: 10px;
     padding-bottom: 10px;
 }
 
@@ -1394,7 +1405,7 @@
     background-color: #ddd;
     color: #555;
     cursor: default;
-    padding: 5px 0.72em;
+    padding: 5px 0.665em;
     font-size: 12px;
     font-weight: bold;
 
@@ -1527,4 +1538,33 @@ dl.inline-dl {
 
 .hidden {
     display: none;
+}
+
+.progress-bar {
+    width: 100%;
+    padding: 0 0 10px 0;
+
+    .benign-box {
+        border: solid 2px #8bcd9c;
+        padding-left: 10px;
+        width: 32%;
+        float: left;
+        background-color: #fff;
+    }
+
+    .pathogenic-box {
+        border: solid 2px #d78;
+        padding-left: 10px;
+        width: 34%;
+        float: left;
+        background-color: #fff;
+    }
+
+    .assertion-box {
+        border: solid 2px #1b75bc;
+        padding-left: 10px;
+        width: 34%;
+        float: left;
+        background-color: #fff;
+    }
 }

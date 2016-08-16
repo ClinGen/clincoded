@@ -89,7 +89,7 @@
 .nav-user {
     display: table-row;
 
-    li {
+    li.link {
         display: table-cell;
         vertical-align: top;
         text-align: center;
@@ -112,6 +112,10 @@
             display: block;
             padding-top: 0;
         }
+    }
+
+    li.white-space {
+        margin-left: 30px;
     }
 
     @media screen and (min-width: $screen-sm-min) {

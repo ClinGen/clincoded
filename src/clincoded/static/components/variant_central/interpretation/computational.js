@@ -3,7 +3,10 @@ var React = require('react');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
-var CurationInterpretationForm = require('./shared/form').CurationInterpretationForm;
+var vciFormHelper = require('./shared/form');
+var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+var findDiffKeyValuesMixin = require('./shared/find_diff').findDiffKeyValuesMixin;
+var CompleteSection = require('./shared/complete_section').CompleteSection;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
 
@@ -56,7 +59,7 @@ var computationStatic = {
 
 // Display the curator data of the curation data
 var CurationInterpretationComputational = module.exports.CurationInterpretationComputational = React.createClass({
-    mixins: [RestMixin],
+    mixins: [RestMixin, findDiffKeyValuesMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
@@ -100,8 +103,34 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     revel: {score_range: '0 to 1', score: null, prediction: 'higher score = higher pathogenicity', visible: true},
                     cftr: {score_range: '--', score: null, prediction: '--', visible: false}
                 }
-            }
+            },
+            computationObjDiff: null,
+            computationObjDiffFlag: false
         };
+    },
+
+    componentDidMount: function() {
+        if (this.props.interpretation) {
+            this.setState({interpretation: this.props.interpretation});
+        }
+        if (this.props.ext_myVariantInfo) {
+            this.parseOtherPredData(this.props.ext_myVariantInfo);
+            this.parseConservationData(this.props.ext_myVariantInfo);
+        }
+        if (this.props.ext_bustamante) {
+            this.parseClingenPredData(this.props.ext_bustamante);
+        }
+        if (this.props.ext_clinVarEsearch) {
+            var codonObj = {};
+            codonObj.count = parseInt(this.props.ext_clinVarEsearch.esearchresult.count);
+            codonObj.term = this.props.ext_clinVarEsearch.vci_term;
+            codonObj.symbol = this.props.ext_clinVarEsearch.vci_symbol;
+            this.setState({codonObj: codonObj});
+        }
+
+        if (this.state.interpretation && this.state.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.computationObj, this.state.interpretation.evaluations);
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -121,6 +150,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             codonObj.symbol = nextProps.ext_clinVarEsearch.vci_symbol;
             this.setState({codonObj: codonObj});
         }
+
+        if (nextProps.interpretation && nextProps.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.computationObj, nextProps.interpretation.evaluations);
+        }
     },
 
     componentWillUnmount: function() {
@@ -129,6 +162,17 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             hasOtherPredData: false,
             hasBustamanteData: false
         });
+    },
+
+    // function to compare current external data with external data saved with a previous interpretation
+    compareExternalDatas: function(newData, savedEvals) {
+        for (var i in savedEvals) {
+            if (['PP3', 'BP4', 'BP1', 'PP2'].indexOf(savedEvals[i].criteria) > -1) {
+                var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].computational.computationalData);
+                this.setState({computationObjDiff: tempCompare[0], computationObjDiffFlag: tempCompare[1]});
+                break;
+            }
+        }
     },
 
     // Method to assign clingen predictors data to global computation object
@@ -343,6 +387,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         var otherPred = (this.state.computationObj && this.state.computationObj.other_predictors) ? this.state.computationObj.other_predictors : null;
         var clingenPred = (this.state.computationObj && this.state.computationObj.clingen) ? this.state.computationObj.clingen : null;
         var codon = (this.state.codonObj) ? this.state.codonObj : null;
+        var computationObjDiffFlag = this.state.computationObjDiffFlag;
 
         var variant = this.props.data;
         var gRCh38 = null;
@@ -362,24 +407,35 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
         return (
             <div className="variant-interpretation computational">
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="predictors" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
                 <ul className="vci-tabs-header tab-label-list vci-subtabs" role="tablist">
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('missense')} aria-selected={this.state.selectedTab == 'missense'}>Missense</li>
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('lof')} aria-selected={this.state.selectedTab == 'lof'}>Loss of Function</li>
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('silent-intron')} aria-selected={this.state.selectedTab == 'silent-intron'}>Silent & Intron</li>
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('indel')} aria-selected={this.state.selectedTab == 'indel'}>In-frame Indel</li>
                 </ul>
-
-                <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'missense' ? '' : ' hidden')}>
+                {this.state.selectedTab == '' || this.state.selectedTab == 'missense' ?
+                <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaMissense1}
-                                    evidenceType={'computational'} evidenceData={this.state.computationObj} evidenceDataUpdated={true} formChangeHandler={criteriaMissense1Change}
-                                    formDataUpdater={criteriaMissense1Update} variantUuid={this.props.data['@id']} criteria={['BP4', 'PP3', 'BP7']}
+                                    evidenceData={this.state.computationObj} evidenceDataUpdated={computationObjDiffFlag} formChangeHandler={criteriaMissense1Change}
+                                    formDataUpdater={criteriaMissense1Update} variantUuid={this.props.data['@id']}
+                                    criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
+                        : null}
+                        {computationObjDiffFlag ?
+                            <div className="row">
+                                <p className="alert alert-warning">
+                                    <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
+                                </p>
+                            </div>
                         : null}
                         {clingenPred ?
                             <div className="panel panel-info datasource-clingen">
@@ -604,39 +660,68 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         {(this.props.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaMissense2}
-                                    evidenceType={'computational'} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaMissense2Update} variantUuid={this.props.data['@id']} criteria={['PM5', 'PS1']}
+                                <CurationInterpretationForm renderedFormContent={criteriaMissense2} criteria={['PM5', 'PS1']}
+                                    evidenceData={null} evidenceDataUpdated={true}
+                                    formDataUpdater={criteriaMissense2Update} variantUuid={this.props.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
                         : null}
                     </Panel></PanelGroup>
                 </div>
-
-                <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'lof' ? '' : ' hidden')}>
-                    <PanelGroup accordion><Panel title="Does variant result in LOF?" panelBodyClassName="panel-wide-content" open>
-                    </Panel></PanelGroup>
-                    <PanelGroup accordion><Panel title="Is LOF known mechanism for disease of interest?" panelBodyClassName="panel-wide-content" open>
+                : null}
+                {this.state.selectedTab == 'lof' ?
+                <div role="tabpanel" className="tab-panel">
+                    <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content" open>
+                        {(this.props.data && this.state.interpretation) ?
+                        <div className="row">
+                            <div className="col-sm-12">
+                                <CurationInterpretationForm renderedFormContent={criteriaLof1} criteria={['PVS1']}
+                                    evidenceData={null} evidenceDataUpdated={true}
+                                    formDataUpdater={criteriaLof1Update} variantUuid={this.props.data['@id']}
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            </div>
+                        </div>
+                        : null}
+                        <div className="panel panel-info">
+                            <div className="panel-heading"><h3 className="panel-title">Does variant result in LOF?</h3></div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div className="panel panel-info">
+                            <div className="panel-heading"><h3 className="panel-title">Is LOF known mechanism for disease of interest?</h3></div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
                     </Panel></PanelGroup>
                 </div>
-
-                <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'silent-intron' ? '' : ' hidden')}>
+                : null}
+                {this.state.selectedTab == 'silent-intron' ?
+                <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                             <div className="row">
                                 <div className="col-sm-12">
-                                    <CurationInterpretationForm renderedFormContent={criteriaGroupSilentIntron1}
-                                        evidenceType={'computational'} evidenceData={this.state.computationObj} evidenceDataUpdated={true}
-                                        formDataUpdater={criteriaGroupSilentIntron1Update} variantUuid={this.props.data['@id']} criteria={['BP7']}
+                                    <CurationInterpretationForm renderedFormContent={criteriaSilentIntron1} criteria={['BP7']}
+                                        evidenceData={null} evidenceDataUpdated={true}
+                                        formDataUpdater={criteriaSilentIntron1Update} variantUuid={this.props.data['@id']}
                                         interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                                 </div>
                             </div>
                         : null}
                     </Panel></PanelGroup>
                 </div>
-
-                <div role="tabpanel" className={"tab-panel" + (this.state.selectedTab == '' || this.state.selectedTab == 'indel' ? '' : ' hidden')}>
+                : null}
+                {this.state.selectedTab == 'indel' ?
+                <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
                         <div className="panel panel-info">
                             <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
@@ -678,291 +763,155 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         {(this.props.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaIndel1}
-                                    evidenceType={'computational'} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaIndel1Update} variantUuid={this.props.data['@id']} criteria={['BP3', 'PM4']}
+                                <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
+                                    evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
+                                    formDataUpdater={criteriaIndel1Update} variantUuid={this.props.data['@id']} formChangeHandler={criteriaIndel1Change}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
                         : null}
                     </Panel></PanelGroup>
                 </div>
-
+                : null}
             </div>
         );
     }
 });
 
-// code for rendering of computational tab interpretation forms, first group:
-// functional, conservation, and splicing predictors
+// code for rendering of this group of interpretation forms
 var criteriaMissense1 = function() {
+    let criteriaList1 = ['PP3', 'BP4'], // array of criteria code handled subgroup of this section
+        hiddenList1 = [false, true], // array indicating hidden status of explanation boxes for above list of criteria codes
+        criteriaList2 = ['BP1', 'PP2'], // array of criteria code handled subgroup of this section
+        hiddenList2 = [false, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>BP4:</strong> Multiple lines of computational evidence suggest no impact on gene or gene product (conservation, evolutionary, splicing impact, etc.)
-                    <br /><br />
-                    <strong>PP3:</strong> Multiple lines of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc.)
-                </p>
-            </div>
-            <Input type="checkbox" ref="BP4-value" label="BP4 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BP4-value'] ? this.state.checkboxes['BP4-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
-            <Input type="checkbox" ref="PP3-value" label="PP3 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['PP3-value'] ? this.state.checkboxes['PP3-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BP4-explanation" label="Explain criteria selection:" rows="5"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <Input type="textarea" ref="PP3-explanation" label="Explain criteria selection (PP3):" rows="5"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
-
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>BP1:</strong> Missense variant in a gene for which primarily truncating variants are known to cause disease
-                    <br /><br />
-                    <strong>PP2:</strong> Missense variant in a gene that has a low rate of benign missense variation and in which missense variants are a common mechanism of disease
-                </p>
-            </div>
-            <Input type="checkbox" ref="BP1-value" label={<span>BP1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BP1-value'] ? this.state.checkboxes['BP1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
-            <Input type="checkbox" ref="PP2-value" label={<span>PP2 met? (Disease dependent):</span>} handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['PP2-value'] ? this.state.checkboxes['PP2-value'] : false} inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BP1-explanation" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <Input type="textarea" ref="PP2-explanation" label="Explain criteria selection (PP2):" rows="5" inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
+            {vciFormHelper.evalFormSectionWrapper.call(this,
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
+                true
+            )}
+            {vciFormHelper.evalFormSectionWrapper.call(this,
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList2),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList2),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList2, hiddenList2, null, null),
+                false
+            )}
         </div>
     );
 };
 
-// code for updating the form values of computational tab interpretation forms upon receiving
+
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaMissense1Update = function(nextProps) {
-    if (nextProps.interpretation) {
-        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaluation => {
-                var tempCheckboxes = this.state.checkboxes;
-                switch(evaluation.criteria) {
-                    case 'BP4':
-                        tempCheckboxes['BP4-value'] = evaluation.value === 'true';
-                        this.refs['BP4-explanation'].setValue(evaluation.explanation);
-                        break;
-                    case 'PP3':
-                        tempCheckboxes['PP3-value'] = evaluation.value === 'true';
-                        this.refs['PP3-explanation'].setValue(evaluation.explanation);
-                        break;
-                    case 'BP1':
-                        tempCheckboxes['BP1-value'] = evaluation.value === 'true';
-                        this.refs['BP1-explanation'].setValue(evaluation.explanation);
-                        break;
-                    case 'PP2':
-                        tempCheckboxes['PP2-value'] = evaluation.value === 'true';
-                        this.refs['PP2-explanation'].setValue(evaluation.explanation);
-                        break;
-                    case 'BP7':
-                        tempCheckboxes['BP7-value'] = evaluation.value === 'true';
-                        this.refs['BP7-explanation'].setValue(evaluation.explanation);
-                        break;
-                }
-                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
-            });
-        }
-    }
+    vciFormHelper.updateEvalForm.call(this, nextProps, ['PP3', 'BP4', 'BP1', 'PP2'], null);
 };
-
 // code for handling logic within the form
 var criteriaMissense1Change = function(ref, e) {
-    // BP4 and PP3 are exclusive. The following is to ensure that if one of the checkboxes
-    // are checked, the other is un-checked
-    if (ref === 'BP4-value' || ref === 'PP3-value') {
-        let tempCheckboxes = this.state.checkboxes,
-            altCriteriaValue = 'PP3-value';
-        if (ref === 'PP3-value') {
-            altCriteriaValue = 'BP4-value';
-        }
-        if (this.state.checkboxes[ref]) {
-            tempCheckboxes[altCriteriaValue] = false;
-            this.setState({checkboxes: tempCheckboxes});
-        }
-    }
-    // Since BP4 and PP3 'share' the same explanation box, and the user only sees the BP4 box,
-    // the following is to update the value in the PP3 box to contain the same data on
-    // saving of the evaluation. Handles changes going the other way, too, just in case (although
-    // this should never happen)
-    if (ref === 'BP4-explanation' || ref === 'PP3-explanation') {
-        let altCriteriaExplanation = 'PP3-explanation';
-        if (ref === 'PP3-explanation') {
-            altCriteriaExplanation = 'BP4-explanation';
-        }
-        this.refs[altCriteriaExplanation].setValue(this.refs[ref].getValue());
-    }
-
-    // BP1 and PP2 are exclusive. The following is to ensure that if one of the checkboxes
-    // are checked, the other is un-checked
-    if (ref === 'BP1-value' || ref === 'PP2-value') {
-        let tempCheckboxes = this.state.checkboxes,
-            altCriteriaValue = 'PP2-value';
-        if (ref === 'PP2-value') {
-            altCriteriaValue = 'BP1-value';
-        }
-        if (this.state.checkboxes[ref]) {
-            tempCheckboxes[altCriteriaValue] = false;
-            this.setState({checkboxes: tempCheckboxes});
-        }
-    }
-    // Since BP1 and PP2 'share' the same description box, and the user only sees the BP4 box,
-    // the following is to update the value in the PP2 box to contain the same data on
-    // saving of the evaluation. Handles changes going the other way, too, just in case (although
-    // this should never happen)
-    if (ref === 'BP1-explanation' || ref === 'PP2-explanation') {
-        let altCriteriaDescription = 'PP2-explanation';
-        if (ref === 'PP2-explanation') {
-            altCriteriaDescription = 'BP1-explanation';
-        }
-        this.refs[altCriteriaDescription].setValue(this.refs[ref].getValue());
-    }
+    // Both explanation boxes for both criteria of each group must be the same
+    vciFormHelper.shareExplanation.call(this, ref, ['PP3', 'BP4']);
+    vciFormHelper.shareExplanation.call(this, ref, ['BP1', 'PP2']);
 };
 
-// code for rendering of computational tab interpretation forms, second group:
-// alternate changes in codon
+
+// code for rendering of this group of interpretation forms
 var criteriaMissense2 = function() {
+    let criteriaList1 = ['PM5'], // array of criteria code handled subgroup of this section
+        hiddenList1 = [false], // array indicating hidden status of explanation boxes for above list of criteria codes
+        criteriaList2 = ['PS1'], // array of criteria code handled subgroup of this section
+        hiddenList2 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>PM5:</strong> Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has not been seen before
-                </p>
-            </div>
-            <Input type="checkbox" ref="PM5-value" label={<span>PM5 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['PM5-value'] ? this.state.checkboxes['PM5-value'] : false} inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="PM5-explanation" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>PS1:</strong> Same amino acid change as a previously established pathogenic variant regardless of nucleotide change
-                </p>
-            </div>
-            <Input type="checkbox" ref="PS1-value" label={<span>PS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['PS1-value'] ? this.state.checkboxes['PS1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="PS1-explanation" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+            {vciFormHelper.evalFormSectionWrapper.call(this,
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
+                true
+            )}
+            {vciFormHelper.evalFormSectionWrapper.call(this,
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList2),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList2),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList2, hiddenList2, null, null),
+                false
+            )}
         </div>
     );
 };
-
-// code for updating the form values of computational tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaMissense2Update = function(nextProps) {
-    if (nextProps.interpretation) {
-        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaluation => {
-                var tempCheckboxes = this.state.checkboxes;
-                switch(evaluation.criteria) {
-                    case 'PM5':
-                        tempCheckboxes['PM5-value'] = evaluation.value === 'true';
-                        this.refs['PM5-explanation'].setValue(evaluation.explanation);
-                        break;
-                    case 'PS1':
-                        tempCheckboxes['PS1-value'] = evaluation.value === 'true';
-                        this.refs['PS1-explanation'].setValue(evaluation.explanation);
-                        break;
-                }
-                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
-            });
-        }
-    }
+    vciFormHelper.updateEvalForm.call(this, nextProps, ['PM5', 'PS1'], null);
 };
 
-// code for rendering of computational tab interpretation forms, silent & intron subtab, first group:
-var criteriaGroupSilentIntron1 = function() {
+
+// code for rendering of this group of interpretation forms
+var criteriaLof1 = function() {
+    let criteriaList1 = ['PVS1'], // array of criteria code handled subgroup of this section
+        hiddenList1 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>BP7:</strong> A synonymous (silent) variant for which splicing prediction algorithms predict no impact to the splice site consensus sequence nor the creation of a new splice site AND the nucleotide is not highly conserved
-                </p>
-            </div>
-            <Input type="checkbox" ref="BP7-value" label={<span>BP7 met?:</span>} handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BP7-value'] ? this.state.checkboxes['BP7-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BP7-explanation" label="Explain criteria selection:" rows="5"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+            {vciFormHelper.evalFormSectionWrapper.call(this,
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
+                false
+            )}
         </div>
     );
 };
-
-// code for updating the form values of computational tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
-var criteriaGroupSilentIntron1Update = function(nextProps) {
-    if (nextProps.interpretation) {
-        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaluation => {
-                var tempCheckboxes = this.state.checkboxes;
-                switch(evaluation.criteria) {
-                    case 'BP7':
-                        tempCheckboxes['BP7-value'] = evaluation.value === 'true';
-                        this.refs['BP7-explanation'].setValue(evaluation.description);
-                        break;
-                }
-                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
-            });
-        }
-    }
+var criteriaLof1Update = function(nextProps) {
+    vciFormHelper.updateEvalForm.call(this, nextProps, ['PVS1'], null);
 };
 
-// code for rendering of computational tab interpretation forms, in-frame indel subtab, first group:
-var criteriaIndel1 = function() {
+
+// code for rendering of this group of interpretation forms
+var criteriaSilentIntron1 = function() {
+    let criteriaList1 = ['BP7'], // array of criteria code handled subgroup of this section
+        hiddenList1 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
         <div>
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>BP3:</strong> In-frame deletions/insertions in a repetitive region without a known function
-                </p>
-            </div>
-            <Input type="checkbox" ref="BP3-value" label="BP3 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BP3-value'] ? this.state.checkboxes['BP3-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BP3-explanation" label="Explain criteria selection:" rows="5"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>PM4:</strong> Protein length changes as a result of in-frame deletions/insertions in a nonrepeat region or stop-loss variant
-                </p>
-            </div>
-            <Input type="checkbox" ref="PM4-value" label="PM4 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['PM4-value'] ? this.state.checkboxes['PM4-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="PM4-explanation" label="Explain criteria selection:" rows="5"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+            {vciFormHelper.evalFormSectionWrapper.call(this,
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
+                false
+            )}
         </div>
     );
 };
+// code for updating the form values of interpretation forms upon receiving
+// existing interpretations and evaluations
+var criteriaSilentIntron1Update = function(nextProps) {
+    vciFormHelper.updateEvalForm.call(this, nextProps, ['BP7'], null);
+};
 
-// code for updating the form values of computational tab interpretation forms upon receiving
+
+// code for rendering of this group of interpretation forms
+var criteriaIndel1 = function() {
+    let criteriaList1 = ['BP3', 'PM4'], // array of criteria code handled subgroup of this section
+        hiddenList1 = [false, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    return (
+        <div>
+            {vciFormHelper.evalFormSectionWrapper.call(this,
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
+                false
+            )}
+        </div>
+    );
+};
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaIndel1Update = function(nextProps) {
-    if (nextProps.interpretation) {
-        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaluation => {
-                var tempCheckboxes = this.state.checkboxes;
-                switch(evaluation.criteria) {
-                    case 'BP3':
-                        tempCheckboxes['BP3-value'] = evaluation.value === 'true';
-                        this.refs['BP3-explanation'].setValue(evaluation.explanation);
-                        break;
-                    case 'PM4':
-                        tempCheckboxes['PM4-value'] = evaluation.value === 'true';
-                        this.refs['PM4-explanation'].setValue(evaluation.explanation);
-                        break;
-                }
-                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
-            });
-        }
-    }
+    vciFormHelper.updateEvalForm.call(this, nextProps, ['BP3', 'PM4'], null);
+};
+// code for handling logic within the form
+var criteriaIndel1Change = function(ref, e) {
+    // Both explanation boxes for both criteria of each group must be the same
+    vciFormHelper.shareExplanation.call(this, ref, ['BP3', 'PM4']);
 };
