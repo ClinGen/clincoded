@@ -365,7 +365,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         var otherPred = (this.state.computationObj && this.state.computationObj.other_predictors) ? this.state.computationObj.other_predictors : null;
         var clingenPred = (this.state.computationObj && this.state.computationObj.clingen) ? this.state.computationObj.clingen : null;
         var codon = (this.state.codonObj) ? this.state.codonObj : null;
-        var completedSections = this.state.interpretation && this.state.interpretation.completed_sections ? this.state.interpretation.completed_sections : [];
 
         var variant = this.props.data;
         var gRCh38 = null;
@@ -385,17 +384,17 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
         return (
             <div className="variant-interpretation computational">
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="predictors" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
                 <ul className="vci-tabs-header tab-label-list vci-subtabs" role="tablist">
-                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('missense')} aria-selected={this.state.selectedTab == 'missense'}>Missense {completedSections.indexOf('predictors-missense') > -1 ? <span>&#10003;</span> : null}</li>
-                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('lof')} aria-selected={this.state.selectedTab == 'lof'}>Loss of Function {completedSections.indexOf('predictors-lof') > -1 ? <span>&#10003;</span> : null}</li>
-                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('silent-intron')} aria-selected={this.state.selectedTab == 'silent-intron'}>Silent & Intron {completedSections.indexOf('predictors-silent-intron') > -1 ? <span>&#10003;</span> : null}</li>
-                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('indel')} aria-selected={this.state.selectedTab == 'indel'}>In-frame Indel {completedSections.indexOf('predictors-indel') > -1 ? <span>&#10003;</span> : null}</li>
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('missense')} aria-selected={this.state.selectedTab == 'missense'}>Missense</li>
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('lof')} aria-selected={this.state.selectedTab == 'lof'}>Loss of Function</li>
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('silent-intron')} aria-selected={this.state.selectedTab == 'silent-intron'}>Silent & Intron</li>
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('indel')} aria-selected={this.state.selectedTab == 'indel'}>In-frame Indel</li>
                 </ul>
                 {this.state.selectedTab == '' || this.state.selectedTab == 'missense' ?
                 <div role="tabpanel" className="tab-panel">
-                    {this.state.interpretation ?
-                        <CompleteSection interpretation={this.state.interpretation} tabName="predictors-missense" updateInterpretationObj={this.props.updateInterpretationObj} />
-                    : null}
                     <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                         <div className="row">
@@ -643,9 +642,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 : null}
                 {this.state.selectedTab == 'lof' ?
                 <div role="tabpanel" className="tab-panel">
-                    {this.state.interpretation ?
-                        <CompleteSection interpretation={this.state.interpretation} tabName="predictors-lof" updateInterpretationObj={this.props.updateInterpretationObj} />
-                    : null}
                     <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                         <div className="row">
@@ -680,9 +676,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 : null}
                 {this.state.selectedTab == 'silent-intron' ?
                 <div role="tabpanel" className="tab-panel">
-                    {this.state.interpretation ?
-                        <CompleteSection interpretation={this.state.interpretation} tabName="predictors-silent-intron" updateInterpretationObj={this.props.updateInterpretationObj} />
-                    : null}
                     <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
                             <div className="row">
@@ -699,9 +692,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 : null}
                 {this.state.selectedTab == 'indel' ?
                 <div role="tabpanel" className="tab-panel">
-                    {this.state.interpretation ?
-                        <CompleteSection interpretation={this.state.interpretation} tabName="predictors-indel" updateInterpretationObj={this.props.updateInterpretationObj} />
-                    : null}
                     <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
                         <div className="panel panel-info">
                             <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
