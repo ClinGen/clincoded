@@ -7,11 +7,11 @@
 var React = require('react');
 
 export function renderDataCredit(source) {
-	if (source === 'mvi') {
+	if (source === 'myvariant') {
 		return (
 	    	<div className="credits">
-	            <div className="credit credit-mvi" id="credit-mvi"><a name="credit-mvi"></a>
-                    <span className="label label-primary">MVi</span> - The data in this table were retrieved using:
+	            <div className="credit credit-myvariant" id="credit-myvariant"><a name="credit-myvariant"></a>
+                    <span className="label label-primary">MyVariant</span> - The data in this table were retrieved using:
                     MyVariant.info (<a href="http://myvariant.info" target="_blank">http://myvariant.info</a>)
                     Xin J, Mark A, Afrasiabi C, Tsueng G, Juchler M, Gopal N, Stupp GS, Putman TE, Ainscough BJ,
                     Griffith OL, Torkamani A, Whetzel PL, Mungall CJ, Mooney SD, Su AI, Wu C (2016)
