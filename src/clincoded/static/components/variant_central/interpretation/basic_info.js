@@ -92,9 +92,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     componentDidUpdate: function(prevProps, prevState) {
-        // Finds all hgvs terms in tables and
-        // sets 'title' and 'class' attributes
-        // if text overflows
+        // Finds all hgvs terms in <li> and <td> nodes
+        // Then sets 'title' and 'class' attributes if text overflows
         let nodeList = document.querySelectorAll('.hgvs-term span');
         let hgvsNodes = Array.from(nodeList);
         if (hgvsNodes) {
