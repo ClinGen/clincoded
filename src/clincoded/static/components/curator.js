@@ -1789,7 +1789,7 @@ function flattenProvisional(provisional) {
     return flat;
 }
 
-var interpretationSimpleProps = ["active", "date_created"];
+var interpretationSimpleProps = ["active", "date_created", "completed_sections"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties

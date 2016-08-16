@@ -7,6 +7,7 @@ var RestMixin = require('../../rest').RestMixin;
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 var findDiffKeyValuesMixin = require('./shared/find_diff').findDiffKeyValuesMixin;
+var CompleteSection = require('./shared/complete_section').CompleteSection;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
@@ -587,6 +588,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         return (
             <div className="variant-interpretation population">
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
                 <div className="bs-callout bs-callout-info clearfix">
                     <h4>Highest Minor Allele Frequency</h4>
                     <div className="clearfix">
@@ -605,7 +609,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                     <span>
                                         <dt className="dtFormLabel">Desired CI:</dt>
                                         <dd className="ddFormInput">
-                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI}
+                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI} inputDisabled={true}
                                                 onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT.toString()} />
                                         </dd>
                                         <dt>CI - lower: </dt><dd>{this.state.CILow || this.state.CILow === 0 ? this.parseFloatShort(this.state.CILow) : ''}</dd>
