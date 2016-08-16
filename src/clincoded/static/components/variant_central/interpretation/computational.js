@@ -5,6 +5,7 @@ var RestMixin = require('../../rest').RestMixin;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+var findDiffKeyValuesMixin = require('./shared/find_diff').findDiffKeyValuesMixin;
 var CompleteSection = require('./shared/complete_section').CompleteSection;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
@@ -58,7 +59,7 @@ var computationStatic = {
 
 // Display the curator data of the curation data
 var CurationInterpretationComputational = module.exports.CurationInterpretationComputational = React.createClass({
-    mixins: [RestMixin],
+    mixins: [RestMixin, findDiffKeyValuesMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
@@ -102,7 +103,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     revel: {score_range: '0 to 1', score: null, prediction: 'higher score = higher pathogenicity', visible: true},
                     cftr: {score_range: '--', score: null, prediction: '--', visible: false}
                 }
-            }
+            },
+            computationObjDiff: null,
+            computationObjDiffFlag: false
         };
     },
 
@@ -124,6 +127,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             codonObj.symbol = this.props.ext_clinVarEsearch.vci_symbol;
             this.setState({codonObj: codonObj});
         }
+
+        if (this.state.interpretation && this.state.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.computationObj, this.state.interpretation.evaluations);
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -143,6 +150,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             codonObj.symbol = nextProps.ext_clinVarEsearch.vci_symbol;
             this.setState({codonObj: codonObj});
         }
+
+        if (nextProps.interpretation && nextProps.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.computationObj, nextProps.interpretation.evaluations);
+        }
     },
 
     componentWillUnmount: function() {
@@ -151,6 +162,17 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             hasOtherPredData: false,
             hasBustamanteData: false
         });
+    },
+
+    // function to compare current external data with external data saved with a previous interpretation
+    compareExternalDatas: function(newData, savedEvals) {
+        for (var i in savedEvals) {
+            if (['PP3', 'BP4', 'BP1', 'PP2'].indexOf(savedEvals[i].criteria) > -1) {
+                var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].computational.computationalData);
+                this.setState({computationObjDiff: tempCompare[0], computationObjDiffFlag: tempCompare[1]});
+                break;
+            }
+        }
     },
 
     // Method to assign clingen predictors data to global computation object
@@ -365,6 +387,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         var otherPred = (this.state.computationObj && this.state.computationObj.other_predictors) ? this.state.computationObj.other_predictors : null;
         var clingenPred = (this.state.computationObj && this.state.computationObj.clingen) ? this.state.computationObj.clingen : null;
         var codon = (this.state.codonObj) ? this.state.codonObj : null;
+        var computationObjDiffFlag = this.state.computationObjDiffFlag;
 
         var variant = this.props.data;
         var gRCh38 = null;
@@ -400,12 +423,19 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaMissense1}
-                                    evidenceData={this.state.computationObj} evidenceDataUpdated={true} formChangeHandler={criteriaMissense1Change}
+                                    evidenceData={this.state.computationObj} evidenceDataUpdated={computationObjDiffFlag} formChangeHandler={criteriaMissense1Change}
                                     formDataUpdater={criteriaMissense1Update} variantUuid={this.props.data['@id']}
                                     criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
+                        : null}
+                        {computationObjDiffFlag ?
+                            <div className="row">
+                                <p className="alert alert-warning">
+                                    <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
+                                </p>
+                            </div>
                         : null}
                         {clingenPred ?
                             <div className="panel panel-info datasource-clingen">

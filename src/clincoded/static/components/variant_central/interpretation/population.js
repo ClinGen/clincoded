@@ -6,6 +6,7 @@ var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+var findDiffKeyValuesMixin = require('./shared/find_diff').findDiffKeyValuesMixin;
 var CompleteSection = require('./shared/complete_section').CompleteSection;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
@@ -43,7 +44,7 @@ var CI_DEFAULT = 95;
 
 // Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
-    mixins: [RestMixin],
+    mixins: [RestMixin, findDiffKeyValuesMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
@@ -91,7 +92,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     _tot: {ac: {}, gc: {}},
                     _extra: {}
                 }
-            }
+            },
+            populationObjDiff: null,
+            populationObjDiffFlag: false
         };
     },
 
@@ -114,6 +117,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (this.props.ext_ensemblVariation) {
             this.parseTGenomesData(this.props.ext_ensemblVariation);
             this.calculateHighestMAF();
+        }
+
+        if (this.state.interpretation && this.state.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.populationObj, this.state.interpretation.evaluations);
         }
     },
 
@@ -140,6 +147,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.parseTGenomesData(nextProps.ext_ensemblVariation);
             this.calculateHighestMAF();
         }
+
+        if (nextProps.interpretation && nextProps.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.populationObj, nextProps.interpretation.evaluations);
+        }
     },
 
     componentWillUnmount: function() {
@@ -159,6 +170,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             return float.toFixed(5) + '';
         } else {
             return float.toString();
+        }
+    },
+
+    // function to compare current external data with external data saved with a previous interpretation
+    compareExternalDatas: function(newData, savedEvals) {
+        for (var i in savedEvals) {
+            if (['BA1', 'PM2', 'BS1'].indexOf(savedEvals[i].criteria) > -1) {
+                var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].population.populationData);
+                this.setState({populationObjDiff: tempCompare[0], populationObjDiffFlag: tempCompare[1]});
+                break;
+            }
         }
     },
 
@@ -406,6 +428,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // method to render a row of data for the 1000Genomes table
     renderTGenomesRow: function(key, tGenomes, tGenomesStatic, rowNameCustom, className) {
         let rowName = tGenomesStatic._labels[key];
+        // for when generating difference object:
+        //let tGenomesDiff = this.state.populationObjDiff && this.state.populationObjDiff.tGenomes ? this.state.populationObjDiff.tGenomes : null; // this null creates issues when populationObjDiff is not set because it compraes on null later
         // generate genotype strings from reference and alt allele information
         let g_ref = tGenomes._extra.ref + '|' + tGenomes._extra.ref,
             g_alt = tGenomes._extra.alt + '|' + tGenomes._extra.alt,
@@ -560,6 +584,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
         var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
+        var populationObjDiffFlag = this.state.populationObjDiffFlag;
 
         return (
             <div className="variant-interpretation population">
@@ -610,14 +635,20 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm renderedFormContent={criteriaGroup1}
-                                evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
+                                evidenceData={this.state.populationObj} evidenceDataUpdated={populationObjDiffFlag} formChangeHandler={criteriaGroup1Change}
                                 formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']}
                                 criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
                     : null}
-
+                    {populationObjDiffFlag ?
+                        <div className="row">
+                            <p className="alert alert-warning">
+                                <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
+                            </p>
+                        </div>
+                    : null}
                     {this.state.hasExacData ?
                         <div className="panel panel-info datasource-ExAC">
                             <div className="panel-heading">
