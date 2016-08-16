@@ -195,6 +195,7 @@ module.exports.external_url_map = {
     'EXAC': '//exac.broadinstitute.org/variant/',
     'EXACHome': 'http://exac.broadinstitute.org/',
     'ExACGene': 'http://exac.broadinstitute.org/gene/',
+    'ExACRegion': 'http://exac.broadinstitute.org/region/',
     'ESPHome': 'http://evs.gs.washington.edu/EVS/',
     '1000GenomesHome': 'http://browser.1000genomes.org/',
     'mutalyzer': 'https://mutalyzer.nl/',

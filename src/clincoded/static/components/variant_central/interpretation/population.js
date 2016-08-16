@@ -407,6 +407,43 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         });
     },
 
+    // Method to render external ExAC linkout when no ExAC population data found
+    renderExacLinkout: function(response) {
+        let exacLink;
+        // If no ExAC population data, construct external linkout for one of the following:
+        // 1) clinvar/cadd data found & the variant type is substitution
+        // 2) clinvar/cadd data found & the variant type is NOT substitution
+        // 3) no data returned by myvariant.info
+        if (response) {
+            let chrom = response.chrom,
+                pos = response.hg19.start,
+                regionStart = parseInt(response.hg19.start) - 30,
+                regionEnd = parseInt(response.hg19.end) + 30;
+            if (response.clinvar) {
+                // Try 'clinvar' as primary data object
+                let clinvar = response.clinvar;
+                // Applies to substitution variant (e.g. C>T in which '>' means 'changes to')
+                if (clinvar.type && clinvar.type === 'single nucleotide variant') {
+                    exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + clinvar.ref + '-' + clinvar.alt;
+                } else {
+                    // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
+                    exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
+                }
+            } else if (response.cadd) {
+                // Fallback to 'cadd' as alternative data object
+                let cadd = response.cadd;
+                if (cadd.type && cadd.type === 'SNV') {
+                    exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + cadd.ref + '-' + cadd.alt;
+                } else {
+                    exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
+                }
+            }
+        } else {
+            exacLink = external_url_map['EXACHome'];
+        }
+        return exacLink;
+    },
+
     /* the following methods are related to the rendering of population data tables */
     // method to render a row of data for the ExAC table
     renderExacRow: function(key, exac, exacStatic, rowNameCustom, className) {
@@ -682,7 +719,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th>No population data was found for this allele in ExAC. <a href={external_url_map['EXACHome']} target="_blank">Search ExAC</a> for this variant.</th>
+                                        <th>No population data was found for this allele in ExAC. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search ExAC</a> for this variant.</th>
                                     </tr>
                                 </thead>
                             </table>
