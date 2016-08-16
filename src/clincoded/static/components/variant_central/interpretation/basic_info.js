@@ -91,6 +91,22 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         });
     },
 
+    componentDidUpdate: function(prevProps, prevState) {
+        // Finds all hgvs terms in tables and
+        // sets 'title' and 'class' attributes
+        // if text overflows
+        let nodeList = document.querySelectorAll('.hgvs-term span');
+        let hgvsNodes = Array.from(nodeList);
+        if (hgvsNodes) {
+            hgvsNodes.forEach(node => {
+                if (node.offsetWidth < node.scrollWidth) {
+                    node.setAttribute('title', node.innerHTML);
+                    node.className += ' dotted';
+                }
+            });
+        }
+    },
+
     parseData: function(variant) {
         if (variant.clinvarVariantId) {
             this.setState({clinvar_id: variant.clinvarVariantId});
@@ -180,7 +196,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (item.hgvsc && item.source === source) {
             return (
                 <tr key={key} className={(item.canonical && item.canonical === 1) ? 'primary-transcript' : null}>
-                    <td><span className="title-ellipsis" title={item.hgvsc}>{item.hgvsc}</span></td>
+                    <td className="hgvs-term"><span className="title-ellipsis">{item.hgvsc}</span></td>
                     <td>{(item.exon) ? item.exon : '--'}</td>
                     <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
                     <td className="clearfix">
@@ -356,8 +372,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="bs-callout-content-container-fullwidth">
                         <h4>Genomic</h4>
                         <ul>
-                            {(GRCh38) ? <li><span className="title-ellipsis title-ellipsis-short">{GRCh38}</span><span> (GRCh38)</span></li> : null}
-                            {(GRCh37) ? <li><span className="title-ellipsis title-ellipsis-short">{GRCh37}</span><span> (GRCh37)</span></li> : null}
+                            {(GRCh38) ? <li className="hgvs-term"><span className="title-ellipsis title-ellipsis-short">{GRCh38}</span><span> (GRCh38)</span></li> : null}
+                            {(GRCh37) ? <li className="hgvs-term"><span className="title-ellipsis title-ellipsis-short">{GRCh37}</span><span> (GRCh37)</span></li> : null}
                         </ul>
                     </div>
                 </div>
@@ -399,7 +415,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>
+                                    <td className="hgvs-term">
                                         <span className="title-ellipsis">{(primary_transcript) ? primary_transcript.nucleotide : '--'}</span>
                                     </td>
                                     <td>
