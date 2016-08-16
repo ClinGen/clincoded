@@ -7,11 +7,11 @@
 var React = require('react');
 
 export function renderDataCredit(source) {
-	if (source === 'myvariant') {
+	if (source === 'myvariant') { 
 		return (
 	    	<div className="credits">
 	            <div className="credit credit-myvariant" id="credit-myvariant"><a name="credit-myvariant"></a>
-                    <span className="label label-primary">MyVariant</span> - The data in this table were retrieved using:
+                    <span className="label label-primary">MyVariant</span> - The data in this table was retrieved using:
                     MyVariant.info (<a href="http://myvariant.info" target="_blank">http://myvariant.info</a>)
                     Xin J, Mark A, Afrasiabi C, Tsueng G, Juchler M, Gopal N, Stupp GS, Putman TE, Ainscough BJ,
                     Griffith OL, Torkamani A, Whetzel PL, Mungall CJ, Mooney SD, Su AI, Wu C (2016)
@@ -26,7 +26,7 @@ export function renderDataCredit(source) {
 		return (
 	    	<div className="credits">
 	            <div className="credit credit-vep" id="credit-vep"><a name="credit-vep"></a>
-                    <span className="label label-primary">VEP</span> - The data in this table were retrieved using:
+                    <span className="label label-primary">VEP</span> - The data in this table was retrieved using:
                     The Ensembl Variant Effect Predictor (<a href="http://www.ensembl.org/Homo_sapiens/Tools/VEP" target="_blank">www.ensembl.org/Homo_sapiens/Tools/VEP</a>)
                     McLaren W, Gil L, Hunt SE, Riat HS, Ritchie GR, Thormann A, Flicek P, Cunningham F.
                     Genome Biol. 2016 Jun 6;17(1):122.

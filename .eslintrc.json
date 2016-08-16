@@ -14,7 +14,8 @@
     "extends": "eslint:recommended",
     "ecmaFeatures": {
         "jsx": true,
-        "experimentalObjectRestSpread": true
+        "experimentalObjectRestSpread": true,
+        "modules": true
     },
     "plugins": [
         "react"
