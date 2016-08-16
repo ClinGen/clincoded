@@ -473,7 +473,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
                         {this.state.hasOtherPredData ?
                             <div className="panel panel-info datasource-other">
-                                <div className="panel-heading"><h3 className="panel-title">Other Predictors<a href="#credit-mvi" className="label label-primary">MVi</a></h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Other Predictors<a href="#credit-myvariant" className="label label-primary">MyVariant</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -492,7 +492,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         :
                             <div className="panel panel-info datasource-other">
-                                <div className="panel-heading"><h3 className="panel-title">Other Predictors<a href="#credit-mvi" className="label label-primary">MVi</a></h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Other Predictors<a href="#credit-myvariant" className="label label-primary">MyVariant</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -505,7 +505,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
                         {this.state.hasConservationData ?
                             <div className="panel panel-info datasource-conservation">
-                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis<a href="#credit-mvi" className="label label-primary">MVi</a></h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis<a href="#credit-myvariant" className="label label-primary">MyVariant</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -522,7 +522,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         :
                             <div className="panel panel-info datasource-conservation">
-                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis<a href="#credit-mvi" className="label label-primary">MVi</a></h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis<a href="#credit-myvariant" className="label label-primary">MyVariant</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -776,7 +776,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </div>
                 : null}
 
-                {renderDataCredit('mvi')}
+                {renderDataCredit('myvariant')}
 
             </div>
         );
