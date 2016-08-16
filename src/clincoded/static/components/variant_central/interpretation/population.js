@@ -682,7 +682,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th>No population data was found for this allele in ExAC. <a href={external_url_map['EXACHome']}>Search ExAC</a> for this variant.</th>
+                                        <th>No population data was found for this allele in ExAC. <a href={external_url_map['EXACHome']} target="_blank">Search ExAC</a> for this variant.</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -717,7 +717,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']}>Search 1000 Genomes</a> for this variant.</th>
+                                        <th>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']} target="_blank">Search 1000 Genomes</a> for this variant.</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -757,7 +757,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']}>Search ESP</a> for this variant.</th>
+                                        <th>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']} target="_blank">Search ESP</a> for this variant.</th>
                                     </tr>
                                 </thead>
                             </table>
