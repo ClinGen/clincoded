@@ -43,6 +43,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             diseaseCriteria: [], // array of criteria codes that are disease-dependent
             diseaseAssociated: false, // flag to define whether or not the interpretation has a disease associated with it
             evaluationExists: false, // flag to define whether or not a previous evaluation for this group already exists
+            evidenceDataUpdated: this.props.evidenceDataUpdated, // flag to indicate whether or not the evidence data has changed, in case of interpretation
             checkboxes: {}, // store any checkbox values
             updateMsg: null // specifies what html to display next to button after press
         };
@@ -79,7 +80,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
     componentWillReceiveProps: function(nextProps) {
         // this block is for handling props and states when props (external data) is updated after the initial load/rendering
         // when props are updated, update the parent interpreatation object, if applicable
-        if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
+        if (nextProps.interpretation) {
             this.setState({interpretation: nextProps.interpretation}, () => {
                 this.interpretationEvalCheck();
             });
@@ -89,7 +90,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             }
         }
         // when props are updated, update the form with new extra data, if applicable
-        if (typeof nextProps.evidenceData !== undefined && nextProps.evidenceData != this.props.evidenceData) {
+        if (nextProps.evidenceData) {
             this.setState({evidenceData: nextProps.evidenceData, evidenceDataUpdated: nextProps.evidenceDataUpdated});
         }
     },
@@ -257,7 +258,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
 
             // figure out if we need to create a new evidence data object or not
             if (this.state.evidenceData) {
-                if (this.state.evidenceDataUpdated) {
+                if (this.state.evidenceDataUpdated || (!this.state.evidenceDataUpdated && !evidenceObjectId)) {
+                    // only create/update if evidence object has been updated, or if the object data has not been updated
+                    // and there is no previous evidence object (new interpretation)
                     let evidenceObject = {variant: this.props.variantUuid};
                     evidenceObject[this.state.evidenceType + 'Data'] = this.state.evidenceData;
                     if (evidenceObjectId) {
@@ -291,7 +294,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 };
 
                 // set criterion status and modifiers
-                if (['supporting', 'moderate', 'strong', 'very-strong'].indexOf(this.refs[criterion + '-status'].getValue()) > -1) {
+                if (['supporting', 'moderate', 'strong', 'very-strong', 'stand-alone'].indexOf(this.refs[criterion + '-status'].getValue()) > -1) {
                     // if dropdown selection is a modifier to met, set status to met, and set modifier as needed...
                     evaluations[criterion]['criteriaStatus'] = 'met';
                     evaluations[criterion]['criteriaModifier'] = this.refs[criterion + '-status'].getValue();
@@ -451,7 +454,7 @@ function evalFormValueDropdown(criteria) {
             {criteria[1] === 'P' ? null : <option value="supporting">{criteria}_P</option>}
             {criteria[0] === 'P' && criteria[1] !== 'M' ? <option value="moderate">{criteria}_M</option> : null}
             {criteria[1] === 'S' ? null : <option value="strong">{criteria}_S</option>}
-            {criteria[0] === 'B' ? <option value="stand-alone">{criteria}_stand alone</option> : null}
+            {(criteria[0] === 'B' && criteria[1] !== 'A') ? <option value="stand-alone">{criteria}_stand alone</option> : null}
             {criteria[0] === 'P' && criteria[1] !== 'V' ? <option value="very-strong">{criteria}_VS</option> : null}
         </Input>
     );

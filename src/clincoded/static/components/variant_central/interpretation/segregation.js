@@ -6,6 +6,7 @@ var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+var CompleteSection = require('./shared/complete_section').CompleteSection;
 
 var panel = require('../../../libs/bootstrap/panel');
 var form = require('../../../libs/bootstrap/form');
@@ -42,6 +43,9 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     render: function() {
         return (
             <div className="variant-interpretation segregation">
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="segregation-case" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
                 <PanelGroup accordion><Panel title="Observed in healthy adult(s)" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                         <div className="row">
