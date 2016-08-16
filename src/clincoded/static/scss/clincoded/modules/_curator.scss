@@ -1129,6 +1129,10 @@
             .basic-info .table th,
             .basic-info .table td {
                 width: 25%;
+
+                .title-ellipsis {
+                    max-width: 250px;
+                }
             }
 
             .basic-info .datasource-clinvar-interpretaions .table th,
@@ -1165,10 +1169,6 @@
             .basic-info .clinvar-interpretation .disease .identifiers li + li:before {
                 content: "-";
                 margin: 0 4px;
-            }
-
-            .basic-info .table .primary-transcript {
-                background-color: #fff4f4;
             }
 
             .basic-info .table .primary-transcript td:last-child:after {
