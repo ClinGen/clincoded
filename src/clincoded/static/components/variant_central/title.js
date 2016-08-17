@@ -62,7 +62,7 @@ var Title = module.exports.Title = React.createClass({
                             <div className="feature-in-development pull-right"> {/* FIXME div for temp yellow UI display */}
 
                                 <button type="button-button" className="btn btn-primary pull-right">
-                                    Calculate Pathogenicity
+                                    View Summary
                                 </button>
 
                             </div> {/* /FIXME div for temp yellow UI display */}

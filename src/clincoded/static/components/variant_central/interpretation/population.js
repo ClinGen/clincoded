@@ -19,6 +19,8 @@ var queryKeyValue = globals.queryKeyValue;
 var panel = require('../../../libs/bootstrap/panel');
 var form = require('../../../libs/bootstrap/form');
 
+import { renderDataCredit } from './shared/credit';
+
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
 var Form = form.Form;
@@ -407,6 +409,43 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         });
     },
 
+    // Method to render external ExAC linkout when no ExAC population data found
+    renderExacLinkout: function(response) {
+        let exacLink;
+        // If no ExAC population data, construct external linkout for one of the following:
+        // 1) clinvar/cadd data found & the variant type is substitution
+        // 2) clinvar/cadd data found & the variant type is NOT substitution
+        // 3) no data returned by myvariant.info
+        if (response) {
+            let chrom = response.chrom,
+                pos = response.hg19.start,
+                regionStart = parseInt(response.hg19.start) - 30,
+                regionEnd = parseInt(response.hg19.end) + 30;
+            if (response.clinvar) {
+                // Try 'clinvar' as primary data object
+                let clinvar = response.clinvar;
+                // Applies to substitution variant (e.g. C>T in which '>' means 'changes to')
+                if (clinvar.type && clinvar.type === 'single nucleotide variant') {
+                    exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + clinvar.ref + '-' + clinvar.alt;
+                } else {
+                    // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
+                    exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
+                }
+            } else if (response.cadd) {
+                // Fallback to 'cadd' as alternative data object
+                let cadd = response.cadd;
+                if (cadd.type && cadd.type === 'SNV') {
+                    exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + cadd.ref + '-' + cadd.alt;
+                } else {
+                    exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
+                }
+            }
+        } else {
+            exacLink = external_url_map['EXACHome'];
+        }
+        return exacLink;
+    },
+
     /* the following methods are related to the rendering of population data tables */
     // method to render a row of data for the ExAC table
     renderExacRow: function(key, exac, exacStatic, rowNameCustom, className) {
@@ -652,7 +691,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     {this.state.hasExacData ?
                         <div className="panel panel-info datasource-ExAC">
                             <div className="panel-heading">
-                                <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}
+                                <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}<a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
                                     <a className="panel-subtitle pull-right" href={'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
                                 </h3>
                             </div>
@@ -678,11 +717,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     :
                         <div className="panel panel-info datasource-ExAC">
-                            <div className="panel-heading"><h3 className="panel-title">ExAC</h3></div>
+                            <div className="panel-heading"><h3 className="panel-title">ExAC<a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a></h3></div>
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th>No population data was found for this allele in ExAC. <a href={external_url_map['EXACHome']}>Search ExAC</a> for this variant.</th>
+                                        <th>No population data was found for this allele in ExAC. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search ExAC</a> for this variant.</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -691,7 +730,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     {this.state.hasTGenomesData ?
                         <div className="panel panel-info datasource-1000G">
                             <div className="panel-heading">
-                                <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}
+                                <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}<a href="#credit-vep" className="label label-primary">VEP</a>
                                     <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
                                 </h3>
                             </div>
@@ -713,11 +752,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     :
                         <div className="panel panel-info datasource-1000G">
-                            <div className="panel-heading"><h3 className="panel-title">1000 Genomes</h3></div>
+                            <div className="panel-heading"><h3 className="panel-title">1000 Genomes<a href="#credit-vep" className="label label-primary">VEP</a></h3></div>
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']}>Search 1000 Genomes</a> for this variant.</th>
+                                        <th>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']} target="_blank">Search 1000 Genomes</a> for this variant.</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -727,6 +766,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         <div className="panel panel-info datasource-ESP">
                             <div className="panel-heading">
                                 <h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}
+                                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
                                     <a className="panel-subtitle pull-right" href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
                                 </h3>
                             </div>
@@ -753,17 +793,22 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     :
                         <div className="panel panel-info datasource-ESP">
-                            <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP)</h3></div>
+                            <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP)<a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a></h3></div>
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']}>Search ESP</a> for this variant.</th>
+                                        <th>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']} target="_blank">Search ESP</a> for this variant.</th>
                                     </tr>
                                 </thead>
                             </table>
                         </div>
                     }
                 </Panel></PanelGroup>
+
+                {renderDataCredit('myvariant')}
+
+                {renderDataCredit('vep')}
+
             </div>
         );
     }

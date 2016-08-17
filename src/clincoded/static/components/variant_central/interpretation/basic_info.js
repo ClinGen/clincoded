@@ -12,6 +12,8 @@ var externalLinks = require('./shared/externalLinks');
 var external_url_map = globals.external_url_map;
 var dbxref_prefix_map = globals.dbxref_prefix_map;
 
+import { renderDataCredit } from './shared/credit';
+
 // Display the curator data of the curation data
 var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasicInfo = React.createClass({
     mixins: [RestMixin],
@@ -28,7 +30,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         return {
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
-            clinvar_hgvs_names: [],
             dbSNP_id: null,
             nucleotide_change: [],
             molecular_consequence: [],
@@ -92,6 +93,21 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         });
     },
 
+    componentDidUpdate: function(prevProps, prevState) {
+        // Finds all hgvs terms in <li> and <td> nodes
+        // Then sets 'title' and 'class' attributes if text overflows
+        let nodeList = document.querySelectorAll('.hgvs-term span');
+        let hgvsNodes = Array.from(nodeList);
+        if (hgvsNodes) {
+            hgvsNodes.forEach(node => {
+                if (node.offsetWidth < node.scrollWidth) {
+                    node.setAttribute('title', node.innerHTML);
+                    node.className += ' dotted';
+                }
+            });
+        }
+    },
+
     parseData: function(variant) {
         if (variant.clinvarVariantId) {
             this.setState({clinvar_id: variant.clinvarVariantId});
@@ -121,7 +137,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     parseClinVarEutils: function(variantData) {
         this.setState({
             hasRefseqData: true,
-            clinvar_hgvs_names: this.parseHgvsNames(variantData.hgvsNames),
             nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
             protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
             molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
@@ -133,17 +148,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         // Calling method to identify nucleotide change, protein change and molecular consequence
         // Used for UI display in the Primary Transcript table
         this.getPrimaryTranscript(variantData.clinvarVariantTitle, variantData.RefSeqTranscripts.NucleotideChangeList, variantData.RefSeqTranscripts.MolecularConsequenceList);
-    },
-
-    // Return all non NC_ genomic hgvsNames in an array
-    parseHgvsNames: function(hgvsNames) {
-        var hgvs_names = [];
-        if (hgvsNames) {
-            if (hgvsNames.others) {
-                hgvs_names = hgvsNames.others;
-            }
-        }
-        return hgvs_names;
     },
 
     // Create ClinVar primary transcript object
@@ -165,25 +169,25 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     SO_id_term = found.SO_term + ' ' + found.SO_id;
                 }
             }
-            // Find RefSeq transcript (from VEP) whose nucleotide HGVS matches ClinVar's
-            // and map the Exon and Protein HGVS of the found RefSeq transcript to ClinVar
-            // Filter RefSeq transcripts by 'source' and 'hgvsc' flags
-            ensemblTranscripts.forEach(refseqTranscript => {
-                if (refseqTranscript.source === 'RefSeq') {
-                    if (refseqTranscript.hgvsc && refseqTranscript.hgvsc === result.HGVS) {
-                        exon = refseqTranscript.exon ? refseqTranscript.exon : '--';
-                        protein_hgvs = refseqTranscript.hgvsp ? refseqTranscript.hgvsp : '--';
-                    }
-                }
-            });
-            // Set transcript object properties
-            transcript = {
-                "nucleotide": result.HGVS,
-                "exon": exon,
-                "protein": protein_hgvs,
-                "molecular": SO_id_term
-            };
         }
+        // Find RefSeq transcript (from VEP) whose nucleotide HGVS matches ClinVar's
+        // and map the Exon and Protein HGVS of the found RefSeq transcript to ClinVar
+        // Filter RefSeq transcripts by 'source' and 'hgvsc' flags
+        ensemblTranscripts.forEach(refseqTranscript => {
+            if (refseqTranscript.source === 'RefSeq') {
+                if (refseqTranscript.hgvsc && refseqTranscript.hgvsc === result.HGVS) {
+                    exon = refseqTranscript.exon ? refseqTranscript.exon : '--';
+                    protein_hgvs = refseqTranscript.hgvsp ? refseqTranscript.hgvsp : '--';
+                }
+            }
+        });
+        // Set transcript object properties
+        transcript = {
+            "nucleotide": result.HGVS,
+            "exon": exon,
+            "protein": protein_hgvs,
+            "molecular": SO_id_term
+        };
         this.setState({primary_transcript: transcript});
     },
 
@@ -193,7 +197,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (item.hgvsc && item.source === source) {
             return (
                 <tr key={key} className={(item.canonical && item.canonical === 1) ? 'primary-transcript' : null}>
-                    <td><span className="title-ellipsis" title={item.hgvsc}>{item.hgvsc}</span></td>
+                    <td className="hgvs-term"><span className="title-ellipsis">{item.hgvsc}</span></td>
                     <td>{(item.exon) ? item.exon : '--'}</td>
                     <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
                     <td className="clearfix">
@@ -351,7 +355,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var GRCh37 = this.state.hgvs_GRCh37;
         var GRCh38 = this.state.hgvs_GRCh38;
         var primary_transcript = this.state.primary_transcript;
-        var clinvar_hgvs_names = this.state.clinvar_hgvs_names;
         var clinVarRCV = this.state.clinVarRCV;
         var self = this;
 
@@ -364,22 +367,21 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             links_37 = externalLinks.setContextLinks(GRCh37, 'GRCh37');
         }
 
-
         return (
             <div className="variant-interpretation basic-info">
                 <div className="bs-callout bs-callout-info clearfix">
                     <div className="bs-callout-content-container-fullwidth">
                         <h4>Genomic</h4>
                         <ul>
-                            {(GRCh38) ? <li><span className="title-ellipsis title-ellipsis-short">{GRCh38}</span><span> (GRCh38)</span></li> : null}
-                            {(GRCh37) ? <li><span className="title-ellipsis title-ellipsis-short">{GRCh37}</span><span> (GRCh37)</span></li> : null}
+                            {(GRCh38) ? <li className="hgvs-term"><span className="title-ellipsis title-ellipsis-short">{GRCh38}</span><span> (GRCh38)</span></li> : null}
+                            {(GRCh37) ? <li className="hgvs-term"><span className="title-ellipsis title-ellipsis-short">{GRCh37}</span><span> (GRCh37)</span></li> : null}
                         </ul>
                     </div>
                 </div>
 
                 <div className="panel panel-info datasource-clinvar-interpretaions">
                     <div className="panel-heading"><h3 className="panel-title">ClinVar Interpretations</h3></div>
-                    {(clinVarRCV) ?
+                    {(clinVarRCV.length > 0) ?
                         <table className="table">
                             <thead>
                                 <tr>
@@ -414,7 +416,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>
+                                    <td className="hgvs-term">
                                         <span className="title-ellipsis">{(primary_transcript) ? primary_transcript.nucleotide : '--'}</span>
                                     </td>
                                     <td>
@@ -436,11 +438,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">RefSeq Transcripts
+                        <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="label label-primary">VEP</a>
                             <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                         </h3>
                     </div>
-                    {(clinvar_id && clinvar_hgvs_names) ?
+                    {(this.state.hasHgvsGRCh38 && GRCh38) ?
                         <table className="table">
                             <thead>
                                 <tr>
@@ -457,13 +459,13 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </tbody>
                         </table>
                         :
-                        <table className="table"><tbody><tr><td>No data was found for this allele in RefSeq. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</td></tr></tbody></table>
+                        <table className="table"><tbody><tr><td>No data was found for this allele in RefSeq. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank">Search RefSeq</a> for this variant.</td></tr></tbody></table>
                     }
                 </div>
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">Ensembl Transcripts
+                        <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="label label-primary">VEP</a>
                             <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                         </h3>
                     </div>
@@ -525,6 +527,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                         </dl>
                     </div>
                 </div>
+
+                {renderDataCredit('vep')}
 
             </div>
         );

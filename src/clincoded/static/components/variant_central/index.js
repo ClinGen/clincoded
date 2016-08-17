@@ -38,7 +38,9 @@ var VariantCurationHub = React.createClass({
             ext_ensemblHgvsVEP: null,
             ext_clinvarEutils: null,
             ext_clinVarEsearch: null,
-            ext_clinVarRCV: null
+            ext_clinVarRCV: null,
+            ext_myGeneInfo_MyVariant: null,
+            ext_myGeneInfo_VEP: null
         };
     },
 
@@ -111,6 +113,7 @@ var VariantCurationHub = React.createClass({
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfo'] + hgvs_notation).then(response => {
                     this.setState({ext_myVariantInfo: response});
+                    this.parseMyVariantInfo(response);
                     // check dbsnfp data for bustamante query
                     var hgvsObj = {};
                     if (response.dbnsfp) {
@@ -177,10 +180,71 @@ var VariantCurationHub = React.createClass({
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then(response => {
                     this.setState({ext_ensemblHgvsVEP: response});
+                    this.parseEnsemblHgvsVEP(response);
                 }).catch(function(e) {
                     console.log('Ensembl Fetch Error=: %o', e);
                 });
             }
+        }
+    },
+
+    // Method to parse gene symbol and id from myvariant.info
+    parseMyVariantInfo: function(myVariantInfo) {
+        let geneSymbol, geneId;
+        if (myVariantInfo) {
+            if (myVariantInfo.clinvar) {
+                geneSymbol = myVariantInfo.clinvar.gene.symbol;
+                geneId = myVariantInfo.clinvar.gene.id;
+            } else if (myVariantInfo.dbsnp) {
+                geneSymbol = myVariantInfo.dbsnp.gene.symbol;
+                geneId = myVariantInfo.dbsnp.gene.geneid;
+            } else if (myVariantInfo.cadd) {
+                geneSymbol = myVariantInfo.cadd.gene.genename;
+                geneId = myVariantInfo.cadd.gene.gene_id;
+            }
+            this.fetchMyGeneInfo(geneSymbol, geneId, 'myVariantInfo');
+        }
+    },
+
+    // Method to parse gene symbol and id from VEP
+    parseEnsemblHgvsVEP: function(ensemblHgvsVEP) {
+        let geneSymbol, geneId;
+        if (ensemblHgvsVEP) {
+            let primaryTranscript = setPrimaryTranscript(ensemblHgvsVEP);
+            if (primaryTranscript) {
+                geneSymbol = primaryTranscript.gene_symbol;
+                geneId = primaryTranscript.gene_id;
+            }
+            this.fetchMyGeneInfo(geneSymbol, geneId, 'ensemblHgvsVEP');
+        }
+    },
+
+    // Method to fetch Gene-centric data from mygene.info
+    // and pass the data object to child component
+    fetchMyGeneInfo: function(geneSymbol, geneId, source) {
+        let synonyms = [], geneObj = {};
+        if (geneSymbol) {
+            this.getRestData('/genes/' + geneSymbol).then(response => {
+                synonyms = response.synonyms;
+            }).catch(function(e) {
+                console.log('Local Gene Fetch ERROR=: %o', e);
+            });
+        }
+        if (geneId) {
+            let fields = 'fields=entrezgene,exac,HGNC,MIM,homologene.id,interpro,name,pathway.kegg,pathway.netpath,pathway.pid,pdb,pfam,pharmgkb,prosite,uniprot.Swiss-Prot,summary,symbol';
+            this.getRestData(this.props.href_url.protocol + external_url_map['MyGeneInfo'] + geneId + '&species=human&' + fields).then(result => {
+                geneObj = result.hits[0];
+                if (synonyms) {
+                    geneObj.synonyms = synonyms;
+                }
+                if (source === 'myVariantInfo') {
+                    this.setState({ext_myGeneInfo_MyVariant: geneObj});
+                } else if (source === 'ensemblHgvsVEP') {
+                    this.setState({ext_myGeneInfo_VEP: geneObj});
+                }
+            }).catch(function(e) {
+                console.log('MyGeneInfo Fetch Error=: %o', e);
+            });
         }
     },
 
@@ -224,6 +288,7 @@ var VariantCurationHub = React.createClass({
                     href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
                 <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                     href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj}
+                    ext_myGeneInfo={(this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : this.state.ext_myGeneInfo_VEP}
                     ext_myVariantInfo={this.state.ext_myVariantInfo}
                     ext_bustamante={this.state.ext_bustamante}
                     ext_ensemblVEP={this.state.ext_ensemblVEP}
