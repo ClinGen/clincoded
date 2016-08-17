@@ -1391,6 +1391,28 @@
             margin-left: 10px;
             vertical-align: top;
         }
+
+        a.credit-mygene {
+            background: url(/static/img/mygene-logo.png) 0 1px no-repeat;
+        }
+
+        a.credit-myvariant {
+            background: url(/static/img/myvariant-logo.png) 0 1px no-repeat;
+        }
+
+        a.credit-mygene,
+        a.credit-myvariant {
+            background-size: 18px 18px;
+            display: inline-block;
+            height: 18px;
+            width: 18px;
+            margin-left: 10px;
+            vertical-align: bottom;
+
+            span {
+                display: none;
+            }
+        }
     }
 
     .panel-subtitle {
@@ -1564,6 +1586,27 @@ dl.inline-dl {
 
     .label-primary {
         vertical-align: text-top;
+    }
+
+    span.credit-mygene {
+        background: url(/static/img/mygene-logo.png) 0 0 no-repeat;
+    }
+
+    span.credit-myvariant {
+        background: url(/static/img/myvariant-logo.png) 0 0 no-repeat;
+    }
+
+    span.credit-mygene,
+    span.credit-myvariant {
+        background-size: 18px 18px;
+        display: inline-block;
+        height: 18px;
+        width: 18px;
+        vertical-align: bottom;
+
+        span {
+            display: none;
+        }
     }
 }
 
