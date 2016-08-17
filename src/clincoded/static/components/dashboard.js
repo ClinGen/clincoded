@@ -109,17 +109,17 @@ var Dashboard = React.createClass({
                 if (gdm.annotations) gdmMapping = this.gdmMappingLoop(gdmMapping, gdm.annotations, gdm.uuid,
                     gdm.gene.symbol, gdm.disease.term, gdm.modeInheritance, null);
             }
-            console.log(data[2]['@graph']);
-            var temp = data[2]['@graph'].map(res => { return res['@id']; });
-            console.log(temp);
-            this.getRestDatas(temp, null, true).then(vciInterpResults => {
+            var vciInterpURLs = data[2]['@graph'].map(res => { return res['@id']; });
+            this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
+                console.log(vciInterpResults);
                 vciInterpResults.map(vciInterpResult => {
                     vciInterpList.push({
                         uuid: vciInterpResult.uuid,
                         variantUuid: vciInterpResult.variant.uuid,
-                        carId: vciInterpResult.variant.carId,
-                        clinvarVariantId: vciInterpResult.variant.clinvarVariantId,
                         clinvarVariantTitle: vciInterpResult.variant.clinvarVariantTitle,
+                        hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
+                        hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
+                        diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
                         date_created: vciInterpResult.date_created
                     });
                 });
@@ -155,6 +155,7 @@ var Dashboard = React.createClass({
     },
 
     render: function() {
+        console.log(this.state.vciInterpList);
         return (
             <div className="container">
                 <h1>Welcome, {this.state.userName}!</h1>
@@ -191,11 +192,18 @@ var Dashboard = React.createClass({
                             <ul>
                                 {this.state.vciInterpList.map(function(item) {
                                     return (
-                                    <a key={item.uuid} className="block-link" href={"/variant-central/?variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
+                                    <a key={item.uuid} className="block-link" href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
                                     <li key={item.uuid}>
-                                        <span className="block-link-color"><strong>{item.carId}</strong> // <i>{item.clinvarVariantId}</i></span><br />
-                                        <span className="block-link-no-color">{item.clinvarVariantTitle}<br />
-                                        <strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                                        <span className="block-link-color"><strong>
+                                        {item.clinvarVariantTitle
+                                            ? item.clinvarVariantTitle
+                                            : (item.hgvsName37 ? item.hgvsName37 : item.hgvsName38)
+                                        }
+                                        </strong><br /></span>
+                                        <span className="block-link-no-color">
+                                            {item.diseaseTerm ? item.diseaseTerm : "No disease associated"}
+                                            <br /><strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}
+                                        </span>
                                     </li>
                                     </a>
                                     );
