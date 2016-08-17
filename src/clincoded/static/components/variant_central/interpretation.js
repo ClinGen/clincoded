@@ -28,7 +28,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
-        geneObj: React.PropTypes.object,
+        ext_myGeneInfo: React.PropTypes.object,
         href_url: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
@@ -44,7 +44,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     getInitialState: function() {
         return {
             interpretation: this.props.interpretation,
-            geneObj: this.props.geneObj,
+            ext_myGeneInfo: this.props.ext_myGeneInfo,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
             ext_bustamante: this.props.ext_bustamante,
             ext_ensemblVEP: this.props.ext_ensemblVEP,
@@ -63,8 +63,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
             this.setState({interpretation: nextProps.interpretation});
         }
-        if (typeof nextProps.geneObj !== undefined && !_.isEqual(nextProps.geneObj, this.props.geneObj)) {
-            this.setState({geneObj: nextProps.geneObj});
+        if (nextProps.ext_myGeneInfo) {
+            this.setState({ext_myGeneInfo: nextProps.ext_myGeneInfo});
         }
         if (nextProps.ext_myVariantInfo) {
             this.setState({ext_myVariantInfo: nextProps.ext_myVariantInfo});
@@ -168,7 +168,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationGeneSpecific data={variant} data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            ext_clinvarEutils={this.state.ext_clinvarEutils} geneObj={this.state.geneObj} />
+                            ext_myGeneInfo={this.state.ext_myGeneInfo}
+                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP} />
                     </div>
                     : null}
                 </div>
