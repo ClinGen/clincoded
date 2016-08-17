@@ -30,6 +30,8 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 
+var validTabs = ['missense', 'lof', 'silent-intron', 'indel'];
+
 var computationStatic = {
     conservation: {
         _order: ['phylop7way', 'phylop20way', 'phastconsp7way', 'phastconsp20way', 'gerp', 'siphy'],
@@ -80,7 +82,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             hasConservationData: false,
             hasOtherPredData: false,
             hasBustamanteData: false,
-            selectedTab: (this.props.href_url.href ? (queryKeyValue('subtab', this.props.href_url.href) ? queryKeyValue('subtab', this.props.href_url.href) : 'missense')  : 'missense'),
+            selectedSubtab: (this.props.href_url.href ? (queryKeyValue('subtab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('subtab', this.props.href_url.href)) > -1 ? queryKeyValue('subtab', this.props.href_url.href) : 'missense') : 'missense')  : 'missense'),
             codonObj: {},
             computationObj: {
                 conservation: {
@@ -159,6 +161,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     },
 
     componentWillUnmount: function() {
+        window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', null));
         this.setState({
             hasConservationData: false,
             hasOtherPredData: false,
@@ -326,12 +329,13 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         );
     },
 
-    // set selectedTab to whichever tab the user switches to, and update the address accordingly
-    handleSelect: function (subtab) {
-        this.setState({selectedTab: subtab});
-        if (subtab == 'missense') {
+    // set selectedSubtab to whichever tab the user switches to, and update the address accordingly
+    handleSubtabSelect: function (subtab) {
+        if (subtab == 'missense' || validTabs.indexOf(subtab) == -1) {
+            this.setState({selectedSubtab: 'missense'});
             window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', null));
         } else {
+            this.setState({selectedSubtab: subtab});
             window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', subtab));
         }
     },
@@ -413,12 +417,12 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     <CompleteSection interpretation={this.state.interpretation} tabName="predictors" updateInterpretationObj={this.props.updateInterpretationObj} />
                 : null}
                 <ul className="vci-tabs-header tab-label-list vci-subtabs" role="tablist">
-                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('missense')} aria-selected={this.state.selectedTab == 'missense'}>Missense</li>
-                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('lof')} aria-selected={this.state.selectedTab == 'lof'}>Loss of Function</li>
-                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('silent-intron')} aria-selected={this.state.selectedTab == 'silent-intron'}>Silent & Intron</li>
-                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSelect('indel')} aria-selected={this.state.selectedTab == 'indel'}>In-frame Indel</li>
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSubtabSelect('missense')} aria-selected={this.state.selectedSubtab == 'missense'}>Missense</li>
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSubtabSelect('lof')} aria-selected={this.state.selectedSubtab == 'lof'}>Loss of Function</li>
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSubtabSelect('silent-intron')} aria-selected={this.state.selectedSubtab == 'silent-intron'}>Silent & Intron</li>
+                    <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSubtabSelect('indel')} aria-selected={this.state.selectedSubtab == 'indel'}>In-frame Indel</li>
                 </ul>
-                {this.state.selectedTab == '' || this.state.selectedTab == 'missense' ?
+                {this.state.selectedSubtab == '' || this.state.selectedSubtab == 'missense' ?
                 <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
@@ -672,7 +676,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     </Panel></PanelGroup>
                 </div>
                 : null}
-                {this.state.selectedTab == 'lof' ?
+                {this.state.selectedSubtab == 'lof' ?
                 <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
@@ -706,7 +710,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     </Panel></PanelGroup>
                 </div>
                 : null}
-                {this.state.selectedTab == 'silent-intron' ?
+                {this.state.selectedSubtab == 'silent-intron' ?
                 <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content" open>
                         {(this.props.data && this.state.interpretation) ?
@@ -722,7 +726,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     </Panel></PanelGroup>
                 </div>
                 : null}
-                {this.state.selectedTab == 'indel' ?
+                {this.state.selectedSubtab == 'indel' ?
                 <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
                         <div className="panel panel-info">

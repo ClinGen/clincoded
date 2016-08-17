@@ -23,6 +23,8 @@ var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific
 var calculator = require('./interpretation/shared/calculator');
 var PathogenicityCalculator = calculator.PathogenicityCalculator;
 
+var validTabs = ['basic-info', 'population', 'predictors', 'experimental', 'segregation-case', 'gene-centric'];
+
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
     propTypes: {
@@ -53,7 +55,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_clinvarEutils: this.props.ext_clinvarEutils,
             ext_clinVarEsearch: this.props.ext_clinVarEsearch,
             ext_clinVarRCV: this.props.ext_clinVarRCV,
-            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info')  : 'basic-info') // set selectedTab to whatever is defined in the address; default to first tab if not set
+            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
         };
     },
 
@@ -94,11 +96,12 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     // set selectedTab to whichever tab the user switches to, and update the address accordingly
     handleSelect: function (tab) {
-        this.setState({selectedTab: tab});
-        if (tab == 'basic-info') {
-            window.history.replaceState(window.state, '', editQueryValue(this.props.href_url.href, 'tab', null));
+        if (tab == 'basic-info' || validTabs.indexOf(tab) == -1) {
+            this.setState({selectedTab: 'basic-info'});
+            window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'tab', null));
         } else {
-            window.history.replaceState(window.state, '', editQueryValue(this.props.href_url.href, 'tab', tab));
+            this.setState({selectedTab: tab});
+            window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'tab', tab));
         }
     },
 
