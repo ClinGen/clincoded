@@ -297,7 +297,9 @@
 }
 
 .panel-dashboard {
-    position: relative;
+    .panel-relative-content {
+        position: relative;
+    }
 
     .panel-std {
         padding: 10px 0 15px 0;
@@ -1641,7 +1643,7 @@ dl.inline-dl {
     }
 }
 
-.busy-overlay {
+.loading-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -1649,12 +1651,20 @@ dl.inline-dl {
     bottom: 0;
     background-color: rgba(240,240,240, 0.8);
     color: #000;
+    text-align: center;
     z-index: 999;
+}
 
-    .center {
-        display: inline-block;
-        position: relative;
-        vertical-align: middle
-        font-weight: bold;
-    }
+.loading-overlay:before {
+    content: '';
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+
+.loading-overlay-center {
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    font-weight: bold;
 }
