@@ -1235,6 +1235,15 @@
                     font-weight: bold;
                 }
             }
+
+            .gene-specific .datasource-constraint-scores .table thead td,
+            .gene-specific .datasource-constraint-scores .table tbody td {
+                width: 25%;
+            }
+
+            .gene-specific .datasource-constraint-scores .table tfoot td {
+                font-size: 90%;
+            }
         }
     }
 }
