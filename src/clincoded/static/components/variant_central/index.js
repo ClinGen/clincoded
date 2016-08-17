@@ -222,7 +222,7 @@ var VariantCurationHub = React.createClass({
     // Method to fetch Gene-centric data from mygene.info
     // and pass the data object to child component
     fetchMyGeneInfo: function(geneSymbol, geneId, source) {
-        let synonyms, geneObj;
+        let synonyms = [], geneObj = {};
         if (geneSymbol) {
             this.getRestData('/genes/' + geneSymbol).then(response => {
                 synonyms = response.synonyms;
@@ -234,7 +234,9 @@ var VariantCurationHub = React.createClass({
             let fields = 'fields=entrezgene,exac,HGNC,MIM,homologene.id,interpro,name,pathway.kegg,pathway.netpath,pathway.pid,pdb,pfam,pharmgkb,prosite,uniprot.Swiss-Prot,summary,symbol';
             this.getRestData(this.props.href_url.protocol + external_url_map['MyGeneInfo'] + geneId + '&species=human&' + fields).then(result => {
                 geneObj = result.hits[0];
-                geneObj.synonyms = synonyms;
+                if (synonyms) {
+                    geneObj.synonyms = synonyms;
+                }
                 if (source === 'myVariantInfo') {
                     this.setState({ext_myGeneInfo_MyVariant: geneObj});
                 } else if (source === 'ensemblHgvsVEP') {
