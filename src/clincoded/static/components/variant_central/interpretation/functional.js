@@ -44,7 +44,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         return (
             <div className="variant-interpretation functional">
                 {this.state.interpretation ?
-                    <CompleteSection interpretation={this.state.interpretation} tabName="functional" updateInterpretationObj={this.props.updateInterpretationObj} />
+                    <CompleteSection interpretation={this.state.interpretation} tabName="experimental" updateInterpretationObj={this.props.updateInterpretationObj} />
                 : null}
                 <PanelGroup accordion><Panel title="Does variant result in LOF?" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?

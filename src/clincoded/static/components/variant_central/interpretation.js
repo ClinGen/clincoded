@@ -28,6 +28,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
+        ext_myGeneInfo: React.PropTypes.object,
         href_url: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
@@ -43,6 +44,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     getInitialState: function() {
         return {
             interpretation: this.props.interpretation,
+            ext_myGeneInfo: this.props.ext_myGeneInfo,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
             ext_bustamante: this.props.ext_bustamante,
             ext_ensemblVEP: this.props.ext_ensemblVEP,
@@ -60,6 +62,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         // when props are updated, update the parent interpreatation object, if applicable
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
             this.setState({interpretation: nextProps.interpretation});
+        }
+        if (nextProps.ext_myGeneInfo) {
+            this.setState({ext_myGeneInfo: nextProps.ext_myGeneInfo});
         }
         if (nextProps.ext_myVariantInfo) {
             this.setState({ext_myVariantInfo: nextProps.ext_myVariantInfo});
@@ -113,9 +118,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('population')} aria-selected={this.state.selectedTab == 'population'}>Population {completedSections.indexOf('population') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')} aria-selected={this.state.selectedTab == 'predictors'}>Predictors {completedSections.indexOf('predictors') > -1 ? <span>&#10003;</span> : null}</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('functional')} aria-selected={this.state.selectedTab == 'functional'}>Functional {completedSections.indexOf('functional') > -1 ? <span>&#10003;</span> : null}</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('experimental')} aria-selected={this.state.selectedTab == 'experimental'}>Experimental {completedSections.indexOf('experimental') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')} aria-selected={this.state.selectedTab == 'segregation-case'}>Segregation/Case {completedSections.indexOf('segregation-case') > -1 ? <span>&#10003;</span> : null}</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-specific')} aria-selected={this.state.selectedTab == 'gene-specific'}>Gene-specific {completedSections.indexOf('gene-specific') > -1 ? <span>&#10003;</span> : null}</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-centric')} aria-selected={this.state.selectedTab == 'gene-centric'}>Gene-centric {completedSections.indexOf('gene-centric') > -1 ? <span>&#10003;</span> : null}</li>
                     </ul>
 
                     {this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ?
@@ -146,7 +151,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch} />
                     </div>
                     : null}
-                    {this.state.selectedTab == 'functional' ?
+                    {this.state.selectedTab == 'experimental' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
@@ -158,10 +163,12 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
                     : null}
-                    {this.state.selectedTab == 'gene-specific' ?
+                    {this.state.selectedTab == 'gene-centric' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationGeneSpecific data={variant} data={variant} href_url={this.props.href_url}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                            ext_myGeneInfo={this.state.ext_myGeneInfo}
+                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP} />
                     </div>
                     : null}
                 </div>
