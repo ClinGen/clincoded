@@ -194,13 +194,13 @@ var Dashboard = React.createClass({
                                     return (
                                     <a key={item.uuid} className="block-link" href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
                                     <li key={item.uuid}>
-                                        <span className="block-link-color"><strong>
+                                        <span className="block-link-color title-ellipsis"><strong>
                                         {item.clinvarVariantTitle
                                             ? item.clinvarVariantTitle
                                             : (item.hgvsName37 ? item.hgvsName37 : item.hgvsName38)
                                         }
                                         </strong><br /></span>
-                                        <span className="block-link-no-color">
+                                        <span className="block-link-no-color title-ellipsis">
                                             {item.diseaseTerm ? item.diseaseTerm : "No disease associated"}
                                             <br /><strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}
                                         </span>
@@ -218,7 +218,7 @@ var Dashboard = React.createClass({
                             <ul>
                                 {this.state.gdmList.map(function(item) {
                                     return (
-                                    <a key={item.uuid} className="block-link" href={"/curation-central/?gdm=" + item.uuid}>
+                                    <a key={item.uuid} className="block-link title-ellipsis" href={"/curation-central/?gdm=" + item.uuid}>
                                     <li key={item.uuid}>
                                         <span className="block-link-color"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span><br />
                                         <span className="block-link-no-color"><strong>Status</strong>: {item.status}<br />
