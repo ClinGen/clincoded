@@ -50,47 +50,49 @@ var Dashboard = React.createClass({
     },
 
     getData: function(session) {
-        // Retrieve all GDMs and other objects related to user via search
+        // get 10 gdms and VCI interpretations created by user
         this.getRestDatas([
             '/search/?type=gdm&limit=10&submitted_by.uuid=' + session.user_properties.uuid,
             '/search/?type=interpretation&limit=10&submitted_by.uuid=' + session.user_properties.uuid
         ],
             null)
         .then(data => {
-            // Search objects successfully retrieved; process results
-            // GDM results; finds GDMs created by user, and also creates PMID-GDM mapping table
-            // (stopgap measure until article -> GDM mapping ability is incorporated)
-            var gdmList = [],
-                vciInterpList = [],
-                tempRecentHistory = [];
-            var gdmURLs = data[0]['@graph'].map(res => { return res['@id']; });
-            this.getRestDatas(gdmURLs, null, true).then(gdmResults => {
-                gdmResults.map(gdmResult => {
-                    gdmList.push({
-                        uuid: gdmResult.uuid,
-                        gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdmResult.gene.symbol, gdmResult.disease.term),
-                        gdmModel: this.cleanGdmModelName(gdmResult.modeInheritance),
-                        status: gdmResult.gdm_status,
-                        date_created: gdmResult.date_created
+            var gdmURLs = [], gdmList = [],
+                vciInterpURLs = [], vciInterpList = [];
+            // go through GDM results and get their data
+            gdmURLs = data[0]['@graph'].map(res => { return res['@id']; });
+            if (gdmURLs.length > 0) {
+                this.getRestDatas(gdmURLs, null, true).then(gdmResults => {
+                    gdmResults.map(gdmResult => {
+                        gdmList.push({
+                            uuid: gdmResult.uuid,
+                            gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdmResult.gene.symbol, gdmResult.disease.term),
+                            gdmModel: this.cleanGdmModelName(gdmResult.modeInheritance),
+                            status: gdmResult.gdm_status,
+                            date_created: gdmResult.date_created
+                        });
                     });
+                    this.setState({gdmList: gdmList});
                 });
-                this.setState({gdmList: gdmList});
-            });
-            var vciInterpURLs = data[1]['@graph'].map(res => { return res['@id']; });
-            this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
-                vciInterpResults.map(vciInterpResult => {
-                    vciInterpList.push({
-                        uuid: vciInterpResult.uuid,
-                        variantUuid: vciInterpResult.variant.uuid,
-                        clinvarVariantTitle: vciInterpResult.variant.clinvarVariantTitle,
-                        hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
-                        hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
-                        diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
-                        date_created: vciInterpResult.date_created
+            }
+            // go through VCI interpretation results and get their data
+            vciInterpURLs = data[1]['@graph'].map(res => { return res['@id']; });
+            if (vciInterpURLs.length > 0) {
+                this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
+                    vciInterpResults.map(vciInterpResult => {
+                        vciInterpList.push({
+                            uuid: vciInterpResult.uuid,
+                            variantUuid: vciInterpResult.variant.uuid,
+                            clinvarVariantTitle: vciInterpResult.variant.clinvarVariantTitle,
+                            hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
+                            hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
+                            diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
+                            date_created: vciInterpResult.date_created
+                        });
                     });
+                    this.setState({vciInterpList: vciInterpList});
                 });
-                this.setState({vciInterpList: vciInterpList});
-            });
+            }
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
