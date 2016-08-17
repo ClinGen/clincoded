@@ -26,7 +26,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
         return {
             clinvar_id: null,
             interpretation: this.props.interpretation,
-            ensembl_transcripts: [],
+            ensembl_gene_id: null,
             ext_myGeneInfo: this.props.ext_myGeneInfo
         };
     },
@@ -35,7 +35,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
         this.setState({interpretation: nextProps.interpretation});
         // update data based on api call results
         if (nextProps.ext_ensemblHgvsVEP) {
-            this.setState({ensembl_transcripts: nextProps.ext_ensemblHgvsVEP[0].transcript_consequences});
+            this.parseEnsemblGeneId(nextProps.ext_ensemblHgvsVEP[0].transcript_consequences);
         }
         if (nextProps.ext_myGeneInfo) {
             this.setState({ext_myGeneInfo: nextProps.ext_myGeneInfo});
@@ -75,9 +75,8 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
     },
 
     // Method to parse Ensembl gene_id from VEP
-    parseEnsemblGeneId: function() {
+    parseEnsemblGeneId: function(ensemblTranscripts) {
         let ensemblGeneId = '';
-        let ensemblTranscripts = this.state.ensembl_transcripts;
         if (ensemblTranscripts) {
             ensemblTranscripts.forEach(transcript => {
                 if (transcript.source === 'Ensembl') {
@@ -87,7 +86,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                 }
             });
         }
-        return ensemblGeneId;
+        this.setState({ensembl_gene_id: ensemblGeneId});
     },
 
     render: function() {
@@ -131,7 +130,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                             </tfoot>
                         </table>
                         :
-                        <div className="panel-body"><span>No other variants found in same gene at ClinVar.</span></div>
+                        <div className="panel-body"><span>No other variants found in this gene at ClinVar.</span></div>
                     }
                 </div>
 
@@ -139,9 +138,10 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                     <div className="panel-heading"><h3 className="panel-title">Other ClinVar Variants in Same Gene</h3></div>
                     <div className="panel-body">
                         {(myGeneInfo) ?
-                            <a href={external_url_map['ClinVar'] + '?term=' + myGeneInfo.symbol + '%5Bgene%5D'} target="_blank">{external_url_map['ClinVar'] + '?term=' + myGeneInfo.symbol + '[gene]'}</a>
+                            <a href={external_url_map['ClinVar'] + '?term=' + myGeneInfo.symbol + '%5Bgene%5D'}
+                                target="_blank">Search ClinVar for variants in this gene <i className="icon icon-external-link"></i></a>
                             :
-                            <span>No other variants found in same gene at ClinVar.</span>
+                            <span>No other variants found in this gene at ClinVar.</span>
                         }
                     </div>
                 </div>
@@ -155,16 +155,15 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                                 <dd>
                                     Symbol: <a href={external_url_map['HGNC'] + myGeneInfo.HGNC} target="_blank">{myGeneInfo.symbol}</a><br/>
                                     Approved Name: {myGeneInfo.name}<br/>
-                                    Synonyms: [placeholder]
                                 </dd>
                             </dl>
                             <dl className="inline-dl clearfix">
-                                <dt>Entrez:</dt>
+                                <dt>Entrez Gene:</dt>
                                 <dd><a href={dbxref_prefix_map['GeneID'] + myGeneInfo.entrezgene.toString()} target="_blank">{myGeneInfo.entrezgene}</a></dd>
                             </dl>
                             <dl className="inline-dl clearfix">
                                 <dt>Ensembl:</dt>
-                                <dd><a href={dbxref_prefix_map['ENSEMBL'] + this.parseEnsemblGeneId() + ';db=core'} target="_blank">{this.parseEnsemblGeneId()}</a></dd>
+                                <dd><a href={dbxref_prefix_map['ENSEMBL'] + this.state.ensembl_gene_id + ';db=core'} target="_blank">{this.state.ensembl_gene_id}</a></dd>
                             </dl>
                             <dl className="inline-dl clearfix">
                                 <dt>GeneCards:</dt>
@@ -172,13 +171,13 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                             </dl>
                         </div>
                         :
-                        <div className="panel-body"><span>No other resources found for the current gene.</span></div>
+                        <div className="panel-body"><span>No gene resources found for this gene.</span></div>
                     }
                 </div>
 
                 <div className="panel panel-info datasource-protein-resources">
                     <div className="panel-heading"><h3 className="panel-title">Protein Resources</h3></div>
-                    {(myGeneInfo) ?
+                    {(myGeneInfo && myGeneInfo.uniprot['Swiss-Prot']) ?
                         <div className="panel-body">
                             <dl className="inline-dl clearfix">
                                 <dt>UniProtKB:</dt>
@@ -198,7 +197,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                             </dl>
                         </div>
                         :
-                        <div className="panel-body"><span>No other resources found for the current gene.</span></div>
+                        <div className="panel-body"><span>No protein resources found for this gene.</span></div>
                     }
                 </div>
 
