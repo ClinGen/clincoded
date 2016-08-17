@@ -40,35 +40,6 @@ var Dashboard = React.createClass({
         return model.indexOf('(') > -1 ? model.substring(0, model.indexOf('(') - 1) : model;
     },
 
-    gdmMappingLoop: function(gdmMapping, gdmSubItem, gdmUuid, geneSymbol, diseaseTerm, modeInheritance, extraInfo) {
-        // loop through an gdmSubItem and map its subitems' UUIDs to the GDM UUID and Disease/Gene/Mode data
-        if (gdmSubItem.length > 0) {
-            for (var i = 0; i < gdmSubItem.length; i++) {
-                // create mapping object
-                gdmMapping[gdmSubItem[i].uuid] = {
-                    uuid: gdmUuid,
-                    displayName: this.cleanGdmGeneDiseaseName(geneSymbol, diseaseTerm),
-                    displayName2: this.cleanGdmModelName(modeInheritance),
-                    extraInfo: extraInfo
-                };
-                // recursively loop through the annotations' groups, families, individuals
-                if (gdmSubItem[i].individuals) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].individuals,
-                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
-                if (gdmSubItem[i].families) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].families,
-                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
-                if (gdmSubItem[i].groups) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].groups,
-                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
-                if (gdmSubItem[i].experimentalData) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].experimentalData,
-                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, {pmid: gdmSubItem[i].article.pmid, pmidUuid: gdmSubItem[i].uuid});
-                if (gdmSubItem[i].familyIncluded) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].familyIncluded,
-                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, _.extend({}, extraInfo, {parent: gdmSubItem[i].label, parentUrl: gdmSubItem[i]['@id'], parentType: gdmSubItem[i]['@type'][0]}));
-                if (gdmSubItem[i].individualIncluded) gdmMapping = this.gdmMappingLoop(gdmMapping, gdmSubItem[i].individualIncluded,
-                    gdmUuid, geneSymbol, diseaseTerm, modeInheritance, _.extend({}, extraInfo, {parent: gdmSubItem[i].label, parentUrl: gdmSubItem[i]['@id'], parentType: gdmSubItem[i]['@type'][0]}));
-            }
-        }
-        return gdmMapping;
-    },
-
     setUserData: function(props) {
         // sets the display name and curator status
         this.setState({
@@ -81,37 +52,32 @@ var Dashboard = React.createClass({
     getData: function(session) {
         // Retrieve all GDMs and other objects related to user via search
         this.getRestDatas([
-            '/gdm/',
             '/search/?type=gdm&limit=10&submitted_by.uuid=' + session.user_properties.uuid,
             '/search/?type=interpretation&limit=10&submitted_by.uuid=' + session.user_properties.uuid
         ],
-            [function() {}, function() {}, function() {}])
+            null)
         .then(data => {
             // Search objects successfully retrieved; process results
             // GDM results; finds GDMs created by user, and also creates PMID-GDM mapping table
             // (stopgap measure until article -> GDM mapping ability is incorporated)
-            var tempGdmList = [], tempRecentHistory = [];
-            var vciInterpList = [];
-            var gdmMapping = {};
-            for (var i = 0; i < data[0]['@graph'].length; i++) {
-                // loop through GDMs
-                var gdm = data[0]['@graph'][i];
-                if (userMatch(gdm.submitted_by, session)) {
-                    tempGdmList.push({
-                        uuid: gdm.uuid,
-                        gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
-                        gdmModel: this.cleanGdmModelName(gdm.modeInheritance),
-                        status: gdm.gdm_status,
-                        date_created: gdm.date_created
+            var gdmList = [],
+                vciInterpList = [],
+                tempRecentHistory = [];
+            var gdmURLs = data[0]['@graph'].map(res => { return res['@id']; });
+            this.getRestDatas(gdmURLs, null, true).then(gdmResults => {
+                gdmResults.map(gdmResult => {
+                    gdmList.push({
+                        uuid: gdmResult.uuid,
+                        gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdmResult.gene.symbol, gdmResult.disease.term),
+                        gdmModel: this.cleanGdmModelName(gdmResult.modeInheritance),
+                        status: gdmResult.gdm_status,
+                        date_created: gdmResult.date_created
                     });
-                }
-                // loop through annotations, if they exist, and map annotation UUIDs to GDMs
-                if (gdm.annotations) gdmMapping = this.gdmMappingLoop(gdmMapping, gdm.annotations, gdm.uuid,
-                    gdm.gene.symbol, gdm.disease.term, gdm.modeInheritance, null);
-            }
-            var vciInterpURLs = data[2]['@graph'].map(res => { return res['@id']; });
+                });
+                this.setState({gdmList: gdmList});
+            });
+            var vciInterpURLs = data[1]['@graph'].map(res => { return res['@id']; });
             this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
-                console.log(vciInterpResults);
                 vciInterpResults.map(vciInterpResult => {
                     vciInterpList.push({
                         uuid: vciInterpResult.uuid,
@@ -125,8 +91,6 @@ var Dashboard = React.createClass({
                 });
                 this.setState({vciInterpList: vciInterpList});
             });
-            // Set states for cleaned results
-            this.setState({gdmList: tempGdmList});
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
@@ -155,7 +119,6 @@ var Dashboard = React.createClass({
     },
 
     render: function() {
-        console.log(this.state.vciInterpList);
         return (
             <div className="container">
                 <h1>Welcome, {this.state.userName}!</h1>
@@ -194,12 +157,12 @@ var Dashboard = React.createClass({
                                     return (
                                     <a key={item.uuid} className="block-link" href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
                                     <li key={item.uuid}>
-                                        <span className="block-link-color title-ellipsis"><strong>
+                                        <div><span className="block-link-color title-ellipsis"><strong>
                                         {item.clinvarVariantTitle
                                             ? item.clinvarVariantTitle
                                             : (item.hgvsName37 ? item.hgvsName37 : item.hgvsName38)
                                         }
-                                        </strong><br /></span>
+                                        </strong></span></div>
                                         <span className="block-link-no-color title-ellipsis">
                                             {item.diseaseTerm ? item.diseaseTerm : "No disease associated"}
                                             <br /><strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}
@@ -218,9 +181,9 @@ var Dashboard = React.createClass({
                             <ul>
                                 {this.state.gdmList.map(function(item) {
                                     return (
-                                    <a key={item.uuid} className="block-link title-ellipsis" href={"/curation-central/?gdm=" + item.uuid}>
+                                    <a key={item.uuid} className="block-link" href={"/curation-central/?gdm=" + item.uuid}>
                                     <li key={item.uuid}>
-                                        <span className="block-link-color"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span><br />
+                                        <div><span className="block-link-color title-ellipsis"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span></div>
                                         <span className="block-link-no-color"><strong>Status</strong>: {item.status}<br />
                                         <strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}</span>
                                     </li>
