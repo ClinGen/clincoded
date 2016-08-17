@@ -21,6 +21,8 @@ var form = require('../../../libs/bootstrap/form');
 
 var externalLinks = require('./shared/externalLinks');
 
+import { renderDataCredit } from './shared/credit';
+
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
 var Form = form.Form;
@@ -471,7 +473,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
                         {this.state.hasOtherPredData ?
                             <div className="panel panel-info datasource-other">
-                                <div className="panel-heading"><h3 className="panel-title">Other Predictors</h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Other Predictors<a href="#credit-myvariant" className="label label-primary">MyVariant</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -490,7 +492,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         :
                             <div className="panel panel-info datasource-other">
-                                <div className="panel-heading"><h3 className="panel-title">Other Predictors</h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Other Predictors<a href="#credit-myvariant" className="label label-primary">MyVariant</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -503,7 +505,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
                         {this.state.hasConservationData ?
                             <div className="panel panel-info datasource-conservation">
-                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis</h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis<a href="#credit-myvariant" className="label label-primary">MyVariant</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -520,7 +522,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         :
                             <div className="panel panel-info datasource-conservation">
-                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis</h3></div>
+                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis<a href="#credit-myvariant" className="label label-primary">MyVariant</a></h3></div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -773,6 +775,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     </Panel></PanelGroup>
                 </div>
                 : null}
+
+                {renderDataCredit('myvariant')}
+
             </div>
         );
     }

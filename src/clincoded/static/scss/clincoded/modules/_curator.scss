@@ -1129,6 +1129,10 @@
             .basic-info .table th,
             .basic-info .table td {
                 width: 25%;
+
+                .title-ellipsis {
+                    max-width: 250px;
+                }
             }
 
             .basic-info .datasource-clinvar-interpretaions .table th,
@@ -1165,10 +1169,6 @@
             .basic-info .clinvar-interpretation .disease .identifiers li + li:before {
                 content: "-";
                 margin: 0 4px;
-            }
-
-            .basic-info .table .primary-transcript {
-                background-color: #fff4f4;
             }
 
             .basic-info .table .primary-transcript td:last-child:after {
@@ -1383,6 +1383,14 @@
         .help-note span {
             font-style: italic;
         }
+
+        a.label-primary {
+            color: #fff;
+            font-size: 55%;
+            font-weight: bold;
+            margin-left: 10px;
+            vertical-align: top;
+        }
     }
 
     .panel-subtitle {
@@ -1547,6 +1555,16 @@ dl.inline-dl {
 
 .hidden {
     display: none;
+}
+
+/* Credits at the bottom of tabs */
+.credits {
+    font-size: 12px;
+    margin: 20px 0 0 0;
+
+    .label-primary {
+        vertical-align: text-top;
+    }
 }
 
 .progress-bar {
