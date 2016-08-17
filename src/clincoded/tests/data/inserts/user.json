@@ -1825,5 +1825,110 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+        {
+        "email": "bellendi@med.unc.edu",
+        "first_name": "Stephanie",
+        "last_name": "Bellendir",
+        "uuid": "e2e83419-729e-4dab-b389-f1d325972c36",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "mdistefano1@partners.org",
+        "first_name": "Marina",
+        "last_name": "DiStefano",
+        "uuid": "6aac14d5-3ccf-45e6-aa4c-31400b4346d1",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "jmester@genedx.com",
+        "first_name": "Jessica",
+        "last_name": "Mester",
+        "uuid": "a941ef39-ab74-4ed2-b4fd-0583239576b5",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "mlebo@partners.org",
+        "first_name": "Matt",
+        "last_name": "Lebo",
+        "uuid": "fd86b43b-07b2-4e68-b78a-f05083cc7202",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "clingen.gene.curator@gmail.com",
+        "first_name": "ClinGen",
+        "last_name": "Gene Curator",
+        "uuid": "37e44543-48d0-49d5-a349-62701bac1d2a",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "clingen.variant.curator@gmail.com",
+        "first_name": "ClinGen",
+        "last_name": "Variant Curator",
+        "uuid": "9f88f6a6-09ac-4464-9395-34ddf9c187b2",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "clingen.test.curator@gmail.com",
+        "first_name": "ClinGen",
+        "last_name": "Test Curator",
+        "uuid": "662f0393-4b75-49af-8a70-7e7ca5ba2f95",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
