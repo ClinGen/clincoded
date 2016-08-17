@@ -1374,6 +1374,14 @@
         .help-note span {
             font-style: italic;
         }
+
+        a.label-primary {
+            color: #fff;
+            font-size: 55%;
+            font-weight: bold;
+            margin-left: 10px;
+            vertical-align: top;
+        }
     }
 
     .panel-subtitle {
@@ -1538,6 +1546,16 @@ dl.inline-dl {
 
 .hidden {
     display: none;
+}
+
+/* Credits at the bottom of tabs */
+.credits {
+    font-size: 12px;
+    margin: 20px 0 0 0;
+
+    .label-primary {
+        vertical-align: text-top;
+    }
 }
 
 .progress-bar {

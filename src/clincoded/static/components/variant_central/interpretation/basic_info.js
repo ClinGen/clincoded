@@ -12,6 +12,8 @@ var externalLinks = require('./shared/externalLinks');
 var external_url_map = globals.external_url_map;
 var dbxref_prefix_map = globals.dbxref_prefix_map;
 
+import { renderDataCredit } from './shared/credit';
+
 // Display the curator data of the curation data
 var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasicInfo = React.createClass({
     mixins: [RestMixin],
@@ -436,7 +438,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">RefSeq Transcripts
+                        <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="label label-primary">VEP</a>
                             <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                         </h3>
                     </div>
@@ -463,7 +465,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">Ensembl Transcripts
+                        <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="label label-primary">VEP</a>
                             <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                         </h3>
                     </div>
@@ -525,6 +527,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                         </dl>
                     </div>
                 </div>
+
+                {renderDataCredit('vep')}
 
             </div>
         );
