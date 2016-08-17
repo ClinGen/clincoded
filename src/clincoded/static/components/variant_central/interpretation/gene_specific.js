@@ -9,6 +9,8 @@ var CompleteSection = require('./shared/complete_section').CompleteSection;
 var external_url_map = globals.external_url_map;
 var dbxref_prefix_map = globals.dbxref_prefix_map;
 
+import { renderDataCredit } from './shared/credit';
+
 // Display the curator data of the curation data
 var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGeneSpecific = React.createClass({
     mixins: [RestMixin],
@@ -99,7 +101,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                 : null}
 
                 <div className="panel panel-info datasource-constraint-scores">
-                    <div className="panel-heading"><h3 className="panel-title">ExAC Constraint Scores</h3></div>
+                    <div className="panel-heading"><h3 className="panel-title">ExAC Constraint Scores<a href="#credit-mygene" className="credit-mygene" title="MyGene.info"><span>MyGene</span></a></h3></div>
                     {(myGeneInfo) ?
                         <table className="table">
                             <thead>
@@ -200,6 +202,8 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                         <div className="panel-body"><span>No protein resources found for this gene.</span></div>
                     }
                 </div>
+
+                {renderDataCredit('mygene')}
 
             </div>
         );
