@@ -19,6 +19,8 @@ var queryKeyValue = globals.queryKeyValue;
 var panel = require('../../../libs/bootstrap/panel');
 var form = require('../../../libs/bootstrap/form');
 
+import { renderDataCredit } from './shared/credit';
+
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
 var Form = form.Form;
@@ -689,7 +691,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     {this.state.hasExacData ?
                         <div className="panel panel-info datasource-ExAC">
                             <div className="panel-heading">
-                                <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}
+                                <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}<a href="#credit-myvariant" className="label label-primary">MyVariant</a>
                                     <a className="panel-subtitle pull-right" href={'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
                                 </h3>
                             </div>
@@ -715,7 +717,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     :
                         <div className="panel panel-info datasource-ExAC">
-                            <div className="panel-heading"><h3 className="panel-title">ExAC</h3></div>
+                            <div className="panel-heading"><h3 className="panel-title">ExAC<a href="#credit-myvariant" className="label label-primary">MyVariant</a></h3></div>
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -728,7 +730,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     {this.state.hasTGenomesData ?
                         <div className="panel panel-info datasource-1000G">
                             <div className="panel-heading">
-                                <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}
+                                <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}<a href="#credit-vep" className="label label-primary">VEP</a>
                                     <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
                                 </h3>
                             </div>
@@ -750,7 +752,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     :
                         <div className="panel panel-info datasource-1000G">
-                            <div className="panel-heading"><h3 className="panel-title">1000 Genomes</h3></div>
+                            <div className="panel-heading"><h3 className="panel-title">1000 Genomes<a href="#credit-vep" className="label label-primary">VEP</a></h3></div>
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -763,7 +765,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     {this.state.hasEspData ?
                         <div className="panel panel-info datasource-ESP">
                             <div className="panel-heading">
-                                <h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}
+                                <h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}<a href="#credit-myvariant" className="label label-primary">MyVariant</a>
                                     <a className="panel-subtitle pull-right" href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
                                 </h3>
                             </div>
@@ -790,7 +792,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     :
                         <div className="panel panel-info datasource-ESP">
-                            <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP)</h3></div>
+                            <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP)<a href="#credit-myvariant" className="label label-primary">MyVariant</a></h3></div>
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -801,6 +803,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     }
                 </Panel></PanelGroup>
+
+                {renderDataCredit('myvariant')}
+
+                {renderDataCredit('vep')}
+
             </div>
         );
     }
