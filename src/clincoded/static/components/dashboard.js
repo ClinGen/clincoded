@@ -77,6 +77,8 @@ var Dashboard = React.createClass({
                     });
                     this.setState({gdmList: gdmList, gdmListLoading: false});
                 });
+            } else {
+                this.setState({gdmListLoading: false});
             }
             // go through VCI interpretation results and get their data
             vciInterpURLs = data[1]['@graph'].map(res => { return res['@id']; });
@@ -95,6 +97,8 @@ var Dashboard = React.createClass({
                     });
                     this.setState({vciInterpList: vciInterpList, vciInterpListLoading: false});
                 });
+            } else {
+                this.setState({vciInterpListLoading: false});
             }
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
