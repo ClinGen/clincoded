@@ -137,17 +137,20 @@ var Dashboard = React.createClass({
                         </Panel>
                         <Panel panelClassName="panel-dashboard">
                             <h3>Your Recent History</h3>
-                            {this.state.histories.length ?
-                                <ul>
-                                    {this.state.histories.map(history => {
-                                        // Call the history display view based on the primary object
-                                        var HistoryView = this.getHistoryView(history);
-                                        return <li key={history.uuid}><HistoryView history={history} user={this.props.session && this.props.session.user_properties} /></li>;
-                                    })}
-                                </ul>
-                            :
-                                <li>You have no activity to display.</li>
-                            }
+                            <div>
+                                <div className="busy-overlay">Loading... </div>
+                                {this.state.histories.length ?
+                                    <ul>
+                                        {this.state.histories.map(history => {
+                                            // Call the history display view based on the primary object
+                                            var HistoryView = this.getHistoryView(history);
+                                            return <li key={history.uuid}><HistoryView history={history} user={this.props.session && this.props.session.user_properties} /></li>;
+                                        })}
+                                    </ul>
+                                :
+                                    <li>You have no activity to display.</li>
+                                }
+                            </div>
                         </Panel>
                     </div>
                     <div className="col-md-6">

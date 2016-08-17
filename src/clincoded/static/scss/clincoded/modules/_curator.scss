@@ -297,6 +297,8 @@
 }
 
 .panel-dashboard {
+    position: relative;
+
     .panel-std {
         padding: 10px 0 15px 0;
 
@@ -1566,5 +1568,23 @@ dl.inline-dl {
         width: 34%;
         float: left;
         background-color: #fff;
+    }
+}
+
+.busy-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(240,240,240, 0.8);
+    color: #000;
+    z-index: 999;
+
+    .center {
+        display: inline-block;
+        position: relative;
+        vertical-align: middle
+        font-weight: bold;
     }
 }
