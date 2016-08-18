@@ -20,48 +20,55 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
         interpretation: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
         href_url: React.PropTypes.object,
-        ext_ensemblHgvsVEP: React.PropTypes.array,
-        ext_myGeneInfo: React.PropTypes.object
+        ext_myGeneInfo: React.PropTypes.object,
+        ext_ensemblGeneId: React.PropTypes.string,
+        ext_geneSynonyms: React.PropTypes.array
     },
 
     getInitialState: function() {
         return {
             clinvar_id: null,
             interpretation: this.props.interpretation,
-            ensembl_gene_id: null,
-            ext_myGeneInfo: this.props.ext_myGeneInfo
+            ext_myGeneInfo: this.props.ext_myGeneInfo,
+            ext_ensemblGeneId: this.props.ext_ensemblGeneId,
+            ext_geneSynonyms: this.props.ext_geneSynonyms
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretation: nextProps.interpretation});
         // update data based on api call results
-        if (nextProps.ext_ensemblHgvsVEP) {
-            this.parseEnsemblGeneId(nextProps.ext_ensemblHgvsVEP[0].transcript_consequences);
-        }
         if (nextProps.ext_myGeneInfo) {
             this.setState({ext_myGeneInfo: nextProps.ext_myGeneInfo});
+        }
+        if (nextProps.ext_ensemblGeneId) {
+            this.setState({ext_ensemblGeneId: nextProps.ext_ensemblGeneId});
+        }
+        if (nextProps.ext_geneSynonyms) {
+            this.setState({ext_geneSynonyms: nextProps.ext_geneSynonyms});
         }
     },
 
     // Method to render constraint scores table
     renderConstraintScores: function(myGeneInfo) {
-        let allExac = myGeneInfo.exac.all,
-            nonPsych = myGeneInfo.exac.nonpsych,
-            nonTcga = myGeneInfo.exac.nontcga;
-        return (
-            <tbody>
-                <tr>
-                    <td>All ExAC</td><td>{this.parseFloatShort(allExac.p_li)}</td><td>{this.parseFloatShort(allExac.p_rec)}</td><td>{this.parseFloatShort(allExac.p_null)}</td>
-                </tr>
-                <tr>
-                    <td>Non-psych</td><td>{this.parseFloatShort(nonPsych.p_li)}</td><td>{this.parseFloatShort(nonPsych.p_rec)}</td><td>{this.parseFloatShort(nonPsych.p_null)}</td>
-                </tr>
-                <tr>
-                    <td>Non-TCGA</td><td>{this.parseFloatShort(nonTcga.p_li)}</td><td>{this.parseFloatShort(nonTcga.p_rec)}</td><td>{this.parseFloatShort(nonTcga.p_null)}</td>
-                </tr>
-            </tbody>
-        );
+        if (myGeneInfo.exac) {
+            let allExac = myGeneInfo.exac.all,
+                nonPsych = myGeneInfo.exac.nonpsych,
+                nonTcga = myGeneInfo.exac.nontcga;
+            return (
+                <tbody>
+                    <tr>
+                        <td>All ExAC</td><td>{this.parseFloatShort(allExac.p_li)}</td><td>{this.parseFloatShort(allExac.p_rec)}</td><td>{this.parseFloatShort(allExac.p_null)}</td>
+                    </tr>
+                    <tr>
+                        <td>Non-psych</td><td>{this.parseFloatShort(nonPsych.p_li)}</td><td>{this.parseFloatShort(nonPsych.p_rec)}</td><td>{this.parseFloatShort(nonPsych.p_null)}</td>
+                    </tr>
+                    <tr>
+                        <td>Non-TCGA</td><td>{this.parseFloatShort(nonTcga.p_li)}</td><td>{this.parseFloatShort(nonTcga.p_rec)}</td><td>{this.parseFloatShort(nonTcga.p_null)}</td>
+                    </tr>
+                </tbody>
+            );
+        }
     },
 
     // helper function to shorten display of imported float values to 5 decimal places;
@@ -76,23 +83,10 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
         }
     },
 
-    // Method to parse Ensembl gene_id from VEP
-    parseEnsemblGeneId: function(ensemblTranscripts) {
-        let ensemblGeneId = '';
-        if (ensemblTranscripts) {
-            ensemblTranscripts.forEach(transcript => {
-                if (transcript.source === 'Ensembl') {
-                    if (transcript.canonical && transcript.canonical === 1) {
-                        ensemblGeneId = transcript.gene_id;
-                    }
-                }
-            });
-        }
-        this.setState({ensembl_gene_id: ensemblGeneId});
-    },
-
     render: function() {
         let myGeneInfo = (this.state.ext_myGeneInfo) ? this.state.ext_myGeneInfo : null;
+        let geneSynonyms = (this.state.ext_geneSynonyms) ? this.state.ext_geneSynonyms : null;
+        let ensemblGeneId = (this.state.ext_ensemblGeneId) ? this.state.ext_ensemblGeneId : null;
 
         return (
             <div className="variant-interpretation gene-specific">
@@ -102,7 +96,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
 
                 <div className="panel panel-info datasource-constraint-scores">
                     <div className="panel-heading"><h3 className="panel-title">ExAC Constraint Scores<a href="#credit-mygene" className="credit-mygene" title="MyGene.info"><span>MyGene</span></a></h3></div>
-                    {(myGeneInfo) ?
+                    {(myGeneInfo && myGeneInfo.exac) ?
                         <table className="table">
                             <thead>
                                 <tr>
@@ -132,7 +126,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                             </tfoot>
                         </table>
                         :
-                        <div className="panel-body"><span>No other variants found in this gene at ClinVar.</span></div>
+                        <div className="panel-body"><span>No ExAC constraint scores found for this variant.</span></div>
                     }
                 </div>
 
@@ -157,6 +151,9 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                                 <dd>
                                     Symbol: <a href={external_url_map['HGNC'] + myGeneInfo.HGNC} target="_blank">{myGeneInfo.symbol}</a><br/>
                                     Approved Name: {myGeneInfo.name}<br/>
+                                    {(geneSynonyms) ?
+                                        <span>Synonyms: {geneSynonyms.join(', ')}</span>
+                                    : null}
                                 </dd>
                             </dl>
                             <dl className="inline-dl clearfix">
@@ -165,7 +162,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                             </dl>
                             <dl className="inline-dl clearfix">
                                 <dt>Ensembl:</dt>
-                                <dd><a href={dbxref_prefix_map['ENSEMBL'] + this.state.ensembl_gene_id + ';db=core'} target="_blank">{this.state.ensembl_gene_id}</a></dd>
+                                <dd><a href={dbxref_prefix_map['ENSEMBL'] + ensemblGeneId + ';db=core'} target="_blank">{ensemblGeneId}</a></dd>
                             </dl>
                             <dl className="inline-dl clearfix">
                                 <dt>GeneCards:</dt>

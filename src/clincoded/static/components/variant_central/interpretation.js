@@ -40,7 +40,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_clinvarEutils: React.PropTypes.object,
         ext_clinVarEsearch: React.PropTypes.object,
-        ext_clinVarRCV: React.PropTypes.array
+        ext_clinVarRCV: React.PropTypes.array,
+        ext_ensemblGeneId: React.PropTypes.string,
+        ext_geneSynonyms: React.PropTypes.array
     },
 
     getInitialState: function() {
@@ -55,6 +57,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_clinvarEutils: this.props.ext_clinvarEutils,
             ext_clinVarEsearch: this.props.ext_clinVarEsearch,
             ext_clinVarRCV: this.props.ext_clinVarRCV,
+            ext_ensemblGeneId: this.props.ext_ensemblGeneId,
+            ext_geneSynonyms: this.props.ext_geneSynonyms,
+            //remember current tab/subtab so user will land on that tab when interpretation starts
             selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
         };
     },
@@ -91,6 +96,12 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         if (nextProps.ext_clinVarRCV) {
             this.setState({ext_clinVarRCV: nextProps.ext_clinVarRCV});
+        }
+        if (nextProps.ext_ensemblGeneId) {
+            this.setState({ext_ensemblGeneId: nextProps.ext_ensemblGeneId});
+        }
+        if (nextProps.ext_geneSynonyms) {
+            this.setState({ext_geneSynonyms: nextProps.ext_geneSynonyms});
         }
     },
 
@@ -171,7 +182,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <CurationInterpretationGeneSpecific data={variant} data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myGeneInfo={this.state.ext_myGeneInfo}
-                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP} />
+                            ext_ensemblGeneId={this.state.ext_ensemblGeneId}
+                            ext_geneSynonyms={this.state.ext_geneSynonyms} />
                     </div>
                     : null}
                 </div>
