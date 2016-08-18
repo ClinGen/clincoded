@@ -122,6 +122,7 @@ var calculatePathogenicity = function(evaluationObjList) {
             // Algorithm, ACMG Standarts & Guidelines 2015
             // setup cases for 4 types of assertions (Pathogenic, Likely pathogenic, Benign and Likely benign)
             var cases = {
+                path_pvs2: pvs_count >= 2 ? true : false,
                 path_pvs1_ps1: (pvs_count === 1 && ps_count >= 1) ? true : false,
                 path_pvs1_pm2: (pvs_count === 1 && pm_count >= 2) ? true : false,
                 path_pvs1_pm1_pp1: (pvs_count === 1 && pm_count == 1 && pp_count == 1) ? true : false,
@@ -138,7 +139,7 @@ var calculatePathogenicity = function(evaluationObjList) {
                 likelyPath_pm2_pp2: (pm_count === 2 && pp_count >= 2) ? true : false,
                 likelyPath_pm1_pp4: (pm_count === 1 && pp_count >= 4) ? true : false,
 
-                benign_ba1: ba_count === 1 ? true : false,
+                benign_ba1: ba_count >= 1 ? true : false,
                 benign_bs2: bs_count >= 2 ? true : false,
 
                 likelyBenign_bs1_pp1: (bs_count === 1 && bp_count === 1) ? true : false,
