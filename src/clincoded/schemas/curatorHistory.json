@@ -40,7 +40,8 @@
                 "individual",
                 "pathogenicity",
                 "provisionalClassification",
-                "variant"
+                "variant",
+                "interpretation"
             ]
         },
         "hidden": {
@@ -391,6 +392,26 @@
                             "linkTo": "variant"
                         }
                     }
+                },
+                "interpretation": {
+                    "title": "VCI interpretation history",
+                    "description": "History metadata for VCI interpretation",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "variant": {
+                            "title": "Variant",
+                            "description": "Variant for the interpretation",
+                            "type": "string",
+                            "linkTo": "variant"
+                        },
+                        "disease": {
+                            "title": "Disease",
+                            "description": "Disease associated with the interpretation",
+                            "type": "string",
+                            "linkTo": "orphaPhenotype"
+                        }
+                    }
                 }
             }
         }
@@ -485,6 +506,14 @@
             "type": "string"
         },
         "meta.gdm.disease": {
+            "title": "Orpha ID",
+            "type": "string"
+        },
+        "meta.interpretation.variant": {
+            "title": "Variant ID",
+            "type": "string"
+        },
+        "meta.interpretation.disease": {
             "title": "Orpha ID",
             "type": "string"
         },

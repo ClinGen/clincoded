@@ -191,3 +191,18 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         );
     },
 });
+
+// Display a history item for adding an individual
+var InterpretationAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var interpretation = history.primary;
+        return (
+            <div>
+                hey
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(InterpretationAddHistory, 'interpretation', 'add');
