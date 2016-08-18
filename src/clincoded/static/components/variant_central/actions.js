@@ -70,10 +70,8 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     handleInterpretationEvent: function(e) {
         e.preventDefault(); e.stopPropagation();
         var variantObj = this.props.variantData;
-        var selectedTab = '';
-        if (window.location.href.indexOf('tab=') > -1) {
-            selectedTab = '&tab=' + window.location.href.split('tab=').pop();
-        }
+        var selectedTab = queryKeyValue('tab', window.location.href),
+            selectedSubtab = queryKeyValue('subtab', window.location.href);
         var newInterpretationObj;
         if (!this.state.hasExistingInterpretation) {
             if (variantObj) {
@@ -85,10 +83,10 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             // the new interpretation UUID in the query string.
             this.postRestData('/interpretations/', newInterpretationObj).then(data => {
                 var newInterpretationUuid = data['@graph'][0].uuid;
-                window.location.href = '/variant-central/?edit=true&variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid + selectedTab;
+                window.location.href = '/variant-central/?edit=true&variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
             }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
         } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
-            window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + variantObj.associatedInterpretations[0].uuid + selectedTab;
+            window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + variantObj.associatedInterpretations[0].uuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
         }
     },
 
