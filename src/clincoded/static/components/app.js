@@ -21,6 +21,8 @@ var routes = {
 var portal = {
     portal_title: 'ClinGen',
     navUser: [
+        {id: 'help', title: 'Quick Start Guide', icon: 'icon-question-circle',
+            url: '/static/help/clingen-variant-curation-quickstart.pdf', target: '_blank'}, // link to Quick Start Guide
         {id: 'variant', title: 'New Variant Curation', url: '/select-variant/'}, // link to VCI page /select-variant/
         {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'}, // link to GCI page /create-gene-disease/
         {id: 'space', title: 'space'}, // white space between
@@ -242,7 +244,7 @@ var NavbarUser = React.createClass({
                     if (menu.url || menu.title === 'space') {
                         // Normal menu item; disabled if user is not logged in
                         if (session && session['auth.userid']) {
-                            return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title}>{menu.title}</NavItem>;
+                            return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title} target={menu.target}>{menu.title}</NavItem>;
                         }
                     } else {
                         // Trigger menu item; set <a> data attribute to login or logout
