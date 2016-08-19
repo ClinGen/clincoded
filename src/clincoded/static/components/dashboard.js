@@ -143,7 +143,7 @@ var Dashboard = React.createClass({
                             <ul>
                                 <li>
                                     <a href="/select-variant/">Select Variant for Variant Curation</a>
-                                    <a className="help-quickstart" href="/static/help/clingen-variant-curation-quickstart.pdf" title="Quick Start Guide" target="_blank">
+                                    <a className="help-doc" href="/static/help/clingen-variant-curation-help.pdf" title="Quick Start Guide" target="_blank">
                                         <i className="icon icon-question-circle"></i>
                                     </a>
                                 </li>
