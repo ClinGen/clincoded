@@ -21,8 +21,8 @@ var routes = {
 var portal = {
     portal_title: 'ClinGen',
     navUser: [
-        {id: 'help', title: 'Quick Start Guide', icon: 'icon-question-circle',
-            url: '/static/help/clingen-variant-curation-quickstart.pdf', target: '_blank'}, // link to Quick Start Guide
+        {id: 'help', title: 'Curation Help', icon: 'icon-question-circle',
+            url: '/static/help/clingen-variant-curation-help.pdf', target: '_blank'}, // link to Curation Help
         {id: 'variant', title: 'New Variant Curation', url: '/select-variant/'}, // link to VCI page /select-variant/
         {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'}, // link to GCI page /create-gene-disease/
         {id: 'space', title: 'space'}, // white space between
