@@ -202,7 +202,7 @@ var InterpretationAddHistory = React.createClass({
             disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
         return (
             <div>
-                <span>Interpretation added to Variant <strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></span>
+                <span>Interpretation added to Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></a></span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
@@ -221,10 +221,10 @@ var InterpretationModifyHistory = React.createClass({
         return (
             <div>
                 {history.meta.interpretation.mode == 'edit-disease' ?
-                    <span>Disease <strong>{disease.term}</strong> associated with Interpretation for Variant <strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></span>
+                    <span>Disease <strong>{disease.term}</strong> associated with Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></a> interpretation</span>
                 : null}
                 {history.meta.interpretation.mode == 'update-eval' ?
-                    <span>Evaluation(s) updated for Variant <strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong> {disease ? <span>({disease.term})</span> : null}</span>
+                    <span>Evaluation(s) updated for Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong> {disease ? <span>({disease.term})</span> : null}</a></span>
                 : null}
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
