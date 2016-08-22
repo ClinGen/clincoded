@@ -11,7 +11,7 @@ export function renderDataCredit(source) {
         return (
             <div className="credits">
                 <div className="credit credit-myvariant" id="credit-myvariant"><a name="credit-myvariant"></a>
-                    <span className="credit-myvariant"><span>MyVariant</span></span> - The data in this table was retrieved using:
+                    <span className="credit-myvariant"><span>MyVariant</span></span> - When available, data in this table was retrieved using:
                     MyVariant.info (<a href="http://myvariant.info" target="_blank">http://myvariant.info</a>)
                     Xin J, Mark A, Afrasiabi C, Tsueng G, Juchler M, Gopal N, Stupp GS, Putman TE, Ainscough BJ,
                     Griffith OL, Torkamani A, Whetzel PL, Mungall CJ, Mooney SD, Su AI, Wu C (2016)
@@ -26,7 +26,7 @@ export function renderDataCredit(source) {
         return (
             <div className="credits">
                 <div className="credit credit-mygene" id="credit-mygene"><a name="credit-mygene"></a>
-                    <span className="credit-mygene"><span>MyGene</span></span> - The data in this table was retrieved using:
+                    <span className="credit-mygene"><span>MyGene</span></span> - When available, data in this table was retrieved using:
                     MyGene.info (<a href="http://mygene.info" target="_blank">http://mygene.info</a>)
                     Xin J, Mark A, Afrasiabi C, Tsueng G, et al. (2016) High-performance web services for querying gene and variant annotation. Genome Biology 17(1):1-7.
                     PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/27154141" target="_blank">27154141</a>&nbsp;
@@ -43,7 +43,7 @@ export function renderDataCredit(source) {
         return (
             <div className="credits">
                 <div className="credit credit-vep" id="credit-vep"><a name="credit-vep"></a>
-                    <span className="label label-primary">VEP</span> - The data in this table was retrieved using:
+                    <span className="label label-primary">VEP</span> - When available, data in this table was retrieved using:
                     The Ensembl Variant Effect Predictor (<a href="http://www.ensembl.org/Homo_sapiens/Tools/VEP" target="_blank">www.ensembl.org/Homo_sapiens/Tools/VEP</a>)
                     McLaren W, Gil L, Hunt SE, Riat HS, Ritchie GR, Thormann A, Flicek P, Cunningham F.
                     Genome Biol. 2016 Jun 6;17(1):122.

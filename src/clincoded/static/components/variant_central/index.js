@@ -40,7 +40,9 @@ var VariantCurationHub = React.createClass({
             ext_clinVarEsearch: null,
             ext_clinVarRCV: null,
             ext_myGeneInfo_MyVariant: null,
-            ext_myGeneInfo_VEP: null
+            ext_myGeneInfo_VEP: null,
+            ext_ensemblGeneId: null,
+            ext_geneSynonyms: null
         };
     },
 
@@ -180,6 +182,7 @@ var VariantCurationHub = React.createClass({
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then(response => {
                     this.setState({ext_ensemblHgvsVEP: response});
+                    this.parseEnsemblGeneId(response);
                     this.parseEnsemblHgvsVEP(response);
                 }).catch(function(e) {
                     console.log('Ensembl Fetch Error=: %o', e);
@@ -188,7 +191,7 @@ var VariantCurationHub = React.createClass({
         }
     },
 
-    // Method to parse gene symbol and id from myvariant.info
+    // Method to parse Entrez gene symbol and id from myvariant.info
     parseMyVariantInfo: function(myVariantInfo) {
         let geneSymbol, geneId;
         if (myVariantInfo) {
@@ -206,7 +209,22 @@ var VariantCurationHub = React.createClass({
         }
     },
 
-    // Method to parse gene symbol and id from VEP
+    // Method to parse Ensembl gene_id from VEP
+    parseEnsemblGeneId: function(ensemblHgvsVEP) {
+        let transcripts = ensemblHgvsVEP[0].transcript_consequences;
+        if (transcripts) {
+            transcripts.forEach(transcript => {
+                // Filter Ensembl transcripts by 'source' and 'canonical' flags
+                if (transcript.source === 'Ensembl' && transcript.hgvsc) {
+                    if (transcript.canonical && transcript.canonical === 1) {
+                        this.setState({ext_ensemblGeneId: transcript.gene_id});
+                    }
+                }
+            });
+        }
+    },
+
+    // Method to parse Entrez gene symbol and id from VEP
     parseEnsemblHgvsVEP: function(ensemblHgvsVEP) {
         let geneSymbol, geneId;
         if (ensemblHgvsVEP) {
@@ -221,11 +239,10 @@ var VariantCurationHub = React.createClass({
 
     // Method to fetch Gene-centric data from mygene.info
     // and pass the data object to child component
-    fetchMyGeneInfo: function(geneSymbol, geneId, source) {
-        let synonyms = [], geneObj = {};
+    fetchMyGeneInfo: function(geneSymbol, geneId, source) {;
         if (geneSymbol) {
             this.getRestData('/genes/' + geneSymbol).then(response => {
-                synonyms = response.synonyms;
+                this.setState({ext_geneSynonyms: response.synonyms});
             }).catch(function(e) {
                 console.log('Local Gene Fetch ERROR=: %o', e);
             });
@@ -233,10 +250,7 @@ var VariantCurationHub = React.createClass({
         if (geneId) {
             let fields = 'fields=entrezgene,exac,HGNC,MIM,homologene.id,interpro,name,pathway.kegg,pathway.netpath,pathway.pid,pdb,pfam,pharmgkb,prosite,uniprot.Swiss-Prot,summary,symbol';
             this.getRestData(this.props.href_url.protocol + external_url_map['MyGeneInfo'] + geneId + '&species=human&' + fields).then(result => {
-                geneObj = result.hits[0];
-                if (synonyms) {
-                    geneObj.synonyms = synonyms;
-                }
+                let geneObj = result.hits[0];
                 if (source === 'myVariantInfo') {
                     this.setState({ext_myGeneInfo_MyVariant: geneObj});
                 } else if (source === 'ensemblHgvsVEP') {
@@ -296,7 +310,9 @@ var VariantCurationHub = React.createClass({
                     ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                     ext_clinvarEutils={this.state.ext_clinvarEutils}
                     ext_clinVarEsearch={this.state.ext_clinVarEsearch}
-                    ext_clinVarRCV={this.state.ext_clinVarRCV} />
+                    ext_clinVarRCV={this.state.ext_clinVarRCV}
+                    ext_ensemblGeneId={this.state.ext_ensemblGeneId}
+                    ext_geneSynonyms={this.state.ext_geneSynonyms} />
             </div>
         );
     }

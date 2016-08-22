@@ -2,6 +2,7 @@
 var React = require('react');
 var _ = require('underscore');
 var globals = require('../globals');
+var moment = require('moment');
 var form = require('../../libs/bootstrap/form');
 var Form = form.Form;
 var Input = form.Input;
@@ -23,6 +24,8 @@ var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific
 var calculator = require('./interpretation/shared/calculator');
 var PathogenicityCalculator = calculator.PathogenicityCalculator;
 
+var validTabs = ['basic-info', 'population', 'predictors', 'experimental', 'segregation-case', 'gene-centric'];
+
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
     propTypes: {
@@ -38,7 +41,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_clinvarEutils: React.PropTypes.object,
         ext_clinVarEsearch: React.PropTypes.object,
-        ext_clinVarRCV: React.PropTypes.array
+        ext_clinVarRCV: React.PropTypes.array,
+        ext_ensemblGeneId: React.PropTypes.string,
+        ext_geneSynonyms: React.PropTypes.array
     },
 
     getInitialState: function() {
@@ -53,7 +58,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_clinvarEutils: this.props.ext_clinvarEutils,
             ext_clinVarEsearch: this.props.ext_clinVarEsearch,
             ext_clinVarRCV: this.props.ext_clinVarRCV,
-            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info')  : 'basic-info') // set selectedTab to whatever is defined in the address; default to first tab if not set
+            ext_ensemblGeneId: this.props.ext_ensemblGeneId,
+            ext_geneSynonyms: this.props.ext_geneSynonyms,
+            //remember current tab/subtab so user will land on that tab when interpretation starts
+            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
         };
     },
 
@@ -90,15 +98,22 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (nextProps.ext_clinVarRCV) {
             this.setState({ext_clinVarRCV: nextProps.ext_clinVarRCV});
         }
+        if (nextProps.ext_ensemblGeneId) {
+            this.setState({ext_ensemblGeneId: nextProps.ext_ensemblGeneId});
+        }
+        if (nextProps.ext_geneSynonyms) {
+            this.setState({ext_geneSynonyms: nextProps.ext_geneSynonyms});
+        }
     },
 
     // set selectedTab to whichever tab the user switches to, and update the address accordingly
     handleSelect: function (tab) {
-        this.setState({selectedTab: tab});
-        if (tab == 'basic-info') {
-            window.history.replaceState(window.state, '', editQueryValue(this.props.href_url.href, 'tab', null));
+        if (tab == 'basic-info' || validTabs.indexOf(tab) == -1) {
+            this.setState({selectedTab: 'basic-info'});
+            window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'tab', null));
         } else {
-            window.history.replaceState(window.state, '', editQueryValue(this.props.href_url.href, 'tab', tab));
+            this.setState({selectedTab: tab});
+            window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'tab', tab));
         }
     },
 
@@ -168,7 +183,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <CurationInterpretationGeneSpecific data={variant} data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myGeneInfo={this.state.ext_myGeneInfo}
-                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP} />
+                            ext_ensemblGeneId={this.state.ext_ensemblGeneId}
+                            ext_geneSynonyms={this.state.ext_geneSynonyms} />
                     </div>
                     : null}
                 </div>
@@ -176,3 +192,44 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         );
     },
 });
+
+// Display a history item for adding an interpretation
+var InterpretationAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var interpretation = history.primary,
+            variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
+            disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
+        return (
+            <div>
+                <span>Interpretation added to Variant <strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(InterpretationAddHistory, 'interpretation', 'add');
+
+// Display a history item for adding an individual
+var InterpretationModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var interpretation = history.primary,
+            variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
+            disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
+        return (
+            <div>
+                {history.meta.interpretation.mode == 'edit-disease' ?
+                    <span>Disease <strong>{disease.term}</strong> associated with Interpretation for Variant <strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></span>
+                : null}
+                {history.meta.interpretation.mode == 'update-eval' ?
+                    <span>Evaluation(s) updated for Variant <strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong> {disease ? <span>({disease.term})</span> : null}</span>
+                : null}
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(InterpretationModifyHistory, 'interpretation', 'modify');
