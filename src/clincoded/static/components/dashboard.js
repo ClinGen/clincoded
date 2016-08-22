@@ -55,8 +55,8 @@ var Dashboard = React.createClass({
     getData: function(session) {
         // get 10 gdms and VCI interpretations created by user
         this.getRestDatas([
-            '/search/?type=gdm&limit=10&submitted_by.uuid=' + session.user_properties.uuid,
-            '/search/?type=interpretation&limit=10&submitted_by.uuid=' + session.user_properties.uuid
+            '/search/?type=gdm&submitted_by.uuid=' + session.user_properties.uuid,
+            '/search/?type=interpretation&submitted_by.uuid=' + session.user_properties.uuid
         ],
             null)
         .then(data => {
