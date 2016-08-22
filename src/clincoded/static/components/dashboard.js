@@ -120,10 +120,10 @@ var Dashboard = React.createClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
-        if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
+        if (nextProps.session.user_properties && nextProps.href.indexOf('dashboard') > -1 && !_.isEqual(nextProps.session.user_properties, this.props.session.user_properties)) {
             this.setUserData(nextProps.session.user_properties);
             this.getData(nextProps.session);
-            this.getHistories(this.props.session.user_properties, 10).then(histories => {
+            this.getHistories(nextProps.session.user_properties, 10).then(histories => {
                 if (histories) {
                     this.setState({histories: histories});
                 }
