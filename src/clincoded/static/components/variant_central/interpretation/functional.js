@@ -46,7 +46,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                 {this.state.interpretation ?
                     <CompleteSection interpretation={this.state.interpretation} tabName="experimental" updateInterpretationObj={this.props.updateInterpretationObj} />
                 : null}
-                <PanelGroup accordion><Panel title="Does variant result in LOF?" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Hotspot or functional domain" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -58,7 +58,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         </div>
                     : null}
                 </Panel></PanelGroup>
-                <PanelGroup accordion><Panel title="Is LOF known mechanism for disease of interest?" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Experimental Studies" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
