@@ -196,7 +196,11 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 var InterpretationAddHistory = React.createClass({
     render: function() {
         var history = this.props.history;
-        var interpretation = history.primary;
+        var interpretation = history.primary,
+            variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
+            disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
+        console.log(variant);
+        console.log(disease);
         return (
             <div>
                 hey
