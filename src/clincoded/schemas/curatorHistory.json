@@ -410,6 +410,11 @@
                             "description": "Disease associated with the interpretation",
                             "type": "string",
                             "linkTo": "orphaPhenotype"
+                        },
+                        "mode": {
+                            "title": "Specific mode of change",
+                            "description": "Specific mode of change",
+                            "type": "string"
                         }
                     }
                 }
@@ -515,6 +520,10 @@
         },
         "meta.interpretation.disease": {
             "title": "Orpha ID",
+            "type": "string"
+        },
+        "meta.interpretation.mode": {
+            "title": "Mode of change",
             "type": "string"
         },
         "meta.pathogenicity": {

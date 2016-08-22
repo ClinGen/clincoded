@@ -2,6 +2,7 @@
 var React = require('react');
 var _ = require('underscore');
 var globals = require('../globals');
+var moment = require('moment');
 var form = require('../../libs/bootstrap/form');
 var Form = form.Form;
 var Input = form.Input;
@@ -192,21 +193,43 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     },
 });
 
-// Display a history item for adding an individual
+// Display a history item for adding an interpretation
 var InterpretationAddHistory = React.createClass({
     render: function() {
         var history = this.props.history;
         var interpretation = history.primary,
             variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
             disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
-        console.log(variant);
-        console.log(disease);
         return (
             <div>
-                hey
+                <span>Interpretation added to Variant <strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
     }
 });
 
 globals.history_views.register(InterpretationAddHistory, 'interpretation', 'add');
+
+// Display a history item for adding an individual
+var InterpretationModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var interpretation = history.primary,
+            variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
+            disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
+        return (
+            <div>
+                {history.meta.interpretation.mode == 'edit-disease' ?
+                    <span>Disease <strong>{disease.term}</strong> associated with Interpretation for Variant <strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></span>
+                : null}
+                {history.meta.interpretation.mode == 'update-eval' ?
+                    <span>Evaluation(s) updated for Variant <strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong> {disease ? <span>({disease.term})</span> : null}</span>
+                : null}
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(InterpretationModifyHistory, 'interpretation', 'modify');
