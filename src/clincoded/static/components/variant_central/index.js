@@ -30,7 +30,6 @@ var VariantCurationHub = React.createClass({
             interpretation: null,
             editKey: queryKeyValue('edit', this.props.href),
             variantObj: null,
-            isLoadingComplete: false,
             ext_myVariantInfo: null,
             ext_bustamante: null,
             ext_ensemblVEP: null,
@@ -42,7 +41,8 @@ var VariantCurationHub = React.createClass({
             ext_myGeneInfo_MyVariant: null,
             ext_myGeneInfo_VEP: null,
             ext_ensemblGeneId: null,
-            ext_geneSynonyms: null
+            ext_geneSynonyms: null,
+            isClinVarLoading: true
         };
     },
 
@@ -60,7 +60,6 @@ var VariantCurationHub = React.createClass({
         return this.getRestData('/variants/' + uuid, null, true).then(response => {
             // The variant object successfully retrieved
             this.setState({variantObj: response});
-            this.setState({isLoadingComplete: true});
             // ping out external resources (all async)
             this.fetchClinVarEutils(this.state.variantObj);
             this.fetchMyVariantInfoAndBustamante(this.state.variantObj);
@@ -97,9 +96,12 @@ var VariantCurationHub = React.createClass({
                                 clinvarInterpretations.push(clinvarInterpretation);
                                 this.setState({ext_clinVarRCV: clinvarInterpretations});
                             }).catch(function(e) {
+                                this.setState({isClinVarLoading: false});
                                 console.log('ClinVarEfetch for RCV Error=: %o', e);
                             });
                         }
+                        this.setState({isClinVarLoading: false});
+                        console.log('this.state.isClinVarLoading is === ' + this.state.isClinVarLoading);
                     }
                 }).catch(function(e) {
                     console.log('ClinVarEutils Fetch Error=: %o', e);
@@ -117,16 +119,17 @@ var VariantCurationHub = React.createClass({
                     this.setState({ext_myVariantInfo: response});
                     this.parseMyVariantInfo(response);
                     // check dbsnfp data for bustamante query
-                    var hgvsObj = {};
+                    const hgvsObj = {};
+                    hgvsObj.chrom = (response.chrom) ? response.chrom : null;
+                    hgvsObj.pos = (response.hg19.start) ? response.hg19.start : null;
                     if (response.dbnsfp) {
-                        hgvsObj.chrom = (response.dbnsfp.chrom) ? response.dbnsfp.chrom : null;
-                        hgvsObj.pos = (response.dbnsfp.hg19.start) ? response.dbnsfp.hg19.start : null;
                         hgvsObj.alt = (response.dbnsfp.alt) ? response.dbnsfp.alt : null;
                         return Promise.resolve(hgvsObj);
                     } else if (response.clinvar) {
-                        hgvsObj.chrom = (response.clinvar.chrom) ? response.clinvar.chrom : null;
-                        hgvsObj.pos = (response.clinvar.hg19.start) ? response.clinvar.hg19.start : null;
                         hgvsObj.alt = (response.clinvar.alt) ? response.clinvar.alt : null;
+                        return Promise.resolve(hgvsObj);
+                    } else if (response.dbsnp) {
+                        hgvsObj.alt = (response.dbsnp.alt) ? response.dbsnp.alt : null;
                         return Promise.resolve(hgvsObj);
                     }
                 }).then(data => {
@@ -239,7 +242,7 @@ var VariantCurationHub = React.createClass({
 
     // Method to fetch Gene-centric data from mygene.info
     // and pass the data object to child component
-    fetchMyGeneInfo: function(geneSymbol, geneId, source) {;
+    fetchMyGeneInfo: function(geneSymbol, geneId, source) {
         if (geneSymbol) {
             this.getRestData('/genes/' + geneSymbol).then(response => {
                 this.setState({ext_geneSynonyms: response.synonyms});
@@ -291,7 +294,6 @@ var VariantCurationHub = React.createClass({
         var interpretation = (this.state.interpretation) ? this.state.interpretation : null;
         var interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
         var editKey = this.state.editKey;
-        var isLoadingComplete = this.state.isLoadingComplete;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         return (
@@ -312,7 +314,8 @@ var VariantCurationHub = React.createClass({
                     ext_clinVarEsearch={this.state.ext_clinVarEsearch}
                     ext_clinVarRCV={this.state.ext_clinVarRCV}
                     ext_ensemblGeneId={this.state.ext_ensemblGeneId}
-                    ext_geneSynonyms={this.state.ext_geneSynonyms} />
+                    ext_geneSynonyms={this.state.ext_geneSynonyms}
+                    isClinVarLoading={this.state.isClinVarLoading} />
             </div>
         );
     }
