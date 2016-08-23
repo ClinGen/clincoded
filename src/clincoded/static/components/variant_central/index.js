@@ -95,16 +95,15 @@ var VariantCurationHub = React.createClass({
                                 let clinvarInterpretation = parseClinvarInterpretation(RCV, result);
                                 clinvarInterpretations.push(clinvarInterpretation);
                                 this.setState({ext_clinVarRCV: clinvarInterpretations});
-                            }).catch(function(e) {
+                            }).catch(err => {
                                 this.setState({isClinVarLoading: false});
-                                console.log('ClinVarEfetch for RCV Error=: %o', e);
+                                console.log('ClinVarEfetch for RCV Error=: %o', err);
                             });
                         }
                         this.setState({isClinVarLoading: false});
-                        console.log('this.state.isClinVarLoading is === ' + this.state.isClinVarLoading);
                     }
-                }).catch(function(e) {
-                    console.log('ClinVarEutils Fetch Error=: %o', e);
+                }).catch(err => {
+                    console.log('ClinVarEutils Fetch Error=: %o', err);
                 });
             }
         }
