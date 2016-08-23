@@ -46,8 +46,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             hasHgvsGRCh38: false,
             gene_symbol: null,
             uniprot_id: null,
-            hasRefseqData: false,
-            hasEnsemblData: false,
             isClinVarLoading: this.props.isClinVarLoading
         };
     },
@@ -58,7 +56,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
         if (this.props.ext_ensemblHgvsVEP) {
             this.setState({
-                hasEnsemblData: true,
                 ensembl_transcripts: this.props.ext_ensemblHgvsVEP[0].transcript_consequences
             });
         }
@@ -76,10 +73,10 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
         // update data based on api call results
         if (nextProps.ext_ensemblHgvsVEP) {
-            this.setState({
-                hasEnsemblData: true,
-                ensembl_transcripts: nextProps.ext_ensemblHgvsVEP[0].transcript_consequences
-            });
+            this.setState({ensembl_transcripts: nextProps.ext_ensemblHgvsVEP[0].transcript_consequences});
+            if (!nextProps.ext_clinVarRCV) {
+                this.setState({isClinVarLoading: nextProps.isClinVarLoading});
+            }
         }
         if (nextProps.ext_clinvarEutils) {
             this.parseClinVarEutils(nextProps.ext_clinvarEutils);
@@ -87,13 +84,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (nextProps.ext_clinVarRCV) {
             this.setState({clinVarRCV: nextProps.ext_clinVarRCV, isClinVarLoading: nextProps.isClinVarLoading});
         }
-    },
-
-    componentWillUnmount: function() {
-        this.setState({
-            hasRefseqData: false,
-            hasEnsemblData: false
-        });
     },
 
     componentDidUpdate: function(prevProps, prevState) {
@@ -139,7 +129,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
     parseClinVarEutils: function(variantData) {
         this.setState({
-            hasRefseqData: true,
             nucleotide_change: variantData.RefSeqTranscripts.NucleotideChangeList,
             protein_change: variantData.RefSeqTranscripts.ProteinChangeList,
             molecular_consequence: variantData.RefSeqTranscripts.MolecularConsequenceList,
