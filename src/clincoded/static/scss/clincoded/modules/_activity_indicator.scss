@@ -1,0 +1,30 @@
+.panel-content-wrapper {
+    position: relative;
+}
+
+.activity-indicator.overlay-wrapper {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #fff;
+    color: #000;
+    position: absolute;
+    text-align: center;
+    z-index: 999;
+
+    &:before {
+        content: '';
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+    }
+
+    .overlay-content {
+        display: inline-block;
+        font-weight: bold;
+        padding: 8px 0;
+        position: relative;
+        vertical-align: middle;
+    }
+}
