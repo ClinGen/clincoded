@@ -42,7 +42,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_clinVarEsearch: React.PropTypes.object,
         ext_clinVarRCV: React.PropTypes.array,
         ext_ensemblGeneId: React.PropTypes.string,
-        ext_geneSynonyms: React.PropTypes.array
+        ext_geneSynonyms: React.PropTypes.array,
+        isClinVarLoading: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -59,6 +60,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_clinVarRCV: this.props.ext_clinVarRCV,
             ext_ensemblGeneId: this.props.ext_ensemblGeneId,
             ext_geneSynonyms: this.props.ext_geneSynonyms,
+            isClinVarLoading: this.props.isClinVarLoading,
             //remember current tab/subtab so user will land on that tab when interpretation starts
             selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
         };
@@ -95,7 +97,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             this.setState({ext_clinVarEsearch: nextProps.ext_clinVarEsearch});
         }
         if (nextProps.ext_clinVarRCV) {
-            this.setState({ext_clinVarRCV: nextProps.ext_clinVarRCV});
+            this.setState({ext_clinVarRCV: nextProps.ext_clinVarRCV, isClinVarLoading: nextProps.isClinVarLoading});
         }
         if (nextProps.ext_ensemblGeneId) {
             this.setState({ext_ensemblGeneId: nextProps.ext_ensemblGeneId});
@@ -143,7 +145,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
-                            ext_clinVarRCV={this.state.ext_clinVarRCV} />
+                            ext_clinVarRCV={this.state.ext_clinVarRCV}
+                            isClinVarLoading={this.state.isClinVarLoading} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'population' ?
