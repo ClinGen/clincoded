@@ -135,8 +135,9 @@ var VariantCurationHub = React.createClass({
                     this.getRestData('https:' + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
                         this.setState({ext_bustamante: result});
                     });
-                }).catch(function(e) {
-                    console.log('MyVariant or Bustamante Fetch Error=: %o', e);
+                }).catch(err => {
+                    this.setState({isClinVarLoading: false});
+                    console.log('MyVariant or Bustamante Fetch Error=: %o', err);
                 });
             }
         }
