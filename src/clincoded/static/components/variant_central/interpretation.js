@@ -89,6 +89,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         if (nextProps.ext_ensemblHgvsVEP) {
             this.setState({ext_ensemblHgvsVEP: nextProps.ext_ensemblHgvsVEP});
+            if (!nextProps.ext_clinVarRCV) {
+                this.setState({isClinVarLoading: nextProps.isClinVarLoading});
+            }
         }
         if (nextProps.ext_clinvarEutils) {
             this.setState({ext_clinvarEutils: nextProps.ext_clinvarEutils});
