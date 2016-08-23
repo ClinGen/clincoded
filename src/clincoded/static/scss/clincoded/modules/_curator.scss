@@ -1620,8 +1620,7 @@ dl.inline-dl {
 }
 
 .progress-bar {
-    width: 100%;
-    padding: 0 0 10px 0;
+    margin-bottom: 10px;
 
     .benign-box {
         border: solid 2px #8bcd9c;
@@ -1634,7 +1633,7 @@ dl.inline-dl {
     .pathogenic-box {
         border: solid 2px #d78;
         padding-left: 10px;
-        width: 34%;
+        width: 36%;
         float: left;
         background-color: #fff;
     }
@@ -1642,7 +1641,7 @@ dl.inline-dl {
     .assertion-box {
         border: solid 2px #1b75bc;
         padding-left: 10px;
-        width: 34%;
+        width: 32%;
         float: left;
         background-color: #fff;
     }

@@ -17,7 +17,7 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
 
     getInitialState: function() {
         return {
-            rules: 'ACMG 2015' // Default role for calculation
+            rules: 'ACMG 2015' // Currently use ACMG rules only
         };
     },
 
@@ -28,7 +28,8 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
         var rules = this.state.rules;
 
         return (
-            <div>{interpretation ?
+            <div>
+                {interpretation ?
                     progressBar(result, rules)
                     :
                     null
@@ -40,22 +41,19 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
 
 var progressBar = function(result, rules) {
     return (
-        <div>
-            <div className="progress-bar">
-                <div className="benign-box">
-                    <dt>Benign:</dt>
-                    {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
-                </div>
-                <div className="pathogenic-box">
-                    <dt>Pathogenic:</dt>
-                    {result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }
-                </div>
-                <div className="assertion-box">
-                    <dt>Calculated Pathogenicity{' (' + rules +')'}:</dt>
-                    {result && result.assertion ? result.assertion : 'None'}
-                </div>
+        <div className="container progress-bar">
+            <div className="benign-box">
+                <dt>Benign:</dt>
+                {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
             </div>
-            <br /><br />
+            <div className="pathogenic-box">
+                <dt>Pathogenic:</dt>
+                {result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }
+            </div>
+            <div className="assertion-box">
+                <dt>Calculated Pathogenicity{' (' + rules +')'}:</dt>
+                {result && result.assertion ? result.assertion : 'None'}
+            </div>
         </div>
     );
 };

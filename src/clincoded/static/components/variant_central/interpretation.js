@@ -125,67 +125,69 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         // The ordering of TabPanels are corresponding to that of tabs
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
         return (
-            <div className="container curation-variant-tab-group">
+            <div>
                 <PathogenicityCalculator interpretation={interpretation} />
-                <div className="vci-tabs">
-                    <ul className="vci-tabs-header tab-label-list" role="tablist">
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('population')} aria-selected={this.state.selectedTab == 'population'}>Population {completedSections.indexOf('population') > -1 ? <span>&#10003;</span> : null}</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')} aria-selected={this.state.selectedTab == 'predictors'}>Predictors {completedSections.indexOf('predictors') > -1 ? <span>&#10003;</span> : null}</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('experimental')} aria-selected={this.state.selectedTab == 'experimental'}>Experimental {completedSections.indexOf('experimental') > -1 ? <span>&#10003;</span> : null}</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')} aria-selected={this.state.selectedTab == 'segregation-case'}>Segregation/Case {completedSections.indexOf('segregation-case') > -1 ? <span>&#10003;</span> : null}</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-centric')} aria-selected={this.state.selectedTab == 'gene-centric'}>Gene-centric {completedSections.indexOf('gene-centric') > -1 ? <span>&#10003;</span> : null}</li>
-                    </ul>
+                <div className="container curation-variant-tab-group">
+                    <div className="vci-tabs">
+                        <ul className="vci-tabs-header tab-label-list" role="tablist">
+                            <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
+                            <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('population')} aria-selected={this.state.selectedTab == 'population'}>Population {completedSections.indexOf('population') > -1 ? <span>&#10003;</span> : null}</li>
+                            <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')} aria-selected={this.state.selectedTab == 'predictors'}>Predictors {completedSections.indexOf('predictors') > -1 ? <span>&#10003;</span> : null}</li>
+                            <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('experimental')} aria-selected={this.state.selectedTab == 'experimental'}>Experimental {completedSections.indexOf('experimental') > -1 ? <span>&#10003;</span> : null}</li>
+                            <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')} aria-selected={this.state.selectedTab == 'segregation-case'}>Segregation/Case {completedSections.indexOf('segregation-case') > -1 ? <span>&#10003;</span> : null}</li>
+                            <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-centric')} aria-selected={this.state.selectedTab == 'gene-centric'}>Gene-centric {completedSections.indexOf('gene-centric') > -1 ? <span>&#10003;</span> : null}</li>
+                        </ul>
 
-                    {this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ?
-                    <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationBasicInfo data={variant} href_url={this.props.href_url}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            ext_clinvarEutils={this.state.ext_clinvarEutils}
-                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
-                            ext_clinVarRCV={this.state.ext_clinVarRCV} />
+                        {this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ?
+                        <div role="tabpanel" className="tab-panel">
+                            <CurationInterpretationBasicInfo data={variant} href_url={this.props.href_url}
+                                interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                ext_clinvarEutils={this.state.ext_clinvarEutils}
+                                ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
+                                ext_clinVarRCV={this.state.ext_clinVarRCV} />
+                        </div>
+                        : null}
+                        {this.state.selectedTab == 'population' ?
+                        <div role="tabpanel" className="tab-panel">
+                            <CurationInterpretationPopulation data={variant}
+                                interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                ext_myVariantInfo={this.state.ext_myVariantInfo}
+                                ext_ensemblVEP={this.state.ext_ensemblVEP}
+                                ext_ensemblVariation={this.state.ext_ensemblVariation} />
+                        </div>
+                        : null}
+                        {this.state.selectedTab == 'predictors' ?
+                        <div role="tabpanel" className="tab-panel">
+                            <CurationInterpretationComputational data={variant} href_url={this.props.href_url}
+                                interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                ext_myVariantInfo={this.state.ext_myVariantInfo}
+                                ext_bustamante={this.state.ext_bustamante}
+                                ext_clinvarEutils={this.state.ext_clinvarEutils}
+                                ext_clinVarEsearch={this.state.ext_clinVarEsearch} />
+                        </div>
+                        : null}
+                        {this.state.selectedTab == 'experimental' ?
+                        <div role="tabpanel" className="tab-panel">
+                            <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url}
+                                interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
+                        : null}
+                        {this.state.selectedTab == 'segregation-case' ?
+                        <div role="tabpanel" className="tab-panel">
+                            <CurationInterpretationSegregation data={variant} data={variant} href_url={this.props.href_url}
+                                interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        </div>
+                        : null}
+                        {this.state.selectedTab == 'gene-centric' ?
+                        <div role="tabpanel" className="tab-panel">
+                            <CurationInterpretationGeneSpecific data={variant} data={variant} href_url={this.props.href_url}
+                                interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                ext_myGeneInfo={this.state.ext_myGeneInfo}
+                                ext_ensemblGeneId={this.state.ext_ensemblGeneId}
+                                ext_geneSynonyms={this.state.ext_geneSynonyms} />
+                        </div>
+                        : null}
                     </div>
-                    : null}
-                    {this.state.selectedTab == 'population' ?
-                    <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationPopulation data={variant}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            ext_myVariantInfo={this.state.ext_myVariantInfo}
-                            ext_ensemblVEP={this.state.ext_ensemblVEP}
-                            ext_ensemblVariation={this.state.ext_ensemblVariation} />
-                    </div>
-                    : null}
-                    {this.state.selectedTab == 'predictors' ?
-                    <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationComputational data={variant} href_url={this.props.href_url}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            ext_myVariantInfo={this.state.ext_myVariantInfo}
-                            ext_bustamante={this.state.ext_bustamante}
-                            ext_clinvarEutils={this.state.ext_clinvarEutils}
-                            ext_clinVarEsearch={this.state.ext_clinVarEsearch} />
-                    </div>
-                    : null}
-                    {this.state.selectedTab == 'experimental' ?
-                    <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                    </div>
-                    : null}
-                    {this.state.selectedTab == 'segregation-case' ?
-                    <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationSegregation data={variant} data={variant} href_url={this.props.href_url}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                    </div>
-                    : null}
-                    {this.state.selectedTab == 'gene-centric' ?
-                    <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationGeneSpecific data={variant} data={variant} href_url={this.props.href_url}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            ext_myGeneInfo={this.state.ext_myGeneInfo}
-                            ext_ensemblGeneId={this.state.ext_ensemblGeneId}
-                            ext_geneSynonyms={this.state.ext_geneSynonyms} />
-                    </div>
-                    : null}
                 </div>
             </div>
         );
