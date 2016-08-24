@@ -142,7 +142,7 @@ var calculatePathogenicity = function(evaluationObjList) {
 
             likelyBenign_bs1_pp1: (bs_count === 1 && bp_count === 1) ? true : false,
             likelyBenign_pp2: (bp_count >= 2) ? true : false,
-        }
+        };
 
         for (var cs of Object.keys(cases)) {
             if (cases[cs]) {
@@ -197,7 +197,7 @@ var calculatePathogenicity = function(evaluationObjList) {
             result.benign_summary.push('Strong: ' + bs_count.toString());
         }
         if (bp_count > 0) {
-            result.benign_summary.push('Supporting: ' + bp_count.toString());;
+            result.benign_summary.push('Supporting: ' + bp_count.toString());
         }
     }
 
