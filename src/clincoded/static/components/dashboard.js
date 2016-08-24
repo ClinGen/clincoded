@@ -92,6 +92,7 @@ var Dashboard = React.createClass({
                             hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
                             hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
                             diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
+                            status: vciInterpResult.status,
                             date_created: vciInterpResult.date_created
                         });
                     });
@@ -179,7 +180,8 @@ var Dashboard = React.createClass({
                                             </strong></span></div>
                                             <span className="block-link-no-color title-ellipsis">
                                                 {item.diseaseTerm ? item.diseaseTerm : "No disease associated"}
-                                                <br /><strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}
+                                                <br /><span className="block-link-no-color"><strong>Status</strong>: {item.status}
+                                                <br /><strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}</span>
                                             </span>
                                         </li>
                                         </a>
