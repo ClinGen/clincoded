@@ -88,7 +88,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                         variant: variantObj['@id']
                     }
                 };
-                this.recordHistory('add', data['@graph'][0], meta).then(result => {
+                this.recordHistory('add-hide', data['@graph'][0], meta).then(result => {
                     window.location.href = '/variant-central/?edit=true&variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
                 });
             }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
