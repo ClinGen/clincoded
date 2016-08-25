@@ -140,7 +140,12 @@ var Dashboard = React.createClass({
                         <Panel panelClassName="panel-dashboard">
                             <h3>Tools</h3>
                             <ul>
-                                <li><a href="/select-variant/">Select Variant for Variant Curation</a></li>
+                                <li>
+                                    <a href="/select-variant/">Select Variant for Variant Curation</a>
+                                    <a className="help-doc" href="/static/help/clingen-variant-curation-help.pdf" title="Curation Help" target="_blank">
+                                        <i className="icon icon-question-circle"></i>
+                                    </a>
+                                </li>
                                 <li><a href="/create-gene-disease/">Create Gene-Disease Record</a></li>
                                 <li><a href="/gdm/">View list of all Gene-Disease Records</a></li>
                             </ul>

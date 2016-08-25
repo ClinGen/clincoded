@@ -341,6 +341,15 @@
             color: #000;
         }
     }
+
+    a.help-doc {
+        margin-left: 8px;
+
+        .icon {
+            font-size: 16px;
+            vertical-align: text-top;
+        }
+    }
 }
 
 .edit-omim-modal {

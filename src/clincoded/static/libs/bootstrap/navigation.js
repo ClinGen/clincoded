@@ -100,7 +100,8 @@ var NavItem = module.exports.NavItem = React.createClass({
         title: React.PropTypes.string,
         styles: React.PropTypes.string, // CSS classes to add to <li> elements
         href: React.PropTypes.string, // URL to link this item to
-        icon: React.PropTypes.string // CSS class for fontawesome icon (e.g. 'icon-home')
+        icon: React.PropTypes.string, // CSS class for fontawesome icon (e.g. 'icon-home')
+        target: React.PropTypes.string // target attribute
         // Additional properties (data attributes) set on <a> for the item
     },
 
