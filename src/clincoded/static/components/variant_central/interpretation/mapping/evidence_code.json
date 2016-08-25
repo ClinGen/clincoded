@@ -51,7 +51,7 @@
     "BP3": {
         "class": "benign-supporting",
         "definition": "In-frame indels in repeat w/out known function",
-        "definitionLong": "In-frame deletions/insertions in a repetitive region without a known functoin",
+        "definitionLong": "In-frame deletions/insertions in a repetitive region without a known function",
         "category": "computational",
         "diseaseDependent": false
     },
@@ -107,14 +107,14 @@
     "PP4": {
         "class": "pathogenic-supporting",
         "definition": "Patient's phenotype or FH highly specific for gene",
-        "definitionLong": "Patient's phenotpye or family history is highly specific for a disease with a single genetic etiology",
+        "definitionLong": "Patient's phenotype or family history is highly specific for a disease with a single genetic etiology",
         "category": "functional",
         "diseaseDependent": true
     },
     "PP5": {
         "class": "pathogenic-supporting",
         "definition": "Reputable source = pathogenic",
-        "definitionLong": "Reputable source recently reports variant as pathogenic, but the evidence is not available to the laboratory to perform and independent evalutation",
+        "definitionLong": "Reputable source recently reports variant as pathogenic, but the evidence is not available to the laboratory to perform an independent evalutation",
         "category": "functional",
         "diseaseDependent": true
     },
