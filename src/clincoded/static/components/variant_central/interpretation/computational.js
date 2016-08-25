@@ -22,6 +22,7 @@ var form = require('../../../libs/bootstrap/form');
 var externalLinks = require('./shared/externalLinks');
 
 import { renderDataCredit } from './shared/credit';
+import { showActivityIndicator } from '../../activity_indicator';
 
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -72,7 +73,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         href_url: React.PropTypes.object,
         ext_myVariantInfo: React.PropTypes.object,
         ext_bustamante: React.PropTypes.object,
-        ext_clinVarEsearch: React.PropTypes.object
+        ext_clinVarEsearch: React.PropTypes.object,
+        loading_bustamante: React.PropTypes.bool,
+        loading_myVariantInfo: React.PropTypes.bool,
+        loading_clinvarEsearch: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -109,7 +113,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 }
             },
             computationObjDiff: null,
-            computationObjDiffFlag: false
+            computationObjDiffFlag: false,
+            loading_bustamante: this.props.loading_bustamante,
+            loading_myVariantInfo: this.props.loading_myVariantInfo,
+            loading_clinvarEsearch: this.props.loading_clinvarEsearch
         };
     },
 
@@ -154,10 +161,14 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             codonObj.symbol = nextProps.ext_clinVarEsearch.vci_symbol;
             this.setState({codonObj: codonObj});
         }
-
         if (nextProps.interpretation && nextProps.interpretation.evaluations) {
             this.compareExternalDatas(this.state.computationObj, nextProps.interpretation.evaluations);
         }
+        this.setState({
+            loading_bustamante: nextProps.loading_bustamante,
+            loading_myVariantInfo: nextProps.loading_myVariantInfo,
+            loading_clinvarEsearch: nextProps.loading_clinvarEsearch
+        });
     },
 
     componentWillUnmount: function() {
@@ -443,100 +454,87 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 </p>
                             </div>
                         : null}
-                        {clingenPred ?
-                            <div className="panel panel-info datasource-clingen">
-                                <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Source</th>
-                                            <th>Score Range</th>
-                                            <th>Score</th>
-                                            <th>Prediction</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {clingenPredStatic._order.map(key => {
-                                            return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
-                                        })}
-                                    </tbody>
-                                </table>
+                        <div className="panel panel-info datasource-clingen">
+                            <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
+                            <div className="panel-content-wrapper">
+                                {this.state.loading_bustamante ? showActivityIndicator('Retrieving data... ') : null}
+                                {clingenPred ?
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Source</th>
+                                                <th>Score Range</th>
+                                                <th>Score</th>
+                                                <th>Prediction</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {clingenPredStatic._order.map(key => {
+                                                return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
+                                            })}
+                                        </tbody>
+                                    </table>
+                                    :
+                                    <div className="panel-body"><span>No predictors found for this allele.</span></div>
+                                }
                             </div>
-                        :
-                            <div className="panel panel-info datasource-clingen">
-                                <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <td>No predictors were found for this allele.</td>
-                                        </tr>
-                                    </thead>
-                                </table>
+                        </div>
+                        <div className="panel panel-info datasource-other">
+                            <div className="panel-heading">
+                                <h3 className="panel-title">Other Predictors
+                                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                                </h3>
                             </div>
-                        }
-
-                        {this.state.hasOtherPredData ?
-                            <div className="panel panel-info datasource-other">
-                                <div className="panel-heading"><h3 className="panel-title">Other Predictors<a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a></h3></div>
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Source</th>
-                                            <th>Score Range</th>
-                                            <th>Score</th>
-                                            <th>Prediction</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {otherPredStatic._order.map(key => {
-                                            return (this.renderOtherPredRow(key, otherPred, otherPredStatic));
-                                        })}
-                                    </tbody>
-                                </table>
+                            <div className="panel-content-wrapper">
+                                {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
+                                {this.state.hasOtherPredData ?
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Source</th>
+                                                <th>Score Range</th>
+                                                <th>Score</th>
+                                                <th>Prediction</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {otherPredStatic._order.map(key => {
+                                                return (this.renderOtherPredRow(key, otherPred, otherPredStatic));
+                                            })}
+                                        </tbody>
+                                    </table>
+                                    :
+                                    <div className="panel-body"><span>No predictors found for this allele.</span></div>
+                                }
                             </div>
-                        :
-                            <div className="panel panel-info datasource-other">
-                                <div className="panel-heading"><h3 className="panel-title">Other Predictors<a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a></h3></div>
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <td>No predictors were found for this allele.</td>
-                                        </tr>
-                                    </thead>
-                                </table>
+                        </div>
+                        <div className="panel panel-info datasource-conservation">
+                            <div className="panel-heading">
+                                <h3 className="panel-title">Conservation Analysis
+                                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                                </h3>
                             </div>
-                        }
-
-                        {this.state.hasConservationData ?
-                            <div className="panel panel-info datasource-conservation">
-                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis<a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a></h3></div>
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Source</th>
-                                            <th>Score</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {conservationStatic._order.map(key => {
-                                            return (this.renderConservationRow(key, conservation, conservationStatic));
-                                        })}
-                                    </tbody>
-                                </table>
+                            <div className="panel-content-wrapper">
+                                {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
+                                {this.state.hasConservationData ?
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Source</th>
+                                                <th>Score</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {conservationStatic._order.map(key => {
+                                                return (this.renderConservationRow(key, conservation, conservationStatic));
+                                            })}
+                                        </tbody>
+                                    </table>
+                                    :
+                                    <div className="panel-body"><span>No conservation analysis data found for this allele.</span></div>
+                                }
                             </div>
-                        :
-                            <div className="panel panel-info datasource-conservation">
-                                <div className="panel-heading"><h3 className="panel-title">Conservation Analysis<a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a></h3></div>
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <td>No conservation analysis data was found for this allele.</td>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </div>
-                        }
-
+                        </div>
                         <div className="panel panel-info datasource-splice">
                             <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
                             <div className="panel-body">
@@ -659,8 +657,11 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
                         <div className="panel panel-info datasource-clinvar">
                             <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
-                            <div className="panel-body">
-                                {this.renderVariantCodon(variant, codon)}
+                            <div className="panel-content-wrapper">
+                                {this.state.loading_clinvarEsearch ? showActivityIndicator('Retrieving data... ') : null}
+                                <div className="panel-body">
+                                    {this.renderVariantCodon(variant, codon)}
+                                </div>
                             </div>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
