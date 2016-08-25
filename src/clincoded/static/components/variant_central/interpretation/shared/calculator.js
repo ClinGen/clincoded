@@ -7,6 +7,8 @@ var Form = form.Form;
 var Input = form.Input;
 var FormMixin = form.FormMixin;
 
+var panel = require('../../../../libs/bootstrap/panel');
+var Panel = panel.Panel;
 
 var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.createClass({
     mixins: [FormMixin, RestMixin],
@@ -41,18 +43,19 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
 
 var progressBar = function(result, rules) {
     return (
-        <div className="container progress-bar">
-            <div className="benign-box">
-                <dt>Benign:</dt>
-                {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
+        <div className="container">
+            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-title">
+                <span><strong>Calculated Pathogenicity:</strong>&nbsp;{result && result.assertion ? result.assertion : 'None'}</span>
             </div>
-            <div className="pathogenic-box">
-                <dt>Pathogenic:</dt>
-                {result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }
-            </div>
-            <div className="assertion-box">
-                <dt>Calculated Pathogenicity{' (' + rules +')'}:</dt>
-                {result && result.assertion ? result.assertion : 'None'}
+            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-body">
+                <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12 benign-box">
+                    <span className="btn btn-success shape-circle" data-toggle="tooltip" data-placement="top" data-tooltip="Benign criteria met">B</span><strong>&nbsp;</strong>
+                    {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
+                </div>
+                <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12 pathogenic-box">
+                    <button className="btn btn-danger shape-circle" data-toggle="tooltip" data-placement="top" data-tooltip="Pathogenic criteria met">P</button><strong>&nbsp;</strong>
+                    {result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }
+                </div>
             </div>
         </div>
     );

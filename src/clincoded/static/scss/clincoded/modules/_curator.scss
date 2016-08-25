@@ -1619,30 +1619,38 @@ dl.inline-dl {
     }
 }
 
-.progress-bar {
+.progress-bar-title {
+    padding: 5px 0 5px 10px;
+    font-size: 16px;
+    background-color: #dddddd;
+    border-top: solid 1px #aaaaaa;
+    border-left: solid 1px #aaaaaa;
+    border-right: solid 1px #aaaaaa;
+}
+
+.progress-bar-body {
     margin-bottom: 10px;
+    border-left: solid 1px #aaaaaa;
+    border-right: solid 1px #aaaaaa;
+    border-bottom: solid 1px #aaaaaa;
+    background-color: #ffffff;
 
     .benign-box {
-        border: solid 2px #8bcd9c;
-        padding-left: 10px;
-        width: 32%;
-        float: left;
-        background-color: #ffffff;
+        padding: 5px 0 5px 0;
     }
 
     .pathogenic-box {
-        border: solid 2px #d33535;
-        padding-left: 10px;
-        width: 36%;
-        float: left;
-        background-color: #ffffff;
+        padding: 5px 0 5px 0;
     }
 
-    .assertion-box {
-        border: solid 2px #1b75bc;
-        padding-left: 10px;
-        width: 32%;
-        float: left;
-        background-color: #ffffff;
+    .shape-circle {
+        margin: none;
+        width: 40px;
+        height: 40px;
+        text-align: center;
+        font-size: 20px;
+        //line-height: 1.33;
+        border-radius: 20px;
+        padding-left: 13px;
     }
 }
