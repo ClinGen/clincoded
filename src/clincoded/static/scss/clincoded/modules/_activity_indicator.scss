@@ -10,7 +10,7 @@
     background-color: #fff;
     color: #000;
     position: absolute;
-    text-align: center;
+    text-align: left;
     z-index: 999;
 
     &:before {
@@ -23,7 +23,7 @@
     .overlay-content {
         display: inline-block;
         font-weight: bold;
-        padding: 8px 0;
+        padding: 8px 12px;
         position: relative;
         vertical-align: middle;
     }
