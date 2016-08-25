@@ -58,7 +58,7 @@
     "BP4": {
         "class": "benign-supporting",
         "definition": "Multiple lines of computational evidence suggest no impact on gene /gene product",
-        "definitionLong": "Multiple lines of computational evidence suggest no impact on gene or gene product (conservation, evolutionary, splicing impact, more) (has caveat)",
+        "definitionLong": "Multiple lines of computational evidence suggest no impact on the gene or gene product (conservation, evolutionary, splicing impact, etc.) (has caveat)",
         "category": "computational",
         "diseaseDependent": false
     },
@@ -100,7 +100,7 @@
     "PP3": {
         "class": "pathogenic-supporting",
         "definition": "Multiple lines of computational evidence support a deleterious effect on the gene /gene product",
-        "definitionLong": "Multiple lines of computation evidence support a deleteriuos effect on the gene or gene product (conservation, evolutaionary, splicing impact, etc.) (has caveat)",
+        "definitionLong": "Multiple lines of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc.) (has caveat)",
         "category": "computational",
         "diseaseDependent": false
     },
