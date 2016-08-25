@@ -42,7 +42,14 @@ var VariantCurationHub = React.createClass({
             ext_myGeneInfo_VEP: null,
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
-            isClinVarLoading: true
+            loading_clinvarEutils: true,
+            loading_clinvarEsearch: true,
+            loading_clinvarRCV: true,
+            loading_ensemblHgvsVEP: true,
+            loading_ensemblVariation: true,
+            loading_myVariantInfo: true,
+            loading_myGeneInfo: true,
+            loading_bustamante: true
         };
     },
 
@@ -81,7 +88,7 @@ var VariantCurationHub = React.createClass({
                     // Passing 'true' option to invoke 'mixin' function
                     // To extract more ClinVar data for 'Basic Information' tab
                     var variantData = parseClinvar(xml, true);
-                    this.setState({ext_clinvarEutils: variantData});
+                    this.setState({ext_clinvarEutils: variantData, loading_clinvarEutils: false});
                     this.handleCodonEsearch(variantData);
                     let clinVarRCVs = getClinvarRCVs(xml);
                     return Promise.resolve(clinVarRCVs);
@@ -96,14 +103,25 @@ var VariantCurationHub = React.createClass({
                                 clinvarInterpretations.push(clinvarInterpretation);
                                 this.setState({ext_clinVarRCV: clinvarInterpretations});
                             }).catch(err => {
-                                this.setState({isClinVarLoading: false});
+                                this.setState({loading_clinvarRCV: false});
                                 console.log('ClinVarEfetch for RCV Error=: %o', err);
                             });
                         }
-                        this.setState({isClinVarLoading: false});
                     }
+                    this.setState({loading_clinvarRCV: false});
                 }).catch(err => {
+                    this.setState({
+                        loading_clinvarEutils: false,
+                        loading_clinvarRCV: false,
+                        loading_clinvarEsearch: false
+                    });
                     console.log('ClinVarEutils Fetch Error=: %o', err);
+                });
+            } else {
+                this.setState({
+                    loading_clinvarEutils: false,
+                    loading_clinvarRCV: false,
+                    loading_clinvarEsearch: false
                 });
             }
         }
@@ -115,7 +133,7 @@ var VariantCurationHub = React.createClass({
             let hgvs_notation = getHgvsNotation(variant, 'GRCh37');
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfo'] + hgvs_notation).then(response => {
-                    this.setState({ext_myVariantInfo: response});
+                    this.setState({ext_myVariantInfo: response, loading_myVariantInfo: false});
                     this.parseMyVariantInfo(response);
                     // check dbsnfp data for bustamante query
                     const hgvsObj = {};
@@ -133,11 +151,19 @@ var VariantCurationHub = React.createClass({
                     }
                 }).then(data => {
                     this.getRestData('https:' + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
-                        this.setState({ext_bustamante: result});
+                        this.setState({ext_bustamante: result, loading_bustamante: false});
                     });
                 }).catch(err => {
-                    this.setState({isClinVarLoading: false});
+                    this.setState({
+                        loading_myVariantInfo: false,
+                        loading_bustamante: false
+                    });
                     console.log('MyVariant or Bustamante Fetch Error=: %o', err);
+                });
+            } else {
+                this.setState({
+                    loading_myVariantInfo: false,
+                    loading_bustamante: false
                 });
             }
         }
@@ -167,12 +193,15 @@ var VariantCurationHub = React.createClass({
             var rsid = (variant.dbSNPIds && variant.dbSNPIds.length > 0) ? variant.dbSNPIds[0].match(numberPattern) : null;
             if (rsid) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
-                    this.setState({ext_ensemblVariation: response});
+                    this.setState({ext_ensemblVariation: response, loading_ensemblVariation: false});
                     //this.parseTGenomesData(response);
                     //this.calculateHighestMAF();
-                }).catch(function(e) {
-                    console.log('Ensembl Fetch Error=: %o', e);
+                }).catch(err => {
+                    this.setState({loading_ensemblVariation: false});
+                    console.log('Ensembl Fetch Error=: %o', err);
                 });
+            } else {
+                this.setState({loading_ensemblVariation: false});
             }
         }
     },
@@ -184,12 +213,15 @@ var VariantCurationHub = React.createClass({
             let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&canonical=1&merged=1';
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then(response => {
-                    this.setState({ext_ensemblHgvsVEP: response});
+                    this.setState({ext_ensemblHgvsVEP: response, loading_ensemblHgvsVEP: false});
                     this.parseEnsemblGeneId(response);
                     this.parseEnsemblHgvsVEP(response);
-                }).catch(function(e) {
-                    console.log('Ensembl Fetch Error=: %o', e);
+                }).catch(err => {
+                    this.setState({loading_ensemblHgvsVEP: false});
+                    console.log('Ensembl Fetch Error=: %o', err);
                 });
+            } else {
+                this.setState({loading_ensemblHgvsVEP: false});
             }
         }
     },
@@ -246,8 +278,8 @@ var VariantCurationHub = React.createClass({
         if (geneSymbol) {
             this.getRestData('/genes/' + geneSymbol).then(response => {
                 this.setState({ext_geneSynonyms: response.synonyms});
-            }).catch(function(e) {
-                console.log('Local Gene Fetch ERROR=: %o', e);
+            }).catch(err => {
+                console.log('Local Gene Symbol Fetch ERROR=: %o', err);
             });
         }
         if (geneId) {
@@ -259,8 +291,10 @@ var VariantCurationHub = React.createClass({
                 } else if (source === 'ensemblHgvsVEP') {
                     this.setState({ext_myGeneInfo_VEP: geneObj});
                 }
-            }).catch(function(e) {
-                console.log('MyGeneInfo Fetch Error=: %o', e);
+                this.setState({loading_myGeneInfo: false});
+            }).catch(err => {
+                this.setState({loading_myGeneInfo: false});
+                console.log('MyGeneInfo Fetch Error=: %o', err);
             });
         }
     },
@@ -275,10 +309,13 @@ var VariantCurationHub = React.createClass({
                 // pass in these additional values, in case receiving component needs them
                 result.vci_term = term;
                 result.vci_symbol = symbol;
-                this.setState({ext_clinVarEsearch: result});
-            }).catch(function(e) {
-                console.log('ClinVarEsearch Fetch Error=: %o', e);
+                this.setState({ext_clinVarEsearch: result, loading_clinvarEsearch: false});
+            }).catch(err => {
+                this.setState({loading_clinvarEsearch: false});
+                console.log('ClinVarEsearch Fetch Error=: %o', err);
             });
+        } else {
+            this.setState({loading_clinvarEsearch: false});
         }
     },
 
@@ -315,7 +352,14 @@ var VariantCurationHub = React.createClass({
                     ext_clinVarRCV={this.state.ext_clinVarRCV}
                     ext_ensemblGeneId={this.state.ext_ensemblGeneId}
                     ext_geneSynonyms={this.state.ext_geneSynonyms}
-                    isClinVarLoading={this.state.isClinVarLoading} />
+                    loading_clinvarEutils={this.state.loading_clinvarEutils}
+                    loading_clinvarEsearch={this.state.loading_clinvarEsearch}
+                    loading_clinvarRCV={this.state.loading_clinvarRCV}
+                    loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
+                    loading_ensemblVariation={this.state.loading_ensemblVariation}
+                    loading_myVariantInfo={this.state.loading_myVariantInfo}
+                    loading_myGeneInfo={this.state.loading_myGeneInfo}
+                    loading_bustamante={this.state.loading_bustamante} />
             </div>
         );
     }
