@@ -97,18 +97,24 @@ var VariantCurationHub = React.createClass({
                     // parse associated disease and clinical significance for each id
                     if (RCVs.length) {
                         let clinvarInterpretations = [];
+                        let Urls = [];
                         for (let RCV of RCVs.values()) {
-                            this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV).then(result => {
-                                let clinvarInterpretation = parseClinvarInterpretation(RCV, result);
+                            Urls.push(this.props.href_url.protocol + external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV);
+                        }
+                        return this.getRestDatasXml(Urls).then(xml => {
+                            xml.forEach(result => {
+                                let clinvarInterpretation = parseClinvarInterpretation(result);
                                 clinvarInterpretations.push(clinvarInterpretation);
                                 this.setState({ext_clinVarRCV: clinvarInterpretations});
-                            }).catch(err => {
-                                this.setState({loading_clinvarRCV: false});
-                                console.log('ClinVarEfetch for RCV Error=: %o', err);
                             });
-                        }
+                            this.setState({loading_clinvarRCV: false});
+                        }).catch(err => {
+                            this.setState({loading_clinvarRCV: false});
+                            console.log('ClinVarEfetch for RCV Error=: %o', err);
+                        });
+                    } else {
+                        this.setState({loading_clinvarRCV: false});
                     }
-                    this.setState({loading_clinvarRCV: false});
                 }).catch(err => {
                     this.setState({
                         loading_clinvarEutils: false,
