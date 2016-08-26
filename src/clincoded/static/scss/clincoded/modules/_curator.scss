@@ -1630,27 +1630,58 @@ dl.inline-dl {
 
 .progress-bar-body {
     margin-bottom: 10px;
-    border-left: solid 1px #aaaaaa;
-    border-right: solid 1px #aaaaaa;
-    border-bottom: solid 1px #aaaaaa;
-    background-color: #ffffff;
+    border: solid 1px #aaaaaa;
+    background-color: #dddddd;
 
-    .benign-box {
+    .criteria-box {
         padding: 5px 0 5px 0;
+
+        .criteria-label {
+            float: left;
+        }
+
+        .criteria-list {
+            float: left;
+        }
+
+        li.criteria-title {
+            content: "•";
+            color: #f78;
+            font-size: 150%;
+
+            span {
+                color: #000;
+                font-size: 14px;
+                text-indent: -10px;
+            }
+        }
+
+        c.riteria-list {
+            padding-left:20px;
+        }
     }
 
     .pathogenic-box {
         padding: 5px 0 5px 0;
+
+        .criteria-label {
+            float: left;
+        }
+
+        .criteria-list {
+            float: left;
+        }
     }
 
     .shape-circle {
-        margin: none;
-        width: 40px;
-        height: 40px;
+        margin-right: 10px;
+        width: 10px;
+        height: 10px;
+        background-color: #ffffff;
         text-align: center;
-        font-size: 20px;
+        //font-size: 20px;
         //line-height: 1.33;
-        border-radius: 20px;
-        padding-left: 13px;
+        border-radius: 5px;
+        //padding-left: 13px;
     }
 }
