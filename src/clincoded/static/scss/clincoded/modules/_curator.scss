@@ -1619,69 +1619,26 @@ dl.inline-dl {
     }
 }
 
-.progress-bar-title {
-    padding: 5px 0 5px 10px;
-    font-size: 16px;
-    background-color: #dddddd;
-    border-top: solid 1px #aaaaaa;
-    border-left: solid 1px #aaaaaa;
-    border-right: solid 1px #aaaaaa;
-}
-
 .progress-bar-body {
     margin-bottom: 10px;
-    border: solid 1px #aaaaaa;
-    background-color: #dddddd;
+    border: solid 1px #bbb;
+    background-color: #eee;
 
     .criteria-box {
         padding: 5px 0 5px 0;
 
-        .criteria-label {
-            float: left;
+        .icon-calculator {
+            color: #0044cc;
         }
 
-        .criteria-list {
-            float: left;
+        .benign-label {
+            color: #6a6;
+            font-size: 1.5rem;
         }
 
-        li.criteria-title {
-            content: "•";
-            color: #f78;
-            font-size: 150%;
-
-            span {
-                color: #000;
-                font-size: 14px;
-                text-indent: -10px;
-            }
+        .pathogenic-label {
+            color: #d77;
+            font-size: 1.5rem;
         }
-
-        c.riteria-list {
-            padding-left:20px;
-        }
-    }
-
-    .pathogenic-box {
-        padding: 5px 0 5px 0;
-
-        .criteria-label {
-            float: left;
-        }
-
-        .criteria-list {
-            float: left;
-        }
-    }
-
-    .shape-circle {
-        margin-right: 10px;
-        width: 10px;
-        height: 10px;
-        background-color: #ffffff;
-        text-align: center;
-        //font-size: 20px;
-        //line-height: 1.33;
-        border-radius: 5px;
-        //padding-left: 13px;
     }
 }

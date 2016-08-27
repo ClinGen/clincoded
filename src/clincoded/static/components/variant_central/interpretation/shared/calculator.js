@@ -42,20 +42,53 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
 });
 
 var progressBar = function(result, rules) {
+    let browser_width = window.inner
+
     return (
         <div className="container">
             <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-body">
-                <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12 criteria-box">
-                    <span className="shape-circle">&nbsp;</span><span><strong>Benign criteria met:</strong></span><br />
-                    <span>{result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }</span>
+                <div className="col-lg-3 col-md-12 col-sm-12 col-xs-12 criteria-box">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td className="icon-middle" rowSpan="2"><i className="icon icon-check-circle fa-2x benign-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
+                                <td className="title"><strong>Benign criteria met:</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12 criteria-box">
-                    <li className="criteria-title"><span><strong>Pathongenic criteria met:</strong></span></li>
-                    <span className="criteria-list">{result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }</span>
+                <div className="col-lg-5 col-md-12 col-sm-12 col-xs-12 criteria-box">
+                    <table>
+                        <tbody>
+                            <tr>
+                            <td className="icon-top" rowSpan="2"><i className="icon icon-check-circle pathogenic-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
+                                <td className="title">
+                                    <strong>Pathogenic criteria met:</strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12 criteria-box">
-                    <i class="icon icon-calculator"></i><strong>Calculated Pathogenicity:</strong><br />
-                    <span>{result && result.assertion ? result.assertion : 'None'}</span>
+                <div className="col-lg-4 col-md-12 col-sm-12 col-xs-12 criteria-box">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td className="icon-top" rowSpan="2"><i className="icon icon-calculator" aria-hidden="true"></i>&nbsp;&nbsp;</td>
+                                <td className="title"><strong>Calculated Pathogenicity:</strong></td>
+                            </tr>
+                            <tr>
+                                <td>{result && result.assertion ? result.assertion : 'None'}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
