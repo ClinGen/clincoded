@@ -408,7 +408,7 @@ var evalFormSectionWrapper = module.exports.evalFormSectionWrapper = function(no
 // description and disease-dependency are ascertained from evidence_codes.json
 var evalFormNoteSectionWrapper = module.exports.evalFormNoteSectionWrapper = function(criteriaList) {
     return (
-        <p className="alert alert-info">
+        <p className="alert alert-info criteria-description">
             {criteriaList.map((criteria, i) => {
                 return (
                     <span key={i}>
