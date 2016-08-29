@@ -117,16 +117,17 @@ var VariantCurationHub = React.createClass({
                     this.setState({ext_myVariantInfo: response});
                     this.parseMyVariantInfo(response);
                     // check dbsnfp data for bustamante query
-                    var hgvsObj = {};
+                    let hgvsObj = {};
+                    hgvsObj.chrom = (response.chrom) ? response.chrom : null;
+                    hgvsObj.pos = (response.hg19.start) ? response.hg19.start : null;
                     if (response.dbnsfp) {
-                        hgvsObj.chrom = (response.dbnsfp.chrom) ? response.dbnsfp.chrom : null;
-                        hgvsObj.pos = (response.dbnsfp.hg19.start) ? response.dbnsfp.hg19.start : null;
                         hgvsObj.alt = (response.dbnsfp.alt) ? response.dbnsfp.alt : null;
                         return Promise.resolve(hgvsObj);
                     } else if (response.clinvar) {
-                        hgvsObj.chrom = (response.clinvar.chrom) ? response.clinvar.chrom : null;
-                        hgvsObj.pos = (response.clinvar.hg19.start) ? response.clinvar.hg19.start : null;
                         hgvsObj.alt = (response.clinvar.alt) ? response.clinvar.alt : null;
+                        return Promise.resolve(hgvsObj);
+                    } else if (response.dbsnp) {
+                        hgvsObj.alt = (response.dbsnp.alt) ? response.dbsnp.alt : null;
                         return Promise.resolve(hgvsObj);
                     }
                 }).then(data => {
