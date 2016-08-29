@@ -42,21 +42,34 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
 });
 
 var progressBar = function(result, rules) {
-    let browser_width = window.inner
+    let benign_summary = result && result.benign_summary ? result.benign_summary : null;
+    let path_summary = result && result.path_summary ? result.path_summary : null;
 
     return (
         <div className="container">
             <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-body">
-                <div className="col-lg-3 col-md-12 col-sm-12 col-xs-12 criteria-box">
+                <div className="col-lg-4 col-md-12 col-sm-12 col-xs-12 criteria-box">
                     <table>
                         <tbody>
                             <tr>
-                                <td className="icon-middle" rowSpan="2"><i className="icon icon-check-circle fa-2x benign-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
-                                <td className="title"><strong>Benign criteria met:</strong></td>
+                                <td rowSpan="2"><i className="icon icon-check-circle benign-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
+                                <td className="title">Benign criteria met:</td>
                             </tr>
                             <tr>
-                                <td>
-                                    {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
+                                <td className="criteria-list">
+                                    {benign_summary && Object.keys(benign_summary).length ?
+                                        Object.keys(benign_summary).map((criteria, i) => {
+                                            return (
+                                                <span key={i}>
+                                                    {criteria + ': '}
+                                                    <span className="btn btn-circle">{benign_summary[criteria]}</span>
+                                                    {i < Object.keys(benign_summary).length - 1 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
+                                                </span>
+                                            );
+                                        })
+                                        :
+                                        'No criteria met'
+                                    }
                                 </td>
                             </tr>
                         </tbody>
@@ -66,26 +79,38 @@ var progressBar = function(result, rules) {
                     <table>
                         <tbody>
                             <tr>
-                            <td className="icon-top" rowSpan="2"><i className="icon icon-check-circle pathogenic-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
-                                <td className="title">
-                                    <strong>Pathogenic criteria met:</strong>
-                                </td>
+                                <td rowSpan="2"><i className="icon icon-check-circle pathogenic-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
+                                <td className="title">Pathogenic criteria met:</td>
                             </tr>
                             <tr>
-                                <td>{result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }</td>
+                                <td className="criteria-list">
+                                    {path_summary && Object.keys(path_summary).length ?
+                                        Object.keys(path_summary).map((criteria, i) => {
+                                            return (
+                                                <span key={i}>
+                                                    {criteria + ': '}
+                                                    <span className="btn btn-circle">{path_summary[criteria]}</span>
+                                                    {i < Object.keys(path_summary).length - 1 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
+                                                </span>
+                                            );
+                                        })
+                                        :
+                                        'No criteria met'
+                                    }
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div className="col-lg-4 col-md-12 col-sm-12 col-xs-12 criteria-box">
+                <div className="col-lg-3 col-md-12 col-sm-12 col-xs-12 criteria-box">
                     <table>
                         <tbody>
                             <tr>
-                                <td className="icon-top" rowSpan="2"><i className="icon icon-calculator" aria-hidden="true"></i>&nbsp;&nbsp;</td>
-                                <td className="title"><strong>Calculated Pathogenicity:</strong></td>
+                                <td rowSpan="2"><i className="icon icon-calculator" aria-hidden="true"></i>&nbsp;&nbsp;</td>
+                                <td className="title">Calculated Pathogenicity:</td>
                             </tr>
                             <tr>
-                                <td>{result && result.assertion ? result.assertion : 'None'}</td>
+                                <td className="criteria-list">{result && result.assertion ? result.assertion : 'None'}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -212,29 +237,29 @@ var calculatePathogenicity = function(evaluationObjList) {
 
         var result = {
             assertion: assertion,
-            path_summary: [],
-            benign_summary: []
+            path_summary: {},
+            benign_summary: {}
         };
         if (pvs_count > 0) {
-            result.path_summary.push('Very strong: ' + pvs_count.toString());
+            result.path_summary['Very strong'] = pvs_count;
         }
         if (ps_count > 0) {
-            result.path_summary.push('Strong: ' + ps_count.toString());
+            result.path_summary['Strong'] = ps_count;
         }
         if (pm_count > 0) {
-            result.path_summary.push('Moderate: ' + pm_count.toString());
+            result.path_summary['Moderate'] = pm_count;
         }
         if (pp_count > 0) {
-            result.path_summary.push('Supporting: ' + pp_count.toString());
+            result.path_summary['Supporting'] = pp_count;
         }
         if (ba_count > 0) {
-            result.benign_summary.push('Stand alone: ' + ba_count.toString());
+            result.benign_summary['Stand alone'] = ba_count;
         }
         if (bs_count > 0) {
-            result.benign_summary.push('Strong: ' + bs_count.toString());
+            result.benign_summary['Strong'] = bs_count;
         }
         if (bp_count > 0) {
-            result.benign_summary.push('Supporting: ' + bp_count.toString());
+            result.benign_summary['Supporting'] = bp_count;
         }
     }
 

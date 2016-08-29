@@ -1621,24 +1621,53 @@ dl.inline-dl {
 
 .progress-bar-body {
     margin-bottom: 10px;
-    border: solid 1px #bbb;
-    background-color: #eee;
+    border: solid 1px #dddddd;
+    background-color: #f5f5f5;
 
     .criteria-box {
         padding: 5px 0 5px 0;
 
+        .title {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .criteria-list {
+            font-size: 12px;
+        }
+
         .icon-calculator {
-            color: #0044cc;
+            color: #1b75bc;
+            font-size: 14pt;
         }
 
         .benign-label {
-            color: #6a6;
-            font-size: 1.5rem;
+            color: #92cd9e;
+            font-size: 18pt;
         }
 
         .pathogenic-label {
-            color: #d77;
-            font-size: 1.5rem;
+            color: #f4978a;
+            font-size: 18pt;
+        }
+
+        .badge {
+            background-color: #b7b7b7;
+            font-size: 11px;
+            font-weight: normal;
+        }
+
+        .btn-circle {
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            //text-align: center;
+            //vertical-align: middle;
+            padding: 0 0 2px 0;
+            font-size: 12px;
+            line-height: 16px;
+            color: #fff;
+            background: #b7b7b7;
         }
     }
 }
