@@ -62,7 +62,7 @@ var progressBar = function(result, rules) {
                                             return (
                                                 <span key={i}>
                                                     {criteria + ': '}
-                                                    <span className="btn btn-circle">{benign_summary[criteria]}</span>
+                                                    <span className="badge">{benign_summary[criteria]}</span>
                                                     {i < Object.keys(benign_summary).length - 1 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
                                                 </span>
                                             );
@@ -89,7 +89,7 @@ var progressBar = function(result, rules) {
                                             return (
                                                 <span key={i}>
                                                     {criteria + ': '}
-                                                    <span className="btn btn-circle">{path_summary[criteria]}</span>
+                                                    <span className="badge">{path_summary[criteria]}</span>
                                                     {i < Object.keys(path_summary).length - 1 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
                                                 </span>
                                             );
