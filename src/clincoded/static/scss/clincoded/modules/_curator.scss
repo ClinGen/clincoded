@@ -1620,14 +1620,16 @@ dl.inline-dl {
 }
 
 .progress-bar-body {
+    border-radius: 4px;
     margin-bottom: 10px;
     border: solid 1px #dddddd;
     background-color: #f5f5f5;
 
     .criteria-box {
-        padding: 5px 0 5px 0;
+        padding: 10px 0;
 
         .title {
+            padding-bottom: 5px;
             font-size: 14px;
             font-weight: bold;
         }
