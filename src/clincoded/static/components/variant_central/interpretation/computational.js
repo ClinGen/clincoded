@@ -276,9 +276,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             let computationObj = this.state.computationObj;
             let dbnsfp = response.dbnsfp;
             // get scores from dbnsfp
-            computationObj.conservation.phylop7way = parseFloat(dbnsfp.phylo.p7way.vertebrate);
+            computationObj.conservation.phylop7way = (dbnsfp.phylo.p7way) ? parseFloat(dbnsfp.phylo.p7way.vertebrate) : parseFloat(dbnsfp.phylo.p100way.vertebrate);
             computationObj.conservation.phylop20way = parseFloat(dbnsfp.phylo.p20way.mammalian);
-            computationObj.conservation.phastconsp7way = parseFloat(dbnsfp.phastcons['7way'].vertebrate);
+            computationObj.conservation.phastconsp7way = (dbnsfp.phastcons['7way']) ? parseFloat(dbnsfp.phastcons['7way'].vertebrate) : parseFloat(dbnsfp.phastcons['100way'].vertebrate);
             computationObj.conservation.phastconsp20way = parseFloat(dbnsfp.phastcons['20way'].mammalian);
             computationObj.conservation.gerp = parseFloat(dbnsfp['gerp++'].rs);
             computationObj.conservation.siphy = parseFloat(dbnsfp.siphy_29way.logodds);
