@@ -345,6 +345,20 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         return url;
     },
 
+    // Function to render message for ClinVar Primary transcript table
+    // when no transcript data is found
+    renderClinvarTranscriptMessage: function(clinvarId) {
+        if (clinvarId) {
+            return (
+                <span>No ClinVar Primary Transcript was found for ClinVar VariationID <a href={'http://www.ncbi.nlm.nih.gov/clinvar/variation/' + clinvarId} target="_blank">{clinvarId}</a>.</span>
+            );
+        } else {
+            return (
+                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</span>
+            );
+        }
+    },
+
     render: function() {
         var clinvar_id = this.state.clinvar_id;
         var car_id = this.state.car_id;
@@ -436,7 +450,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </tbody>
                         </table>
                         :
-                        <table className="table"><tbody><tr><td>No ClinVar Primary Transcript was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</td></tr></tbody></table>
+                        <div className="panel-body">{self.renderClinvarTranscriptMessage(clinvar_id)}</div>
                     }
                 </div>
 
