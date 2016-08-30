@@ -12,6 +12,14 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 
+/*
+NOTE: disease dependency of criteria codes are in a state of flux right now. The mapping to actually
+dictate whether or not a criteria is disease-dependent is in ../mapping/evidence_code.json, but the
+code to deal with the associated form rendering and storing is here. If criteria codes need to have
+their disease dependency modified, edit evidence_code. To change or remove its behavior, edit here
+(search for 'diseaseCriteria', 'diseaseAssociated', 'diseaseDependent', and finally 'disease')
+*/
+
 // Form component to be re-used by various tabs
 var CurationInterpretationForm = module.exports.CurationInterpretationForm = React.createClass({
     mixins: [RestMixin, FormMixin],
