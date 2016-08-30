@@ -126,6 +126,7 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset) {
             alt_protein_change = stringArray[0] + num + stringArray[1].substr(0, 1);
         }
     }
+    // Set protein change property value
     if (protein_change) {
         variant.allele.ProteinChange = protein_change.textContent;
     } else if (alt_protein_change) {
