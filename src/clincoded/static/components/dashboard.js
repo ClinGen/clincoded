@@ -93,7 +93,7 @@ var Dashboard = React.createClass({
                                 hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
                                 hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
                                 diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
-                                status: vciInterpResult.status,
+                                status: vciInterpResult.interpretation_status,
                                 date_created: vciInterpResult.date_created
                             });
                         }
