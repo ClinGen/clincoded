@@ -47,7 +47,7 @@ var progressBar = function(result, rules) {
 
     return (
         <div className="container">
-            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-body">
+            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar">
                 <div className="col-lg-4 col-md-12 col-sm-12 col-xs-12 criteria-box">
                     <table>
                         <tbody>

@@ -1619,7 +1619,7 @@ dl.inline-dl {
     }
 }
 
-.progress-bar-body {
+.progress-bar {
     border-radius: 4px;
     margin-bottom: 10px;
     padding: 0 0 0 10px;
@@ -1669,11 +1669,15 @@ dl.inline-dl {
         }
 
         @media not screen and (min-width: 768px) {
+            margin-left: 100px;
+        }
+
+        @media not screen and (min-width: 610px) {
             margin-left: 75px;
         }
 
         @media not screen and (min-width: 550px) {
-            margin-left: 30px;
+            margin-left: 50px;
         }
 
         @media not screen and (min-width: 480px) {
