@@ -1659,5 +1659,25 @@ dl.inline-dl {
             font-size: 11px;
             font-weight: normal;
         }
+
+        @media not screen and (min-width: 1200px) {
+            margin-left: 250px;
+        }
+
+        @media not screen and (min-width: 992px) {
+            margin-left: 150px;
+        }
+
+        @media not screen and (min-width: 768px) {
+            margin-left: 75px;
+        }
+
+        @media not screen and (min-width: 550px) {
+            margin-left: 30px;
+        }
+
+        @media not screen and (min-width: 480px) {
+            margin-left: 0;
+        }
     }
 }
