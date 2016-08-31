@@ -240,7 +240,7 @@ var VariantCurationHub = React.createClass({
 
     // Method to fetch Gene-centric data from mygene.info
     // and pass the data object to child component
-    fetchMyGeneInfo: function(geneSymbol, geneId, source) {;
+    fetchMyGeneInfo: function(geneSymbol, geneId, source) {
         if (geneSymbol) {
             this.getRestData('/genes/' + geneSymbol).then(response => {
                 this.setState({ext_geneSynonyms: response.synonyms});
