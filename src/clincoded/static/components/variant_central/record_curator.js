@@ -87,7 +87,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                     <div key={i}>
                                                         <span className="my-interpretation">
                                                             {(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}
-                                                            {item.interpretation_status}
+                                                            {item.interpretation_status + ' '}
                                                             (last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')})
                                                         </span>
                                                         {(item.uuid === interpretationUuid) ?
@@ -112,7 +112,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                         <span className="other-interpretation">
                                                             {otherInterpretations[0].submitted_by.title + ', '}
                                                             {(otherInterpretations[0].interpretation_disease !== '') ? otherInterpretations[0].interpretation_disease + ', ' : null}
-                                                            {otherInterpretations[0].interpretation_status + ', '}
+                                                            {otherInterpretations[0].interpretation_status + ' '}
                                                             (last edited {moment(otherInterpretations[0].last_modified).format('YYYY MMM DD, h:mm a')})
                                                         </span>
                                                     </div>
