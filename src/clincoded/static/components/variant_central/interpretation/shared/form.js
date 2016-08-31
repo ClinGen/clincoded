@@ -454,8 +454,8 @@ function evalFormValueDropdown(criteria) {
             {criteria[1] === 'P' ? null : <option value="supporting">{criteria}_Supporting</option>}
             {criteria[0] === 'P' && criteria[1] !== 'M' ? <option value="moderate">{criteria}_Moderate</option> : null}
             {criteria[1] === 'S' ? null : <option value="strong">{criteria}_Strong</option>}
-            {(criteria[0] === 'B' && criteria[1] !== 'A') ? <option value="stand-alone">{criteria}_stand alone</option> : null}
-            {criteria === 'PS2' ? <option value="very-strong">{criteria}_Very Strong</option> : null}
+            {(criteria[0] === 'B' && criteria[1] !== 'A') ? <option value="stand-alone">{criteria}_Stand-alone</option> : null}
+            {criteria === 'PS2' ? <option value="very-strong">{criteria}_Very strong</option> : null}
         </Input>
     );
 }
