@@ -156,16 +156,16 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         // Get the primary RefSeq transcript from VEP response
         let ensemblTranscripts = this.state.ensembl_transcripts;
         let transcript = {},
-            neucleotide_hgvs,
+            nucleotide_hgvs,
             exon = '--',
             protein_hgvs = '--',
             SO_id_term = '--';
         let result = nucleotide_change.find((n) => str.indexOf(n.AccessionVersion) > -1);
         if (result) {
-            neucleotide_hgvs = result.HGVS;
+            nucleotide_hgvs = result.HGVS;
         }
-        if (neucleotide_hgvs && molecular_consequence.length) {
-            let item = molecular_consequence.find((x) => x.HGVS === neucleotide_hgvs);
+        if (nucleotide_hgvs && molecular_consequence.length) {
+            let item = molecular_consequence.find((x) => x.HGVS === nucleotide_hgvs);
             // 'SO_terms' is defined via requiring external mapping file
             if (item) {
                 let found = SO_terms.find((entry) => entry.SO_id === item.SOid);
@@ -179,7 +179,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         // Filter RefSeq transcripts by 'source' and 'hgvsc' flags
         ensemblTranscripts.forEach(refseqTranscript => {
             if (refseqTranscript.source === 'RefSeq') {
-                if (refseqTranscript.hgvsc && refseqTranscript.hgvsc === neucleotide_hgvs) {
+                if (refseqTranscript.hgvsc && refseqTranscript.hgvsc === nucleotide_hgvs) {
                     exon = refseqTranscript.exon ? refseqTranscript.exon : '--';
                     protein_hgvs = refseqTranscript.hgvsp ? refseqTranscript.hgvsp : '--';
                 }
@@ -187,7 +187,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         });
         // Set transcript object properties
         transcript = {
-            "nucleotide": neucleotide_hgvs,
+            "nucleotide": nucleotide_hgvs,
             "exon": exon,
             "protein": protein_hgvs,
             "molecular": SO_id_term
