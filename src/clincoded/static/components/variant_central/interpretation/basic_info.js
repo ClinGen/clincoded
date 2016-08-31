@@ -154,12 +154,16 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         // Get the primary RefSeq transcript from VEP response
         let ensemblTranscripts = this.state.ensembl_transcripts;
         let transcript = {},
+            nucleotide_hgvs,
             exon = '--',
             protein_hgvs = '--',
             SO_id_term = '--';
         let result = nucleotide_change.find((n) => str.indexOf(n.AccessionVersion) > -1);
-        if (result && molecular_consequence.length) {
-            let item = molecular_consequence.find((x) => x.HGVS === result.HGVS);
+        if (result) {
+            nucleotide_hgvs = result.HGVS;
+        }
+        if (nucleotide_hgvs && molecular_consequence.length) {
+            let item = molecular_consequence.find((x) => x.HGVS === nucleotide_hgvs);
             // 'SO_terms' is defined via requiring external mapping file
             if (item) {
                 let found = SO_terms.find((entry) => entry.SO_id === item.SOid);
@@ -173,7 +177,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         // Filter RefSeq transcripts by 'source' and 'hgvsc' flags
         ensemblTranscripts.forEach(refseqTranscript => {
             if (refseqTranscript.source === 'RefSeq') {
-                if (refseqTranscript.hgvsc && refseqTranscript.hgvsc === result.HGVS) {
+                if (refseqTranscript.hgvsc && refseqTranscript.hgvsc === nucleotide_hgvs) {
                     exon = refseqTranscript.exon ? refseqTranscript.exon : '--';
                     protein_hgvs = refseqTranscript.hgvsp ? refseqTranscript.hgvsp : '--';
                 }
@@ -181,7 +185,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         });
         // Set transcript object properties
         transcript = {
-            "nucleotide": result.HGVS,
+            "nucleotide": nucleotide_hgvs,
             "exon": exon,
             "protein": protein_hgvs,
             "molecular": SO_id_term
@@ -339,6 +343,20 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         return url;
     },
 
+    // Function to render message for ClinVar Primary transcript table
+    // when no transcript data is found
+    renderClinvarTranscriptMessage: function(clinvarId) {
+        if (clinvarId) {
+            return (
+                <span>No ClinVar Primary Transcript was found for ClinVar VariationID <a href={'http://www.ncbi.nlm.nih.gov/clinvar/variation/' + clinvarId} target="_blank">{clinvarId}</a>.</span>
+            );
+        } else {
+            return (
+                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</span>
+            );
+        }
+    },
+
     render: function() {
         var clinvar_id = this.state.clinvar_id;
         var car_id = this.state.car_id;
@@ -409,7 +427,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="panel-heading"><h3 className="panel-title">ClinVar Primary Transcript</h3></div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_clinvarEutils ? showActivityIndicator('Retrieving data... ') : null}
-                        {(clinvar_id && primary_transcript) ?
+                        {(primary_transcript && primary_transcript.nucleotide) ?
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -422,7 +440,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                 <tbody>
                                     <tr>
                                         <td className="hgvs-term">
-                                            <span className="title-ellipsis">{(primary_transcript) ? primary_transcript.nucleotide : '--'}</span>
+                                            <span className="title-ellipsis">{primary_transcript.nucleotide}</span>
                                         </td>
                                         <td>
                                             {primary_transcript.exon}
@@ -431,15 +449,13 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                             {primary_transcript.protein}
                                         </td>
                                         <td>
-                                            {(primary_transcript) ? primary_transcript.molecular : '--'}
+                                            {primary_transcript.molecular}
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                             :
-                            <div className="panel-body">
-                                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</span>
-                            </div>
+                            <div className="panel-body">{self.renderClinvarTranscriptMessage(clinvar_id)}</div>
                         }
                     </div>
                 </div>
