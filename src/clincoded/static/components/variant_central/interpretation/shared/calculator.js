@@ -53,7 +53,7 @@ var progressBar = function(result, rules) {
                         <tbody>
                             <tr>
                                 <td rowSpan="2"><i className="icon icon-check-circle benign-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
-                                <td className="title">Benign criteria met:</td>
+                                <td className="title">Benign</td>
                             </tr>
                             <tr>
                                 <td className="criteria-list">
@@ -80,7 +80,7 @@ var progressBar = function(result, rules) {
                         <tbody>
                             <tr>
                                 <td rowSpan="2"><i className="icon icon-check-circle pathogenic-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
-                                <td className="title">Pathogenic criteria met:</td>
+                                <td className="title">Pathogenic</td>
                             </tr>
                             <tr>
                                 <td className="criteria-list">
@@ -107,7 +107,7 @@ var progressBar = function(result, rules) {
                         <tbody>
                             <tr>
                                 <td rowSpan="2"><i className="icon icon-calculator" aria-hidden="true"></i>&nbsp;&nbsp;</td>
-                                <td className="title">Calculated Pathogenicity:</td>
+                                <td className="title">Calculated Pathogenicity</td>
                             </tr>
                             <tr>
                                 <td className="criteria-list">{result && result.assertion ? result.assertion : 'None'}</td>
