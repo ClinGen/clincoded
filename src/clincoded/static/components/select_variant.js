@@ -75,6 +75,9 @@ var SelectVariant = React.createClass({
                                             </li>
                                         </ol>
                                     </div>
+                                    <div className="alert alert-warning">
+                                        When registering your allele in the ClinGen Allele Registry, please use a <strong>GRCh37</strong> HGVS term in order to retrieve all available evidence for the allele. For an rsID, you can us the <a href={external_url_map['mutalyzerSnpConverter']}>SNP Converter</a> functionality of <a href={external_url_map['mutalyzer']}>Mutalyzer</a> to retrieve the GRCh37 genomic HGVS term.
+                                    </div>
                                 </div>
                                 <div className="row">
                                     <Input type="select" ref="variantIdType" label="Select Variant by ID type"
@@ -91,14 +94,14 @@ var SelectVariant = React.createClass({
                             : null}
                             {this.state.variantIdType == "ClinVar Variation ID" ?
                             <div className="row col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4">
-                                <AddResourceId resourceType="clinvar" label="ClinVar" wrapperClass="modal-buttons-wrapper" protocol={this.props.href_url.protocol}
+                                <AddResourceId resourceType="clinvar" wrapperClass="modal-buttons-wrapper" protocol={this.props.href_url.protocol}
                                     buttonText={this.state.variantData ? "Edit ClinVar ID" : "Add ClinVar ID" } initialFormValue={this.state.variantData && this.state.variantData.clinvarVariantId}
                                     modalButtonText="Save and View Evidence" updateParentForm={this.updateVariantData} buttonOnly={true} />
                             </div>
                             : null}
                             {this.state.variantIdType == "ClinGen Allele Registry ID (CA ID)" ?
                             <div className="row col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4">
-                                <AddResourceId resourceType="car" label="ClinGen Allele Registry" wrapperClass="modal-buttons-wrapper" protocol={this.props.href_url.protocol}
+                                <AddResourceId resourceType="car" wrapperClass="modal-buttons-wrapper" protocol={this.props.href_url.protocol}
                                     buttonText={this.state.variantData ? "Edit CA ID" : "Add CA ID" } initialFormValue={this.state.variantData && this.state.variantData.carVariantId}
                                     modalButtonText="Save and View Evidence" updateParentForm={this.updateVariantData} buttonOnly={true} />
                             </div>

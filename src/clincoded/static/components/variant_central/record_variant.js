@@ -27,9 +27,12 @@ var CurationRecordVariant = module.exports.CurationRecordVariant = React.createC
         var variant = this.props.data;
         var recordHeader = this.props.recordHeader;
         if (variant) {
-            var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : 'Unknown';
-            var carId = (variant.carId) ? variant.carId : 'Unknown';
-            var dbSNPId = (variant.dbSNPIds.length) ? variant.dbSNPIds[0] : 'Unknown';
+            var clinVarId = (variant.clinvarVariantId) ? variant.clinvarVariantId : null;
+            var carId = (variant.carId) ? variant.carId : null;
+            var dbSNPId = (variant.dbSNPIds.length) ? variant.dbSNPIds[0] : null;
+            if (dbSNPId && dbSNPId.indexOf('rs') == -1) {
+                dbSNPId = 'rs' + dbSNPId;
+            }
         }
         var addEdit = this.props.interpretationTranscript ? 'Edit' : 'Add';
 
@@ -37,11 +40,23 @@ var CurationRecordVariant = module.exports.CurationRecordVariant = React.createC
             <div className="col-xs-12 col-sm-3 gutter-exc">
                 <div className="curation-data-gene">
                     <h4>{recordHeader}</h4>
-                    {variant ?
+                    {clinVarId || carId ?
                         <dl className="inline-dl clearfix">
-                            <dd><a href={external_url_map['ClinVar'] + clinVarId} target="_blank" title={'ClinVar page for ' + clinVarId + ' in a new window'}>ClinVar</a></dd>
-                            <dd><a href={'http://reg.genome.network/allele/' + carId + '.html'} target="_blank" title={'GlinGen Allele Registry page for ' + carId + ' in a new window'}>ClinGen Allele Registry</a></dd>
-                            <dd><a href={external_url_map['dbSNP'] + dbSNPId.slice(2)} target="_blank" title={'dbSNP page for ' + dbSNPId + ' in a new window'}>dbSNP</a></dd>
+                            {clinVarId ?
+                                <dd>ClinVar VariationID:&nbsp;<a href={'http://www.ncbi.nlm.nih.gov/clinvar/variation/' + clinVarId} target="_blank" title={'ClinVar page for ' + clinVarId + ' in a new window'}>{clinVarId}</a></dd>
+                                :
+                                null
+                            }
+                            {carId ?
+                                <dd>ClinGen Allele Registry ID:&nbsp;<a href={'http://reg.genome.network/allele/' + carId + '.html'} target="_blank" title={'GlinGen Allele Registry page for ' + carId + ' in a new window'}>{carId}</a></dd>
+                                :
+                                null
+                            }
+                            {dbSNPId ?
+                                <dd>dbSNP ID:&nbsp;<a href={'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=' + dbSNPId.replace('rs', '')} target="_blank" title={'dbSNP page for ' + dbSNPId + ' in a new window'}>{dbSNPId}</a></dd>
+                                :
+                                null
+                            }
                         </dl>
                     : null}
                 </div>

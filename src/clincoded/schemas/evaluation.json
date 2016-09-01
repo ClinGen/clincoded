@@ -57,23 +57,35 @@
             "description": "ACMG criteria to be evaluated. Must be one of the 28 codes",
             "type": "string"
         },
-        "value": {
+        "criteriaStatus": {
             "title": "Evaluation Value",
             "type": "string"
         },
-        "description": {
-            "title": "Description",
+        "criteriaModifier": {
+            "title": "Modified Value",
+            "type": "string"
+        },
+        "explanation": {
+            "title": "Explanation",
             "description": "The reason to select evaluation value.",
             "type": "string"
         }
     },
     "columns": {
-        "variant.represent": {
+        "variant.variant_identifier": {
             "title": "Variant",
             "type": "string"
         },
         "criteria": {
             "title": "Criteria",
+            "type": "string"
+        },
+        "criteriaStatus": {
+            "title": "Criteria Status",
+            "type": "string"
+        },
+        "modifier": {
+            "title": "Modified Value",
             "type": "string"
         },
         "evidence_type": {

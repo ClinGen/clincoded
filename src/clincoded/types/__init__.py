@@ -153,7 +153,7 @@ class Variant(Item):
         return paths_filtered_by_status(request, associatedInterpretations)
 
     @calculated_property(schema={
-        "title": "Variant Representation",
+        "title": "Variant ID",
         "type": "string"
     })
     def variant_identifier(self, clinvarVariantId='', carId='', otherDescription=''):
@@ -817,8 +817,11 @@ class Pathogenicity(Item):
 
     @calculated_property(schema={
         "title": "Associated GDM",
-        "type": "object",
-        "linkFrom": "gdm.variantPathogenicity"
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "gdm.variantPathogenicity"
+        }
     })
     def associatedGdm(self, request, associatedGdm):
         return paths_filtered_by_status(request, associatedGdm)
@@ -856,16 +859,22 @@ class Assessment(Item):
 
     @calculated_property(schema={
         "title": "Pathogenicity Assessed",
-        "type": ["string", "object"],
-        "linkFrom": "pathogenicity.assessments"
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "pathogenicity.assessments"
+        }
     })
     def pathogenicity_assessed(self, request, pathogenicity_assessed):
         return paths_filtered_by_status(request, pathogenicity_assessed)
 
     @calculated_property(schema={
         "title": "Experimental Assessed",
-        "type": ["string", "object"],
-        "linkFrom": "experimental.assessments"
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "experimental.assessments"
+        }
     })
     def experimental_assessed(self, request, experimental_assessed):
         return paths_filtered_by_status(request, experimental_assessed)
@@ -892,8 +901,11 @@ class Provisional(Item):
 
     @calculated_property(schema={
         "title": "GDM Associated",
-        "type": ["string", "object"],
-        "linkFrom": "gdm.provisionalClassifications"
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "gdm.provisionalClassifications"
+        }
     })
     def gdm_associated(self, request, gdm_associated):
         return paths_filtered_by_status(request, gdm_associated)
@@ -922,8 +934,11 @@ class Transcript(Item):
 
     @calculated_property(schema={
         "title": "Interpretation Associated",
-        "type": ["string", "object"],
-        "linkFrom": "interpretation.transcripts"
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "interpretation.transcripts"
+        }
     })
     def interpretation_associated(self, request, interpretation_associated):
         return paths_filtered_by_status(request, interpretation_associated)
@@ -950,8 +965,11 @@ class Protein(Item):
 
     @calculated_property(schema={
         "title": "Interpretation Associated",
-        "type": ["string", "object"],
-        "linkFrom": "interpretation.proteins"
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "interpretation.proteins"
+        }
     })
     def interpretation_associated(self, request, interpretation_associated):
         return paths_filtered_by_status(request, interpretation_associated)
@@ -1023,39 +1041,17 @@ class Interpretation(Item):
         return ''
 
     @calculated_property(schema={
-        "title": "Transcripts",
-        "type": "string",
-    })
-    def interpretation_transcripts(self, transcripts=[]):
-        if len(transcripts) == 0:
-            return ''
-        return len(transcripts)
-
-    @calculated_property(schema={
-        "title": "Proteins",
-        "type": "string",
-    })
-    def interpretation_proteins(self, proteins=[]):
-        if len(proteins) == 0:
-            return ''
-        return len(proteins)
-
-    @calculated_property(schema={
         "title": "Evaluations",
-        "type": "string",
+        "type": "number",
     })
     def evaluation_count(self, evaluations=[]):
-        if len(evaluations) == 0:
-            return ''
         return len(evaluations)
 
     @calculated_property(schema={
         "title": "Provisionals",
-        "type": "string",
+        "type": "number",
     })
     def provisional_count(self, provisional_variant=[]):
-        if len(provisional_variant) == 0:
-            return ''
         return len(provisional_variant)
 
 
@@ -1086,11 +1082,24 @@ class Evaluation(Item):
 
     @calculated_property(schema={
         "title": "Interpretation Associated",
-        "type": ["string", "object"],
-        "linkFrom": "interpretation.evaluations"
+        "type": "array",
+        "items": {
+            "title": ["string", "object"],
+            "linkFrom": "interpretation.evaluations"
+        }
     })
     def interpretation_associated(self, request, interpretation_associated):
         return paths_filtered_by_status(request, interpretation_associated)
+
+    @calculated_property(schema={
+        "title": "Modified Value",
+        "type": "string"
+    })
+    def modifier(self, criteriaModifier=''):
+        if criteriaModifier == '':
+            return ''
+        else:
+            return criteriaModifier
 
     @calculated_property(schema={
         "title": "Evidence Type",
@@ -1135,8 +1144,11 @@ class Population(Item):
 
     @calculated_property(schema={
         "title": "Evaluation Associated",
-        "type": ["string", "object"],
-        "linkFrom": "evaluation.population"
+        "type": "array",
+        "items": {
+            "title": ["string", "object"],
+            "linkFrom": "evaluation.population"
+        }
     })
     def evaluation_associated(self, request, evaluation_associated):
         return paths_filtered_by_status(request, evaluation_associated)
@@ -1175,8 +1187,11 @@ class Computational(Item):
 
     @calculated_property(schema={
         "title": "Evaluation Associated",
-        "type": ["string", "object"],
-        "linkFrom": "evaluation.computational"
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "evaluation.computational"
+        }
     })
     def evaluation_associated(self, request, evaluation_associated):
         return paths_filtered_by_status(request, evaluation_associated)
@@ -1217,8 +1232,11 @@ class Provisional_variant(Item):
 
     @calculated_property(schema={
         "title": "Interpretation Associated",
-        "type": ["string", "object"],
-        "linkFrom": "interpretation.provisional_variant"
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "interpretation.provisional_variant"
+        }
     })
     def interpretation_associated(self, request, interpretation_associated):
         return paths_filtered_by_status(request, interpretation_associated)

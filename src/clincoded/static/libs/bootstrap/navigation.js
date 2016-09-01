@@ -97,9 +97,11 @@ var Nav = module.exports.Nav = React.createClass({
 // Individual menu items within a <Nav> component.
 var NavItem = module.exports.NavItem = React.createClass({
     propTypes: {
+        title: React.PropTypes.string,
         styles: React.PropTypes.string, // CSS classes to add to <li> elements
         href: React.PropTypes.string, // URL to link this item to
-        icon: React.PropTypes.string // CSS class for fontawesome icon (e.g. 'icon-home')
+        icon: React.PropTypes.string, // CSS class for fontawesome icon (e.g. 'icon-home')
+        target: React.PropTypes.string // target attribute
         // Additional properties (data attributes) set on <a> for the item
     },
 
@@ -107,12 +109,17 @@ var NavItem = module.exports.NavItem = React.createClass({
         var url = this.props.href ? this.props.href : '#';
         var iconClass = this.props.icon ? this.props.icon + ' icon icon-alt' : '';
         var contentClass = iconClass ? 'sr-only' : '';
+        var title = this.props.title;
 
         return (
-            <li className={this.props.styles}>
-                <a {...this.props} href={url} className={iconClass}>
-                    <span className={contentClass}>{this.props.children}</span>
-                </a>
+            <li className={title === 'space' ? 'white-space' : 'link'}>
+                {title === 'space' ?
+                    <span>&nbsp;</span>
+                    :
+                    <a {...this.props} href={url} className={iconClass}>
+                        <span className={contentClass}>{this.props.children}</span>
+                    </a>
+                }
             </li>
         );
     }
