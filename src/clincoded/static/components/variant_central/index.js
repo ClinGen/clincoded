@@ -33,7 +33,6 @@ var VariantCurationHub = React.createClass({
             isLoadingComplete: false,
             ext_myVariantInfo: null,
             ext_bustamante: null,
-            ext_ensemblVEP: null,
             ext_ensemblVariation: null,
             ext_ensemblHgvsVEP: null,
             ext_clinvarEutils: null,
@@ -64,7 +63,6 @@ var VariantCurationHub = React.createClass({
             // ping out external resources (all async)
             this.fetchClinVarEutils(this.state.variantObj);
             this.fetchMyVariantInfoAndBustamante(this.state.variantObj);
-            this.fetchEnsemblVEP(this.state.variantObj);
             this.fetchEnsemblVariation(this.state.variantObj);
             this.fetchEnsemblHGVSVEP(this.state.variantObj);
         }).catch(function(e) {
@@ -136,22 +134,6 @@ var VariantCurationHub = React.createClass({
                     });
                 }).catch(function(e) {
                     console.log('MyVariant or Bustamante Fetch Error=: %o', e);
-                });
-            }
-        }
-    },
-
-    // Retrieve data from Ensembl VEP
-    fetchEnsemblVEP: function(variant) {
-        if (variant) {
-            // Extract only the number portion of the dbSNP id
-            var numberPattern = /\d+/g;
-            var rsid = (variant.dbSNPIds && variant.dbSNPIds.length > 0) ? variant.dbSNPIds[0].match(numberPattern) : null;
-            if (rsid) {
-                this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblVEP'] + 'rs' + rsid + '?content-type=application/json').then(response => {
-                    this.setState({ext_ensemblVEP: response});
-                }).catch(function(e) {
-                    console.log('VEP Allele Frequency Fetch Error=: %o', e);
                 });
             }
         }
@@ -306,7 +288,6 @@ var VariantCurationHub = React.createClass({
                     ext_myGeneInfo={(this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : this.state.ext_myGeneInfo_VEP}
                     ext_myVariantInfo={this.state.ext_myVariantInfo}
                     ext_bustamante={this.state.ext_bustamante}
-                    ext_ensemblVEP={this.state.ext_ensemblVEP}
                     ext_ensemblVariation={this.state.ext_ensemblVariation}
                     ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                     ext_clinvarEutils={this.state.ext_clinvarEutils}
