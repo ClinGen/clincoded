@@ -44,26 +44,28 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
 var progressBar = function(result, rules) {
     let benign_summary = result && result.benign_summary ? result.benign_summary : null;
     let path_summary = result && result.path_summary ? result.path_summary : null;
+    let browser_width = parseInt(window.innerWidth);
 
     return (
         <div className="container">
-            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar">
-                <div className="col-lg-4 col-md-12 col-sm-12 col-xs-12 criteria-box">
-                    <table>
+            <div>{browser_width}</div>
+            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-area">
+                <div className="col-lg-4 col-md-4 col-sm-4 col-xs-12 outer-box">
+                    <table className="inner-box benign-box">
                         <tbody>
                             <tr>
                                 <td rowSpan="2"><i className="icon icon-check-circle benign-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
                                 <td className="title">Benign</td>
                             </tr>
                             <tr>
-                                <td className="criteria-list">
+                                <td className="benign-list">
                                     {benign_summary && Object.keys(benign_summary).length ?
                                         Object.keys(benign_summary).map((criteria, i) => {
                                             return (
-                                                <span key={i}>
+                                                <span key={i} className="btn btn-default btn-xs criteria-strength">
                                                     {criteria + ': '}
                                                     <span className="badge">{benign_summary[criteria]}</span>
-                                                    {i < Object.keys(benign_summary).length - 1 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
+                                                    {i < 2 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
                                                 </span>
                                             );
                                         })
@@ -75,22 +77,22 @@ var progressBar = function(result, rules) {
                         </tbody>
                     </table>
                 </div>
-                <div className="col-lg-5 col-md-12 col-sm-12 col-xs-12 criteria-box">
-                    <table>
+                <div className="col-lg-5 col-md-4 col-sm-4 col-xs-12 outer-box path-box">
+                    <table className="inner-box path-box">
                         <tbody>
                             <tr>
                                 <td rowSpan="2"><i className="icon icon-check-circle pathogenic-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
                                 <td className="title">Pathogenic</td>
                             </tr>
                             <tr>
-                                <td className="criteria-list">
+                                <td className="path-list">
                                     {path_summary && Object.keys(path_summary).length ?
                                         Object.keys(path_summary).map((criteria, i) => {
                                             return (
-                                                <span key={i}>
+                                                <span key={i} className="btn btn-default btn-xs criteria-strength">
                                                     {criteria + ': '}
                                                     <span className="badge">{path_summary[criteria]}</span>
-                                                    {i < Object.keys(path_summary).length - 1 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
+                                                    {i < 3 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
                                                 </span>
                                             );
                                         })
@@ -102,19 +104,20 @@ var progressBar = function(result, rules) {
                         </tbody>
                     </table>
                 </div>
-                <div className="col-lg-3 col-md-12 col-sm-12 col-xs-12 criteria-box">
-                    <table>
+                <div className="col-lg-3 col-md-4 col-sm-4 col-xs-12 outer-box">
+                    <table className="inner-box assertion-box">
                         <tbody>
                             <tr>
                                 <td rowSpan="2"><i className="icon icon-calculator" aria-hidden="true"></i>&nbsp;&nbsp;</td>
                                 <td className="title">Calculated Pathogenicity</td>
                             </tr>
                             <tr>
-                                <td className="criteria-list">{result && result.assertion ? result.assertion : 'None'}</td>
+                                <td className="assertion-list">{result && result.assertion ? result.assertion : 'None'}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     );

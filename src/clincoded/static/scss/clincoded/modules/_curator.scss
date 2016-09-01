@@ -1619,69 +1619,128 @@ dl.inline-dl {
     }
 }
 
-.progress-bar {
+.progress-bar-area {
     border-radius: 4px;
     margin-bottom: 10px;
-    padding: 0 0 0 10px;
+    padding: 10px 0 10px 0;
     border: solid 1px #dddddd;
     background-color: #f5f5f5;
 
-    .criteria-box {
-        padding: 10px 0;
+    .outer-box {
+        padding: 0;
+        display: block;
+        //border: solid 1px #aaa;
 
-        .title {
-            padding-bottom: 5px;
-            font-size: 14px;
-            font-weight: bold;
+        .inner-box {
+            text-align: left;
+
+            .title {
+                padding-bottom: 5px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+            .benign-list {
+                font-size: 12px;
+            }
+
+            .path-list {
+                font-size: 12px;
+            }
+
+            .assertion-list {
+                font-size: 12px;
+                line-height: 20px;
+            }
+
+            .icon-calculator {
+                color: #1b75bc;
+                font-size: 14pt;
+            }
+
+            .benign-label {
+                color: #92cd9e;
+                font-size: 18pt;
+            }
+
+            .pathogenic-label {
+                color: #f4978a;
+                font-size: 18pt;
+            }
+
+            .criteria-strength {
+                border: none;
+                background-color: #f5f5f5;
+                color: #000;
+                cursor: text;
+            }
+
+            .badge {
+                background-color: #b7b7b7;
+                font-size: 11px;
+                font-weight: normal;
+            }
         }
 
-        .criteria-list {
-            font-size: 12px;
+        .benign-box {
+            margin-left: 35px;
+            //border: solid 1px #000;
+
+            @media not screen and (min-width: $screen-lg-min) {
+                margin-left: 40px;
+            }
+
+            @media not screen and (min-width: $screen-md-min) {
+                margin-left: 20px;
+            }
+
+            @media not screen and (min-width: $screen-sm-min) {
+                margin-left: 50px;
+                margin-bottom: 20px;
+
+            }
+
+            @media not screen and (min-width: $screen-xs-min) {
+                margin-left: 10px;
+                margin-bottom: 20px;
+            }
         }
 
-        .icon-calculator {
-            color: #1b75bc;
-            font-size: 14pt;
+        .path-box {
+            margin-left: 35px;
+
+            @media not screen and (min-width: $screen-lg-min) {
+                margin-left: 10px;
+            }
+
+            @media not screen and (min-width: $screen-md-min) {
+                margin-left: 15px;
+            }
+
+            @media not screen and (min-width: $screen-sm-min) {
+                margin-left: 50px;
+                margin-bottom: 20px;
+            }
+
+            @media not screen and (min-width: $screen-xs-min) {
+                margin-left: 10px;
+                margin-bottom: 20px;
+            }
         }
 
-        .benign-label {
-            color: #92cd9e;
-            font-size: 18pt;
-        }
+        .assertion-box {
+            @media not screen and (min-width: $screen-lg-min) {
+                margin-left: 15px;
+            }
 
-        .pathogenic-label {
-            color: #f4978a;
-            font-size: 18pt;
-        }
+            @media not screen and (min-width: $screen-sm-min) {
+                margin-left: 50px;
+            }
 
-        .badge {
-            background-color: #b7b7b7;
-            font-size: 11px;
-            font-weight: normal;
-        }
-
-        @media not screen and (min-width: 1200px) {
-            margin-left: 250px;
-        }
-
-        @media not screen and (min-width: 992px) {
-            margin-left: 150px;
-        }
-
-        @media not screen and (min-width: 768px) {
-            margin-left: 100px;
-        }
-
-        @media not screen and (min-width: 610px) {
-            margin-left: 75px;
-        }
-
-        @media not screen and (min-width: 550px) {
-            margin-left: 50px;
-        }
-
-        @media not screen and (min-width: 480px) {
-            margin-left: 0;
+            @media not screen and (min-width: $screen-xs-min) {
+                margin-left: 10px;
+            }
         }
     }
+
 }
