@@ -10,6 +10,8 @@ var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
 var CuratorHistory = require('./curator_history');
 
+import { showActivityIndicator } from '../../activity_indicator';
+
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
@@ -152,8 +154,8 @@ var Dashboard = React.createClass({
                         </Panel>
                         <Panel panelClassName="panel-dashboard">
                             <h3>Your Recent History</h3>
-                            <div className="panel-relative-content">
-                                {this.state.historiesLoading ? <div className="loading-overlay"><div className="loading-overlay-center">Loading... <i className="icon icon-spin icon-circle-o-notch"></i></div></div> : null}
+                            <div className="panel-content-wrapper">
+                                {this.state.historiesLoading ? showActivityIndicator('Loading... ') : null}
                                 {this.state.histories.length ?
                                     <ul>
                                         {this.state.histories.map(history => {
@@ -171,8 +173,8 @@ var Dashboard = React.createClass({
                     <div className="col-md-6">
                         <Panel panelClassName="panel-dashboard">
                             <h3>Your Variant Interpretations</h3>
-                            <div className="panel-relative-content">
-                                {this.state.vciInterpListLoading ? <div className="loading-overlay"><div className="loading-overlay-center">Loading... <i className="icon icon-spin icon-circle-o-notch"></i></div></div> : null}
+                            <div className="panel-content-wrapper">
+                                {this.state.vciInterpListLoading ? showActivityIndicator('Loading... ') : null}
                                 {this.state.vciInterpList.length > 0 ?
                                 <ul>
                                     {this.state.vciInterpList.map(function(item) {
@@ -201,8 +203,8 @@ var Dashboard = React.createClass({
 
                         <Panel panelClassName="panel-dashboard">
                             <h3>Your Gene-Disease Records</h3>
-                            <div className="panel-relative-content">
-                                {this.state.gdmListLoading ? <div className="loading-overlay"><div className="loading-overlay-center">Loading... <i className="icon icon-spin icon-circle-o-notch"></i></div></div> : null}
+                            <div className="panel-content-wrapper">
+                                {this.state.gdmListLoading ? showActivityIndicator('Loading... ') : null}
                                 {this.state.gdmList.length > 0 ?
                                 <ul>
                                     {this.state.gdmList.map(function(item) {
