@@ -184,7 +184,7 @@ var Dashboard = React.createClass({
                                             <div><span className="block-link-color title-ellipsis"><strong>
                                             {item.clinvarVariantTitle
                                                 ? item.clinvarVariantTitle
-                                                : (item.hgvsName37 ? item.hgvsName37 : item.hgvsName38)
+                                                : (item.hgvsName38 ? item.hgvsName38 : item.hgvsName37)
                                             }
                                             </strong></span></div>
                                             <span className="block-link-no-color title-ellipsis">
