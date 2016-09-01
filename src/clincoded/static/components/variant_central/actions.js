@@ -236,6 +236,7 @@ var AssociateDisease = React.createClass({
                 });
             }).catch(e => {
                 // Some unexpected error happened
+                this.setState({submitResourceBusy: false});
                 parseAndLogError.bind(undefined, 'fetchedRequest');
             });
         }
@@ -243,6 +244,7 @@ var AssociateDisease = React.createClass({
 
     // Called when the modal 'Cancel' button is clicked
     cancelAction: function(e) {
+        this.setState({submitResourceBusy: false});
         this.props.closeModal();
     },
 

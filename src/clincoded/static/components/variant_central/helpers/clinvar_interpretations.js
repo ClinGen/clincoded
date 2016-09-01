@@ -32,7 +32,7 @@ export function getClinvarRCVs(xml) {
 }
 
 // Method to parse conditions data for the most recent version of individual RCV accession
-export function parseClinvarInterpretation(RCV, result) {
+export function parseClinvarInterpretation(result) {
     // Define 'interpretation' object model
     let interpretation = {
         'RCV': '',
@@ -48,6 +48,8 @@ export function parseClinvarInterpretation(RCV, result) {
         if (ClinVarSet) {
             let ReferenceClinVarAssertion = ClinVarSet.getElementsByTagName('ReferenceClinVarAssertion')[0];
             if (ReferenceClinVarAssertion) {
+                // Get clinvar accession if <ReferenceClinVarAssertion> node is found
+                let ClinVarAccession = ReferenceClinVarAssertion.getElementsByTagName('ClinVarAccession')[0];
                 // Get clinical significance description if <ReferenceClinVarAssertion> node is found
                 let ClinicalSignificance = ReferenceClinVarAssertion.getElementsByTagName('ClinicalSignificance')[0];
                 if (ClinicalSignificance) {
@@ -55,7 +57,7 @@ export function parseClinvarInterpretation(RCV, result) {
                     let ReviewStatus = ClinicalSignificance.getElementsByTagName('ReviewStatus')[0];
                     let Description = ClinicalSignificance.getElementsByTagName('Description')[0];
                     // Set 'RCV' and 'clinicalSignificance' property values of the 'interpretation' object
-                    interpretation['RCV'] = RCV;
+                    interpretation['RCV'] = ClinVarAccession.getAttribute('Acc');
                     interpretation['reviewStatus'] = ReviewStatus.textContent;
                     interpretation['clinicalSignificance'] = Description.textContent;
                 }

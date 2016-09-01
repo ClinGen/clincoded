@@ -20,6 +20,7 @@ var panel = require('../../../libs/bootstrap/panel');
 var form = require('../../../libs/bootstrap/form');
 
 import { renderDataCredit } from './shared/credit';
+import { showActivityIndicator } from '../../activity_indicator';
 
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -54,7 +55,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         updateInterpretationObj: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
         ext_ensemblVEP: React.PropTypes.array,
-        ext_ensemblVariation: React.PropTypes.object
+        ext_ensemblVariation: React.PropTypes.object,
+        loading_myVariantInfo: React.PropTypes.bool,
+        loading_ensemblVariation: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -96,7 +99,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             },
             populationObjDiff: null,
-            populationObjDiffFlag: false
+            populationObjDiffFlag: false,
+            loading_myVariantInfo: this.props.loading_myVariantInfo,
+            loading_ensemblVariation: this.props.loading_ensemblVariation
         };
     },
 
@@ -149,10 +154,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.parseTGenomesData(nextProps.ext_ensemblVariation);
             this.calculateHighestMAF();
         }
-
         if (nextProps.interpretation && nextProps.interpretation.evaluations) {
             this.compareExternalDatas(this.state.populationObj, nextProps.interpretation.evaluations);
         }
+        this.setState({
+            loading_ensemblVariation: nextProps.loading_ensemblVariation,
+            loading_myVariantInfo: nextProps.loading_myVariantInfo
+        });
     },
 
     componentWillUnmount: function() {
@@ -614,6 +622,66 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return retVal;
     },
 
+    // Method to render ExAC population table header content
+    renderExacHeader: function(hasExacData, loading_myVariantInfo, exac) {
+        if (hasExacData && !loading_myVariantInfo) {
+            const variantExac = exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt;
+            const linkoutExac = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
+            return (
+                <h3 className="panel-title">ExAC {variantExac}
+                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                    <a className="panel-subtitle pull-right" href={linkoutExac} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
+                </h3>
+            );
+        } else {
+            return (
+                <h3 className="panel-title">ExAC
+                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                </h3>
+            );
+        }
+    },
+
+    // Method to render 1000 Genomes population table header content
+    renderTGenomesHeader: function(hasTGenomesData, loading_ensemblVariation, tGenomes) {
+        if (hasTGenomesData && !loading_ensemblVariation) {
+            const variantTGenomes = tGenomes._extra.name + ' ' + tGenomes._extra.var_class;
+            const linkoutEnsembl = external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name;
+            return (
+                <h3 className="panel-title">1000 Genomes: {variantTGenomes}
+                    <a href="#credit-vep" className="label label-primary">VEP</a>
+                    <a className="panel-subtitle pull-right" href={linkoutEnsembl} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
+                </h3>
+            );
+        } else {
+            return (
+                <h3 className="panel-title">1000 Genomes
+                    <a href="#credit-vep" className="label label-primary">VEP</a>
+                </h3>
+            );
+        }
+    },
+
+    // Method to render ESP population table header content
+    renderEspHeader: function(hasEspData, loading_myVariantInfo, esp) {
+        if (hasEspData && !loading_myVariantInfo) {
+            const variantEsp = esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt;
+            const linkoutEsp = dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0';
+            return (
+                <h3 className="panel-title">Exome Sequencing Project (ESP): {variantEsp}
+                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                    <a className="panel-subtitle pull-right" href={linkoutEsp} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
+                </h3>
+            );
+        } else {
+            return (
+                <h3 className="panel-title">Exome Sequencing Project (ESP)
+                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                </h3>
+            );
+        }
+    },
+
     render: function() {
         var exacStatic = populationStatic.exac,
             tGenomesStatic = populationStatic.tGenomes,
@@ -688,121 +756,102 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </p>
                         </div>
                     : null}
-                    {this.state.hasExacData ?
-                        <div className="panel panel-info datasource-ExAC">
-                            <div className="panel-heading">
-                                <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}<a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
-                                    <a className="panel-subtitle pull-right" href={'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
-                                </h3>
-                            </div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Population</th>
-                                        <th>Allele Count</th>
-                                        <th>Allele Number</th>
-                                        <th>Number of Homozygotes</th>
-                                        <th>Allele Frequency</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {exacStatic._order.map(key => {
-                                        return (this.renderExacRow(key, exac, exacStatic));
-                                    })}
-                                </tbody>
-                                <tfoot>
-                                    {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
-                                </tfoot>
-                            </table>
+                    <div className="panel panel-info datasource-ExAC">
+                        <div className="panel-heading">
+                            {this.renderExacHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac)}
                         </div>
-                    :
-                        <div className="panel panel-info datasource-ExAC">
-                            <div className="panel-heading"><h3 className="panel-title">ExAC<a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a></h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>No population data was found for this allele in ExAC. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search ExAC</a> for this variant.</th>
-                                    </tr>
-                                </thead>
-                            </table>
+                        <div className="panel-content-wrapper">
+                            {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
+                            {this.state.hasExacData ?
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Population</th>
+                                            <th>Allele Count</th>
+                                            <th>Allele Number</th>
+                                            <th>Number of Homozygotes</th>
+                                            <th>Allele Frequency</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {exacStatic._order.map(key => {
+                                            return (this.renderExacRow(key, exac, exacStatic));
+                                        })}
+                                    </tbody>
+                                    <tfoot>
+                                        {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
+                                    </tfoot>
+                                </table>
+                                :
+                                <div className="panel-body">
+                                    <span>No population data was found for this allele in ExAC. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search ExAC</a> for this variant.</span>
+                                </div>
+                            }
                         </div>
-                    }
-                    {this.state.hasTGenomesData ?
-                        <div className="panel panel-info datasource-1000G">
-                            <div className="panel-heading">
-                                <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}<a href="#credit-vep" className="label label-primary">VEP</a>
-                                    <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
-                                </h3>
-                            </div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Population</th>
-                                        <th colSpan="2">Allele Frequency (count)</th>
-                                        <th colSpan="3">Genotype Frequency (count)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.renderTGenomesRow('_tot', tGenomes, tGenomesStatic, 'ALL')}
-                                    {tGenomesStatic._order.map(key => {
-                                        return (this.renderTGenomesRow(key, tGenomes, tGenomesStatic));
-                                    })}
-                                </tbody>
-                            </table>
+                    </div>
+                    <div className="panel panel-info datasource-1000G">
+                        <div className="panel-heading">
+                            {this.renderTGenomesHeader(this.state.hasTGenomesData, this.state.loading_ensemblVariation, tGenomes)}
                         </div>
-                    :
-                        <div className="panel panel-info datasource-1000G">
-                            <div className="panel-heading"><h3 className="panel-title">1000 Genomes<a href="#credit-vep" className="label label-primary">VEP</a></h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']} target="_blank">Search 1000 Genomes</a> for this variant.</th>
-                                    </tr>
-                                </thead>
-                            </table>
+                        <div className="panel-content-wrapper">
+                            {this.state.loading_ensemblVariation ? showActivityIndicator('Retrieving data... ') : null}
+                            {this.state.hasTGenomesData ?
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Population</th>
+                                            <th colSpan="2">Allele Frequency (count)</th>
+                                            <th colSpan="3">Genotype Frequency (count)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.renderTGenomesRow('_tot', tGenomes, tGenomesStatic, 'ALL')}
+                                        {tGenomesStatic._order.map(key => {
+                                            return (this.renderTGenomesRow(key, tGenomes, tGenomesStatic));
+                                        })}
+                                    </tbody>
+                                </table>
+                                :
+                                <div className="panel-body">
+                                    <span>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']} target="_blank">Search 1000 Genomes</a> for this variant.</span>
+                                </div>
+                            }
                         </div>
-                    }
-                    {this.state.hasEspData ?
-                        <div className="panel panel-info datasource-ESP">
-                            <div className="panel-heading">
-                                <h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}
-                                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
-                                    <a className="panel-subtitle pull-right" href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
-                                </h3>
-                            </div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Population</th>
-                                        <th colSpan="2">Allele Count</th>
-                                        <th colSpan="3">Genotype Count</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {espStatic._order.map(key => {
-                                        return (this.renderEspRow(key, esp, espStatic));
-                                    })}
-                                    {this.renderEspRow('_tot', esp, espStatic, 'All Allele', 'count')}
-                                </tbody>
-                                <tfoot>
-                                    <tr className="count">
-                                        <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                    </div>
+                    <div className="panel panel-info datasource-ESP">
+                        <div className="panel-heading">
+                            {this.renderEspHeader(this.state.hasEspData, this.state.loading_myVariantInfo, esp)}
                         </div>
-                    :
-                        <div className="panel panel-info datasource-ESP">
-                            <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP)<a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a></h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']} target="_blank">Search ESP</a> for this variant.</th>
-                                    </tr>
-                                </thead>
-                            </table>
+                        <div className="panel-content-wrapper">
+                            {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
+                            {this.state.hasEspData ?
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Population</th>
+                                            <th colSpan="2">Allele Count</th>
+                                            <th colSpan="3">Genotype Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {espStatic._order.map(key => {
+                                            return (this.renderEspRow(key, esp, espStatic));
+                                        })}
+                                        {this.renderEspRow('_tot', esp, espStatic, 'All Allele', 'count')}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr className="count">
+                                            <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                :
+                                <div className="panel-body">
+                                    <span>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']} target="_blank">Search ESP</a> for this variant.</span>
+                                </div>
+                            }
                         </div>
-                    }
+                    </div>
                 </Panel></PanelGroup>
 
                 {renderDataCredit('myvariant')}

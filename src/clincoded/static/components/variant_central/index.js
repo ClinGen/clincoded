@@ -30,7 +30,6 @@ var VariantCurationHub = React.createClass({
             interpretation: null,
             editKey: queryKeyValue('edit', this.props.href),
             variantObj: null,
-            isLoadingComplete: false,
             ext_myVariantInfo: null,
             ext_bustamante: null,
             ext_ensemblVEP: null,
@@ -42,7 +41,15 @@ var VariantCurationHub = React.createClass({
             ext_myGeneInfo_MyVariant: null,
             ext_myGeneInfo_VEP: null,
             ext_ensemblGeneId: null,
-            ext_geneSynonyms: null
+            ext_geneSynonyms: null,
+            loading_clinvarEutils: true,
+            loading_clinvarEsearch: true,
+            loading_clinvarRCV: true,
+            loading_ensemblHgvsVEP: true,
+            loading_ensemblVariation: true,
+            loading_myVariantInfo: true,
+            loading_myGeneInfo: true,
+            loading_bustamante: true
         };
     },
 
@@ -60,7 +67,6 @@ var VariantCurationHub = React.createClass({
         return this.getRestData('/variants/' + uuid, null, true).then(response => {
             // The variant object successfully retrieved
             this.setState({variantObj: response});
-            this.setState({isLoadingComplete: true});
             // ping out external resources (all async)
             this.fetchClinVarEutils(this.state.variantObj);
             this.fetchMyVariantInfoAndBustamante(this.state.variantObj);
@@ -82,7 +88,7 @@ var VariantCurationHub = React.createClass({
                     // Passing 'true' option to invoke 'mixin' function
                     // To extract more ClinVar data for 'Basic Information' tab
                     var variantData = parseClinvar(xml, true);
-                    this.setState({ext_clinvarEutils: variantData});
+                    this.setState({ext_clinvarEutils: variantData, loading_clinvarEutils: false});
                     this.handleCodonEsearch(variantData);
                     let clinVarRCVs = getClinvarRCVs(xml);
                     return Promise.resolve(clinVarRCVs);
@@ -91,18 +97,37 @@ var VariantCurationHub = React.createClass({
                     // parse associated disease and clinical significance for each id
                     if (RCVs.length) {
                         let clinvarInterpretations = [];
+                        let Urls = [];
                         for (let RCV of RCVs.values()) {
-                            this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV).then(result => {
-                                let clinvarInterpretation = parseClinvarInterpretation(RCV, result);
+                            Urls.push(this.props.href_url.protocol + external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV);
+                        }
+                        return this.getRestDatasXml(Urls).then(xml => {
+                            xml.forEach(result => {
+                                let clinvarInterpretation = parseClinvarInterpretation(result);
                                 clinvarInterpretations.push(clinvarInterpretation);
                                 this.setState({ext_clinVarRCV: clinvarInterpretations});
-                            }).catch(function(e) {
-                                console.log('ClinVarEfetch for RCV Error=: %o', e);
                             });
-                        }
+                            this.setState({loading_clinvarRCV: false});
+                        }).catch(err => {
+                            this.setState({loading_clinvarRCV: false});
+                            console.log('ClinVarEfetch for RCV Error=: %o', err);
+                        });
+                    } else {
+                        this.setState({loading_clinvarRCV: false});
                     }
-                }).catch(function(e) {
-                    console.log('ClinVarEutils Fetch Error=: %o', e);
+                }).catch(err => {
+                    this.setState({
+                        loading_clinvarEutils: false,
+                        loading_clinvarRCV: false,
+                        loading_clinvarEsearch: false
+                    });
+                    console.log('ClinVarEutils Fetch Error=: %o', err);
+                });
+            } else {
+                this.setState({
+                    loading_clinvarEutils: false,
+                    loading_clinvarRCV: false,
+                    loading_clinvarEsearch: false
                 });
             }
         }
@@ -114,27 +139,37 @@ var VariantCurationHub = React.createClass({
             let hgvs_notation = getHgvsNotation(variant, 'GRCh37');
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfo'] + hgvs_notation).then(response => {
-                    this.setState({ext_myVariantInfo: response});
+                    this.setState({ext_myVariantInfo: response, loading_myVariantInfo: false});
                     this.parseMyVariantInfo(response);
                     // check dbsnfp data for bustamante query
-                    var hgvsObj = {};
+                    let hgvsObj = {};
+                    hgvsObj.chrom = (response.chrom) ? response.chrom : null;
+                    hgvsObj.pos = (response.hg19.start) ? response.hg19.start : null;
                     if (response.dbnsfp) {
-                        hgvsObj.chrom = (response.dbnsfp.chrom) ? response.dbnsfp.chrom : null;
-                        hgvsObj.pos = (response.dbnsfp.hg19.start) ? response.dbnsfp.hg19.start : null;
                         hgvsObj.alt = (response.dbnsfp.alt) ? response.dbnsfp.alt : null;
                         return Promise.resolve(hgvsObj);
                     } else if (response.clinvar) {
-                        hgvsObj.chrom = (response.clinvar.chrom) ? response.clinvar.chrom : null;
-                        hgvsObj.pos = (response.clinvar.hg19.start) ? response.clinvar.hg19.start : null;
                         hgvsObj.alt = (response.clinvar.alt) ? response.clinvar.alt : null;
+                        return Promise.resolve(hgvsObj);
+                    } else if (response.dbsnp) {
+                        hgvsObj.alt = (response.dbsnp.alt) ? response.dbsnp.alt : null;
                         return Promise.resolve(hgvsObj);
                     }
                 }).then(data => {
                     this.getRestData('https:' + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
-                        this.setState({ext_bustamante: result});
+                        this.setState({ext_bustamante: result, loading_bustamante: false});
                     });
-                }).catch(function(e) {
-                    console.log('MyVariant or Bustamante Fetch Error=: %o', e);
+                }).catch(err => {
+                    this.setState({
+                        loading_myVariantInfo: false,
+                        loading_bustamante: false
+                    });
+                    console.log('MyVariant or Bustamante Fetch Error=: %o', err);
+                });
+            } else {
+                this.setState({
+                    loading_myVariantInfo: false,
+                    loading_bustamante: false
                 });
             }
         }
@@ -164,12 +199,15 @@ var VariantCurationHub = React.createClass({
             var rsid = (variant.dbSNPIds && variant.dbSNPIds.length > 0) ? variant.dbSNPIds[0].match(numberPattern) : null;
             if (rsid) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblVariation'] + 'rs' + rsid + '?content-type=application/json;pops=1;population_genotypes=1').then(response => {
-                    this.setState({ext_ensemblVariation: response});
+                    this.setState({ext_ensemblVariation: response, loading_ensemblVariation: false});
                     //this.parseTGenomesData(response);
                     //this.calculateHighestMAF();
-                }).catch(function(e) {
-                    console.log('Ensembl Fetch Error=: %o', e);
+                }).catch(err => {
+                    this.setState({loading_ensemblVariation: false});
+                    console.log('Ensembl Fetch Error=: %o', err);
                 });
+            } else {
+                this.setState({loading_ensemblVariation: false});
             }
         }
     },
@@ -181,12 +219,15 @@ var VariantCurationHub = React.createClass({
             let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&canonical=1&merged=1';
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then(response => {
-                    this.setState({ext_ensemblHgvsVEP: response});
+                    this.setState({ext_ensemblHgvsVEP: response, loading_ensemblHgvsVEP: false});
                     this.parseEnsemblGeneId(response);
                     this.parseEnsemblHgvsVEP(response);
-                }).catch(function(e) {
-                    console.log('Ensembl Fetch Error=: %o', e);
+                }).catch(err => {
+                    this.setState({loading_ensemblHgvsVEP: false});
+                    console.log('Ensembl Fetch Error=: %o', err);
                 });
+            } else {
+                this.setState({loading_ensemblHgvsVEP: false});
             }
         }
     },
@@ -239,12 +280,12 @@ var VariantCurationHub = React.createClass({
 
     // Method to fetch Gene-centric data from mygene.info
     // and pass the data object to child component
-    fetchMyGeneInfo: function(geneSymbol, geneId, source) {;
+    fetchMyGeneInfo: function(geneSymbol, geneId, source) {
         if (geneSymbol) {
             this.getRestData('/genes/' + geneSymbol).then(response => {
                 this.setState({ext_geneSynonyms: response.synonyms});
-            }).catch(function(e) {
-                console.log('Local Gene Fetch ERROR=: %o', e);
+            }).catch(err => {
+                console.log('Local Gene Symbol Fetch ERROR=: %o', err);
             });
         }
         if (geneId) {
@@ -256,8 +297,10 @@ var VariantCurationHub = React.createClass({
                 } else if (source === 'ensemblHgvsVEP') {
                     this.setState({ext_myGeneInfo_VEP: geneObj});
                 }
-            }).catch(function(e) {
-                console.log('MyGeneInfo Fetch Error=: %o', e);
+                this.setState({loading_myGeneInfo: false});
+            }).catch(err => {
+                this.setState({loading_myGeneInfo: false});
+                console.log('MyGeneInfo Fetch Error=: %o', err);
             });
         }
     },
@@ -272,10 +315,13 @@ var VariantCurationHub = React.createClass({
                 // pass in these additional values, in case receiving component needs them
                 result.vci_term = term;
                 result.vci_symbol = symbol;
-                this.setState({ext_clinVarEsearch: result});
-            }).catch(function(e) {
-                console.log('ClinVarEsearch Fetch Error=: %o', e);
+                this.setState({ext_clinVarEsearch: result, loading_clinvarEsearch: false});
+            }).catch(err => {
+                this.setState({loading_clinvarEsearch: false});
+                console.log('ClinVarEsearch Fetch Error=: %o', err);
             });
+        } else {
+            this.setState({loading_clinvarEsearch: false});
         }
     },
 
@@ -291,7 +337,6 @@ var VariantCurationHub = React.createClass({
         var interpretation = (this.state.interpretation) ? this.state.interpretation : null;
         var interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
         var editKey = this.state.editKey;
-        var isLoadingComplete = this.state.isLoadingComplete;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
         return (
@@ -312,7 +357,15 @@ var VariantCurationHub = React.createClass({
                     ext_clinVarEsearch={this.state.ext_clinVarEsearch}
                     ext_clinVarRCV={this.state.ext_clinVarRCV}
                     ext_ensemblGeneId={this.state.ext_ensemblGeneId}
-                    ext_geneSynonyms={this.state.ext_geneSynonyms} />
+                    ext_geneSynonyms={this.state.ext_geneSynonyms}
+                    loading_clinvarEutils={this.state.loading_clinvarEutils}
+                    loading_clinvarEsearch={this.state.loading_clinvarEsearch}
+                    loading_clinvarRCV={this.state.loading_clinvarRCV}
+                    loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
+                    loading_ensemblVariation={this.state.loading_ensemblVariation}
+                    loading_myVariantInfo={this.state.loading_myVariantInfo}
+                    loading_myGeneInfo={this.state.loading_myGeneInfo}
+                    loading_bustamante={this.state.loading_bustamante} />
             </div>
         );
     }
