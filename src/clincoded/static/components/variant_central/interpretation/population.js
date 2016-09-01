@@ -627,9 +627,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         return (
             <div className="variant-interpretation population">
-                {this.state.interpretation ?
-                    <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
-                : null}
                 <div className="bs-callout bs-callout-info clearfix">
                     <h4>Highest Minor Allele Frequency</h4>
                     <div className="clearfix">
@@ -804,6 +801,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     }
                 </Panel></PanelGroup>
+
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
 
                 {renderDataCredit('myvariant')}
 

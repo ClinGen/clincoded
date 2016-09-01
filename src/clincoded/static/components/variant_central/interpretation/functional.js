@@ -70,6 +70,10 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         </div>
                     : null}
                 </Panel></PanelGroup>
+
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="experimental" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
             </div>
         );
     }
