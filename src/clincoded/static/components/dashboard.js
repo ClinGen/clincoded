@@ -10,7 +10,7 @@ var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
 var CuratorHistory = require('./curator_history');
 
-import { showActivityIndicator } from '../../activity_indicator';
+import { showActivityIndicator } from './activity_indicator';
 
 var Form = form.Form;
 var FormMixin = form.FormMixin;
