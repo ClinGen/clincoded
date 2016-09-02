@@ -47,76 +47,74 @@ var progressBar = function(result, rules) {
     let browser_width = parseInt(window.innerWidth);
 
     return (
-        <div className="container">
-            <div>{browser_width}</div>
-            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-area">
-                <div className="col-lg-4 col-md-4 col-sm-4 col-xs-12 outer-box">
-                    <table className="inner-box benign-box">
-                        <tbody>
-                            <tr>
-                                <td rowSpan="2"><i className="icon icon-check-circle benign-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
-                                <td className="title">Benign</td>
-                            </tr>
-                            <tr>
-                                <td className="benign-list">
-                                    {benign_summary && Object.keys(benign_summary).length ?
-                                        Object.keys(benign_summary).map((criteria, i) => {
-                                            return (
-                                                <span key={i} className="btn btn-default btn-xs criteria-strength">
-                                                    {criteria + ': '}
-                                                    <span className="badge">{benign_summary[criteria]}</span>
-                                                    {i < 2 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
-                                                </span>
-                                            );
-                                        })
-                                        :
-                                        'No criteria met'
-                                    }
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div className="col-lg-5 col-md-4 col-sm-4 col-xs-12 outer-box path-box">
-                    <table className="inner-box path-box">
-                        <tbody>
-                            <tr>
-                                <td rowSpan="2"><i className="icon icon-check-circle pathogenic-label" aria-hidden="true"></i>&nbsp;&nbsp;</td>
-                                <td className="title">Pathogenic</td>
-                            </tr>
-                            <tr>
-                                <td className="path-list">
-                                    {path_summary && Object.keys(path_summary).length ?
-                                        Object.keys(path_summary).map((criteria, i) => {
-                                            return (
-                                                <span key={i} className="btn btn-default btn-xs criteria-strength">
-                                                    {criteria + ': '}
-                                                    <span className="badge">{path_summary[criteria]}</span>
-                                                    {i < 3 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
-                                                </span>
-                                            );
-                                        })
-                                        :
-                                        'No criteria met'
-                                    }
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div className="col-lg-3 col-md-4 col-sm-4 col-xs-12 outer-box">
-                    <table className="inner-box assertion-box">
-                        <tbody>
-                            <tr>
-                                <td rowSpan="2"><i className="icon icon-calculator" aria-hidden="true"></i>&nbsp;&nbsp;</td>
-                                <td className="title">Calculated Pathogenicity</td>
-                            </tr>
-                            <tr>
-                                <td className="assertion-list">{result && result.assertion ? result.assertion : 'None'}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-area">
+            <div className="col-lg-4 col-md-4 col-sm-4 col-xs-12 benign-box">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td rowSpan="2" className="icon-box">
+                                <i className="icon icon-check-circle benign-icon" aria-hidden="true"></i>
+                            </td>
+                            <td><dt>Benign</dt></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {benign_summary && Object.keys(benign_summary).length ?
+                                    Object.keys(benign_summary).map((criteria, i) => {
+                                        return (
+                                            <span key={i} className="btn btn-default btn-xs criteria-strength">
+                                                {criteria + ': '}
+                                                <span className="badge">{benign_summary[criteria]}</span>
+                                                {i < 2 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
+                                            </span>
+                                        );
+                                    })
+                                    :
+                                    'No criteria met'
+                                }
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div className="col-lg-5 col-md-4 col-sm-4 col-xs-12 path-box">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td rowSpan="2" className="icon-box">
+                                <i className="icon icon-check-circle path-icon" aria-hidden="true"></i>
+                            </td>
+                            <td><dt>Pathogenic</dt></td>
+                        </tr>
+                        <tr><td>
+                            {path_summary && Object.keys(path_summary).length ?
+                                Object.keys(path_summary).map((criteria, i) => {
+                                    return (
+                                        <span key={i} className="btn btn-default btn-xs criteria-strength">
+                                            {criteria + ': '}
+                                            <span className="badge">{path_summary[criteria]}</span>
+                                            {i < 3 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
+                                        </span>
+                                    );
+                                })
+                                :
+                                'No criteria met'
+                            }
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div className="col-lg-3 col-md-4 col-sm-4 col-xs-12 assertion-box">
+                <table>
+                    <tbody>
+                        <tr><td rowSpan="2" className="icon-box">
+                                <i className="icon icon-calculator" aria-hidden="true"></i>
+                            </td>
+                            <td><dt>Calculated Pathogenicity</dt></td>
+                        </tr>
+                        <tr><td className="pathogenicity-box">{result && result.assertion ? result.assertion : 'None'}</td></tr>
+                    </tbody>
+                </table>
 
             </div>
         </div>
