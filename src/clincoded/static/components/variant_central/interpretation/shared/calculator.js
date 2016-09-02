@@ -33,53 +33,59 @@ let PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
         let path_summary = result && result.path_summary ? result.path_summary : null;
 
         return (
-            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-area">
-                <div className="col-lg-4 col-md-4 col-sm-4 col-xs-12 benign-box">
-                    <dl className="benign-result">
-                        <dt>Benign</dt>
-                        <dd>
-                            {benign_summary && Object.keys(benign_summary).length ?
-                                Object.keys(benign_summary).map((criteria, i) => {
-                                    return (
-                                        <span key={i} className="btn btn-default btn-xs criteria-strength">
-                                            {criteria + ': '}
-                                            <span className="badge">{benign_summary[criteria]}</span>
-                                            {i < 2 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
-                                        </span>
-                                    );
-                                })
-                                :
-                                'No criteria met'
-                            }
-                        </dd>
-                    </dl>
-                </div>
-                <div className="col-lg-5 col-md-4 col-sm-4 col-xs-12 path-box">
-                    <dl className="path-result">
-                        <dt>Pathogenic</dt>
-                        <dd>
-                            {path_summary && Object.keys(path_summary).length ?
-                                Object.keys(path_summary).map((criteria, i) => {
-                                    return (
-                                        <span key={i} className="btn btn-default btn-xs criteria-strength">
-                                            {criteria + ': '}
-                                            <span className="badge">{path_summary[criteria]}</span>
-                                            {i < 3 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
-                                        </span>
-                                    );
-                                })
-                                :
-                                'No criteria met'
-                            }
-                        </dd>
-                    </dl>
-                </div>
-                <div className="col-lg-3 col-md-4 col-sm-4 col-xs-12 assertion-box">
-                     <dl className="calculate-result">
-                        <dt>Calculated Pathogenicity</dt>
-                        <dd>{result && result.assertion ? result.assertion : 'None'}</dd>
-                    </dl>
-                </div>
+            <div>
+                {interpretation ?
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-area">
+                        <div className="col-lg-4 col-md-4 col-sm-4 col-xs-12 benign-box">
+                            <dl className="benign-result">
+                                <dt>Benign</dt>
+                                <dd>
+                                    {benign_summary && Object.keys(benign_summary).length ?
+                                        Object.keys(benign_summary).map((criteria, i) => {
+                                            return (
+                                                <span key={i} className="btn btn-default btn-xs criteria-strength">
+                                                    {criteria + ': '}
+                                                    <span className="badge">{benign_summary[criteria]}</span>
+                                                    {i < 2 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
+                                                </span>
+                                            );
+                                        })
+                                        :
+                                        'No criteria met'
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                        <div className="col-lg-5 col-md-4 col-sm-4 col-xs-12 path-box">
+                            <dl className="path-result">
+                                <dt>Pathogenic</dt>
+                                <dd>
+                                    {path_summary && Object.keys(path_summary).length ?
+                                        Object.keys(path_summary).map((criteria, i) => {
+                                            return (
+                                                <span key={i} className="btn btn-default btn-xs criteria-strength">
+                                                    {criteria + ': '}
+                                                    <span className="badge">{path_summary[criteria]}</span>
+                                                    {i < 3 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
+                                                </span>
+                                            );
+                                        })
+                                        :
+                                        'No criteria met'
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                        <div className="col-lg-3 col-md-4 col-sm-4 col-xs-12 assertion-box">
+                             <dl className="calculate-result">
+                                <dt>Calculated Pathogenicity</dt>
+                                <dd>{result && result.assertion ? result.assertion : 'None'}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    :
+                    null
+                }
             </div>
         );
     },
@@ -97,6 +103,8 @@ let calculatePathogenicity = function(evaluationObjList) {
     const MODIFIER_M = 'moderate';
     const MODIFIER_P = 'supporting';
     const MODIFIER_SA = 'stand-alone';
+
+    let result = null;
 
     if (evaluationObjList && evaluationObjList.length) {
         let evaluated = false;
@@ -201,11 +209,12 @@ let calculatePathogenicity = function(evaluationObjList) {
             assertion = 'Uncertain significance - insufficient evidence';
         }
 
-        var result = {
+        result = {
             assertion: assertion,
             path_summary: {},
             benign_summary: {}
-        };
+        }
+
         if (pvs_count > 0) {
             result.path_summary['Very strong'] = pvs_count;
         }
