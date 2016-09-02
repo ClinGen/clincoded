@@ -81,13 +81,13 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                 <div className="current-user-interpretations">
                                     <dl className="inline-dl clearfix">
                                         <dt>My interpretations:</dt>
-                                        <dd>
+                                        <dd className="fullWidth">
                                             {myInterpretations.map(function(item, i) {
                                                 return (
                                                     <div key={i}>
                                                         <span className="my-interpretation">
                                                             {(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}
-                                                            {item.interpretation_status},&nbsp;
+                                                            {item.interpretation_status + ' '}
                                                             (last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')})
                                                         </span>
                                                         {(item.uuid === interpretationUuid) ?
@@ -105,14 +105,14 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                     <dl className="inline-dl clearfix">
                                         <dt>Other interpretations:</dt>
                                         <br />
-                                        <dd>
+                                        <dd className="fullWidth">
                                             {otherInterpretations.map(function(item, i) {
                                                 return (
                                                     <div key={i}>
                                                         <span className="other-interpretation">
                                                             {otherInterpretations[0].submitted_by.title + ', '}
                                                             {(otherInterpretations[0].interpretation_disease !== '') ? otherInterpretations[0].interpretation_disease + ', ' : null}
-                                                            {otherInterpretations[0].interpretation_status + ', '}
+                                                            {otherInterpretations[0].interpretation_status + ' '}
                                                             (last edited {moment(otherInterpretations[0].last_modified).format('YYYY MMM DD, h:mm a')})
                                                         </span>
                                                     </div>

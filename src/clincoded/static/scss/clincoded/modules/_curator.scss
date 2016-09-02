@@ -1135,6 +1135,10 @@
                 }
             }
 
+            .panel-content-wrapper .table {
+                margin-bottom: 0;
+            }
+
             .basic-info .table th,
             .basic-info .table td {
                 width: 25%;
@@ -1571,6 +1575,10 @@
 }
 
 dl.inline-dl {
+    dd.fullWidth {
+        width: 100%;
+    }
+
     dt.dtFormLabel {
         line-height: 4.5;
     }
