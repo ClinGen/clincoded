@@ -1638,43 +1638,63 @@ dl.inline-dl {
         margin: 0;
         padding: 0;
 
-        .icon-box {
-            padding-right: 5px;
-            vertical-align: middle;
-        }
+        dl {
+            margin: 0;
+            padding-left: 30px;
+            position:  relative;
 
-        .benign-icon {
-            color: #92cd9e;
-            font-size: 18pt;
-        }
+            &:before  {
+                content: "\f058";
+                font-family: 'FontAwesome';
+                font-size: 18pt;
+                position: absolute;
+                left: 0;
+                padding: 0px;
+            }
 
-        .path-icon {
-            color: #f4978a;
-            font-size: 18pt;
-        }
+            &.benign-result:before {
+                color: #92cd9e;
+            }
 
-        .icon-calculator {
-            color: #1b75bc;
-            font-size: 14pt;
-        }
+            &.path-result:before {
+                color: #f4978a;
+            }
 
-        .criteria-strength {
-            border: none;
-            margin-left: 0;
-            padding-left: 0;
-            background-color: #f5f5f5;
-            color: #000;
-            cursor: text;
-        }
+            &.calculate-result:before {
+                content: "\f1ec";
+                font-family: 'FontAwesome';
+                font-size: 15pt;
+                color: #1b75bc;
+                top: 8px;
+            }
 
-        .badge {
-            background-color: #b7b7b7;
-            font-size: 11px;
-            font-weight: normal;
-        }
+            dd {
+                font-size: 12px;
+            }
 
-        .pathogenicity-box {
-            font-size: 12px;
+            .criteria-strength {
+                border: none;
+                margin-left: 0;
+                padding-left: 0;
+                background-color: #f5f5f5;
+                color: #000;
+                cursor: text;
+            }
+
+            .badge {
+                background-color: #b7b7b7;
+                display: inline-block;
+                min-width: 10px;
+                padding: 3px 7px;
+                font-size: 12px;
+                font-weight: 700;
+                line-height: 1;
+                color: #fff;
+                text-align: center;
+                white-space: nowrap;
+                vertical-align: middle;
+                border-radius: 10px;
+            }
         }
     }
 
@@ -1713,7 +1733,7 @@ dl.inline-dl {
         }
 
         .assertion-box {
-            padding-left: 2.5em;
+            padding-left: 2em;
         }
     }
 

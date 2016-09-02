@@ -1,16 +1,16 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var RestMixin = require('../../../rest').RestMixin;
-var form = require('../../../../libs/bootstrap/form');
-var Form = form.Form;
-var Input = form.Input;
-var FormMixin = form.FormMixin;
+let React = require('react');
+let _ = require('underscore');
+let RestMixin = require('../../../rest').RestMixin;
+let form = require('../../../../libs/bootstrap/form');
+let Form = form.Form;
+let Input = form.Input;
+let FormMixin = form.FormMixin;
 
-var panel = require('../../../../libs/bootstrap/panel');
-var Panel = panel.Panel;
+let panel = require('../../../../libs/bootstrap/panel');
+let Panel = panel.Panel;
 
-var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.createClass({
+let PathogenicityCalculator = module.exports.PathogenicityCalculator = React.createClass({
     mixins: [FormMixin, RestMixin],
 
     propTypes: {
@@ -24,69 +24,40 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
     },
 
     render: function() {
-        var interpretation = this.props.interpretation;
-        var evaluations = interpretation && interpretation.evaluations && interpretation.evaluations.length ? interpretation.evaluations : null;
-        var result = evaluations ? calculatePathogenicity(evaluations) : null;
-        var rules = this.state.rules;
+        let interpretation = this.props.interpretation;
+        let evaluations = interpretation && interpretation.evaluations && interpretation.evaluations.length ? interpretation.evaluations : null;
+        let result = evaluations ? calculatePathogenicity(evaluations) : null;
+        let rules = this.state.rules;
+
+        let benign_summary = result && result.benign_summary ? result.benign_summary : null;
+        let path_summary = result && result.path_summary ? result.path_summary : null;
 
         return (
-            <div>
-                {interpretation ?
-                    progressBar(result, rules)
-                    :
-                    null
-                }
-            </div>
-        );
-    },
-});
-
-var progressBar = function(result, rules) {
-    let benign_summary = result && result.benign_summary ? result.benign_summary : null;
-    let path_summary = result && result.path_summary ? result.path_summary : null;
-    let browser_width = parseInt(window.innerWidth);
-
-    return (
-        <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-area">
-            <div className="col-lg-4 col-md-4 col-sm-4 col-xs-12 benign-box">
-                <table>
-                    <tbody>
-                        <tr>
-                            <td rowSpan="2" className="icon-box">
-                                <i className="icon icon-check-circle benign-icon" aria-hidden="true"></i>
-                            </td>
-                            <td><dt>Benign</dt></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                {benign_summary && Object.keys(benign_summary).length ?
-                                    Object.keys(benign_summary).map((criteria, i) => {
-                                        return (
-                                            <span key={i} className="btn btn-default btn-xs criteria-strength">
-                                                {criteria + ': '}
-                                                <span className="badge">{benign_summary[criteria]}</span>
-                                                {i < 2 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
-                                            </span>
-                                        );
-                                    })
-                                    :
-                                    'No criteria met'
-                                }
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div className="col-lg-5 col-md-4 col-sm-4 col-xs-12 path-box">
-                <table>
-                    <tbody>
-                        <tr>
-                            <td rowSpan="2" className="icon-box">
-                                <i className="icon icon-check-circle path-icon" aria-hidden="true"></i>
-                            </td>
-                            <td><dt>Pathogenic</dt></td>
-                        </tr>
-                        <tr><td>
+            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-area">
+                <div className="col-lg-4 col-md-4 col-sm-4 col-xs-12 benign-box">
+                    <dl className="benign-result">
+                        <dt>Benign</dt>
+                        <dd>
+                            {benign_summary && Object.keys(benign_summary).length ?
+                                Object.keys(benign_summary).map((criteria, i) => {
+                                    return (
+                                        <span key={i} className="btn btn-default btn-xs criteria-strength">
+                                            {criteria + ': '}
+                                            <span className="badge">{benign_summary[criteria]}</span>
+                                            {i < 2 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
+                                        </span>
+                                    );
+                                })
+                                :
+                                'No criteria met'
+                            }
+                        </dd>
+                    </dl>
+                </div>
+                <div className="col-lg-5 col-md-4 col-sm-4 col-xs-12 path-box">
+                    <dl className="path-result">
+                        <dt>Pathogenic</dt>
+                        <dd>
                             {path_summary && Object.keys(path_summary).length ?
                                 Object.keys(path_summary).map((criteria, i) => {
                                     return (
@@ -100,62 +71,56 @@ var progressBar = function(result, rules) {
                                 :
                                 'No criteria met'
                             }
-                        </td></tr>
-                    </tbody>
-                </table>
+                        </dd>
+                    </dl>
+                </div>
+                <div className="col-lg-3 col-md-4 col-sm-4 col-xs-12 assertion-box">
+                     <dl className="calculate-result">
+                        <dt>Calculated Pathogenicity</dt>
+                        <dd>{result && result.assertion ? result.assertion : 'None'}</dd>
+                    </dl>
+                </div>
             </div>
-            <div className="col-lg-3 col-md-4 col-sm-4 col-xs-12 assertion-box">
-                <table>
-                    <tbody>
-                        <tr><td rowSpan="2" className="icon-box">
-                                <i className="icon icon-calculator" aria-hidden="true"></i>
-                            </td>
-                            <td><dt>Calculated Pathogenicity</dt></td>
-                        </tr>
-                        <tr><td className="pathogenicity-box">{result && result.assertion ? result.assertion : 'None'}</td></tr>
-                    </tbody>
-                </table>
-
-            </div>
-        </div>
-    );
-};
+        );
+    },
+});
 
 // Function to calculate pathogenicity
-var calculatePathogenicity = function(evaluationObjList) {
+// Leave this function outside of class PathogenicityCalculator so that other object can use it separately.
+let calculatePathogenicity = function(evaluationObjList) {
     // setup count values
-    var MET = 'met';
-    var NOT_MET = 'not-met';
-    var NOT_EVALUATED = 'not-evaluated';
-    var MODIFIER_VS = 'very-strong';
-    var MODIFIER_S = 'strong';
-    var MODIFIER_M = 'moderate';
-    var MODIFIER_P = 'supporting';
-    var MODIFIER_SA = 'stand-alone';
+    const MET = 'met';
+    const NOT_MET = 'not-met';
+    const NOT_EVALUATED = 'not-evaluated';
+    const MODIFIER_VS = 'very-strong';
+    const MODIFIER_S = 'strong';
+    const MODIFIER_M = 'moderate';
+    const MODIFIER_P = 'supporting';
+    const MODIFIER_SA = 'stand-alone';
 
     if (evaluationObjList && evaluationObjList.length) {
-        var evaluated = false;
+        let evaluated = false;
 
         // Initialize count numbers
-        var pvs_count = 0;
-        var ps_count = 0;
-        var pm_count = 0;
-        var pp_count = 0;
-        var ba_count = 0;
-        var bs_count = 0;
-        var bp_count = 0;
+        let pvs_count = 0;
+        let ps_count = 0;
+        let pm_count = 0;
+        let pp_count = 0;
+        let ba_count = 0;
+        let bs_count = 0;
+        let bp_count = 0;
 
         // count each criteria level (PVS, PS, PM, PP, BA, BS, BP)
-        for (var evaluationObj of evaluationObjList) {
+        for (let evaluationObj of evaluationObjList) {
             // In each evaluation object, criteria and criteriaStatus must exist, criteriaModifier may or may not
-            var criteria = evaluationObj.criteria;
-            var criteriaStatus = evaluationObj.criteriaStatus;
+            let criteria = evaluationObj.criteria;
+            let criteriaStatus = evaluationObj.criteriaStatus;
 
             // count met criteria only, modified by criteriaModifier
             if (criteriaStatus === MET) {
                 evaluated = true;
 
-                var criteriaModifier = evaluationObj.criteriaModifier;
+                let criteriaModifier = evaluationObj.criteriaModifier;
                 if ((criteria.indexOf('PVS') === 0 && criteriaModifier === '') || (criteria.indexOf('P') === 0 && criteriaModifier === MODIFIER_VS)) {
                     pvs_count += 1;
                 } else if ((criteria.indexOf('PS') === 0 && criteriaModifier === '') || (criteria.indexOf('P') === 0 && criteriaModifier === MODIFIER_S)) {
@@ -176,13 +141,13 @@ var calculatePathogenicity = function(evaluationObjList) {
             }
         }
 
-        var contradict = ((pvs_count > 0 || ps_count > 0 || pm_count > 0 || pp_count > 0) && (ba_count > 0 || bs_count > 0 || bp_count > 0)) ? true : false;
-        var patho_assertion = null;
-        var benign_assertion = null;
+        let contradict = ((pvs_count > 0 || ps_count > 0 || pm_count > 0 || pp_count > 0) && (ba_count > 0 || bs_count > 0 || bp_count > 0)) ? true : false;
+        let patho_assertion = null;
+        let benign_assertion = null;
 
         // Algorithm, ACMG Standarts & Guidelines 2015
         // setup cases for 4 types of assertions (Pathogenic, Likely pathogenic, Benign and Likely benign)
-        var cases = {
+        let cases = {
             path_pvs2: pvs_count >= 2 ? true : false,
             path_pvs1_ps1: (pvs_count === 1 && ps_count >= 1) ? true : false,
             path_pvs1_pm2: (pvs_count === 1 && pm_count >= 2) ? true : false,
@@ -207,7 +172,7 @@ var calculatePathogenicity = function(evaluationObjList) {
             likelyBenign_pp2: (bp_count >= 2) ? true : false,
         };
 
-        for (var cs of Object.keys(cases)) {
+        for (let cs of Object.keys(cases)) {
             if (cases[cs]) {
                 if (cs.indexOf('path_') !== -1) {
                     patho_assertion = 'Pathogenic';
@@ -223,7 +188,7 @@ var calculatePathogenicity = function(evaluationObjList) {
             }
         }
 
-        var assertion = null;
+        let assertion = null;
         if (!evaluated) {
             assertion = '';
         } else if ((patho_assertion && contradict) || (benign_assertion && contradict)) {
