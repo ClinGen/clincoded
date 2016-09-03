@@ -36,7 +36,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         updateInterpretationObj: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
         ext_bustamante: React.PropTypes.object,
-        ext_ensemblVEP: React.PropTypes.array,
         ext_ensemblVariation: React.PropTypes.object,
         ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_clinvarEutils: React.PropTypes.object,
@@ -60,7 +59,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_myGeneInfo: this.props.ext_myGeneInfo,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
             ext_bustamante: this.props.ext_bustamante,
-            ext_ensemblVEP: this.props.ext_ensemblVEP,
             ext_ensemblVariation: this.props.ext_ensemblVariation,
             ext_ensemblHgvsVEP: this.props.ext_ensemblHgvsVEP,
             ext_clinvarEutils: this.props.ext_clinvarEutils,
@@ -95,9 +93,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         if (nextProps.ext_bustamante) {
             this.setState({ext_bustamante: nextProps.ext_bustamante});
-        }
-        if (nextProps.ext_ensemblVEP) {
-            this.setState({ext_ensemblVEP: nextProps.ext_ensemblVEP});
         }
         if (nextProps.ext_ensemblVariation) {
             this.setState({ext_ensemblVariation: nextProps.ext_ensemblVariation});
@@ -181,7 +176,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <CurationInterpretationPopulation data={variant}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
-                            ext_ensemblVEP={this.state.ext_ensemblVEP}
+                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_ensemblVariation={this.state.loading_ensemblVariation} />
