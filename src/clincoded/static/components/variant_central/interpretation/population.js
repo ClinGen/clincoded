@@ -54,7 +54,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         interpretation: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
-        ext_ensemblVEP: React.PropTypes.array,
+        ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_ensemblVariation: React.PropTypes.object,
         loading_myVariantInfo: React.PropTypes.bool,
         loading_ensemblVariation: React.PropTypes.bool
@@ -116,9 +116,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.parseEspData(this.props.ext_myVariantInfo);
             this.calculateHighestMAF();
         }
-        if (this.props.ext_ensemblVEP) {
-            this.parseAlleleFrequencyData(this.props.ext_ensemblVEP);
-            this.parseGeneConstraintScores(this.props.ext_ensemblVEP);
+        if (this.props.ext_ensemblHgvsVEP) {
+            this.parseAlleleFrequencyData(this.props.ext_ensemblHgvsVEP);
+            this.parseGeneConstraintScores(this.props.ext_ensemblHgvsVEP);
             this.calculateHighestMAF();
         }
         if (this.props.ext_ensemblVariation) {
@@ -145,9 +145,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.parseEspData(nextProps.ext_myVariantInfo);
             this.calculateHighestMAF();
         }
-        if (nextProps.ext_ensemblVEP) {
-            this.parseAlleleFrequencyData(nextProps.ext_ensemblVEP);
-            this.parseGeneConstraintScores(nextProps.ext_ensemblVEP);
+        if (nextProps.ext_ensemblHgvsVEP) {
+            this.parseAlleleFrequencyData(nextProps.ext_ensemblHgvsVEP);
+            this.parseGeneConstraintScores(nextProps.ext_ensemblHgvsVEP);
             this.calculateHighestMAF();
         }
         if (nextProps.ext_ensemblVariation) {

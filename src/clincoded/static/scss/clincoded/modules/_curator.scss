@@ -1576,6 +1576,10 @@
 }
 
 dl.inline-dl {
+    dd.fullWidth {
+        width: 100%;
+    }
+
     dt.dtFormLabel {
         line-height: 4.5;
     }
