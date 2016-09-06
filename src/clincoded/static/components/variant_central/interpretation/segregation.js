@@ -43,9 +43,6 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     render: function() {
         return (
             <div className="variant-interpretation segregation">
-                {this.state.interpretation ?
-                    <CompleteSection interpretation={this.state.interpretation} tabName="segregation-case" updateInterpretationObj={this.props.updateInterpretationObj} />
-                : null}
                 <PanelGroup accordion><Panel title="Observed in healthy adult(s)" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                         <div className="row">
@@ -149,6 +146,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         </div>
                     : null}
                 </Panel></PanelGroup>
+
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="segregation-case" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
             </div>
         );
     }

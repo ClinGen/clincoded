@@ -10,6 +10,13 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 
+var tabNames = {
+    'population': 'Population',
+    'predictors': 'Predictors',
+    'experimental': 'Experimental',
+    'segregation-case': 'Segregation/Case'
+};
+
 // Recursive function to compare oldObj against newObj and its key:values. Creates diffObj that shares the keys (full-depth) with newObj,
 // but with values of true or false depending on whether or not oldObj's values for that key matches newValue's. A value of true means that
 // the key:value is different. Also creates diffObjFlag that keeps track of whether or not there is any change in the diffObj. A value of true
@@ -70,10 +77,10 @@ var CompleteSection = module.exports.CompleteSection = React.createClass({
     },
 
     render: function() {
-        var checked = this.state.interpretation.completed_sections && this.state.interpretation.completed_sections.indexOf(this.props.tabName) > -1 ? true : false;
+        let checked = this.state.interpretation.completed_sections && this.state.interpretation.completed_sections.indexOf(this.props.tabName) > -1 ? true : false;
         return (
             <div className="alert alert-warning section-complete-bar">
-                Set this evidence category as complete <input type="checkbox" onChange={this.setCompleteSection} disabled={this.state.submitBusy} checked={checked} /> {this.state.submitBusy ? <i className="icon icon-spin icon-cog"></i> : null}
+                The evaluations on the {tabNames[this.props.tabName]} tab have been reviewed to my satisfaction (<i>optional</i>) <input type="checkbox" onChange={this.setCompleteSection} disabled={this.state.submitBusy} checked={checked} /> {this.state.submitBusy ? <i className="icon icon-spin icon-cog"></i> : null}
             </div>
         );
     }
