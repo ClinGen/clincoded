@@ -43,7 +43,7 @@
     },
     "BP2": {
         "class": "benign-supporting",
-        "definition": "Observed in <i>trans</i> with path. variant for dominant disorder or <i>cis</i> any inheritance",
+        "definition": "Observed in trans with path. variant for dominant disorder or cis any inheritance",
         "definitionLong": "Observed in <i>trans</i> with a pathogenic variant for a fully penetrant dominant gene/disorder or observed in <i>cis</i> with a pathogenic variant in any inheritance pattern",
         "category": "segregation",
         "diseaseDependent": true
@@ -134,7 +134,7 @@
     },
     "PM3": {
         "class": "pathogenic-moderate",
-        "definition": "For recessive disorders, detected in <i>trans</i> with a pathogenic variant",
+        "definition": "For recessive disorders, detected in trans with a pathogenic variant",
         "definitionLong": "For recessive disorders, detected in <i>trans</i> with a pathogenic variant",
         "category": "segregation",
         "diseaseDependent": true
@@ -155,7 +155,7 @@
     },
     "PM6": {
         "class": "pathogenic-moderate",
-        "definition": "<i>De novo</i> (without paternity & maternity confirmed)",
+        "definition": "De novo (without paternity & maternity confirmed)",
         "definitionLong": "Assumed <i>de novo</i>, but without confirmation of maternity/paternity",
         "category": "segregation",
         "diseaseDependent": false
@@ -169,7 +169,7 @@
     },
     "PS2": {
         "class": "pathogenic-strong",
-        "definition": "<i>De novo</i> (paternity and maternity confirmed)",
+        "definition": "De novo (paternity and maternity confirmed)",
         "definitionLong": "<i>De novo</i> (both maternity and paternity confirmed) in a patient with the disease and no family history",
         "category": "segregation",
         "diseaseDependent": true
