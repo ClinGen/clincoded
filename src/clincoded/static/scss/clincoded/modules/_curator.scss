@@ -337,6 +337,15 @@
             color: #000;
         }
     }
+
+    a.help-doc {
+        margin-left: 8px;
+
+        .icon {
+            font-size: 16px;
+            vertical-align: text-top;
+        }
+    }
 }
 
 .edit-omim-modal {
@@ -550,6 +559,15 @@
 .variant-interpretation {
     input[type=checkbox] {
         margin-top: 11px;
+    }
+
+    .section-complete-bar {
+        margin: 0 -15px 0 -15px;
+        padding-top: 3px;
+        padding-bottom: 9px;
+        border-left: 0;
+        border-right: 0;
+        border-radius: 0;
     }
 }
 
@@ -981,6 +999,39 @@
     }
 }
 
+.evaluation {
+    .form-group {
+        background-color: #fff;
+        margin: 0;
+    }
+    .form-group:after {
+        clear: none;
+    }
+    .pad-top {
+        padding: 20px 0 0 0;
+
+    }
+    .pad-bottom {
+        padding-bottom: 15px;
+    }
+    .center {
+        text-align: center;
+    }
+    .input-right input {
+        text-align: right;
+    }
+    .after-input {
+        padding: 7px 0 0 0;
+    }
+    .clear {
+        clear: both;
+    }
+    .divider {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ddd;
+    }
+}
+
 .panel-data {
     .variant-view-panel {
         dt {
@@ -1054,9 +1105,17 @@
             }
         }
 
+        ul.vci-tabs-header[role=tablist].vci-subtabs {
+            li[role=tab] {
+                background-color: #fff;
+                color: #1b75bc;
+            }
+        }
+
         .tab-panel {
             border: solid 1px #1b75bc;
             padding: 15px;
+            margin-bottom: 10px;
             clear: both;
 
             ul, li {
@@ -1077,9 +1136,62 @@
                 }
             }
 
+            .panel-content-wrapper .table {
+                margin-bottom: 0;
+            }
+
             .basic-info .table th,
             .basic-info .table td {
-                width: 33%;
+                width: 25%;
+
+                .title-ellipsis {
+                    max-width: 250px;
+                }
+            }
+
+            .basic-info .datasource-clinvar-interpretaions .table th,
+            .basic-info .datasource-clinvar-interpretaions .table td {
+                width: 16.67%;
+            }
+
+            .basic-info .datasource-clinvar-interpretaions {
+                margin-bottom: 20px;
+            }
+
+            .basic-info .datasource-clinvar-interpretaions .table th:last-child,
+            .basic-info .datasource-clinvar-interpretaions .table td:last-child {
+                width: 50%;
+            }
+
+            .basic-info .clinvar-interpretation .review-status:first-letter,
+            .basic-info .clinvar-interpretation .clinical-significance:first-letter {
+                text-transform: capitalize;
+            }
+
+            .basic-info .clinvar-interpretation .disease .identifiers ul {
+                display: inline-block;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                vertical-align: bottom;
+            }
+
+            .basic-info .clinvar-interpretation .disease .identifiers li {
+                float: left;
+            }
+
+            .basic-info .clinvar-interpretation .disease .identifiers li + li:before {
+                content: "-";
+                margin: 0 4px;
+            }
+
+            .basic-info .table .primary-transcript td:last-child:after {
+                content: "\f069";
+                font-family: 'FontAwesome';
+                color: #31708f;
+                float: right;
+                position: relative;
+                right: 0;
             }
 
             .population .table tfoot .count:first-child td {
@@ -1137,6 +1249,15 @@
                     font-weight: bold;
                 }
             }
+
+            .gene-specific .datasource-constraint-scores .table thead td,
+            .gene-specific .datasource-constraint-scores .table tbody td {
+                width: 25%;
+            }
+
+            .gene-specific .datasource-constraint-scores .table tfoot td {
+                font-size: 90%;
+            }
         }
     }
 }
@@ -1150,7 +1271,6 @@
     font-weight: normal;
     padding: 3px 8px;
 }
-/* FIXME: ** end ** temp placeholder style. Will be removed. */
 
 /* variant curation interface - interpretation action bar */
 .curation-actions {
@@ -1267,10 +1387,45 @@
     .panel-title {
         font-weight: bold;
 
-        a {
+        a, .help-note {
             font-size: 85%;
             font-weight: normal;
+            line-height: 17.5px;
             margin-left: 20px;
+        }
+
+        .help-note span {
+            font-style: italic;
+        }
+
+        a.label-primary {
+            color: #fff;
+            font-size: 55%;
+            font-weight: bold;
+            margin-left: 10px;
+            vertical-align: top;
+        }
+
+        a.credit-mygene {
+            background: url(/static/img/mygene-logo.png) 0 1px no-repeat;
+        }
+
+        a.credit-myvariant {
+            background: url(/static/img/myvariant-logo.png) 0 1px no-repeat;
+        }
+
+        a.credit-mygene,
+        a.credit-myvariant {
+            background-size: 18px 18px;
+            display: inline-block;
+            height: 18px;
+            width: 18px;
+            margin-left: 10px;
+            vertical-align: bottom;
+
+            span {
+                display: none;
+            }
         }
     }
 
@@ -1295,6 +1450,7 @@
 
 /* variant curation interface - criteria bar */
 .criteria-group.btn-group-sm {
+    padding-top: 10px;
     padding-bottom: 10px;
 }
 
@@ -1493,7 +1649,7 @@
 }
 
 /**
- * Tooltip Styles
+ * Tooltip Styles for criteria bar
  */
 
 /* Add this attribute to the element that needs a tooltip */
@@ -1580,6 +1736,10 @@
 }
 
 dl.inline-dl {
+    dd.fullWidth {
+        width: 100%;
+    }
+
     dt.dtFormLabel {
         line-height: 4.5;
     }
@@ -1595,4 +1755,64 @@ dl.inline-dl {
 
 .hidden {
     display: none;
+}
+
+/* Credits at the bottom of tabs */
+.credits {
+    font-size: 12px;
+    margin: 20px 0 0 0;
+
+    .label-primary {
+        vertical-align: text-top;
+    }
+
+    span.credit-mygene {
+        background: url(/static/img/mygene-logo.png) 0 0 no-repeat;
+    }
+
+    span.credit-myvariant {
+        background: url(/static/img/myvariant-logo.png) 0 0 no-repeat;
+    }
+
+    span.credit-mygene,
+    span.credit-myvariant {
+        background-size: 18px 18px;
+        display: inline-block;
+        height: 18px;
+        width: 18px;
+        vertical-align: bottom;
+
+        span {
+            display: none;
+        }
+    }
+}
+
+.progress-bar {
+    width: 100%;
+    padding: 0 0 10px 0;
+
+    .benign-box {
+        border: solid 2px #8bcd9c;
+        padding-left: 10px;
+        width: 32%;
+        float: left;
+        background-color: #fff;
+    }
+
+    .pathogenic-box {
+        border: solid 2px #d78;
+        padding-left: 10px;
+        width: 34%;
+        float: left;
+        background-color: #fff;
+    }
+
+    .assertion-box {
+        border: solid 2px #1b75bc;
+        padding-left: 10px;
+        width: 34%;
+        float: left;
+        background-color: #fff;
+    }
 }

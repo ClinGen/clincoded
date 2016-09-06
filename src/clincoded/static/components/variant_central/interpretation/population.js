@@ -4,7 +4,10 @@ var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
-var CurationInterpretationForm = require('./shared/form').CurationInterpretationForm;
+var vciFormHelper = require('./shared/form');
+var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+var findDiffKeyValuesMixin = require('./shared/find_diff').findDiffKeyValuesMixin;
+var CompleteSection = require('./shared/complete_section').CompleteSection;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
@@ -16,6 +19,9 @@ var queryKeyValue = globals.queryKeyValue;
 var panel = require('../../../libs/bootstrap/panel');
 var form = require('../../../libs/bootstrap/form');
 
+import { renderDataCredit } from './shared/credit';
+import { showActivityIndicator } from '../../activity_indicator';
+
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
 var Form = form.Form;
@@ -25,7 +31,7 @@ var InputMixin = form.InputMixin;
 
 var populationStatic = {
     exac: {
-        _order: ['afr', 'oth', 'amr', 'sas', 'nfe', 'eas', 'fin'],
+        _order: ['afr', 'amr', 'sas', 'nfe', 'eas', 'fin', 'oth'],
         _labels: {afr: 'African', amr: 'Latino', eas: 'East Asian', fin: 'European (Finnish)', nfe: 'European (Non-Finnish)', oth: 'Other', sas: 'South Asian'}
     },
     tGenomes: {
@@ -41,16 +47,17 @@ var CI_DEFAULT = 95;
 
 // Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
-    mixins: [RestMixin],
+    mixins: [RestMixin, findDiffKeyValuesMixin],
 
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
         interpretation: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
-        protocol: React.PropTypes.string,
         ext_myVariantInfo: React.PropTypes.object,
-        ext_ensemblVEP: React.PropTypes.array,
-        ext_ensemblVariation: React.PropTypes.object
+        ext_ensemblHgvsVEP: React.PropTypes.array,
+        ext_ensemblVariation: React.PropTypes.object,
+        loading_myVariantInfo: React.PropTypes.bool,
+        loading_ensemblVariation: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -63,7 +70,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             hasExacData: false, // flag to display ExAC table
             hasTGenomesData: false,
             hasEspData: false, // flag to display ESP table
-            geneENSG: null,
             CILow: null,
             CIhigh: null,
             populationObj: {
@@ -90,12 +96,37 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     _tot: {ac: {}, gc: {}},
                     _extra: {}
                 }
-            }
+            },
+            populationObjDiff: null,
+            populationObjDiffFlag: false,
+            loading_myVariantInfo: this.props.loading_myVariantInfo,
+            loading_ensemblVariation: this.props.loading_ensemblVariation
         };
     },
 
     componentDidMount: function() {
-        this.getPrevSetDesiredCI(this.props.interpretation);
+        if (this.props.interpretation) {
+            this.setState({interpretation: this.props.interpretation});
+            // set desired CI if previous data for it exists
+            this.getPrevSetDesiredCI(this.props.interpretation);
+        }
+        if (this.props.ext_myVariantInfo) {
+            this.parseExacData(this.props.ext_myVariantInfo);
+            this.parseEspData(this.props.ext_myVariantInfo);
+            this.calculateHighestMAF();
+        }
+        if (this.props.ext_ensemblHgvsVEP) {
+            this.parseAlleleFrequencyData(this.props.ext_ensemblHgvsVEP);
+            this.calculateHighestMAF();
+        }
+        if (this.props.ext_ensemblVariation) {
+            this.parseTGenomesData(this.props.ext_ensemblVariation);
+            this.calculateHighestMAF();
+        }
+
+        if (this.state.interpretation && this.state.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.populationObj, this.state.interpretation.evaluations);
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -112,15 +143,21 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.parseEspData(nextProps.ext_myVariantInfo);
             this.calculateHighestMAF();
         }
-        if (nextProps.ext_ensemblVEP) {
-            this.parseAlleleFrequencyData(nextProps.ext_ensemblVEP);
-            this.parseGeneConstraintScores(nextProps.ext_ensemblVEP);
+        if (nextProps.ext_ensemblHgvsVEP) {
+            this.parseAlleleFrequencyData(nextProps.ext_ensemblHgvsVEP);
             this.calculateHighestMAF();
         }
         if (nextProps.ext_ensemblVariation) {
             this.parseTGenomesData(nextProps.ext_ensemblVariation);
             this.calculateHighestMAF();
         }
+        if (nextProps.interpretation && nextProps.interpretation.evaluations) {
+            this.compareExternalDatas(this.state.populationObj, nextProps.interpretation.evaluations);
+        }
+        this.setState({
+            loading_ensemblVariation: nextProps.loading_ensemblVariation,
+            loading_myVariantInfo: nextProps.loading_myVariantInfo
+        });
     },
 
     componentWillUnmount: function() {
@@ -143,24 +180,27 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
+    // function to compare current external data with external data saved with a previous interpretation
+    compareExternalDatas: function(newData, savedEvals) {
+        for (var i in savedEvals) {
+            if (['BA1', 'PM2', 'BS1'].indexOf(savedEvals[i].criteria) > -1) {
+                var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].population.populationData);
+                this.setState({populationObjDiff: tempCompare[0], populationObjDiffFlag: tempCompare[1]});
+                break;
+            }
+        }
+    },
+
     // Get ExAC allele frequency from Ensembl (VEP) directly
     // Because myvariant.info doesn't always return ExAC allele frequency data
     parseAlleleFrequencyData: function(response) {
         let populationObj = this.state.populationObj;
         populationStatic.exac._order.map(key => {
-            populationObj.exac[key].af = parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
+            populationObj.exac[key].af = typeof populationObj.exac[key].af !== 'undefined' ? (isNaN(populationObj.exac[key].af) ? null : populationObj.exac[key].af) : parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
         });
-        populationObj.exac._tot.af = parseFloat(response[0].colocated_variants[0].exac_adj_maf);
+        populationObj.exac._tot.af = typeof populationObj.exac._tot.af !== 'undefined' ? (isNaN(populationObj.exac._tot.af) ? null : populationObj.exac._tot.af) : parseFloat(response[0].colocated_variants[0].exac_adj_maf);
 
         this.setState({populationObj: populationObj});
-    },
-
-    // Get gene ENSG value to link out to Gene's page on ExAC, as temporary stop gap for displaying
-    // constraint scores (see #750)
-    parseGeneConstraintScores: function(response) {
-        if (response && response.length > 0 && response[0].transcript_consequences && response[0].transcript_consequences.length > 0) {
-            this.setState({geneENSG: response[0].transcript_consequences[0].gene_id});
-        }
     },
 
     // Method to assign ExAC population data to global population object
@@ -174,11 +214,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 populationObj.exac[key].ac = parseInt(response.exac.ac['ac_' + key]);
                 populationObj.exac[key].an = parseInt(response.exac.an['an_' + key]);
                 populationObj.exac[key].hom = parseInt(response.exac.hom['hom_' + key]);
+                populationObj.exac[key].af = populationObj.exac[key].ac / populationObj.exac[key].an;
             });
             // get the allele count, allele number, and homozygote count totals
             populationObj.exac._tot.ac = parseInt(response.exac.ac.ac_adj);
             populationObj.exac._tot.an = parseInt(response.exac.an.an_adj);
             populationObj.exac._tot.hom = parseInt(response.exac.hom.ac_hom);
+            populationObj.exac._tot.af = populationObj.exac._tot.ac / populationObj.exac._tot.an;
             // get extra ExAC information
             populationObj.exac._extra.chrom = response.exac.chrom + ''; // ensure that the chromosome is stored as a String
             populationObj.exac._extra.pos = parseInt(response.exac.pos);
@@ -216,7 +258,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     // extract 20 characters and forward to get population code (not always relevant)
                     let populationCode = population.population.substring(20).toLowerCase();
                     if (population.population.indexOf('1000GENOMES:phase_3') == 0 &&
-                        populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                        populationStatic.tGenomes._order.indexOf(populationCode) > -1) {
                         // ... for specific populations =
                         populationObj.tGenomes[populationCode].ac[population.allele] = parseInt(population.allele_count);
                         populationObj.tGenomes[populationCode].af[population.allele] = parseFloat(population.frequency);
@@ -245,7 +287,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     // extract 20 characters and forward to get population code (not always relevant)
                     let populationCode = population_genotype.population.substring(20).toLowerCase();
                     if (population_genotype.population.indexOf('1000GENOMES:phase_3:') == 0 &&
-                        populationStatic.tGenomes._order.indexOf(populationCode) > 0) {
+                        populationStatic.tGenomes._order.indexOf(populationCode) > -1) {
                         // ... for specific populations
                         populationObj.tGenomes[populationCode].gc[population_genotype.genotype] = parseInt(population_genotype.count);
                         populationObj.tGenomes[populationCode].gf[population_genotype.genotype] = parseFloat(population_genotype.frequency);
@@ -359,8 +401,46 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         });
         // embed highest MAF and related data into population obj, and update to state
         populationObj.highestMAF = highestMAFObj;
-        this.setState({populationObj: populationObj});
-        this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
+        this.setState({populationObj: populationObj}, () => {
+            this.changeDesiredCI(); // we have highest MAF data, so calculate the CI ranges
+        });
+    },
+
+    // Method to render external ExAC linkout when no ExAC population data found
+    renderExacLinkout: function(response) {
+        let exacLink;
+        // If no ExAC population data, construct external linkout for one of the following:
+        // 1) clinvar/cadd data found & the variant type is substitution
+        // 2) clinvar/cadd data found & the variant type is NOT substitution
+        // 3) no data returned by myvariant.info
+        if (response) {
+            let chrom = response.chrom,
+                pos = response.hg19.start,
+                regionStart = parseInt(response.hg19.start) - 30,
+                regionEnd = parseInt(response.hg19.end) + 30;
+            if (response.clinvar) {
+                // Try 'clinvar' as primary data object
+                let clinvar = response.clinvar;
+                // Applies to substitution variant (e.g. C>T in which '>' means 'changes to')
+                if (clinvar.type && clinvar.type === 'single nucleotide variant') {
+                    exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + clinvar.ref + '-' + clinvar.alt;
+                } else {
+                    // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
+                    exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
+                }
+            } else if (response.cadd) {
+                // Fallback to 'cadd' as alternative data object
+                let cadd = response.cadd;
+                if (cadd.type && cadd.type === 'SNV') {
+                    exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + cadd.ref + '-' + cadd.alt;
+                } else {
+                    exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
+                }
+            }
+        } else {
+            exacLink = external_url_map['EXACHome'];
+        }
+        return exacLink;
     },
 
     /* the following methods are related to the rendering of population data tables */
@@ -373,9 +453,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{exac[key].ac ? exac[key].ac : '--'}</td>
-                <td>{exac[key].an ? exac[key].an : '--'}</td>
-                <td>{exac[key].hom ? exac[key].hom : '--'}</td>
+                <td>{exac[key].ac || exac[key].ac === 0 ? exac[key].ac : '--'}</td>
+                <td>{exac[key].an || exac[key].an === 0 ? exac[key].an : '--'}</td>
+                <td>{exac[key].hom || exac[key].hom === 0 ? exac[key].hom : '--'}</td>
                 <td>{exac[key].af || exac[key].af === 0 ? this.parseFloatShort(exac[key].af) : '--'}</td>
             </tr>
         );
@@ -384,6 +464,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // method to render a row of data for the 1000Genomes table
     renderTGenomesRow: function(key, tGenomes, tGenomesStatic, rowNameCustom, className) {
         let rowName = tGenomesStatic._labels[key];
+        // for when generating difference object:
+        //let tGenomesDiff = this.state.populationObjDiff && this.state.populationObjDiff.tGenomes ? this.state.populationObjDiff.tGenomes : null; // this null creates issues when populationObjDiff is not set because it compraes on null later
         // generate genotype strings from reference and alt allele information
         let g_ref = tGenomes._extra.ref + '|' + tGenomes._extra.ref,
             g_alt = tGenomes._extra.alt + '|' + tGenomes._extra.alt,
@@ -416,11 +498,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{esp[key].ac[esp._extra.ref] ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
-                <td>{esp[key].ac[esp._extra.alt] ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
-                <td>{esp[key].gc[g_ref] ? g_ref + ': ' + esp[key].gc[g_ref] : '--'}</td>
-                <td>{esp[key].gc[g_alt] ? g_alt + ': ' + esp[key].gc[g_alt] : '--'}</td>
-                <td>{esp[key].gc[g_mixed] ? g_mixed + ': ' + esp[key].gc[g_mixed] : '--'}</td>
+                <td>{esp[key].ac[esp._extra.ref] || esp[key].ac[esp._extra.ref] === 0 ? esp._extra.ref + ': ' + esp[key].ac[esp._extra.ref] : '--'}</td>
+                <td>{esp[key].ac[esp._extra.alt] || esp[key].ac[esp._extra.alt] === 0 ? esp._extra.alt + ': ' + esp[key].ac[esp._extra.alt] : '--'}</td>
+                <td>{esp[key].gc[g_ref] || esp[key].gc[g_ref] ? g_ref + ': ' + esp[key].gc[g_ref] : '--'}</td>
+                <td>{esp[key].gc[g_alt] || esp[key].gc[g_alt] ? g_alt + ': ' + esp[key].gc[g_alt] : '--'}</td>
+                <td>{esp[key].gc[g_mixed] || esp[key].gc[g_mixed] ? g_mixed + ': ' + esp[key].gc[g_mixed] : '--'}</td>
             </tr>
         );
     },
@@ -529,6 +611,66 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return retVal;
     },
 
+    // Method to render ExAC population table header content
+    renderExacHeader: function(hasExacData, loading_myVariantInfo, exac) {
+        if (hasExacData && !loading_myVariantInfo) {
+            const variantExac = exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt;
+            const linkoutExac = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
+            return (
+                <h3 className="panel-title">ExAC {variantExac}
+                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                    <a className="panel-subtitle pull-right" href={linkoutExac} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
+                </h3>
+            );
+        } else {
+            return (
+                <h3 className="panel-title">ExAC
+                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                </h3>
+            );
+        }
+    },
+
+    // Method to render 1000 Genomes population table header content
+    renderTGenomesHeader: function(hasTGenomesData, loading_ensemblVariation, tGenomes) {
+        if (hasTGenomesData && !loading_ensemblVariation) {
+            const variantTGenomes = tGenomes._extra.name + ' ' + tGenomes._extra.var_class;
+            const linkoutEnsembl = external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name;
+            return (
+                <h3 className="panel-title">1000 Genomes: {variantTGenomes}
+                    <a href="#credit-vep" className="label label-primary">VEP</a>
+                    <a className="panel-subtitle pull-right" href={linkoutEnsembl} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
+                </h3>
+            );
+        } else {
+            return (
+                <h3 className="panel-title">1000 Genomes
+                    <a href="#credit-vep" className="label label-primary">VEP</a>
+                </h3>
+            );
+        }
+    },
+
+    // Method to render ESP population table header content
+    renderEspHeader: function(hasEspData, loading_myVariantInfo, esp) {
+        if (hasEspData && !loading_myVariantInfo) {
+            const variantEsp = esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt;
+            const linkoutEsp = dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0';
+            return (
+                <h3 className="panel-title">Exome Sequencing Project (ESP): {variantEsp}
+                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                    <a className="panel-subtitle pull-right" href={linkoutEsp} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
+                </h3>
+            );
+        } else {
+            return (
+                <h3 className="panel-title">Exome Sequencing Project (ESP)
+                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                </h3>
+            );
+        }
+    },
+
     render: function() {
         var exacStatic = populationStatic.exac,
             tGenomesStatic = populationStatic.tGenomes,
@@ -538,6 +680,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
         var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
+        var populationObjDiffFlag = this.state.populationObjDiffFlag;
 
         return (
             <div className="variant-interpretation population">
@@ -559,7 +702,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                     <span>
                                         <dt className="dtFormLabel">Desired CI:</dt>
                                         <dd className="ddFormInput">
-                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI}
+                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI} inputDisabled={true}
                                                 onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT.toString()} />
                                         </dd>
                                         <dt>CI - lower: </dt><dd>{this.state.CILow || this.state.CILow === 0 ? this.parseFloatShort(this.state.CILow) : ''}</dd>
@@ -569,15 +712,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </dl>
                         </div>
                     </div>
-                    {this.state.geneENSG ?
-                        <div>
-                            <br />
-                            <h4>ExAC Constraint Score</h4>
-                            <div className="clearfix">
-                                <div className="bs-callout-content-container"><a href={external_url_map['ExACGene'] + this.state.geneENSG} target="_blank">View pLI in ExAC <i className="icon icon-external-link"></i></a></div>
-                            </div>
-                        </div>
-                    : null}
                 </div>
 
                 <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
@@ -585,226 +719,173 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm renderedFormContent={criteriaGroup1}
-                                evidenceType={'population'} evidenceData={this.state.populationObj} evidenceDataUpdated={true} formChangeHandler={criteriaGroup1Change}
-                                formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']} criteria={['BA1', 'PM2']} criteriaDisease={['BS1']}
+                                evidenceData={this.state.populationObj} evidenceDataUpdated={populationObjDiffFlag} formChangeHandler={criteriaGroup1Change}
+                                formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']}
+                                criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
                     : null}
-
-                    {this.state.hasExacData ?
-                        <div className="panel panel-info datasource-ExAC">
-                            <div className="panel-heading">
-                                <h3 className="panel-title">ExAC {exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt}
-                                    <a className="panel-subtitle pull-right" href={'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
-                                </h3>
-                            </div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Population</th>
-                                        <th>Allele Count</th>
-                                        <th>Allele Number</th>
-                                        <th>Number of Homozygotes</th>
-                                        <th>Allele Frequency</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {exacStatic._order.map(key => {
-                                        return (this.renderExacRow(key, exac, exacStatic));
-                                    })}
-                                </tbody>
-                                <tfoot>
-                                    {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
-                                </tfoot>
-                            </table>
+                    {populationObjDiffFlag ?
+                        <div className="row">
+                            <p className="alert alert-warning">
+                                <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
+                            </p>
                         </div>
-                    :
-                        <div className="panel panel-info datasource-ExAC">
-                            <div className="panel-heading"><h3 className="panel-title">ExAC</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>No population data was found for this allele in ExAC. <a href={external_url_map['EXACHome']}>Search ExAC</a> for this variant.</th>
-                                    </tr>
-                                </thead>
-                            </table>
+                    : null}
+                    <div className="panel panel-info datasource-ExAC">
+                        <div className="panel-heading">
+                            {this.renderExacHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac)}
                         </div>
-                    }
-                    {this.state.hasTGenomesData ?
-                        <div className="panel panel-info datasource-1000G">
-                            <div className="panel-heading">
-                                <h3 className="panel-title">1000 Genomes: {tGenomes._extra.name + ' ' + tGenomes._extra.var_class}
-                                    <a className="panel-subtitle pull-right" href={external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
-                                </h3>
-                            </div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Population</th>
-                                        <th colSpan="2">Allele Frequency (count)</th>
-                                        <th colSpan="3">Genotype Frequency (count)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.renderTGenomesRow('_tot', tGenomes, tGenomesStatic, 'ALL')}
-                                    {tGenomesStatic._order.map(key => {
-                                        return (this.renderTGenomesRow(key, tGenomes, tGenomesStatic));
-                                    })}
-                                </tbody>
-                            </table>
+                        <div className="panel-content-wrapper">
+                            {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
+                            {this.state.hasExacData ?
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Population</th>
+                                            <th>Allele Count</th>
+                                            <th>Allele Number</th>
+                                            <th>Number of Homozygotes</th>
+                                            <th>Allele Frequency</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {exacStatic._order.map(key => {
+                                            return (this.renderExacRow(key, exac, exacStatic));
+                                        })}
+                                    </tbody>
+                                    <tfoot>
+                                        {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
+                                    </tfoot>
+                                </table>
+                                :
+                                <div className="panel-body">
+                                    <span>No population data was found for this allele in ExAC. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search ExAC</a> for this variant.</span>
+                                </div>
+                            }
                         </div>
-                    :
-                        <div className="panel panel-info datasource-1000G">
-                            <div className="panel-heading"><h3 className="panel-title">1000 Genomes</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']}>Search 1000 Genomes</a> for this variant.</th>
-                                    </tr>
-                                </thead>
-                            </table>
+                    </div>
+                    <div className="panel panel-info datasource-1000G">
+                        <div className="panel-heading">
+                            {this.renderTGenomesHeader(this.state.hasTGenomesData, this.state.loading_ensemblVariation, tGenomes)}
                         </div>
-                    }
-                    {this.state.hasEspData ?
-                        <div className="panel panel-info datasource-ESP">
-                            <div className="panel-heading">
-                                <h3 className="panel-title">Exome Sequencing Project (ESP): {esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt}
-                                    <a className="panel-subtitle pull-right" href={dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0'} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
-                                </h3>
-                            </div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Population</th>
-                                        <th colSpan="2">Allele Count</th>
-                                        <th colSpan="3">Genotype Count</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {espStatic._order.map(key => {
-                                        return (this.renderEspRow(key, esp, espStatic));
-                                    })}
-                                    {this.renderEspRow('_tot', esp, espStatic, 'All Allele', 'count')}
-                                </tbody>
-                                <tfoot>
-                                    <tr className="count">
-                                        <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                        <div className="panel-content-wrapper">
+                            {this.state.loading_ensemblVariation ? showActivityIndicator('Retrieving data... ') : null}
+                            {this.state.hasTGenomesData ?
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Population</th>
+                                            <th colSpan="2">Allele Frequency (count)</th>
+                                            <th colSpan="3">Genotype Frequency (count)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.renderTGenomesRow('_tot', tGenomes, tGenomesStatic, 'ALL')}
+                                        {tGenomesStatic._order.map(key => {
+                                            return (this.renderTGenomesRow(key, tGenomes, tGenomesStatic));
+                                        })}
+                                    </tbody>
+                                </table>
+                                :
+                                <div className="panel-body">
+                                    <span>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']} target="_blank">Search 1000 Genomes</a> for this variant.</span>
+                                </div>
+                            }
                         </div>
-                    :
-                        <div className="panel panel-info datasource-ESP">
-                            <div className="panel-heading"><h3 className="panel-title">Exome Sequencing Project (ESP)</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']}>Search ESP</a> for this variant.</th>
-                                    </tr>
-                                </thead>
-                            </table>
+                    </div>
+                    <div className="panel panel-info datasource-ESP">
+                        <div className="panel-heading">
+                            {this.renderEspHeader(this.state.hasEspData, this.state.loading_myVariantInfo, esp)}
                         </div>
-                    }
+                        <div className="panel-content-wrapper">
+                            {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
+                            {this.state.hasEspData ?
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Population</th>
+                                            <th colSpan="2">Allele Count</th>
+                                            <th colSpan="3">Genotype Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {espStatic._order.map(key => {
+                                            return (this.renderEspRow(key, esp, espStatic));
+                                        })}
+                                        {this.renderEspRow('_tot', esp, espStatic, 'All Allele', 'count')}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr className="count">
+                                            <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                :
+                                <div className="panel-body">
+                                    <span>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']} target="_blank">Search ESP</a> for this variant.</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </Panel></PanelGroup>
+
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
+
+                {renderDataCredit('myvariant')}
+
+                {renderDataCredit('vep')}
+
             </div>
         );
     }
 });
 
-// code for rendering of population tab interpretation forms
+
+// code for rendering of this group of interpretation forms
 var criteriaGroup1 = function() {
+    let criteriaList1 = ['BA1', 'PM2', 'BS1'], // array of criteria code handled subgroup of this section
+        hiddenList1 = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let mafCutoffInput = (
+        <span>
+            <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
+                value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"} inputDisabled={true}
+                labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-3 input-right" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
+            <span className="col-xs-5 after-input">%</span>
+            <div className="clear"></div>
+        </span>
+    );
     return (
         <div>
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>BA1:</strong> Allele frequency is > 5% in ExAC, 1000 Genomes, or ESP
-                    <br /><br />
-                    <strong>PM2:</strong> Absent from controls (or at extremely low frequency if recessive) in ExAC, 1000 Genomes, or ESP
-                </p>
-            </div>
-            <Input type="checkbox" ref="BA1-value" label="BA1 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BA1-value'] ? this.state.checkboxes['BA1-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-8 col-sm-offset-4 input-note-below-no-bottom">- or -</p>
-            <Input type="checkbox" ref="PM2-value" label="PM2 met?:" handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['PM2-value'] ? this.state.checkboxes['PM2-value'] : false}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="maf-cutoff" label="MAF cutoff (%):" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
-                value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
-            <Input type="textarea" ref="BA1-explanation" label="Explain criteria selection:" rows="5"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
-            <Input type="textarea" ref="PM2-explanation" label="Explain criteria selection (PM2):" rows="5"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" handleChange={this.handleFormChange} />
-            <div className="col-sm-7 col-sm-offset-5 input-note-top">
-                <p className="alert alert-info">
-                    <strong>BS1:</strong> Allele frequency greater than expected due to disorder
-                </p>
-            </div>
-            <Input type="checkbox" ref="BS1-value" label={<span>BS1 met?:<br />(Disease dependent)</span>} handleChange={this.handleCheckboxChange}
-                checked={this.state.checkboxes['BS1-value'] ? this.state.checkboxes['BS1-value'] : false} inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="BS1-explanation" label="Explain criteria selection:" rows="5" inputDisabled={!this.state.diseaseAssociated}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleFormChange} />
+            {vciFormHelper.evalFormSectionWrapper.call(this,
+                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
+                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, mafCutoffInput, null),
+                false
+            )}
         </div>
     );
 };
-
-// code for updating the form values of population tab interpretation forms upon receiving
+// code for updating the form values of interpretation forms upon receiving
 // existing interpretations and evaluations
 var criteriaGroup1Update = function(nextProps) {
-    if (nextProps.interpretation) {
-        if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
-            nextProps.interpretation.evaluations.map(evaluation => {
-                var tempCheckboxes = this.state.checkboxes;
-                switch(evaluation.criteria) {
-                    case 'BA1':
-                        tempCheckboxes['BA1-value'] = evaluation.value === 'true';
-                        this.refs['BA1-explanation'].setValue(evaluation.explanation);
-                        this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
-                        break;
-                    case 'PM2':
-                        tempCheckboxes['PM2-value'] = evaluation.value === 'true';
-                        this.refs['PM2-explanation'].setValue(evaluation.explanation);
-                        break;
-                    case 'BS1':
-                        tempCheckboxes['BS1-value'] = evaluation.value === 'true';
-                        this.refs['BS1-explanation'].setValue(evaluation.explanation);
-                        break;
-                }
-                this.setState({checkboxes: tempCheckboxes, submitDisabled: false});
-            });
-        }
-    }
+    // define custom form update function for MAF Cutoff field in BA1
+    let mafCutoffUpdate = function(evaluation) {
+        this.refs['maf-cutoff'].setValue(evaluation.population.populationData.mafCutoff);
+    };
+    // add custom form update functions into customActions dictionary
+    let customActions = {
+        'BA1': mafCutoffUpdate
+    };
+    vciFormHelper.updateEvalForm.call(this, nextProps, ['BA1', 'PM2', 'BS1'], customActions);
 };
-
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
-    // BA1 and PM2 are exclusive. The following is to ensure that if one of the checkboxes
-    // are checked, the other is un-checked
-    if (ref === 'BA1-value' || ref === 'PM2-value') {
-        let tempCheckboxes = this.state.checkboxes,
-            altCriteriaValue = 'PM2-value';
-        if (ref === 'PM2-value') {
-            altCriteriaValue = 'BA1-value';
-        }
-        if (this.state.checkboxes[ref]) {
-            tempCheckboxes[altCriteriaValue] = false;
-            this.setState({checkboxes: tempCheckboxes});
-        }
-    }
-    // Since BA1 and PM2 'share' the same explanation box, and the user only sees the BA1 box,
-    // the following is to update the value in the PM2 box to contain the same data on
-    // saving of the evaluation. Handles changes going the other way, too, just in case (although
-    // this should never happen)
-    if (ref === 'BA1-explanation' || ref === 'PM2-explanation') {
-        let altCriteriaExplanation = 'PM2-explanation';
-        if (ref === 'PM2-explanation') {
-            altCriteriaExplanation = 'BA1-explanation';
-        }
-        this.refs[altCriteriaExplanation].setValue(this.refs[ref].getValue());
-    }
+    // Both explanation boxes for both criteria of each group must be the same
+    vciFormHelper.shareExplanation.call(this, ref, ['BA1', 'PM2', 'BS1']);
     // if the MAF cutoff field is changed, update the populationObj payload with the updated value
     if (ref === 'maf-cutoff') {
         let tempEvidenceData = this.state.evidenceData;
@@ -812,7 +893,6 @@ var criteriaGroup1Change = function(ref, e) {
         this.setState({evidenceData: tempEvidenceData});
     }
 };
-
 // special function to handle the MAF cutoff % field
 var mafCutoffBlur = function(event) {
     let mafCutoff = parseInt(this.refs['maf-cutoff'].getValue());

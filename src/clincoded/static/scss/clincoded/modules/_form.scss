@@ -51,7 +51,8 @@ input[type=text],
 textarea.form-control,
 input[type=password],
 input[type=email],
-input[type=search] {
+input[type=search],
+select {
     &.error {
         border: 1px solid red;
         background-color: #f0d8d0;

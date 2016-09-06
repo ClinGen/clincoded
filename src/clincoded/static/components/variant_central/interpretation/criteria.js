@@ -68,10 +68,9 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
                             {keys.map(key => {
                                 return (this.renderCriteriaBar(key, evidenceCodes, interpretation));
                             })}
-                        </div>                       
+                        </div> 
                     </div>
-                    : null
-                }
+                : null}
             </div>
         );
     }

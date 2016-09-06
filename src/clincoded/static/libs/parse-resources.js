@@ -65,37 +65,41 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset) {
     variant.RefSeqTranscripts.ProteinChangeList = [];
     // Parse <MolecularConsequence> nodes
     var MolecularConsequenceList = allele.getElementsByTagName('MolecularConsequenceList')[0];
-    var MolecularConsequence = MolecularConsequenceList.getElementsByTagName('MolecularConsequence');
-    for(let n of MolecularConsequence) {
-        // Used for transcript tables on "Basic Information" tab in VCI
-        // HGVS property for mapping to transcripts with matching HGVS names
-        // SOid and Function properties for UI display
-        var MolecularObj = {
-            "HGVS": n.getAttribute('HGVS'),
-            "SOid": n.getAttribute('SOid'),
-            "Function": n.getAttribute('Function')
-        };
-        variant.RefSeqTranscripts.MolecularConsequenceList.push(MolecularObj);
+    if (MolecularConsequenceList) {
+        var MolecularConsequence = MolecularConsequenceList.getElementsByTagName('MolecularConsequence');
+        for(let n of MolecularConsequence) {
+            // Used for transcript tables on "Basic Information" tab in VCI
+            // HGVS property for mapping to transcripts with matching HGVS names
+            // SOid and Function properties for UI display
+            var MolecularObj = {
+                "HGVS": n.getAttribute('HGVS'),
+                "SOid": n.getAttribute('SOid'),
+                "Function": n.getAttribute('Function')
+            };
+            variant.RefSeqTranscripts.MolecularConsequenceList.push(MolecularObj);
+        }
     }
     // Parse <HGVS> nodes
     var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
-    for (let x of HGVSnodes) {
-        // Used for transcript tables on "Basic Information" tab in VCI
-        // Type property for identifying the nucleotide change transcripts
-        // and protein change transcripts
-        var hgvsObj = {
-            "HGVS": x.textContent,
-            "Change": x.getAttribute('Change'),
-            "AccessionVersion": x.getAttribute('AccessionVersion'),
-            "Type": x.getAttribute('Type')
-        };
-        // nucleotide change
-        if (x.getAttribute('Type') === 'HGVS, coding, RefSeq') {
-            variant.RefSeqTranscripts.NucleotideChangeList.push(hgvsObj);
-        }
-        // protein change
-        if (x.getAttribute('Type') === 'HGVS, protein, RefSeq') {
-            variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
+    if (HGVSnodes) {
+        for (let x of HGVSnodes) {
+            // Used for transcript tables on "Basic Information" tab in VCI
+            // Type property for identifying the nucleotide change transcripts
+            // and protein change transcripts
+            var hgvsObj = {
+                "HGVS": x.textContent,
+                "Change": x.getAttribute('Change'),
+                "AccessionVersion": x.getAttribute('AccessionVersion'),
+                "Type": x.getAttribute('Type')
+            };
+            // nucleotide change
+            if (x.getAttribute('Type') === 'HGVS, coding, RefSeq') {
+                variant.RefSeqTranscripts.NucleotideChangeList.push(hgvsObj);
+            }
+            // protein change
+            if (x.getAttribute('Type') === 'HGVS, protein, RefSeq') {
+                variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
+            }
         }
     }
     // Parse <gene> node
@@ -103,26 +107,53 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset) {
     var geneNode = geneList.getElementsByTagName('Gene')[0];
     variant.gene.symbol = geneNode.getAttribute('Symbol');
     variant.gene.full_name = geneNode.getAttribute('FullName');
-    var protein_change = allele.getElementsByTagName('ProteinChange')[0];
-    variant.allele.ProteinChange = protein_change ? protein_change.textContent : null;
+    // Evaluate whether a variant has protein change
+    // First check whether te <ProteinChange> node exists. If not,
+    // then check whether the <HGVS> node with Type="HGVS, protein, RefSeq" attribute exists
+    const protein_change = allele.getElementsByTagName('ProteinChange')[0];
+    let alt_protein_change;
+    if (variant.RefSeqTranscripts.ProteinChangeList.length > 0) {
+        const changeAttr = variant.RefSeqTranscripts.ProteinChangeList[0].Change;
+        if (changeAttr.length) {
+            // Remove 'p.' from string value
+            let posStart = changeAttr.indexOf('.') + 1;
+            let newAttrValue = changeAttr.slice(posStart);
+            // Extract the numbers into a new string
+            let num = newAttrValue.match(/[0-9]+(?!.*[0-9])/);
+            // Separate groups of letters into arrays
+            let stringArray = newAttrValue.split(/[0-9]+(?!.*[0-9])/);
+            // Transform string into the format similar to common <ProteinChange> value
+            alt_protein_change = stringArray[0] + num + stringArray[1].substr(0, 1);
+        }
+    }
+    // Set protein change property value
+    if (protein_change) {
+        variant.allele.ProteinChange = protein_change.textContent;
+    } else if (alt_protein_change) {
+        variant.allele.ProteinChange = alt_protein_change;
+    } else {
+        variant.allele.ProteinChange = null;
+    }
     // Parse <SequenceLocation> nodes
     var SequenceLocationNodes = allele.getElementsByTagName('SequenceLocation');
-    for(let y of SequenceLocationNodes) {
-        // Properties in SequenceLocationObj are used to construct LinkOut URLs
-        // Used primarily for LinkOut links on "Basic Information" tab in VCI
-        // referenceAllele and alternateAllele properties are added for Population tab
-        var SequenceLocationObj = {
-            "Assembly": y.getAttribute('Assembly'),
-            "AssemblyAccessionVersion": y.getAttribute('AssemblyAccessionVersion'),
-            "AssemblyStatus": y.getAttribute('AssemblyStatus'),
-            "Chr": y.getAttribute('Chr'),
-            "Accession": y.getAttribute('Accession'),
-            "start": y.getAttribute('start'),
-            "stop": y.getAttribute('stop'),
-            "referenceAllele": y.getAttribute('referenceAllele'),
-            "alternateAllele": y.getAttribute('alternateAllele')
-        };
-        variant.allele.SequenceLocation.push(SequenceLocationObj);
+    if (SequenceLocationNodes) {
+        for(let y of SequenceLocationNodes) {
+            // Properties in SequenceLocationObj are used to construct LinkOut URLs
+            // Used primarily for LinkOut links on "Basic Information" tab in VCI
+            // referenceAllele and alternateAllele properties are added for Population tab
+            var SequenceLocationObj = {
+                "Assembly": y.getAttribute('Assembly'),
+                "AssemblyAccessionVersion": y.getAttribute('AssemblyAccessionVersion'),
+                "AssemblyStatus": y.getAttribute('AssemblyStatus'),
+                "Chr": y.getAttribute('Chr'),
+                "Accession": y.getAttribute('Accession'),
+                "start": y.getAttribute('start'),
+                "stop": y.getAttribute('stop'),
+                "referenceAllele": y.getAttribute('referenceAllele'),
+                "alternateAllele": y.getAttribute('alternateAllele')
+            };
+            variant.allele.SequenceLocation.push(SequenceLocationObj);
+        }
     }
 }
 
