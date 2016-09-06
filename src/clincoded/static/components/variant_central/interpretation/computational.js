@@ -548,7 +548,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 <thead>
                                     <tr>
                                         <th>Source</th>
-                                        <th>5&#x00027; or 3&#x00027;</th>
+                                        <th>5' or 3'</th>
                                         <th>Score Range</th>
                                         <th>Score</th>
                                     </tr>
@@ -559,7 +559,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">5&#x00027;</td>
+                                        <td rowSpan="3" className="row-span">5'</td>
                                         <td>[0-12]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
@@ -575,7 +575,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">3&#x00027;</td>
+                                        <td rowSpan="3" className="row-span">3'</td>
                                         <td>[0-16]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
@@ -594,7 +594,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">5&#x00027;</td>
+                                        <td rowSpan="3" className="row-span">5'</td>
                                         <td>[0-12]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
@@ -610,7 +610,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">3&#x00027;</td>
+                                        <td rowSpan="3" className="row-span">3'</td>
                                         <td>[0-16]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
@@ -737,7 +737,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 <thead>
                                     <tr>
                                         <th>Source</th>
-                                        <th>5&#x00027; or 3&#x00027;</th>
+                                        <th>5' or 3'</th>
                                         <th>Score Range</th>
                                         <th>Score</th>
                                     </tr>
@@ -748,7 +748,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">5&#x00027;</td>
+                                        <td rowSpan="3" className="row-span">5'</td>
                                         <td>[0-12]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
@@ -764,7 +764,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">3&#x00027;</td>
+                                        <td rowSpan="3" className="row-span">3'</td>
                                         <td>[0-16]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
@@ -783,7 +783,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">5&#x00027;</td>
+                                        <td rowSpan="3" className="row-span">5'</td>
                                         <td>[0-12]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
@@ -799,7 +799,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </tr>
                                     <tr>
                                         <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">3&#x00027;</td>
+                                        <td rowSpan="3" className="row-span">3'</td>
                                         <td>[0-16]</td>
                                         <td><span className="wip">IN PROGRESS</span></td>
                                     </tr>
