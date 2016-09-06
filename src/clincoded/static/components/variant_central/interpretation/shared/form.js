@@ -427,7 +427,7 @@ var evalFormNoteSectionWrapper = module.exports.evalFormNoteSectionWrapper = fun
             {criteriaList.map((criteria, i) => {
                 return (
                     <span key={i}>
-                        <strong>{criteria}:</strong> {evidenceCodes[criteria].definitionLong}
+                        <strong>{criteria}:</strong> <span dangerouslySetInnerHTML={ { __html: evidenceCodes[criteria].definitionLong } }></span>
                         {evidenceCodes[criteria].diseaseDependent ? <span><br /><span className="label label-warning pull-right">Disease-specific</span></span> : null}
                         {i < criteriaList.length - 1 ? <span><br /><br /></span> : null}
                     </span>

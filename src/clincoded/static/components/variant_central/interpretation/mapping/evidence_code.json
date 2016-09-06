@@ -169,15 +169,15 @@
     },
     "PS2": {
         "class": "pathogenic-strong",
-        "definition": "De novo (paternity and maternity confirmed)",
-        "definitionLong": "De novo (both maternity and paternity confirmed) in a patient with the disease and no family history",
+        "definition": "<i>De novo</i> (paternity and maternity confirmed)",
+        "definitionLong": "<i>De novo</i> (both maternity and paternity confirmed) in a patient with the disease and no family history",
         "category": "segregation",
         "diseaseDependent": true
     },
     "PS3": {
         "class": "pathogenic-strong",
         "definition": "Well-established functional studies show a deleterious effect",
-        "definitionLong": "Well established in vitro or in vivo functional studies supportive of a damaging effect on the gene or gene product",
+        "definitionLong": "Well established <i>in vitro</i> or <i>in vivo</i> functional studies supportive of a damaging effect on the gene or gene product",
         "category": "functional",
         "diseaseDependent": true
     },
