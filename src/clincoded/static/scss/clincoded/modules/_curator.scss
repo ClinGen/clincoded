@@ -1560,7 +1560,7 @@
             color: $pathogenic-very-strong;
         }
 
-        &[data-evaluation='met'] {
+        &[data-status='met'] {
             background-color: $pathogenic-very-strong;
             border-color: darken(#ccc, 15%);
             color: #fff;
