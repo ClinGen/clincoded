@@ -191,7 +191,7 @@
     "PVS1": {
         "class": "pathogenic-very-strong",
         "definition": "Predicted null variant in a gene where LOF is a known mechanism of disease",
-        "definitionLong": "Null variant (nonsense, frameshift, canonical +/-1 or 2 splice sites, initiation codon, single or multiexon deletion) in a gene where LOF is a known mechanism of disease (caveats - variants at 3' end, genes where LOF is not a known disease mechanism, splice variants that lead to exon skipping but rest of protein intact, caution in presence of multiple transcripts)",
+        "definitionLong": "Null variant (nonsense, frameshift, canonical +/- 1 or 2 splice sites, initiation codon, single or multiexon deletion) in a gene where LOF is a known mechanism of disease (caveats - variants at 3' end, genes where LOF is not a known disease mechanism, splice variants that lead to exon skipping but rest of protein intact, caution in presence of multiple transcripts)",
         "category": "computational",
         "diseaseDependent": true
     }
