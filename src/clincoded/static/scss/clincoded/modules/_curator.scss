@@ -562,7 +562,7 @@
     }
 
     .section-complete-bar {
-        margin: 0 -15px 15px -15px;
+        margin: 0 -15px 0 -15px;
         padding-top: 3px;
         padding-bottom: 9px;
         border-left: 0;
@@ -1115,6 +1115,7 @@
         .tab-panel {
             border: solid 1px #1b75bc;
             padding: 15px;
+            margin-bottom: 10px;
             clear: both;
 
             ul, li {
@@ -1133,6 +1134,10 @@
                         margin-right: 0;
                     }
                 }
+            }
+
+            .panel-content-wrapper .table {
+                margin-bottom: 0;
             }
 
             .basic-info .table th,
@@ -1571,6 +1576,10 @@
 }
 
 dl.inline-dl {
+    dd.fullWidth {
+        width: 100%;
+    }
+
     dt.dtFormLabel {
         line-height: 4.5;
     }

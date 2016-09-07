@@ -35,14 +35,21 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         updateInterpretationObj: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
         ext_bustamante: React.PropTypes.object,
-        ext_ensemblVEP: React.PropTypes.array,
         ext_ensemblVariation: React.PropTypes.object,
         ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_clinvarEutils: React.PropTypes.object,
         ext_clinVarEsearch: React.PropTypes.object,
         ext_clinVarRCV: React.PropTypes.array,
         ext_ensemblGeneId: React.PropTypes.string,
-        ext_geneSynonyms: React.PropTypes.array
+        ext_geneSynonyms: React.PropTypes.array,
+        loading_clinvarEutils: React.PropTypes.bool,
+        loading_clinvarEsearch: React.PropTypes.bool,
+        loading_clinvarRCV: React.PropTypes.bool,
+        loading_ensemblHgvsVEP: React.PropTypes.bool,
+        loading_ensemblVariation: React.PropTypes.bool,
+        loading_myVariantInfo: React.PropTypes.bool,
+        loading_myGeneInfo: React.PropTypes.bool,
+        loading_bustamante: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -51,7 +58,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_myGeneInfo: this.props.ext_myGeneInfo,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
             ext_bustamante: this.props.ext_bustamante,
-            ext_ensemblVEP: this.props.ext_ensemblVEP,
             ext_ensemblVariation: this.props.ext_ensemblVariation,
             ext_ensemblHgvsVEP: this.props.ext_ensemblHgvsVEP,
             ext_clinvarEutils: this.props.ext_clinvarEutils,
@@ -59,6 +65,14 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_clinVarRCV: this.props.ext_clinVarRCV,
             ext_ensemblGeneId: this.props.ext_ensemblGeneId,
             ext_geneSynonyms: this.props.ext_geneSynonyms,
+            loading_clinvarEutils: this.props.loading_clinvarEutils,
+            loading_clinvarEsearch: this.props.loading_clinvarEsearch,
+            loading_clinvarRCV: this.props.loading_clinvarRCV,
+            loading_ensemblHgvsVEP: this.props.loading_ensemblHgvsVEP,
+            loading_ensemblVariation: this.props.loading_ensemblVariation,
+            loading_myVariantInfo: this.props.loading_myVariantInfo,
+            loading_myGeneInfo: this.props.loading_myGeneInfo,
+            loading_bustamante: this.props.loading_bustamante,
             //remember current tab/subtab so user will land on that tab when interpretation starts
             selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
         };
@@ -78,9 +92,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         if (nextProps.ext_bustamante) {
             this.setState({ext_bustamante: nextProps.ext_bustamante});
-        }
-        if (nextProps.ext_ensemblVEP) {
-            this.setState({ext_ensemblVEP: nextProps.ext_ensemblVEP});
         }
         if (nextProps.ext_ensemblVariation) {
             this.setState({ext_ensemblVariation: nextProps.ext_ensemblVariation});
@@ -103,6 +114,16 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (nextProps.ext_geneSynonyms) {
             this.setState({ext_geneSynonyms: nextProps.ext_geneSynonyms});
         }
+        this.setState({
+            loading_myGeneInfo: nextProps.loading_myGeneInfo,
+            loading_myVariantInfo: nextProps.loading_myVariantInfo,
+            loading_bustamante: nextProps.loading_bustamante,
+            loading_ensemblVariation: nextProps.loading_ensemblVariation,
+            loading_ensemblHgvsVEP: nextProps.loading_ensemblHgvsVEP,
+            loading_clinvarEutils: nextProps.loading_clinvarEutils,
+            loading_clinvarEsearch: nextProps.loading_clinvarEsearch,
+            loading_clinvarRCV: nextProps.loading_clinvarRCV
+        });
     },
 
     // set selectedTab to whichever tab the user switches to, and update the address accordingly
@@ -134,7 +155,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')} aria-selected={this.state.selectedTab == 'predictors'}>Predictors {completedSections.indexOf('predictors') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('experimental')} aria-selected={this.state.selectedTab == 'experimental'}>Experimental {completedSections.indexOf('experimental') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')} aria-selected={this.state.selectedTab == 'segregation-case'}>Segregation/Case {completedSections.indexOf('segregation-case') > -1 ? <span>&#10003;</span> : null}</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-centric')} aria-selected={this.state.selectedTab == 'gene-centric'}>Gene-centric {completedSections.indexOf('gene-centric') > -1 ? <span>&#10003;</span> : null}</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-centric')} aria-selected={this.state.selectedTab == 'gene-centric'}>Gene-centric</li>
                     </ul>
 
                     {this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ?
@@ -143,7 +164,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
-                            ext_clinVarRCV={this.state.ext_clinVarRCV} />
+                            ext_clinVarRCV={this.state.ext_clinVarRCV}
+                            loading_clinvarEutils={this.state.loading_clinvarEutils}
+                            loading_clinvarRCV={this.state.loading_clinvarRCV}
+                            loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'population' ?
@@ -151,8 +175,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <CurationInterpretationPopulation data={variant}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
-                            ext_ensemblVEP={this.state.ext_ensemblVEP}
-                            ext_ensemblVariation={this.state.ext_ensemblVariation} />
+                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
+                            ext_ensemblVariation={this.state.ext_ensemblVariation}
+                            loading_myVariantInfo={this.state.loading_myVariantInfo}
+                            loading_ensemblVariation={this.state.loading_ensemblVariation} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'predictors' ?
@@ -162,7 +188,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_bustamante={this.state.ext_bustamante}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
-                            ext_clinVarEsearch={this.state.ext_clinVarEsearch} />
+                            ext_clinVarEsearch={this.state.ext_clinVarEsearch}
+                            loading_bustamante={this.state.loading_bustamante}
+                            loading_myVariantInfo={this.state.loading_myVariantInfo}
+                            loading_clinvarEsearch={this.state.loading_clinvarEsearch} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'experimental' ?
@@ -183,7 +212,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myGeneInfo={this.state.ext_myGeneInfo}
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
-                            ext_geneSynonyms={this.state.ext_geneSynonyms} />
+                            ext_geneSynonyms={this.state.ext_geneSynonyms}
+                            loading_myGeneInfo={this.state.loading_myGeneInfo} />
                     </div>
                     : null}
                 </div>
