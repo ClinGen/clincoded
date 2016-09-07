@@ -459,24 +459,30 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
                             <div className="panel-content-wrapper">
                                 {this.state.loading_bustamante ? showActivityIndicator('Retrieving data... ') : null}
-                                {clingenPred ?
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Source</th>
-                                                <th>Score Range</th>
-                                                <th>Score</th>
-                                                <th>Prediction</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {clingenPredStatic._order.map(key => {
-                                                return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
-                                            })}
-                                        </tbody>
-                                    </table>
+                                {!singleNucleotide ?
+                                    <div className="panel-body"><span>These predictors only return data for missense variants.</span></div>
                                     :
-                                    <div className="panel-body"><span>No predictors found for this allele.</span></div>
+                                    <div>
+                                    {clingenPred ?
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Source</th>
+                                                    <th>Score Range</th>
+                                                    <th>Score</th>
+                                                    <th>Prediction</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {clingenPredStatic._order.map(key => {
+                                                    return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
+                                                })}
+                                            </tbody>
+                                        </table>
+                                        :
+                                        <div className="panel-body"><span>No predictors found for this allele.</span></div>
+                                    }
+                                    </div>
                                 }
                             </div>
                         </div>
