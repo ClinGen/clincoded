@@ -220,7 +220,7 @@ var VariantCurationHub = React.createClass({
     parseVariantType: function(variant) {
         if (variant) {
             // Reference to http://www.hgvs.org/mutnomen/recs-DNA.html
-            let seqChangeTypes = ['del', 'dup', 'ins', 'indels'];
+            let seqChangeTypes = ['del', 'dup', 'ins', 'indels', 'inv', 'con'];
             let genomicHGVS, ncGenomic;
 
             if (variant.hgvsNames.GRCh37) {
