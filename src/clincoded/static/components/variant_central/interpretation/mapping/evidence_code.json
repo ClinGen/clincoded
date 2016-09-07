@@ -74,7 +74,7 @@
         "definition": "Reputable source w/out shared data = benign",
         "definitionLong": "Reputable source recently reports variant as benign, but the evidence is not available to the laboratory to perform an independent evaluation",
         "category": "segregation",
-        "diseaseDependent": true
+        "diseaseDependent": false
     },
     "BP7": {
         "class": "benign-supporting",
@@ -186,7 +186,7 @@
         "definition": "Prevalence in affecteds statistically increased over controls",
         "definitionLong": "The prevalence of the variant in affected individuals is significantly increased compared with the prevalence in controls",
         "category": "segregation",
-        "diseaseDependent": false
+        "diseaseDependent": true
     },
     "PVS1": {
         "class": "pathogenic-very-strong",
