@@ -41,6 +41,7 @@ var VariantCurationHub = React.createClass({
             ext_myGeneInfo_VEP: null,
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
+            ext_singleNucleotide: true,
             loading_clinvarEutils: true,
             loading_clinvarEsearch: true,
             loading_clinvarRCV: true,
@@ -71,6 +72,7 @@ var VariantCurationHub = React.createClass({
             this.fetchMyVariantInfoAndBustamante(this.state.variantObj);
             this.fetchEnsemblVariation(this.state.variantObj);
             this.fetchEnsemblHGVSVEP(this.state.variantObj);
+            this.parseVariantType(this.state.variantObj);
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
@@ -214,6 +216,30 @@ var VariantCurationHub = React.createClass({
         }
     },
 
+    // Method to parse variant type
+    parseVariantType: function(variant) {
+        if (variant) {
+            // Reference to http://www.hgvs.org/mutnomen/recs-DNA.html
+            let seqChangeTypes = ['del', 'dup', 'ins', 'indels'];
+            let genomicHGVS, ncGenomic;
+
+            if (variant.hgvsNames.GRCh37) {
+                genomicHGVS = variant.hgvsNames.GRCh37;
+            } else if (variant.hgvsNames.GRCh38) {
+                genomicHGVS = variant.hgvsNames.GRCh38;
+            }
+
+            if (genomicHGVS) {
+                ncGenomic = genomicHGVS.substring(genomicHGVS.indexOf(':'));
+                seqChangeTypes.forEach(type => {
+                    if (ncGenomic.indexOf(type) > 0) {
+                        this.setState({ext_singleNucleotide: false});
+                    }
+                });
+            }
+        }
+    },
+
     // Method to parse Entrez gene symbol and id from myvariant.info
     parseMyVariantInfo: function(myVariantInfo) {
         let geneSymbol, geneId;
@@ -339,6 +365,7 @@ var VariantCurationHub = React.createClass({
                     ext_clinVarRCV={this.state.ext_clinVarRCV}
                     ext_ensemblGeneId={this.state.ext_ensemblGeneId}
                     ext_geneSynonyms={this.state.ext_geneSynonyms}
+                    ext_singleNucleotide={this.state.ext_singleNucleotide}
                     loading_clinvarEutils={this.state.loading_clinvarEutils}
                     loading_clinvarEsearch={this.state.loading_clinvarEsearch}
                     loading_clinvarRCV={this.state.loading_clinvarRCV}
