@@ -163,7 +163,7 @@
     "PS1": {
         "class": "pathogenic-strong",
         "definition": "Same amino acid change as an established pathogenic variant",
-        "definitionLong": "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change (has caveats)",
+        "definitionLong": "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change (has caveat)",
         "category": "computational",
         "diseaseDependent": true
     },
