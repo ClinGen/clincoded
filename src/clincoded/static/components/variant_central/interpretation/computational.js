@@ -480,7 +480,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             </tbody>
                                         </table>
                                         :
-                                        <div className="panel-body"><span>No predictors found for this allele.</span></div>
+                                        <div className="panel-body"><span>No predictor data found for this allele.</span></div>
                                     }
                                     </div>
                                 }
@@ -515,7 +515,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             </tbody>
                                         </table>
                                         :
-                                        <div className="panel-body"><span>No predictors found for this allele.</span></div>
+                                        <div className="panel-body"><span>No predictor data found for this allele.</span></div>
                                     }
                                     </div>
                                 }
