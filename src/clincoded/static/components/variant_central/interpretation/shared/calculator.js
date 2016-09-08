@@ -1,13 +1,10 @@
 'use strict';
-let React = require('react');
-let _ = require('underscore');
-let RestMixin = require('../../../rest').RestMixin;
-let form = require('../../../../libs/bootstrap/form');
-let FormMixin = form.FormMixin;
+import React from 'react';
+import  _ from 'underscore';
 
 
-let PathogenicityCalculator = module.exports.PathogenicityCalculator = React.createClass({
-    mixins: [FormMixin, RestMixin],
+var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.createClass({
+    //mixins: [FormMixin, RestMixin],
 
     propTypes: {
         interpretation: React.PropTypes.object,
@@ -179,7 +176,7 @@ let PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
         return (
             <div>
                 {interpretation ?
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 progress-bar-area">
+                    <div className="clearfix progress-bar-area">
                         <div className="col-lg-4 col-md-4 col-sm-4 col-xs-12 benign-box">
                             <dl className="benign-result">
                                 <dt>Benign</dt>
