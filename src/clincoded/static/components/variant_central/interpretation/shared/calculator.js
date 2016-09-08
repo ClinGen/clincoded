@@ -4,8 +4,6 @@ import  _ from 'underscore';
 
 
 var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.createClass({
-    //mixins: [FormMixin, RestMixin],
-
     propTypes: {
         interpretation: React.PropTypes.object,
     },
