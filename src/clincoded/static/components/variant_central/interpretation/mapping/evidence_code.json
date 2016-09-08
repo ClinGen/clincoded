@@ -74,7 +74,7 @@
         "definition": "Reputable source w/out shared data = benign",
         "definitionLong": "Reputable source recently reports variant as benign, but the evidence is not available to the laboratory to perform an independent evaluation",
         "category": "segregation",
-        "diseaseDependent": false
+        "diseaseDependent": true
     },
     "BP7": {
         "class": "benign-supporting",
