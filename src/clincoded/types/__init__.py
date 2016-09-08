@@ -1366,5 +1366,7 @@ class History(Item):
         'meta.assessment.family',
         'meta.assessment.pathogenicity',
         'meta.assessment.variant',
+        'meta.interpretation.variant',
+        'meta.interpretation.disease',
         'submitted_by',
     ]

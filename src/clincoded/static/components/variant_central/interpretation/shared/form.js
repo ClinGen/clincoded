@@ -5,6 +5,7 @@ var moment = require('moment');
 var form = require('../../../../libs/bootstrap/form');
 var RestMixin = require('../../../rest').RestMixin;
 var curator = require('../../../curator');
+var CuratorHistory = require('../../../curator_history');
 var evidenceCodes = require('../mapping/evidence_code.json');
 
 var Form = form.Form;
@@ -23,7 +24,7 @@ search for 'diseaseCriteria', 'diseaseAssociated', 'diseaseDependent', and final
 
 // Form component to be re-used by various tabs
 var CurationInterpretationForm = module.exports.CurationInterpretationForm = React.createClass({
-    mixins: [RestMixin, FormMixin],
+    mixins: [RestMixin, FormMixin, CuratorHistory],
 
     propTypes: {
         renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
@@ -362,9 +363,21 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 });
             }
         }).then(interpretation => {
-            // REST handling is done. Re-enable Save button, and send the interpretation object back to index.js
-            this.setState({submitBusy: false, updateMsg: <span className="text-success">Evaluations for {submittedCriteria.join(', ')} saved successfully!</span>});
-            this.props.updateInterpretationObj();
+            var meta = {
+                interpretation: {
+                    variant: freshInterpretation.variant['@id'],
+                    mode: 'update-eval'
+                }
+            };
+            if (freshInterpretation.disease) {
+                meta.interpretation.disease = freshInterpretation.disease['@id'];
+            }
+            this.recordHistory('modify', freshInterpretation, meta).then(result => {
+                // REST handling is done. Re-enable Save button, and send the interpretation object back to index.js
+                this.setState({submitBusy: false, updateMsg: <span className="text-success">Evaluations for {submittedCriteria.join(', ')} saved successfully!</span>});
+                this.props.updateInterpretationObj();
+            });
+
         }).catch(error => {
             if (error == 'crossCheckError') {
                 this.setState({submitBusy: false, updateMsg: <span className="text-danger">{manualCheck1} cannot have a value other than "Not Met" or "Not Evaluated" because {manualCheck2} has already been evaluated as being Met</span>});
