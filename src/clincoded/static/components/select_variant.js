@@ -87,7 +87,7 @@ var SelectVariant = React.createClass({
                                     : null}
                                 </div>
                                 <div className="row">
-                                    <div className="alert alert-customized">
+                                    <div className="alert alert-danger">
                                         Note: <strong>This version of the interface currently supports SNVs (single nucleotide variants) only.</strong> We are currently working to optimize the evidence returned for non-SNVs.
                                     </div>
                                     <div className="alert alert-info">
