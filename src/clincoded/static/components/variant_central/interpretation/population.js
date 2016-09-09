@@ -635,8 +635,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to render 1000 Genomes population table header content
-    renderTGenomesHeader: function(hasTGenomesData, loading_ensemblVariation, tGenomes) {
-        if (hasTGenomesData && !loading_ensemblVariation) {
+    renderTGenomesHeader: function(hasTGenomesData, loading_ensemblVariation, tGenomes, singleNucleotide) {
+        if (hasTGenomesData && !loading_ensemblVariation && singleNucleotide) {
             const variantTGenomes = tGenomes._extra.name + ' ' + tGenomes._extra.var_class;
             const linkoutEnsembl = external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name;
             return (
@@ -655,8 +655,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to render ESP population table header content
-    renderEspHeader: function(hasEspData, loading_myVariantInfo, esp) {
-        if (hasEspData && !loading_myVariantInfo) {
+    renderEspHeader: function(hasEspData, loading_myVariantInfo, esp, singleNucleotide) {
+        if (hasEspData && !loading_myVariantInfo && singleNucleotide) {
             const variantEsp = esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt;
             const linkoutEsp = dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0';
             return (
@@ -780,7 +780,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </div>
                     <div className="panel panel-info datasource-1000G">
                         <div className="panel-heading">
-                            {this.renderTGenomesHeader(this.state.hasTGenomesData, this.state.loading_ensemblVariation, tGenomes)}
+                            {this.renderTGenomesHeader(this.state.hasTGenomesData, this.state.loading_ensemblVariation, tGenomes, singleNucleotide)}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_ensemblVariation ? showActivityIndicator('Retrieving data... ') : null}
@@ -817,7 +817,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </div>
                     <div className="panel panel-info datasource-ESP">
                         <div className="panel-heading">
-                            {this.renderEspHeader(this.state.hasEspData, this.state.loading_myVariantInfo, esp)}
+                            {this.renderEspHeader(this.state.hasEspData, this.state.loading_myVariantInfo, esp, singleNucleotide)}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
