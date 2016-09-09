@@ -2,6 +2,7 @@
 var React = require('react');
 var _ = require('underscore');
 var globals = require('../globals');
+var moment = require('moment');
 var form = require('../../libs/bootstrap/form');
 var Form = form.Form;
 var Input = form.Input;
@@ -155,7 +156,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')} aria-selected={this.state.selectedTab == 'predictors'}>Predictors {completedSections.indexOf('predictors') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('experimental')} aria-selected={this.state.selectedTab == 'experimental'}>Experimental {completedSections.indexOf('experimental') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')} aria-selected={this.state.selectedTab == 'segregation-case'}>Segregation/Case {completedSections.indexOf('segregation-case') > -1 ? <span>&#10003;</span> : null}</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-centric')} aria-selected={this.state.selectedTab == 'gene-centric'}>Gene-centric {completedSections.indexOf('gene-centric') > -1 ? <span>&#10003;</span> : null}</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-centric')} aria-selected={this.state.selectedTab == 'gene-centric'}>Gene-centric</li>
                     </ul>
 
                     {this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ?
@@ -221,3 +222,44 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         );
     },
 });
+
+// Display a history item for adding an interpretation
+var InterpretationAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var interpretation = history.primary,
+            variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
+            disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
+        return (
+            <div>
+                <span>Interpretation added to Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></a></span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(InterpretationAddHistory, 'interpretation', 'add');
+
+// Display a history item for adding an individual
+var InterpretationModifyHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var interpretation = history.primary,
+            variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
+            disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
+        return (
+            <div>
+                {history.meta.interpretation.mode == 'edit-disease' ?
+                    <span>Disease <strong>{disease.term}</strong> associated with Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></a> interpretation</span>
+                : null}
+                {history.meta.interpretation.mode == 'update-eval' ?
+                    <span>Evaluation(s) updated for Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong> {disease ? <span>({disease.term})</span> : null}</a></span>
+                : null}
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+globals.history_views.register(InterpretationModifyHistory, 'interpretation', 'modify');

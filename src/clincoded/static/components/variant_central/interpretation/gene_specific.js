@@ -94,10 +94,6 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
 
         return (
             <div className="variant-interpretation gene-specific">
-                {this.state.interpretation ?
-                    <CompleteSection interpretation={this.state.interpretation} tabName="gene-centric" updateInterpretationObj={this.props.updateInterpretationObj} />
-                : null}
-
                 <div className="panel panel-info datasource-constraint-scores">
                     <div className="panel-heading">
                         <h3 className="panel-title">ExAC Constraint Scores

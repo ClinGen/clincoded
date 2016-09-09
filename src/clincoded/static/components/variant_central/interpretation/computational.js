@@ -424,9 +424,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
         return (
             <div className="variant-interpretation computational">
-                {this.state.interpretation ?
-                    <CompleteSection interpretation={this.state.interpretation} tabName="predictors" updateInterpretationObj={this.props.updateInterpretationObj} />
-                : null}
                 <ul className="vci-tabs-header tab-label-list vci-subtabs" role="tablist">
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSubtabSelect('missense')} aria-selected={this.state.selectedSubtab == 'missense'}>Missense</li>
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSubtabSelect('lof')} aria-selected={this.state.selectedSubtab == 'lof'}>Loss of Function</li>
@@ -876,6 +873,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         : null}
                     </Panel></PanelGroup>
                 </div>
+                : null}
+
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="predictors" updateInterpretationObj={this.props.updateInterpretationObj} />
                 : null}
 
                 {renderDataCredit('myvariant')}

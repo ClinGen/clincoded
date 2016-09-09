@@ -83,7 +83,14 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             // the new interpretation UUID in the query string.
             this.postRestData('/interpretations/', newInterpretationObj).then(data => {
                 var newInterpretationUuid = data['@graph'][0].uuid;
-                window.location.href = '/variant-central/?edit=true&variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
+                var meta = {
+                    interpretation: {
+                        variant: variantObj['@id']
+                    }
+                };
+                this.recordHistory('add-hide', data['@graph'][0], meta).then(result => {
+                    window.location.href = '/variant-central/?edit=true&variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
+                });
             }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
         } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
             window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + variantObj.associatedInterpretations[0].uuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
@@ -131,7 +138,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
 
 // handle 'Associate with Disease' button click event
 var AssociateDisease = React.createClass({
-    mixins: [RestMixin, FormMixin],
+    mixins: [RestMixin, FormMixin, CuratorHistory],
 
     contextTypes: {
         handleStateChange: React.PropTypes.func
@@ -178,7 +185,7 @@ var AssociateDisease = React.createClass({
         if (this.validateForm()) {
             // Get the free-text values for the Orphanet ID to check against the DB
             var orphaId = this.getFormValue('orphanetid').match(/^ORPHA([0-9]{1,6})$/i)[1];
-            var interpretationDisease;
+            var interpretationDisease, currInterpretation;
             // Get the disease orresponding to the given Orphanet ID.
             // If either error out, set the form error fields
             this.getRestDatas([
@@ -188,7 +195,7 @@ var AssociateDisease = React.createClass({
             ]).then(data => {
                 interpretationDisease = data[0]['@id'];
                 this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
-                    var currInterpretation = interpretation;
+                    currInterpretation = interpretation;
                     // get up-to-date copy of interpretation object and flatten it
                     var flatInterpretation = curator.flatten(currInterpretation);
                     // if the interpretation object does not have a disease object, create it
@@ -207,9 +214,18 @@ var AssociateDisease = React.createClass({
                         return this.putRestData('/interpretation/' + this.props.interpretation.uuid, interpretationObj).then(result => {
                             this.props.updateInterpretationObj();
                             this.props.updateParentState();
-                            this.setState({submitResourceBusy: false});
-                            // Need 'submitResourceBusy' state to proceed closing modal
-                            return Promise.resolve(this.state.submitResourceBusy);
+                            var meta = {
+                                interpretation: {
+                                    variant: this.props.data['@id'],
+                                    disease: interpretationDisease,
+                                    mode: 'edit-disease'
+                                }
+                            };
+                            return this.recordHistory('modify', currInterpretation, meta).then(result => {
+                                this.setState({submitResourceBusy: false});
+                                // Need 'submitResourceBusy' state to proceed closing modal
+                                return Promise.resolve(this.state.submitResourceBusy);
+                            });
                         }).then(submitState => {
                             // Close modal after 'submitResourceBusy' is completed
                             if (submitState !== true) {

@@ -70,7 +70,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             hasExacData: false, // flag to display ExAC table
             hasTGenomesData: false,
             hasEspData: false, // flag to display ESP table
-            geneENSG: null,
             CILow: null,
             CIhigh: null,
             populationObj: {
@@ -118,7 +117,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
         if (this.props.ext_ensemblHgvsVEP) {
             this.parseAlleleFrequencyData(this.props.ext_ensemblHgvsVEP);
-            this.parseGeneConstraintScores(this.props.ext_ensemblHgvsVEP);
             this.calculateHighestMAF();
         }
         if (this.props.ext_ensemblVariation) {
@@ -147,7 +145,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
         if (nextProps.ext_ensemblHgvsVEP) {
             this.parseAlleleFrequencyData(nextProps.ext_ensemblHgvsVEP);
-            this.parseGeneConstraintScores(nextProps.ext_ensemblHgvsVEP);
             this.calculateHighestMAF();
         }
         if (nextProps.ext_ensemblVariation) {
@@ -204,14 +201,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         populationObj.exac._tot.af = typeof populationObj.exac._tot.af !== 'undefined' ? (isNaN(populationObj.exac._tot.af) ? null : populationObj.exac._tot.af) : parseFloat(response[0].colocated_variants[0].exac_adj_maf);
 
         this.setState({populationObj: populationObj});
-    },
-
-    // Get gene ENSG value to link out to Gene's page on ExAC, as temporary stop gap for displaying
-    // constraint scores (see #750)
-    parseGeneConstraintScores: function(response) {
-        if (response && response.length > 0 && response[0].transcript_consequences && response[0].transcript_consequences.length > 0) {
-            this.setState({geneENSG: response[0].transcript_consequences[0].gene_id});
-        }
     },
 
     // Method to assign ExAC population data to global population object
@@ -695,9 +684,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         return (
             <div className="variant-interpretation population">
-                {this.state.interpretation ?
-                    <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
-                : null}
                 <div className="bs-callout bs-callout-info clearfix">
                     <h4>Highest Minor Allele Frequency</h4>
                     <div className="clearfix">
@@ -726,15 +712,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </dl>
                         </div>
                     </div>
-                    {this.state.geneENSG ?
-                        <div>
-                            <br />
-                            <h4>ExAC Constraint Score</h4>
-                            <div className="clearfix">
-                                <div className="bs-callout-content-container"><a href={external_url_map['ExACGene'] + this.state.geneENSG} target="_blank">View pLI in ExAC <i className="icon icon-external-link"></i></a></div>
-                            </div>
-                        </div>
-                    : null}
                 </div>
 
                 <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
@@ -853,6 +830,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                     </div>
                 </Panel></PanelGroup>
+
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
 
                 {renderDataCredit('myvariant')}
 
