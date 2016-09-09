@@ -88,6 +88,10 @@ var VariantCurationHub = React.createClass({
                     // Passing 'true' option to invoke 'mixin' function
                     // To extract more ClinVar data for 'Basic Information' tab
                     var variantData = parseClinvar(xml, true);
+                    // Won't show population/predictor data if variation type is 'Haplotype'
+                    if (variantData.clinvarVariationType && variantData.clinvarVariationType === 'Haplotype') {
+                        this.setState({ext_singleNucleotide: false});
+                    }
                     this.setState({ext_clinvarEutils: variantData, loading_clinvarEutils: false});
                     this.handleCodonEsearch(variantData);
                     let clinVarRCVs = getClinvarRCVs(xml);
@@ -217,6 +221,7 @@ var VariantCurationHub = React.createClass({
     },
 
     // Method to parse variant type
+    // Won't show population/predictor data if subject is not single nucleotide variant
     parseVariantType: function(variant) {
         if (variant) {
             // Reference to http://www.hgvs.org/mutnomen/recs-DNA.html
@@ -228,8 +233,12 @@ var VariantCurationHub = React.createClass({
             } else if (variant.hgvsNames.GRCh38) {
                 genomicHGVS = variant.hgvsNames.GRCh38;
             }
-
-            if (genomicHGVS) {
+            // Filter variant by its change type
+            // Look for the <VariantType> node value in first pass
+            // Then look into HGVS term for non-SNV type patterns
+            if (variant.variationType && variant.variationType !== 'single nucleotide variant') {
+                this.setState({ext_singleNucleotide: false});
+            } else if (genomicHGVS) {
                 ncGenomic = genomicHGVS.substring(genomicHGVS.indexOf(':'));
                 seqChangeTypes.forEach(type => {
                     if (ncGenomic.indexOf(type) > 0) {
