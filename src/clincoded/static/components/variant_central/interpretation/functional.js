@@ -43,9 +43,6 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     render: function() {
         return (
             <div className="variant-interpretation functional">
-                {this.state.interpretation ?
-                    <CompleteSection interpretation={this.state.interpretation} tabName="experimental" updateInterpretationObj={this.props.updateInterpretationObj} />
-                : null}
                 <PanelGroup accordion><Panel title="Hotspot or functional domain" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
                         <div className="row">
@@ -70,6 +67,10 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         </div>
                     : null}
                 </Panel></PanelGroup>
+
+                {this.state.interpretation ?
+                    <CompleteSection interpretation={this.state.interpretation} tabName="experimental" updateInterpretationObj={this.props.updateInterpretationObj} />
+                : null}
             </div>
         );
     }
