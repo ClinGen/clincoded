@@ -232,8 +232,8 @@ var PmidSelectionList = React.createClass({
         return (
             <div className="pmid-selection-wrapper">
                 <div className="pmid-selection-add">
-                    <AddResourceId resourceType="pubmed" wrapperClass="pmid-selection-add" protocol={this.props.protocol} parentObj={this.props.currGdm}
-                        buttonText="Add new PMID" modalButtonText="Add Article" updateParentForm={this.props.updateGdmArticles} buttonOnly={true} />
+                    <AddResourceId resourceType="pubmed" wrapperClass="inline-button-wrapper-fullwidth" buttonWrapperClass="inline-button-wrapper-fullwidth" buttonClass="btn btn-primary pmid-selection-add-btn"
+                        protocol={this.props.protocol} parentObj={this.props.currGdm} buttonText="Add New PMID" modalButtonText="Add Article" updateParentForm={this.props.updateGdmArticles} buttonOnly={true} />
                 </div>
                 {annotations ?
                     <div className="pmid-selection-list" id="user-pmid-list">
