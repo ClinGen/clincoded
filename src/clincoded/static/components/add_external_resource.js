@@ -422,12 +422,12 @@ function pubmedQueryResource() {
     }
 }
 function pubmedRenderResourceResult() {
+    console.log(this.state.tempResource);
     return(
         <div>
-            <span className="p-break">tempresoursce</span>
             {this.state.tempResource ?
                 <div className="row">
-                    <span className="col-sm-12"><PmidSummary article={this.state.tempResource} displayJournal /></span>
+                    <span className="col-sm-10 col-sm-offset-1"><PmidSummary article={this.state.tempResource} displayJournal /></span>
                 </div>
             : null}
         </div>
@@ -436,30 +436,17 @@ function pubmedRenderResourceResult() {
 function pubmedSubmitResource() {
     // for dealing with the main form
     this.setState({submitResourceBusy: true});
-    if (this.state.tempResource.clinvarVariantId) {
-        this.getRestData('/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId).then(check => {
+    if (this.state.tempResource) {
+        this.getRestData('/search/?type=article&pmid=' + this.state.tempResource.pmid).then(check => {
             if (check.total) {
                 // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
-                    // if no variant title in db, or db's variant title not matching the retrieved title,
-                    // then update db and fetch result again
-                    if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle']) {
-                        this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
-                            return this.getRestData(result['@graph'][0]['@id']).then(result => {
-                                this.props.updateParentForm(result, this.props.fieldNum);
-                            });
-                        });
-                    } else {
-                        this.props.updateParentForm(result, this.props.fieldNum);
-                    }
+                    this.props.updateParentForm(result);
                 });
             } else {
                 // variation is new to our db
-                this.postRestData('/variants/', this.state.tempResource).then(result => {
-                    // record the user adding a new variant entry
-                    this.recordHistory('add', result['@graph'][0]).then(history => {
-                        this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
-                    });
+                this.postRestData('/article/', this.state.tempResource).then(result => {
+                    this.props.updateParentForm(result['@graph'][0]);
                 });
             }
             this.setState({submitResourceBusy: false});
