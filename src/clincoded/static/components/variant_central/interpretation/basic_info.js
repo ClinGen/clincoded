@@ -233,15 +233,19 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         return (
             <div key={condition.name}>
                 <span className="condition-name">{condition.name}</span>
-                <span className="identifiers"> [<ul className="clearfix">
-                    {condition.identifiers.map(function(identifier, i) {
-                        return (
-                            <li key={i} className="xref-linkout">
-                                <a href={self.handleLinkOuts(identifier.id, identifier.db)} target="_blank">{identifier.db}</a>
-                            </li>
-                        );
-                    })}
-                </ul>]</span>
+                {condition.identifiers && condition.identifiers.length ?
+                    <span className="identifiers"> [<ul className="clearfix">
+                        {condition.identifiers.map(function(identifier, i) {
+                            return (
+                                <li key={i} className="xref-linkout">
+                                    <a href={self.handleLinkOuts(identifier.id, identifier.db)} target="_blank">{identifier.db}</a>
+                                </li>
+                            );
+                        })}
+                    </ul>]</span>
+                    :
+                    null
+                }
             </div>
         );
     },
