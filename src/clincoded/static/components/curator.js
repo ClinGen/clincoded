@@ -485,7 +485,7 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
                     {article.title + ' '}
                     {this.props.displayJournal ? <i>{article.journal + '. '}</i> : null}
                     <strong>{date[1]}</strong>{date[2]}
-                    {this.props.pmidLinkout ? <span>&nbsp;<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span> : null}
+                    {this.props.pmidLinkout ? <span>&nbsp;<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID: {article.pmid} <i className="icon icon-external-link"></i></a></span> : null}
                 </p>
             );
         } else {

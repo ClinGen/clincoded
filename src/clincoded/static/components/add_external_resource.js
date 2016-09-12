@@ -423,7 +423,7 @@ function pubmedRenderResourceResult() {
         <div>
             {this.state.tempResource ?
                 <div className="row">
-                    <span className="col-sm-10 col-sm-offset-1"><PmidSummary article={this.state.tempResource} displayJournal /></span>
+                    <span className="col-sm-10 col-sm-offset-1"><PmidSummary article={this.state.tempResource} displayJournal pmidLinkout /></span>
                 </div>
             : null}
         </div>
