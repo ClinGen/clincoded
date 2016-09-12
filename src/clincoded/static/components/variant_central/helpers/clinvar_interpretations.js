@@ -14,14 +14,21 @@ export function getClinvarRCVs(xml) {
     if (ClinVarResult) {
         let VariationReport = ClinVarResult.getElementsByTagName('VariationReport')[0];
         if (VariationReport) {
+            // Catch variation id and will used to filter RCVs later
+            let v_id = VariationReport.getAttribute('VariationID');
             let ObservationList = VariationReport.getElementsByTagName('ObservationList')[0];
             if (ObservationList) {
-                let ObservationNode = ObservationList.getElementsByTagName('Observation')[0];
-                if (ObservationNode) {
-                    let RCV_Nodes = ObservationNode.getElementsByTagName('RCV');
-                    if (RCV_Nodes.length) {
-                        for(let RCV_Node of RCV_Nodes) {
-                            RCVs.push(RCV_Node.textContent);
+                let ObservationNodes = ObservationList.getElementsByTagName('Observation');
+                if (ObservationNodes && ObservationNodes.length) {
+                    for (let ObservationNode of ObservationNodes) {
+                        // Filter RVCs, collect primary RCVs of this variant only
+                        if (ObservationNode.getAttribute('VariationID') === v_id && ObservationNode.getAttribute('ObservationType') === 'primary') {
+                            let RCV_Nodes = ObservationNode.getElementsByTagName('RCV');
+                            if (RCV_Nodes.length) {
+                                for(let RCV_Node of RCV_Nodes) {
+                                    RCVs.push(RCV_Node.textContent);
+                                }
+                            }
                         }
                     }
                 }
@@ -33,6 +40,9 @@ export function getClinvarRCVs(xml) {
 
 // Method to parse conditions data for the most recent version of individual RCV accession
 export function parseClinvarInterpretation(result) {
+    // List of Type values of <Trait>. Each should be traited as disease and collected.
+    const disease_types = ['Disease', 'NamedProteinVariant'];
+
     // Define 'interpretation' object model
     let interpretation = {
         'RCV': '',
@@ -71,7 +81,7 @@ export function parseClinvarInterpretation(result) {
                             xRefNodes = [],
                             identifiers = [],
                             disease = '';
-                        if (Trait.getAttribute('Type') === 'Disease') {
+                        if (disease_types.includes(Trait.getAttribute('Type'))) {
                             nameNodes = Trait.getElementsByTagName('Name');
                             // Expect to find the only one <ElementValue> node in each <Name> node
                             for(let nameNode of nameNodes) {
