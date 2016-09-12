@@ -48,7 +48,8 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         buttonClass: React.PropTypes.string, // specify any special css classes for the button
         clearButtonClass: React.PropTypes.string, // specify any special css classes for the button
         buttonOnly: React.PropTypes.bool, // specify whether or not only the button should be rendered (no form-group)
-        clearButtonRender: React.PropTypes.bool // specify whether or not the Clear button should be rendered
+        clearButtonRender: React.PropTypes.bool, // specify whether or not the Clear button should be rendered
+        parentObj: React.PropTypes.object // parent object; used to see if a duplicate entry exists
     },
 
     getInitialState: function() {
@@ -84,7 +85,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
                 <Modal title={this.state.txtModalTitle} className="input-inline" modalClass="modal-default">
                     <a className={"btn btn-default" + (this.props.buttonClass ? " " + this.props.buttonClass : "") + (this.props.disabled ? " disabled" : "")}
                         modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue} modalButtonText={this.props.modalButtonText}
-                        fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} />}>
+                        fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} parentObj={this.props.parentObj} />}>
                             {this.props.buttonText}
                     </a>
                 </Modal>
@@ -138,7 +139,8 @@ var AddResourceIdModal = React.createClass({
         fieldNum: React.PropTypes.string, // specify which field on the main form this should edit
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateParentForm: React.PropTypes.func // Function to call when submitting and closing the modal
+        updateParentForm: React.PropTypes.func, // Function to call when submitting and closing the modal
+        parentObj: React.PropTypes.object // parent object; used to see if a duplicate entry exists
     },
 
     contextTypes: {
@@ -323,6 +325,7 @@ The ___SubmitResource() functions hold the primary logic for submitting the pars
     specific to that resource. These functions are called when the user hits the 'Submit' button on the modal, subsequently closing it.
 */
 
+// Logic and helper functions for resource type 'pubmed' for AddResource modal
 function pubmedTxt(field, extra) {
     var txt;
     if (!extra) {
@@ -348,47 +351,44 @@ function pubmedTxt(field, extra) {
     return txt;
 }
 function pubmedValidateForm() {
-    // validating the field for ClinVarIDs
+    // validating the field for PMIDs
     var valid = this.validateDefault();
     var formInput = this.getFormValue('resourceId');
 
     // valid if input isn't zero-filled
     if (valid && formInput.match(/^0+$/)) {
         valid = false;
-        this.setFormErrors('pmid', 'This PMID does not exist');
+        this.setFormErrors('resourceId', 'This PMID does not exist');
         this.setState({submitBusy: false});
     }
     // valid if input isn't zero-leading
     if (valid && formInput.match(/^0+/)) {
         valid = false;
-        this.setFormErrors('pmid', 'Please re-enter PMID without any leading 0\'s');
+        this.setFormErrors('resourceId', 'Please re-enter PMID without any leading 0\'s');
         this.setState({submitBusy: false});
     }
     // valid if the input only has numbers
     if (valid && !formInput.match(/^[0-9]*$/)) {
         valid = false;
-        this.setFormErrors('pmid', 'Only numbers allowed');
+        this.setFormErrors('resourceId', 'Only numbers allowed');
         this.setState({submitBusy: false});
     }
-    // FIXME
     // valid if input isn't already associated with GDM
-    /*
-    if (valid) {
-        for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
-            if (this.props.currGdm.annotations[i].article.pmid == formInput) {
+    if (valid && this.props.parentObj['@type'][0] == 'gdm') {
+        for (var i = 0; i < this.props.parentObj.annotations.length; i++) {
+            if (this.props.parentObj.annotations[i].article.pmid == formInput) {
                 valid = false;
-                this.setFormErrors('pmid', 'This article has already been associated with this Gene-Disease Record');
+                this.setFormErrors('resourceId', 'This article has already been associated with this Gene-Disease Record');
                 this.setState({submitBusy: false});
             }
         }
     }
-    */
     return valid;
 }
 function pubmedQueryResource() {
     // for pinging and parsing data from PubMed
     this.saveFormValue('resourceId', this.state.inputValue);
-    if (clinvarValidateForm.call(this)) {
+    if (pubmedValidateForm.call(this)) {
         var url = this.props.protocol + external_url_map['PubMedSearch'];
         var data;
         var id = this.state.inputValue;
@@ -408,9 +408,6 @@ function pubmedQueryResource() {
                     this.setFormErrors('resourceId', 'PMID not found');
                     this.setState({queryResourceBusy: false, resourceFetched: false});
                 }
-                /*this.postRestData('/articles/', newArticle).then(data => {
-                    return Promise.resolve(data['@graph'][0]);
-                });*/
             });
         }).catch(e => {
             // error handling for PubMed query
@@ -422,7 +419,6 @@ function pubmedQueryResource() {
     }
 }
 function pubmedRenderResourceResult() {
-    console.log(this.state.tempResource);
     return(
         <div>
             {this.state.tempResource ?
@@ -439,12 +435,12 @@ function pubmedSubmitResource() {
     if (this.state.tempResource) {
         this.getRestData('/search/?type=article&pmid=' + this.state.tempResource.pmid).then(check => {
             if (check.total) {
-                // variation already exists in our db
+                // article already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
                     this.props.updateParentForm(result);
                 });
             } else {
-                // variation is new to our db
+                // article is new to our db
                 this.postRestData('/article/', this.state.tempResource).then(result => {
                     this.props.updateParentForm(result['@graph'][0]);
                 });
@@ -454,9 +450,6 @@ function pubmedSubmitResource() {
         });
     }
 }
-
-
-
 
 // Logic and helper functions for resource type 'clinvar' for AddResource modal
 function clinvarTxt(field, extra) {

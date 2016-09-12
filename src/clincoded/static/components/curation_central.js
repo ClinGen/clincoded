@@ -158,8 +158,8 @@ var CurationCentral = React.createClass({
                     <VariantHeader gdm={gdm} pmid={this.state.currPmid} session={session} />
                     <div className="row curation-content">
                         <div className="col-md-3">
-                            <PmidSelectionList annotations={gdm && gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
-                                    protocol={this.props.href_url.protocol} updateGdmArticles={this.updateGdmArticles} currGdm={gdm} />
+                            <PmidSelectionList annotations={gdm && gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange} currGdm={gdm}
+                                protocol={this.props.href_url.protocol} updateGdmArticles={this.updateGdmArticles} currGdm={gdm} />
                         </div>
                         <div className="col-md-6">
                             {currArticle ?
@@ -219,7 +219,8 @@ var PmidSelectionList = React.createClass({
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
         currPmid: React.PropTypes.string, // PMID of currently selected article
         currPmidChange: React.PropTypes.func, // Function to call when currently selected article changes
-        updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
+        updateGdmArticles: React.PropTypes.func, // Function to call when we have an article to add to the GDM
+        currGdm: React.PropTypes.object // Current GDM object
     },
 
     render: function() {
@@ -231,9 +232,8 @@ var PmidSelectionList = React.createClass({
         return (
             <div className="pmid-selection-wrapper">
                 <div className="pmid-selection-add">
-                    <AddResourceId resourceType="pubmed" wrapperClass="pmid-selection-add" protocol={this.props.protocol}
-                        buttonText="Add new PMID"
-                        modalButtonText="Add New PMID" updateParentForm={this.props.updateGdmArticles} buttonOnly={true} />
+                    <AddResourceId resourceType="pubmed" wrapperClass="pmid-selection-add" protocol={this.props.protocol} parentObj={this.props.currGdm}
+                        buttonText="Add new PMID" modalButtonText="Add Article" updateParentForm={this.props.updateGdmArticles} buttonOnly={true} />
                 </div>
                 {annotations ?
                     <div className="pmid-selection-list" id="user-pmid-list">
@@ -261,131 +261,6 @@ var PmidSelectionList = React.createClass({
         );
     }
 });
-
-
-// The content of the Add PMID(s) modal dialog box
-var AddPmidModal = React.createClass({
-    mixins: [FormMixin, RestMixin],
-
-    getInitialState: function() {
-        return {
-            submitBusy: false // Whether or not the 'Add Article' button is busy
-        };
-    },
-
-    propTypes: {
-        closeModal: React.PropTypes.func, // Function to call to close the modal
-        protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateGdmArticles: React.PropTypes.func // Function to call when we have an article to add to the GDM
-    },
-
-    contextTypes: {
-        fetch: React.PropTypes.func // Function to perform a search
-    },
-
-    // Form content validation
-    validateForm: function() {
-        // Start with default validation
-        var valid = this.validateDefault();
-        var formInput = this.getFormValue('pmid');
-
-        // valid if input isn't zero-filled
-        if (valid && formInput.match(/^0+$/)) {
-            valid = false;
-            this.setFormErrors('pmid', 'This PMID does not exist');
-            this.setState({submitBusy: false});
-        }
-        // valid if input isn't zero-leading
-        if (valid && formInput.match(/^0+/)) {
-            valid = false;
-            this.setFormErrors('pmid', 'Please re-enter PMID without any leading 0\'s');
-            this.setState({submitBusy: false});
-        }
-        // valid if the input only has numbers
-        if (valid && !formInput.match(/^[0-9]*$/)) {
-            valid = false;
-            this.setFormErrors('pmid', 'Only numbers allowed');
-            this.setState({submitBusy: false});
-        }
-        // valid if input isn't already associated with GDM
-        if (valid) {
-            for (var i = 0; i < this.props.currGdm.annotations.length; i++) {
-                if (this.props.currGdm.annotations[i].article.pmid == formInput) {
-                    valid = false;
-                    this.setFormErrors('pmid', 'This article has already been associated with this Gene-Disease Record');
-                    this.setState({submitBusy: false});
-                }
-            }
-        }
-
-        return valid;
-    },
-
-    // Called when the modal form’s submit button is clicked. Handles validation and triggering
-    // the process to add an article.
-    submitForm: function(e) {
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.saveFormValue('pmid', this.refs.pmid.getValue());
-        this.setState({submitBusy: true});
-        if (this.validateForm()) {
-            // Form is valid -- we have a good PMID. Fetch the article with that PMID
-            var enteredPmid = this.getFormValue('pmid');
-            this.getRestData('/articles/' + enteredPmid).then(article => {
-                // Close the modal; update the GDM with this article.
-                return Promise.resolve(article);
-            }, () => {
-                var url = this.props.protocol + external_url_map['PubMedSearch'];
-                // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
-                return this.getRestDataXml(external_url_map['PubMedSearch'] + enteredPmid).then(xml => {
-                    var newArticle = parsePubmed(xml);
-                    // if the PubMed article for this PMID doesn't exist, display an error
-                    if (!('pmid' in newArticle)) {
-                        this.setFormErrors('pmid', 'This PMID does not exist');
-                        this.setState({submitBusy: false});
-                    }
-                    return this.postRestData('/articles/', newArticle).then(data => {
-                        return Promise.resolve(data['@graph'][0]);
-                    });
-                });
-            }).then(article => {
-                this.setState({submitBusy: false});
-                this.props.closeModal();
-                this.props.updateGdmArticles(article);
-            }).catch(function(e) {
-                console.log('ERROR %o', e);
-            });
-        } else {
-            this.setState({submitBusy: false});
-        }
-    },
-
-    // Called when the modal form's cancel button is clicked. Just closes the modal like
-    // nothing happened.
-    cancelForm: function(e) {
-        // Changed modal cancel button from a form input to a html button
-        // as to avoid accepting enter/return key as a click event.
-        // Removed hack in this method.
-        this.props.closeModal();
-    },
-
-    render: function() {
-        return (
-            <Form submitHandler={this.submitForm} formClassName="form-std">
-                <div className="modal-body">
-                    <Input type="text" ref="pmid" label="Enter a PMID"
-                        error={this.getFormError('pmid')} clearError={this.clrFormErrors.bind(null, 'pmid')}
-                        labelClassName="control-label" groupClassName="form-group" required />
-                </div>
-                <div className='modal-footer'>
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
-                    <Input type="submit" inputClassName={this.getFormError('pmid') === null || this.getFormError('pmid') === undefined || this.getFormError('pmid') === '' ?
-                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title="Add Article" submitBusy={this.state.submitBusy} />
-                </div>
-            </Form>
-        );
-    }
-});
-
 
 // Display a history item for adding a PMID to a GDM
 var PmidGdmAddHistory = React.createClass({
