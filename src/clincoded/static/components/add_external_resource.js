@@ -345,7 +345,7 @@ function pubmedTxt(field, extra) {
             txt = 'Retrieve PubMed Article';
             break;
         case 'resourceResponse':
-            txt = "Below is the citation from PubMed for the PMID you submitted. Select \"" + extra + "\" below if it is the correct article, otherwise revise your search above:";
+            txt = "Select \"" + extra + "\" (below) if the following citation is correct; otherwise, edit the PMID above to retrieve a different article.";
             break;
     }
     return txt;
