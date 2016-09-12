@@ -512,7 +512,7 @@ function clinvarValidateForm() {
             if (this.props.parentObj.variantList.hasOwnProperty(i)) {
                 if (this.props.parentObj.variantList[i].clinvarVariantId == formInput) {
                     valid = false;
-                    this.setFormErrors('resourceId', 'This variant has already been associated with this ' + this.props.parentObj['@type'][1] + '.');
+                    this.setFormErrors('resourceId', 'This variant has already been associated with this piece of ' + this.props.parentObj['@type'][1] + ' evidence.');
                     this.setState({submitBusy: false});
                 }
             }
