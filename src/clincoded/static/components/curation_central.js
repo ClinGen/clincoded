@@ -11,6 +11,8 @@ var RestMixin = require('./rest').RestMixin;
 var CurationMixin = require('./curator').CurationMixin;
 var CuratorHistory = require('./curator_history');
 var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
+var add_external_resource = require('./add_external_resource');
+var AddResourceId = add_external_resource.AddResourceId;
 
 var Modal = modal.Modal;
 var ModalMixin = modal.ModalMixin;
@@ -229,11 +231,9 @@ var PmidSelectionList = React.createClass({
         return (
             <div className="pmid-selection-wrapper">
                 <div className="pmid-selection-add">
-                    <Modal title='Add new PubMed Article'>
-                        <button className="btn btn-primary pmid-selection-add-btn" modal={<AddPmidModal protocol={this.props.protocol} closeModal={this.closeModal} updateGdmArticles={this.props.updateGdmArticles} currGdm={this.props.currGdm} />}>
-                            Add New PMID(s)
-                        </button>
-                    </Modal>
+                    <AddResourceId resourceType="pubmed" wrapperClass="pmid-selection-add" protocol={this.props.protocol}
+                        buttonText="Add new PMID"
+                        modalButtonText="Add New PMID" buttonOnly={true} />
                 </div>
                 {annotations ?
                     <div className="pmid-selection-list" id="user-pmid-list">
