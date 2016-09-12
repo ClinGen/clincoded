@@ -373,7 +373,7 @@ function pubmedValidateForm() {
         this.setFormErrors('resourceId', 'Only numbers allowed');
         this.setState({submitBusy: false});
     }
-    // valid if input isn't already associated with GDM
+    // valid if parent object is GDM and input isn't already associated with it
     if (valid && this.props.parentObj['@type'][0] == 'gdm') {
         for (var i = 0; i < this.props.parentObj.annotations.length; i++) {
             if (this.props.parentObj.annotations[i].article.pmid == formInput) {
@@ -505,6 +505,18 @@ function clinvarValidateForm() {
     if (valid && !formInput.match(/^[0-9]*$/)) {
         valid = false;
         this.setFormErrors('resourceId', 'Only numbers allowed');
+    }
+    // valid if parent object is family, individual or experimental and input isn't already associated with it
+    if (valid && (this.props.parentObj['@type'][0] == 'variantList')) {
+        for (var i in this.props.parentObj.variantList) {
+            if (this.props.parentObj.variantList.hasOwnProperty(i)) {
+                if (this.props.parentObj.variantList[i].clinvarVariantId == formInput) {
+                    valid = false;
+                    this.setFormErrors('resourceId', 'This variant has already been associated with this ' + this.props.parentObj['@type'][1] + '.');
+                    this.setState({submitBusy: false});
+                }
+            }
+        }
     }
     return valid;
 }
