@@ -1443,7 +1443,11 @@
         padding-bottom: 12px;
 
         .pull-right a {
-            margin-left: 20px;
+            display: inline-block;
+
+            &:not(:last-child) {
+            margin-right: 20px;
+        }
         }
     }
 }
@@ -1751,4 +1755,8 @@ dl.inline-dl {
             margin-bottom: 15px;
         }
     }
+}
+
+.criteria-description {
+    text-overflow: clip;
 }
