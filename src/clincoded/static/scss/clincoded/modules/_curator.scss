@@ -1656,3 +1656,107 @@ dl.inline-dl {
         background-color: #fff;
     }
 }
+
+/* Evaluation summary table UIs */
+.evaluation-summary {
+    h2 {
+        text-align: center;
+    }
+
+    .table tbody td {
+        vertical-align: inherit;
+    }
+
+    .criteria-class {
+        font-size: 20px;
+
+        .benign {
+            color: #92cd9e;
+        }
+
+        .pathogenic {
+            color: #f4978a;
+        }
+    }
+
+    .criteria-code {
+        font-weight: bold;
+
+        &.benign-strong {
+            color: #62387e;
+        }
+
+        &.benign-supporting {
+            color: #2b67a0;
+        }
+
+        &.pathogenic-supporting  {
+            color: #728b42;
+        }
+
+        &.pathogenic-moderate {
+            color: #d36735;
+        }
+
+        &.pathogenic-strong {
+            color: #d33535;
+        }
+
+        &.pathogenic-very-strong {
+            color: #d33535;
+        }
+    }
+
+    .evaluation-status {
+        &:first-letter {
+            text-transform: capitalize;
+        }
+    }
+
+    .criteria-modified {
+        position: relative;
+
+        &:after {
+            font-family: 'FontAwesome';
+            float: left;
+            position: absolute;
+            left: 35px;
+        }
+    }
+
+    [data-modlevel='1-up']:after {
+        content: "\f176";
+    }
+
+    [data-modlevel='2-up']:after {
+        content: "\f176 \f176";
+    }
+
+    [data-modlevel='3-up']:after {
+        content: "\f176 \f176 \f176";
+    }
+
+    [data-modlevel='1-down']:after {
+        content: "\f175";
+    }
+
+    [data-modlevel='2-down']:after {
+        content: "\f175 \f175";
+    }
+
+    [data-modlevel='3-down']:after {
+        content: "\f175 \f175 \f175";
+    }
+
+    [data-evaltype='benign'] {
+        .criteria-modified:after {
+            color: #92cd9e;
+        }
+    }
+
+    [data-evaltype='pathogenic'] {
+        .criteria-modified:after {
+            color: #f4978a;
+        }
+    }
+}
