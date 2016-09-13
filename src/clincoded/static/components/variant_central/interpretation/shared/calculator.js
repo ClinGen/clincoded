@@ -6,6 +6,7 @@ import  _ from 'underscore';
 var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.createClass({
     propTypes: {
         interpretation: React.PropTypes.object,
+        setCalculatedPathogenicity: React.PropTypes.func
     },
 
     getInitialState: function() {
@@ -158,7 +159,8 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
                 result.benign_summary['Supporting'] = bp_count;
             }
         }
-
+        let calculated_path = result && result.assertion ? result.assertion : null;
+        this.props.setCalculatedPathogenicity(calculated_path);
         return result;
     },
 
