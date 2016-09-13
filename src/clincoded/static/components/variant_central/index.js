@@ -18,6 +18,7 @@ import { setPrimaryTranscript } from './helpers/primary_transcript';
 import { getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
 
 var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
+import EvaluationSummary from './interpretation/summary';
 
 // Variant Curation Hub
 var VariantCurationHub = React.createClass({
@@ -29,6 +30,8 @@ var VariantCurationHub = React.createClass({
             interpretationUuid: queryKeyValue('interpretation', this.props.href),
             interpretation: null,
             editKey: queryKeyValue('edit', this.props.href),
+            summaryKey: queryKeyValue('summary', this.props.href),
+            summaryVisible: false,
             variantObj: null,
             ext_myVariantInfo: null,
             ext_bustamante: null,
@@ -58,6 +61,9 @@ var VariantCurationHub = React.createClass({
             this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
                 this.setState({interpretation: interpretation});
             });
+        }
+        if (this.state.summaryKey) {
+            this.setState({summaryVisible: true});
         }
     },
 
@@ -314,39 +320,52 @@ var VariantCurationHub = React.createClass({
         });
     },
 
+    // Method to update status of summary page visibility
+    setSummaryVisibility: function(visible) {
+        this.setState({summaryVisible: visible});
+    },
+
     render: function() {
         var variantData = this.state.variantObj;
         var interpretation = (this.state.interpretation) ? this.state.interpretation : null;
         var interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
         var editKey = this.state.editKey;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        let summaryKey = this.state.summaryKey;
 
         return (
             <div>
-                <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} interpretation={interpretation} />
-                <CurationInterpretationCriteria interpretation={interpretation} />
-                <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
-                    href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
-                <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
-                    href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj}
-                    ext_myGeneInfo={(this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : this.state.ext_myGeneInfo_VEP}
-                    ext_myVariantInfo={this.state.ext_myVariantInfo}
-                    ext_bustamante={this.state.ext_bustamante}
-                    ext_ensemblVariation={this.state.ext_ensemblVariation}
-                    ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
-                    ext_clinvarEutils={this.state.ext_clinvarEutils}
-                    ext_clinVarEsearch={this.state.ext_clinVarEsearch}
-                    ext_clinVarRCV={this.state.ext_clinVarRCV}
-                    ext_ensemblGeneId={this.state.ext_ensemblGeneId}
-                    ext_geneSynonyms={this.state.ext_geneSynonyms}
-                    loading_clinvarEutils={this.state.loading_clinvarEutils}
-                    loading_clinvarEsearch={this.state.loading_clinvarEsearch}
-                    loading_clinvarRCV={this.state.loading_clinvarRCV}
-                    loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
-                    loading_ensemblVariation={this.state.loading_ensemblVariation}
-                    loading_myVariantInfo={this.state.loading_myVariantInfo}
-                    loading_myGeneInfo={this.state.loading_myGeneInfo}
-                    loading_bustamante={this.state.loading_bustamante} />
+                <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session}
+                    interpretation={interpretation} setSummaryVisibility={this.setSummaryVisibility} summaryVisible={this.state.summaryVisible} />
+                {!this.state.summaryVisible ?
+                    <div>
+                        <CurationInterpretationCriteria interpretation={interpretation} />
+                        <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
+                            href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
+                        <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
+                            href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj}
+                            ext_myGeneInfo={(this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : this.state.ext_myGeneInfo_VEP}
+                            ext_myVariantInfo={this.state.ext_myVariantInfo}
+                            ext_bustamante={this.state.ext_bustamante}
+                            ext_ensemblVariation={this.state.ext_ensemblVariation}
+                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
+                            ext_clinvarEutils={this.state.ext_clinvarEutils}
+                            ext_clinVarEsearch={this.state.ext_clinVarEsearch}
+                            ext_clinVarRCV={this.state.ext_clinVarRCV}
+                            ext_ensemblGeneId={this.state.ext_ensemblGeneId}
+                            ext_geneSynonyms={this.state.ext_geneSynonyms}
+                            loading_clinvarEutils={this.state.loading_clinvarEutils}
+                            loading_clinvarEsearch={this.state.loading_clinvarEsearch}
+                            loading_clinvarRCV={this.state.loading_clinvarRCV}
+                            loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
+                            loading_ensemblVariation={this.state.loading_ensemblVariation}
+                            loading_myVariantInfo={this.state.loading_myVariantInfo}
+                            loading_myGeneInfo={this.state.loading_myGeneInfo}
+                            loading_bustamante={this.state.loading_bustamante} />
+                    </div>
+                    :
+                    <EvaluationSummary interpretation={interpretation} />
+                }
             </div>
         );
     }
