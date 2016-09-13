@@ -29,6 +29,7 @@ var VariantCurationHub = React.createClass({
             interpretationUuid: queryKeyValue('interpretation', this.props.href),
             interpretation: null,
             editKey: queryKeyValue('edit', this.props.href),
+            selectedTab: queryKeyValue('tab', this.props.href),
             variantObj: null,
             ext_myVariantInfo: null,
             ext_bustamante: null,
@@ -314,21 +315,27 @@ var VariantCurationHub = React.createClass({
         });
     },
 
+    // Method to update the selected tab state to be used by criteria bar
+    getSelectedTab: function(selectedTab) {
+        this.setState({selectedTab: selectedTab});
+    },
+
     render: function() {
         var variantData = this.state.variantObj;
         var interpretation = (this.state.interpretation) ? this.state.interpretation : null;
         var interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
         var editKey = this.state.editKey;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        var selectedTab = this.state.selectedTab;
 
         return (
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} interpretation={interpretation} />
-                <CurationInterpretationCriteria interpretation={interpretation} />
+                <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab} />
                 <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                     href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
                 <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
-                    href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj}
+                    href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
                     ext_myGeneInfo={(this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : this.state.ext_myGeneInfo_VEP}
                     ext_myVariantInfo={this.state.ext_myVariantInfo}
                     ext_bustamante={this.state.ext_bustamante}
