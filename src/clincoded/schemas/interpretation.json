@@ -97,7 +97,7 @@
         },
         "markAsProvisional": {
             "title": "Mark As Provisional Interpretation",
-            "description": "A flag to mark the interpretation status as Provisional",
+            "description": "Flag to mark interpretation status as Provisional",
             "type": "boolean"
         }
     },
