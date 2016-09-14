@@ -476,7 +476,7 @@ function clinvarTxt(field, extra) {
             txt =
                 <span>
                     <p className="alert alert-info">
-                        <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>
+                        <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214 <i className="icon icon-external-link"></i></a>).</span>
                     </p>
                 </span>;
             break;
@@ -633,7 +633,7 @@ function carTxt(field, extra) {
             txt =
                 <span>
                     <p className="alert alert-info">
-                        <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323</a>).</span>
+                        <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323 <i className="icon icon-external-link"></i></a>).</span>
                     </p>
                     <p className="alert alert-warning">
                         <span>Note: Please register your allele with the ClinGen Allele Registry using a <strong>GRCh37</strong> HGVS representation in order to return all possible associated evidence.</span>
