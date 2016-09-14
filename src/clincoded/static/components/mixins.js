@@ -107,6 +107,7 @@ module.exports.Auth0 = {
             });
             window.auth0 = auth0;
             this.extractSessionCookie();
+            this.setState({loadingComplete: true});
         } else {
             // auth0 is not defined, so it either did not load, was blocked by the user, or jest testing is occuring.
             // A custom error cannot be set, otherwise jest tests will fail due to the error page returning
@@ -145,7 +146,7 @@ module.exports.Auth0 = {
                 popup: true,
                 popupOptions: {
                     width: 450,
-                    height: 800
+                    height: 600
                 }
             }, (err, profile, id_token, access_token, state) => {
                 if (err) {
@@ -176,6 +177,8 @@ module.exports.Auth0 = {
                             this.navigate(next_url, {replace: true}).then(() => {
                                 this.setState({loadingComplete: true});
                             });
+                        } else {
+                            this.setState({loadingComplete: true});
                         }
                     }, err => {
                         parseError(err).then(data => {
