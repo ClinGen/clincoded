@@ -94,6 +94,11 @@
                 "title": "TabName",
                 "type": "string"
             }
+        },
+        "markAsProvisional": {
+            "title": "Mark As Provisional Interpretation",
+            "description": "A flag to mark the interpretation status as Provisional",
+            "type": "boolean"
         }
     },
     "columns": {
