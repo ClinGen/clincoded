@@ -63,7 +63,7 @@ def login(request):
         namespace = userid = None
     else:
         namespace, userid = login.split('.', 1)
-    if namespace != 'google':
+    if namespace != 'auth0':
         request.session['user_properties'] = {}
         request.response.headerlist.extend(forget(request))
         raise LoginDenied()

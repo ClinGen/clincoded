@@ -183,7 +183,7 @@ module.exports.Auth0 = {
                                 // On first page-load, the CSRF token might not be properly set, incurring a Bad Request error.
                                 // This logic is to silently refresh the page so that the request is re-done with the new CSRF token.
                                 if (!retrying) {
-                                    window.setTimeout(this.triggerLogin.bind(this));
+                                    window.setTimeout(this.triggerLogin);
                                     return;
                                 }
                             }

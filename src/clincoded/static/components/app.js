@@ -35,7 +35,7 @@ var portal = {
 
 // Renders HTML common to all pages.
 var App = module.exports = React.createClass({
-    mixins: [mixins.Persona, mixins.HistoryAndTriggers],
+    mixins: [mixins.Auth0, mixins.HistoryAndTriggers],
 
     triggers: {
         login: 'triggerLogin',
@@ -126,9 +126,10 @@ var App = module.exports = React.createClass({
                     <title>ClinGen</title>
                     <link rel="canonical" href={canonical} />
                     <script async src='//www.google-analytics.com/analytics.js'></script>
+                    <script src='https://cdn.auth0.com/w2/auth0-7.1.min.js'></script>
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="@@cssFile" />
-                    <script src="@@bundleJsFile" async defer></script>
+                    <script src="@@bundleJsFile"></script>
                 </head>
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit} className={this.state.demoWarning ? "demo-background" : ""}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
@@ -221,7 +222,7 @@ var NavbarMain = React.createClass({
 
     render: function() {
         var headerUrl = '/';
-        if (this.props.session['auth.userid'] !== undefined) headerUrl = '/dashboard/';
+        if (this.props.session && this.props.session['auth.userid'] !== undefined) headerUrl = '/dashboard/';
         return (
             <div>
                 <div className="container">
@@ -240,7 +241,7 @@ var NavbarUser = React.createClass({
 
         return (
             <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
-                {this.props.portal.navUser.map(function(menu) {
+                {this.props.portal.navUser.map(menu => {
                     if (menu.url || menu.title === 'space') {
                         // Normal menu item; disabled if user is not logged in
                         if (session && session['auth.userid']) {
