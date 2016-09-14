@@ -1759,4 +1759,76 @@ dl.inline-dl {
             color: #f4978a;
         }
     }
+
+    .evaluation-provision {
+        margin-left: 15px;
+        margin-right: 0;
+
+        label {
+            padding-left: 0;
+        }
+
+        .col-sm-6,
+        .col-sm-7 {
+            padding-left: 0;
+        }
+
+        select {
+            width: auto;
+        }
+
+        &.provisional-interpretation {
+            .col-sm-7 {
+                margin-left: -15px;
+            }
+
+            .icon-question-circle {
+                cursor: pointer;
+                font-size: 120%;
+                margin-right: 8px;
+                position: relative;
+
+                &:after {
+                    content: "Editing interpretation is permitted after selecting this option";
+                    background-color: #000;
+                    color: #fff;
+                    text-align: center;
+                    border-radius: 3px;
+                    padding: 5px 0;
+                    position: absolute;
+                    visibility: hidden;
+                    width: 370px;
+                    font-size: 12px;
+                    font-family: "Helvetica";
+                    font-weight: bold;
+                    z-index: 1;
+                    top: -25px;
+                    left: 0;
+                }
+
+                &:hover:after {
+                    visibility: visible;
+                }
+            }
+
+            .form-group {
+                display: inline-block;
+                margin: 0 0 0 10px;
+
+                .col-sm-7 {
+                    margin-left: 0;
+                }
+
+                .form-error {
+                    display: none;
+                }
+            }
+
+            input[type="checkbox"] {
+                margin-top: 0;
+                position: relative;
+                top: 4px;
+            }
+        }
+    }
 }
