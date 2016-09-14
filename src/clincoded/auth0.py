@@ -21,24 +21,8 @@ from pyramid.view import (
 _marker = object()
 
 
-AUDIENCES_MESSAGE = """\
-Missing persona.audiences settings. This is needed for security reasons. \
-See https://developer.mozilla.org/en-US/docs/Mozilla/Persona/Security_Considerations \
-for details."""
-
-
 def includeme(config):
     config.scan(__name__)
-    settings = config.registry.settings
-
-    if 'persona.audiences' not in settings:
-        raise ConfigurationError(AUDIENCES_MESSAGE)
-    # Construct a browserid Verifier using the configured audience.
-    # This will pre-compile some regexes to reduce per-request overhead.
-    verifier_factory = config.maybe_dotted(settings.get('persona.verifier',
-                                                        'browserid.RemoteVerifier'))
-    audiences = aslist(settings['persona.audiences'])
-    config.registry['persona.verifier'] = verifier_factory(audiences)
     config.add_route('login', 'login')
     config.add_route('logout', 'logout')
     config.add_route('session', 'session')
@@ -48,7 +32,7 @@ class LoginDenied(HTTPForbidden):
     title = 'Login failure'
 
 
-class PersonaAuthenticationPolicy(CallbackAuthenticationPolicy):
+class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
     """
     Checks assertion during authentication so login can construct user session.
     """
@@ -58,35 +42,7 @@ class PersonaAuthenticationPolicy(CallbackAuthenticationPolicy):
     def unauthenticated_userid(self, request):
         if request.method != self.method or request.path != self.login_path:
             return None
-
-        cached = getattr(request, '_persona_authenticated', _marker)
-        if cached is not _marker:
-            return cached
-
-        verifier = request.registry['persona.verifier']
-        try:
-            assertion = request.json['assertion']
-        except (ValueError, TypeError, KeyError):
-            if self.debug:
-                self._log(
-                    'Missing assertion.',
-                    'unauthenticated_userid',
-                    request)
-            request._persona_authenticated = None
-            return None
-        try:
-            data = verifier.verify(assertion)
-        except (ValueError, TrustError) as e:
-            if self.debug:
-                self._log(
-                    ('Invalid assertion: %s (%s)', (e, type(e).__name__)),
-                    'unauthenticated_userid',
-                    request)
-            request._persona_authenticated = None
-            return None
-
-        email = request._persona_authenticated = data['email'].lower()
-        return email
+        return request.json['email']
 
     def remember(self, request, principal, **kw):
         return []
@@ -101,13 +57,13 @@ class PersonaAuthenticationPolicy(CallbackAuthenticationPolicy):
 @view_config(route_name='login', request_method='POST',
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
-    """View to check the persona assertion and remember the user"""
+    """View to check the auth0 assertion and remember the user"""
     login = request.authenticated_userid
     if login is None:
         namespace = userid = None
     else:
         namespace, userid = login.split('.', 1)
-    if namespace != 'persona':
+    if namespace != 'google':
         request.session['user_properties'] = {}
         request.response.headerlist.extend(forget(request))
         raise LoginDenied()
