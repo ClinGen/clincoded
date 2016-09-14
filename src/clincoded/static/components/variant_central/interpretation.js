@@ -51,7 +51,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         loading_ensemblVariation: React.PropTypes.bool,
         loading_myVariantInfo: React.PropTypes.bool,
         loading_myGeneInfo: React.PropTypes.bool,
-        loading_bustamante: React.PropTypes.bool
+        loading_bustamante: React.PropTypes.bool,
+        setCalculatedPathogenicity: React.PropTypes.func
     },
 
     getInitialState: function() {
@@ -150,7 +151,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
         return (
             <div className="container curation-variant-tab-group">
-                <PathogenicityCalculator interpretation={interpretation} />
+                <PathogenicityCalculator interpretation={interpretation} setCalculatedPathogenicity={this.props.setCalculatedPathogenicity} />
                 <div className="vci-tabs">
                     <ul className="vci-tabs-header tab-label-list" role="tablist">
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
