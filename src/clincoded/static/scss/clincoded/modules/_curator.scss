@@ -1576,6 +1576,20 @@
             color: #fff;
         }
     }
+
+    .stand-alone {
+        color: $stand-alone;
+
+        &:active {
+            color: $stand-alone;
+        }
+
+        &[data-status='met'] {
+            background-color: $stand-alone;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
+    }
 }
 
 /**
@@ -1603,6 +1617,10 @@
 
 .pathogenic-very-strong {
     color: $pathogenic-very-strong;
+}
+
+.stand-alone {
+    color: $stand-alone;
 }
 
 /**
