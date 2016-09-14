@@ -26,7 +26,7 @@
         "provisional_variant": [
             "a9886cb9-cea3-4372-8d2b-845563b47b1f"
         ],
-        "markAsProvisional": true,
+        "markAsProvisional": false,
         "disease": "788e024f-16a6-11e5-a0b5-60f81dc5b05a",
         "transcripts": [
             "8f1b7cb9-e798-412d-adf4-cbe140998407"
