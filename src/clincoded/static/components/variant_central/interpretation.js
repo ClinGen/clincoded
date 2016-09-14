@@ -34,6 +34,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_myGeneInfo: React.PropTypes.object,
         href_url: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
+        getSelectedTab: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
         ext_bustamante: React.PropTypes.object,
         ext_ensemblVariation: React.PropTypes.object,
@@ -136,6 +137,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             this.setState({selectedTab: tab});
             window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'tab', tab));
         }
+        this.props.getSelectedTab(tab);
     },
 
     render: function() {

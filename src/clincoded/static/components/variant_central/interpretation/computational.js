@@ -721,6 +721,103 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 </div>
                             </div>
                         : null}
+                        <div className="panel panel-info datasource-splice">
+                            <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
+                            <div className="panel-body">
+                                <span className="pull-right">
+                                    <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
+                                    <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
+                                    <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
+                                </span>
+                            </div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Source</th>
+                                        <th>5' or 3'</th>
+                                        <th>Score Range</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th colSpan="4">WT Sequence</th>
+                                    </tr>
+                                    <tr>
+                                        <td>MaxEntScan</td>
+                                        <td rowSpan="3" className="row-span">5'</td>
+                                        <td>[0-12]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>NNSPLICE</td>
+                                        <td>[0-1]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>MaxEntScan</td>
+                                        <td rowSpan="3" className="row-span">3'</td>
+                                        <td>[0-16]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>NNSPLICE</td>
+                                        <td>[0-1]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th colSpan="4">Variant Sequence</th>
+                                    </tr>
+                                    <tr>
+                                        <td>MaxEntScan</td>
+                                        <td rowSpan="3" className="row-span">5'</td>
+                                        <td>[0-12]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>NNSPLICE</td>
+                                        <td>[0-1]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>MaxEntScan</td>
+                                        <td rowSpan="3" className="row-span">3'</td>
+                                        <td>[0-16]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>NNSPLICE</td>
+                                        <td>[0-1]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colSpan="4">Average Change to Nearest Splice Site: <span className="splice-avg-change wip">IN PROGRESS</span></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </Panel></PanelGroup>
                 </div>
                 : null}
