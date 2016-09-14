@@ -76,8 +76,8 @@ class Timeout {
     }
 }
 
-
-module.exports.Persona = {
+module.exports.Auth0 = {
+    // Mixin for providing Auth0 Authentication functionality. Call in app.js
     childContextTypes: {
         fetch: React.PropTypes.func
     },
@@ -88,31 +88,191 @@ module.exports.Persona = {
         };
     },
 
-    getInitialState: function () {
+    getInitialState: function() {
+        // Define loadingComplete and session here so they are available to mixin, as well as main app
         return {
             loadingComplete: false,
             session: {}
         };
     },
 
-    componentDidMount: function () {
-        // Login / logout actions must be deferred until persona is ready.
-        this.extractSessionCookie();
-        $script.ready('persona', this.configurePersona);
+    componentDidMount: function() {
+        // Check for Auth0 (defined by external js file from auth0)
+        if (window.Auth0 !== undefined) {
+            var auth0 = new window.Auth0({
+                domain:       'mrmin.auth0.com',
+                clientID:     'L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo',
+                callbackURL:  'https://mrmin.auth0.com/login/callback',
+                responseType: 'token'
+            });
+            window.auth0 = auth0;
+            this.extractSessionCookie();
+        } else {
+            // auth0 is not defined, so it either did not load, was blocked by the user, or jest testing is occuring.
+            // A custom error cannot be set, otherwise jest tests will fail due to the error page returning
+            // instead of the normal home page as jest expects. The following is a workaround to mimic the normal
+            // home page despite gapi not being found.
+            let auth0_not_found = {};
+            // gapi_not_found['@type'] = ['GAPINotFound', 'error'];
+            auth0_not_found = {
+                "@id": "/",
+                "@type": ["portal"],
+                "portal_title": "ClinGen",
+                "title": "Home"
+            };
+            this.setState({context: auth0_not_found, loadingComplete: true});
+        }
     },
 
     ajaxPrefilter: function (options, original, xhr) {
+        // Function to specify request headers of all ajax requests
         var http_method = options.type;
         if (http_method === 'GET' || http_method === 'HEAD') return;
         var session = this.state.session;
         var userid = session['auth.userid'];
         if (userid) {
-            // XXX Server should use this to check user is logged in
             xhr.setRequestHeader('X-Session-Userid', userid);
         }
         if (session._csrft_) {
             xhr.setRequestHeader('X-CSRF-Token', session._csrft_);
         }
+    },
+
+    triggerLogin: function(e, retrying) {
+        if (window.auth0) {
+            window.auth0.login({
+                connection: 'google-oauth2',
+                popup: true,
+                popupOptions: {
+                    width: 450,
+                    height: 800
+                }
+            }, (err, profile, id_token, access_token, state) => {
+                if (err) {
+                    console.log("Login failure: " + err.message);
+                    return;
+                }
+                this.fetch('https://mrmin.auth0.com/userinfo/?access_token=' + profile.accessToken, {
+                    method: 'GET',
+                    headers: {'Accept': 'application/json'}
+                }).then(response => {
+                    if (!response.ok) throw response;
+                    return response.json();
+                }).then(response => {
+                    this.fetch('/login', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({email: response.email})
+                    }).then(response => {
+                        if (!response.ok) throw response;
+                        return response.json();
+                    }).then(session => {
+                        // Login was successful, so forward user to dashboard or target URI as necessary
+                        var next_url = window.location.href;
+                        if (!(window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/')) {
+                            this.navigate(next_url, {replace: true}).then(() => {
+                                this.setState({loadingComplete: true});
+                            });
+                        }
+                    }, err => {
+                        parseError(err).then(data => {
+                            if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
+                                // On first page-load, the CSRF token might not be properly set, incurring a Bad Request error.
+                                // This logic is to silently refresh the page so that the request is re-done with the new CSRF token.
+                                if (!retrying) {
+                                    window.setTimeout(this.triggerLogin.bind(this));
+                                    return;
+                                }
+                            }
+                            // If there is an error, show the error messages, and sign the user out of that Google account automatically
+                            window.auth0.logout();
+                            this.setState({context: data, loadingComplete: true});
+                        });
+                    });
+                });
+            });
+        }
+    },
+
+    triggerLoginFail: function() {
+        // Login failed (not sure when this ever happens)
+        let login_failure = {};
+        login_failure['@type'] = ['LoginDenied', 'error'];
+        this.setState({context: login_failure, loadingComplete: true});
+    },
+
+    componentDidUpdate: function(prevProps, prevState) {
+        // Check session on updates
+        if (prevState.session['auth.userid'] && !this.state.session['auth.userid']) {
+            // Session expired
+            window.auth0.logout();
+        }
+    },
+
+    triggerLogout: function() {
+        // Called when the user presses the logout button. Log the user out of Google and forward them to the proper page
+        var session = this.state.session;
+        if (!(session && session['auth.userid'])) {
+            return;
+        }
+
+        this.fetch('/logout?redirect=false', {
+            headers: {'Accept': 'application/json'}
+        })
+        .then(response => {
+            if (!response.ok) throw response;
+            return response.json();
+        })
+        .then(window.auth0.logout())
+        .then(data => {
+            this.DISABLE_POPSTATE = true;
+            var old_path = window.location.pathname + window.location.search;
+            window.location.assign('/#logged-out');
+            if (old_path == '/') {
+                window.location.reload();
+            }
+        }, err => {
+            parseError(err).then(data => {
+                data.title = 'Logout failure: ' + data.title;
+                this.setState({context: data});
+            });
+        });
+
+    },
+
+    extractSessionCookie: function () {
+        // Function for extracting data out of the session cookie and save the info to the reactjs state
+        var cookie = require('cookie-monster');
+        var session_cookie = cookie(document).get('session');
+        if (this.state.session_cookie !== session_cookie) {
+            this.setState({
+                session_cookie: session_cookie,
+                session: this.parseSessionCookie(session_cookie)
+            });
+        }
+
+    },
+
+    parseSessionCookie: function (session_cookie) {
+        // Helper function for extractSessionCookie()
+        var Buffer = require('buffer').Buffer;
+        var session;
+        if (session_cookie) {
+            // URL-safe base64
+            session_cookie = session_cookie.replace(/\-/g, '+').replace(/\_/g, '/');
+            // First 64 chars is the sha-512 server signature
+            // Payload is [accessed, created, data]
+            try {
+                session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
+            } catch (e) {
+                console.log('Error while parsing session cookie');
+                // error'ed
+            }
+        }
+        return session || {};
     },
 
     fetch: function (url, options) {
@@ -121,11 +281,6 @@ module.exports.Persona = {
         if (!(http_method === 'GET' || http_method === 'HEAD')) {
             var headers = options.headers = _.extend({}, options.headers);
             var session = this.state.session;
-            //var userid = session['auth.userid'];
-            //if (userid) {
-            //    // Server uses this to check user is logged in
-            //    headers['X-If-Match-User'] = userid;
-            //}
             if (session._csrft_) {
                 headers['X-CSRF-Token'] = session._csrft_;
             }
@@ -145,144 +300,9 @@ module.exports.Persona = {
             this.extractSessionCookie();
         });
         return request;
-    },
-
-    extractSessionCookie: function () {
-        var cookie = require('cookie-monster');
-        var session_cookie = cookie(document).get('session');
-        if (this.state.session_cookie !== session_cookie) {
-            this.setState({
-                session_cookie: session_cookie,
-                session: this.parseSessionCookie(session_cookie)
-            });
-        }
-    },
-
-    componentDidUpdate: function (prevProps, prevState) {
-        if (prevState.session['auth.userid'] && !this.state.session['auth.userid']) {
-            // Session expired.
-            $script.ready('persona', function () {
-                navigator.id.logout();
-            });
-        }
-    },
-
-    parseSessionCookie: function (session_cookie) {
-        var Buffer = require('buffer').Buffer;
-        var session;
-        if (session_cookie) {
-            // URL-safe base64
-            session_cookie = session_cookie.replace(/\-/g, '+').replace(/\_/g, '/');
-            // First 64 chars is the sha-512 server signature
-            // Payload is [accessed, created, data]
-            try {
-                session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
-            } catch (e) {
-            }
-        }
-        return session || {};
-    },
-
-    configurePersona: function () {
-        this._persona_watched = false;
-        navigator.id.watch({
-            loggedInUser: this.state.session['auth.userid'] || null,
-            onlogin: this.handlePersonaLogin,
-            onlogout: this.handlePersonaLogout,
-            onmatch: this.handlePersonaMatch,
-            onready: this.handlePersonaReady
-        });
-    },
-
-    handlePersonaLogin: function (assertion, retrying) {
-        this._persona_watched = true;
-        if (!assertion) return;
-        this.fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({assertion: assertion})
-        })
-        .then(response => {
-            if (!response.ok) throw response;
-            return response.json();
-        })
-        .then(session => {
-            var next_url = window.location.href;
-            if (window.location.hash == '#logged-out') {
-                next_url = window.location.pathname + window.location.search;
-            }
-            this.navigate(next_url, {replace: true}).then(() => {
-                this.setState({loadingComplete: true});
-            });
-        }, err => {
-            parseError(err).then(data => {
-                if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
-                    if (!retrying) {
-                        window.setTimeout(this.handlePersonaLogin.bind(this, assertion, true));
-                        return;
-                    }
-                }
-                // If there is an error, show the error messages
-                navigator.id.logout();
-                this.setState({context: data, loadingComplete: true});
-            });
-        });
-    },
-
-    handlePersonaLogout: function () {
-        this._persona_watched = true;
-        console.log("Persona thinks we need to log out");
-        var session = this.state.session;
-        if (!(session && session['auth.userid'])) return;
-        this.fetch('/logout?redirect=false', {
-            headers: {'Accept': 'application/json'}
-        })
-        .then(response => {
-            if (!response.ok) throw response;
-            return response.json();
-        })
-        .then(data => {
-            this.DISABLE_POPSTATE = true;
-            var old_path = window.location.pathname + window.location.search;
-            window.location.assign('/#logged-out');
-            if (old_path == '/') {
-                window.location.reload();
-            }
-        }, err => {
-            parseError(err).then(data => {
-                data.title = 'Logout failure: ' + data.title;
-                this.setState({context: data});
-            });
-        });
-    },
-
-    handlePersonaMatch: function () {
-        this._persona_watched = true;
-        this.setState({loadingComplete: true});
-    },
-
-    handlePersonaReady: function () {
-        console.log('persona ready');
-        // Handle Safari https://github.com/mozilla/persona/issues/3905
-        if (!this._persona_watched) {
-            this.setState({loadingComplete: true});
-        }
-    },
-
-    triggerLogin: function (event) {
-        var request_params = {}; // could be site name
-        console.log('Logging in (persona) ');
-        navigator.id.request(request_params);
-    },
-
-    triggerLogout: function (event) {
-        console.log('Logging out (persona)');
-        navigator.id.logout();
     }
 };
+
 
 class UnsavedChangesToken {
     constructor(manager) {
