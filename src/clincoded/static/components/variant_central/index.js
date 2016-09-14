@@ -52,7 +52,8 @@ var VariantCurationHub = React.createClass({
             loading_ensemblVariation: true,
             loading_myVariantInfo: true,
             loading_myGeneInfo: true,
-            loading_bustamante: true
+            loading_bustamante: true,
+            calculated_pathogenicity: null
         };
     },
 
@@ -331,6 +332,13 @@ var VariantCurationHub = React.createClass({
         this.setState({selectedTab: selectedTab});
     },
 
+    // Method to set the calculated pathogenicity state for summary page
+    setCalculatedPathogenicity: function(assertion) {
+        if (assertion) {
+            this.state.calculated_pathogenicity = assertion;
+        }
+    },
+
     render: function() {
         var variantData = this.state.variantObj;
         var interpretation = (this.state.interpretation) ? this.state.interpretation : null;
@@ -338,7 +346,7 @@ var VariantCurationHub = React.createClass({
         var editKey = this.state.editKey;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
         var selectedTab = this.state.selectedTab;
-        let summaryKey = this.state.summaryKey;
+        let calculated_pathogenicity = this.state.calculated_pathogenicity;
 
         return (
             <div>
@@ -368,10 +376,11 @@ var VariantCurationHub = React.createClass({
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}
-                            loading_bustamante={this.state.loading_bustamante} />
+                            loading_bustamante={this.state.loading_bustamante}
+                            setCalculatedPathogenicity={this.setCalculatedPathogenicity} />
                     </div>
                     :
-                    <EvaluationSummary interpretation={interpretation} />
+                    <EvaluationSummary interpretation={interpretation} calculatedAssertion={calculated_pathogenicity} />
                 }
             </div>
         );
