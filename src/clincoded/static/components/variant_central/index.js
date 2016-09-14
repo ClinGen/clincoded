@@ -18,7 +18,7 @@ import { setPrimaryTranscript } from './helpers/primary_transcript';
 import { getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
 
 var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
-import EvaluationSummary from './interpretation/summary';
+var EvaluationSummary = require('./interpretation/summary').EvaluationSummary;
 
 // Variant Curation Hub
 var VariantCurationHub = React.createClass({
