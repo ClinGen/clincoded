@@ -47,4 +47,4 @@ window.onload = function () {
 
 var $script = require('scriptjs');
 $script.path('/static/build/');
-$script('https://login.persona.org/include.js', 'persona');
+$script('https://cdn.auth0.com/w2/auth0-7.1.min.js', 'auth0');
