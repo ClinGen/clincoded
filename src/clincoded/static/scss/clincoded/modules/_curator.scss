@@ -1459,37 +1459,150 @@
 }
 
 .criteria-group.btn-group-sm .btn {
-    background-color: #ddd;
-    color: #555;
+    background-color: #fff;
     cursor: default;
     padding: 5px 0.665em;
     font-size: 12px;
     font-weight: bold;
 
-    &.benign-strong {
-        color: #62387e;
+    /*
+     * Suppress form element outline if criteria button is clicked.
+     * FIXME: Assessibility concern. Will address when implementing
+     * 'clicking on any given criteria button activates the
+     * corresponding tab' functionality.
+     */
+    &:focus {
+        outline: none;
     }
 
-    &.benign-supporting {
-        color: #2b67a0;
+    /* Keep for future version
+    &.onCurrentTab span:after {
+        position: absolute;
+        margin-left: -38%;
+        content: "\f111";
+        font-family: 'FontAwesome';
+        font-size: 50%;
+        color: #ccc;
+        top: 32px;
+    }
+    */
+
+    &[data-status='not-met'] {
+        background-color: #ccc;
+    }
+}
+
+.criteria-group.btn-group-sm {
+    .benign-strong {
+        color: $benign-strong;
+
+        &:active {
+            color: $benign-strong;
+        }
+
+        &[data-status='met'] {
+            background-color: $benign-strong;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
     }
 
-    &.pathogenic-supporting  {
-        color: #728b42;
+    .benign-supporting {
+        color: $benign-supporting;
+
+        &:active {
+            color: $benign-supporting;
+        }
+
+        &[data-status='met'] {
+            background-color: $benign-supporting;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
     }
 
-    &.pathogenic-moderate {
-        color: #d36735;
+    .pathogenic-supporting {
+        color: $pathogenic-supporting;
+
+        &:active {
+            color: $pathogenic-supporting;
+        }
+
+        &[data-status='met'] {
+            background-color: $pathogenic-supporting;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
     }
 
-    &.pathogenic-strong {
-        color: #d33535;
+    .pathogenic-moderate {
+        color: $pathogenic-moderate;
+
+        &:active {
+            color: $pathogenic-moderate;
+        }
+
+        &[data-status='met'] {
+            background-color: $pathogenic-moderate;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
     }
 
-    &.pathogenic-very-strong {
-        color: #d33535;
+    .pathogenic-strong {
+        color: $pathogenic-strong;
+
+        &:active {
+            color: $pathogenic-strong;
+        }
+
+        &[data-status='met'] {
+            background-color: $pathogenic-strong;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
     }
 
+    .pathogenic-very-strong {
+        color: $pathogenic-very-strong;
+
+        &:active {
+            color: $pathogenic-very-strong;
+        }
+
+        &[data-status='met'] {
+            background-color: $pathogenic-very-strong;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
+    }
+}
+
+/**
+ * Criteria code colors
+ */
+.benign-strong {
+    color: $benign-strong;
+}
+
+.benign-supporting {
+    color: $benign-supporting;
+}
+
+.pathogenic-supporting {
+    color: $pathogenic-supporting;
+}
+
+.pathogenic-moderate {
+    color: $pathogenic-moderate;
+}
+
+.pathogenic-strong {
+    color: $pathogenic-strong;
+}
+
+.pathogenic-very-strong {
+    color: $pathogenic-very-strong;
 }
 
 /**

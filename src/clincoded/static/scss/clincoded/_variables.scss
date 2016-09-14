@@ -27,3 +27,10 @@ $table-header-bg: $color-trim;
 $table-header-highlight-bg: darken($table-header-bg, 10%);
 $table-row-odd-bg: #f0f0f8;
 $table-row-even-bg: #fcfcff;
+
+$benign-strong: #62387e;
+$benign-supporting: #2b67a0;
+$pathogenic-supporting: #728b42;
+$pathogenic-moderate: #d36735;
+$pathogenic-strong: #d33535;
+$pathogenic-very-strong: #d33535;
