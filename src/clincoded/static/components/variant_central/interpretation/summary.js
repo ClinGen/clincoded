@@ -10,12 +10,14 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
     mixins: [FormMixin],
 
     propTypes: {
-        interpretation: React.PropTypes.object
+        interpretation: React.PropTypes.object,
+        calculatedAssertion: React.PropTypes.string
     },
 
     getInitialState: function() {
         return {
             interpretation: this.props.interpretation,
+            calculatedAssertion: this.props.calculatedAssertion,
             provisionalPathogenicity: null,
             provisionalReason: null,
             provisionalInterpretation: false
@@ -25,6 +27,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
     componentWillReceiveProps: function(nextProps) {
         if (nextProps.interpretation && this.props.interpretation) {
             this.setState({interpretation: nextProps.interpretation});
+        }
+        if (nextProps.calculatedAssertion && this.props.calculatedAssertion) {
+            this.setState({calculatedAssertion: nextProps.calculatedAssertion});
         }
     },
 
@@ -45,6 +50,23 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         let interpretation = this.state.interpretation;
         let evaluations = interpretation ? interpretation.evaluations : null;
         let sortedEvaluations = evaluations ? sortByStrength(evaluations) : null;
+        let calculatedAssertion = this.state.calculatedAssertion;
+
+        let disabledCheckbox = false;
+        if (interpretation) {
+            if (interpretation.disease && interpretation.disease.term) {
+                switch (calculatedAssertion) {
+                    case 'Likely Pathogenic':
+                        disabledCheckbox === true;
+                        break;
+                    case 'Pathogenic':
+                        disabledCheckbox === true;
+                        break;
+                    default:
+                        disabledCheckbox === false;
+                }
+            }
+        }
 
         return (
             <div className="container evaluation-summary">
@@ -122,11 +144,11 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                             <div className="panel-body">
                                 <dl className="inline-dl clearfix">
                                     <dt>Calculated Pathogenicity:</dt>
-                                    <dd>Likely Benign</dd>
+                                    <dd>{calculatedAssertion ? calculatedAssertion : 'None'}</dd>
                                 </dl>
                                 <dl className="inline-dl clearfix">
                                     <dt>Disease:</dt>
-                                    <dd>{interpretation.interpretation_disease ? interpretation.interpretation_disease : 'None'}</dd>
+                                    <dd>{interpretation.disease ? interpretation.disease.term : 'None'}</dd>
                                 </dl>
                                 <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                     <div className="evaluation-provision provisional-pathogenicity">
@@ -150,7 +172,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                         <div className="col-xs-12 col-sm-7">
                                             <i className="icon icon-question-circle"></i>
                                             <strong>Mark as Provisional Interpretation</strong>
-                                            <Input type="checkbox" ref="provisional-interpretation" defaultChecked="false"
+                                            <Input type="checkbox" ref="provisional-interpretation" defaultChecked="false" inputDisabled={disabledCheckbox}
                                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
                                         </div>
                                     </div>
