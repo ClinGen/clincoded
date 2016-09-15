@@ -1003,7 +1003,8 @@ class Interpretation(Item):
         'evaluations.computational',
         'evaluations.computational.submitted_by',
         'provisional_variant',
-        'provisional_variant.submitted_by'
+        'provisional_variant.submitted_by',
+        'externalEvidenceList'
     ]
 
     @calculated_property(schema={
@@ -1053,6 +1054,22 @@ class Interpretation(Item):
     })
     def provisional_count(self, provisional_variant=[]):
         return len(provisional_variant)
+
+
+@collection(
+    name='external-evidence',
+    properties={
+        'title': "External evidence for VCI",
+        'description': 'External evidence for VCI',
+    })
+class ExternalEvidence(Item):
+    item_type = 'external_evidence'
+    schema = load_schema('clincoded:schemas/external_evidence.json')
+    embedded = [
+        'variant',
+        'articles',
+        'submitted_by',
+    ]
 
 
 @collection(

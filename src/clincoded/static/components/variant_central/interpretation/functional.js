@@ -7,9 +7,12 @@ var RestMixin = require('../../rest').RestMixin;
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 var CompleteSection = require('./shared/complete_section').CompleteSection;
+var add_external_resource = require('../../add_external_resource');
+var AddResourceId = add_external_resource.AddResourceId;
 
 var panel = require('../../../libs/bootstrap/panel');
 var form = require('../../../libs/bootstrap/form');
+var curator = require('../../curator');
 
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -32,12 +35,63 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     getInitialState: function() {
         return {
             clinvar_id: null,
-            interpretation: this.props.interpretation
+            interpretation: this.props.interpretation,
+            submitBusy: false,
+            pmid: 0
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
         this.setState({interpretation: nextProps.interpretation});
+    },
+
+    updatePmid: function(article) {
+        console.log(article);
+        this.setState({pmid: article.pmid});
+    },
+
+    updateInterpretationPmids: function() {
+        this.setState({submitBusy: true}); // Save button pressed; disable it and start spinner
+        let external_evidence = {
+            variant: this.state.interpretation.variant['@id'],
+            category: 'experimental',
+            articles: [this.state.pmid],
+            description: 'N/A'
+        };
+
+        this.postRestData('/external-evidence/', external_evidence).then(data => {
+            console.log(data);
+        });
+        /*
+        var flatInterpretation = null;
+        var freshInterpretation = null;
+        this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+            freshInterpretation = interpretation;
+            // get fresh update of interpretation object so we have newest evaluation list, then flatten it
+            flatInterpretation = curator.flatten(freshInterpretation);
+
+            if (!flatInterpretation.completed_sections) {
+                flatInterpretation.completed_sections = [];
+            }
+
+            if (flatInterpretation.completed_sections.indexOf(this.props.tabName) == -1) {
+                flatInterpretation.completed_sections.push(this.props.tabName);
+            } else {
+                flatInterpretation.completed_sections.splice(flatInterpretation.completed_sections.indexOf(this.props.tabName), 1);
+            }
+
+            return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                return Promise.resolve(data['@graph'][0]);
+            });
+        }).then(interpretation => {
+            // REST handling is done. Re-enable Save button, and send the interpretation object back to index.js
+            this.setState({submitBusy: false});
+            this.props.updateInterpretationObj();
+        }).catch(error => {
+            this.setState({submitBusy: false});
+            console.log(error);
+        });
+        */
     },
 
     render: function() {
@@ -67,6 +121,15 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         </div>
                     : null}
                 </Panel></PanelGroup>
+
+                {this.state.interpretation ?
+                    <div>
+                        <AddResourceId resourceType="pubmed"
+                            protocol={this.props.href_url.protocol} parentObj={this.state.interpretation} buttonText="Add New PMID" modalButtonText="Add Article" updateParentForm={this.updatePmid} buttonOnly={true} />
+                        {this.state.pmid}
+                        <span onClick={this.updateInterpretationPmids}>Update</span>
+                    </div>
+                : null}
 
                 {this.state.interpretation ?
                     <CompleteSection interpretation={this.state.interpretation} tabName="experimental" updateInterpretationObj={this.props.updateInterpretationObj} />
