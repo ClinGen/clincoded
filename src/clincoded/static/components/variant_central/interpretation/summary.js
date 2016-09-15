@@ -5,12 +5,15 @@ const form = require('../../../libs/bootstrap/form');
 const Input = form.Input;
 const Form = form.Form;
 const FormMixin = form.FormMixin;
+const RestMixin = require('../../rest').RestMixin;
+var curator = require('../../curator');
 
 var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
-    mixins: [FormMixin],
+    mixins: [FormMixin, RestMixin],
 
     propTypes: {
         interpretation: React.PropTypes.object,
+        updateInterpretationObj: React.PropTypes.func,
         calculatedAssertion: React.PropTypes.string
     },
 
@@ -21,13 +24,21 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
             provisionalPathogenicity: null,
             provisionalReason: null,
             provisionalInterpretation: false,
-            submitBusy: false // spinner for Save button
+            submitBusy: false, // spinner for Save button
+            updateMsg: null
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
         if (nextProps.interpretation && this.props.interpretation) {
-            this.setState({interpretation: nextProps.interpretation});
+            this.setState({interpretation: nextProps.interpretation}, () => {
+                if (this.state.interpretation.provisional_variant && this.state.interpretation.provisional_variant.length) {
+                    this.setState({
+                        provisionalPathogenicity: this.state.interpretation.provisional_variant[0].alteredClassification,
+                        provisionalReason: this.state.interpretation.provisional_variant[0].reason
+                    });
+                }
+            });
         }
         if (nextProps.calculatedAssertion && this.props.calculatedAssertion) {
             this.setState({calculatedAssertion: nextProps.calculatedAssertion});
@@ -48,8 +59,49 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
     },
 
     submitForm: function(e) {
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setState({submitBusy: true}); // Save button pressed; disable it and start spinner
+        e.preventDefault(); e.stopPropagation();
+        this.setState({submitBusy: true, updateMsg: null});
+
+        const interpretation = this.state.interpretation;
+        const provisionalObj = {
+            'alteredClassification': this.state.provisionalPathogenicity,
+            'reason': this.state.provisionalReason
+        };
+        if (interpretation) {
+            if (!interpretation.provisional_variant || interpretation.provisional_variant.length < 1) {
+                this.postRestData('/provisional-variant/', provisionalObj).then(result => {
+                    this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes saved successfully!</span>});
+                    let provisionalObjUuid = result['@graph'][0]['@id'];
+                    let flatInterpretationObj = curator.flatten(interpretation);
+                    if (!('provisional_variant' in flatInterpretationObj)) {
+                        flatInterpretationObj.provisional_variant = [provisionalObjUuid];
+                        // Return the newly flattened interpretation object in a Promise
+                        return Promise.resolve(flatInterpretationObj);
+                    } else {
+                        flatInterpretationObj.provisional_variant.push(provisionalObjUuid);
+                        return Promise.resolve(flatInterpretationObj);
+                    }
+                }).then(interpretationObj => {
+                    this.putRestData('/interpretation/' + interpretation.uuid, interpretationObj).then(data => {
+                        this.props.updateInterpretationObj();
+                    }).catch(err => {
+                        console.log(err);
+                    });
+                }).catch(err => {
+                    this.setState({submitBusy: false, updateMsg: <span className="text-danger">Unable to save provisional changes.</span>});
+                    console.log(err);
+                });
+            } else {
+                //let flatProvisionalObj = curator.flatten(provisionalObj);
+                this.putRestData('/provisional-variant/' + interpretation.provisional_variant[0].uuid, provisionalObj).then(response => {
+                    this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes updated successfully!</span>});
+                    this.props.updateInterpretationObj();
+                }).catch(err => {
+                    this.setState({submitBusy: false, updateMsg: <span className="text-danger">Unable to update provisional changes.</span>});
+                    console.log(err);
+                });
+            }
+        }
     },
 
     render: function() {
@@ -57,7 +109,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         let evaluations = interpretation ? interpretation.evaluations : null;
         let sortedEvaluations = evaluations ? sortByStrength(evaluations) : null;
         let calculatedAssertion = this.state.calculatedAssertion;
-        let provisionalVariant = interpretation ? interpretation.provisional_variant : null;
+        let provisionalVariant = interpretation ? interpretation.provisional_variant[0] : null;
 
         let disabledCheckbox = false;
         if (interpretation) {
@@ -164,9 +216,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                                 value={provisionalVariant ? provisionalVariant.alteredClassification : 'Benign'}
                                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
                                                 <option value="Benign">Benign</option>
-                                                <option value="Likely Benign">Likely Benign</option>
-                                                <option value="Uncertain Significance">Uncertain Significance</option>
-                                                <option value="Likely Pathogenic">Likely Pathogenic</option>
+                                                <option value="Likely benign">Likely Benign</option>
+                                                <option value="Uncertain significance">Uncertain Significance</option>
+                                                <option value="Likely pathogenic">Likely Pathogenic</option>
                                                 <option value="Pathogenic">Pathogenic</option>
                                             </Input>
                                         </div>
@@ -188,6 +240,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                     <div className="provisional-submit">
                                         <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
                                             id="submit" title={provisionalVariant ? "Update" : "Save"} submitBusy={this.state.submitBusy} />
+                                        {this.state.updateMsg ?
+                                            <div className="submit-info pull-right">{this.state.updateMsg}</div>
+                                        : null}
                                     </div>
                                 </Form>
                             </div>
@@ -276,6 +331,7 @@ function getCriteriaType(entry) {
     keys.map(key => {
         if (key === entry.criteria) {
             switch (evidenceCodes[key].class) {
+                case 'stand-alone':
                 case 'benign-strong':
                 case 'benign-supporting':
                     type = 'benign';
