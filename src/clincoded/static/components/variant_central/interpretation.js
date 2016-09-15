@@ -77,6 +77,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_bustamante: this.props.loading_bustamante,
             //remember current tab/subtab so user will land on that tab when interpretation starts
             selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
+            // save calculated pathogenicity
+            calculated_pathogenicity: null
         };
     },
 
@@ -128,6 +130,12 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         });
     },
 
+    setCalculatedPathogenicity: function(assertion) {
+        if (assertion) {
+            this.state.calculated_pathogenicity = assertion;
+        }
+    },
+
     // set selectedTab to whichever tab the user switches to, and update the address accordingly
     handleSelect: function (tab) {
         if (tab == 'basic-info' || validTabs.indexOf(tab) == -1) {
@@ -150,7 +158,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
         return (
             <div className="container curation-variant-tab-group">
-                <PathogenicityCalculator interpretation={interpretation} />
+                <PathogenicityCalculator interpretation={interpretation} setCalculatedPathogenicity={this.setCalculatedPathogenicity} />
                 <div className="vci-tabs">
                     <ul className="vci-tabs-header tab-label-list" role="tablist">
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
