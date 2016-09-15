@@ -413,7 +413,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                         <th>Reference Accession</th>
                                         <th>Review Status</th>
                                         <th>Clinical Significance</th>
-                                        <th>Disease [Source]</th>
+                                        <th>Condition [Source]</th>
                                     </tr>
                                 </thead>
                                 <tbody>
