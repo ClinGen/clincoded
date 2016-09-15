@@ -266,6 +266,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             case "Gene":
                 url = external_url_map['Entrez'] + id;
                 break;
+            case "Human Phenotype Ontology":
+                url = external_url_map['HPO'] + id;
+                break;
             default:
                 url = '#';
         }
