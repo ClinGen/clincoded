@@ -221,9 +221,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <td className="disease">
                     {item.conditions.map(function(condition, i) {
                         return (
-                            <div>
+                            <div className={i < item.conditions.length - 1 ? 'space-between-condition' : null}>
                                 {self.handleCondition(condition, i)}
-                                {i < item.conditions.length - 1 ? <br /> : null}
                             </div>
                         );
                     })}
