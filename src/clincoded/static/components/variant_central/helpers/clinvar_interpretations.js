@@ -41,7 +41,7 @@ export function getClinvarRCVs(xml) {
 // Method to parse conditions data for the most recent version of individual RCV accession
 export function parseClinvarInterpretation(result) {
     // List of Type values of <Trait>. Each should be traited as disease and collected.
-    const disease_types = ['Disease', 'NamedProteinVariant'];
+    //const disease_types = ['Disease', 'NamedProteinVariant'];
 
     // Define 'interpretation' object model
     let interpretation = {
@@ -81,34 +81,38 @@ export function parseClinvarInterpretation(result) {
                             xRefNodes = [],
                             identifiers = [],
                             disease = '';
-                        if (disease_types.includes(Trait.getAttribute('Type'))) {
-                            nameNodes = Trait.getElementsByTagName('Name');
-                            // Expect to find the only one <ElementValue> node in each <Name> node
-                            for(let nameNode of nameNodes) {
-                                let ElementValueNode = nameNode.getElementsByTagName('ElementValue')[0];
-                                if (ElementValueNode.getAttribute('Type') === 'Preferred') {
-                                    // Set disease name property value for each associated condition
-                                    disease = ElementValueNode.textContent;
-                                }
+                        //if (disease_types.includes(Trait.getAttribute('Type'))) {
+                        nameNodes = Trait.getElementsByTagName('Name');
+                        // Expect to find the only one <ElementValue> node in each <Name> node
+                        for(let nameNode of nameNodes) {
+                            let ElementValueNode = nameNode.getElementsByTagName('ElementValue')[0];
+                            if (ElementValueNode.getAttribute('Type') === 'Preferred') {
+                                // Set disease name property value for each associated condition
+                                disease = ElementValueNode.textContent;
                             }
-                            // Expect to find multiple <XRef> nodes in each <Trait> node
-                            // Filter & find only the <XRef> nodes that are immediate children of <Trait> node
-                            for (var i=0; i<Trait.childNodes.length; i++) {
-                                if (Trait.childNodes[i].nodeName === 'XRef') {
-                                    xRefNodes.push(Trait.childNodes[i]);
-                                }
-                            }
-                            // Set identifiers property value for each associated condition
-                            if (xRefNodes) {
-                                for(let xRef of xRefNodes) {
-                                    let identifier = {
-                                        'db': xRef.getAttribute('DB'),
-                                        'id': xRef.getAttribute('ID')
-                                    };
-                                    identifiers.push(identifier);
+                        }
+
+                        for (let childNode of Trait.childNodes) {
+                            if (childNode.nodeName === 'XRef') {
+                                if (childNode.attributes.length === 2) {
+                                    xRefNodes.push(childNode);
+                                } else if (childNode.getAttribute('Type') !== 'secondary') {
+                                    xRefNodes.push(childNode);
                                 }
                             }
                         }
+
+                        // Set identifiers property value for each associated condition
+                        if (xRefNodes) {
+                            for(let xRef of xRefNodes) {
+                                let identifier = {
+                                    'db': xRef.getAttribute('DB'),
+                                    'id': xRef.getAttribute('ID')
+                                };
+                                identifiers.push(identifier);
+                            }
+                        }
+                        //}
                         let condition = {
                             'name': disease,
                             'identifiers': identifiers
