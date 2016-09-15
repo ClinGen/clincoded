@@ -6,10 +6,13 @@ var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
+var curator = require('./curator');
 var CuratorHistory = require('./curator_history');
-var variantHgvsRender = require('./curator').variantHgvsRender;
+var variantHgvsRender = curator.variantHgvsRender;
+var PmidSummary = curator.PmidSummary;
 var parseAndLogError = require('./mixins').parseAndLogError;
 
+var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 var parseClinvar = require('../libs/parse-resources').parseClinvar;
 var parseCAR = require('../libs/parse-resources').parseCAR;
 
@@ -45,7 +48,8 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         buttonClass: React.PropTypes.string, // specify any special css classes for the button
         clearButtonClass: React.PropTypes.string, // specify any special css classes for the button
         buttonOnly: React.PropTypes.bool, // specify whether or not only the button should be rendered (no form-group)
-        clearButtonRender: React.PropTypes.bool // specify whether or not the Clear button should be rendered
+        clearButtonRender: React.PropTypes.bool, // specify whether or not the Clear button should be rendered
+        parentObj: React.PropTypes.object // parent object; used to see if a duplicate entry exists
     },
 
     getInitialState: function() {
@@ -57,6 +61,9 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
     // set the text of the modal title on load
     componentDidMount: function() {
         switch(this.props.resourceType) {
+            case 'pubmed':
+                this.setState({txtModalTitle: pubmedTxt('modalTitle')});
+                break;
             case 'clinvar':
                 this.setState({txtModalTitle: clinvarTxt('modalTitle')});
                 break;
@@ -78,7 +85,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
                 <Modal title={this.state.txtModalTitle} className="input-inline" modalClass="modal-default">
                     <a className={"btn btn-default" + (this.props.buttonClass ? " " + this.props.buttonClass : "") + (this.props.disabled ? " disabled" : "")}
                         modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue} modalButtonText={this.props.modalButtonText}
-                        fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} />}>
+                        fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} parentObj={this.props.parentObj} />}>
                             {this.props.buttonText}
                     </a>
                 </Modal>
@@ -132,7 +139,8 @@ var AddResourceIdModal = React.createClass({
         fieldNum: React.PropTypes.string, // specify which field on the main form this should edit
         closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateParentForm: React.PropTypes.func // Function to call when submitting and closing the modal
+        updateParentForm: React.PropTypes.func, // Function to call when submitting and closing the modal
+        parentObj: React.PropTypes.object // parent object; used to see if a duplicate entry exists
     },
 
     contextTypes: {
@@ -158,6 +166,21 @@ var AddResourceIdModal = React.createClass({
     componentDidMount: function() {
         var tempTxtLabel;
         switch(this.props.resourceType) {
+            case 'pubmed':
+                if (this.props.initialFormValue) {
+                    tempTxtLabel = pubmedTxt('editLabel');
+                    this.setState({queryResourceDisabled: false});
+                    this.setState({inputValue: this.props.initialFormValue});
+                } else {
+                    tempTxtLabel = pubmedTxt('inputLabel');
+                }
+                this.setState({
+                    txtInputLabel: tempTxtLabel,
+                    txtInputButton: pubmedTxt('inputButton'),
+                    txtHelpText: pubmedTxt('helpText'),
+                    txtResourceResponse: pubmedTxt('resourceResponse', this.props.modalButtonText ? this.props.modalButtonText : "Save")
+                });
+                break;
             case 'clinvar':
                 if (this.props.initialFormValue) {
                     tempTxtLabel = clinvarTxt('editLabel');
@@ -197,6 +220,9 @@ var AddResourceIdModal = React.createClass({
         this.setState({queryResourceBusy: true, resourceFetched: false});
         // Apply queryResource logic depending on resourceType
         switch(this.props.resourceType) {
+            case 'pubmed':
+                pubmedQueryResource.call(this);
+                break;
             case 'clinvar':
                 clinvarQueryResource.call(this);
                 break;
@@ -210,6 +236,9 @@ var AddResourceIdModal = React.createClass({
     renderResourceResult: function() {
         var renderResult;
         switch(this.props.resourceType) {
+            case 'pubmed':
+                renderResult = pubmedRenderResourceResult.call(this);
+                break;
             case 'clinvar':
                 renderResult = clinvarRenderResourceResult.call(this);
                 break;
@@ -225,6 +254,9 @@ var AddResourceIdModal = React.createClass({
         e.preventDefault(); e.stopPropagation();
         // Apply submitResource logic depending on resourceType
         switch(this.props.resourceType) {
+            case 'pubmed':
+                pubmedSubmitResource.call(this);
+                break;
             case 'clinvar':
                 clinvarSubmitResource.call(this);
                 break;
@@ -293,6 +325,133 @@ The ___SubmitResource() functions hold the primary logic for submitting the pars
     specific to that resource. These functions are called when the user hits the 'Submit' button on the modal, subsequently closing it.
 */
 
+// Logic and helper functions for resource type 'pubmed' for AddResource modal
+function pubmedTxt(field, extra) {
+    var txt;
+    if (!extra) {
+        extra = '';
+    }
+    switch(field) {
+        case 'modalTitle':
+            txt = 'Add new PubMed Article';
+            break;
+        case 'inputLabel':
+            txt = 'Enter a PMID';
+            break;
+        case 'editLabel':
+            txt = 'Edit PMID';
+            break;
+        case 'inputButton':
+            txt = 'Retrieve PubMed Article';
+            break;
+        case 'resourceResponse':
+            txt = "Select \"" + extra + "\" (below) if the following citation is correct; otherwise, edit the PMID (above) to retrieve a different article.";
+            break;
+    }
+    return txt;
+}
+function pubmedValidateForm() {
+    // validating the field for PMIDs
+    var valid = this.validateDefault();
+    var formInput = this.getFormValue('resourceId');
+
+    // valid if input isn't zero-filled
+    if (valid && formInput.match(/^0+$/)) {
+        valid = false;
+        this.setFormErrors('resourceId', 'This PMID does not exist');
+        this.setState({submitBusy: false});
+    }
+    // valid if input isn't zero-leading
+    if (valid && formInput.match(/^0+/)) {
+        valid = false;
+        this.setFormErrors('resourceId', 'Please re-enter PMID without any leading 0\'s');
+        this.setState({submitBusy: false});
+    }
+    // valid if the input only has numbers
+    if (valid && !formInput.match(/^[0-9]*$/)) {
+        valid = false;
+        this.setFormErrors('resourceId', 'Only numbers allowed');
+        this.setState({submitBusy: false});
+    }
+    // valid if parent object is GDM and input isn't already associated with it
+    if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'gdm') {
+        for (var i = 0; i < this.props.parentObj.annotations.length; i++) {
+            if (this.props.parentObj.annotations[i].article.pmid == formInput) {
+                valid = false;
+                this.setFormErrors('resourceId', 'This article has already been associated with this Gene-Disease Record');
+                this.setState({submitBusy: false});
+                break;
+            }
+        }
+    }
+    return valid;
+}
+function pubmedQueryResource() {
+    // for pinging and parsing data from PubMed
+    this.saveFormValue('resourceId', this.state.inputValue);
+    if (pubmedValidateForm.call(this)) {
+        var url = this.props.protocol + external_url_map['PubMedSearch'];
+        var data;
+        var id = this.state.inputValue;
+        this.getRestData('/articles/' + id).then(article => {
+            // article already exists in db
+            this.setState({queryResourceBusy: false, tempResource: article, resourceFetched: true});
+        }, () => {
+            var url = this.props.protocol + external_url_map['PubMedSearch'];
+            // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
+            this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
+                var data = parsePubmed(xml);
+                if (data.pmid) {
+                    // found the result we want
+                    this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                } else {
+                    // no result from ClinVar
+                    this.setFormErrors('resourceId', 'PMID not found');
+                    this.setState({queryResourceBusy: false, resourceFetched: false});
+                }
+            });
+        }).catch(e => {
+            // error handling for PubMed query
+            this.setFormErrors('resourceId', 'Error querying PubMed. Please check your input and try again.');
+            this.setState({queryResourceBusy: false, resourceFetched: false});
+        });
+    } else {
+        this.setState({queryResourceBusy: false});
+    }
+}
+function pubmedRenderResourceResult() {
+    return(
+        <div>
+            {this.state.tempResource ?
+                <div className="row">
+                    <span className="col-sm-10 col-sm-offset-1"><PmidSummary article={this.state.tempResource} displayJournal pmidLinkout /></span>
+                </div>
+            : null}
+        </div>
+    );
+}
+function pubmedSubmitResource() {
+    // for dealing with the main form
+    this.setState({submitResourceBusy: true});
+    if (this.state.tempResource) {
+        this.getRestData('/search/?type=article&pmid=' + this.state.tempResource.pmid).then(check => {
+            if (check.total) {
+                // article already exists in our db
+                this.getRestData(check['@graph'][0]['@id']).then(result => {
+                    this.props.updateParentForm(result);
+                });
+            } else {
+                // article is new to our db
+                this.postRestData('/article/', this.state.tempResource).then(result => {
+                    this.props.updateParentForm(result['@graph'][0]);
+                });
+            }
+            this.setState({submitResourceBusy: false});
+            this.props.closeModal();
+        });
+    }
+}
+
 // Logic and helper functions for resource type 'clinvar' for AddResource modal
 function clinvarTxt(field, extra) {
     // Text to use for the resource type of 'clinvar'
@@ -317,7 +476,7 @@ function clinvarTxt(field, extra) {
             txt =
                 <span>
                     <p className="alert alert-info">
-                        <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>
+                        <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214 <i className="icon icon-external-link"></i></a>).</span>
                     </p>
                 </span>;
             break;
@@ -347,6 +506,21 @@ function clinvarValidateForm() {
     if (valid && !formInput.match(/^[0-9]*$/)) {
         valid = false;
         this.setFormErrors('resourceId', 'Only numbers allowed');
+    }
+    // valid if parent object is family, individual or experimental and input isn't already associated with it
+    if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'variantList') {
+        // loop through received variantlist and make sure that the variant is not already associated
+        for (var i in this.props.parentObj.variantList) {
+            // but don't check against the field it's editing against, in case it is an edit
+            if (i != this.props.fieldNum && this.props.parentObj.variantList.hasOwnProperty(i)) {
+                if (this.props.parentObj.variantList[i].clinvarVariantId == formInput) {
+                    valid = false;
+                    this.setFormErrors('resourceId', 'This variant has already been associated with this piece of ' + this.props.parentObj['@type'][1] + ' evidence.');
+                    this.setState({submitBusy: false});
+                    break;
+                }
+            }
+        }
     }
     return valid;
 }
@@ -459,7 +633,7 @@ function carTxt(field, extra) {
             txt =
                 <span>
                     <p className="alert alert-info">
-                        <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323</a>).</span>
+                        <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323 <i className="icon icon-external-link"></i></a>).</span>
                     </p>
                     <p className="alert alert-warning">
                         <span>Note: Please register your allele with the ClinGen Allele Registry using a <strong>GRCh37</strong> HGVS representation in order to return all possible associated evidence.</span>
