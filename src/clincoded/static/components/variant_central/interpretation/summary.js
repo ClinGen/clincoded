@@ -109,8 +109,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         let evaluations = interpretation ? interpretation.evaluations : null;
         let sortedEvaluations = evaluations ? sortByStrength(evaluations) : null;
         let calculatedAssertion = this.state.calculatedAssertion;
-        let provisionalVariant = interpretation ? interpretation.provisional_variant[0] : null;
-
+        let provisionalVariant = null;
         let disabledCheckbox = false;
         if (interpretation) {
             if (interpretation.disease && interpretation.disease.term) {
@@ -124,6 +123,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                     default:
                         disabledCheckbox === false;
                 }
+            }
+            if (interpretation.provisional_variant && interpretation.provisional_variant.length) {
+                provisionalVariant = interpretation.provisional_variant[0];
             }
         }
 
