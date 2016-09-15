@@ -836,7 +836,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             ]
                                         </dd>
                                         :
-                                        null
+                                        <dd className="col-lg-3">UCSC</dd>
                                     }
                                     {(links_38 || links_37) ?
                                         <dd>Variation Viewer [
@@ -846,7 +846,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             ]
                                         </dd>
                                         :
-                                        null
+                                        <dd className="col-lg-4">Variation Viewer</dd>
                                     }
                                     {(links_38 || links_37) ?
                                         <dd>Ensembl Browser [
@@ -856,7 +856,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             ]
                                         </dd>
                                         :
-                                        null
+                                        <dd className="col-lg-3">Ensembl Browser</dd>
                                     }
                                 </dl>
                             </div>
