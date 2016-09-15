@@ -380,7 +380,7 @@ var VariantCurationHub = React.createClass({
                             setCalculatedPathogenicity={this.setCalculatedPathogenicity} />
                     </div>
                     :
-                    <EvaluationSummary interpretation={interpretation} calculatedAssertion={calculated_pathogenicity} />
+                    <EvaluationSummary interpretation={interpretation} calculatedAssertion={calculated_pathogenicity} updateInterpretationObj={this.updateInterpretationObj} />
                 }
             </div>
         );
