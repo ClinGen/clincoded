@@ -220,7 +220,12 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <td className="clinical-significance">{item.clinicalSignificance}</td>
                 <td className="disease">
                     {item.conditions.map(function(condition, i) {
-                        return (self.handleCondition(condition, i));
+                        return (
+                            <div>
+                                {self.handleCondition(condition, i)}
+                                {i < item.conditions.length - 1 ? <br /> : null}
+                            </div>
+                        );
                     })}
                 </td>
             </tr>
@@ -238,7 +243,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                         {condition.identifiers.map(function(identifier, i) {
                             return (
                                 <li key={i} className="xref-linkout">
-                                    <a href={self.handleLinkOuts(identifier.id, identifier.db)} target="_blank">{identifier.db}</a>
+                                    <a href={self.handleLinkOuts(identifier.id, identifier.db)} target="_blank">{identifier.db === 'Human Phenotype Ontology' ? 'HPO' : identifier.db}</a>
                                 </li>
                             );
                         })}
