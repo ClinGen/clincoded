@@ -229,9 +229,9 @@ var VariantCurationHub = React.createClass({
             let seqChangeTypes = ['del', 'dup', 'ins', 'indels', 'inv', 'con'];
             let genomicHGVS, ncGenomic;
 
-            if (variant.hgvsNames.GRCh37) {
+            if (variant.hgvsNames && variant.hgvsNames.GRCh37) {
                 genomicHGVS = variant.hgvsNames.GRCh37;
-            } else if (variant.hgvsNames.GRCh38) {
+            } else if (variant.hgvsNames && variant.hgvsNames.GRCh38) {
                 genomicHGVS = variant.hgvsNames.GRCh38;
             }
             // Filter variant by its change type
