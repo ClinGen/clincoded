@@ -77,7 +77,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_myGeneInfo: this.props.loading_myGeneInfo,
             loading_bustamante: this.props.loading_bustamante,
             //remember current tab/subtab so user will land on that tab when interpretation starts
-            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
+            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info')
         };
     },
 
