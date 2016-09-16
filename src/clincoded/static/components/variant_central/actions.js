@@ -26,39 +26,44 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         session: React.PropTypes.object,
         interpretation: React.PropTypes.object,
         editKey: React.PropTypes.string,
-        updateInterpretationObj: React.PropTypes.func
+        updateInterpretationObj: React.PropTypes.func,
+        hasExistingInterpretation: React.PropTypes.bool,
+        isInterpretationActive: React.PropTypes.bool,
+        hasAssociatedDisease: React.PropTypes.bool,
     },
 
     getInitialState: function() {
         return {
             variantUuid: null,
-            interpretation: null,
-            hasExistingInterpretation: false,
-            isInterpretationActive: false,
-            hasAssociatedDisease: false
+            variantData: this.props.variantData,
+            interpretation: this.props.interpretation,
+            editKey: this.props.editKey,
+            hasExistingInterpretation: this.props.hasExistingInterpretation,
+            isInterpretationActive: this.props.isInterpretationActive,
+            hasAssociatedDisease: this.props.hasAssociatedDisease
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
-        if (this.props.variantData) {
-            if (this.props.variantData.associatedInterpretations) {
-                if (this.props.variantData.associatedInterpretations.length) {
-                    var associatedInterpretations = this.props.variantData.associatedInterpretations;
-                    associatedInterpretations.forEach(associatedInterpretation => {
-                        if (associatedInterpretation.submitted_by['@id'] === this.props.session.user_properties['@id']) {
-                            this.setState({hasExistingInterpretation: true});
-                        }
-                    });
+        if (nextProps.interpretation && this.props.interpretation) {
+            this.setState({interpretation: nextProps.interpretation}, () => {
+                let interpretation = this.state.interpretation;
+                if (interpretation.submitted_by['@id'] === this.props.session.user_properties['@id']) {
+                    this.setState({hasExistingInterpretation: true});
                 }
-            }
+            });
         }
-        if (this.props.editKey === 'true' && this.props.interpretation) {
-            this.setState({isInterpretationActive: true});
-            if (this.props.interpretation) {
-                if (this.props.interpretation.interpretation_disease) {
-                    this.setState({hasAssociatedDisease: true});
-                }
-            }
+        if (nextProps.editKey) {
+            this.setState({editKey: nextProps.editKey});
+        }
+        if (nextProps.hasExistingInterpretation) {
+            this.setState({hasExistingInterpretation: nextProps.hasExistingInterpretation});
+        }
+        if (nextProps.isInterpretationActive) {
+            this.setState({isInterpretationActive: nextProps.isInterpretationActive});
+        }
+        if (nextProps.hasAssociatedDisease) {
+            this.setState({hasAssociatedDisease: nextProps.hasAssociatedDisease});
         }
     },
 
@@ -98,20 +103,25 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     },
 
     render: function() {
-        var interpretationButtonTitle = '';
-        if (!this.state.hasExistingInterpretation) {
-            interpretationButtonTitle = 'Start New Interpretation';
-        } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
-            interpretationButtonTitle = 'Continue Interpretation';
-        }
+        let interpretation = this.state.interpretation;
+        let interpretationButtonTitle = '',
+            associateDiseaseButtonTitle = '',
+            associateDiseaseModalTitle = '';
 
-        var associateDiseaseButtonTitle = '', associateDiseaseModalTitle = '';
-        if (this.state.hasAssociatedDisease) {
-            associateDiseaseButtonTitle = 'Edit Disease';
-            associateDiseaseModalTitle = 'Associate this interpretation with a different disease';
-        } else {
-            associateDiseaseButtonTitle = 'Associate with Disease';
-            associateDiseaseModalTitle = 'Associate this interpretation with a disease';
+        if (!interpretation) {
+            interpretationButtonTitle = 'Start New Interpretation';
+        } else if (interpretation) {
+            if (!this.state.isInterpretationActive) {
+                interpretationButtonTitle = 'Continue Interpretation';
+            } else {
+                if (interpretation.disease && this.state.hasAssociatedDisease) {
+                    associateDiseaseButtonTitle = 'Edit Disease';
+                    associateDiseaseModalTitle = 'Associate this interpretation with a different disease';
+                } else {
+                    associateDiseaseButtonTitle = 'Associate with Disease';
+                    associateDiseaseModalTitle = 'Associate this interpretation with a disease';
+                }
+            }
         }
 
         return (
