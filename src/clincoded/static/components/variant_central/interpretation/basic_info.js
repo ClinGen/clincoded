@@ -220,11 +220,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <td className="clinical-significance">{item.clinicalSignificance}</td>
                 <td className="disease">
                     {item.conditions.map(function(condition, i) {
-                        return (
-                            <div className={i < item.conditions.length - 1 ? 'space-between-condition' : null}>
-                                {self.handleCondition(condition, i)}
-                            </div>
-                        );
+                        return (self.handleCondition(condition, i));
                     })}
                 </td>
             </tr>
@@ -235,7 +231,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     handleCondition: function(condition, key) {
         let self = this;
         return (
-            <div key={condition.name}>
+            <div className="condition" key={condition.name}>
                 <span className="condition-name">{condition.name}</span>&nbsp;
                 {condition.identifiers && condition.identifiers.length ?
                     <span className="identifiers">[<ul className="clearfix">

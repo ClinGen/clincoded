@@ -93,10 +93,10 @@ export function parseClinvarInterpretation(result) {
                         }
 
                         for (let childNode of Trait.childNodes) {
-                            if (childNode.nodeName === 'XRef') {
-                                if (childNode.attributes.length === 2) {
+                            if (childNode.nodeName === 'XRef' && childNode.getAttribute('ID') && childNode.getAttribute('DB')) {
+                                if (childNode.getAttribute('Type') && childNode.getAttribute('Type') === 'primary') {
                                     xRefNodes.push(childNode);
-                                } else if (childNode.getAttribute('Type') !== 'secondary') {
+                                } else if (!childNode.getAttribute('Type')) {
                                     xRefNodes.push(childNode);
                                 }
                             }

@@ -1173,15 +1173,21 @@
                 text-transform: capitalize;
             }
 
-            .basic-info .clinvar-interpretation .disease .identifiers {
-                display: inline-block;
+            .basic-info .clinvar-interpretation .disease {
+                .condition:not(:first-child) {
+                    padding-top: 5px;
+                }
 
-                ul {
+                .identifiers {
                     display: inline-block;
-                    list-style: none;
-                    margin: 0;
-                    padding: 0;
-                    vertical-align: bottom;
+
+                    ul {
+                        display: inline-block;
+                        list-style: none;
+                        margin: 0;
+                        padding: 0;
+                        vertical-align: bottom;
+                    }
                 }
             }
 
@@ -1881,8 +1887,4 @@ dl.inline-dl {
 
 .criteria-description {
     text-overflow: clip;
-}
-
-.space-between-condition {
-    padding-bottom: 5px;
 }
