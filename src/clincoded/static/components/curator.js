@@ -1837,9 +1837,9 @@ function flattenInterpretation(interpretation) {
         });
     }
 
-    if (interpretation.external_evidence_list && interpretation.external_evidence_list.length) {
-        flat.external_evidence_list = interpretation.external_evidence_list.map(function(external_evidence) {
-            return external_evidence['@id'];
+    if (interpretation.extra_evidence_list && interpretation.extra_evidence_list.length) {
+        flat.extra_evidence_list = interpretation.extra_evidence_list.map(function(extra_evidence) {
+            return extra_evidence['@id'];
         });
     }
 
