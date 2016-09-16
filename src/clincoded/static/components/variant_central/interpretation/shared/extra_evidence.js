@@ -149,28 +149,43 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         });
     },
 
-    deleteEvidence: function(id) {
+    deleteEvidence: function(evidence) {
         // called when the Delete button for an existing evidence is pressed
         this.setState({deleteBusy: true});
+
+        let deleteTargetId = evidence['@id'];
         let flatInterpretation = null;
         let freshInterpretation = null;
 
-        this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
-            // get updated interpretation object, then flatten it
-            freshInterpretation = interpretation;
-            flatInterpretation = curator.flatten(freshInterpretation);
+        // since the extra_evidence object is really simple, and the description is the only thing changing,
+        // make a new one instead of getting an updated and flattened one
+        let extra_evidence = {
+            variant: evidence.variant,
+            category: this.props.category,
+            subcategory: this.props.subcategory,
+            articles: [evidence.articles[0]['@id']],
+            description: evidence.description,
+            status: 'deleted'
+        };
 
-            // remove removed evidence from evidence list
-            flatInterpretation.extra_evidence_list.splice(flatInterpretation.extra_evidence_list.indexOf(id), 1);
+        this.putRestData(evidence['@id'], extra_evidence).then(result => {
+            this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+                // get updated interpretation object, then flatten it
+                freshInterpretation = interpretation;
+                flatInterpretation = curator.flatten(freshInterpretation);
 
-            // update the interpretation object
-            return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
-                return Promise.resolve(data['@graph'][0]);
+                // remove removed evidence from evidence list
+                flatInterpretation.extra_evidence_list.splice(flatInterpretation.extra_evidence_list.indexOf(deleteTargetId), 1);
+
+                // update the interpretation object
+                return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
+            }).then(interpretation => {
+                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
+                this.setState({deleteBusy: false});
+                this.props.updateInterpretationObj();
             });
-        }).then(interpretation => {
-            // upon successful save, set everything to default state, and trigger updateInterptationObj callback
-            this.setState({deleteBusy: false});
-            this.props.updateInterpretationObj();
         }).catch(error => {
             this.setState({deleteBusy: false});
             console.log(error);
@@ -180,13 +195,13 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     renderInterpretationExtraEvidence: function(extra_evidence) {
         // for rendering the evidence in tabular format
         return (
-            <tr key={extra_evidence.subcategory + '_' + extra_evidence.articles[0].pmid}>
+            <tr key={extra_evidence.uuid}>
                 <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
                 <td className="col-md-5">{extra_evidence.description}</td>
                 <td className="col-md-2">
                     <button className="btn btn-default btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence.articles[0].pmid)}>Edit</button>
                     <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
-                        clickHandler={() => this.deleteEvidence(extra_evidence['@id'])} />
+                        clickHandler={() => this.deleteEvidence(extra_evidence)} />
                 </td>
             </tr>
         );
