@@ -1005,6 +1005,7 @@ class Interpretation(Item):
         'provisional_variant',
         'provisional_variant.submitted_by',
         'extra_evidence_list',
+        'extra_evidence_list.submitted_by',
         'extra_evidence_list.articles',
         'extra_evidence_list.articles.submitted_by'
     ]

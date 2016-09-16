@@ -4,7 +4,7 @@
     "description": "Extra evidence group for a VCI interpretation",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["variant"],
+    "required": ["variant", "evidenceDescription"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -45,7 +45,7 @@
                 "linkTo": "article"
             }
         },
-        "description": {
+        "evidenceDescription": {
             "title": "Description",
             "description": "Description for external evidence",
             "type": "string"
@@ -57,7 +57,7 @@
         }
     },
     "columns": {
-        "description": {
+        "evidenceDescription": {
             "title": "Description",
             "type": "string"
         },

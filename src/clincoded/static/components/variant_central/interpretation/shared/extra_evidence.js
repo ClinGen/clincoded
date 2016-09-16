@@ -79,7 +79,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 category: this.props.category,
                 subcategory: this.props.subcategory,
                 articles: [this.state.tempEvidence.pmid],
-                description: this.refs['description'].getValue()
+                evidenceDescription: this.refs['description'].getValue()
             };
 
             return this.postRestData('/extra-evidence/', extra_evidence).then(result => {
@@ -142,7 +142,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
             category: this.props.category,
             subcategory: this.props.subcategory,
             articles: [this.refs['edit-pmid'].getValue()],
-            description: this.refs['edit-description'].getValue()
+            evidenceDescription: this.refs['edit-description'].getValue()
         };
 
         this.putRestData(this.refs['edit-target'].getValue(), extra_evidence).then(result => {
@@ -172,7 +172,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
             category: this.props.category,
             subcategory: this.props.subcategory,
             articles: [evidence.articles[0]['@id']],
-            description: evidence.description,
+            evidenceDescription: evidence.description,
             status: 'deleted'
         };
 
@@ -209,7 +209,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         return (
             <tr key={extra_evidence.uuid}>
                 <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
-                <td className="col-md-5">{extra_evidence.description}</td>
+                <td className="col-md-5">{extra_evidence.evidenceDescription}</td>
                 <td className="col-md-2">
                     <button className="btn btn-default btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence.articles[0].pmid)}>Edit</button>
                     <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
@@ -237,7 +237,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                     <Form submitHandler={this.submitEditForm} formClassName="form-horizontal form-std">
                         <Input type="text" ref="edit-target" value={extra_evidence['@id']} inputDisabled={true} groupClassName="hidden" />
                         <Input type="text" ref="edit-pmid" value={extra_evidence.articles[0].pmid} inputDisabled={true} groupClassName="hidden" />
-                        <Input type="textarea" ref="edit-description" rows="2" label="Evidence:" value={extra_evidence.description} defaultValue={extra_evidence.description}
+                        <Input type="textarea" ref="edit-description" rows="2" label="Evidence:" value={extra_evidence.evidenceDescription} defaultValue={extra_evidence.evidenceDescription}
                             labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" handleChange={this.handleDescriptionChange} />
                         <div className="clearfix">
                             <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel Edit</button>
