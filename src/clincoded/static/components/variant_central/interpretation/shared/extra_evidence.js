@@ -236,10 +236,10 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 }
             });
         }
-        let parentObj = {
+        let parentObj = {/*
             '@type': ['evidenceList'],
             'evidenceList': relevantEvidenceList
-        };
+        */};
 
         return (
             <div className="panel panel-info">

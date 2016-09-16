@@ -384,7 +384,8 @@ function pubmedValidateForm() {
             }
         }
     }
-    // valid if parent object is evidence list (VCI) and input isn't already associated with it
+    // valid if parent object is evidence list (VCI) and input isn't already associated with it - final behavior TBD
+    /*
     if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'evidenceList') {
         for (var j = 0; j < this.props.parentObj.evidenceList.length; j++) {
             if (this.props.parentObj.evidenceList[j].articles[0].pmid == formInput) {
@@ -394,7 +395,7 @@ function pubmedValidateForm() {
                 break;
             }
         }
-    }
+    }*/
     return valid;
 }
 function pubmedQueryResource() {
