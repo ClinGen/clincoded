@@ -108,7 +108,7 @@ var Title = module.exports.Title = React.createClass({
                     <div className="btn-vertical-space">
                         <div className="interpretation-record clearfix">
                             <div className="pull-right">
-                                <Input type="button-button" inputClassName="btn btn-primary pull-right"
+                                <Input type="button-button" inputClassName="btn btn-primary pull-right view-summary"
                                     title={summaryButtonTitle} clickHandler={this.handleSummaryButtonEvent} />
                             </div>
                         </div>
