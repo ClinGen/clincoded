@@ -39,6 +39,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
             updateMsg: null,
             tempEvidence: null,
             editEvidenceId: null,
+            descriptionInput: null,
             editDescriptionInput: null,
             interpretation: this.props.interpretation // parent interpretation object
         };
@@ -54,7 +55,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     },
 
     updateTempEvidence: function(article) {
-        this.setState({tempEvidence: article});
+        this.setState({tempEvidence: article, descriptionInput: null});
     },
 
     submitForm: function(e) {
@@ -90,7 +91,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 });
             });
         }).then(interpretation => {
-            this.setState({submitBusy: false, tempEvidence: null});
+            this.setState({submitBusy: false, tempEvidence: null, descriptionInput: null});
             this.props.updateInterpretationObj();
         }).catch(error => {
             this.setState({submitBusy: false, tempEvidence: null, updateMsg: <span className="text-danger">Something went wrong while trying to save this evidence!</span>});
@@ -100,7 +101,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
 
     cancelAddEvidenceButton: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setState({tempEvidence: null});
+        this.setState({tempEvidence: null, descriptionInput: null});
     },
 
     editEvidenceButton: function(index) {
@@ -171,6 +172,10 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 </td>
             </tr>
         );
+    },
+
+    handleDescriptionChange: function(ref, e) {
+        this.setState({descriptionInput: this.refs[ref].getValue()});
     },
 
     handleEditDescriptionChange: function(ref, e) {
@@ -252,7 +257,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                                     <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={this.state.interpretation} wrapperClass="pull-right btn-inline-spacer" buttonClass="btn-info"
                                                         buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
                                                     <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                                                        submitBusy={this.state.submitBusy} inputDisabled={this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated} />
+                                                        submitBusy={this.state.submitBusy} inputDisabled={!(this.state.descriptionInput && this.state.descriptionInput.length > 0)} />
                                                     {this.state.updateMsg ?
                                                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                                                     : null}
