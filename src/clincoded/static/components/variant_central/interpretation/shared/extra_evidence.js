@@ -204,7 +204,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
 
     renderInterpretationExtraEvidenceEdit: function(extra_evidence) {
         return (
-            <tr key={extra_evidence.subcategory + '_' + extra_evidence.articles[0].pmid}>
+            <tr key={extra_evidence.uuid}>
                 <td colSpan="3">
                     <PmidSummary article={extra_evidence.articles[0]} className="alert alert-info" pmidLinkout />
                     <Form submitHandler={this.submitEditForm} formClassName="form-horizontal form-std">
@@ -212,7 +212,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                         <Input type="text" ref="edit-pmid" value={extra_evidence.articles[0].pmid} inputDisabled={true} groupClassName="hidden" />
                         <Input type="textarea" ref="edit-description" rows="2" label="Evidence:" value={extra_evidence.description} defaultValue={extra_evidence.description}
                             labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" handleChange={this.handleDescriptionChange} />
-                        <div className="curation-submit clearfix">
+                        <div className="clearfix">
                             <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel Edit</button>
                             <Input type="submit" inputClassName="btn-info pull-right btn-inline-spacer" id="submit" title="Edit"
                                 submitBusy={this.state.editBusy} inputDisabled={!(this.state.editDescriptionInput && this.state.editDescriptionInput.length > 0)} />
@@ -276,7 +276,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                                 <Input type="textarea" ref="description" rows="2" label="Evidence:" handleChange={this.handleDescriptionChange}
                                                     labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
-                                                <div className="curation-submit clearfix">
+                                                <div className="clearfix">
                                                     <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelAddEvidenceButton}>Cancel</button>
                                                     <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} wrapperClass="pull-right btn-inline-spacer" buttonClass="btn-info"
                                                         buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
