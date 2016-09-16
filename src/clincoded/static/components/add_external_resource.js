@@ -81,7 +81,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
     // renders the main Add/Edit button
     buttonRender: function() {
         return (
-            <span className={"inline-button-wrapper button-push" + (this.props.buttonWrapperClass ? " " + this.props.buttonWrapperClass : "")}>
+            <span className={"inline-button-wrapper" + (this.props.buttonWrapperClass ? " " + this.props.buttonWrapperClass : "")}>
                 <Modal title={this.state.txtModalTitle} className="input-inline" modalClass="modal-default">
                     <a className={"btn btn-default" + (this.props.buttonClass ? " " + this.props.buttonClass : "") + (this.props.disabled ? " disabled" : "")}
                         modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue} modalButtonText={this.props.modalButtonText}
@@ -115,7 +115,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
                 <div className="form-group">
                     <span className="col-sm-5 control-label">{this.props.labelVisible ? this.props.label : null}</span>
                     <span className="col-sm-7">
-                        <div className={"inline-button-wrapper button-push" + (this.props.wrapperClass ? " " + this.props.wrapperClass : "")}>
+                        <div className={"inline-button-wrapper" + (this.props.wrapperClass ? " " + this.props.wrapperClass : "")}>
                             {this.buttonRender()}
                             {this.props.clearButtonRender && this.props.initialFormValue ?
                                 this.clearButtonRender()

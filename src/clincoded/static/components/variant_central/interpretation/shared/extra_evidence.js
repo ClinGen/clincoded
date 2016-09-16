@@ -237,17 +237,17 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                     : null}
                                     {this.state.tempEvidence ?
                                         <div>
-                                            <PmidSummary article={this.state.tempEvidence} className="alert alert-info col-xs-offset-4" pmidLinkout />
+                                            <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
 
                                             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                                 <Input type="textarea" ref="description" rows="2" label="Evidence:"
                                                     labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
                                                 <div className="curation-submit clearfix">
+                                                    <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel</button>
+                                                    <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={this.state.interpretation} wrapperClass="pull-right btn-inline-spacer" buttonClass="btn-info"
+                                                        buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
                                                     <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
                                                         submitBusy={this.state.submitBusy} inputDisabled={this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated} />
-                                                    <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={this.state.interpretation} wrapperClass="pull-right" buttonClass="btn-info"
-                                                        buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
-                                                    <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel Edit</button>
                                                     {this.state.updateMsg ?
                                                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                                                     : null}
