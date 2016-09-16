@@ -56,6 +56,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         ext_myVariantInfo: React.PropTypes.object,
         ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_ensemblVariation: React.PropTypes.object,
+        ext_singleNucleotide: React.PropTypes.bool,
         loading_myVariantInfo: React.PropTypes.bool,
         loading_ensemblVariation: React.PropTypes.bool
     },
@@ -99,6 +100,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             },
             populationObjDiff: null,
             populationObjDiffFlag: false,
+            ext_singleNucleotide: this.props.ext_singleNucleotide,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_ensemblVariation: this.props.loading_ensemblVariation
         };
@@ -155,6 +157,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.compareExternalDatas(this.state.populationObj, nextProps.interpretation.evaluations);
         }
         this.setState({
+            ext_singleNucleotide: nextProps.ext_singleNucleotide,
             loading_ensemblVariation: nextProps.loading_ensemblVariation,
             loading_myVariantInfo: nextProps.loading_myVariantInfo
         });
@@ -407,13 +410,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to render external ExAC linkout when no ExAC population data found
-    renderExacLinkout: function(response) {
+    renderExacLinkout: function(response, singleNucleotide) {
         let exacLink;
         // If no ExAC population data, construct external linkout for one of the following:
         // 1) clinvar/cadd data found & the variant type is substitution
         // 2) clinvar/cadd data found & the variant type is NOT substitution
         // 3) no data returned by myvariant.info
-        if (response) {
+        if (response && singleNucleotide) {
             let chrom = response.chrom,
                 pos = response.hg19.start,
                 regionStart = parseInt(response.hg19.start) - 30,
@@ -612,8 +615,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to render ExAC population table header content
-    renderExacHeader: function(hasExacData, loading_myVariantInfo, exac) {
-        if (hasExacData && !loading_myVariantInfo) {
+    renderExacHeader: function(hasExacData, loading_myVariantInfo, exac, singleNucleotide) {
+        if (hasExacData && !loading_myVariantInfo && singleNucleotide) {
             const variantExac = exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt;
             const linkoutExac = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
             return (
@@ -632,8 +635,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to render 1000 Genomes population table header content
-    renderTGenomesHeader: function(hasTGenomesData, loading_ensemblVariation, tGenomes) {
-        if (hasTGenomesData && !loading_ensemblVariation) {
+    renderTGenomesHeader: function(hasTGenomesData, loading_ensemblVariation, tGenomes, singleNucleotide) {
+        if (hasTGenomesData && !loading_ensemblVariation && singleNucleotide) {
             const variantTGenomes = tGenomes._extra.name + ' ' + tGenomes._extra.var_class;
             const linkoutEnsembl = external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name;
             return (
@@ -652,8 +655,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to render ESP population table header content
-    renderEspHeader: function(hasEspData, loading_myVariantInfo, esp) {
-        if (hasEspData && !loading_myVariantInfo) {
+    renderEspHeader: function(hasEspData, loading_myVariantInfo, esp, singleNucleotide) {
+        if (hasEspData && !loading_myVariantInfo && singleNucleotide) {
             const variantEsp = esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt;
             const linkoutEsp = dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0';
             return (
@@ -681,6 +684,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
         var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
         var populationObjDiffFlag = this.state.populationObjDiffFlag;
+        var singleNucleotide = this.state.ext_singleNucleotide;
 
         return (
             <div className="variant-interpretation population">
@@ -735,96 +739,120 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     : null}
                     <div className="panel panel-info datasource-ExAC">
                         <div className="panel-heading">
-                            {this.renderExacHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac)}
+                            {this.renderExacHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, singleNucleotide)}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
-                            {this.state.hasExacData ?
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Population</th>
-                                            <th>Allele Count</th>
-                                            <th>Allele Number</th>
-                                            <th>Number of Homozygotes</th>
-                                            <th>Allele Frequency</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {exacStatic._order.map(key => {
-                                            return (this.renderExacRow(key, exac, exacStatic));
-                                        })}
-                                    </tbody>
-                                    <tfoot>
-                                        {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
-                                    </tfoot>
-                                </table>
-                                :
+                            {!singleNucleotide ?
                                 <div className="panel-body">
-                                    <span>No population data was found for this allele in ExAC. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search ExAC</a> for this variant.</span>
+                                    <span>Data is currently only returned for single nucleotide variants. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search ExAC</a> for this variant.</span>
+                                </div>
+                                :
+                                <div>
+                                {this.state.hasExacData ?
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Population</th>
+                                                <th>Allele Count</th>
+                                                <th>Allele Number</th>
+                                                <th>Number of Homozygotes</th>
+                                                <th>Allele Frequency</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {exacStatic._order.map(key => {
+                                                return (this.renderExacRow(key, exac, exacStatic));
+                                            })}
+                                        </tbody>
+                                        <tfoot>
+                                            {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
+                                        </tfoot>
+                                    </table>
+                                    :
+                                    <div className="panel-body">
+                                        <span>No population data was found for this allele in ExAC. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search ExAC</a> for this variant.</span>
+                                    </div>
+                                }
                                 </div>
                             }
                         </div>
                     </div>
                     <div className="panel panel-info datasource-1000G">
                         <div className="panel-heading">
-                            {this.renderTGenomesHeader(this.state.hasTGenomesData, this.state.loading_ensemblVariation, tGenomes)}
+                            {this.renderTGenomesHeader(this.state.hasTGenomesData, this.state.loading_ensemblVariation, tGenomes, singleNucleotide)}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_ensemblVariation ? showActivityIndicator('Retrieving data... ') : null}
-                            {this.state.hasTGenomesData ?
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Population</th>
-                                            <th colSpan="2">Allele Frequency (count)</th>
-                                            <th colSpan="3">Genotype Frequency (count)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {this.renderTGenomesRow('_tot', tGenomes, tGenomesStatic, 'ALL')}
-                                        {tGenomesStatic._order.map(key => {
-                                            return (this.renderTGenomesRow(key, tGenomes, tGenomesStatic));
-                                        })}
-                                    </tbody>
-                                </table>
-                                :
+                            {!singleNucleotide ?
                                 <div className="panel-body">
-                                    <span>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']} target="_blank">Search 1000 Genomes</a> for this variant.</span>
+                                    <span>Data is currently only returned for single nucleotide variants. <a href={external_url_map['1000GenomesHome']} target="_blank">Search 1000 Genomes</a> for this variant.</span>
+                                </div>
+                                :
+                                <div>
+                                {this.state.hasTGenomesData ?
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Population</th>
+                                                <th colSpan="2">Allele Frequency (count)</th>
+                                                <th colSpan="3">Genotype Frequency (count)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {this.renderTGenomesRow('_tot', tGenomes, tGenomesStatic, 'ALL')}
+                                            {tGenomesStatic._order.map(key => {
+                                                return (this.renderTGenomesRow(key, tGenomes, tGenomesStatic));
+                                            })}
+                                        </tbody>
+                                    </table>
+                                    :
+                                    <div className="panel-body">
+                                        <span>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']} target="_blank">Search 1000 Genomes</a> for this variant.</span>
+                                    </div>
+                                }
                                 </div>
                             }
                         </div>
                     </div>
                     <div className="panel panel-info datasource-ESP">
                         <div className="panel-heading">
-                            {this.renderEspHeader(this.state.hasEspData, this.state.loading_myVariantInfo, esp)}
+                            {this.renderEspHeader(this.state.hasEspData, this.state.loading_myVariantInfo, esp, singleNucleotide)}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
-                            {this.state.hasEspData ?
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Population</th>
-                                            <th colSpan="2">Allele Count</th>
-                                            <th colSpan="3">Genotype Count</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {espStatic._order.map(key => {
-                                            return (this.renderEspRow(key, esp, espStatic));
-                                        })}
-                                        {this.renderEspRow('_tot', esp, espStatic, 'All Allele', 'count')}
-                                    </tbody>
-                                    <tfoot>
-                                        <tr className="count">
-                                            <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                                :
+                            {!singleNucleotide ?
                                 <div className="panel-body">
-                                    <span>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']} target="_blank">Search ESP</a> for this variant.</span>
+                                    <span>Data is currently only returned for single nucleotide variants. <a href={external_url_map['ESPHome']} target="_blank">Search ESP</a> for this variant.</span>
+                                </div>
+                                :
+                                <div>
+                                {this.state.hasEspData ?
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Population</th>
+                                                <th colSpan="2">Allele Count</th>
+                                                <th colSpan="3">Genotype Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {espStatic._order.map(key => {
+                                                return (this.renderEspRow(key, esp, espStatic));
+                                            })}
+                                            {this.renderEspRow('_tot', esp, espStatic, 'All Allele', 'count')}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr className="count">
+                                                <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                    :
+                                    <div className="panel-body">
+                                        <span>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']} target="_blank">Search ESP</a> for this variant.</span>
+                                    </div>
+                                }
                                 </div>
                             }
                         </div>
