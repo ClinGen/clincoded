@@ -175,11 +175,12 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     },
 
     handleDescriptionChange: function(ref, e) {
-        this.setState({descriptionInput: this.refs[ref].getValue()});
-    },
+        if (ref === 'description') {
+            this.setState({descriptionInput: this.refs[ref].getValue()});
+        } else if (ref === 'edit-description') {
+            this.setState({editDescriptionInput: this.refs[ref].getValue()});
+        }
 
-    handleEditDescriptionChange: function(ref, e) {
-        this.setState({editDescriptionInput: this.refs[ref].getValue()});
     },
 
     renderInterpretationExtraEvidenceEdit: function(extra_evidence) {
@@ -191,7 +192,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                         <Input type="text" ref="edit-target" value={extra_evidence['@id']} inputDisabled={true} groupClassName="hidden" />
                         <Input type="text" ref="edit-pmid" value={extra_evidence.articles[0].pmid} inputDisabled={true} groupClassName="hidden" />
                         <Input type="textarea" ref="edit-description" rows="2" label="Evidence:" value={extra_evidence.description} defaultValue={extra_evidence.description}
-                            labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" handleChange={this.handleEditDescriptionChange} />
+                            labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" handleChange={this.handleDescriptionChange} />
                         <div className="curation-submit clearfix">
                             <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel Edit</button>
                             <Input type="submit" inputClassName="btn-info pull-right btn-inline-spacer" id="submit" title="Edit"
@@ -250,7 +251,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                             <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
 
                                             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                                <Input type="textarea" ref="description" rows="2" label="Evidence:"
+                                                <Input type="textarea" ref="description" rows="2" label="Evidence:" handleChange={this.handleDescriptionChange}
                                                     labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
                                                 <div className="curation-submit clearfix">
                                                     <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelAddEvidenceButton}>Cancel</button>
