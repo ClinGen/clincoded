@@ -13,6 +13,7 @@ var AddResourceId = add_external_resource.AddResourceId;
 var panel = require('../../../libs/bootstrap/panel');
 var form = require('../../../libs/bootstrap/form');
 var curator = require('../../curator');
+var PmidSummary = curator.PmidSummary;
 
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -46,52 +47,52 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     },
 
     updatePmid: function(article) {
-        console.log(article);
         this.setState({pmid: article.pmid});
     },
 
     updateInterpretationPmids: function() {
         this.setState({submitBusy: true}); // Save button pressed; disable it and start spinner
-        let external_evidence = {
-            variant: this.state.interpretation.variant['@id'],
-            category: 'experimental',
-            articles: [this.state.pmid],
-            description: 'N/A'
-        };
+        let flatInterpretation = null;
+        let freshInterpretation = null;
 
-        this.postRestData('/external-evidence/', external_evidence).then(data => {
-            console.log(data);
-        });
-        /*
-        var flatInterpretation = null;
-        var freshInterpretation = null;
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
             freshInterpretation = interpretation;
-            // get fresh update of interpretation object so we have newest evaluation list, then flatten it
             flatInterpretation = curator.flatten(freshInterpretation);
 
-            if (!flatInterpretation.completed_sections) {
-                flatInterpretation.completed_sections = [];
-            }
+            let extra_evidence = {
+                variant: this.state.interpretation.variant['@id'],
+                category: 'experimental',
+                subcategory: 'experimental-studies',
+                articles: [this.state.pmid],
+                description: 'N/A'
+            };
 
-            if (flatInterpretation.completed_sections.indexOf(this.props.tabName) == -1) {
-                flatInterpretation.completed_sections.push(this.props.tabName);
-            } else {
-                flatInterpretation.completed_sections.splice(flatInterpretation.completed_sections.indexOf(this.props.tabName), 1);
-            }
+            return this.postRestData('/extra-evidence/', extra_evidence).then(result => {
+                if (!flatInterpretation.extra_evidence_list) {
+                    flatInterpretation.extra_evidence_list = [];
+                }
 
-            return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
-                return Promise.resolve(data['@graph'][0]);
+                flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
+
+                return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                    return Promise.resolve(data['@graph'][0]);
+                });
             });
         }).then(interpretation => {
-            // REST handling is done. Re-enable Save button, and send the interpretation object back to index.js
             this.setState({submitBusy: false});
             this.props.updateInterpretationObj();
-        }).catch(error => {
-            this.setState({submitBusy: false});
-            console.log(error);
         });
-        */
+    },
+
+    renderInterpretationExtraEvidence: function(extra_evidence) {
+        return (
+            <tr key={extra_evidence.subcategory + '_' + extra_evidence.articles[0].pmid}>
+                <td><PmidSummary article={extra_evidence.articles[0]} displayJournal /></td>
+                <td>{extra_evidence.description}</td>
+                <td>Edit | Delete</td>
+            </tr>
+
+        );
     },
 
     render: function() {
@@ -120,16 +121,41 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                             </div>
                         </div>
                     : null}
-                </Panel></PanelGroup>
 
-                {this.state.interpretation ?
-                    <div>
-                        <AddResourceId resourceType="pubmed"
-                            protocol={this.props.href_url.protocol} parentObj={this.state.interpretation} buttonText="Add New PMID" modalButtonText="Add Article" updateParentForm={this.updatePmid} buttonOnly={true} />
-                        {this.state.pmid}
-                        <span onClick={this.updateInterpretationPmids}>Update</span>
-                    </div>
-                : null}
+                    {this.state.interpretation ?
+                        <div className="panel panel-info">
+                            <div className="panel-heading"><h3 className="panel-title">PubMed Evidence</h3></div>
+                            <div className="panel-content-wrapper">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Article</th>
+                                            <th>Description</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.state.interpretation.extra_evidence_list ?
+                                            this.state.interpretation.extra_evidence_list.map(extra_evidence => {
+                                                if (extra_evidence.subcategory === 'experimental-studies') {
+                                                    return (this.renderInterpretationExtraEvidence(extra_evidence));
+                                                }
+                                            })
+                                        : null}
+                                        <tr>
+                                            <td colSpan="3">
+                                                <AddResourceId resourceType="pubmed"
+                                                    protocol={this.props.href_url.protocol} parentObj={this.state.interpretation} buttonText="Add New PMID" modalButtonText="Add Article" updateParentForm={this.updatePmid} buttonOnly={true} />
+                                                {this.state.pmid}
+                                                <span onClick={this.updateInterpretationPmids}>Update</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    : null}
+                </Panel></PanelGroup>
 
                 {this.state.interpretation ?
                     <CompleteSection interpretation={this.state.interpretation} tabName="experimental" updateInterpretationObj={this.props.updateInterpretationObj} />

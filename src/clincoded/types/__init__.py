@@ -1004,7 +1004,9 @@ class Interpretation(Item):
         'evaluations.computational.submitted_by',
         'provisional_variant',
         'provisional_variant.submitted_by',
-        'externalEvidenceList'
+        'extra_evidence_list',
+        'extra_evidence_list.articles',
+        'extra_evidence_list.articles.submitted_by'
     ]
 
     @calculated_property(schema={
@@ -1057,14 +1059,14 @@ class Interpretation(Item):
 
 
 @collection(
-    name='external-evidence',
+    name='extra-evidence',
     properties={
-        'title': "External evidence for VCI",
-        'description': 'External evidence for VCI',
+        'title': "Extra evidence for VCI",
+        'description': 'Extra evidence for VCI',
     })
-class ExternalEvidence(Item):
-    item_type = 'external_evidence'
-    schema = load_schema('clincoded:schemas/external_evidence.json')
+class ExtraEvidence(Item):
+    item_type = 'extra_evidence'
+    schema = load_schema('clincoded:schemas/extra_evidence.json')
     embedded = [
         'variant',
         'articles',

@@ -1,9 +1,10 @@
 {
-    "title": "external_evidence",
-    "id": "/profiles/external_evidence.json",
-    "description": "External evidence group for a VCI interpretation",
+    "title": "extra_evidence",
+    "id": "/profiles/extra_evidence.json",
+    "description": "Extra evidence group for a VCI interpretation",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "required": ["variant"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -34,7 +35,7 @@
         },
         "articles": {
             "title": "List of articles",
-            "descripton": "List of articles part of this external evidence group",
+            "description": "List of articles part of this external evidence group",
             "type": "array",
             "default": [],
             "items": {

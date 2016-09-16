@@ -100,14 +100,14 @@
             "description": "Flag to mark interpretation status as Provisional",
             "type": "boolean"
         },
-        "externalEvidenceList": {
-            "title": "External Evidence",
-            "description": "List of external evidence objects",
+        "extra_evidence_list": {
+            "title": "Extra Evidence",
+            "description": "List of extra evidence objects",
             "type": "array",
             "items": {
-                "title": "externalEvidence",
+                "title": "extra_evidence",
                 "type": "string",
-                "linkTo": "external_evidence"
+                "linkTo": "extra_evidence"
             }
         }
     },
