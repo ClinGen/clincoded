@@ -15,15 +15,6 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 
-/*
-NOTE: disease dependency of criteria codes are in a state of flux right now. The mapping to actually
-dictate whether or not a criteria is disease-dependent is in ../mapping/evidence_code.json, but the
-code to deal with the associated form rendering and storing is here. If criteria codes need to have
-their disease dependency modified, edit evidence_code. To change or remove its behavior, edit here
-(if re-enabling, search for 'DISEASE DEPENDENCY RESTRICTION' and read involved notes. For other tweaks,
-search for 'diseaseCriteria', 'diseaseAssociated', 'diseaseDependent', and finally 'disease')
-*/
-
 // Form component to be re-used by various tabs
 var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
@@ -44,7 +35,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         return {
             submitBusy: false, // spinner for Save button
             editBusy: false, // spinner for Edit button
-            removeBusy: false, // spinner for Remove button
+            deleteBusy: false, // spinner for Delete button
             updateMsg: null,
             tempEvidence: null,
             editEvidenceId: null,
@@ -140,8 +131,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         this.setState({editEvidenceId: null, editDescriptionInput: null});
     },
 
-    removeEvidence: function(id) {
-        this.setState({removeBusy: true});
+    deleteEvidence: function(id) {
+        this.setState({deleteBusy: true});
         let flatInterpretation = null;
         let freshInterpretation = null;
 
@@ -155,10 +146,10 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 return Promise.resolve(data['@graph'][0]);
             });
         }).then(interpretation => {
-            this.setState({removeBusy: false});
+            this.setState({deleteBusy: false});
             this.props.updateInterpretationObj();
         }).catch(error => {
-            this.setState({removeBusy: false});
+            this.setState({deleteBusy: false});
             console.log(error);
         });
     },
@@ -170,8 +161,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 <td className="col-md-5">{extra_evidence.description}</td>
                 <td className="col-md-2">
                     <button className="btn btn-default btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence.articles[0].pmid)}>Edit</button>
-                    <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Remove" submitBusy={this.state.removeBusy}
-                        clickHandler={() => this.removeEvidence(extra_evidence['@id'])} />
+                    <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
+                        clickHandler={() => this.deleteEvidence(extra_evidence['@id'])} />
                 </td>
             </tr>
         );
