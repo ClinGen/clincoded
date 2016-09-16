@@ -55,8 +55,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                             </div>
                         </div>
                     : null}
-
-                    {this.state.interpretation ?
+                    {(this.props.data && this.state.interpretation) ?
                         <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="observed-in-healthy" href_url={this.props.href_url}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
@@ -73,8 +72,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                             </div>
                         </div>
                     : null}
-
-                    {this.state.interpretation ?
+                    {(this.props.data && this.state.interpretation) ?
                         <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="case-control" href_url={this.props.href_url}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}

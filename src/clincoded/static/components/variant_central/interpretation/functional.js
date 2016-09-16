@@ -69,8 +69,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                             </div>
                         </div>
                     : null}
-
-                    {this.state.interpretation ?
+                    {(this.props.data && this.state.interpretation) ?
                         <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="experimental-studies" href_url={this.props.href_url}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
