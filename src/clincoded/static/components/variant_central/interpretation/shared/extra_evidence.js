@@ -90,9 +90,15 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
 
                 // update interpretation object
-                return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
-                    return Promise.resolve(data['@graph'][0]);
+                return this.recordHistory('add-hide', result['@graph'][0]).then(addHistory => {
+                    return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                        return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+
+                    });
                 });
+
             });
         }).then(interpretation => {
             // upon successful save, set everything to default state, and trigger updateInterptationObj callback
@@ -140,9 +146,11 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         };
 
         this.putRestData(this.refs['edit-target'].getValue(), extra_evidence).then(result => {
-            // upon successful save, set everything to default state, and trigger updateInterptationObj callback
-            this.setState({editBusy: false, editEvidenceId: null, editDescriptionInput: null});
-            this.props.updateInterpretationObj();
+            this.recordHistory('modify-hide', result['@graph'][0]).then(addHistory => {
+                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
+                this.setState({editBusy: false, editEvidenceId: null, editDescriptionInput: null});
+                this.props.updateInterpretationObj();
+            });
         }).catch(error => {
             this.setState({editBusy: false, editEvidenceId: null, editDescriptionInput: null});
             console.log(error);
@@ -169,17 +177,21 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         };
 
         this.putRestData(evidence['@id'], extra_evidence).then(result => {
-            this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
-                // get updated interpretation object, then flatten it
-                freshInterpretation = interpretation;
-                flatInterpretation = curator.flatten(freshInterpretation);
+            return this.recordHistory('delete-hide', result['@graph'][0]).then(deleteHistory => {
+                return this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+                    // get updated interpretation object, then flatten it
+                    freshInterpretation = interpretation;
+                    flatInterpretation = curator.flatten(freshInterpretation);
 
-                // remove removed evidence from evidence list
-                flatInterpretation.extra_evidence_list.splice(flatInterpretation.extra_evidence_list.indexOf(deleteTargetId), 1);
+                    // remove removed evidence from evidence list
+                    flatInterpretation.extra_evidence_list.splice(flatInterpretation.extra_evidence_list.indexOf(deleteTargetId), 1);
 
-                // update the interpretation object
-                return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
-                    return Promise.resolve(data['@graph'][0]);
+                    // update the interpretation object
+                    return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                        return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    });
                 });
             }).then(interpretation => {
                 // upon successful save, set everything to default state, and trigger updateInterptationObj callback
@@ -241,7 +253,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         );
     },
 
-
     render: function() {
         let relevantEvidenceList = [];
         if (this.state.interpretation && this.state.interpretation.extra_evidence_list) {
@@ -251,7 +262,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 }
             });
         }
-        let parentObj = {/*
+        let parentObj = {/* // BEHAVIOR TBD
             '@type': ['evidenceList'],
             'evidenceList': relevantEvidenceList
         */};

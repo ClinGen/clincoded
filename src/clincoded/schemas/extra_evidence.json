@@ -49,6 +49,11 @@
             "title": "Description",
             "description": "Description for external evidence",
             "type": "string"
+        },
+        "experimentalType": {
+            "title": "Experimental Type",
+            "description": "Experimental Type",
+            "type": "string"
         }
     },
     "columns": {

@@ -41,7 +41,8 @@
                 "pathogenicity",
                 "provisionalClassification",
                 "variant",
-                "interpretation"
+                "interpretation",
+                "extra_evidence"
             ]
         },
         "hidden": {
