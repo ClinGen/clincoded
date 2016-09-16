@@ -15,14 +15,14 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 
-// Form component to be re-used by various tabs
+// Class to render the extra evidence table in VCI, and handle any interactions with it
 var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
 
     propTypes: {
-        category: React.PropTypes.string,
-        subcategory: React.PropTypes.string,
-        href_url: React.PropTypes.object,
+        category: React.PropTypes.string, // category (usually the tab) the evidence is part of
+        subcategory: React.PropTypes.string, // subcategory (usually the panel) the evidence is part of
+        href_url: React.PropTypes.object, // href_url object
         interpretation: React.PropTypes.object, // parent interpretation object
         updateInterpretationObj: React.PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
     },
@@ -37,28 +37,28 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
             editBusy: false, // spinner for Edit button
             deleteBusy: false, // spinner for Delete button
             updateMsg: null,
-            tempEvidence: null,
-            editEvidenceId: null,
-            descriptionInput: null,
-            editDescriptionInput: null,
+            tempEvidence: null, // evidence object brought in my AddResourceId modal
+            editEvidenceId: null, // the ID of the evidence to be edited from the table
+            descriptionInput: null, // state to store the description input content
+            editDescriptionInput: null, // state to store the edit description input content
             interpretation: this.props.interpretation // parent interpretation object
         };
     },
 
-    componentDidMount: function() {
-    },
-
     componentWillReceiveProps: function(nextProps) {
+        // Update interpretation object when received
         if (nextProps.interpretation) {
             this.setState({interpretation: nextProps.interpretation});
         }
     },
 
     updateTempEvidence: function(article) {
+        // Called by AddResourceId modal upon closing modal. Updates the tempEvidence state and clears description input
         this.setState({tempEvidence: article, descriptionInput: null});
     },
 
     submitForm: function(e) {
+        // Called when Add PMID form is submitted
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.setState({submitBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
 
@@ -69,9 +69,11 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         let freshInterpretation = null;
 
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+            // get updated interpretation object, then flatten it
             freshInterpretation = interpretation;
             flatInterpretation = curator.flatten(freshInterpretation);
 
+            // create extra_evidence object to be inserted
             let extra_evidence = {
                 variant: this.state.interpretation.variant['@id'],
                 category: this.props.category,
@@ -81,16 +83,19 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
             };
 
             return this.postRestData('/extra-evidence/', extra_evidence).then(result => {
+                // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
                 if (!flatInterpretation.extra_evidence_list) {
                     flatInterpretation.extra_evidence_list = [];
                 }
                 flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
 
+                // update interpretation object
                 return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
                     return Promise.resolve(data['@graph'][0]);
                 });
             });
         }).then(interpretation => {
+            // upon successful save, set everything to default state, and trigger updateInterptationObj callback
             this.setState({submitBusy: false, tempEvidence: null, descriptionInput: null});
             this.props.updateInterpretationObj();
         }).catch(error => {
@@ -100,26 +105,32 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     },
 
     cancelAddEvidenceButton: function(e) {
+        // called when the Cancel button is pressed during Add PMID
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.setState({tempEvidence: null, descriptionInput: null});
     },
 
     editEvidenceButton: function(index) {
+        // called when the Edit button is pressed for an existing evidence
         this.setState({editEvidenceId: index, editDescriptionInput: null});
     },
 
     cancelEditEvidenceButton: function(e) {
+        // called when the Cancel button is pressed while editing an existing evidence
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.setState({editEvidenceId: null, editDescriptionInput: null});
     },
 
     submitEditForm: function(e) {
+        // called when Edit PMID form is submitted
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.setState({editBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
 
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
+        // since the extra_evidence object is really simple, and the description is the only thing changing,
+        // make a new one instead of getting an updated and flattened one
         let extra_evidence = {
             variant: this.state.interpretation.variant['@id'],
             category: this.props.category,
@@ -129,6 +140,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         };
 
         this.putRestData(this.refs['edit-target'].getValue(), extra_evidence).then(result => {
+            // upon successful save, set everything to default state, and trigger updateInterptationObj callback
             this.setState({editBusy: false, editEvidenceId: null, editDescriptionInput: null});
             this.props.updateInterpretationObj();
         }).catch(error => {
@@ -138,20 +150,25 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     },
 
     deleteEvidence: function(id) {
+        // called when the Delete button for an existing evidence is pressed
         this.setState({deleteBusy: true});
         let flatInterpretation = null;
         let freshInterpretation = null;
 
         this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+            // get updated interpretation object, then flatten it
             freshInterpretation = interpretation;
             flatInterpretation = curator.flatten(freshInterpretation);
 
+            // remove removed evidence from evidence list
             flatInterpretation.extra_evidence_list.splice(flatInterpretation.extra_evidence_list.indexOf(id), 1);
 
+            // update the interpretation object
             return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
                 return Promise.resolve(data['@graph'][0]);
             });
         }).then(interpretation => {
+            // upon successful save, set everything to default state, and trigger updateInterptationObj callback
             this.setState({deleteBusy: false});
             this.props.updateInterpretationObj();
         }).catch(error => {
@@ -161,6 +178,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     },
 
     renderInterpretationExtraEvidence: function(extra_evidence) {
+        // for rendering the evidence in tabular format
         return (
             <tr key={extra_evidence.subcategory + '_' + extra_evidence.articles[0].pmid}>
                 <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
@@ -175,6 +193,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     },
 
     handleDescriptionChange: function(ref, e) {
+        // handles updating the state on textbox input change
         if (ref === 'description') {
             this.setState({descriptionInput: this.refs[ref].getValue()});
         } else if (ref === 'edit-description') {
