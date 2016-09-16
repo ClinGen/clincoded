@@ -98,6 +98,20 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         });
     },
 
+    cancelAddEvidenceButton: function(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+        this.setState({tempEvidence: null});
+    },
+
+    editEvidenceButton: function(index) {
+        this.setState({editEvidenceId: index, editDescriptionInput: null});
+    },
+
+    cancelEditEvidenceButton: function(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+        this.setState({editEvidenceId: null, editDescriptionInput: null});
+    },
+
     submitEditForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.setState({editBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
@@ -120,15 +134,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
             this.setState({editBusy: false, editEvidenceId: null, editDescriptionInput: null});
             console.log(error);
         });
-    },
-
-    editEvidenceButton: function(index) {
-        this.setState({editEvidenceId: index, editDescriptionInput: null});
-    },
-
-    cancelEditEvidenceButton: function(e) {
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setState({editEvidenceId: null, editDescriptionInput: null});
     },
 
     deleteEvidence: function(id) {
@@ -243,7 +248,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                                 <Input type="textarea" ref="description" rows="2" label="Evidence:"
                                                     labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
                                                 <div className="curation-submit clearfix">
-                                                    <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel</button>
+                                                    <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelAddEvidenceButton}>Cancel</button>
                                                     <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={this.state.interpretation} wrapperClass="pull-right btn-inline-spacer" buttonClass="btn-info"
                                                         buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
                                                     <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
