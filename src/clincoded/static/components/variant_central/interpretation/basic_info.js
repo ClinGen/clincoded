@@ -240,9 +240,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 {condition.identifiers && condition.identifiers.length ?
                     <span className="identifiers"> [<ul className="clearfix">
                         {condition.identifiers.map(function(identifier, i) {
+                            let url = self.handleLinkOuts(identifier.id, identifier.db);
                             return (
                                 <li key={i} className="xref-linkout">
-                                    <a href={self.handleLinkOuts(identifier.id, identifier.db)} target="_blank">{identifier.db === 'Human Phenotype Ontology' ? 'HPO' : identifier.db}</a>
+                                    {url ?
+                                        <a href={url} target="_blank">{identifier.db === 'Human Phenotype Ontology' ? 'HPO' : identifier.db}</a>
+                                        :
+                                        <span>{identifier.db + ': ' + identifier.id}</span>
+                                    }
                                 </li>
                             );
                         })}
@@ -274,7 +279,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 url = external_url_map['HPO'] + id;
                 break;
             default:
-                url = '#';
+                url = null;
+                //url = '#';
         }
         return url;
     },
