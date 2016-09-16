@@ -53,15 +53,43 @@ var VariantCurationHub = React.createClass({
             loading_myVariantInfo: true,
             loading_myGeneInfo: true,
             loading_bustamante: true,
-            calculated_pathogenicity: null
+            calculated_pathogenicity: null,
+            hasExistingInterpretation: false,
+            isInterpretationActive: false,
+            hasAssociatedDisease: false,
+            provisionalPathogenicity: null,
+            provisionalReason: null,
+            provisionalInterpretation: false,
+            disabledProvisionalCheckbox: true
         };
     },
 
     componentDidMount: function() {
         this.getClinVarData(this.state.variantUuid);
         if (this.state.interpretationUuid) {
+            this.setState({hasExistingInterpretation: true});
+            if (this.state.editKey && this.state.editKey === 'true') {
+                this.setState({isInterpretationActive: true});
+            }
             this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
-                this.setState({interpretation: interpretation});
+                this.setState({interpretation: interpretation}, () => {
+                    if (this.state.interpretation.disease) {
+                        this.setState({hasAssociatedDisease: true});
+                    }
+                    if (interpretation.provisional_variant && interpretation.provisional_variant.length) {
+                        this.setState({
+                            provisionalPathogenicity: interpretation.provisional_variant[0].alteredClassification,
+                            provisionalReason: interpretation.provisional_variant[0].reason
+                        }, () => {
+                            if (this.state.provisionalPathogenicity && this.state.provisionalReason) {
+                                this.setState({disabledProvisionalCheckbox: false});
+                            }
+                        });
+                    }
+                    if (this.state.interpretation.markAsProvisional) {
+                        this.setState({provisionalInterpretation: true});
+                    }
+                });
             });
         }
         if (this.state.summaryKey) {
@@ -318,7 +346,11 @@ var VariantCurationHub = React.createClass({
     // method to update the interpretation object and send it down to child components on demand
     updateInterpretationObj: function() {
         this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
-            this.setState({interpretation: interpretation});
+            this.setState({interpretation: interpretation}, () => {
+                if (this.state.interpretation.disease) {
+                    this.setState({hasAssociatedDisease: true});
+                }
+            });
         });
     },
 
@@ -339,6 +371,27 @@ var VariantCurationHub = React.createClass({
         }
     },
 
+    // Method to persist provisional evaluation states
+    setProvisionalEvaluation: function(field, value) {
+        if (field === 'provisional-pathogenicity') {
+            this.setState({provisionalPathogenicity: value}, () => {
+                if (this.state.provisionalPathogenicity && this.state.provisionalReason) {
+                    this.setState({disabledProvisionalCheckbox: false});
+                }
+            });
+        }
+        if (field === 'provisional-reason') {
+            this.setState({provisionalReason: value}, () => {
+                if (this.state.provisionalPathogenicity && this.state.provisionalReason) {
+                    this.setState({disabledProvisionalCheckbox: false});
+                }
+            });
+        }
+        if (field === 'provisional-interpretation') {
+            this.setState({provisionalInterpretation: value});
+        }
+    },
+
     render: function() {
         var variantData = this.state.variantObj;
         var interpretation = (this.state.interpretation) ? this.state.interpretation : null;
@@ -356,7 +409,9 @@ var VariantCurationHub = React.createClass({
                     <div>
                         <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab} />
                         <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
-                            href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
+                            href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj}
+                            hasExistingInterpretation={this.state.hasExistingInterpretation} isInterpretationActive={this.state.isInterpretationActive}
+                            hasAssociatedDisease={this.state.hasAssociatedDisease} />
                         <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
                             ext_myGeneInfo={(this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : this.state.ext_myGeneInfo_VEP}
@@ -380,7 +435,13 @@ var VariantCurationHub = React.createClass({
                             setCalculatedPathogenicity={this.setCalculatedPathogenicity} />
                     </div>
                     :
-                    <EvaluationSummary interpretation={interpretation} calculatedAssertion={calculated_pathogenicity} updateInterpretationObj={this.updateInterpretationObj} />
+                    <EvaluationSummary interpretation={interpretation} calculatedAssertion={calculated_pathogenicity}
+                        updateInterpretationObj={this.updateInterpretationObj}
+                        setProvisionalEvaluation={this.setProvisionalEvaluation}
+                        provisionalPathogenicity={this.state.provisionalPathogenicity}
+                        provisionalReason={this.state.provisionalReason}
+                        provisionalInterpretation={this.state.provisionalInterpretation}
+                        disabledProvisionalCheckbox={this.state.disabledProvisionalCheckbox} />
                 }
             </div>
         );
