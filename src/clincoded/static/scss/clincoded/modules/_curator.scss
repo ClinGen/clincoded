@@ -1897,6 +1897,14 @@ dl.inline-dl {
     text-overflow: clip;
 }
 
+/* View Summary button */
+.view-summary {
+    &:focus,
+    &:active {
+        outline: none;
+    }
+}
+
 /* Evaluation summary table UIs */
 .evaluation-summary {
     h2 {
