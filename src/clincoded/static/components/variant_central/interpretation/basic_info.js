@@ -405,7 +405,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 </div>
 
                 <div className="panel panel-info datasource-clinvar-interpretaions">
-                    <div className="panel-heading"><h3 className="panel-title">ClinVar Interpretations</h3></div>
+                    <div className="panel-heading"><h3 className="panel-title">ClinVar Interpretation and Supporting Records</h3></div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_clinvarRCV ? showActivityIndicator('Retrieving data... ') : null}
                         {(clinVarRCV.length > 0) ?
