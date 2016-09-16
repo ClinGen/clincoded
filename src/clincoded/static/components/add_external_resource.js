@@ -384,6 +384,17 @@ function pubmedValidateForm() {
             }
         }
     }
+    // valid if parent object is evidence list (VCI) and input isn't already associated with it
+    if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'evidenceList') {
+        for (var j = 0; j < this.props.parentObj.evidenceList.length; j++) {
+            if (this.props.parentObj.evidenceList[j].articles[0].pmid == formInput) {
+                valid = false;
+                this.setFormErrors('resourceId', 'This article has already been associated with this evidence group');
+                this.setState({submitBusy: false});
+                break;
+            }
+        }
+    }
     return valid;
 }
 function pubmedQueryResource() {
