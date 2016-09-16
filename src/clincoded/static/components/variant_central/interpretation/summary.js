@@ -14,16 +14,23 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
     propTypes: {
         interpretation: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
-        calculatedAssertion: React.PropTypes.string
+        setProvisionalEvaluation: React.PropTypes.func,
+        calculatedAssertion: React.PropTypes.string,
+        provisionalPathogenicity: React.PropTypes.string,
+        provisionalReason: React.PropTypes.string,
+        provisionalInterpretation: React.PropTypes.bool,
+        disabledProvisionalCheckbox: React.PropTypes.bool
     },
 
     getInitialState: function() {
         return {
             interpretation: this.props.interpretation,
             calculatedAssertion: this.props.calculatedAssertion,
-            provisionalPathogenicity: null,
-            provisionalReason: null,
-            provisionalInterpretation: false,
+            autoClassification: null,
+            provisionalPathogenicity: this.props.provisionalPathogenicity,
+            provisionalReason: this.props.provisionalReason,
+            provisionalInterpretation: this.props.provisionalInterpretation,
+            disabledCheckbox: this.props.disabledProvisionalCheckbox,
             submitBusy: false, // spinner for Save button
             updateMsg: null
         };
@@ -31,30 +38,53 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
 
     componentWillReceiveProps: function(nextProps) {
         if (nextProps.interpretation && this.props.interpretation) {
-            this.setState({interpretation: nextProps.interpretation}, () => {
-                if (this.state.interpretation.provisional_variant && this.state.interpretation.provisional_variant.length) {
-                    this.setState({
-                        provisionalPathogenicity: this.state.interpretation.provisional_variant[0].alteredClassification,
-                        provisionalReason: this.state.interpretation.provisional_variant[0].reason
-                    });
-                }
-            });
+            this.setState({interpretation: nextProps.interpretation});
         }
         if (nextProps.calculatedAssertion && this.props.calculatedAssertion) {
             this.setState({calculatedAssertion: nextProps.calculatedAssertion});
         }
+        if (nextProps.provisionalPathogenicity) {
+            this.setState({provisionalPathogenicity: nextProps.provisionalPathogenicity});
+        }
+        if (nextProps.provisionalReason) {
+            this.setState({provisionalReason: nextProps.provisionalReason});
+        }
+        this.setState({
+            provisionalInterpretation: nextProps.provisionalInterpretation,
+            disabledCheckbox: nextProps.disabledProvisionalCheckbox
+        });
     },
 
     // Handle value changes in forms
     handleChange: function(ref, e) {
-        if (ref === 'provisional-pathogenicity' && this.refs[ref].getValue()) {
-            this.setState({provisionalPathogenicity: this.refs[ref].getValue()});
+        if (ref === 'provisional-pathogenicity') {
+            if (this.refs[ref].getValue()) {
+                this.setState({provisionalPathogenicity: this.refs[ref].getValue()}, () => {
+                    this.props.setProvisionalEvaluation('provisional-pathogenicity', this.state.provisionalPathogenicity);
+                    if (this.state.provisionalReason) {
+                        this.setState({disabledCheckbox: false});
+                    }
+                });
+            } else {
+                this.setState({provisionalPathogenicity: null, disabledCheckbox: true});
+            }
         }
-        if (ref === 'provisional-reason' && this.refs[ref].getValue()) {
-            this.setState({provisionalReason: this.refs[ref].getValue()});
+        if (ref === 'provisional-reason') {
+            if (this.refs[ref].getValue()) {
+                this.setState({provisionalReason: this.refs[ref].getValue()}, () => {
+                    this.props.setProvisionalEvaluation('provisional-reason', this.state.provisionalReason);
+                    if (this.state.provisionalPathogenicity) {
+                        this.setState({disabledCheckbox: false});
+                    }
+                });
+            } else {
+                this.setState({provisionalReason: null, disabledCheckbox: true});
+            }
         }
         if (ref === 'provisional-interpretation' && this.refs[ref]) {
-            this.setState({provisionalInterpretation: !this.state.provisionalInterpretation});
+            this.setState({provisionalInterpretation: !this.state.provisionalInterpretation}, () => {
+                this.props.setProvisionalEvaluation('provisional-interpretation', this.state.provisionalInterpretation);
+            });
         }
     },
 
@@ -64,15 +94,19 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
 
         const interpretation = this.state.interpretation;
         const provisionalObj = {
+            'autoClassification': this.state.calculatedAssertion,
             'alteredClassification': this.state.provisionalPathogenicity,
             'reason': this.state.provisionalReason
         };
+        const provisionalInterpretation = this.state.provisionalInterpretation;
         if (interpretation) {
+            let flatInterpretationObj = curator.flatten(interpretation);
+            flatInterpretationObj.markAsProvisional = provisionalInterpretation;
             if (!interpretation.provisional_variant || interpretation.provisional_variant.length < 1) {
                 this.postRestData('/provisional-variant/', provisionalObj).then(result => {
                     this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes saved successfully!</span>});
+                    this.setState({autoClassification: result['@graph'][0]['autoClassification']});
                     let provisionalObjUuid = result['@graph'][0]['@id'];
-                    let flatInterpretationObj = curator.flatten(interpretation);
                     if (!('provisional_variant' in flatInterpretationObj)) {
                         flatInterpretationObj.provisional_variant = [provisionalObjUuid];
                         // Return the newly flattened interpretation object in a Promise
@@ -92,12 +126,18 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                     console.log(err);
                 });
             } else {
-                //let flatProvisionalObj = curator.flatten(provisionalObj);
                 this.putRestData('/provisional-variant/' + interpretation.provisional_variant[0].uuid, provisionalObj).then(response => {
                     this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes updated successfully!</span>});
+                    this.setState({autoClassification: response['@graph'][0]['autoClassification']});
                     this.props.updateInterpretationObj();
                 }).catch(err => {
                     this.setState({submitBusy: false, updateMsg: <span className="text-danger">Unable to update provisional changes.</span>});
+                    console.log(err);
+                });
+                // Also update the interpretation object in case the checkbox value has changed
+                this.putRestData('/interpretation/' + interpretation.uuid, flatInterpretationObj).then(obj => {
+                    this.props.updateInterpretationObj();
+                }).catch(err => {
                     console.log(err);
                 });
             }
@@ -108,9 +148,11 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         let interpretation = this.state.interpretation;
         let evaluations = interpretation ? interpretation.evaluations : null;
         let sortedEvaluations = evaluations ? sortByStrength(evaluations) : null;
-        let calculatedAssertion = this.state.calculatedAssertion;
+        let calculatedAssertion = this.state.autoClassification ? this.state.autoClassification : this.state.calculatedAssertion;
         let provisionalVariant = null;
-        let disabledCheckbox = false;
+        let provisionalInterpretation = this.state.provisionalInterpretation;
+        let disabledCheckbox = this.state.disabledCheckbox;
+        let disabledFormSumbit = (this.state.provisionalPathogenicity && this.state.provisionalReason) ? false : true;
         if (interpretation) {
             if (interpretation.disease && interpretation.disease.term) {
                 switch (calculatedAssertion) {
@@ -135,6 +177,57 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
 
                 {(evaluations && evaluations.length) ?
                     <div className="summary-content-wrapper">
+
+                        <div className="panel panel-info datasource-evaluation-summary-provision">
+                            <div className="panel-body">
+                                <dl className="inline-dl clearfix">
+                                    <dt>Calculated Pathogenicity:</dt>
+                                    <dd>{calculatedAssertion ? calculatedAssertion : 'None'}</dd>
+                                </dl>
+                                <dl className="inline-dl clearfix">
+                                    <dt>Disease:</dt>
+                                    <dd>{interpretation.disease ? interpretation.disease.term : 'None'}</dd>
+                                </dl>
+                                <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                    <div className="evaluation-provision provisional-pathogenicity">
+                                        <div className="col-xs-12 col-sm-6">
+                                            <Input type="select" ref="provisional-pathogenicity" label="Select Provisional Pathogenicity:"
+                                                value={provisionalVariant ? provisionalVariant.alteredClassification : ''}
+                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
+                                                <option value=''>Select an option</option>
+                                                <option value="Benign">Benign</option>
+                                                <option value="Likely benign">Likely Benign</option>
+                                                <option value="Uncertain significance">Uncertain Significance</option>
+                                                <option value="Likely pathogenic">Likely Pathogenic</option>
+                                                <option value="Pathogenic">Pathogenic</option>
+                                            </Input>
+                                        </div>
+                                        <div className="col-xs-12 col-sm-6">
+                                            <Input type="textarea" ref="provisional-reason" label="Explain Reason(s) for change:" rows="5" required
+                                                value={provisionalVariant ? provisionalVariant.reason : null}
+                                                placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, provide a reason for the change here."
+                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
+                                        </div>
+                                    </div>
+                                    <div className="evaluation-provision provisional-interpretation">
+                                        <div className="col-xs-12 col-sm-7">
+                                            <i className="icon icon-question-circle"></i>
+                                            <strong>Mark as Provisional Interpretation</strong>
+                                            <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation} defaultChecked="false"
+                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
+                                        </div>
+                                    </div>
+                                    <div className="provisional-submit">
+                                        <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
+                                            id="submit" title={provisionalVariant ? "Update" : "Save"} submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
+                                        {this.state.updateMsg ?
+                                            <div className="submit-info pull-right">{this.state.updateMsg}</div>
+                                        : null}
+                                    </div>
+                                </Form>
+                            </div>
+                        </div>
+
                         <div className="panel panel-info datasource-evaluation-summary">
                             <div className="panel-heading">
                                 <h3 className="panel-title">Criteria meeting an evaluation strength</h3>
@@ -199,55 +292,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                     </div>
                                 }
                             </table>
-                        </div>
-
-                        <div className="panel panel-info">
-                            <div className="panel-body">
-                                <dl className="inline-dl clearfix">
-                                    <dt>Calculated Pathogenicity:</dt>
-                                    <dd>{calculatedAssertion ? calculatedAssertion : 'None'}</dd>
-                                </dl>
-                                <dl className="inline-dl clearfix">
-                                    <dt>Disease:</dt>
-                                    <dd>{interpretation.disease ? interpretation.disease.term : 'None'}</dd>
-                                </dl>
-                                <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                    <div className="evaluation-provision provisional-pathogenicity">
-                                        <div className="col-xs-12 col-sm-6">
-                                            <Input type="select" ref="provisional-pathogenicity" label="Select Provisional Pathogenicity:"
-                                                value={provisionalVariant ? provisionalVariant.alteredClassification : 'Benign'}
-                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
-                                                <option value="Benign">Benign</option>
-                                                <option value="Likely benign">Likely Benign</option>
-                                                <option value="Uncertain significance">Uncertain Significance</option>
-                                                <option value="Likely pathogenic">Likely Pathogenic</option>
-                                                <option value="Pathogenic">Pathogenic</option>
-                                            </Input>
-                                        </div>
-                                        <div className="col-xs-12 col-sm-6">
-                                            <Input type="textarea" ref="provisional-reason" label="Explain Reason(s) for change:" rows="5"
-                                                value={provisionalVariant ? provisionalVariant.reason : null}
-                                                placeholder="Note: If your selected pathogenicity is different from the Calculated Pathogenicity, provide a reason to explain why."
-                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
-                                        </div>
-                                    </div>
-                                    <div className="evaluation-provision provisional-interpretation">
-                                        <div className="col-xs-12 col-sm-7">
-                                            <i className="icon icon-question-circle"></i>
-                                            <strong>Mark as Provisional Interpretation</strong>
-                                            <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={this.state.provisionalInterpretation} defaultChecked="false"
-                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
-                                        </div>
-                                    </div>
-                                    <div className="provisional-submit">
-                                        <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
-                                            id="submit" title={provisionalVariant ? "Update" : "Save"} submitBusy={this.state.submitBusy} />
-                                        {this.state.updateMsg ?
-                                            <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                        : null}
-                                    </div>
-                                </Form>
-                            </div>
                         </div>
 
                     </div>
@@ -320,7 +364,7 @@ function renderNotEvalCriteriaRow(item, key) {
             <td className="criteria-description col-md-3">{getCriteriaDescription(item)}</td>
             <td className="criteria-modified col-md-1">N/A</td>
             <td className="evaluation-status col-md-2">Not Evaluated</td>
-            <td className="evaluation-description col-md-4">{item.explanation}</td>
+            <td className="evaluation-description col-md-4">{item.explanation ? item.explanation : null}</td>
         </tr>
     );
 }
@@ -490,9 +534,14 @@ function getModifiedLevel(entry) {
 //      {
 //          met: array of sorted met evaluations,
 //          not_met: array of sorted not-met evaluations,
-//          not_evaluated: array of sorted not-evaluated evaluations
+//          not_evaluated: array of sorted not-evaluated and untouched objects;
+//                         untouched obj has only one key:value element (criteria: code)
 //      }
+
 function sortByStrength(evaluations) {
+    // Get all criteria codes
+    let criteriaCodes = Object.keys(evidenceCodes);
+
     let evaluationMet = [];
     let evaluationNotMet = [];
     let evaluationNotEvaluated = [];
@@ -500,12 +549,27 @@ function sortByStrength(evaluations) {
     for (let evaluation of evaluations) {
         if (evaluation.criteriaStatus === 'met') {
             evaluationMet.push(evaluation);
+            criteriaCodes.splice(criteriaCodes.indexOf(evaluation.criteria), 1);
         } else if (evaluation.criteriaStatus === 'not-met') {
             evaluationNotMet.push(evaluation);
+            criteriaCodes.splice(criteriaCodes.indexOf(evaluation.criteria), 1);
         } else {
             evaluationNotEvaluated.push(evaluation);
+            criteriaCodes.splice(criteriaCodes.indexOf(evaluation.criteria), 1);
         }
     }
+
+    // Generate object for earch untouched criteria
+    let untouchedCriteriaObjList = [];
+    if (criteriaCodes.length) {
+        for (let criterion of criteriaCodes) {
+            untouchedCriteriaObjList.push({
+                criteria: criterion
+            });
+        }
+    }
+    // merge not-evaluated and untouched together
+    evaluationNotEvaluated = evaluationNotEvaluated.concat(untouchedCriteriaObjList);
 
     let sortedMetList = [];
     let sortedNotMetList = [];
@@ -566,7 +630,7 @@ function sortByStrength(evaluations) {
     }
 
     // sort Not-Met
-    if (evaluationNotMet) {
+    if (evaluationNotMet.length) {
         // temp storage
         let vs_sa_level = [];
         let strong_level = [];
@@ -599,8 +663,8 @@ function sortByStrength(evaluations) {
         }
     }
 
-    //sort Not-Evaluated
-    if (evaluationNotEvaluated) {
+    //sort Not-Evaluated and untouched
+    if (evaluationNotEvaluated.length) {
         // temp storage
         let vs_sa_level = [];
         let strong_level = [];
