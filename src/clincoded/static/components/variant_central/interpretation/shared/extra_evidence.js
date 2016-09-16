@@ -93,7 +93,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
             this.setState({submitBusy: false, tempEvidence: null});
             this.props.updateInterpretationObj();
         }).catch(error => {
-            this.setState({submitBusy: false, tempEvidence: null});
+            this.setState({submitBusy: false, tempEvidence: null, updateMsg: <span className="text-danger">Something went wrong while trying to save this evidence!</span>});
             console.log(error);
         });
     },
@@ -180,11 +180,11 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                     <Form submitHandler={this.submitEditForm} formClassName="form-horizontal form-std">
                         <Input type="text" ref="edit-target" value={extra_evidence['@id']} inputDisabled={true} groupClassName="hidden" />
                         <Input type="text" ref="edit-pmid" value={extra_evidence.articles[0].pmid} inputDisabled={true} groupClassName="hidden" />
-                        <Input type="textarea" ref="edit-description" rows="2" label="Description:" value={extra_evidence.description} defaultValue={extra_evidence.description}
+                        <Input type="textarea" ref="edit-description" rows="2" label="Evidence:" value={extra_evidence.description} defaultValue={extra_evidence.description}
                             labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" handleChange={this.handleEditDescriptionChange} />
                         <div className="curation-submit clearfix">
-                            <button className="btn btn-info pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel Edit</button>
-                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Edit"
+                            <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel Edit</button>
+                            <Input type="submit" inputClassName="btn-info pull-right btn-inline-spacer" id="submit" title="Edit"
                                 submitBusy={this.state.editBusy} inputDisabled={!(this.state.editDescriptionInput && this.state.editDescriptionInput.length > 0)} />
                             {this.state.updateMsg ?
                                 <div className="submit-info pull-right">{this.state.updateMsg}</div>
@@ -198,42 +198,56 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
 
 
     render: function() {
+        let relevantEvidenceList = [];
+        if (this.state.interpretation && this.state.interpretation.extra_evidence_list) {
+            this.state.interpretation.extra_evidence_list.map(extra_evidence => {
+                if (extra_evidence.subcategory === this.props.subcategory) {
+                    relevantEvidenceList.push(extra_evidence);
+                }
+            });
+        }
+
         return (
             <div className="panel panel-info">
                 <div className="panel-heading"><h3 className="panel-title">PubMed Evidence</h3></div>
                 <div className="panel-content-wrapper">
                     <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Article</th>
-                                <th>Description</th>
-                                <th></th>
-                            </tr>
-                        </thead>
+                        {relevantEvidenceList.length > 0 ?
+                            <thead>
+                                <tr>
+                                    <th>Article</th>
+                                    <th>Evidence</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                        : null}
                         <tbody>
-                            {this.state.interpretation.extra_evidence_list ?
-                                this.state.interpretation.extra_evidence_list.map(extra_evidence => {
-                                    if (extra_evidence.subcategory === this.props.subcategory) {
-                                        return (this.state.editEvidenceId === extra_evidence.articles[0].pmid
-                                            ? this.renderInterpretationExtraEvidenceEdit(extra_evidence)
-                                            : this.renderInterpretationExtraEvidence(extra_evidence));
-                                    }
+                            {relevantEvidenceList.length > 0 ?
+                                relevantEvidenceList.map(evidence => {
+                                    return (this.state.editEvidenceId === evidence.articles[0].pmid
+                                        ? this.renderInterpretationExtraEvidenceEdit(evidence)
+                                        : this.renderInterpretationExtraEvidence(evidence));
                                 })
                             : null}
                             <tr>
                                 <td colSpan="3">
-                                    <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={this.state.interpretation}
-                                        buttonText={this.state.tempEvidence ? "Edit PMID" : "Add PMID"} modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
+                                    {!this.state.tempEvidence ?
+                                    <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={this.state.interpretation} wrapperClass="pull-right" buttonClass="btn-primary"
+                                        buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
+                                    : null}
                                     {this.state.tempEvidence ?
                                         <div>
                                             <PmidSummary article={this.state.tempEvidence} className="alert alert-info col-xs-offset-4" pmidLinkout />
 
                                             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                                <Input type="textarea" ref="description" rows="2" label="Description:"
+                                                <Input type="textarea" ref="description" rows="2" label="Evidence:"
                                                     labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
                                                 <div className="curation-submit clearfix">
                                                     <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
                                                         submitBusy={this.state.submitBusy} inputDisabled={this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated} />
+                                                    <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={this.state.interpretation} wrapperClass="pull-right" buttonClass="btn-info"
+                                                        buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
+                                                    <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel Edit</button>
                                                     {this.state.updateMsg ?
                                                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                                                     : null}
