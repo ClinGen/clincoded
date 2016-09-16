@@ -1173,12 +1173,16 @@
                 text-transform: capitalize;
             }
 
-            .basic-info .clinvar-interpretation .disease .identifiers ul {
+            .basic-info .clinvar-interpretation .disease .identifiers {
                 display: inline-block;
-                list-style: none;
-                margin: 0;
-                padding: 0;
-                vertical-align: bottom;
+
+                ul {
+                    display: inline-block;
+                    list-style: none;
+                    margin: 0;
+                    padding: 0;
+                    vertical-align: bottom;
+                }
             }
 
             .basic-info .clinvar-interpretation .disease .identifiers li {

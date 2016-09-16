@@ -236,9 +236,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         let self = this;
         return (
             <div key={condition.name}>
-                <span className="condition-name">{condition.name}</span>
+                <span className="condition-name">{condition.name}</span>&nbsp;
                 {condition.identifiers && condition.identifiers.length ?
-                    <span className="identifiers"> [<ul className="clearfix">
+                    <span className="identifiers">[<ul className="clearfix">
                         {condition.identifiers.map(function(identifier, i) {
                             let url = self.handleLinkOuts(identifier.id, identifier.db);
                             return (
