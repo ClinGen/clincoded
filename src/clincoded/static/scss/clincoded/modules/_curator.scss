@@ -1154,6 +1154,16 @@
                 }
             }
 
+            .basic-info .datasource-clinvar-interpretaions  {
+                .clinvar-interpretation-summary {
+                    border-bottom: solid 1px #ddd;
+
+                    .reviewStatus:first-letter {
+                        text-transform: capitalize;
+                    }
+                }
+            }
+
             .basic-info .datasource-clinvar-interpretaions .table th,
             .basic-info .datasource-clinvar-interpretaions .table td {
                 width: 16.67%;
