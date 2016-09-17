@@ -31,8 +31,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
             provisionalReason: this.props.provisionalReason,
             provisionalInterpretation: this.props.provisionalInterpretation,
             disabledCheckbox: this.props.disabledProvisionalCheckbox,
+            disabledFormSumbit: false,
             submitBusy: false, // spinner for Save button
-            updateMsg: null
+            updateMsg: null // status message for Save/Update button
         };
     },
 
@@ -60,29 +61,56 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         if (ref === 'provisional-pathogenicity') {
             if (this.refs[ref].getValue()) {
                 this.setState({provisionalPathogenicity: this.refs[ref].getValue()}, () => {
+                    // Pass dropdown state change back to parent component
                     this.props.setProvisionalEvaluation('provisional-pathogenicity', this.state.provisionalPathogenicity);
-                    if (this.state.provisionalReason) {
-                        this.setState({disabledCheckbox: false});
+                    // Disable save button if a reason is not provided for the modification
+                    if (!this.state.provisionalReason) {
+                        this.setState({disabledFormSumbit: true});
+                    } else {
+                        this.setState({disabledFormSumbit: false});
                     }
                 });
             } else {
-                this.setState({provisionalPathogenicity: null, disabledCheckbox: true});
+                this.setState({provisionalPathogenicity: null}, () => {
+                    // Pass null dropdown state change back to parent component
+                    this.props.setProvisionalEvaluation('provisional-pathogenicity', this.state.provisionalPathogenicity);
+                    // Disable save button if a reason is provided without the modification
+                    if (this.state.provisionalReason) {
+                        this.setState({disabledFormSumbit: true});
+                    } else {
+                        this.setState({disabledFormSumbit: false});
+                    }
+                });
             }
         }
         if (ref === 'provisional-reason') {
             if (this.refs[ref].getValue()) {
                 this.setState({provisionalReason: this.refs[ref].getValue()}, () => {
+                    // Pass textarea state change back to parent component
                     this.props.setProvisionalEvaluation('provisional-reason', this.state.provisionalReason);
-                    if (this.state.provisionalPathogenicity) {
-                        this.setState({disabledCheckbox: false});
+                    // Disable save button if a modification is not provided for the reason
+                    if (!this.state.provisionalPathogenicity) {
+                        this.setState({disabledFormSumbit: true});
+                    } else {
+                        this.setState({disabledFormSumbit: false});
                     }
                 });
             } else {
-                this.setState({provisionalReason: null, disabledCheckbox: true});
+                this.setState({provisionalReason: null}, () => {
+                    // Pass null textarea state change back to parent component
+                    this.props.setProvisionalEvaluation('provisional-reason', this.state.provisionalReason);
+                    // Disable save button if a modification is provided without the reason
+                    if (this.state.provisionalPathogenicity) {
+                        this.setState({disabledFormSumbit: true});
+                    } else {
+                        this.setState({disabledFormSumbit: false});
+                    }
+                });
             }
         }
         if (ref === 'provisional-interpretation' && this.refs[ref]) {
             this.setState({provisionalInterpretation: !this.state.provisionalInterpretation}, () => {
+                // Pass checkbox state change back to parent component
                 this.props.setProvisionalEvaluation('provisional-interpretation', this.state.provisionalInterpretation);
             });
         }
@@ -93,6 +121,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         this.setState({submitBusy: true, updateMsg: null});
 
         const interpretation = this.state.interpretation;
+        // Set up 'provisional-variant' object
         const provisionalObj = {
             'autoClassification': this.state.calculatedAssertion,
             'alteredClassification': this.state.provisionalPathogenicity,
@@ -100,7 +129,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         };
         const provisionalInterpretation = this.state.provisionalInterpretation;
         if (interpretation) {
+            // Flattened interpretation object
             let flatInterpretationObj = curator.flatten(interpretation);
+            // Set 'markAsProvisional' property value in the flatten interpretation object
             flatInterpretationObj.markAsProvisional = provisionalInterpretation;
             if (!interpretation.provisional_variant || interpretation.provisional_variant.length < 1) {
                 this.postRestData('/provisional-variant/', provisionalObj).then(result => {
@@ -150,22 +181,13 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         let sortedEvaluations = evaluations ? sortByStrength(evaluations) : null;
         let calculatedAssertion = this.state.autoClassification ? this.state.autoClassification : this.state.calculatedAssertion;
         let provisionalVariant = null;
+        let provisionalPathogenicity = this.state.provisionalPathogenicity;
+        let provisionalReason = this.state.provisionalReason;
         let provisionalInterpretation = this.state.provisionalInterpretation;
         let disabledCheckbox = this.state.disabledCheckbox;
-        let disabledFormSumbit = (this.state.provisionalPathogenicity && this.state.provisionalReason) ? false : true;
+        let disabledFormSumbit = this.state.disabledFormSumbit;
+
         if (interpretation) {
-            if (interpretation.disease && interpretation.disease.term) {
-                switch (calculatedAssertion) {
-                    case 'Likely Pathogenic':
-                        disabledCheckbox === true;
-                        break;
-                    case 'Pathogenic':
-                        disabledCheckbox === true;
-                        break;
-                    default:
-                        disabledCheckbox === false;
-                }
-            }
             if (interpretation.provisional_variant && interpretation.provisional_variant.length) {
                 provisionalVariant = interpretation.provisional_variant[0];
             }
@@ -180,20 +202,37 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
 
                         <div className="panel panel-info datasource-evaluation-summary-provision">
                             <div className="panel-body">
-                                <dl className="inline-dl clearfix">
-                                    <dt>Calculated Pathogenicity:</dt>
-                                    <dd>{calculatedAssertion ? calculatedAssertion : 'None'}</dd>
-                                </dl>
-                                <dl className="inline-dl clearfix">
-                                    <dt>Disease:</dt>
-                                    <dd>{interpretation.disease ? interpretation.disease.term : 'None'}</dd>
-                                </dl>
                                 <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                    <div className="evaluation-provision provisional-pathogenicity">
-                                        <div className="col-xs-12 col-sm-6">
+                                    <div className="col-xs-12 col-sm-6">
+                                        <dl className="inline-dl clearfix">
+                                            <dt>Calculated Pathogenicity:</dt>
+                                            <dd>{calculatedAssertion ? calculatedAssertion : 'None'}</dd>
+                                        </dl>
+                                        <dl className="inline-dl clearfix">
+                                            <dt>Modified Pathogenicity:</dt>
+                                            <dd>{provisionalPathogenicity ? provisionalPathogenicity : 'None'}</dd>
+                                        </dl>
+                                        <dl className="inline-dl clearfix">
+                                            <dt>Disease:</dt>
+                                            <dd>{interpretation.disease ? interpretation.disease.term : 'None'}</dd>
+                                        </dl>
+                                        <div className="evaluation-provision provisional-interpretation">
+                                            <div>
+                                                <i className="icon icon-question-circle"></i>
+                                                <strong>Mark as Provisional Interpretation</strong>
+                                                <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation} defaultChecked="false"
+                                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
+                                            </div>
+                                        </div>
+                                        <div className="alert alert-warning">
+                                            Note: If the Calculated Pathogenicity is "Likely Pathogenic" or "Pathogenic," a disease must first be associated with the interpretation before it is marked as a "Provisional Interpretation".
+                                        </div>
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6">
+                                        <div className="evaluation-provision provisional-pathogenicity">
                                             <Input type="select" ref="provisional-pathogenicity" label="Select Provisional Pathogenicity:"
-                                                value={provisionalVariant ? provisionalVariant.alteredClassification : ''}
-                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}>
+                                                value={provisionalPathogenicity ? provisionalPathogenicity : ''}
+                                                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange}>
                                                 <option value=''>Select an option</option>
                                                 <option value="Benign">Benign</option>
                                                 <option value="Likely benign">Likely Benign</option>
@@ -201,28 +240,18 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                                 <option value="Likely pathogenic">Likely Pathogenic</option>
                                                 <option value="Pathogenic">Pathogenic</option>
                                             </Input>
-                                        </div>
-                                        <div className="col-xs-12 col-sm-6">
                                             <Input type="textarea" ref="provisional-reason" label="Explain Reason(s) for change:" rows="5" required
-                                                value={provisionalVariant ? provisionalVariant.reason : null}
+                                                value={provisionalReason ? provisionalReason : null}
                                                 placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, provide a reason for the change here."
-                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
+                                                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
                                         </div>
-                                    </div>
-                                    <div className="evaluation-provision provisional-interpretation">
-                                        <div className="col-xs-12 col-sm-7">
-                                            <i className="icon icon-question-circle"></i>
-                                            <strong>Mark as Provisional Interpretation</strong>
-                                            <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation} defaultChecked="false"
-                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
+                                        <div className="provisional-submit">
+                                            <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
+                                                id="submit" title={provisionalVariant ? "Update" : "Save"} submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
+                                            {this.state.updateMsg ?
+                                                <div className="submit-info pull-right">{this.state.updateMsg}</div>
+                                            : null}
                                         </div>
-                                    </div>
-                                    <div className="provisional-submit">
-                                        <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
-                                            id="submit" title={provisionalVariant ? "Update" : "Save"} submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
-                                        {this.state.updateMsg ?
-                                            <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                        : null}
                                     </div>
                                 </Form>
                             </div>
