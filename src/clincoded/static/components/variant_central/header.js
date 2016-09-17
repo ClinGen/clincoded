@@ -16,7 +16,8 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
         interpretation: React.PropTypes.object,
         session: React.PropTypes.object,
         setSummaryVisibility: React.PropTypes.func,
-        summaryVisible: React.PropTypes.bool
+        summaryVisible: React.PropTypes.bool,
+        getSelectedTab: React.PropTypes.func
     },
 
     getInitialState: function() {
@@ -46,7 +47,8 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
                 <div className="curation-data-title">
                     <div className="container">
                         <Title data={variant} interpretation={interpretation} interpretationUuid={interpretationUuid}
-                            setSummaryVisibility={this.props.setSummaryVisibility} summaryVisible={this.state.summaryVisible} />
+                            setSummaryVisibility={this.props.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
+                            getSelectedTab={this.props.getSelectedTab} />
                     </div>
                 </div>
                 <div className="container curation-data curation-variant">
