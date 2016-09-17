@@ -53,7 +53,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         loading_myVariantInfo: React.PropTypes.bool,
         loading_myGeneInfo: React.PropTypes.bool,
         loading_bustamante: React.PropTypes.bool,
-        setCalculatedPathogenicity: React.PropTypes.func
+        setCalculatedPathogenicity: React.PropTypes.func,
+        selectedTab:React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -118,6 +119,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         if (nextProps.ext_geneSynonyms) {
             this.setState({ext_geneSynonyms: nextProps.ext_geneSynonyms});
+        }
+        if (nextProps.selectedTab) {
+            this.setState({selectedTab: nextProps.selectedTab});
         }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
