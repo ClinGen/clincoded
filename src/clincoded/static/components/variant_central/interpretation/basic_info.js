@@ -25,6 +25,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_clinvarEutils: React.PropTypes.object,
         ext_clinVarRCV: React.PropTypes.array,
+        ext_clinvarInterpretationSummary: React.PropTypes.object,
         loading_clinvarEutils: React.PropTypes.bool,
         loading_clinvarRCV: React.PropTypes.bool,
         loading_ensemblHgvsVEP: React.PropTypes.bool
@@ -42,6 +43,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             sequence_location: [],
             primary_transcript: {},
             clinVarRCV: [],
+            clinVarInterpretationSummary: {},
             hgvs_GRCh37: null,
             hgvs_GRCh38: null,
             hasHgvsGRCh37: false,
@@ -69,6 +71,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (this.props.ext_clinVarRCV) {
             this.setState({clinVarRCV: this.props.ext_clinVarRCV});
         }
+        if (this.props.ext_clinvarInterpretationSummary) {
+            this.setState({clinVarInterpretationSummary: this.props.ext_clinvarInterpretationSummary});
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -84,6 +89,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
         if (nextProps.ext_clinVarRCV) {
             this.setState({clinVarRCV: nextProps.ext_clinVarRCV});
+        }
+        if (nextProps.ext_clinvarInterpretationSummary) {
+            this.setState({clinVarInterpretationSummary: nextProps.ext_clinvarInterpretationSummary});
         }
         this.setState({
             loading_ensemblHgvsVEP: nextProps.loading_ensemblHgvsVEP,
@@ -385,6 +393,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var GRCh38 = this.state.hgvs_GRCh38;
         var primary_transcript = this.state.primary_transcript;
         var clinVarRCV = this.state.clinVarRCV;
+        var clinVarInterpretationSummary = this.state.clinVarInterpretationSummary;
         var self = this;
 
         var links_38 = null;
@@ -409,25 +418,37 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 </div>
 
                 <div className="panel panel-info datasource-clinvar-interpretaions">
-                    <div className="panel-heading"><h3 className="panel-title">ClinVar Interpretations</h3></div>
+                    <div className="panel-heading"><h3 className="panel-title">ClinVar Interpretation and Supporting Records</h3></div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_clinvarRCV ? showActivityIndicator('Retrieving data... ') : null}
                         {(clinVarRCV.length > 0) ?
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Reference Accession</th>
-                                        <th>Review Status</th>
-                                        <th>Clinical Significance</th>
-                                        <th>Condition [Source]</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {clinVarRCV.map(function(item, i) {
-                                        return (self.renderClinvarInterpretations(item, i));
-                                    })}
-                                </tbody>
-                            </table>
+                            <div className="clinvar-interpretaions-content-wrapper">
+                                <div className="panel-body clearfix clinvar-interpretation-summary">
+                                    <dl className="inline-dl clearfix col-sm-6">
+                                        <dt>Review status:</dt><dd className="reviewStatus">{clinVarInterpretationSummary['ReviewStatus']}</dd>
+                                        <dt>Clinical significance:</dt><dd className="clinicalSignificance">{clinVarInterpretationSummary['ClinicalSignificance']}</dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix col-sm-6">
+                                        <dt>Last evaluated:</dt><dd className="dateLastEvaluated">{moment(clinVarInterpretationSummary['DateLastEvaluated']).format('MMM DD, YYYY')}</dd>
+                                        <dt>Number of submission(s):</dt><dd className="submissionCount">{clinVarInterpretationSummary['SubmissionCount']}</dd>
+                                    </dl>
+                                </div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Reference Accession</th>
+                                            <th>Review Status</th>
+                                            <th>Clinical Significance</th>
+                                            <th>Disease [Source]</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {clinVarRCV.map(function(item, i) {
+                                            return (self.renderClinvarInterpretations(item, i));
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                             :
                             <div className="panel-body">
                                 <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</span>

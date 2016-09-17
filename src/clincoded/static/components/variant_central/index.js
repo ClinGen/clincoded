@@ -15,7 +15,7 @@ var queryKeyValue = globals.queryKeyValue;
 var parseClinvar = require('../../libs/parse-resources').parseClinvar;
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
-import { getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
+import { getClinvarInterpretations, getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
 
 var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
 
@@ -38,10 +38,12 @@ var VariantCurationHub = React.createClass({
             ext_clinvarEutils: null,
             ext_clinVarEsearch: null,
             ext_clinVarRCV: null,
+            ext_clinvarInterpretationSummary: null,
             ext_myGeneInfo_MyVariant: null,
             ext_myGeneInfo_VEP: null,
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
+            ext_singleNucleotide: true,
             loading_clinvarEutils: true,
             loading_clinvarEsearch: true,
             loading_clinvarRCV: true,
@@ -72,6 +74,7 @@ var VariantCurationHub = React.createClass({
             this.fetchMyVariantInfoAndBustamante(this.state.variantObj);
             this.fetchEnsemblVariation(this.state.variantObj);
             this.fetchEnsemblHGVSVEP(this.state.variantObj);
+            this.parseVariantType(this.state.variantObj);
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
@@ -87,7 +90,15 @@ var VariantCurationHub = React.createClass({
                     // Passing 'true' option to invoke 'mixin' function
                     // To extract more ClinVar data for 'Basic Information' tab
                     var variantData = parseClinvar(xml, true);
-                    this.setState({ext_clinvarEutils: variantData, loading_clinvarEutils: false});
+                    // Won't show population/predictor data if variation type is 'Haplotype'
+                    if (variantData.clinvarVariationType && variantData.clinvarVariationType === 'Haplotype') {
+                        this.setState({ext_singleNucleotide: false});
+                    }
+                    this.setState({
+                        ext_clinvarEutils: variantData,
+                        ext_clinvarInterpretationSummary: getClinvarInterpretations(xml),
+                        loading_clinvarEutils: false
+                    });
                     this.handleCodonEsearch(variantData);
                     let clinVarRCVs = getClinvarRCVs(xml);
                     return Promise.resolve(clinVarRCVs);
@@ -211,6 +222,35 @@ var VariantCurationHub = React.createClass({
                 });
             } else {
                 this.setState({loading_ensemblHgvsVEP: false});
+            }
+        }
+    },
+
+    // Method to parse variant type
+    // Won't show population/predictor data if subject is not single nucleotide variant
+    parseVariantType: function(variant) {
+        if (variant) {
+            // Reference to http://www.hgvs.org/mutnomen/recs-DNA.html
+            let seqChangeTypes = ['del', 'dup', 'ins', 'indels', 'inv', 'con'];
+            let genomicHGVS, ncGenomic;
+
+            if (variant.hgvsNames && variant.hgvsNames.GRCh37) {
+                genomicHGVS = variant.hgvsNames.GRCh37;
+            } else if (variant.hgvsNames && variant.hgvsNames.GRCh38) {
+                genomicHGVS = variant.hgvsNames.GRCh38;
+            }
+            // Filter variant by its change type
+            // Look for the <VariantType> node value in first pass
+            // Then look into HGVS term for non-SNV type patterns
+            if (variant.variationType && variant.variationType !== 'single nucleotide variant') {
+                this.setState({ext_singleNucleotide: false});
+            } else if (genomicHGVS) {
+                ncGenomic = genomicHGVS.substring(genomicHGVS.indexOf(':'));
+                seqChangeTypes.forEach(type => {
+                    if (ncGenomic.indexOf(type) > 0) {
+                        this.setState({ext_singleNucleotide: false});
+                    }
+                });
             }
         }
     },
@@ -344,8 +384,10 @@ var VariantCurationHub = React.createClass({
                     ext_clinvarEutils={this.state.ext_clinvarEutils}
                     ext_clinVarEsearch={this.state.ext_clinVarEsearch}
                     ext_clinVarRCV={this.state.ext_clinVarRCV}
+                    ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                     ext_ensemblGeneId={this.state.ext_ensemblGeneId}
                     ext_geneSynonyms={this.state.ext_geneSynonyms}
+                    ext_singleNucleotide={this.state.ext_singleNucleotide}
                     loading_clinvarEutils={this.state.loading_clinvarEutils}
                     loading_clinvarEsearch={this.state.loading_clinvarEsearch}
                     loading_clinvarRCV={this.state.loading_clinvarRCV}

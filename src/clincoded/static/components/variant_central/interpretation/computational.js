@@ -74,6 +74,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         ext_myVariantInfo: React.PropTypes.object,
         ext_bustamante: React.PropTypes.object,
         ext_clinVarEsearch: React.PropTypes.object,
+        ext_singleNucleotide: React.PropTypes.bool,
         loading_bustamante: React.PropTypes.bool,
         loading_myVariantInfo: React.PropTypes.bool,
         loading_clinvarEsearch: React.PropTypes.bool
@@ -114,6 +115,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             },
             computationObjDiff: null,
             computationObjDiffFlag: false,
+            ext_singleNucleotide: this.props.ext_singleNucleotide,
             loading_bustamante: this.props.loading_bustamante,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_clinvarEsearch: this.props.loading_clinvarEsearch
@@ -165,6 +167,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             this.compareExternalDatas(this.state.computationObj, nextProps.interpretation.evaluations);
         }
         this.setState({
+            ext_singleNucleotide: nextProps.ext_singleNucleotide,
             loading_bustamante: nextProps.loading_bustamante,
             loading_myVariantInfo: nextProps.loading_myVariantInfo,
             loading_clinvarEsearch: nextProps.loading_clinvarEsearch
@@ -405,6 +408,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         var clingenPred = (this.state.computationObj && this.state.computationObj.clingen) ? this.state.computationObj.clingen : null;
         var codon = (this.state.codonObj) ? this.state.codonObj : null;
         var computationObjDiffFlag = this.state.computationObjDiffFlag;
+        var singleNucleotide = this.state.ext_singleNucleotide;
 
         var variant = this.props.data;
         var gRCh38 = null;
@@ -455,24 +459,30 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
                             <div className="panel-content-wrapper">
                                 {this.state.loading_bustamante ? showActivityIndicator('Retrieving data... ') : null}
-                                {clingenPred ?
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Source</th>
-                                                <th>Score Range</th>
-                                                <th>Score</th>
-                                                <th>Prediction</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {clingenPredStatic._order.map(key => {
-                                                return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
-                                            })}
-                                        </tbody>
-                                    </table>
+                                {!singleNucleotide ?
+                                    <div className="panel-body"><span>These predictors only return data for missense variants.</span></div>
                                     :
-                                    <div className="panel-body"><span>No predictors found for this allele.</span></div>
+                                    <div>
+                                    {clingenPred ?
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Source</th>
+                                                    <th>Score Range</th>
+                                                    <th>Score</th>
+                                                    <th>Prediction</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {clingenPredStatic._order.map(key => {
+                                                    return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
+                                                })}
+                                            </tbody>
+                                        </table>
+                                        :
+                                        <div className="panel-body"><span>No predictor data found for this allele.</span></div>
+                                    }
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -484,24 +494,30 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                             <div className="panel-content-wrapper">
                                 {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
-                                {this.state.hasOtherPredData ?
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Source</th>
-                                                <th>Score Range</th>
-                                                <th>Score</th>
-                                                <th>Prediction</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {otherPredStatic._order.map(key => {
-                                                return (this.renderOtherPredRow(key, otherPred, otherPredStatic));
-                                            })}
-                                        </tbody>
-                                    </table>
+                                {!singleNucleotide ?
+                                    <div className="panel-body"><span>Data is currently only returned for single nucleotide variants.</span></div>
                                     :
-                                    <div className="panel-body"><span>No predictors found for this allele.</span></div>
+                                    <div>
+                                    {this.state.hasOtherPredData ?
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Source</th>
+                                                    <th>Score Range</th>
+                                                    <th>Score</th>
+                                                    <th>Prediction</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {otherPredStatic._order.map(key => {
+                                                    return (this.renderOtherPredRow(key, otherPred, otherPredStatic));
+                                                })}
+                                            </tbody>
+                                        </table>
+                                        :
+                                        <div className="panel-body"><span>No predictor data found for this allele.</span></div>
+                                    }
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -513,22 +529,28 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                             <div className="panel-content-wrapper">
                                 {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
-                                {this.state.hasConservationData ?
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Source</th>
-                                                <th>Score</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {conservationStatic._order.map(key => {
-                                                return (this.renderConservationRow(key, conservation, conservationStatic));
-                                            })}
-                                        </tbody>
-                                    </table>
+                                {!singleNucleotide ?
+                                    <div className="panel-body"><span>Data is currently only returned for single nucleotide variants.</span></div>
                                     :
-                                    <div className="panel-body"><span>No conservation analysis data found for this allele.</span></div>
+                                    <div>
+                                    {this.state.hasConservationData ?
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Source</th>
+                                                    <th>Score</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {conservationStatic._order.map(key => {
+                                                    return (this.renderConservationRow(key, conservation, conservationStatic));
+                                                })}
+                                            </tbody>
+                                        </table>
+                                        :
+                                        <div className="panel-body"><span>No conservation analysis data found for this allele.</span></div>
+                                    }
+                                    </div>
                                 }
                             </div>
                         </div>

@@ -42,8 +42,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_clinvarEutils: React.PropTypes.object,
         ext_clinVarEsearch: React.PropTypes.object,
         ext_clinVarRCV: React.PropTypes.array,
+        ext_clinvarInterpretationSummary: React.PropTypes.object,
         ext_ensemblGeneId: React.PropTypes.string,
         ext_geneSynonyms: React.PropTypes.array,
+        ext_singleNucleotide: React.PropTypes.bool,
         loading_clinvarEutils: React.PropTypes.bool,
         loading_clinvarEsearch: React.PropTypes.bool,
         loading_clinvarRCV: React.PropTypes.bool,
@@ -65,8 +67,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_clinvarEutils: this.props.ext_clinvarEutils,
             ext_clinVarEsearch: this.props.ext_clinVarEsearch,
             ext_clinVarRCV: this.props.ext_clinVarRCV,
+            ext_clinvarInterpretationSummary: this.props.ext_clinvarInterpretationSummary,
             ext_ensemblGeneId: this.props.ext_ensemblGeneId,
             ext_geneSynonyms: this.props.ext_geneSynonyms,
+            ext_singleNucleotide: this.props.ext_singleNucleotide,
             loading_clinvarEutils: this.props.loading_clinvarEutils,
             loading_clinvarEsearch: this.props.loading_clinvarEsearch,
             loading_clinvarRCV: this.props.loading_clinvarRCV,
@@ -112,6 +116,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (nextProps.ext_clinVarRCV) {
             this.setState({ext_clinVarRCV: nextProps.ext_clinVarRCV});
         }
+        if (nextProps.ext_clinvarInterpretationSummary) {
+            this.setState({ext_clinvarInterpretationSummary: nextProps.ext_clinvarInterpretationSummary});
+        }
         if (nextProps.ext_ensemblGeneId) {
             this.setState({ext_ensemblGeneId: nextProps.ext_ensemblGeneId});
         }
@@ -119,6 +126,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             this.setState({ext_geneSynonyms: nextProps.ext_geneSynonyms});
         }
         this.setState({
+            ext_singleNucleotide: nextProps.ext_singleNucleotide,
             loading_myGeneInfo: nextProps.loading_myGeneInfo,
             loading_myVariantInfo: nextProps.loading_myVariantInfo,
             loading_bustamante: nextProps.loading_bustamante,
@@ -176,6 +184,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_clinVarRCV={this.state.ext_clinVarRCV}
+                            ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             loading_clinvarEutils={this.state.loading_clinvarEutils}
                             loading_clinvarRCV={this.state.loading_clinvarRCV}
                             loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP} />
@@ -188,6 +197,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
+                            ext_singleNucleotide={this.state.ext_singleNucleotide}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_ensemblVariation={this.state.loading_ensemblVariation} />
                     </div>
@@ -200,6 +210,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_bustamante={this.state.ext_bustamante}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch}
+                            ext_singleNucleotide={this.state.ext_singleNucleotide}
                             loading_bustamante={this.state.loading_bustamante}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch} />
