@@ -61,7 +61,7 @@ var VariantCurationHub = React.createClass({
             provisionalPathogenicity: null,
             provisionalReason: null,
             provisionalInterpretation: false,
-            disabledProvisionalCheckbox: true
+            disabledProvisionalCheckbox: false
         };
     },
 
@@ -69,22 +69,34 @@ var VariantCurationHub = React.createClass({
         this.getClinVarData(this.state.variantUuid);
         if (this.state.interpretationUuid) {
             this.setState({hasExistingInterpretation: true});
+            // User starts a new or continues an existing interpretation
             if (this.state.editKey && this.state.editKey === 'true') {
                 this.setState({isInterpretationActive: true});
             }
             this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
                 this.setState({interpretation: interpretation}, () => {
                     if (this.state.interpretation.disease) {
-                        this.setState({hasAssociatedDisease: true});
+                        this.setState({hasAssociatedDisease: true}, () => {
+                            this.setState({disabledProvisionalCheckbox: false});
+                        });
+                    } else {
+                        // If no disease is associated, we disable provisional checkbox
+                        // when calculated pathogenicity is either 'Likely pathogenic' or 'Pathogenic'
+                        switch (this.state.calculated_pathogenicity) {
+                            case 'Likely pathogenic':
+                                this.setState({disabledProvisionalCheckbox: true});
+                                break;
+                            case 'Pathogenic':
+                                this.setState({disabledProvisionalCheckbox: true});
+                                break;
+                            default:
+                                this.setState({disabledProvisionalCheckbox: false});
+                        }
                     }
-                    if (interpretation.provisional_variant && interpretation.provisional_variant.length) {
+                    if (this.state.interpretation.provisional_variant && this.state.interpretation.provisional_variant.length) {
                         this.setState({
                             provisionalPathogenicity: interpretation.provisional_variant[0].alteredClassification,
                             provisionalReason: interpretation.provisional_variant[0].reason
-                        }, () => {
-                            if (this.state.provisionalPathogenicity && this.state.provisionalReason) {
-                                this.setState({disabledProvisionalCheckbox: false});
-                            }
                         });
                     }
                     if (this.state.interpretation.markAsProvisional) {
@@ -383,7 +395,9 @@ var VariantCurationHub = React.createClass({
         this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
             this.setState({interpretation: interpretation}, () => {
                 if (this.state.interpretation.disease) {
-                    this.setState({hasAssociatedDisease: true});
+                    this.setState({hasAssociatedDisease: true}, () => {
+                        this.setState({disabledProvisionalCheckbox: false});
+                    });
                 }
             });
         });
@@ -403,24 +417,30 @@ var VariantCurationHub = React.createClass({
     setCalculatedPathogenicity: function(assertion) {
         if (assertion) {
             this.state.calculated_pathogenicity = assertion;
+            if (!this.state.hasAssociatedDisease) {
+                // If no disease is associated, we disable provisional checkbox
+                // when calculated pathogenicity is either 'Likely pathogenic' or 'Pathogenic'
+                switch (assertion) {
+                    case 'Likely pathogenic':
+                        this.state.disabledProvisionalCheckbox = true;
+                        break;
+                    case 'Pathogenic':
+                        this.state.disabledProvisionalCheckbox = true;
+                        break;
+                    default:
+                        this.state.disabledProvisionalCheckbox = false;
+                }
+            }
         }
     },
 
     // Method to persist provisional evaluation states
     setProvisionalEvaluation: function(field, value) {
         if (field === 'provisional-pathogenicity') {
-            this.setState({provisionalPathogenicity: value}, () => {
-                if (this.state.provisionalPathogenicity && this.state.provisionalReason) {
-                    this.setState({disabledProvisionalCheckbox: false});
-                }
-            });
+            this.setState({provisionalPathogenicity: value});
         }
         if (field === 'provisional-reason') {
-            this.setState({provisionalReason: value}, () => {
-                if (this.state.provisionalPathogenicity && this.state.provisionalReason) {
-                    this.setState({disabledProvisionalCheckbox: false});
-                }
-            });
+            this.setState({provisionalReason: value});
         }
         if (field === 'provisional-interpretation') {
             this.setState({provisionalInterpretation: value});
@@ -439,7 +459,8 @@ var VariantCurationHub = React.createClass({
         return (
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session}
-                    interpretation={interpretation} setSummaryVisibility={this.setSummaryVisibility} summaryVisible={this.state.summaryVisible} />
+                    interpretation={interpretation} setSummaryVisibility={this.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
+                    getSelectedTab={this.getSelectedTab} />
                 {!this.state.summaryVisible ?
                     <div>
                         <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab} />
@@ -468,7 +489,8 @@ var VariantCurationHub = React.createClass({
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}
                             loading_bustamante={this.state.loading_bustamante}
-                            setCalculatedPathogenicity={this.setCalculatedPathogenicity} />
+                            setCalculatedPathogenicity={this.setCalculatedPathogenicity}
+                            selectedTab={selectedTab} />
                     </div>
                     :
                     <EvaluationSummary interpretation={interpretation} calculatedAssertion={calculated_pathogenicity}
