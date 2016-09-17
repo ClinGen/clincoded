@@ -20,7 +20,8 @@ var Title = module.exports.Title = React.createClass({
         interpretationUuid: React.PropTypes.string,
         interpretation: React.PropTypes.object,
         setSummaryVisibility: React.PropTypes.func,
-        summaryVisible: React.PropTypes.bool
+        summaryVisible: React.PropTypes.bool,
+        getSelectedTab: React.PropTypes.func
     },
 
     getInitialState: function() {
@@ -78,6 +79,10 @@ var Title = module.exports.Title = React.createClass({
             this.props.setSummaryVisibility(false);
             if (summaryKey) {
                 window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'summary', null));
+                let tabKey = queryKeyValue('tab', window.location.href);
+                if (tabKey) {
+                    this.props.getSelectedTab(tabKey);
+                }
             }
         }
     },
