@@ -2008,8 +2008,14 @@ dl.inline-dl {
         }
     }
 
+    .datasource-evaluation-summary-provision {
+        dl {
+            margin-bottom: 5px;
+        }
+    }
+
     .evaluation-provision {
-        margin-left: 15px;
+        margin-bottom: 5px;
         margin-right: 0;
 
         label {
@@ -2023,6 +2029,12 @@ dl.inline-dl {
 
         select {
             width: auto;
+        }
+
+        &.provisional-pathogenicity {
+            .form-group {
+                margin-bottom: 5px;
+            }
         }
 
         &.provisional-interpretation {
@@ -2050,7 +2062,7 @@ dl.inline-dl {
                     font-family: "Helvetica";
                     font-weight: bold;
                     z-index: 1;
-                    top: -25px;
+                    top: 25px;
                     left: 0;
                 }
 
