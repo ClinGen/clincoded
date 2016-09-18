@@ -42,6 +42,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_clinvarEutils: React.PropTypes.object,
         ext_clinVarEsearch: React.PropTypes.object,
         ext_clinVarRCV: React.PropTypes.array,
+        ext_clinvarInterpretationSummary: React.PropTypes.object,
         ext_ensemblGeneId: React.PropTypes.string,
         ext_geneSynonyms: React.PropTypes.array,
         ext_singleNucleotide: React.PropTypes.bool,
@@ -66,6 +67,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_clinvarEutils: this.props.ext_clinvarEutils,
             ext_clinVarEsearch: this.props.ext_clinVarEsearch,
             ext_clinVarRCV: this.props.ext_clinVarRCV,
+            ext_clinvarInterpretationSummary: this.props.ext_clinvarInterpretationSummary,
             ext_ensemblGeneId: this.props.ext_ensemblGeneId,
             ext_geneSynonyms: this.props.ext_geneSynonyms,
             ext_singleNucleotide: this.props.ext_singleNucleotide,
@@ -111,6 +113,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         if (nextProps.ext_clinVarRCV) {
             this.setState({ext_clinVarRCV: nextProps.ext_clinVarRCV});
+        }
+        if (nextProps.ext_clinvarInterpretationSummary) {
+            this.setState({ext_clinvarInterpretationSummary: nextProps.ext_clinvarInterpretationSummary});
         }
         if (nextProps.ext_ensemblGeneId) {
             this.setState({ext_ensemblGeneId: nextProps.ext_ensemblGeneId});
@@ -177,6 +182,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_clinVarRCV={this.state.ext_clinVarRCV}
+                            ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             loading_clinvarEutils={this.state.loading_clinvarEutils}
                             loading_clinvarRCV={this.state.loading_clinvarRCV}
                             loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP} />

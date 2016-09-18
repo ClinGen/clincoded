@@ -5,6 +5,44 @@
 
 'use strict';
 
+// FIXME: Consoliate repetitive code that can be shared in different methods
+export function getClinvarInterpretations(xml) {
+    let interpretationSummary = {};
+    let xmlDoc = new DOMParser().parseFromString(xml, 'text/xml');
+    let ClinVarResult = xmlDoc.getElementsByTagName('ClinVarResult-Set')[0];
+    if (ClinVarResult) {
+        let VariationReport = ClinVarResult.getElementsByTagName('VariationReport')[0];
+        if (VariationReport) {
+            let ObservationList = VariationReport.getElementsByTagName('ObservationList')[0];
+            if (ObservationList) {
+                let ObservationNodes = ObservationList.getElementsByTagName('Observation');
+                if (ObservationNodes && ObservationNodes.length) {
+                    let ReviewStatus, Description, DateLastEvaluated, SubmissionCount;
+                    for (let node of ObservationNodes) {
+                        let ObservationType = node.getAttribute('ObservationType');
+                        if (ObservationType === 'primary') {
+                            SubmissionCount = node.getAttribute('SubmissionCount');
+                            ReviewStatus = node.getElementsByTagName('ReviewStatus')[0];
+                            let ClinicalSignificance = node.getElementsByTagName('ClinicalSignificance')[0];
+                            if (ClinicalSignificance) {
+                                DateLastEvaluated = ClinicalSignificance.getAttribute('DateLastEvaluated');
+                                Description = ClinicalSignificance.getElementsByTagName('Description')[0];
+                            }
+                        }
+                    }
+                    interpretationSummary = {
+                        'ReviewStatus': ReviewStatus.textContent,
+                        'ClinicalSignificance': Description.textContent,
+                        'DateLastEvaluated': DateLastEvaluated,
+                        'SubmissionCount': SubmissionCount
+                    };
+                }
+            }
+        }
+    }
+    return interpretationSummary;
+}
+
 export function getClinvarRCVs(xml) {
     // Make sure we have at least one RCV node to work with
     // Then put each RCV id into an array
@@ -16,12 +54,17 @@ export function getClinvarRCVs(xml) {
         if (VariationReport) {
             let ObservationList = VariationReport.getElementsByTagName('ObservationList')[0];
             if (ObservationList) {
-                let ObservationNode = ObservationList.getElementsByTagName('Observation')[0];
-                if (ObservationNode) {
-                    let RCV_Nodes = ObservationNode.getElementsByTagName('RCV');
-                    if (RCV_Nodes.length) {
-                        for(let RCV_Node of RCV_Nodes) {
-                            RCVs.push(RCV_Node.textContent);
+                let ObservationNodes = ObservationList.getElementsByTagName('Observation');
+                if (ObservationNodes && ObservationNodes.length) {
+                    for (let node of ObservationNodes) {
+                        let ObservationType = node.getAttribute('ObservationType');
+                        if (ObservationType === 'primary') {
+                            let RCV_Nodes = node.getElementsByTagName('RCV');
+                            if (RCV_Nodes.length) {
+                                for(let RCV_Node of RCV_Nodes) {
+                                    RCVs.push(RCV_Node.textContent);
+                                }
+                            }
                         }
                     }
                 }
