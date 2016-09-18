@@ -116,9 +116,9 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         this.setState({tempEvidence: null, descriptionInput: null});
     },
 
-    editEvidenceButton: function(index) {
+    editEvidenceButton: function(id) {
         // called when the Edit button is pressed for an existing evidence
-        this.setState({editEvidenceId: index, editDescriptionInput: null});
+        this.setState({editEvidenceId: id, editDescriptionInput: null});
     },
 
     cancelEditEvidenceButton: function(e) {
@@ -172,7 +172,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
             category: this.props.category,
             subcategory: this.props.subcategory,
             articles: [evidence.articles[0]['@id']],
-            evidenceDescription: evidence.description,
+            evidenceDescription: evidence.evidenceDescription,
             status: 'deleted'
         };
 
@@ -211,7 +211,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
                 <td className="col-md-5">{extra_evidence.evidenceDescription}</td>
                 <td className="col-md-2">
-                    <button className="btn btn-default btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence.articles[0].pmid)}>Edit</button>
+                    <button className="btn btn-default btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
                     <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
                         clickHandler={() => this.deleteEvidence(extra_evidence)} />
                 </td>
@@ -284,7 +284,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                         <tbody>
                             {relevantEvidenceList.length > 0 ?
                                 relevantEvidenceList.map(evidence => {
-                                    return (this.state.editEvidenceId === evidence.articles[0].pmid
+                                    return (this.state.editEvidenceId === evidence['@id']
                                         ? this.renderInterpretationExtraEvidenceEdit(evidence)
                                         : this.renderInterpretationExtraEvidence(evidence));
                                 })
