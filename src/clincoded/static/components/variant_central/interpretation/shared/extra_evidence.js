@@ -212,7 +212,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
                 <td className="col-md-5">{extra_evidence.evidenceDescription}</td>
                 <td className="col-md-2">
-                    <button className="btn btn-default btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
+                    <button className="btn btn-info btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
                     <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
                         clickHandler={() => this.deleteEvidence(extra_evidence)} />
                 </td>
