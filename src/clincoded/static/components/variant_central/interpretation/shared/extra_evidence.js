@@ -20,6 +20,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
 
     propTypes: {
+        tableName: React.PropTypes.object, // table name as HTML object
         category: React.PropTypes.string, // category (usually the tab) the evidence is part of
         subcategory: React.PropTypes.string, // subcategory (usually the panel) the evidence is part of
         href_url: React.PropTypes.object, // href_url object
@@ -269,7 +270,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
 
         return (
             <div className="panel panel-info">
-                <div className="panel-heading"><h3 className="panel-title">PubMed Evidence</h3></div>
+                <div className="panel-heading"><h3 className="panel-title">{this.props.tableName}</h3></div>
                 <div className="panel-content-wrapper">
                     <table className="table">
                         {relevantEvidenceList.length > 0 ?
