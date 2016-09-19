@@ -130,8 +130,12 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                         <h2><span>Variant Interpretation Record</span></h2>
                         <div className="btn-group">
                             <Modal title={associateDiseaseModalTitle} wrapperClassName="modal-associate-disease">
-                                <button className="btn btn-primary pull-right" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState}
+                                <button className="btn btn-primary pull-right btn-inline-spacer" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState}
                                     interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateDiseaseButtonTitle}</button>
+                            </Modal>
+                            <Modal title={associateInheritanceModalTitle} wrapperClassName="modal-associate-disease">
+                                <button className="btn btn-primary pull-right" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState}
+                                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateInheritanceButtonTitle}</button>
                             </Modal>
                         </div>
                     </div>
