@@ -105,13 +105,11 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             interpretationButtonTitle = 'Continue Interpretation';
         }
 
-        var associateDiseaseButtonTitle = '', associateDiseaseModalTitle = '';
-        if (this.state.hasAssociatedDisease) {
-            associateDiseaseButtonTitle = 'Edit Disease';
-            associateDiseaseModalTitle = 'Associate this interpretation with a different disease';
-        } else {
-            associateDiseaseButtonTitle = 'Associate with Disease';
+        let associateDiseaseButtonTitle = <span>Disease <i className="icon icon-plus-circle"></i></span>,
             associateDiseaseModalTitle = 'Associate this interpretation with a disease';
+        if (this.state.hasAssociatedDisease) {
+            associateDiseaseButtonTitle = <span>Disease <i className="icon icon-pencil"></i></span>;
+            associateDiseaseModalTitle = 'Associate this interpretation with a different disease';
         }
 
         return (
