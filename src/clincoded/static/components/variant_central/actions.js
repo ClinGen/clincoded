@@ -35,7 +35,8 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             interpretation: null,
             hasExistingInterpretation: false,
             isInterpretationActive: false,
-            hasAssociatedDisease: false
+            hasAssociatedDisease: false,
+            hasAssociatedInheritance: false
         };
     },
 
@@ -57,6 +58,9 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             if (this.props.interpretation) {
                 if (this.props.interpretation.interpretation_disease) {
                     this.setState({hasAssociatedDisease: true});
+                }
+                if (this.props.interpretation.modeInheritance) {
+                    this.setState({hasAssociatedInheritance: true});
                 }
             }
         }
@@ -98,7 +102,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     },
 
     render: function() {
-        var interpretationButtonTitle = '';
+        let interpretationButtonTitle = '';
         if (!this.state.hasExistingInterpretation) {
             interpretationButtonTitle = 'Start New Interpretation';
         } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
@@ -110,6 +114,13 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         if (this.state.hasAssociatedDisease) {
             associateDiseaseButtonTitle = <span>Disease <i className="icon icon-pencil"></i></span>;
             associateDiseaseModalTitle = 'Associate this interpretation with a different disease';
+        }
+
+        let associateInheritanceButtonTitle = <span>Inheritance <i className="icon icon-plus-circle"></i></span>,
+            associateInheritanceModalTitle = 'Associate this interpretation with a mode of inheritance';
+        if (this.state.hasAssociatedInheritance) {
+            associateInheritanceButtonTitle = <span>Inheritance <i className="icon icon-pencil"></i></span>;
+            associateInheritanceModalTitle = 'Associate this interpretation with a different mode of inheritance';
         }
 
         return (
