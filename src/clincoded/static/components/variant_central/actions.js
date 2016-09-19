@@ -134,7 +134,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                                     interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateDiseaseButtonTitle}</button>
                             </Modal>
                             <Modal title={associateInheritanceModalTitle} wrapperClassName="modal-associate-disease">
-                                <button className="btn btn-primary pull-right" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState}
+                                <button className="btn btn-primary pull-right" modal={<AssociateInheritance closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState}
                                     interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateInheritanceButtonTitle}</button>
                             </Modal>
                         </div>
@@ -290,5 +290,104 @@ var AssociateDisease = React.createClass({
 var LabelOrphanetId = React.createClass({
     render: function() {
         return <span>Enter <a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> ID</span>;
+    }
+});
+
+// handle 'Associate with Disease' button click event
+var AssociateInheritance = React.createClass({
+    mixins: [RestMixin, FormMixin, CuratorHistory],
+
+    contextTypes: {
+        handleStateChange: React.PropTypes.func
+    },
+
+    propTypes: {
+        data: React.PropTypes.object,
+        session: React.PropTypes.object,
+        closeModal: React.PropTypes.func, // Function to call to close the modal
+        interpretation: React.PropTypes.object,
+        editKey: React.PropTypes.bool,
+        updateInterpretationObj: React.PropTypes.func,
+        updateParentState: React.PropTypes.func
+    },
+
+    getInitialState: function() {
+        return {
+            submitResourceBusy: false
+        };
+    },
+
+    // When the form is submitted...
+    submitForm: function(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
+        // Invoke button progress indicator
+        this.setState({submitResourceBusy: true});
+        // Get values from form and validate them
+        this.saveFormValue('inheritance', this.refs.inheritance.getValue());
+
+        let inheritance = this.getFormValue('inheritance');
+        let interpretationDisease, currInterpretation;
+
+        this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
+            currInterpretation = interpretation;
+            // get up-to-date copy of interpretation object and flatten it
+            var flatInterpretation = curator.flatten(currInterpretation);
+
+            flatInterpretation.modeInheritance = inheritance;
+
+            return this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
+                this.props.updateInterpretationObj();
+                this.props.updateParentState('inheritance');
+                var meta = {
+                    interpretation: {
+                        variant: this.props.data['@id'],
+                        mode: 'edit-inheritance'
+                    }
+                };
+                return this.recordHistory('modify', currInterpretation, meta).then(result => {
+                    this.setState({submitResourceBusy: false});
+                    // Need 'submitResourceBusy' state to proceed closing modal
+                    return Promise.resolve(this.state.submitResourceBusy);
+                });
+            });
+        }).then(result => {
+            this.setState({submitResourceBusy: false});
+            this.props.closeModal();
+        }).catch(e => {
+            // Some unexpected error happened
+            this.setState({submitResourceBusy: false});
+            parseAndLogError.bind(undefined, 'fetchedRequest');
+        });
+    },
+
+    // Called when the modal 'Cancel' button is clicked
+    cancelAction: function(e) {
+        this.setState({submitResourceBusy: false});
+        this.props.closeModal();
+    },
+
+    render: function() {
+        var disease_id = '';
+        if (this.props.interpretation) {
+            if (this.props.interpretation.interpretation_disease) {
+                disease_id = this.props.interpretation.interpretation_disease;
+            }
+        }
+
+        return (
+            <Form submitHandler={this.submitForm} formClassName="form-std">
+                <div className="modal-box">
+                    <div className="modal-body clearfix">
+                        <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
+                            error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
+                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                    </div>
+                    <div className='modal-footer'>
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
+                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />
+                    </div>
+                </div>
+            </Form>
+        );
     }
 });
