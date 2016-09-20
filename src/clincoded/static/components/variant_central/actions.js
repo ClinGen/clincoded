@@ -127,8 +127,11 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                         </div>
                     </div>
                 :
-                    <div className="evidence-only clearfix">
-                        <Input type="button-button" inputClassName="btn btn-primary pull-right" title={interpretationButtonTitle} clickHandler={this.handleInterpretationEvent} />
+                    <div className="interpretation-record clearfix">
+                        <h2><span>View Evidence</span></h2>
+                        <div className="btn-group">
+                            <Input type="button-button" inputClassName="btn btn-primary pull-right" title={interpretationButtonTitle} clickHandler={this.handleInterpretationEvent} />
+                        </div>
                     </div>
                 }
             </div>
