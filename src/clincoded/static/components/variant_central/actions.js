@@ -144,7 +144,7 @@ var DiseaseModalButton = React.createClass({
 
     propTypes: {
         variantData: React.PropTypes.object,
-        hasAssociatedDisease: React.PropTypes.boolean,
+        hasAssociatedDisease: React.PropTypes.bool,
         session: React.PropTypes.object,
         updateParentState: React.PropTypes.func,
         interpretation: React.PropTypes.object,
@@ -174,7 +174,7 @@ var InheritanceModalButton = React.createClass({
 
     propTypes: {
         variantData: React.PropTypes.object,
-        hasAssociatedInheritance: React.PropTypes.boolean,
+        hasAssociatedInheritance: React.PropTypes.bool,
         session: React.PropTypes.object,
         updateParentState: React.PropTypes.func,
         interpretation: React.PropTypes.object,
@@ -367,47 +367,65 @@ var AssociateInheritance = React.createClass({
         };
     },
 
+    // Form content validation
+    validateForm: function() {
+        // Start with default validation
+        var valid = this.validateDefault();
+
+        // Check if orphanetid
+        if (valid) {
+            if (this.getFormValue('inheritance') === "select" || this.getFormValue('inheritance') === "") {
+                this.setFormErrors('inheritance', 'Required');
+                valid = false;
+            }
+        }
+        return valid;
+    },
+
     // When the form is submitted...
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        // Invoke button progress indicator
-        this.setState({submitResourceBusy: true});
         // Get values from form and validate them
         this.saveFormValue('inheritance', this.refs.inheritance.getValue());
 
-        let inheritance = this.getFormValue('inheritance');
-        let interpretationDisease, currInterpretation;
+        if (this.validateForm()) {
+            // Invoke button progress indicator
+            this.setState({submitResourceBusy: true});
 
-        this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
-            currInterpretation = interpretation;
-            // get up-to-date copy of interpretation object and flatten it
-            var flatInterpretation = curator.flatten(currInterpretation);
+            let inheritance = this.getFormValue('inheritance');
+            let interpretationDisease, currInterpretation;
 
-            flatInterpretation.modeInheritance = inheritance;
+            this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
+                currInterpretation = interpretation;
+                // get up-to-date copy of interpretation object and flatten it
+                var flatInterpretation = curator.flatten(currInterpretation);
 
-            return this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
-                this.props.updateInterpretationObj();
-                this.props.updateParentState('inheritance');
-                var meta = {
-                    interpretation: {
-                        variant: this.props.data['@id'],
-                        mode: 'edit-inheritance'
-                    }
-                };
-                return this.recordHistory('modify', currInterpretation, meta).then(result => {
-                    this.setState({submitResourceBusy: false});
-                    // Need 'submitResourceBusy' state to proceed closing modal
-                    return Promise.resolve(this.state.submitResourceBusy);
+                flatInterpretation.modeInheritance = inheritance;
+
+                return this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
+                    this.props.updateInterpretationObj();
+                    this.props.updateParentState('inheritance');
+                    var meta = {
+                        interpretation: {
+                            variant: this.props.data['@id'],
+                            mode: 'edit-inheritance'
+                        }
+                    };
+                    return this.recordHistory('modify', currInterpretation, meta).then(result => {
+                        this.setState({submitResourceBusy: false});
+                        // Need 'submitResourceBusy' state to proceed closing modal
+                        return Promise.resolve(this.state.submitResourceBusy);
+                    });
                 });
+            }).then(result => {
+                this.setState({submitResourceBusy: false});
+                this.props.closeModal();
+            }).catch(e => {
+                // Some unexpected error happened
+                this.setState({submitResourceBusy: false});
+                parseAndLogError.bind(undefined, 'fetchedRequest');
             });
-        }).then(result => {
-            this.setState({submitResourceBusy: false});
-            this.props.closeModal();
-        }).catch(e => {
-            // Some unexpected error happened
-            this.setState({submitResourceBusy: false});
-            parseAndLogError.bind(undefined, 'fetchedRequest');
-        });
+        }
     },
 
     // Called when the modal 'Cancel' button is clicked
@@ -429,6 +447,7 @@ var AssociateInheritance = React.createClass({
                 <div className="modal-box">
                     <div className="modal-body clearfix">
                         <Input type="select" ref="inheritance" label="Mode of Inheritance" defaultValue={defaultModeInheritance}
+                            error={this.getFormError('inheritance')} clearError={this.clrFormErrors.bind(null, 'inheritance')}
                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="inheritance" required>
                             <option value="select" disabled="disabled">Select</option>
                             <option value="" disabled="disabled"></option>
