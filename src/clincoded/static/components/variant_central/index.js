@@ -491,7 +491,7 @@ var VariantCurationHub = React.createClass({
         var editKey = this.state.editKey;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
         var selectedTab = this.state.selectedTab;
-        let calculated_pathogenicity = this.state.calculated_pathogenicity;
+        let calculated_pathogenicity = (this.state.autoClassification) ? this.state.autoClassification : this.state.calculated_pathogenicity;
 
         return (
             <div>
