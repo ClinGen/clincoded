@@ -17,13 +17,16 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
         session: React.PropTypes.object,
         setSummaryVisibility: React.PropTypes.func,
         summaryVisible: React.PropTypes.bool,
-        getSelectedTab: React.PropTypes.func
+        getSelectedTab: React.PropTypes.func,
+        persistProvisionalCheckBox: React.PropTypes.func,
+        disabledProvisionalCheckbox: React.PropTypes.bool
     },
 
     getInitialState: function() {
         return {
             interpretation: null, // parent interpretation object
-            summaryVisible: this.props.summaryVisible
+            summaryVisible: this.props.summaryVisible,
+            disabledProvisionalCheckbox: this.props.disabledProvisionalCheckbox
         };
     },
 
@@ -33,7 +36,10 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
             this.setState({interpretation: nextProps.interpretation});
         }
-        this.setState({summaryVisible: nextProps.summaryVisible});
+        this.setState({
+            summaryVisible: nextProps.summaryVisible,
+            disabledProvisionalCheckbox: nextProps.disabledProvisionalCheckbox
+        });
     },
 
     render: function() {
@@ -48,7 +54,8 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
                     <div className="container">
                         <Title data={variant} interpretation={interpretation} interpretationUuid={interpretationUuid}
                             setSummaryVisibility={this.props.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
-                            getSelectedTab={this.props.getSelectedTab} />
+                            disabledProvisionalCheckbox={this.state.disabledProvisionalCheckbox}
+                            getSelectedTab={this.props.getSelectedTab} persistProvisionalCheckBox={this.props.persistProvisionalCheckBox} />
                     </div>
                 </div>
                 <div className="container curation-data curation-variant">
