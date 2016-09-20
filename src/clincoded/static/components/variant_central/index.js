@@ -15,7 +15,7 @@ var queryKeyValue = globals.queryKeyValue;
 var parseClinvar = require('../../libs/parse-resources').parseClinvar;
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
-import { getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
+import { getClinvarInterpretations, getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
 
 var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
 var EvaluationSummary = require('./interpretation/summary').EvaluationSummary;
@@ -41,6 +41,7 @@ var VariantCurationHub = React.createClass({
             ext_clinvarEutils: null,
             ext_clinVarEsearch: null,
             ext_clinVarRCV: null,
+            ext_clinvarInterpretationSummary: null,
             ext_myGeneInfo_MyVariant: null,
             ext_myGeneInfo_VEP: null,
             ext_ensemblGeneId: null,
@@ -145,7 +146,11 @@ var VariantCurationHub = React.createClass({
                     if (variantData.clinvarVariationType && variantData.clinvarVariationType === 'Haplotype') {
                         this.setState({ext_singleNucleotide: false});
                     }
-                    this.setState({ext_clinvarEutils: variantData, loading_clinvarEutils: false});
+                    this.setState({
+                        ext_clinvarEutils: variantData,
+                        ext_clinvarInterpretationSummary: getClinvarInterpretations(xml),
+                        loading_clinvarEutils: false
+                    });
                     this.handleCodonEsearch(variantData);
                     let clinVarRCVs = getClinvarRCVs(xml);
                     return Promise.resolve(clinVarRCVs);
@@ -511,6 +516,7 @@ var VariantCurationHub = React.createClass({
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch}
                             ext_clinVarRCV={this.state.ext_clinVarRCV}
+                            ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
                             ext_geneSynonyms={this.state.ext_geneSynonyms}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}

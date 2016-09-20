@@ -99,6 +99,16 @@
             "title": "Mark As Provisional Interpretation",
             "description": "Flag to mark interpretation status as Provisional",
             "type": "boolean"
+        },
+        "extra_evidence_list": {
+            "title": "Extra Evidence",
+            "description": "List of extra evidence objects",
+            "type": "array",
+            "items": {
+                "title": "extra_evidence",
+                "type": "string",
+                "linkTo": "extra_evidence"
+            }
         }
     },
     "columns": {

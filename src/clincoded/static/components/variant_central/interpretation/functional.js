@@ -5,6 +5,7 @@ var moment = require('moment');
 var globals = require('../../globals');
 var RestMixin = require('../../rest').RestMixin;
 var vciFormHelper = require('./shared/form');
+var extraEvidence = require('./shared/extra_evidence');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 var CompleteSection = require('./shared/complete_section').CompleteSection;
 
@@ -32,7 +33,9 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     getInitialState: function() {
         return {
             clinvar_id: null,
-            interpretation: this.props.interpretation
+            interpretation: this.props.interpretation,
+            submitBusy: false,
+            pmid: 0
         };
     },
 
@@ -65,6 +68,11 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
+                    : null}
+                    {(this.props.data && this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="experimental-studies"
+                            href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Experimental Studies)</span>}
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
                 </Panel></PanelGroup>
 

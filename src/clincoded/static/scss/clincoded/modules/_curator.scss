@@ -717,10 +717,6 @@
     padding-right: 10px;
 }
 
-.button-push {
-    margin-right: 15px;
-}
-
 .summary-matrix {
     border: solid 3px #000;
     border-collapse: collapse;
@@ -1151,6 +1147,16 @@
 
                 .title-ellipsis {
                     max-width: 250px;
+                }
+            }
+
+            .basic-info .datasource-clinvar-interpretaions  {
+                .clinvar-interpretation-summary {
+                    border-bottom: solid 1px #ddd;
+
+                    .reviewStatus:first-letter {
+                        text-transform: capitalize;
+                    }
                 }
             }
 

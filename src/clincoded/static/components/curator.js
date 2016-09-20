@@ -465,7 +465,8 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
     propTypes: {
         article: React.PropTypes.object, // Article object to display
         displayJournal: React.PropTypes.bool, // T to display article journal
-        pmidLinkout: React.PropTypes.bool // T to display pmid linkout
+        pmidLinkout: React.PropTypes.bool, // T to display pmid linkout
+        className: React.PropTypes.string
     },
 
     render: function() {
@@ -480,7 +481,7 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
             }
 
             return (
-                <p>
+                <p className={this.props.className}>
                     {this.props.displayJournal ? authorsAll : authors}
                     {article.title + ' '}
                     {this.props.displayJournal ? <i>{article.journal + '. '}</i> : null}
@@ -1834,6 +1835,12 @@ function flattenInterpretation(interpretation) {
     if (interpretation.provisional_variant && interpretation.provisional_variant.length) {
         flat.provisional_variant = interpretation.provisional_variant.map(function(provisional) {
             return provisional['@id'];
+        });
+    }
+
+    if (interpretation.extra_evidence_list && interpretation.extra_evidence_list.length) {
+        flat.extra_evidence_list = interpretation.extra_evidence_list.map(function(extra_evidence) {
+            return extra_evidence['@id'];
         });
     }
 
