@@ -228,6 +228,9 @@ var AssociateDisease = React.createClass({
         // Start with default validation
         var valid = this.validateDefault();
 
+        if (valid && this.getFormValue('orphanetid') === '') {
+            return valid;
+        }
         // Check if orphanetid
         if (valid) {
             valid = this.getFormValue('orphanetid').match(/^ORPHA[0-9]{1,6}$/i);
@@ -247,36 +250,75 @@ var AssociateDisease = React.createClass({
             // Invoke button progress indicator
             this.setState({submitResourceBusy: true});
             // Get the free-text values for the Orphanet ID to check against the DB
-            var orphaId = this.getFormValue('orphanetid').match(/^ORPHA([0-9]{1,6})$/i)[1];
+            var orphaId = this.getFormValue('orphanetid');
             var interpretationDisease, currInterpretation;
-            // Get the disease orresponding to the given Orphanet ID.
-            // If either error out, set the form error fields
-            this.getRestDatas([
-                '/diseases/' + orphaId
-            ], [
-                function() { this.setFormErrors('orphanetid', 'Orphanet ID not found'); }.bind(this)
-            ]).then(data => {
-                interpretationDisease = data[0]['@id'];
+
+            if (orphaId !== '') {
+                orphaId = orphaId.match(/^ORPHA([0-9]{1,6})$/i)[1];
+                // Get the disease orresponding to the given Orphanet ID.
+                // If either error out, set the form error fields
+                this.getRestDatas([
+                    '/diseases/' + orphaId
+                ], [
+                    function() { this.setFormErrors('orphanetid', 'Orphanet ID not found'); }.bind(this)
+                ]).then(data => {
+                    interpretationDisease = data[0]['@id'];
+                    this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
+                        currInterpretation = interpretation;
+                        // get up-to-date copy of interpretation object and flatten it
+                        var flatInterpretation = curator.flatten(currInterpretation);
+                        // if the interpretation object does not have a disease object, create it
+                        if (!('disease' in flatInterpretation)) {
+                            flatInterpretation.disease = '';
+                            // Return the newly flattened interpretation object in a Promise
+                            return Promise.resolve(flatInterpretation);
+                        } else {
+                            return Promise.resolve(flatInterpretation);
+                        }
+                    }).then(interpretationObj => {
+                        if (interpretationDisease) {
+                            // Set the disease '@id' to the newly flattened interpretation object's 'disease' property
+                            interpretationObj.disease = interpretationDisease;
+                            // Update the intepretation object partially with the new disease property value
+                            return this.putRestData('/interpretation/' + this.props.interpretation.uuid, interpretationObj).then(result => {
+                                this.props.updateInterpretationObj();
+                                this.props.updateParentState('disease');
+                                var meta = {
+                                    interpretation: {
+                                        variant: this.props.data['@id'],
+                                        disease: interpretationDisease,
+                                        mode: 'edit-disease'
+                                    }
+                                };
+                                return this.recordHistory('modify', currInterpretation, meta).then(result => {
+                                    this.setState({submitResourceBusy: false});
+                                    // Need 'submitResourceBusy' state to proceed closing modal
+                                    return Promise.resolve(this.state.submitResourceBusy);
+                                });
+                            }).then(submitState => {
+                                // Close modal after 'submitResourceBusy' is completed
+                                if (submitState !== true) {
+                                    this.props.closeModal();
+                                }
+                            });
+                        }
+                    });
+                }).catch(e => {
+                    // Some unexpected error happened
+                    this.setState({submitResourceBusy: false});
+                    parseAndLogError.bind(undefined, 'fetchedRequest');
+                });
+            } else {
                 this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
                     currInterpretation = interpretation;
                     // get up-to-date copy of interpretation object and flatten it
                     var flatInterpretation = curator.flatten(currInterpretation);
                     // if the interpretation object does not have a disease object, create it
-                    if (!('disease' in flatInterpretation)) {
-                        flatInterpretation.disease = '';
-                        // Return the newly flattened interpretation object in a Promise
-                        return Promise.resolve(flatInterpretation);
-                    } else {
-                        return Promise.resolve(flatInterpretation);
-                    }
-                }).then(interpretationObj => {
-                    if (interpretationDisease) {
-                        // Set the disease '@id' to the newly flattened interpretation object's 'disease' property
-                        interpretationObj.disease = interpretationDisease;
+                    if ('disease' in flatInterpretation) {
+                        delete flatInterpretation['disease'];
+
                         // Update the intepretation object partially with the new disease property value
-                        return this.putRestData('/interpretation/' + this.props.interpretation.uuid, interpretationObj).then(result => {
-                            this.props.updateInterpretationObj();
-                            this.props.updateParentState('disease');
+                        this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
                             var meta = {
                                 interpretation: {
                                     variant: this.props.data['@id'],
@@ -284,24 +326,27 @@ var AssociateDisease = React.createClass({
                                     mode: 'edit-disease'
                                 }
                             };
-                            return this.recordHistory('modify', currInterpretation, meta).then(result => {
-                                this.setState({submitResourceBusy: false});
-                                // Need 'submitResourceBusy' state to proceed closing modal
-                                return Promise.resolve(this.state.submitResourceBusy);
+                            this.recordHistory('modify', currInterpretation, meta).then(result => {
+                                this.setState({submitResourceBusy: false}, () => {
+                                    // Need 'submitResourceBusy' state to proceed closing modal
+                                    this.props.updateInterpretationObj();
+                                    this.props.updateParentState('disease');
+                                    this.props.closeModal();
+                                });
                             });
-                        }).then(submitState => {
-                            // Close modal after 'submitResourceBusy' is completed
-                            if (submitState !== true) {
-                                this.props.closeModal();
-                            }
+                        });
+                    } else {
+                        this.setState({submitResourceBusy: false}, () => {
+                            // Need 'submitResourceBusy' state to proceed closing modal
+                            this.props.closeModal();
                         });
                     }
+                }).catch(e => {
+                    // Some unexpected error happened
+                    this.setState({submitResourceBusy: false});
+                    parseAndLogError.bind(undefined, 'fetchedRequest');
                 });
-            }).catch(e => {
-                // Some unexpected error happened
-                this.setState({submitResourceBusy: false});
-                parseAndLogError.bind(undefined, 'fetchedRequest');
-            });
+            }
         }
     },
 
@@ -325,7 +370,7 @@ var AssociateDisease = React.createClass({
                     <div className="modal-body clearfix">
                         <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
                             error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
-                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                     </div>
                     <div className='modal-footer'>
                         <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
@@ -367,65 +412,52 @@ var AssociateInheritance = React.createClass({
         };
     },
 
-    // Form content validation
-    validateForm: function() {
-        // Start with default validation
-        var valid = this.validateDefault();
-
-        // Check if orphanetid
-        if (valid) {
-            if (this.getFormValue('inheritance') === "select" || this.getFormValue('inheritance') === "") {
-                this.setFormErrors('inheritance', 'Required');
-                valid = false;
-            }
-        }
-        return valid;
-    },
-
     // When the form is submitted...
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         // Get values from form and validate them
         this.saveFormValue('inheritance', this.refs.inheritance.getValue());
 
-        if (this.validateForm()) {
-            // Invoke button progress indicator
-            this.setState({submitResourceBusy: true});
+        // Invoke button progress indicator
+        this.setState({submitResourceBusy: true});
 
-            let inheritance = this.getFormValue('inheritance');
-            let interpretationDisease, currInterpretation;
+        let inheritance = this.getFormValue('inheritance');
+        let interpretationDisease, currInterpretation;
 
-            this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
-                currInterpretation = interpretation;
-                // get up-to-date copy of interpretation object and flatten it
-                var flatInterpretation = curator.flatten(currInterpretation);
+        this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
+            currInterpretation = interpretation;
+            // get up-to-date copy of interpretation object and flatten it
+            var flatInterpretation = curator.flatten(currInterpretation);
 
+            if (inheritance === 'select') {
+                flatInterpretation.modeInheritance = '';
+            } else {
                 flatInterpretation.modeInheritance = inheritance;
+            }
 
-                return this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
-                    this.props.updateInterpretationObj();
-                    this.props.updateParentState('inheritance');
-                    var meta = {
-                        interpretation: {
-                            variant: this.props.data['@id'],
-                            mode: 'edit-inheritance'
-                        }
-                    };
-                    return this.recordHistory('modify', currInterpretation, meta).then(result => {
-                        this.setState({submitResourceBusy: false});
-                        // Need 'submitResourceBusy' state to proceed closing modal
-                        return Promise.resolve(this.state.submitResourceBusy);
-                    });
+            return this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
+                this.props.updateInterpretationObj();
+                this.props.updateParentState('inheritance');
+                var meta = {
+                    interpretation: {
+                        variant: this.props.data['@id'],
+                        mode: 'edit-inheritance'
+                    }
+                };
+                return this.recordHistory('modify', currInterpretation, meta).then(result => {
+                    this.setState({submitResourceBusy: false});
+                    // Need 'submitResourceBusy' state to proceed closing modal
+                    return Promise.resolve(this.state.submitResourceBusy);
                 });
-            }).then(result => {
-                this.setState({submitResourceBusy: false});
-                this.props.closeModal();
-            }).catch(e => {
-                // Some unexpected error happened
-                this.setState({submitResourceBusy: false});
-                parseAndLogError.bind(undefined, 'fetchedRequest');
             });
-        }
+        }).then(result => {
+            this.setState({submitResourceBusy: false});
+            this.props.closeModal();
+        }).catch(e => {
+            // Some unexpected error happened
+            this.setState({submitResourceBusy: false});
+            parseAndLogError.bind(undefined, 'fetchedRequest');
+        });
     },
 
     // Called when the modal 'Cancel' button is clicked
@@ -448,7 +480,7 @@ var AssociateInheritance = React.createClass({
                     <div className="modal-body clearfix">
                         <Input type="select" ref="inheritance" label="Mode of Inheritance" defaultValue={defaultModeInheritance}
                             error={this.getFormError('inheritance')} clearError={this.clrFormErrors.bind(null, 'inheritance')}
-                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="inheritance" required>
+                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="inheritance" >
                             <option value="select" disabled="disabled">Select</option>
                             <option value="" disabled="disabled"></option>
                             {modesOfInheritance.map(function(modeOfInheritance, i) {
