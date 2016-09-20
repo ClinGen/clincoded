@@ -42,10 +42,10 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     },
 
     componentWillReceiveProps: function(nextProps) {
-        if (this.props.variantData) {
-            if (this.props.variantData.associatedInterpretations) {
-                if (this.props.variantData.associatedInterpretations.length) {
-                    var associatedInterpretations = this.props.variantData.associatedInterpretations;
+        if (nextProps.variantData) {
+            if (nextProps.variantData.associatedInterpretations) {
+                if (nextProps.variantData.associatedInterpretations.length) {
+                    var associatedInterpretations = nextProps.variantData.associatedInterpretations;
                     associatedInterpretations.forEach(associatedInterpretation => {
                         if (associatedInterpretation.submitted_by['@id'] === this.props.session.user_properties['@id']) {
                             this.setState({hasExistingInterpretation: true});
@@ -54,24 +54,18 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                 }
             }
         }
-        if (this.props.editKey === 'true' && this.props.interpretation) {
+        if (this.props.editKey === 'true' && nextProps.interpretation) {
             this.setState({isInterpretationActive: true});
-            if (this.props.interpretation) {
-                if (this.props.interpretation.interpretation_disease) {
-                    this.setState({hasAssociatedDisease: true});
-                }
-                if (this.props.interpretation.modeInheritance) {
-                    this.setState({hasAssociatedInheritance: true});
-                }
+            if (nextProps.interpretation.interpretation_disease) {
+                this.setState({hasAssociatedDisease: true});
+            } else {
+                this.setState({hasAssociatedDisease: false});
             }
-        }
-    },
-
-    updateParentState: function(mode) {
-        if (mode === 'disease') {
-            this.setState({hasAssociatedDisease: true});
-        } else if (mode === 'inheritance') {
-            this.setState({hasAssociatedInheritance: true});
+            if (nextProps.interpretation.modeInheritance) {
+                this.setState({hasAssociatedInheritance: true});
+            } else {
+                this.setState({hasAssociatedInheritance: false});
+            }
         }
     },
 
@@ -120,9 +114,9 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                     <div className="interpretation-record clearfix">
                         <h2><span>Variant Interpretation Record</span></h2>
                         <div className="btn-group">
-                            <InheritanceModalButton variantData={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState} hasAssociatedInheritance={this.state.hasAssociatedInheritance}
+                            <InheritanceModalButton variantData={this.props.variantData} session={this.props.session} hasAssociatedInheritance={this.state.hasAssociatedInheritance}
                                 interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            <DiseaseModalButton variantData={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState} hasAssociatedDisease={this.state.hasAssociatedDisease}
+                            <DiseaseModalButton variantData={this.props.variantData} session={this.props.session} hasAssociatedDisease={this.state.hasAssociatedDisease}
                                 interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
@@ -146,7 +140,6 @@ var DiseaseModalButton = React.createClass({
         variantData: React.PropTypes.object,
         hasAssociatedDisease: React.PropTypes.bool,
         session: React.PropTypes.object,
-        updateParentState: React.PropTypes.func,
         interpretation: React.PropTypes.object,
         editKey: React.PropTypes.string,
         updateInterpretationObj: React.PropTypes.func
@@ -162,7 +155,7 @@ var DiseaseModalButton = React.createClass({
 
         return (
             <Modal title={associateDiseaseModalTitle} wrapperClassName="modal-associate-disease">
-                <button className="btn btn-primary pull-right" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.props.updateParentState}
+                <button className="btn btn-primary pull-right" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session}
                     interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateDiseaseButtonTitle}</button>
             </Modal>
         );
@@ -176,7 +169,6 @@ var InheritanceModalButton = React.createClass({
         variantData: React.PropTypes.object,
         hasAssociatedInheritance: React.PropTypes.bool,
         session: React.PropTypes.object,
-        updateParentState: React.PropTypes.func,
         interpretation: React.PropTypes.object,
         editKey: React.PropTypes.string,
         updateInterpretationObj: React.PropTypes.func
@@ -192,7 +184,7 @@ var InheritanceModalButton = React.createClass({
 
         return (
             <Modal title={associateInheritanceModalTitle} wrapperClassName="modal-associate-inheritance">
-                <button className="btn btn-primary pull-right btn-inline-spacer" modal={<AssociateInheritance closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.props.updateParentState}
+                <button className="btn btn-primary pull-right btn-inline-spacer" modal={<AssociateInheritance closeModal={this.closeModal} data={this.props.variantData} session={this.props.session}
                     interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateInheritanceButtonTitle}</button>
             </Modal>
         );
@@ -213,8 +205,7 @@ var AssociateDisease = React.createClass({
         closeModal: React.PropTypes.func, // Function to call to close the modal
         interpretation: React.PropTypes.object,
         editKey: React.PropTypes.bool,
-        updateInterpretationObj: React.PropTypes.func,
-        updateParentState: React.PropTypes.func
+        updateInterpretationObj: React.PropTypes.func
     },
 
     getInitialState: function() {
@@ -282,7 +273,6 @@ var AssociateDisease = React.createClass({
                             // Update the intepretation object partially with the new disease property value
                             return this.putRestData('/interpretation/' + this.props.interpretation.uuid, interpretationObj).then(result => {
                                 this.props.updateInterpretationObj();
-                                this.props.updateParentState('disease');
                                 var meta = {
                                     interpretation: {
                                         variant: this.props.data['@id'],
@@ -330,7 +320,6 @@ var AssociateDisease = React.createClass({
                                 this.setState({submitResourceBusy: false}, () => {
                                     // Need 'submitResourceBusy' state to proceed closing modal
                                     this.props.updateInterpretationObj();
-                                    this.props.updateParentState('disease');
                                     this.props.closeModal();
                                 });
                             });
@@ -402,8 +391,7 @@ var AssociateInheritance = React.createClass({
         closeModal: React.PropTypes.func, // Function to call to close the modal
         interpretation: React.PropTypes.object,
         editKey: React.PropTypes.bool,
-        updateInterpretationObj: React.PropTypes.func,
-        updateParentState: React.PropTypes.func
+        updateInterpretationObj: React.PropTypes.func
     },
 
     getInitialState: function() {
@@ -429,15 +417,17 @@ var AssociateInheritance = React.createClass({
             // get up-to-date copy of interpretation object and flatten it
             var flatInterpretation = curator.flatten(currInterpretation);
 
-            if (inheritance === 'select') {
-                flatInterpretation.modeInheritance = '';
+            if (inheritance === 'no-moi') {
+                if ('modeInheritance' in flatInterpretation) {
+                    delete flatInterpretation['modeInheritance'];
+                } else {
+                    return null;
+                }
             } else {
                 flatInterpretation.modeInheritance = inheritance;
             }
 
             return this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
-                this.props.updateInterpretationObj();
-                this.props.updateParentState('inheritance');
                 var meta = {
                     interpretation: {
                         variant: this.props.data['@id'],
@@ -451,8 +441,10 @@ var AssociateInheritance = React.createClass({
                 });
             });
         }).then(result => {
-            this.setState({submitResourceBusy: false});
-            this.props.closeModal();
+            this.setState({submitResourceBusy: false}, () => {
+                this.props.updateInterpretationObj();
+                this.props.closeModal();
+            });
         }).catch(e => {
             // Some unexpected error happened
             this.setState({submitResourceBusy: false});
@@ -481,7 +473,7 @@ var AssociateInheritance = React.createClass({
                         <Input type="select" ref="inheritance" label="Mode of Inheritance" defaultValue={defaultModeInheritance}
                             error={this.getFormError('inheritance')} clearError={this.clrFormErrors.bind(null, 'inheritance')}
                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="inheritance" >
-                            <option value="select" disabled="disabled">Select</option>
+                            <option value="no-moi">No mode of inheritance</option>
                             <option value="" disabled="disabled"></option>
                             {modesOfInheritance.map(function(modeOfInheritance, i) {
                                 return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
