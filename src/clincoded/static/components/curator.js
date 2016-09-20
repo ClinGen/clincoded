@@ -169,7 +169,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                             }
                                         </span>
                                     </h1>
-                                    <h2>{mode}</h2>
+                                    <h2><i>{mode}</i></h2>
                                 </span>
                             </div>
                             <div className="provisional-info-panel">
