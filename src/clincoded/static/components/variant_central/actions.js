@@ -45,6 +45,8 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     },
 
     componentWillReceiveProps: function(nextProps) {
+        // Checks whether there are any associated interpretations already existed in the variant object
+        // in the 'evidence only' view or prior to proceeding into an interpretation phase
         if (this.props.variantData) {
             let variant_data = this.props.variantData;
             if (variant_data.associatedInterpretations && variant_data.associatedInterpretations.length) {
@@ -56,6 +58,8 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                 });
             }
         }
+        // Gets an updated interpretation object from parent
+        // And confirms the existence of an associated interpretation object
         if (nextProps.interpretation && this.props.interpretation) {
             this.setState({interpretation: nextProps.interpretation}, () => {
                 let interpretation = this.state.interpretation;
