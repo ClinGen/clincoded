@@ -282,9 +282,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             case "Human Phenotype Ontology":
                 url = external_url_map['HPO'] + id;
                 break;
+            case "MeSH":
+                url = external_url_map['MeSH'] + id + '%5BMeSH+Unique+ID%5D&cmd=DetailsSearch&log$=activity';
+                break;
             default:
                 url = null;
-                //url = '#';
         }
         return url;
     },
