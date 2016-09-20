@@ -27,6 +27,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
             interpretation: this.props.interpretation,
             calculatedAssertion: this.props.calculatedAssertion,
             autoClassification: null,
+            modifiedPathogenicity: null,
             provisionalPathogenicity: this.props.provisionalPathogenicity,
             provisionalReason: this.props.provisionalReason,
             provisionalInterpretation: this.props.provisionalInterpretation,
@@ -136,7 +137,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
             if (!interpretation.provisional_variant || interpretation.provisional_variant.length < 1) {
                 this.postRestData('/provisional-variant/', provisionalObj).then(result => {
                     this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes saved successfully!</span>});
-                    this.setState({autoClassification: result['@graph'][0]['autoClassification']});
+                    this.setState({
+                        autoClassification: result['@graph'][0]['autoClassification'],
+                        modifiedPathogenicity: result['@graph'][0]['alteredClassification']
+                    });
                     let provisionalObjUuid = result['@graph'][0]['@id'];
                     if (!('provisional_variant' in flatInterpretationObj)) {
                         flatInterpretationObj.provisional_variant = [provisionalObjUuid];
@@ -159,7 +163,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
             } else {
                 this.putRestData('/provisional-variant/' + interpretation.provisional_variant[0].uuid, provisionalObj).then(response => {
                     this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes updated successfully!</span>});
-                    this.setState({autoClassification: response['@graph'][0]['autoClassification']});
+                    this.setState({
+                        autoClassification: response['@graph'][0]['autoClassification'],
+                        modifiedPathogenicity: response['@graph'][0]['alteredClassification']
+                    });
                     this.props.updateInterpretationObj();
                 }).catch(err => {
                     this.setState({submitBusy: false, updateMsg: <span className="text-danger">Unable to update provisional changes.</span>});
@@ -181,6 +188,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         let sortedEvaluations = evaluations ? sortByStrength(evaluations) : null;
         let calculatedAssertion = this.state.autoClassification ? this.state.autoClassification : this.state.calculatedAssertion;
         let provisionalVariant = null;
+        let alteredClassification = null;
+        let provisionalStatus = null;
         let provisionalPathogenicity = this.state.provisionalPathogenicity;
         let provisionalReason = this.state.provisionalReason;
         let provisionalInterpretation = this.state.provisionalInterpretation;
@@ -188,10 +197,20 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         let disabledFormSumbit = this.state.disabledFormSumbit;
 
         if (interpretation) {
+            if (interpretation.markAsProvisional) {
+                provisionalStatus = interpretation.markAsProvisional;
+            }
             if (interpretation.provisional_variant && interpretation.provisional_variant.length) {
                 provisionalVariant = interpretation.provisional_variant[0];
+                if (provisionalVariant.alteredClassification) {
+                    alteredClassification = provisionalVariant.alteredClassification;
+                }
             }
         }
+        // Modified pathogenicity value gets updated only after the form is saved
+        // And thus we pull the stored value (if any) initially from the db
+        // Then we pull the updated value from either REST post or put results
+        let modifiedPathogenicity = this.state.modifiedPathogenicity ? this.state.modifiedPathogenicity : alteredClassification;
 
         return (
             <div className="container evaluation-summary">
@@ -210,27 +229,24 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                         </dl>
                                         <dl className="inline-dl clearfix">
                                             <dt>Modified Pathogenicity:</dt>
-                                            <dd>{provisionalPathogenicity ? provisionalPathogenicity : 'None'}</dd>
+                                            <dd>{modifiedPathogenicity ? modifiedPathogenicity : 'None'}</dd>
                                         </dl>
                                         <dl className="inline-dl clearfix">
                                             <dt>Disease:</dt>
                                             <dd>{interpretation.disease ? interpretation.disease.term : 'None'}</dd>
                                         </dl>
-                                        <div className="evaluation-provision provisional-interpretation">
-                                            <div>
-                                                <i className="icon icon-question-circle"></i>
-                                                <strong>Mark as Provisional Interpretation</strong>
-                                                <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation} defaultChecked="false"
-                                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange} />
-                                            </div>
-                                        </div>
-                                        <div className="alert alert-warning">
-                                            Note: If the Calculated Pathogenicity is "Likely Pathogenic" or "Pathogenic," a disease must first be associated with the interpretation before it is marked as a "Provisional Interpretation".
-                                        </div>
+                                        <dl className="inline-dl clearfix">
+                                            <dt>Mode of Inheritance:</dt>
+                                            <dd>{interpretation.modeInheritance ? interpretation.modeInheritance : 'None'}</dd>
+                                        </dl>
+                                        <dl className="inline-dl clearfix">
+                                            <dt>Provisional Interpretation Status:</dt>
+                                            <dd className="provisional-interpretation-status">{provisionalStatus ? 'Provisional' : 'In progress'}</dd>
+                                        </dl>
                                     </div>
-                                    <div className="col-xs-12 col-sm-6">
+                                    <div className="col-xs-12 col-sm-6 provisional-form-content-wrapper">
                                         <div className="evaluation-provision provisional-pathogenicity">
-                                            <Input type="select" ref="provisional-pathogenicity" label="Select Provisional Pathogenicity:"
+                                            <Input type="select" ref="provisional-pathogenicity" label="Modify Pathogenicity (optional):"
                                                 value={provisionalPathogenicity ? provisionalPathogenicity : ''}
                                                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange}>
                                                 <option value=''>Select an option</option>
@@ -240,10 +256,23 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                                 <option value="Likely pathogenic">Likely Pathogenic</option>
                                                 <option value="Pathogenic">Pathogenic</option>
                                             </Input>
-                                            <Input type="textarea" ref="provisional-reason" label="Explain Reason(s) for change:" rows="5" required
+                                            <Input type="textarea" ref="provisional-reason" label="Explain Reason(s) for change:" rows="5"
                                                 value={provisionalReason ? provisionalReason : null}
-                                                placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, provide a reason for the change here."
+                                                placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, you must provide a reason for the change here."
                                                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
+                                        </div>
+                                        <div className="evaluation-provision provisional-interpretation">
+                                            <div>
+                                                <i className="icon icon-question-circle"></i>
+                                                <span>Mark as Provisional Interpretation (optional):</span>
+                                                <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation} defaultChecked="false"
+                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
+                                            </div>
+                                        </div>
+                                        <div className="alert alert-warning">
+                                            Note: If the Calculated Pathogenicity is "Likely Pathogenic" or "Pathogenic,"
+                                            a disease must first be associated with the interpretation before it can be marked
+                                            as a "Provisional Interpretation". Please select "Return to Interpretation" to add a disease.
                                         </div>
                                         <div className="provisional-submit">
                                             <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
