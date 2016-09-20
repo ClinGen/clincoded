@@ -45,6 +45,17 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     },
 
     componentWillReceiveProps: function(nextProps) {
+        if (this.props.variantData) {
+            let variant_data = this.props.variantData;
+            if (variant_data.associatedInterpretations && variant_data.associatedInterpretations.length) {
+                let associatedInterpretations = variant_data.associatedInterpretations;
+                associatedInterpretations.forEach(associatedInterpretation => {
+                    if (associatedInterpretation.submitted_by['@id'] === this.props.session.user_properties['@id']) {
+                        this.setState({hasExistingInterpretation: true});
+                    }
+                });
+            }
+        }
         if (nextProps.interpretation && this.props.interpretation) {
             this.setState({interpretation: nextProps.interpretation}, () => {
                 let interpretation = this.state.interpretation;
@@ -108,13 +119,13 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             associateDiseaseButtonTitle = '',
             associateDiseaseModalTitle = '';
 
-        if (!interpretation) {
+        if (!this.state.hasExistingInterpretation) {
             interpretationButtonTitle = 'Start New Interpretation';
-        } else if (interpretation) {
+        } else {
             if (!this.state.isInterpretationActive) {
                 interpretationButtonTitle = 'Continue Interpretation';
             } else {
-                if (interpretation.disease && this.state.hasAssociatedDisease) {
+                if (interpretation && this.state.hasAssociatedDisease) {
                     associateDiseaseButtonTitle = 'Edit Disease';
                     associateDiseaseModalTitle = 'Associate this interpretation with a different disease';
                 } else {
