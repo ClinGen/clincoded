@@ -241,11 +241,11 @@ var AssociateDisease = React.createClass({
     // When the form is submitted...
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        // Invoke button progress indicator
-        this.setState({submitResourceBusy: true});
         // Get values from form and validate them
         this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
         if (this.validateForm()) {
+            // Invoke button progress indicator
+            this.setState({submitResourceBusy: true});
             // Get the free-text values for the Orphanet ID to check against the DB
             var orphaId = this.getFormValue('orphanetid').match(/^ORPHA([0-9]{1,6})$/i)[1];
             var interpretationDisease, currInterpretation;
