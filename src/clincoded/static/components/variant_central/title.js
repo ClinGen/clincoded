@@ -26,7 +26,7 @@ var Title = module.exports.Title = React.createClass({
 
     renderSubtitle: function(interpretation, variant) {
         var associatedDisease = 'Evidence View';
-        let mode = interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+        let mode = interpretation && interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
         if (interpretation) {
             if (interpretation.disease && interpretation.disease.term && interpretation.modeInheritance) {
                 associatedDisease = <span>This interpretation is associated with <strong>{interpretation.disease.term}</strong> - <i>{mode}</i></span>;
