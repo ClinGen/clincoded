@@ -2011,7 +2011,19 @@ dl.inline-dl {
     .datasource-evaluation-summary-provision {
         dl {
             margin-bottom: 5px;
+
+            .provisional-interpretation-status:first-letter {
+                text-transform: capitalize;
+            }
         }
+    }
+
+    .provisional-form-content-wrapper {
+        border: solid 1px #dfdfdf;
+        padding: 15px 20px;
+        -webkit-border-radius: 2px;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
     }
 
     .evaluation-provision {
@@ -2028,22 +2040,25 @@ dl.inline-dl {
         }
 
         select {
-            width: auto;
+            /*width: auto;*/
         }
 
         &.provisional-pathogenicity {
             .form-group {
-                margin-bottom: 5px;
+                margin-bottom: 0;
             }
         }
 
         &.provisional-interpretation {
+            margin-top: 0;
+
             .col-sm-7 {
                 margin-left: -15px;
             }
 
             .icon-question-circle {
                 cursor: pointer;
+                color: #2697d1;
                 font-size: 120%;
                 margin-right: 8px;
                 position: relative;
@@ -2051,6 +2066,7 @@ dl.inline-dl {
                 &:after {
                     content: "Editing interpretation is permitted after selecting this option";
                     background-color: #000;
+                    background-color: hsla(0, 0%, 20%, 0.9);
                     color: #fff;
                     text-align: center;
                     border-radius: 3px;
@@ -2087,7 +2103,29 @@ dl.inline-dl {
             input[type="checkbox"] {
                 margin-top: 0;
                 position: relative;
-                top: 4px;
+                top: 3px;
+                left: 0px;
+                visibility: hidden;
+
+                &:after,
+                &:checked:after {
+                    font-family: FontAwesome;
+                    font-size: 120%;
+                    display: inline-block;
+                    visibility: visible;
+                }
+
+                &:after {
+                    content: "\f096";
+                }
+
+                &:checked:after {
+                    content: "\f14a";
+                }
+
+                &[disabled] {
+                    color: #bbb;
+                }
             }
         }
     }
