@@ -272,6 +272,9 @@ var InterpretationModifyHistory = React.createClass({
                 {history.meta.interpretation.mode == 'edit-disease' ?
                     <span>Disease <strong>{disease.term}</strong> associated with Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></a> interpretation</span>
                 : null}
+                {history.meta.interpretation.mode == 'edit-inheritance' ?
+                    <span>Disease <strong>{disease.term}</strong> associated with Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></a> interpretation</span>
+                : null}
                 {history.meta.interpretation.mode == 'update-eval' ?
                     <span>Evaluation(s) updated for Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong> {disease ? <span>({disease.term})</span> : null}</a></span>
                 : null}
