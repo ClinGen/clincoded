@@ -9,6 +9,7 @@ var form = require('../../libs/bootstrap/form');
 var modal = require('../../libs/bootstrap/modal');
 var CuratorHistory = require('../curator_history');
 var curator = require('../curator');
+var modesOfInheritance = require('../mapping/modes_of_inheritance.json');
 
 var Input = form.Input;
 var Form = form.Form;
@@ -19,7 +20,7 @@ var queryKeyValue = globals.queryKeyValue;
 
 // Display the variant curation action bar above the criteria and tabs
 var VariantCurationActions = module.exports.VariantCurationActions = React.createClass({
-    mixins: [RestMixin, ModalMixin, FormMixin, CuratorHistory],
+    mixins: [RestMixin, FormMixin, CuratorHistory],
 
     propTypes: {
         variantData: React.PropTypes.object, // ClinVar data payload
@@ -66,8 +67,12 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         }
     },
 
-    updateParentState: function() {
-        this.setState({hasAssociatedDisease: true});
+    updateParentState: function(mode) {
+        if (mode === 'disease') {
+            this.setState({hasAssociatedDisease: true});
+        } else if (mode === 'inheritance') {
+            this.setState({hasAssociatedInheritance: true});
+        }
     },
 
     // handler for 'Start new interpretation' & 'Continue interpretation' button click events
@@ -109,34 +114,16 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             interpretationButtonTitle = 'Continue Interpretation';
         }
 
-        let associateDiseaseButtonTitle = <span>Disease <i className="icon icon-plus-circle"></i></span>,
-            associateDiseaseModalTitle = 'Associate this interpretation with a disease';
-        if (this.state.hasAssociatedDisease) {
-            associateDiseaseButtonTitle = <span>Disease <i className="icon icon-pencil"></i></span>;
-            associateDiseaseModalTitle = 'Associate this interpretation with a different disease';
-        }
-
-        let associateInheritanceButtonTitle = <span>Inheritance <i className="icon icon-plus-circle"></i></span>,
-            associateInheritanceModalTitle = 'Associate this interpretation with a mode of inheritance';
-        if (this.state.hasAssociatedInheritance) {
-            associateInheritanceButtonTitle = <span>Inheritance <i className="icon icon-pencil"></i></span>;
-            associateInheritanceModalTitle = 'Associate this interpretation with a different mode of inheritance';
-        }
-
         return (
             <div className="container curation-actions curation-variant">
                 {(this.state.isInterpretationActive) ?
                     <div className="interpretation-record clearfix">
                         <h2><span>Variant Interpretation Record</span></h2>
                         <div className="btn-group">
-                            <Modal title={associateDiseaseModalTitle} wrapperClassName="modal-associate-disease">
-                                <button className="btn btn-primary pull-right btn-inline-spacer" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState}
-                                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateDiseaseButtonTitle}</button>
-                            </Modal>
-                            <Modal title={associateInheritanceModalTitle} wrapperClassName="modal-associate-disease">
-                                <button className="btn btn-primary pull-right" modal={<AssociateInheritance closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState}
-                                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateInheritanceButtonTitle}</button>
-                            </Modal>
+                            <DiseaseModalButton variantData={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState} hasAssociatedDisease={this.state.hasAssociatedDisease}
+                                interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            <InheritanceModalButton variantData={this.props.variantData} session={this.props.session} updateParentState={this.updateParentState} hasAssociatedInheritance={this.state.hasAssociatedInheritance}
+                                interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
                 :
@@ -145,6 +132,66 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                     </div>
                 }
             </div>
+        );
+    }
+});
+
+var DiseaseModalButton = React.createClass({
+    mixins: [ModalMixin],
+
+    propTypes: {
+        variantData: React.PropTypes.object,
+        hasAssociatedDisease: React.PropTypes.boolean,
+        session: React.PropTypes.object,
+        updateParentState: React.PropTypes.func,
+        interpretation: React.PropTypes.object,
+        editKey: React.PropTypes.string,
+        updateInterpretationObj: React.PropTypes.func
+    },
+
+    render: function() {
+        let associateDiseaseButtonTitle = <span>Disease <i className="icon icon-plus-circle"></i></span>,
+            associateDiseaseModalTitle = 'Associate this interpretation with a disease';
+        if (this.props.hasAssociatedDisease) {
+            associateDiseaseButtonTitle = <span>Disease <i className="icon icon-pencil"></i></span>;
+            associateDiseaseModalTitle = 'Associate this interpretation with a different disease';
+        }
+
+        return (
+            <Modal title={associateDiseaseModalTitle} wrapperClassName="modal-associate-disease">
+                <button className="btn btn-primary pull-right btn-inline-spacer" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.props.updateParentState}
+                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateDiseaseButtonTitle}</button>
+            </Modal>
+        );
+    }
+});
+
+var InheritanceModalButton = React.createClass({
+    mixins: [ModalMixin],
+
+    propTypes: {
+        variantData: React.PropTypes.object,
+        hasAssociatedInheritance: React.PropTypes.boolean,
+        session: React.PropTypes.object,
+        updateParentState: React.PropTypes.func,
+        interpretation: React.PropTypes.object,
+        editKey: React.PropTypes.string,
+        updateInterpretationObj: React.PropTypes.func
+    },
+
+    render: function() {
+        let associateInheritanceButtonTitle = <span>Inheritance <i className="icon icon-plus-circle"></i></span>,
+            associateInheritanceModalTitle = 'Associate this interpretation with a mode of inheritance';
+        if (this.props.hasAssociatedInheritance) {
+            associateInheritanceButtonTitle = <span>Inheritance <i className="icon icon-pencil"></i></span>;
+            associateInheritanceModalTitle = 'Associate this interpretation with a different mode of inheritance';
+        }
+
+        return (
+            <Modal title={associateInheritanceModalTitle} wrapperClassName="modal-associate-inheritance">
+                <button className="btn btn-primary pull-right" modal={<AssociateInheritance closeModal={this.closeModal} data={this.props.variantData} session={this.props.session} updateParentState={this.props.updateParentState}
+                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateInheritanceButtonTitle}</button>
+            </Modal>
         );
     }
 });
@@ -226,7 +273,7 @@ var AssociateDisease = React.createClass({
                         // Update the intepretation object partially with the new disease property value
                         return this.putRestData('/interpretation/' + this.props.interpretation.uuid, interpretationObj).then(result => {
                             this.props.updateInterpretationObj();
-                            this.props.updateParentState();
+                            this.props.updateParentState('disease');
                             var meta = {
                                 interpretation: {
                                     variant: this.props.data['@id'],
@@ -367,10 +414,10 @@ var AssociateInheritance = React.createClass({
     },
 
     render: function() {
-        var disease_id = '';
+        var defaultModeInheritance = 'select';
         if (this.props.interpretation) {
-            if (this.props.interpretation.interpretation_disease) {
-                disease_id = this.props.interpretation.interpretation_disease;
+            if (this.props.interpretation.modeInheritance) {
+                defaultModeInheritance = this.props.interpretation.modeInheritance;
             }
         }
 
@@ -378,9 +425,14 @@ var AssociateInheritance = React.createClass({
             <Form submitHandler={this.submitForm} formClassName="form-std">
                 <div className="modal-box">
                     <div className="modal-body clearfix">
-                        <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
-                            error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
-                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
+                        <Input type="select" ref="inheritance" label="Mode of Inheritance" defaultValue={defaultModeInheritance}
+                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="inheritance" required>
+                            <option value="select" disabled="disabled">Select</option>
+                            <option value="" disabled="disabled"></option>
+                            {modesOfInheritance.map(function(modeOfInheritance, i) {
+                                return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
+                            })}
+                        </Input>
                     </div>
                     <div className='modal-footer'>
                         <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
