@@ -276,7 +276,7 @@ var InterpretationModifyHistory = React.createClass({
                 : null}
                 {history.meta.interpretation.mode == 'edit-inheritance' ?
                     interpretation.modeInheritance ?
-                        <span>Mode of inheritance <strong>{interpretation.modeInheritance}</strong> associated with Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></a> interpretation</span>
+                        <span>Mode of inheritance <i>{interpretation.modeInheritance}</i> associated with Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></a> interpretation</span>
                         : <span>Mode of inheritance association removed from Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></a> interpretation</span>
                 : null}
                 {history.meta.interpretation.mode == 'update-eval' ?
