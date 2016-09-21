@@ -17,16 +17,13 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
         session: React.PropTypes.object,
         setSummaryVisibility: React.PropTypes.func,
         summaryVisible: React.PropTypes.bool,
-        getSelectedTab: React.PropTypes.func,
-        persistProvisionalCheckBox: React.PropTypes.func,
-        disabledProvisionalCheckbox: React.PropTypes.bool
+        getSelectedTab: React.PropTypes.func
     },
 
     getInitialState: function() {
         return {
             interpretation: null, // parent interpretation object
-            summaryVisible: this.props.summaryVisible,
-            disabledProvisionalCheckbox: this.props.disabledProvisionalCheckbox
+            summaryVisible: this.props.summaryVisible
         };
     },
 
@@ -37,8 +34,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
             this.setState({interpretation: nextProps.interpretation});
         }
         this.setState({
-            summaryVisible: nextProps.summaryVisible,
-            disabledProvisionalCheckbox: nextProps.disabledProvisionalCheckbox
+            summaryVisible: nextProps.summaryVisible
         });
     },
 
@@ -54,8 +50,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
                     <div className="container">
                         <Title data={variant} interpretation={interpretation} interpretationUuid={interpretationUuid}
                             setSummaryVisibility={this.props.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
-                            disabledProvisionalCheckbox={this.state.disabledProvisionalCheckbox}
-                            getSelectedTab={this.props.getSelectedTab} persistProvisionalCheckBox={this.props.persistProvisionalCheckBox} />
+                            getSelectedTab={this.props.getSelectedTab} />
                     </div>
                 </div>
                 <div className="container curation-data curation-variant">
