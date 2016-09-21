@@ -15,8 +15,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         calculatedAssertion: React.PropTypes.string,
         provisionalPathogenicity: React.PropTypes.string,
         provisionalReason: React.PropTypes.string,
-        provisionalInterpretation: React.PropTypes.bool,
-        disabledProvisionalCheckbox: React.PropTypes.bool
+        provisionalInterpretation: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -28,18 +27,24 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
             provisionalPathogenicity: this.props.provisionalPathogenicity,
             provisionalReason: this.props.provisionalReason,
             provisionalInterpretation: this.props.provisionalInterpretation,
-            disabledCheckbox: this.props.disabledProvisionalCheckbox,
+            disabledCheckbox: false,
             disabledFormSumbit: false,
             submitBusy: false, // spinner for Save button
             updateMsg: null // status message for Save/Update button
         };
     },
 
+    componentDidMount: function() {
+        if (this.props.interpretation && this.props.calculatedAssertion) {
+            this.handleProvisionalCheckBox(this.state.provisionalPathogenicity);
+        }
+    },
+
     componentWillReceiveProps: function(nextProps) {
-        if (nextProps.interpretation && this.props.interpretation) {
+        if (nextProps.interpretation) {
             this.setState({interpretation: nextProps.interpretation});
         }
-        if (nextProps.calculatedAssertion && this.props.calculatedAssertion) {
+        if (nextProps.calculatedAssertion) {
             this.setState({calculatedAssertion: nextProps.calculatedAssertion});
         }
         if (nextProps.provisionalPathogenicity) {
@@ -49,9 +54,33 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
             this.setState({provisionalReason: nextProps.provisionalReason});
         }
         this.setState({
-            provisionalInterpretation: nextProps.provisionalInterpretation,
-            disabledCheckbox: nextProps.disabledProvisionalCheckbox
+            provisionalInterpretation: nextProps.provisionalInterpretation
         });
+    },
+
+    // Method to set provisional checkbox state given the modified or calculated pathogenicity
+    handleProvisionalCheckBox: function(pathogenicity) {
+        if (!this.props.interpretation.disease) {
+            let assertion = this.props.calculatedAssertion;
+            if (assertion === 'Likely pathogenic' || assertion === 'Pathogenic') {
+                if(pathogenicity === 'Benign' ||
+                   pathogenicity === 'Likely benign' ||
+                   pathogenicity === 'Uncertain significance') {
+                    this.setState({disabledCheckbox: false});
+                } else {
+                    this.setState({disabledCheckbox: true});
+                }
+            } else {
+                if(pathogenicity === 'Likely pathogenic' ||
+                   pathogenicity === 'Pathogenic') {
+                    this.setState({disabledCheckbox: true});
+                } else {
+                    this.setState({disabledCheckbox: false});
+                }
+            }
+        } else {
+            this.setState({disabledCheckbox: false});
+        }
     },
 
     // Handle value changes in provisional form
@@ -68,6 +97,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                     } else {
                         this.setState({disabledFormSumbit: false});
                     }
+                    // If no disease is associated, we disable provisional checkbox
+                    // when modified pathogenicity is either 'Likely pathogenic' or 'Pathogenic'
+                    this.handleProvisionalCheckBox(this.state.provisionalPathogenicity);
                 });
             } else {
                 this.setState({provisionalPathogenicity: null}, () => {
@@ -79,6 +111,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                     } else {
                         this.setState({disabledFormSumbit: false});
                     }
+                    // If no disease is associated, we disable provisional checkbox
+                    // when modified pathogenicity is either 'Likely pathogenic' or 'Pathogenic'
+                    this.handleProvisionalCheckBox(this.state.provisionalPathogenicity);
                 });
             }
         }
