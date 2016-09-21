@@ -1,12 +1,9 @@
 'use strict';
 import React, {PropTypes} from 'react';
-const evidenceCodes = require('./mapping/evidence_code.json');
-const form = require('../../../libs/bootstrap/form');
-const Input = form.Input;
-const Form = form.Form;
-const FormMixin = form.FormMixin;
-const RestMixin = require('../../rest').RestMixin;
-var curator = require('../../curator');
+import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
+import { RestMixin } from '../../rest';
+import * as curator from '../../curator';
+import * as evidenceCodes from './mapping/evidence_code.json';
 
 var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
     mixins: [FormMixin, RestMixin],
@@ -57,8 +54,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         });
     },
 
-    // Handle value changes in forms
+    // Handle value changes in provisional form
     handleChange: function(ref, e) {
+        // Handle modified pathogenicity dropdown
         if (ref === 'provisional-pathogenicity') {
             if (this.refs[ref].getValue()) {
                 this.setState({provisionalPathogenicity: this.refs[ref].getValue()}, () => {
@@ -84,6 +82,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                 });
             }
         }
+        // Handle reason/explanation for pathogenicity modification/change
         if (ref === 'provisional-reason') {
             if (this.refs[ref].getValue()) {
                 this.setState({provisionalReason: this.refs[ref].getValue()}, () => {
@@ -109,6 +108,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                 });
             }
         }
+        // Handle provisional interpretation checkbox
         if (ref === 'provisional-interpretation' && this.refs[ref]) {
             this.setState({provisionalInterpretation: !this.state.provisionalInterpretation}, () => {
                 // Pass checkbox state change back to parent component
@@ -122,19 +122,28 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         this.setState({submitBusy: true, updateMsg: null});
 
         const interpretation = this.state.interpretation;
-        // Set up 'provisional-variant' object
-        const provisionalObj = {
-            'autoClassification': this.state.calculatedAssertion,
-            'alteredClassification': this.state.provisionalPathogenicity,
-            'reason': this.state.provisionalReason
-        };
         const provisionalInterpretation = this.state.provisionalInterpretation;
+
         if (interpretation) {
             // Flattened interpretation object
             let flatInterpretationObj = curator.flatten(interpretation);
             // Set 'markAsProvisional' property value in the flatten interpretation object
             flatInterpretationObj.markAsProvisional = provisionalInterpretation;
             if (!interpretation.provisional_variant || interpretation.provisional_variant.length < 1) {
+                // Configure 'provisional-variant' object properties
+                // Use case #1: user makes pathogenicity modification and marks the interpretation provisional
+                // Use case #2: user marks the interpretation provisional without any modification
+                let provisionalObj;
+                if (this.state.provisionalPathogenicity) {
+                    provisionalObj = {
+                        'autoClassification': this.state.calculatedAssertion,
+                        'alteredClassification': this.state.provisionalPathogenicity,
+                        'reason': this.state.provisionalReason
+                    };
+                } else {
+                    provisionalObj = {'autoClassification': this.state.calculatedAssertion};
+                }
+
                 this.postRestData('/provisional-variant/', provisionalObj).then(result => {
                     this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes saved successfully!</span>});
                     this.setState({
@@ -161,15 +170,40 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                     console.log(err);
                 });
             } else {
-                this.putRestData('/provisional-variant/' + interpretation.provisional_variant[0].uuid, provisionalObj).then(response => {
-                    this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes updated successfully!</span>});
-                    this.setState({
-                        autoClassification: response['@graph'][0]['autoClassification'],
-                        modifiedPathogenicity: response['@graph'][0]['alteredClassification']
+                this.getRestData('/provisional-variant/' + interpretation.provisional_variant[0].uuid).then(provisionalVariantObj => {
+                    // Get up-to-date copy of provisional-variant object and flatten it
+                    let flatProvisionalVariantObj = curator.flatten(provisionalVariantObj);
+                    // Configure 'provisional-variant' object properties
+                    // Use case #1: user updates pathogenicity modification and marks the interpretation provisional
+                    // Use case #2: user removes pre-existing modification and updates the form
+                    if (this.state.provisionalPathogenicity) {
+                        flatProvisionalVariantObj['autoClassification'] = this.state.calculatedAssertion;
+                        flatProvisionalVariantObj['alteredClassification'] = this.state.provisionalPathogenicity;
+                        flatProvisionalVariantObj['reason'] = this.state.provisionalReason;
+                        return Promise.resolve(flatProvisionalVariantObj);
+                    } else {
+                        if ('alteredClassification' in flatProvisionalVariantObj) {
+                            delete flatProvisionalVariantObj['alteredClassification'];
+                        }
+                        if ('reason' in flatProvisionalVariantObj) {
+                            delete flatProvisionalVariantObj['reason'];
+                        }
+                        flatProvisionalVariantObj['autoClassification'] = this.state.calculatedAssertion;
+                        return Promise.resolve(flatProvisionalVariantObj);
+                    }
+                }).then(newProvisionalVariantObj => {
+                    this.putRestData('/provisional-variant/' + interpretation.provisional_variant[0].uuid, newProvisionalVariantObj).then(response => {
+                        this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes updated successfully!</span>});
+                        this.setState({
+                            autoClassification: response['@graph'][0]['autoClassification'],
+                            modifiedPathogenicity: response['@graph'][0]['alteredClassification']
+                        });
+                        this.props.updateInterpretationObj();
+                    }).catch(err => {
+                        this.setState({submitBusy: false, updateMsg: <span className="text-danger">Unable to update provisional changes.</span>});
+                        console.log(err);
                     });
-                    this.props.updateInterpretationObj();
                 }).catch(err => {
-                    this.setState({submitBusy: false, updateMsg: <span className="text-danger">Unable to update provisional changes.</span>});
                     console.log(err);
                 });
                 // Also update the interpretation object in case the checkbox value has changed
