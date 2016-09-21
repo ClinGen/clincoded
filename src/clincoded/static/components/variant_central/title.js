@@ -21,16 +21,13 @@ var Title = module.exports.Title = React.createClass({
         interpretation: React.PropTypes.object,
         setSummaryVisibility: React.PropTypes.func,
         summaryVisible: React.PropTypes.bool,
-        getSelectedTab: React.PropTypes.func,
-        persistProvisionalCheckBox: React.PropTypes.func,
-        disabledProvisionalCheckbox: React.PropTypes.bool
+        getSelectedTab: React.PropTypes.func
     },
 
     getInitialState: function() {
         return {
             interpretation: null, // parent interpretation object
-            summaryVisible: this.props.summaryVisible,
-            disabledProvisionalCheckbox: this.props.disabledProvisionalCheckbox
+            summaryVisible: this.props.summaryVisible
         };
     },
 
@@ -41,8 +38,7 @@ var Title = module.exports.Title = React.createClass({
             this.setState({interpretation: nextProps.interpretation});
         }
         this.setState({
-            summaryVisible: nextProps.summaryVisible,
-            disabledProvisionalCheckbox: nextProps.disabledProvisionalCheckbox
+            summaryVisible: nextProps.summaryVisible
         });
     },
 
@@ -77,14 +73,12 @@ var Title = module.exports.Title = React.createClass({
         let summaryKey = queryKeyValue('summary', window.location.href);
         if (!summaryVisible) {
             this.props.setSummaryVisibility(true);
-            this.props.persistProvisionalCheckBox(this.state.disabledProvisionalCheckbox);
             if (!summaryKey) {
                 window.history.replaceState(window.state, '', addQueryKey(window.location.href, 'summary', 'true'));
             }
         }
         if (summaryVisible) {
             this.props.setSummaryVisibility(false);
-            this.props.persistProvisionalCheckBox(this.state.disabledProvisionalCheckbox);
             if (summaryKey) {
                 window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'summary', null));
                 let tabKey = queryKeyValue('tab', window.location.href);
