@@ -58,6 +58,25 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         });
     },
 
+    componentDidUpdate: function(prevProps, prevState) {
+        // Add notes to labels for modified pathogenicity/reason
+        let nodeList = document.querySelectorAll('.evaluation-provision.provisional-pathogenicity label');
+        let labelNodes = Array.from(nodeList);
+        if (labelNodes) {
+            labelNodes.forEach(node => {
+                let note = document.createElement('i');
+                if (node.getAttribute('for') === 'provisional-pathogenicity') {
+                    note.innerHTML = '(optional)';
+                    node.insertAdjacentElement('beforeend', note);
+                }
+                if (node.getAttribute('for') === 'provisional-reason') {
+                    note.innerHTML = '(<strong>required</strong> for modified pathogenicity)';
+                    node.insertAdjacentElement('beforeend', note);
+                }
+            });
+        }
+    },
+
     // Method to set provisional checkbox state given the modified or calculated pathogenicity
     handleProvisionalCheckBox: function(pathogenicity) {
         if (!this.props.interpretation.disease) {
@@ -315,7 +334,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                     </div>
                                     <div className="col-xs-12 col-sm-6 provisional-form-content-wrapper">
                                         <div className="evaluation-provision provisional-pathogenicity">
-                                            <Input type="select" ref="provisional-pathogenicity" label="Modify Pathogenicity (optional):"
+                                            <Input type="select" ref="provisional-pathogenicity" label="Modify Pathogenicity:"
                                                 value={provisionalPathogenicity ? provisionalPathogenicity : ''}
                                                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange}>
                                                 <option value=''>Select an option</option>
@@ -325,7 +344,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                                 <option value="Likely pathogenic">Likely Pathogenic</option>
                                                 <option value="Pathogenic">Pathogenic</option>
                                             </Input>
-                                            <Input type="textarea" ref="provisional-reason" label="Explain Reason(s) for change:" rows="5"
+                                            <Input type="textarea" ref="provisional-reason" label="Explain reason(s) for change:" rows="5"
                                                 value={provisionalReason ? provisionalReason : null}
                                                 placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, you must provide a reason for the change here."
                                                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
