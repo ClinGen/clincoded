@@ -439,14 +439,12 @@ var VariantCurationHub = React.createClass({
                 // If no disease is associated, we disable provisional checkbox
                 // when calculated pathogenicity is either 'Likely pathogenic' or 'Pathogenic'
                 if (assertion === 'Likely pathogenic' || assertion === 'Pathogenic') {
-                    switch (this.state.provisionalPathogenicity) {
-                        case 'Benign':
-                        case 'Likely benign':
-                        case 'Uncertain significance':
-                            this.state.disabledProvisionalCheckbox = false;
-                            break;
-                        default:
-                            this.state.disabledProvisionalCheckbox = true;
+                    if(this.state.provisionalPathogenicity === 'Benign' ||
+                       this.state.provisionalPathogenicity === 'Likely benign' ||
+                       this.state.provisionalPathogenicity === 'Uncertain significance') {
+                        this.state.disabledProvisionalCheckbox = false;
+                    } else {
+                        this.state.disabledProvisionalCheckbox = true;
                     }
                 } else {
                     this.state.disabledProvisionalCheckbox = false;
@@ -481,6 +479,13 @@ var VariantCurationHub = React.createClass({
             this.setState({disabledProvisionalCheckbox: true});
         } else if (pathogenicity === 'Benign' || pathogenicity === 'Likely benign' || pathogenicity === 'Uncertain significance') {
             this.setState({disabledProvisionalCheckbox: false});
+        } else if (!pathogenicity) {
+            if (this.state.autoClassification === 'Likely pathogenic' ||
+                this.state.autoClassification === 'Pathogenic' ||
+                this.state.calculated_pathogenicity === 'Likely pathogenic' ||
+                this.state.calculated_pathogenicity === 'Pathogenic') {
+                this.setState({disabledProvisionalCheckbox: true});
+            }
         }
     },
 
