@@ -56,6 +56,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         }
         if (this.props.editKey === 'true' && nextProps.interpretation) {
             this.setState({isInterpretationActive: true});
+            // set disease and inheritance flags accordingly
             if (nextProps.interpretation.interpretation_disease) {
                 this.setState({hasAssociatedDisease: true});
             } else {
@@ -133,6 +134,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     }
 });
 
+// class to contain the Disease button and its modal
 var DiseaseModalButton = React.createClass({
     mixins: [ModalMixin],
 
@@ -162,6 +164,7 @@ var DiseaseModalButton = React.createClass({
     }
 });
 
+// class to contain the Inheritance button and its modal
 var InheritanceModalButton = React.createClass({
     mixins: [ModalMixin],
 
@@ -200,11 +203,11 @@ var AssociateDisease = React.createClass({
     },
 
     propTypes: {
-        data: React.PropTypes.object,
-        session: React.PropTypes.object,
+        data: React.PropTypes.object, // variant object
+        session: React.PropTypes.object, // session object
         closeModal: React.PropTypes.func, // Function to call to close the modal
-        interpretation: React.PropTypes.object,
-        editKey: React.PropTypes.bool,
+        interpretation: React.PropTypes.object, // interpretation object
+        editKey: React.PropTypes.bool, // edit flag
         updateInterpretationObj: React.PropTypes.func
     },
 
@@ -377,7 +380,7 @@ var LabelOrphanetId = React.createClass({
     }
 });
 
-// handle 'Associate with Disease' button click event
+// handle 'Associate with Inheritance' button click event
 var AssociateInheritance = React.createClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
 
@@ -386,11 +389,11 @@ var AssociateInheritance = React.createClass({
     },
 
     propTypes: {
-        data: React.PropTypes.object,
-        session: React.PropTypes.object,
+        data: React.PropTypes.object, // variant object
+        session: React.PropTypes.object, // session object
         closeModal: React.PropTypes.func, // Function to call to close the modal
-        interpretation: React.PropTypes.object,
-        editKey: React.PropTypes.bool,
+        interpretation: React.PropTypes.object, // interpretation object
+        editKey: React.PropTypes.bool, // edit flag
         updateInterpretationObj: React.PropTypes.func
     },
 
@@ -417,6 +420,8 @@ var AssociateInheritance = React.createClass({
             // get up-to-date copy of interpretation object and flatten it
             var flatInterpretation = curator.flatten(currInterpretation);
 
+            // if inheritance is set to none, either delete the key in interpretation object, or if
+            // the key is already blank, return null and close modal
             if (inheritance === 'no-moi') {
                 if ('modeInheritance' in flatInterpretation) {
                     delete flatInterpretation['modeInheritance'];
