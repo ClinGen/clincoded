@@ -4,12 +4,16 @@ var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../globals');
 var RestMixin = require('../rest').RestMixin;
+var moment = require('moment');
+
+let external_url_map = globals.external_url_map;
 
 // Display in-progress or provisional interpretations associated with variant
 var CurationRecordCurator = module.exports.CurationRecordCurator = React.createClass({
     mixins: [RestMixin],
 
     propTypes: {
+        calculatedPathogenicity: React.PropTypes.string,
         data: React.PropTypes.object, // ClinVar data payload
         interpretationUuid: React.PropTypes.string,
         interpretation: React.PropTypes.object,
@@ -24,6 +28,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
 
     getInitialState: function() {
         return {
+            calculatedPathogenicity: this.props.calculatedPathogenicity,
             interpretationUuid: this.props.interpretationUuid,
             interpretation: null // parent interpretation object
         };
@@ -34,6 +39,9 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         // when props are updated, update the parent interpreatation object, if applicable
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
             this.setState({interpretation: nextProps.interpretation, interpretationUuid: nextProps.interpretationUuid});
+        }
+        if (typeof nextProps.calculatedPathogenicity !== undefined && !_.isEqual(nextProps.calculatedPathogenicity, this.props.calculatedPathogenicity)) {
+            this.setState({calculatedPathogenicity: nextProps.calculatedPathogenicity});
         }
     },
 
@@ -64,12 +72,13 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         var session = this.props.session;
         var recordHeader = this.props.recordHeader;
         var interpretationUuid = this.state.interpretationUuid;
-        if (variant) {
-            if (variant.associatedInterpretations && variant.associatedInterpretations.length > 0) {
-                var myInterpretations = this.getInterpretations(variant, session, 'currentUser');
-                var otherInterpretations = this.getInterpretations(variant, session, 'otherUsers');
-            }
-        }
+
+        let interpretation = this.state.interpretation ? this.state.interpretation
+            : (variant && variant.associatedInterpretations && variant.associatedInterpretations.length ? this.getInterpretations(variant, session, 'currentUser')[0] : null);
+        let calculatedPathogenicity = this.state.calculatedPathogenicity ? this.state.calculatedPathogenicity
+            : (interpretation && interpretation.provisional_variant && interpretation.provisional_variant.length ? interpretation.provisional_variant[0].autoClassification : 'None');
+        let modifiedPathogenicity = interpretation && interpretation.provisional_variant && interpretation.provisional_variant.length && interpretation.provisional_variant[0].alteredClassification ?
+            interpretation.provisional_variant[0].alteredClassification : 'None';
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
@@ -77,51 +86,23 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                     <h4>{recordHeader}</h4>
                     {variant ?
                         <div className="clearfix">
-                            {myInterpretations && myInterpretations.length ?
+                            {interpretation ?
                                 <div className="current-user-interpretations">
-                                    <dl className="inline-dl clearfix">
-                                        <dt>My interpretations:</dt>
-                                        <dd className="fullWidth">
-                                            {myInterpretations.map(function(item, i) {
-                                                return (
-                                                    <div key={i}>
-                                                        <span className="my-interpretation">
-                                                            {(item.interpretation_disease) ? item.interpretation_disease + ', ' : null}
-                                                            {item.interpretation_status + ' '}
-                                                            (last edited {moment(item.last_modified).format('YYYY MMM DD, h:mm a')})
-                                                        </span>
-                                                        {(item.uuid === interpretationUuid) ?
-                                                            <span className="current-interpretation"> &#x02713;</span>
-                                                        : null}
-                                                    </div>
-                                                );
-                                            })}
-                                        </dd>
-                                    </dl>
+                                    <div><strong>Disease:</strong>&nbsp;
+                                        {interpretation.disease ?
+                                            <span>{interpretation.disease.term}, <a href={external_url_map['OrphaNet'] + interpretation.disease.orphaNumber} target="_blank">{'ORPHA' + interpretation.disease.orphaNumber}</a></span>
+                                            :
+                                            <span>Not associated</span>
+                                        }
+                                    </div>
+                                    <div><strong>Calculated Pathogenicity:</strong> {calculatedPathogenicity}</div>
+                                    <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
+                                    <div><strong>Status:</strong> {interpretation.markAsProvisional ? 'Provisional ' : 'In Progress '}</div>
+                                    <div><strong>Last Edited:</strong> {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}</div>
                                 </div>
-                            : null}
-                            {otherInterpretations && otherInterpretations.length ?
-                                <div className="other-users-interpretations">
-                                    <dl className="inline-dl clearfix">
-                                        <dt>Other interpretations:</dt>
-                                        <br />
-                                        <dd className="fullWidth">
-                                            {otherInterpretations.map(function(item, i) {
-                                                return (
-                                                    <div key={i}>
-                                                        <span className="other-interpretation">
-                                                            {otherInterpretations[0].submitted_by.title + ', '}
-                                                            {(otherInterpretations[0].interpretation_disease !== '') ? otherInterpretations[0].interpretation_disease + ', ' : null}
-                                                            {otherInterpretations[0].interpretation_status + ' '}
-                                                            (last edited {moment(otherInterpretations[0].last_modified).format('YYYY MMM DD, h:mm a')})
-                                                        </span>
-                                                    </div>
-                                                );
-                                            })}
-                                        </dd>
-                                    </dl>
-                                </div>
-                            : null}
+                                :
+                                null
+                            }
                         </div>
                     : null}
                 </div>

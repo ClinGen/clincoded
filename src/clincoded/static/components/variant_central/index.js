@@ -74,7 +74,7 @@ var VariantCurationHub = React.createClass({
             if (this.state.editKey && this.state.editKey === 'true') {
                 this.setState({isInterpretationActive: true});
             }
-            this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
+            this.getRestData('/interpretations/' + this.state.interpretationUuid).then(interpretation => {
                 this.setState({interpretation: interpretation}, () => {
                     // Return provisional-variant object properties
                     if (this.state.interpretation.provisional_variant && this.state.interpretation.provisional_variant.length) {
@@ -435,13 +435,13 @@ var VariantCurationHub = React.createClass({
         var editKey = this.state.editKey;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
         var selectedTab = this.state.selectedTab;
-        let calculated_pathogenicity = (this.state.calculated_pathogenicity) ? this.state.calculated_pathogenicity : this.state.autoClassification;
+        let calculated_pathogenicity = (this.state.calculated_pathogenicity) ? this.state.calculated_pathogenicity : (this.state.autoClassification ? this.state.autoClassification : null);
 
         return (
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session}
                     interpretation={interpretation} setSummaryVisibility={this.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
-                    getSelectedTab={this.getSelectedTab} />
+                    getSelectedTab={this.getSelectedTab} calculatedPathogenicity={calculated_pathogenicity} />
                 {!this.state.summaryVisible ?
                     <div>
                         <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab} />
