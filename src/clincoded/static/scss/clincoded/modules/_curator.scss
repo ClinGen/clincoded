@@ -2053,6 +2053,15 @@ dl.inline-dl {
             .form-group {
                 margin-bottom: 0;
             }
+
+            label {
+                padding-top: 0;
+            }
+
+            label i {
+                display: block;
+                font-weight: normal;
+            }
         }
 
         &.provisional-interpretation {
