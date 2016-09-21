@@ -283,7 +283,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 url = external_url_map['HPO'] + id;
                 break;
             case "MeSH":
-                url = external_url_map['MeSH'] + id + '%5BMeSH+Unique+ID%5D&cmd=DetailsSearch&log$=activity';
+                url = external_url_map['MeSH'] + id + '%5BMeSH%20Unique%20ID%5D';
                 break;
             default:
                 url = null;
