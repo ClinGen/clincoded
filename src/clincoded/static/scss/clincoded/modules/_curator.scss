@@ -1800,7 +1800,7 @@ dl.inline-dl {
             }
 
             &.benign-result:before {
-                color: #92cd9e;
+                color: #57a3de;
             }
 
             &.path-result:before {
@@ -1811,7 +1811,7 @@ dl.inline-dl {
                 content: "\f1ec";
                 font-family: 'FontAwesome';
                 font-size: 15pt;
-                color: #1b75bc;
+                color: #666;
                 top: 8px;
             }
 
@@ -1925,7 +1925,7 @@ dl.inline-dl {
         font-size: 20px;
 
         .benign {
-            color: #92cd9e;
+            color: #57a3de;
         }
 
         .pathogenic {
@@ -2004,7 +2004,7 @@ dl.inline-dl {
 
     [data-evaltype='benign'] {
         .criteria-modified:after {
-            color: #92cd9e;
+            color: #57a3de;
         }
     }
 
