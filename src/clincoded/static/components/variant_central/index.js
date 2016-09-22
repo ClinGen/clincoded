@@ -407,11 +407,9 @@ var VariantCurationHub = React.createClass({
 
     // Method to set the calculated pathogenicity state for summary page
     setCalculatedPathogenicity: function(assertion) {
-        if (assertion) {
-            // In this method, 'this.setState' can't be used
-            // as it causes infinite error loop in React rendering
-            // FIXME candidate?
-            this.state.calculated_pathogenicity = assertion;
+        //if (assertion) {
+        if (assertion && this.state.calculated_pathogenicity !== assertion) {
+            this.setState({calculated_pathogenicity: assertion});
         }
     },
 
