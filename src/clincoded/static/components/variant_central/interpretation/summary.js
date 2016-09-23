@@ -291,64 +291,72 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                         <div className="panel panel-info datasource-evaluation-summary-provision">
                             <div className="panel-body">
                                 <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                    <div className="col-xs-12 col-sm-6">
-                                        <dl className="inline-dl clearfix">
-                                            <dt>Calculated Pathogenicity:</dt>
-                                            <dd>{calculatedAssertion ? calculatedAssertion : 'None'}</dd>
-                                        </dl>
-                                        <dl className="inline-dl clearfix">
-                                            <dt>Modified Pathogenicity:</dt>
-                                            <dd>{modifiedPathogenicity ? modifiedPathogenicity : 'None'}</dd>
-                                        </dl>
-                                        <dl className="inline-dl clearfix">
-                                            <dt>Disease:</dt>
-                                            <dd>{interpretation.disease ? interpretation.disease.term : 'None'}</dd>
-                                        </dl>
-                                        <dl className="inline-dl clearfix">
-                                            <dt>Mode of Inheritance:</dt>
-                                            <dd>{interpretation.modeInheritance ? interpretation.modeInheritance : 'None'}</dd>
-                                        </dl>
-                                        <dl className="inline-dl clearfix">
-                                            <dt>Provisional Interpretation Status:</dt>
-                                            <dd className="provisional-interpretation-status">{provisionalStatus ? 'Provisional' : 'In progress'}</dd>
-                                        </dl>
-                                    </div>
-                                    <div className="col-xs-12 col-sm-6 provisional-form-content-wrapper">
-                                        <div className="evaluation-provision provisional-pathogenicity">
-                                            <Input type="select" ref="provisional-pathogenicity" label={<span>Modify Pathogenicity:<i>(optional)</i></span>}
-                                                value={provisionalPathogenicity ? provisionalPathogenicity : ''}
-                                                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange}>
-                                                <option value=''>Select an option</option>
-                                                <option value="Benign">Benign</option>
-                                                <option value="Likely benign">Likely Benign</option>
-                                                <option value="Uncertain significance">Uncertain Significance</option>
-                                                <option value="Likely pathogenic">Likely Pathogenic</option>
-                                                <option value="Pathogenic">Pathogenic</option>
-                                            </Input>
-                                            <Input type="textarea" ref="provisional-reason" label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for modified pathogenicity)</i></span>} rows="5"
-                                                value={provisionalReason ? provisionalReason : null}
-                                                placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, you must provide a reason for the change here."
-                                                labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
+                                    <div className="col-md-12 provisional-static-content-wrapper">
+                                        <div className="col-xs-12 col-sm-6">
+                                            <dl className="inline-dl clearfix">
+                                                <dt>Calculated Pathogenicity:</dt>
+                                                <dd>{calculatedAssertion ? calculatedAssertion : 'None'}</dd>
+                                            </dl>
+                                            <dl className="inline-dl clearfix">
+                                                <dt>Modified Pathogenicity:</dt>
+                                                <dd>{modifiedPathogenicity ? modifiedPathogenicity : 'None'}</dd>
+                                            </dl>
+                                            <dl className="inline-dl clearfix">
+                                                <dt>Provisional Interpretation Status:</dt>
+                                                <dd className="provisional-interpretation-status">{provisionalStatus ? 'Provisional' : 'In progress'}</dd>
+                                            </dl>
                                         </div>
-                                        <div className="evaluation-provision provisional-interpretation">
-                                            <div>
-                                                <i className="icon icon-question-circle"></i>
-                                                <span>Mark as Provisional Interpretation (optional):</span>
-                                                <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation} defaultChecked="false"
+                                        <div className="col-xs-12 col-sm-6">
+                                            <dl className="inline-dl clearfix">
+                                                <dt>Disease:</dt>
+                                                <dd>{interpretation.disease ? interpretation.disease.term : 'None'}</dd>
+                                            </dl>
+                                            <dl className="inline-dl clearfix">
+                                                <dt>Mode of Inheritance:</dt>
+                                                <dd>{interpretation.modeInheritance ? interpretation.modeInheritance : 'None'}</dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-12 provisional-form-content-wrapper">
+                                        <div className="col-xs-12 col-sm-6">
+                                            <div className="evaluation-provision provisional-pathogenicity">
+                                                <Input type="select" ref="provisional-pathogenicity" label={<span>Modify Pathogenicity:<i>(optional)</i></span>}
+                                                    value={provisionalPathogenicity ? provisionalPathogenicity : ''}
+                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange}>
+                                                    <option value=''>Select an option</option>
+                                                    <option value="Benign">Benign</option>
+                                                    <option value="Likely benign">Likely Benign</option>
+                                                    <option value="Uncertain significance">Uncertain Significance</option>
+                                                    <option value="Likely pathogenic">Likely Pathogenic</option>
+                                                    <option value="Pathogenic">Pathogenic</option>
+                                                </Input>
+                                                <Input type="textarea" ref="provisional-reason" label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for modified pathogenicity)</i></span>} rows="5"
+                                                    value={provisionalReason ? provisionalReason : null}
+                                                    placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, you must provide a reason for the change here."
                                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
                                             </div>
                                         </div>
-                                        <div className="alert alert-warning">
-                                            Note: If the Calculated Pathogenicity is "Likely Pathogenic" or "Pathogenic,"
-                                            a disease must first be associated with the interpretation before it can be marked
-                                            as a "Provisional Interpretation". Please select "Return to Interpretation" to add a disease.
-                                        </div>
-                                        <div className="provisional-submit">
-                                            <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
-                                                id="submit" title={provisionalVariant ? "Update" : "Save"} submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
-                                            {this.state.updateMsg ?
-                                                <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                            : null}
+                                        <div className="col-xs-12 col-sm-6">
+                                            <div className="evaluation-provision provisional-interpretation">
+                                                <div>
+                                                    <i className="icon icon-question-circle"></i>
+                                                    <span>Mark as Provisional Interpretation (optional):</span>
+                                                    <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation} defaultChecked="false"
+                                                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
+                                                </div>
+                                            </div>
+                                            <div className="alert alert-warning">
+                                                Note: If the Calculated Pathogenicity is "Likely Pathogenic" or "Pathogenic,"
+                                                a disease must first be associated with the interpretation before it can be marked
+                                                as a "Provisional Interpretation". Please select "Return to Interpretation" to add a disease.
+                                            </div>
+                                            <div className="provisional-submit">
+                                                <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
+                                                    id="submit" title={provisionalVariant ? "Update" : "Save"} submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
+                                                {this.state.updateMsg ?
+                                                    <div className="submit-info pull-right">{this.state.updateMsg}</div>
+                                                : null}
+                                            </div>
                                         </div>
                                     </div>
                                 </Form>
