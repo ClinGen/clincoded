@@ -169,7 +169,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                             }
                                         </span>
                                     </h1>
-                                    <h2>{mode}</h2>
+                                    <h2><i>{mode}</i></h2>
                                 </span>
                             </div>
                             <div className="provisional-info-panel">
@@ -1805,8 +1805,7 @@ function flattenProvisionalVariant(provisional_variant) {
     return flat;
 }
 
-
-var interpretationSimpleProps = ["active", "date_created", "completed_sections"];
+var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties

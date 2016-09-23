@@ -43,12 +43,17 @@ var Title = module.exports.Title = React.createClass({
     },
 
     renderSubtitle: function(interpretation, variant) {
-        var associatedDisease = 'Evidence View Only';
+        var associatedDisease = 'Evidence View';
+        let mode = interpretation && interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
         if (interpretation) {
-            if (interpretation.disease && interpretation.disease.term) {
-                associatedDisease = <span>This interpretation is associated with the disease <strong>{interpretation.disease.term}</strong></span>;
+            if (interpretation.disease && interpretation.disease.term && interpretation.modeInheritance) {
+                associatedDisease = <span>This interpretation is associated with <strong>{interpretation.disease.term}</strong> - <i>{mode}</i></span>;
+            } else if (interpretation.disease && interpretation.disease.term) {
+                associatedDisease = <span>This interpretation is associated with <strong>{interpretation.disease.term}</strong></span>;
+            } else if (interpretation.modeInheritance) {
+                associatedDisease = <span>This interpretation is associated with <strong>no disease</strong> - <i>{mode}</i></span>;
             } else {
-                associatedDisease = 'This interpretation is not yet associated with a disease';
+                associatedDisease = 'This interpretation is not yet associated with a disease or mode of inheritance';
             }
         }
         return associatedDisease;
