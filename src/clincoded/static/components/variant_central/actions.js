@@ -27,10 +27,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         session: React.PropTypes.object,
         interpretation: React.PropTypes.object,
         editKey: React.PropTypes.string,
-        updateInterpretationObj: React.PropTypes.func,
-        hasExistingInterpretation: React.PropTypes.bool,
-        isInterpretationActive: React.PropTypes.bool,
-        hasAssociatedDisease: React.PropTypes.bool,
+        updateInterpretationObj: React.PropTypes.func
     },
 
     getInitialState: function() {
@@ -38,12 +35,29 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             variantUuid: null,
             variantData: this.props.variantData,
             interpretation: this.props.interpretation,
+            interpretationUuid: null,
             editKey: this.props.editKey,
             hasExistingInterpretation: this.props.hasExistingInterpretation,
             isInterpretationActive: this.props.isInterpretationActive,
             hasAssociatedDisease: this.props.hasAssociatedDisease,
             hasAssociatedInheritance: false
         };
+    },
+
+    componentDidMount: function() {
+        if (this.props.interpretation) {
+            this.setState({hasExistingInterpretation: true});
+            if (this.props.editKey && this.props.editKey === 'true') {
+                this.setState({isInterpretationActive: true});
+                let interpretation = this.props.interpretation;
+                if (interpretation.disease) {
+                    this.setState({hasAssociatedDisease: true});
+                }
+                if (interpretation.modeInheritance) {
+                    this.setState({hasAssociatedInheritance: true});
+                }
+            }
+        }
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -53,14 +67,17 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                     var associatedInterpretations = nextProps.variantData.associatedInterpretations;
                     associatedInterpretations.forEach(associatedInterpretation => {
                         if (associatedInterpretation.submitted_by['@id'] === this.props.session.user_properties['@id']) {
-                            this.setState({hasExistingInterpretation: true});
+                            this.setState({
+                                hasExistingInterpretation: true,
+                                interpretationUuid: associatedInterpretation.uuid
+                            });
                         }
                     });
                 }
             }
         }
         if (this.props.editKey === 'true' && nextProps.interpretation) {
-            this.setState({isInterpretationActive: true});
+            this.setState({isInterpretationActive: true, interpretation: nextProps.interpretation});
             // set disease and inheritance flags accordingly
             if (nextProps.interpretation.interpretation_disease) {
                 this.setState({hasAssociatedDisease: true});
@@ -102,7 +119,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                 });
             }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
         } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
-            window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + variantObj.associatedInterpretations[0].uuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
+            window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + this.state.interpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
         }
     },
 
@@ -111,7 +128,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         if (!this.state.hasExistingInterpretation) {
             interpretationButtonTitle = 'Start New Interpretation';
         } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
-            interpretationButtonTitle = 'Continue Interpretation';
+            interpretationButtonTitle = 'Interpretation';
         }
 
         return (
@@ -126,11 +143,17 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                                 interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
-                :
+                    :
                     <div className="interpretation-record clearfix">
                         <h2><span>Evidence View</span></h2>
                         <div className="btn-group">
-                            <Input type="button-button" inputClassName="btn btn-primary pull-right" title={interpretationButtonTitle} clickHandler={this.handleInterpretationEvent} />
+                            {this.state.hasExistingInterpretation ?
+                                null
+                                :
+                                <button className="btn btn-primary pull-right" onClick={this.handleInterpretationEvent}>
+                                    Interpretation <i className="icon icon-plus-circle"></i>
+                                </button>
+                            }
                         </div>
                     </div>
                 }

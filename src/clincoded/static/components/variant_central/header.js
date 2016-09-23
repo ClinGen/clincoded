@@ -18,6 +18,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
         setSummaryVisibility: React.PropTypes.func,
         summaryVisible: React.PropTypes.bool,
         getSelectedTab: React.PropTypes.func,
+        selectedTab: React.propTypes.string,
         calculatedPathogenicity: React.PropTypes.string
     },
 
@@ -53,14 +54,15 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
                     <div className="container">
                         <Title data={variant} interpretation={interpretation} interpretationUuid={interpretationUuid}
                             setSummaryVisibility={this.props.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
-                            getSelectedTab={this.props.getSelectedTab} />
+                            getSelectedTab={this.props.getSelectedTab} selectedTab={this.props.selectedTab} />
                     </div>
                 </div>
                 <div className="container curation-data curation-variant">
                     <div className="row equal-height">
                         <CurationRecordVariant data={variant} />
                         <CurationRecordGeneDisease data={variant} />
-                        <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} interpretation={interpretation} session={session} calculatedPathogenicity={calculatedPathogenicity} />
+                        <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} interpretation={interpretation} session={session} calculatedPathogenicity={calculatedPathogenicity}
+                             />
                     </div>
                     {variant && !variant.hgvsNames.GRCh37 ?
                         <div className="alert alert-warning">

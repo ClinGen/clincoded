@@ -6,6 +6,7 @@ var globals = require('../globals');
 var RestMixin = require('../rest').RestMixin;
 var moment = require('moment');
 
+var queryKeyValue = globals.queryKeyValue;
 let external_url_map = globals.external_url_map;
 
 // Display in-progress or provisional interpretations associated with variant
@@ -17,12 +18,13 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         data: React.PropTypes.object, // ClinVar data payload
         interpretationUuid: React.PropTypes.string,
         interpretation: React.PropTypes.object,
-        session: React.PropTypes.object
+        session: React.PropTypes.object,
+        selectedTab: React.PropTypes.string
     },
 
     getDefaultProps: function() {
         return {
-            recordHeader: 'Interpretations'
+            recordHeader: 'Interpretation'
         };
     },
 
@@ -73,44 +75,118 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         var recordHeader = this.props.recordHeader;
         var interpretationUuid = this.state.interpretationUuid;
 
-        let interpretation = this.state.interpretation ? this.state.interpretation
+        let myInterpretation = this.state.interpretation ? this.state.interpretation
             : (variant && variant.associatedInterpretations && variant.associatedInterpretations.length ? this.getInterpretations(variant, session, 'currentUser')[0] : null);
+        let otherInterpretations = variant && variant.associatedInterpretations && variant.associatedInterpretations.length ? this.getInterpretations(variant, session, 'otherUsers') : null;
         let calculatedPathogenicity = this.state.calculatedPathogenicity ? this.state.calculatedPathogenicity
-            : (interpretation && interpretation.provisional_variant && interpretation.provisional_variant.length ? interpretation.provisional_variant[0].autoClassification : 'None');
-        let modifiedPathogenicity = interpretation && interpretation.provisional_variant && interpretation.provisional_variant.length && interpretation.provisional_variant[0].alteredClassification ?
-            interpretation.provisional_variant[0].alteredClassification : 'None';
+            : (myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length ? myInterpretation.provisional_variant[0].autoClassification : 'None');
+        let modifiedPathogenicity = myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length && myInterpretation.provisional_variant[0].alteredClassification ?
+            myInterpretation.provisional_variant[0].alteredClassification : 'None';
+
+        //let selectedTab = this.props.selectedTab ? this.props.selectedTab : null;
+        //let myurl = myInterpretation ? '/variant-central/?edit=true&variant=' + variant.uuid + '&interpretation=' + myInterpretation.uuid + (selectedTab ? '&tab=' + selectedTab : '') : null;
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
                 <div className="curation-data-curator">
-                    <h4>{recordHeader}</h4>
-                    {variant ?
+                    {interpretationUuid ?
                         <div className="clearfix">
-                            {interpretation ?
+                            <h4>My {recordHeader}</h4>
+                            {myInterpretation ?
                                 <div className="current-user-interpretations">
                                     <div><strong>Disease:</strong>&nbsp;
-                                        {interpretation.disease ?
-                                            <span>{interpretation.disease.term}, <a href={external_url_map['OrphaNet'] + interpretation.disease.orphaNumber} target="_blank">{'ORPHA' + interpretation.disease.orphaNumber}</a></span>
+                                        {myInterpretation.disease ?
+                                            <span>{myInterpretation.disease.term}, <a href={external_url_map['OrphaNet'] + myInterpretation.disease.orphaNumber} target="_blank">{'ORPHA' + myInterpretation.disease.orphaNumber}</a></span>
                                             :
                                             <span>Not associated</span>
                                         }
                                     </div>
                                     <div><strong>Calculated Pathogenicity:</strong> {calculatedPathogenicity}</div>
                                     <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
-                                    <div><strong>Status:</strong> {interpretation.markAsProvisional ? 'Provisional ' : 'In Progress '}</div>
-                                    <div><strong>Last Edited:</strong> {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}</div>
+                                    <div><strong>Status:</strong> <i>{myInterpretation.markAsProvisional ? 'Provisional ' : 'In Progress '}</i></div>
+                                    <div><strong>Last Edited:</strong> {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}</div>
                                 </div>
                                 :
                                 null
                             }
                         </div>
-                    : null}
+                        :
+                        <div className="clearfix">
+                            <h4>All Existing Interpretations</h4>
+                            {myInterpretation ?
+                                <div className="other-users-interpretations">
+                                    <dl className="inline-dl clearfix">
+                                        <dd className="fullWidth">
+                                            <span className="other-interpretation">
+                                                {myInterpretation.disease ? <strong>{myInterpretation.disease.term}</strong> : 'No disease'}
+                                                {myInterpretation.modeInheritance ?
+                                                    <span>-
+                                                        {myInterpretation.modeInheritance.indexOf('(HP:') === -1 ?
+                                                            <i>{myInterpretation.modeInheritance}</i>
+                                                            :
+                                                            <i>{myInterpretation.modeInheritance.substr(0, myInterpretation.modeInheritance.indexOf('(HP:'))}</i>
+                                                        }
+                                                        ,&nbsp;
+                                                    </span>
+                                                    :
+                                                    <span>, </span>
+                                                }
+                                                <a href={'mailto:' + myInterpretation.submitted_by.email}>{myInterpretation.submitted_by.title}</a>,&nbsp;
+                                                {myInterpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
+                                                {myInterpretation.markAsProvisional && myInterpretation.provisional_variant[0].alteredClassification ?
+                                                    ': ' + myInterpretation.provisional_variant[0].alteredClassification + ', ' : ', '}
+                                                last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                &nbsp;<a href="#" title="Edit interpretation"><i className="icon icon-pencil edit-interpretaion"></i></a>
+                                            </span>
+                                        </dd>
+                                    </dl>
+                                </div>
+                                :
+                                null
+                            }
+                            {otherInterpretations && otherInterpretations.length ?
+                                <div className="other-users-interpretations">
+                                    {otherInterpretations.map(function(interpretation, i) {
+                                        return (
+                                            <dl className="inline-dl clearfix" key={i}>
+                                                <dd className="fullWidth">
+                                                    <span className="other-interpretation">
+                                                        {interpretation.disease ? <strong>{interpretation.disease.term}</strong> : 'No disease'}
+                                                        {interpretation.modeInheritance ?
+                                                            <span>-
+                                                                {interpretation.modeInheritance.indexOf('(HP:') === -1 ?
+                                                                    <i>{interpretation.modeInheritance}</i>
+                                                                    :
+                                                                    <i>{interpretation.modeInheritance.substr(0, interpretation.modeInheritance.length - 12)}</i>
+                                                                }
+                                                            , </span>
+                                                            :
+                                                            ', '
+                                                        }
+                                                        {interpretation.submitted_by.title + ', '}
+                                                        {interpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
+                                                        {interpretation.markAsProvisional && interpretation.provisional_variant[0].alteredClassification ?
+                                                            ': ' + interpretation.provisional_variant[0].alteredClassification + ', ' : ', '}
+                                                        last edited: {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                    </span>
+                                                </dd>
+                                            </dl>
+                                        );
+                                    })}
+                                </div>
+                                :
+                                null
+                            }
+                        </div>
+                    }
                 </div>
             </div>
         );
     }
 });
 
+
 var handleEditEvent = function(url) {
     window.location.href = url;
-}
+};
+

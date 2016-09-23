@@ -57,9 +57,6 @@ var VariantCurationHub = React.createClass({
             loading_bustamante: true,
             calculated_pathogenicity: null,
             autoClassification: null,
-            hasExistingInterpretation: false,
-            isInterpretationActive: false,
-            hasAssociatedDisease: false,
             provisionalPathogenicity: null,
             provisionalReason: null,
             provisionalInterpretation: false
@@ -87,10 +84,6 @@ var VariantCurationHub = React.createClass({
                     // Return interpretation object's 'maskAsProvisional' property
                     if (this.state.interpretation.markAsProvisional) {
                         this.setState({provisionalInterpretation: true});
-                    }
-                    // Determine whether there is an associated disease
-                    if (this.state.interpretation.disease) {
-                        this.setState({hasAssociatedDisease: true});
                     }
                 });
             });
@@ -387,11 +380,7 @@ var VariantCurationHub = React.createClass({
     // method to update the interpretation object and send it down to child components on demand
     updateInterpretationObj: function() {
         this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
-            this.setState({interpretation: interpretation}, () => {
-                if (this.state.interpretation.disease) {
-                    this.setState({hasAssociatedDisease: true});
-                }
-            });
+            this.setState({interpretation: interpretation});
         });
     },
 
@@ -439,14 +428,13 @@ var VariantCurationHub = React.createClass({
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session}
                     interpretation={interpretation} setSummaryVisibility={this.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
-                    getSelectedTab={this.getSelectedTab} calculatedPathogenicity={calculated_pathogenicity} />
+                    getSelectedTab={this.getSelectedTab} calculatedPathogenicity={calculated_pathogenicity}
+                    selectedTab={selectedTab} />
                 {!this.state.summaryVisible ?
                     <div>
                         <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab} />
                         <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
-                            href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj}
-                            hasExistingInterpretation={this.state.hasExistingInterpretation} isInterpretationActive={this.state.isInterpretationActive}
-                            hasAssociatedDisease={this.state.hasAssociatedDisease} />
+                            href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
                         <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
                             ext_myGeneInfo={(this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : this.state.ext_myGeneInfo_VEP}

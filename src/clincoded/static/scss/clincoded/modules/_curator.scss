@@ -2144,3 +2144,13 @@ dl.inline-dl {
         }
     }
 }
+
+.interpretation-button-pencil:after {
+    content: "\f040";
+    font-family: 'FontAwesome';
+    font-size: 18pt;
+    color: white;
+    position: absolute;
+    left: 0;
+    padding: 0px;
+}
