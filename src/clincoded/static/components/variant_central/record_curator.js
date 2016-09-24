@@ -4,7 +4,6 @@ var _ = require('underscore');
 var moment = require('moment');
 var globals = require('../globals');
 var RestMixin = require('../rest').RestMixin;
-var moment = require('moment');
 
 var queryKeyValue = globals.queryKeyValue;
 let external_url_map = globals.external_url_map;
@@ -21,14 +20,9 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         session: React.PropTypes.object
     },
 
-    getDefaultProps: function() {
-        return {
-            recordHeader: 'Interpretation'
-        };
-    },
-
     getInitialState: function() {
         return {
+            variant: this.props.data,
             calculatedPathogenicity: this.props.calculatedPathogenicity,
             interpretationUuid: this.props.interpretationUuid,
             interpretation: null // parent interpretation object
@@ -39,9 +33,9 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         // this block is for handling props and states when props (external data) is updated after the initial load/rendering
         // when props are updated, update the parent interpreatation object, if applicable
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
-            this.setState({interpretation: nextProps.interpretation, interpretationUuid: nextProps.interpretationUuid});
+            this.setState({myInterpretation: nextProps.interpretation, interpretationUuid: nextProps.interpretationUuid});
         }
-        if (typeof nextProps.calculatedPathogenicity !== undefined && !_.isEqual(nextProps.calculatedPathogenicity, this.props.calculatedPathogenicity)) {
+        if (typeof nextProps.calculatedPathogenicity !== undefined && nextProps.calculatedPathogenicity !== this.props.calculatedPathogenicity) {
             this.setState({calculatedPathogenicity: nextProps.calculatedPathogenicity});
         }
     },
@@ -68,10 +62,14 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         }
     },
 
-    goToInterpretationPage: function(url) {
-        if (url) {
-            window.location.href = url;
-        }
+    goToInterpretationPage: function(e) {
+        e.preventDefault(); e.stopPropagation();
+
+        let myInterpretation = this.getInterpretations(this.props.data, this.props.session, 'currentUser')[0];
+        let selectedTab = queryKeyValue('tab', window.location.href);
+        let selectedSubtab = queryKeyValue('subtab', window.location.href);
+        let url = '/variant-central/?edit=true&variant=' + this.props.data.uuid + '&interpretation=' + myInterpretation.uuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
+        window.location.href = url;
     },
 
     render: function() {
@@ -88,15 +86,12 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         let modifiedPathogenicity = myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length && myInterpretation.provisional_variant[0].alteredClassification ?
             myInterpretation.provisional_variant[0].alteredClassification : 'None';
 
-        //let selectedTab = this.props.selectedTab ? this.props.selectedTab : null;
-        let myurl = myInterpretation ? '/variant-central/?edit=true&variant=' + variant.uuid + '&interpretation=' + myInterpretation.uuid : null;
-
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
                 <div className="curation-data-curator">
                     {interpretationUuid ?
                         <div className="clearfix">
-                            <h4>My {recordHeader}</h4>
+                            <h4>My Interpretation</h4>
                             {myInterpretation ?
                                 <div className="current-user-interpretations">
                                     <div><strong>Disease:</strong>&nbsp;
@@ -141,7 +136,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                 {myInterpretation.markAsProvisional && myInterpretation.provisional_variant[0].alteredClassification ?
                                                     ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i>
                                                 last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                &nbsp;<a href={myurl} title="Edit interpretation"><i className="icon icon-pencil"></i></a>
+                                                &nbsp;<a href="#" onClick={this.goToInterpretationPage} title="Edit interpretation"><i className="icon icon-pencil"></i></a>
                                             </span>
                                         </dd>
                                     </dl>
