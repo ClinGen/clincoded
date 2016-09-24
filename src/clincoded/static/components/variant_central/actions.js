@@ -124,12 +124,6 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     },
 
     render: function() {
-        let interpretationButtonTitle = '';
-        if (!this.state.hasExistingInterpretation) {
-            interpretationButtonTitle = 'Start New Interpretation';
-        } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
-            interpretationButtonTitle = 'Interpretation';
-        }
 
         return (
             <div className="container curation-actions curation-variant">

@@ -18,7 +18,6 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
         setSummaryVisibility: React.PropTypes.func,
         summaryVisible: React.PropTypes.bool,
         getSelectedTab: React.PropTypes.func,
-        selectedTab: React.propTypes.string,
         calculatedPathogenicity: React.PropTypes.string
     },
 

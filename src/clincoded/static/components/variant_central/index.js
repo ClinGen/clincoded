@@ -396,7 +396,6 @@ var VariantCurationHub = React.createClass({
 
     // Method to set the calculated pathogenicity state for summary page
     setCalculatedPathogenicity: function(assertion) {
-        //if (assertion) {
         if (assertion && this.state.calculated_pathogenicity !== assertion) {
             this.setState({calculated_pathogenicity: assertion});
         }
@@ -428,8 +427,7 @@ var VariantCurationHub = React.createClass({
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session}
                     interpretation={interpretation} setSummaryVisibility={this.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
-                    getSelectedTab={this.getSelectedTab} calculatedPathogenicity={calculated_pathogenicity}
-                    selectedTab={selectedTab} />
+                    getSelectedTab={this.getSelectedTab} calculatedPathogenicity={calculated_pathogenicity} />
                 {!this.state.summaryVisible ?
                     <div>
                         <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab} />

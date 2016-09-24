@@ -18,8 +18,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         data: React.PropTypes.object, // ClinVar data payload
         interpretationUuid: React.PropTypes.string,
         interpretation: React.PropTypes.object,
-        session: React.PropTypes.object,
-        selectedTab: React.PropTypes.string
+        session: React.PropTypes.object
     },
 
     getDefaultProps: function() {
@@ -69,6 +68,12 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         }
     },
 
+    goToInterpretationPage: function(url) {
+        if (url) {
+            window.location.href = url;
+        }
+    },
+
     render: function() {
         var variant = this.props.data;
         var session = this.props.session;
@@ -84,7 +89,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
             myInterpretation.provisional_variant[0].alteredClassification : 'None';
 
         //let selectedTab = this.props.selectedTab ? this.props.selectedTab : null;
-        //let myurl = myInterpretation ? '/variant-central/?edit=true&variant=' + variant.uuid + '&interpretation=' + myInterpretation.uuid + (selectedTab ? '&tab=' + selectedTab : '') : null;
+        let myurl = myInterpretation ? '/variant-central/?edit=true&variant=' + variant.uuid + '&interpretation=' + myInterpretation.uuid : null;
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
@@ -124,19 +129,19 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                         {myInterpretation.modeInheritance.indexOf('(HP:') === -1 ?
                                                             <i>{myInterpretation.modeInheritance}</i>
                                                             :
-                                                            <i>{myInterpretation.modeInheritance.substr(0, myInterpretation.modeInheritance.indexOf('(HP:'))}</i>
+                                                            <i>{myInterpretation.modeInheritance.substr(0, myInterpretation.modeInheritance.indexOf('(HP:')-1)}</i>
                                                         }
                                                         ,&nbsp;
                                                     </span>
                                                     :
                                                     <span>, </span>
                                                 }
-                                                <a href={'mailto:' + myInterpretation.submitted_by.email}>{myInterpretation.submitted_by.title}</a>,&nbsp;
-                                                {myInterpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
+                                                {myInterpretation.submitted_by.title},&nbsp;
+                                                <i>{myInterpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
                                                 {myInterpretation.markAsProvisional && myInterpretation.provisional_variant[0].alteredClassification ?
-                                                    ': ' + myInterpretation.provisional_variant[0].alteredClassification + ', ' : ', '}
+                                                    ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i>
                                                 last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                &nbsp;<a href="#" title="Edit interpretation"><i className="icon icon-pencil edit-interpretaion"></i></a>
+                                                &nbsp;<a href={myurl} title="Edit interpretation"><i className="icon icon-pencil"></i></a>
                                             </span>
                                         </dd>
                                     </dl>
@@ -157,16 +162,16 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                                 {interpretation.modeInheritance.indexOf('(HP:') === -1 ?
                                                                     <i>{interpretation.modeInheritance}</i>
                                                                     :
-                                                                    <i>{interpretation.modeInheritance.substr(0, interpretation.modeInheritance.length - 12)}</i>
+                                                                    <i>{interpretation.modeInheritance.substr(0, interpretation.modeInheritance.indexOf('(HP:')-1)}</i>
                                                                 }
                                                             , </span>
                                                             :
                                                             ', '
                                                         }
-                                                        {interpretation.submitted_by.title + ', '}
-                                                        {interpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
+                                                        <a href={'mailto:' + myInterpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>,&nbsp;
+                                                        <i>{interpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
                                                         {interpretation.markAsProvisional && interpretation.provisional_variant[0].alteredClassification ?
-                                                            ': ' + interpretation.provisional_variant[0].alteredClassification + ', ' : ', '}
+                                                            ': ' + interpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i>
                                                         last edited: {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}
                                                     </span>
                                                 </dd>
@@ -184,9 +189,3 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         );
     }
 });
-
-
-var handleEditEvent = function(url) {
-    window.location.href = url;
-};
-
