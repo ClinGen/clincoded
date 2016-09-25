@@ -44,7 +44,8 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         };
     },
 
-    componentDidMount: function() {
+    //componentDidMount: function() {
+    componentWillMount: function() {
         if (this.props.interpretation) {
             this.setState({hasExistingInterpretation: true});
             if (this.props.editKey && this.props.editKey === 'true') {

@@ -25,7 +25,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
             variant: this.props.data,
             calculatedPathogenicity: this.props.calculatedPathogenicity,
             interpretationUuid: this.props.interpretationUuid,
-            interpretation: null // parent interpretation object
+            interpretation: this.props.interpretation ? this.props.interpretation : null // parent interpretation object
         };
     },
 
@@ -33,42 +33,39 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         // this block is for handling props and states when props (external data) is updated after the initial load/rendering
         // when props are updated, update the parent interpreatation object, if applicable
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
-            this.setState({myInterpretation: nextProps.interpretation, interpretationUuid: nextProps.interpretationUuid});
+            this.setState({interpretation: nextProps.interpretation, interpretationUuid: nextProps.interpretationUuid});
         }
         if (typeof nextProps.calculatedPathogenicity !== undefined && nextProps.calculatedPathogenicity !== this.props.calculatedPathogenicity) {
             this.setState({calculatedPathogenicity: nextProps.calculatedPathogenicity});
         }
     },
 
-    // Create 2 arrays of interpretations: one associated with current user
-    // while the other associated with other users
-    getInterpretations: function(data, session, type) {
-        var myInterpretations = [];
-        var otherInterpretations = [];
-        var interpretations = data.associatedInterpretations;
-        for (var i=0; i<interpretations.length; i++) {
-            if (typeof interpretations[i] !== 'undefined') {
-                if (interpretations[i].submitted_by.uuid === session.user_properties.uuid) {
-                    myInterpretations.push(interpretations[i]);
-                } else if (interpretations[i].submitted_by.uuid !== session.user_properties.uuid) {
-                    otherInterpretations.push(interpretations[i]);
+    // Sort interpretation array, and move current user's as the first element
+    getInterpretations: function(data, session) {
+        let myInterpretation = null;
+        let otherInterpretations = [];
+        if (data && data.associatedInterpretations && data.associatedInterpretations.length) {
+            for (let interpretation of data.associatedInterpretations) {
+                if (interpretation.submitted_by.uuid === session.user_properties.uuid) {
+                    myInterpretation = interpretation;
+                } else {
+                    otherInterpretations.push(interpretation);
                 }
             }
         }
-        if (type === 'currentUser') {
-            return myInterpretations;
-        } else if (type === 'otherUsers') {
-            return otherInterpretations;
-        }
+        return {
+            myInterpretation: myInterpretation,
+            otherInterpretations: otherInterpretations
+        };
     },
 
     goToInterpretationPage: function(e) {
         e.preventDefault(); e.stopPropagation();
 
-        let myInterpretation = this.getInterpretations(this.props.data, this.props.session, 'currentUser')[0];
+        let uuid = this.getInterpretations(this.props.data, this.props.session).myInterpretation.uuid;
         let selectedTab = queryKeyValue('tab', window.location.href);
         let selectedSubtab = queryKeyValue('subtab', window.location.href);
-        let url = '/variant-central/?edit=true&variant=' + this.props.data.uuid + '&interpretation=' + myInterpretation.uuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
+        let url = '/variant-central/?edit=true&variant=' + this.props.data.uuid + '&interpretation=' + uuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
         window.location.href = url;
     },
 
@@ -78,9 +75,10 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
         var recordHeader = this.props.recordHeader;
         var interpretationUuid = this.state.interpretationUuid;
 
+        let sortedInterpretations = variant && variant.associatedInterpretations && variant.associatedInterpretations.length ? this.getInterpretations(variant, session) : null;
         let myInterpretation = this.state.interpretation ? this.state.interpretation
-            : (variant && variant.associatedInterpretations && variant.associatedInterpretations.length ? this.getInterpretations(variant, session, 'currentUser')[0] : null);
-        let otherInterpretations = variant && variant.associatedInterpretations && variant.associatedInterpretations.length ? this.getInterpretations(variant, session, 'otherUsers') : null;
+            : (sortedInterpretations && sortedInterpretations.myInterpretation ? sortedInterpretations.myInterpretation : null);
+        let otherInterpretations = sortedInterpretations && sortedInterpretations.otherInterpretations.length ? sortedInterpretations.otherInterpretations : null;
         let calculatedPathogenicity = this.state.calculatedPathogenicity ? this.state.calculatedPathogenicity
             : (myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length ? myInterpretation.provisional_variant[0].autoClassification : 'None');
         let modifiedPathogenicity = myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length && myInterpretation.provisional_variant[0].alteredClassification ?
@@ -131,10 +129,10 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                     :
                                                     <span>, </span>
                                                 }
-                                                {myInterpretation.submitted_by.title},&nbsp;
-                                                <i>{myInterpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
+                                                <span className="no-broken-item">{myInterpretation.submitted_by.title},</span>&nbsp;
+                                                <span className="no-broken-item"><i>{myInterpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
                                                 {myInterpretation.markAsProvisional && myInterpretation.provisional_variant[0].alteredClassification ?
-                                                    ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i>
+                                                    ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
                                                 last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
                                                 &nbsp;<a href="#" onClick={this.goToInterpretationPage} title="Edit interpretation"><i className="icon icon-pencil"></i></a>
                                             </span>
@@ -151,7 +149,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                             <dl className="inline-dl clearfix" key={i}>
                                                 <dd className="fullWidth">
                                                     <span className="other-interpretation">
-                                                        {interpretation.disease ? <strong>{interpretation.disease.term}</strong> : 'No disease'}
+                                                        {interpretation.disease ? <strong>{interpretation.disease.term}</strong> : <strong>No disease</strong>}
                                                         {interpretation.modeInheritance ?
                                                             <span>-
                                                                 {interpretation.modeInheritance.indexOf('(HP:') === -1 ?
@@ -163,10 +161,10 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                             :
                                                             ', '
                                                         }
-                                                        <a href={'mailto:' + myInterpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>,&nbsp;
-                                                        <i>{interpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
+                                                        <span className="no-broken-item"><a href={'mailto:' + myInterpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>,</span>&nbsp;
+                                                        <span className="no-broken-item"><i>{interpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
                                                         {interpretation.markAsProvisional && interpretation.provisional_variant[0].alteredClassification ?
-                                                            ': ' + interpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i>
+                                                            ': ' + interpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
                                                         last edited: {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}
                                                     </span>
                                                 </dd>

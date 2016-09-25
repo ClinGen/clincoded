@@ -60,8 +60,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
                     <div className="row equal-height">
                         <CurationRecordVariant data={variant} />
                         <CurationRecordGeneDisease data={variant} />
-                        <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} interpretation={interpretation} session={session} calculatedPathogenicity={calculatedPathogenicity}
-                             />
+                        <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} interpretation={interpretation} session={session} calculatedPathogenicity={calculatedPathogenicity} />
                     </div>
                     {variant && !variant.hgvsNames.GRCh37 ?
                         <div className="alert alert-warning">
