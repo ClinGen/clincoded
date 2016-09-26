@@ -183,11 +183,6 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
                 result.benign_summary['Supporting'] = bp_count;
             }
         }
-
-        // set calculated pathogenicity in interpretation
-        //this.props.setCalculatedPathogenicity(result.assertion);
-
-        //this.setState({calculatedResult: result});
         return result;
     },
 
