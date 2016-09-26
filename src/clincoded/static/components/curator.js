@@ -169,7 +169,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                             }
                                         </span>
                                     </h1>
-                                    <h2>{mode}</h2>
+                                    <h2><i>{mode}</i></h2>
                                 </span>
                             </div>
                             <div className="provisional-info-panel">
@@ -465,7 +465,8 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
     propTypes: {
         article: React.PropTypes.object, // Article object to display
         displayJournal: React.PropTypes.bool, // T to display article journal
-        pmidLinkout: React.PropTypes.bool // T to display pmid linkout
+        pmidLinkout: React.PropTypes.bool, // T to display pmid linkout
+        className: React.PropTypes.string
     },
 
     render: function() {
@@ -480,7 +481,7 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
             }
 
             return (
-                <p>
+                <p className={this.props.className}>
                     {this.props.displayJournal ? authorsAll : authors}
                     {article.title + ' '}
                     {this.props.displayJournal ? <i>{article.journal + '. '}</i> : null}
@@ -1789,7 +1790,7 @@ function flattenProvisional(provisional) {
     return flat;
 }
 
-var interpretationSimpleProps = ["active", "date_created", "completed_sections"];
+var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties
@@ -1834,6 +1835,12 @@ function flattenInterpretation(interpretation) {
     if (interpretation.provisional_variant && interpretation.provisional_variant.length) {
         flat.provisional_variant = interpretation.provisional_variant.map(function(provisional) {
             return provisional['@id'];
+        });
+    }
+
+    if (interpretation.extra_evidence_list && interpretation.extra_evidence_list.length) {
+        flat.extra_evidence_list = interpretation.extra_evidence_list.map(function(extra_evidence) {
+            return extra_evidence['@id'];
         });
     }
 

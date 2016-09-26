@@ -81,7 +81,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
     // renders the main Add/Edit button
     buttonRender: function() {
         return (
-            <span className={"inline-button-wrapper button-push" + (this.props.buttonWrapperClass ? " " + this.props.buttonWrapperClass : "")}>
+            <span className={"inline-button-wrapper" + (this.props.buttonWrapperClass ? " " + this.props.buttonWrapperClass : "")}>
                 <Modal title={this.state.txtModalTitle} className="input-inline" modalClass="modal-default">
                     <a className={"btn btn-default" + (this.props.buttonClass ? " " + this.props.buttonClass : "") + (this.props.disabled ? " disabled" : "")}
                         modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue} modalButtonText={this.props.modalButtonText}
@@ -115,7 +115,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
                 <div className="form-group">
                     <span className="col-sm-5 control-label">{this.props.labelVisible ? this.props.label : null}</span>
                     <span className="col-sm-7">
-                        <div className={"inline-button-wrapper button-push" + (this.props.wrapperClass ? " " + this.props.wrapperClass : "")}>
+                        <div className={"inline-button-wrapper" + (this.props.wrapperClass ? " " + this.props.wrapperClass : "")}>
                             {this.buttonRender()}
                             {this.props.clearButtonRender && this.props.initialFormValue ?
                                 this.clearButtonRender()
@@ -384,6 +384,18 @@ function pubmedValidateForm() {
             }
         }
     }
+    // valid if parent object is evidence list (VCI) and input isn't already associated with it - final behavior TBD
+    /*
+    if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'evidenceList') {
+        for (var j = 0; j < this.props.parentObj.evidenceList.length; j++) {
+            if (this.props.parentObj.evidenceList[j].articles[0].pmid == formInput) {
+                valid = false;
+                this.setFormErrors('resourceId', 'This article has already been associated with this evidence group');
+                this.setState({submitBusy: false});
+                break;
+            }
+        }
+    }*/
     return valid;
 }
 function pubmedQueryResource() {

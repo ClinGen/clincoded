@@ -10,6 +10,7 @@ var panel = require('../libs/bootstrap/panel');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
 var CuratorHistory = require('./curator_history');
+var modesOfInheritance = require('./mapping/modes_of_inheritance.json');
 
 var Form = form.Form;
 var FormMixin = form.FormMixin;
@@ -17,27 +18,6 @@ var Input = form.Input;
 var Alert = modal.Alert;
 var ModalMixin = modal.ModalMixin;
 var Panel = panel.Panel;
-
-
-var hpoValues = [
-    {value: 'select', text: 'Select', disabled: true},
-    {value: '', text: '', disabled: true},
-    {text: 'Autosomal dominant inheritance (HP:0000006)'},
-    {text: 'Autosomal dominant inheritance with maternal imprinting (HP:0012275)'},
-    {text: 'Autosomal dominant inheritance with paternal imprinting (HP:0012274)'},
-    {text: 'Autosomal recessive inheritance (HP:0000007)'},
-    {text: 'Autosomal unknown'},
-    {text: 'Codominant'},
-    {text: 'Genetic anticipation (HP:0003743)'},
-    {text: 'Mitochondrial inheritance (HP:0001427)'},
-    {text: 'Sex-limited autosomal dominant (HP:0001470)'},
-    {text: 'Somatic mutation (HP:0001428)'},
-    {text: 'X-linked dominant inheritance (HP:0001423)'},
-    {text: 'X-linked inheritance (HP:0001417)'},
-    {text: 'X-linked recessive inheritance (HP:0001419)'},
-    {text: 'Y-linked inheritance (HP:0001450)'},
-    {text: 'Other'}
-];
 
 
 var CreateGeneDisease = React.createClass({
@@ -152,11 +132,13 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15"
                                     error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue={hpoValues[0].value}
+                                <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select"
                                     error={this.getFormError('hpo')} clearError={this.clrFormErrors.bind(null, 'hpo')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="hpo" required>
-                                    {hpoValues.map(function(v, i) {
-                                        return <option key={i} value={v.value !== undefined ? v.value : v.text} disabled={v.disabled ? 'disabled' : ''}>{v.text}</option>;
+                                    <option value="select" disabled="disabled">Select</option>
+                                    <option value="" disabled="disabled"></option>
+                                    {modesOfInheritance.map(function(modeOfInheritance, i) {
+                                        return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
                                     })}
                                 </Input>
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
