@@ -1149,9 +1149,13 @@
                 }
             }
 
-            .basic-info .datasource-clinvar-interpretaions  {
+            .basic-info .datasource-clinvar-interpretaions {
                 .clinvar-interpretation-summary {
-                    border-bottom: solid 1px #ddd;
+                    border: solid 1px #ddd;
+                    margin: 15px 15px 12px 15px;
+                    -webkit-border-radius: 2px;
+                    -moz-border-radius: 2px;
+                    border-radius: 2px;
 
                     .reviewStatus:first-letter {
                         text-transform: capitalize;
@@ -1799,11 +1803,11 @@ dl.inline-dl {
             }
 
             &.benign-result:before {
-                color: #57a3de;
+                color: $stand-alone;
             }
 
             &.path-result:before {
-                color: #f4978a;
+                color: $pathogenic-very-strong;
             }
 
             &.calculate-result:before {
@@ -1906,6 +1910,8 @@ dl.inline-dl {
 .view-summary {
     &:focus,
     &:active {
+        border: 1px solid #1b75bc;
+        background-color: #1b75bc;
         outline: none;
     }
 }
@@ -1918,17 +1924,23 @@ dl.inline-dl {
 
     .table tbody td {
         vertical-align: inherit;
+
+        &.criteria-code,
+        &.criteria-modified,
+        &.evaluation-status {
+            line-height: 0;
+        }
     }
 
     .criteria-class {
         font-size: 20px;
 
         .benign {
-            color: #57a3de;
+            color: $stand-alone;
         }
 
         .pathogenic {
-            color: #f4978a;
+            color: $pathogenic-very-strong;
         }
     }
 
@@ -1974,6 +1986,7 @@ dl.inline-dl {
             float: left;
             position: absolute;
             left: 35px;
+            font-size: 135%;
         }
     }
 
@@ -2003,13 +2016,13 @@ dl.inline-dl {
 
     [data-evaltype='benign'] {
         .criteria-modified:after {
-            color: #57a3de;
+            color: $stand-alone;
         }
     }
 
     [data-evaltype='pathogenic'] {
         .criteria-modified:after {
-            color: #f4978a;
+            color: $pathogenic-very-strong;
         }
     }
 
@@ -2019,6 +2032,10 @@ dl.inline-dl {
 
             .provisional-interpretation-status:first-letter {
                 text-transform: capitalize;
+            }
+
+            .modeInheritance {
+                font-style: italic;
             }
         }
     }
@@ -2060,6 +2077,11 @@ dl.inline-dl {
             label i {
                 display: block;
                 font-weight: normal;
+            }
+
+            textarea:required {
+                background-color: #fde8e8;
+                border-color: #ffb2b2;
             }
         }
 
