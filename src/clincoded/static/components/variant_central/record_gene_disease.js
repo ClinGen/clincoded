@@ -90,7 +90,7 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                                 ]
                             </dd>
                             :
-                            null
+                            <dd>UCSC</dd>
                         }
                         {(links_38 || links_37) ?
                             <dd>Variation Viewer [
@@ -100,7 +100,7 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                                 ]
                             </dd>
                             :
-                            null
+                            <dd>Variation Viewer</dd>
                         }
                         {(links_38 || links_37) ?
                             <dd>Ensembl Browser [
@@ -110,7 +110,7 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                                 ]
                             </dd>
                             :
-                            null
+                            <dd>Ensembl Browser</dd>
                         }
                     </dl>
                 </div>
