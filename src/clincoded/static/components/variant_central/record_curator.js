@@ -161,7 +161,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                             :
                                                             ', '
                                                         }
-                                                        <span className="no-broken-item"><a href={'mailto:' + myInterpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>,</span>&nbsp;
+                                                        <span className="no-broken-item"><a href={'mailto:' + interpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>,</span>&nbsp;
                                                         <span className="no-broken-item"><i>{interpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
                                                         {interpretation.markAsProvisional && interpretation.provisional_variant[0].alteredClassification ?
                                                             ': ' + interpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
