@@ -33,50 +33,14 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     getInitialState: function() {
         return {
             variantUuid: null,
-            variantData: this.props.variantData,
             interpretation: this.props.interpretation,
-            interpretationUuid: null,
-            editKey: this.props.editKey,
-            hasExistingInterpretation: this.props.hasExistingInterpretation,
-            isInterpretationActive: this.props.isInterpretationActive,
-            hasAssociatedDisease: this.props.hasAssociatedDisease,
-            hasAssociatedInheritance: false
+            isInterpretationActive: this.props.interpretation ? true : false,
+            hasAssociatedDisease: this.props.interpretation && this.props.interpretation.disease ? true : false,
+            hasAssociatedInheritance: this.props.interpretation && this.props.interpretation.modeInheritance ? true : false
         };
     },
 
-    //componentDidMount: function() {
-    componentWillMount: function() {
-        if (this.props.interpretation) {
-            this.setState({hasExistingInterpretation: true});
-            if (this.props.editKey && this.props.editKey === 'true') {
-                this.setState({isInterpretationActive: true});
-                let interpretation = this.props.interpretation;
-                if (interpretation.disease) {
-                    this.setState({hasAssociatedDisease: true});
-                }
-                if (interpretation.modeInheritance) {
-                    this.setState({hasAssociatedInheritance: true});
-                }
-            }
-        }
-    },
-
     componentWillReceiveProps: function(nextProps) {
-        if (nextProps.variantData) {
-            if (nextProps.variantData.associatedInterpretations) {
-                if (nextProps.variantData.associatedInterpretations.length) {
-                    var associatedInterpretations = nextProps.variantData.associatedInterpretations;
-                    associatedInterpretations.forEach(associatedInterpretation => {
-                        if (associatedInterpretation.submitted_by['@id'] === this.props.session.user_properties['@id']) {
-                            this.setState({
-                                hasExistingInterpretation: true,
-                                interpretationUuid: associatedInterpretation.uuid
-                            });
-                        }
-                    });
-                }
-            }
-        }
         if (this.props.editKey === 'true' && nextProps.interpretation) {
             this.setState({isInterpretationActive: true, interpretation: nextProps.interpretation});
             // set disease and inheritance flags accordingly
@@ -93,42 +57,44 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         }
     },
 
-    // handler for 'Start new interpretation' & 'Continue interpretation' button click events
+    // handler for 'Start new interpretation'
+    // 'Continue Interpretation' button is removed
     handleInterpretationEvent: function(e) {
         e.preventDefault(); e.stopPropagation();
         var variantObj = this.props.variantData;
         var selectedTab = queryKeyValue('tab', window.location.href),
             selectedSubtab = queryKeyValue('subtab', window.location.href);
-        var newInterpretationObj;
-        if (!this.state.hasExistingInterpretation) {
-            if (variantObj) {
-                this.setState({variantUuid: variantObj.uuid});
-                // Put together a new interpretation object
-                newInterpretationObj = {variant: variantObj.uuid};
-            }
-            // Post new interpretation to the DB. Once promise returns, go to /curation-variant page with
-            // the new interpretation UUID in the query string.
-            this.postRestData('/interpretations/', newInterpretationObj).then(data => {
-                var newInterpretationUuid = data['@graph'][0].uuid;
-                var meta = {
-                    interpretation: {
-                        variant: variantObj['@id']
-                    }
-                };
-                this.recordHistory('add-hide', data['@graph'][0], meta).then(result => {
-                    window.location.href = '/variant-central/?edit=true&variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
-                });
-            }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
-        } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
-            window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + this.state.interpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
-        }
+        var newInterpretationObj = {variant: variantObj.uuid};
+        this.postRestData('/interpretations/', newInterpretationObj).then(interpretation => {
+            var newInterpretationUuid = interpretation['@graph'][0].uuid;
+            var meta = {
+                interpretation: {
+                    variant: variantObj['@id']
+                }
+            };
+            this.recordHistory('add-hide', interpretation['@graph'][0], meta).then(result => {
+                window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + newInterpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
+            });
+        }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
     },
 
     render: function() {
+        let hasExistingInterpretation = this.props.interpretation ? true : false;
+        if (!hasExistingInterpretation) {
+            let variant = this.props.variantData
+            if (variant && variant.associatedInterpretations && variant.associatedInterpretations.length) {
+                for (let interpretation of variant.associatedInterpretations) {
+                    if (interpretation.submitted_by.uuid === this.props.session.user_properties.uuid) {
+                        hasExistingInterpretation = true;
+                        break;
+                    }
+                }
+            }
+        }
 
         return (
             <div className="container curation-actions curation-variant">
-                {(this.state.isInterpretationActive) ?
+                {this.props.interpretation ?
                     <div className="interpretation-record clearfix">
                         <h2><span>Variant Interpretation Record</span></h2>
                         <div className="btn-group">
@@ -142,12 +108,12 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                     <div className="interpretation-record clearfix">
                         <h2><span>Evidence View</span></h2>
                         <div className="btn-group">
-                            {this.state.hasExistingInterpretation ?
-                                null
-                                :
+                            {!hasExistingInterpretation ?
                                 <button className="btn btn-primary pull-right" onClick={this.handleInterpretationEvent}>
                                     Interpretation <i className="icon icon-plus-circle"></i>
                                 </button>
+                                :
+                                null
                             }
                         </div>
                     </div>

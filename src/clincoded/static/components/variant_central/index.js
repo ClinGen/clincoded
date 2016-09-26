@@ -66,11 +66,6 @@ var VariantCurationHub = React.createClass({
     componentDidMount: function() {
         this.getClinVarData(this.state.variantUuid);
         if (this.state.interpretationUuid) {
-            this.setState({hasExistingInterpretation: true});
-            // User starts a new or continues an existing interpretation
-            if (this.state.editKey && this.state.editKey === 'true') {
-                this.setState({isInterpretationActive: true});
-            }
             this.getRestData('/interpretations/' + this.state.interpretationUuid).then(interpretation => {
                 this.setState({interpretation: interpretation}, () => {
                     // Return provisional-variant object properties
