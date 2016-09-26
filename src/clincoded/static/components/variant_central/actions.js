@@ -50,6 +50,9 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                 if (interpretation.disease) {
                     this.setState({hasAssociatedDisease: true});
                 }
+                if (interpretation.modeInheritance) {
+                    this.setState({hasAssociatedInheritance: true});
+                }
             }
         }
     },
@@ -70,7 +73,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         if (this.props.editKey === 'true' && nextProps.interpretation) {
             this.setState({isInterpretationActive: true, interpretation: nextProps.interpretation});
             // set disease and inheritance flags accordingly
-            if (nextProps.interpretation.interpretation_disease) {
+            if (nextProps.interpretation.disease) {
                 this.setState({hasAssociatedDisease: true});
             } else {
                 this.setState({hasAssociatedDisease: false});
