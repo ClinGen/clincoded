@@ -1184,8 +1184,8 @@
             }
 
             .basic-info .clinvar-interpretation .disease {
-                .condition:not(:first-child) {
-                    padding-top: 5px;
+                .condition {
+                    padding-bottom: 5px;
                 }
 
                 .identifiers {
