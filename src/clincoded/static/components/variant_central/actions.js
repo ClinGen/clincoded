@@ -229,7 +229,8 @@ var AssociateDisease = React.createClass({
 
     getInitialState: function() {
         return {
-            submitResourceBusy: false
+            submitResourceBusy: false,
+            shouldShowWarning: false
         };
     },
 
@@ -252,12 +253,16 @@ var AssociateDisease = React.createClass({
     },
 
     // Handle value changes in provisional form
-    handleChange: function(ref, e) {
-        if (this.getFormValue('orphanetid') === '') {
+    handleChange: function() {
+        if (!this.refs['orphanetid'].getValue()) {
             let interpretation = this.props.interpretation;
             if (interpretation && interpretation.markAsProvisional) {
-                this.setFormErrors('orphanetid', 'Warning: This interpretation is marked as "Provisional."');
+                this.setState({shouldShowWarning: true});
+            } else if (interpretation && !interpretation.markAsProvisional) {
+                this.setState({shouldShowWarning: false});
             }
+        } else {
+            this.setState({shouldShowWarning: false});
         }
     },
 
@@ -390,6 +395,13 @@ var AssociateDisease = React.createClass({
                             error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                     </div>
+                    {this.state.shouldShowWarning ?
+                        <div className="alert alert-warning">
+                            Warning: This interpretation is marked as "Provisional." If it has a modified pathogenicity of "Likely pathogenic" or "Pathogenic,"
+                            or no modified pathogenicity but a Calculated Pathogenicity of "Likely pathogenic" or "Pathogenic," it must be associated with a disease.
+                            If you still wish to delete the disease, first go to the Evaluation Summary page and remove the "Provisional" tag.
+                        </div>
+                    : null}
                     <div className='modal-footer'>
                         <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
                         <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />
