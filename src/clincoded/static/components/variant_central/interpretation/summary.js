@@ -37,6 +37,19 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
     componentDidMount: function() {
         if (this.props.interpretation && this.props.calculatedAssertion) {
             this.handleProvisionalCheckBox(this.state.provisionalPathogenicity);
+            // Reset form values to last saved values
+            let interpretation = this.props.interpretation;
+            let markAsProvisional, alteredClassification, reason;
+            if (interpretation) {
+                markAsProvisional = interpretation.markAsProvisional;
+                if (interpretation.provisional_variant) {
+                    alteredClassification = interpretation.provisional_variant[0].alteredClassification;
+                    reason = interpretation.provisional_variant[0].reason;
+                }
+            }
+            this.props.setProvisionalEvaluation('provisional-pathogenicity', alteredClassification ? alteredClassification : null);
+            this.props.setProvisionalEvaluation('provisional-reason', reason ? reason : null);
+            this.props.setProvisionalEvaluation('provisional-interpretation', markAsProvisional);
         }
     },
 
@@ -47,14 +60,20 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         if (nextProps.calculatedAssertion) {
             this.setState({calculatedAssertion: nextProps.calculatedAssertion});
         }
-        if (nextProps.provisionalPathogenicity) {
-            this.setState({provisionalPathogenicity: nextProps.provisionalPathogenicity});
-        }
-        if (nextProps.provisionalReason) {
-            this.setState({provisionalReason: nextProps.provisionalReason});
-        }
+        // Because we accept null values for modified pathogenicity and reason,
+        // the "if (nextProps.provisionalPathogenicity')" check doesn't apply
         this.setState({
+            provisionalPathogenicity: nextProps.provisionalPathogenicity,
+            provisionalReason: nextProps.provisionalReason,
             provisionalInterpretation: nextProps.provisionalInterpretation
+        }, () => {
+            if (!this.state.provisionalPathogenicity) {
+                this.refs['provisional-pathogenicity'].resetSelectedOption();
+                this.refs['provisional-reason'].resetValue();
+            } else {
+                this.refs['provisional-pathogenicity'].setValue(this.state.provisionalPathogenicity);
+                this.refs['provisional-reason'].setValue(this.state.provisionalReason);
+            }
         });
     },
 
@@ -141,8 +160,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                     this.props.setProvisionalEvaluation('provisional-pathogenicity', this.state.provisionalPathogenicity);
                     // Disable save button if a reason is provided without the modification
                     if (this.state.provisionalReason) {
-                        this.setState({disabledFormSumbit: true});
-                        this.handleRequiredInput('setAttribute');
+                        this.props.setProvisionalEvaluation('provisional-reason', null);
+                        this.setState({disabledFormSumbit: false});
+                        this.handleRequiredInput('removeAttribute');
                     } else {
                         this.setState({disabledFormSumbit: false});
                         this.handleRequiredInput('removeAttribute');
@@ -343,7 +363,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                             </dl>
                                             <dl className="inline-dl clearfix">
                                                 <dt>Provisional Interpretation Status:</dt>
-                                                <dd className="provisional-interpretation-status">{provisionalStatus ? 'Provisional' : 'In progress'}</dd>
+                                                <dd className="provisional-interpretation-status">{provisionalStatus ? 'Provisional' : 'In Progress'}</dd>
                                             </dl>
                                         </div>
                                         <div className="col-xs-12 col-sm-6">
@@ -381,7 +401,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                             <div className="evaluation-provision provisional-interpretation">
                                                 <div>
                                                     <i className="icon icon-question-circle"></i>
-                                                    <span>Mark as Provisional Interpretation (optional):</span>
+                                                    <span>Change status to "Provisional Interpretation" <i>(optional)</i>:</span>
                                                     <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation} defaultChecked="false"
                                                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
                                                 </div>
@@ -483,12 +503,12 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
 function tableHeader() {
     return (
         <tr>
-            <th><span className="label-benign">B</span>/<span className="label-pathogenic">P</span></th>
-            <th>Criteria</th>
-            <th>Criteria Descriptions</th>
-            <th>Modified</th>
-            <th>Evaluation Status</th>
-            <th>Evaluation Descriptions</th>
+            <th className="col-md-1"><span className="label-benign">B</span>/<span className="label-pathogenic">P</span></th>
+            <th className="col-md-1">Criteria</th>
+            <th className="col-md-3">Criteria Descriptions</th>
+            <th className="col-md-1">Modified</th>
+            <th className="col-md-2">Evaluation Status</th>
+            <th className="col-md-4">Evaluation Explanation</th>
         </tr>
     );
 }
