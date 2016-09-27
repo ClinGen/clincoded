@@ -34,17 +34,34 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         return {
             variantUuid: null,
             interpretation: this.props.interpretation,
+            //hasExistingInterpretation: false,
             isInterpretationActive: this.props.interpretation ? true : false,
             hasAssociatedDisease: this.props.interpretation && this.props.interpretation.disease ? true : false,
             hasAssociatedInheritance: this.props.interpretation && this.props.interpretation.modeInheritance ? true : false
         };
     },
 
+    componentDidMount: function() {
+        if (this.props.interpretation) {
+            //this.setState({hasExistingInterpretation: true});
+            if (this.props.editKey && this.props.editKey === 'true') {
+                this.setState({isInterpretationActive: true});
+                let interpretation = this.props.interpretation;
+                if (interpretation.disease) {
+                    this.setState({hasAssociatedDisease: true});
+                }
+                if (interpretation.modeInheritance) {
+                    this.setState({hasAssociatedInheritance: true});
+                }
+            }
+        }
+    },
+
     componentWillReceiveProps: function(nextProps) {
         if (this.props.editKey === 'true' && nextProps.interpretation) {
             this.setState({isInterpretationActive: true, interpretation: nextProps.interpretation});
             // set disease and inheritance flags accordingly
-            if (nextProps.interpretation.interpretation_disease) {
+            if (nextProps.interpretation.disease) {
                 this.setState({hasAssociatedDisease: true});
             } else {
                 this.setState({hasAssociatedDisease: false});
