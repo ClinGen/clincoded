@@ -397,9 +397,10 @@ var AssociateDisease = React.createClass({
                     </div>
                     {this.state.shouldShowWarning ?
                         <div className="alert alert-warning">
-                            Warning: This interpretation is marked as "Provisional." If it has a modified pathogenicity of "Likely pathogenic" or "Pathogenic,"
-                            or no modified pathogenicity but a Calculated Pathogenicity of "Likely pathogenic" or "Pathogenic," it must be associated with a disease.
-                            If you still wish to delete the disease, first go to the Evaluation Summary page and remove the "Provisional" tag.
+                            Warning: This interpretation is marked as "Provisional." If it has a Modified Pathogenicity of "Likely pathogenic" or "Pathogenic,"
+                            or no Modified Pathogenicity but a Calculated Pathogenicity of "Likely pathogenic" or "Pathogenic," it must be associated with a disease.<br/><br/>
+                            <strong>If you still wish to delete the disease, select "Cancel," then select "View Summary" and remove the "Provisional" selection </strong>
+                            - otherwise, deleting the disease will automatically remove the "Provisional" status.
                         </div>
                     : null}
                     <div className='modal-footer'>
