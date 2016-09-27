@@ -239,17 +239,26 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     handleCondition: function(condition, key) {
         let self = this;
         return (
-            <div key={condition.name}>
-                <span className="condition-name">{condition.name}</span>
-                <span className="identifiers"> [<ul className="clearfix">
-                    {condition.identifiers.map(function(identifier, i) {
-                        return (
-                            <li key={i} className="xref-linkout">
-                                <a href={self.handleLinkOuts(identifier.id, identifier.db)} target="_blank">{identifier.db}</a>
-                            </li>
-                        );
-                    })}
-                </ul>]</span>
+            <div className="condition" key={condition.name}>
+                <span className="condition-name">{condition.name}</span>&nbsp;
+                {condition.identifiers && condition.identifiers.length ?
+                    <span className="identifiers">[<ul className="clearfix">
+                        {condition.identifiers.map(function(identifier, i) {
+                            let url = self.handleLinkOuts(identifier.id, identifier.db);
+                            return (
+                                <li key={i} className="xref-linkout">
+                                    {url ?
+                                        <a href={url} target="_blank">{identifier.db === 'Human Phenotype Ontology' ? 'HPO' : identifier.db}</a>
+                                        :
+                                        <span>{identifier.db + ': ' + identifier.id}</span>
+                                    }
+                                </li>
+                            );
+                        })}
+                    </ul>]</span>
+                    :
+                    null
+                }
             </div>
         );
     },
@@ -270,8 +279,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             case "Gene":
                 url = external_url_map['Entrez'] + id;
                 break;
+            case "Human Phenotype Ontology":
+                url = external_url_map['HPO'] + id;
+                break;
+            case "MeSH":
+                url = external_url_map['MeSH'] + id + '%5BMeSH%20Unique%20ID%5D';
+                break;
             default:
-                url = '#';
+                url = null;
         }
         return url;
     },
@@ -426,7 +441,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                             <th>Reference Accession</th>
                                             <th>Review Status</th>
                                             <th>Clinical Significance</th>
-                                            <th>Disease [Source]</th>
+                                            <th>Condition [Source]</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -557,7 +572,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     ]
                                 </dd>
                                 :
-                                null
+                                <dd className="col-lg-3">UCSC</dd>
                             }
                             {(links_38 || links_37) ?
                                 <dd>Variation Viewer [
@@ -567,7 +582,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     ]
                                 </dd>
                                 :
-                                null
+                                <dd className="col-lg-4">Variation Viewer</dd>
                             }
                             {(links_38 || links_37) ?
                                 <dd>Ensembl Browser [
@@ -577,7 +592,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     ]
                                 </dd>
                                 :
-                                null
+                                <dd className="col-lg-3">Ensembl Browser</dd>
                             }
                         </dl>
                     </div>

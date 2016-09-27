@@ -1182,12 +1182,22 @@
                 text-transform: capitalize;
             }
 
-            .basic-info .clinvar-interpretation .disease .identifiers ul {
-                display: inline-block;
-                list-style: none;
-                margin: 0;
-                padding: 0;
-                vertical-align: bottom;
+            .basic-info .clinvar-interpretation .disease {
+                .condition {
+                    padding-bottom: 5px;
+                }
+
+                .identifiers {
+                    display: inline-block;
+
+                    ul {
+                        display: inline-block;
+                        list-style: none;
+                        margin: 0;
+                        padding: 0;
+                        vertical-align: bottom;
+                    }
+                }
             }
 
             .basic-info .clinvar-interpretation .disease .identifiers li {
