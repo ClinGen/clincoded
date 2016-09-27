@@ -112,11 +112,11 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                         <div className="clearfix">
                             <h4>All Existing Interpretations</h4>
                             {myInterpretation ?
-                                <div className="other-users-interpretations">
-                                    <dl className="inline-dl clearfix">
-                                        <dd className="fullWidth">
-                                            <span className="other-interpretation">
-                                                {myInterpretation.disease ? <strong>{myInterpretation.disease.term}</strong> : 'No disease'}
+                                <table className="login-users-interpretations">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                {myInterpretation.disease ? <strong>{myInterpretation.disease.term}</strong> : <strong>No disease</strong>}
                                                 {myInterpretation.modeInheritance ?
                                                     <span>-
                                                         {myInterpretation.modeInheritance.indexOf('(HP:') === -1 ?
@@ -133,40 +133,44 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                 <span className="no-broken-item"><i>{myInterpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
                                                 {myInterpretation.markAsProvisional && myInterpretation.provisional_variant[0].alteredClassification ?
                                                     ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
-                                                last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                &nbsp;<a className="continue-interpretation" href="#" onClick={this.goToInterpretationPage} title="Edit interpretation"><i className="icon icon-pencil large-icon"></i></a>
-                                            </span>
-                                        </dd>
-                                    </dl>
-                                </div>
+                                                <span className="no-broken-item">
+                                                    last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a className="continue-interpretation" href="#" onClick={this.goToInterpretationPage} title="Edit interpretation">
+                                                    <i className="icon icon-pencil-square large-icon"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                                 :
                                 null
                             }
                             {otherInterpretations && otherInterpretations.length ?
-                                <div className="other-users-interpretations">
+                                <div className="col-lg-12 other-users-interpretations">
                                     {otherInterpretations.map(function(interpretation, i) {
                                         return (
-                                            <dl className="inline-dl clearfix" key={i}>
-                                                <dd className="fullWidth">
-                                                    <span className="other-interpretation">
-                                                        {interpretation.disease ? <strong>{interpretation.disease.term}</strong> : <strong>No disease</strong>}
-                                                        {interpretation.modeInheritance ?
-                                                            <span>-
-                                                                {interpretation.modeInheritance.indexOf('(HP:') === -1 ?
-                                                                    <i>{interpretation.modeInheritance}</i>
-                                                                    :
-                                                                    <i>{interpretation.modeInheritance.substr(0, interpretation.modeInheritance.indexOf('(HP:')-1)}</i>
-                                                                }
-                                                            , </span>
-                                                            :
-                                                            ', '
-                                                        }
-                                                        <span className="no-broken-item"><a href={'mailto:' + interpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>,</span>&nbsp;
-                                                        <span className="no-broken-item"><i>{interpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
-                                                        {interpretation.markAsProvisional && interpretation.provisional_variant[0].alteredClassification ?
-                                                            ': ' + interpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
-                                                        last edited: {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                    </span>
+                                            <dl key={i}>
+                                                <dd>
+                                                    {interpretation.disease ? <strong>{interpretation.disease.term}</strong> : <strong>No disease</strong>}
+                                                    {interpretation.modeInheritance ?
+                                                        <span>-
+                                                            {interpretation.modeInheritance.indexOf('(HP:') === -1 ?
+                                                                <i>{interpretation.modeInheritance}</i>
+                                                                :
+                                                                <i>{interpretation.modeInheritance.substr(0, interpretation.modeInheritance.indexOf('(HP:')-1)}</i>
+                                                            }
+                                                        , </span>
+                                                        :
+                                                        ', '
+                                                    }
+                                                    <span className="no-broken-item"><a href={'mailto:' + interpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>,</span>&nbsp;
+                                                    <span className="no-broken-item"><i>{interpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
+                                                    {interpretation.markAsProvisional && interpretation.provisional_variant[0].alteredClassification ?
+                                                        ': ' + interpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
+                                                    last edited: {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}
                                                 </dd>
                                             </dl>
                                         );
