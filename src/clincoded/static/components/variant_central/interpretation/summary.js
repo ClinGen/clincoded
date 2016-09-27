@@ -58,6 +58,23 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         });
     },
 
+    // Method to construct mode of inheritance linkout
+    renderModeInheritanceLink: function(modeInheritance) {
+        if (modeInheritance) {
+            let start = modeInheritance.indexOf('(');
+            var end = modeInheritance.indexOf(')');
+            if (start && end) {
+                let hpoNumber = modeInheritance.substring(start+1, end);
+                if (hpoNumber && hpoNumber.indexOf('HP:') > -1) {
+                    let hpoLink = 'http://compbio.charite.de/hpoweb/showterm?id=' + hpoNumber;
+                    return (
+                        <a href={hpoLink} target="_blank">{modeInheritance}</a>
+                    );
+                }
+            }
+        }
+    },
+
     // Method to set provisional checkbox state given the modified or calculated pathogenicity
     handleProvisionalCheckBox: function(pathogenicity) {
         if (!this.props.interpretation.disease) {
@@ -68,11 +85,13 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                    pathogenicity === 'Uncertain significance') {
                     this.setState({disabledCheckbox: false});
                 } else {
+                    this.props.setProvisionalEvaluation('provisional-interpretation', false);
                     this.setState({disabledCheckbox: true});
                 }
             } else {
                 if(pathogenicity === 'Likely pathogenic' ||
                    pathogenicity === 'Pathogenic') {
+                    this.props.setProvisionalEvaluation('provisional-interpretation', false);
                     this.setState({disabledCheckbox: true});
                 } else {
                     this.setState({disabledCheckbox: false});
@@ -80,6 +99,19 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
             }
         } else {
             this.setState({disabledCheckbox: false});
+        }
+    },
+
+    // Method to alert users about requied input missing values
+    handleRequiredInput: function(action) {
+        const inputElement = document.querySelector('.provisional-pathogenicity textarea');
+        if (action === 'setAttribute') {
+            if (!inputElement.getAttribute('required')) {
+                inputElement.setAttribute('required', 'required');
+            }
+        }
+        if (action === 'removeAttribute') {
+            inputElement.removeAttribute('required');
         }
     },
 
@@ -94,8 +126,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                     // Disable save button if a reason is not provided for the modification
                     if (!this.state.provisionalReason) {
                         this.setState({disabledFormSumbit: true});
+                        this.handleRequiredInput('setAttribute');
                     } else {
                         this.setState({disabledFormSumbit: false});
+                        this.handleRequiredInput('removeAttribute');
                     }
                     // If no disease is associated, we disable provisional checkbox
                     // when modified pathogenicity is either 'Likely pathogenic' or 'Pathogenic'
@@ -108,8 +142,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                     // Disable save button if a reason is provided without the modification
                     if (this.state.provisionalReason) {
                         this.setState({disabledFormSumbit: true});
+                        this.handleRequiredInput('setAttribute');
                     } else {
                         this.setState({disabledFormSumbit: false});
+                        this.handleRequiredInput('removeAttribute');
                     }
                     // If no disease is associated, we disable provisional checkbox
                     // when modified pathogenicity is either 'Likely pathogenic' or 'Pathogenic'
@@ -126,8 +162,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                     // Disable save button if a modification is not provided for the reason
                     if (!this.state.provisionalPathogenicity) {
                         this.setState({disabledFormSumbit: true});
+                        this.handleRequiredInput('setAttribute');
                     } else {
                         this.setState({disabledFormSumbit: false});
+                        this.handleRequiredInput('removeAttribute');
                     }
                 });
             } else {
@@ -137,8 +175,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                     // Disable save button if a modification is provided without the reason
                     if (this.state.provisionalPathogenicity) {
                         this.setState({disabledFormSumbit: true});
+                        this.handleRequiredInput('setAttribute');
                     } else {
                         this.setState({disabledFormSumbit: false});
+                        this.handleRequiredInput('removeAttribute');
                     }
                 });
             }
@@ -283,7 +323,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
 
         return (
             <div className="container evaluation-summary">
-                <h2><span>Evaluations Summary View</span></h2>
+                <h2><span>Evaluation Summary</span></h2>
 
                 {(evaluations && evaluations.length) ?
                     <div className="summary-content-wrapper">
@@ -313,7 +353,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                             </dl>
                                             <dl className="inline-dl clearfix">
                                                 <dt>Mode of Inheritance:</dt>
-                                                <dd>{interpretation.modeInheritance ? interpretation.modeInheritance : 'None'}</dd>
+                                                <dd className="modeInheritance">{interpretation.modeInheritance ? this.renderModeInheritanceLink(interpretation.modeInheritance) : 'None'}</dd>
                                             </dl>
                                         </div>
                                     </div>
@@ -324,6 +364,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                                     value={provisionalPathogenicity ? provisionalPathogenicity : ''}
                                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange}>
                                                     <option value=''>Select an option</option>
+                                                    <option value=''>No modification</option>
                                                     <option value="Benign">Benign</option>
                                                     <option value="Likely benign">Likely Benign</option>
                                                     <option value="Uncertain significance">Uncertain Significance</option>
