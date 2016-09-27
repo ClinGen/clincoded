@@ -235,6 +235,16 @@ var AssociateDisease = React.createClass({
         return valid;
     },
 
+    // Handle value changes in provisional form
+    handleChange: function(ref, e) {
+        if (this.getFormValue('orphanetid') === '') {
+            let interpretation = this.props.interpretation;
+            if (interpretation && interpretation.markAsProvisional) {
+                this.setFormErrors('orphanetid', 'Warning: This interpretation is marked as "Provisional."');
+            }
+        }
+    },
+
     // When the form is submitted...
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
@@ -361,7 +371,7 @@ var AssociateDisease = React.createClass({
                 <div className="modal-box">
                     <div className="modal-body clearfix">
                         <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
-                            error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
+                            error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                     </div>
                     <div className='modal-footer'>
