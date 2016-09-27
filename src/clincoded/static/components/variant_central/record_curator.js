@@ -134,7 +134,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                 {myInterpretation.markAsProvisional && myInterpretation.provisional_variant[0].alteredClassification ?
                                                     ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
                                                 last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                &nbsp;<a href="#" onClick={this.goToInterpretationPage} title="Edit interpretation"><i className="icon icon-pencil"></i></a>
+                                                &nbsp;<a className="continue-interpretation" href="#" onClick={this.goToInterpretationPage} title="Edit interpretation"><i className="icon icon-pencil large-icon"></i></a>
                                             </span>
                                         </dd>
                                     </dl>
