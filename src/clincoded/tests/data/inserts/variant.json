@@ -1,5 +1,27 @@
 [
     {
+        "uuid": "2126b5f8-3ba7-4fde-b4ec-792ca230680d",
+        "clinvarVariantId": "11717",
+        "clinvarVariantTitle": "NM_000686.4(AGTR2):c.402delT (p.Phe134Leufs)",
+        "dbSNPId": "",
+        "clinVarRCV": "",
+        "hgvsNames": [],
+        "date_created": "2015-11-12T22:07:50.013929+00:00",
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "last_modified": "2015-11-12T22:07:50.013940+00:00"
+    },
+    {
+        "uuid": "b40273da-d8b4-4faa-8613-5eb5249d1dc9",
+        "clinvarVariantId": "6822",
+        "clinvarVariantTitle": "NM_058216.2(RAD51C):c.773G>A (p.Arg258His)",
+        "dbSNPId": "",
+        "clinVarRCV": "",
+        "hgvsNames": [],
+        "date_created": "2015-11-10T00:01:41.526023+00:00",
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "last_modified": "2015-11-10T00:01:41.526010+00:00"
+    },
+    {
         "uuid": "c71fc085-2683-11e5-b9fe-60f81dc5b05a",
         "dbSNPIds": ["rs386833448"],
         "clinvarVariantId": "55966",
