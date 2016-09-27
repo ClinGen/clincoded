@@ -483,12 +483,12 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
 function tableHeader() {
     return (
         <tr>
-            <th><span className="label-benign">B</span>/<span className="label-pathogenic">P</span></th>
-            <th>Criteria</th>
-            <th>Criteria Descriptions</th>
-            <th>Modified</th>
-            <th>Evaluation Status</th>
-            <th>Evaluation Descriptions</th>
+            <th className="col-md-1"><span className="label-benign">B</span>/<span className="label-pathogenic">P</span></th>
+            <th className="col-md-1">Criteria</th>
+            <th className="col-md-3">Criteria Descriptions</th>
+            <th className="col-md-1">Modified</th>
+            <th className="col-md-2">Evaluation Status</th>
+            <th className="col-md-4">Evaluation Explanation</th>
         </tr>
     );
 }
