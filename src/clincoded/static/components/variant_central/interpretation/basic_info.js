@@ -77,7 +77,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     componentWillReceiveProps: function(nextProps) {
-        if (nextProps.data && this.props.data && !_.isEqual(nextProps.data, this.props.data)) {
+        if (nextProps.data && this.props.data) {
             this.parseData(nextProps.data);
         }
         // update data based on api call results
