@@ -1149,9 +1149,13 @@
                 }
             }
 
-            .basic-info .datasource-clinvar-interpretaions  {
+            .basic-info .datasource-clinvar-interpretaions {
                 .clinvar-interpretation-summary {
-                    border-bottom: solid 1px #ddd;
+                    border: solid 1px #ddd;
+                    margin: 15px 15px 12px 15px;
+                    -webkit-border-radius: 2px;
+                    -moz-border-radius: 2px;
+                    border-radius: 2px;
 
                     .reviewStatus:first-letter {
                         text-transform: capitalize;
@@ -1596,6 +1600,20 @@
             color: #fff;
         }
     }
+
+    .stand-alone {
+        color: $stand-alone;
+
+        &:active {
+            color: $stand-alone;
+        }
+
+        &[data-status='met'] {
+            background-color: $stand-alone;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
+    }
 }
 
 /**
@@ -1623,6 +1641,10 @@
 
 .pathogenic-very-strong {
     color: $pathogenic-very-strong;
+}
+
+.stand-alone {
+    color: $stand-alone;
 }
 
 /**
@@ -1791,18 +1813,18 @@ dl.inline-dl {
             }
 
             &.benign-result:before {
-                color: #92cd9e;
+                color: $stand-alone;
             }
 
             &.path-result:before {
-                color: #f4978a;
+                color: $pathogenic-very-strong;
             }
 
             &.calculate-result:before {
                 content: "\f1ec";
                 font-family: 'FontAwesome';
                 font-size: 15pt;
-                color: #1b75bc;
+                color: #666;
                 top: 8px;
             }
 
@@ -1892,4 +1914,265 @@ dl.inline-dl {
 
 .criteria-description {
     text-overflow: clip;
+}
+
+/* View Summary button */
+.view-summary {
+    &:focus,
+    &:active {
+        border: 1px solid #1b75bc;
+        background-color: #1b75bc;
+        outline: none;
+    }
+}
+
+/* Evaluation summary table UIs */
+.evaluation-summary {
+    h2 {
+        text-align: center;
+    }
+
+    .table tbody td {
+        vertical-align: inherit;
+
+        &.criteria-code,
+        &.criteria-modified,
+        &.evaluation-status {
+            line-height: 0;
+        }
+    }
+
+    .criteria-class {
+        font-size: 20px;
+
+        .benign {
+            color: $stand-alone;
+        }
+
+        .pathogenic {
+            color: $pathogenic-very-strong;
+        }
+    }
+
+    .criteria-code {
+        font-weight: bold;
+
+        &.benign-strong {
+            color: #62387e;
+        }
+
+        &.benign-supporting {
+            color: #2b67a0;
+        }
+
+        &.pathogenic-supporting  {
+            color: #728b42;
+        }
+
+        &.pathogenic-moderate {
+            color: #d36735;
+        }
+
+        &.pathogenic-strong {
+            color: #d33535;
+        }
+
+        &.pathogenic-very-strong {
+            color: #d33535;
+        }
+    }
+
+    .evaluation-status {
+        &:first-letter {
+            text-transform: capitalize;
+        }
+    }
+
+    .criteria-modified {
+        position: relative;
+
+        &:after {
+            font-family: 'FontAwesome';
+            float: left;
+            position: absolute;
+            left: 35px;
+            font-size: 135%;
+        }
+    }
+
+    [data-modlevel='1-up']:after {
+        content: "\f176";
+    }
+
+    [data-modlevel='2-up']:after {
+        content: "\f176 \f176";
+    }
+
+    [data-modlevel='3-up']:after {
+        content: "\f176 \f176 \f176";
+    }
+
+    [data-modlevel='1-down']:after {
+        content: "\f175";
+    }
+
+    [data-modlevel='2-down']:after {
+        content: "\f175 \f175";
+    }
+
+    [data-modlevel='3-down']:after {
+        content: "\f175 \f175 \f175";
+    }
+
+    [data-evaltype='benign'] {
+        .criteria-modified:after {
+            color: $stand-alone;
+        }
+    }
+
+    [data-evaltype='pathogenic'] {
+        .criteria-modified:after {
+            color: $pathogenic-very-strong;
+        }
+    }
+
+    .datasource-evaluation-summary-provision {
+        dl {
+            margin-bottom: 5px;
+
+            .provisional-interpretation-status:first-letter {
+                text-transform: capitalize;
+            }
+
+            .modeInheritance {
+                font-style: italic;
+            }
+        }
+    }
+
+    .provisional-static-content-wrapper {
+        margin-bottom: 10px;
+        padding: 0;
+    }
+
+    .provisional-form-content-wrapper {
+        border: solid 1px #dfdfdf;
+        padding: 15px 0;
+        -webkit-border-radius: 2px;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
+    }
+
+    .evaluation-provision {
+        margin-bottom: 5px;
+        margin-right: 0;
+
+        label {
+            padding-left: 0;
+        }
+
+        .col-sm-6 {
+            padding-left: 0;
+        }
+
+        &.provisional-pathogenicity {
+            .form-group {
+                margin-bottom: 0;
+            }
+
+            label {
+                padding-top: 0;
+            }
+
+            label i {
+                display: block;
+                font-weight: normal;
+            }
+
+            textarea:required {
+                background-color: #fde8e8;
+                border-color: #ffb2b2;
+            }
+        }
+
+        &.provisional-interpretation {
+            margin-top: 0;
+
+            .col-sm-7 {
+                margin-left: -15px;
+            }
+
+            .icon-question-circle {
+                cursor: pointer;
+                color: #2697d1;
+                font-size: 120%;
+                margin-right: 8px;
+                position: relative;
+
+                &:after {
+                    content: "Editing interpretation is permitted after selecting this option";
+                    background-color: #000;
+                    background-color: hsla(0, 0%, 20%, 0.9);
+                    color: #fff;
+                    text-align: center;
+                    border-radius: 3px;
+                    padding: 5px 0;
+                    position: absolute;
+                    visibility: hidden;
+                    width: 370px;
+                    font-size: 12px;
+                    font-family: "Helvetica";
+                    font-weight: bold;
+                    z-index: 1;
+                    top: 25px;
+                    left: 0;
+                }
+
+                &:hover:after {
+                    visibility: visible;
+                }
+            }
+
+            .form-group {
+                display: inline-block;
+                margin: 0 0 0 10px;
+
+                .col-sm-7 {
+                    margin-left: 0;
+                }
+
+                .form-error {
+                    display: none;
+                }
+            }
+
+            input[type="checkbox"] {
+                margin-top: 0;
+                position: relative;
+                top: 3px;
+                left: 0px;
+                visibility: hidden;
+
+                &:after,
+                &:checked:after {
+                    font-family: FontAwesome;
+                    font-size: 120%;
+                    display: inline-block;
+                    visibility: visible;
+                }
+
+                &:after {
+                    content: "\f096";
+                }
+
+                &:checked:after {
+                    content: "\f14a";
+                }
+
+                &[disabled] {
+                    color: #bbb;
+                }
+            }
+        }
+    }
 }
