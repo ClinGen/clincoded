@@ -2160,6 +2160,10 @@ table.login-users-interpretations {
         span.no-broken-item {
             display: inline-block;
         }
+    }
+
+    td.icon-box {
+        vertical-align: text-top;
 
         a.continue-interpretation {
             padding-left: 5px;

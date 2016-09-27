@@ -137,7 +137,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                     last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
                                                 </span>
                                             </td>
-                                            <td>
+                                            <td className="icon-box">
                                                 <a className="continue-interpretation" href="#" onClick={this.goToInterpretationPage} title="Edit interpretation">
                                                     <i className="icon icon-pencil-square large-icon"></i>
                                                 </a>
