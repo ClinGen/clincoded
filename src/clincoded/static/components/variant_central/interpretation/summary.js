@@ -363,8 +363,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                                 <Input type="select" ref="provisional-pathogenicity" label={<span>Modify Pathogenicity:<i>(optional)</i></span>}
                                                     value={provisionalPathogenicity ? provisionalPathogenicity : ''}
                                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange}>
-                                                    <option value=''>Select an option</option>
-                                                    <option value=''>No modification</option>
+                                                    <option value=''>No Selection</option>
+                                                    <option disabled="disabled"></option>
                                                     <option value="Benign">Benign</option>
                                                     <option value="Likely benign">Likely Benign</option>
                                                     <option value="Uncertain significance">Uncertain Significance</option>
