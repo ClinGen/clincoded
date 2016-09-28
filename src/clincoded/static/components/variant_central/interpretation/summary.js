@@ -75,6 +75,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                 this.refs['provisional-reason'].setValue(this.state.provisionalReason);
             }
         });
+        this.handleProvisionalCheckBox(this.state.provisionalPathogenicity);
     },
 
     // Method to construct mode of inheritance linkout
