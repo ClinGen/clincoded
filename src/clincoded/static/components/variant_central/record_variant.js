@@ -43,7 +43,7 @@ var CurationRecordVariant = module.exports.CurationRecordVariant = React.createC
                     {clinVarId || carId ?
                         <dl className="inline-dl clearfix">
                             {clinVarId ?
-                                <dd>ClinVar VariationID:&nbsp;<a href={external_url_map['ClinVarEsearch'] + clinVarId} target="_blank" title={'ClinVar page for ' + clinVarId + ' in a new window'}>{clinVarId}</a></dd>
+                                <dd>ClinVar VariationID:&nbsp;<a href={external_url_map['ClinVarSearch'] + clinVarId} target="_blank" title={'ClinVar page for ' + clinVarId + ' in a new window'}>{clinVarId}</a></dd>
                                 :
                                 null
                             }
