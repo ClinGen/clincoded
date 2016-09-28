@@ -6,7 +6,11 @@ from pyramid.security import (
     Everyone,
 )
 from pyramid.settings import asbool
-from .base import Item
+from .base import (
+    Item,
+    DELETED,
+    ONLY_ADMIN_VIEW,
+)
 from ..authentication import (
     generate_password,
     generate_user,
@@ -37,12 +41,17 @@ from contentbase import (
         (Allow, 'group.read-only-admin', 'view'),
         (Allow, 'remoteuser.INDEXER', 'view'),
         (Allow, 'remoteuser.EMBED', 'view'),
-        (Deny, Everyone, 'view'),
+        (Deny, Everyone, 'list'),
     ])
 class AccessKey(Item):
     item_type = 'access_key'
     schema = load_schema('clincoded:schemas/access_key.json')
     name_key = 'access_key_id'
+
+    STATUS_ACL = {
+        'current': [(Allow, 'role.owner', ['view', 'edit'])] + ONLY_ADMIN_VIEW,
+        'deleted': DELETED,
+    }
 
     def __ac_local_roles__(self):
         owner = 'userid.%s' % self.properties['user']
