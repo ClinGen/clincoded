@@ -110,7 +110,7 @@ var VariantCurationHub = React.createClass({
             if (variant.clinvarVariantId) {
                 this.setState({clinvar_id: variant.clinvarVariantId});
                 // Get ClinVar data via the parseClinvar method defined in parse-resources.js
-                this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
+                this.getRestDataXml(external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
                     // Passing 'true' option to invoke 'mixin' function
                     // To extract more ClinVar data for 'Basic Information' tab
                     var variantData = parseClinvar(xml, true);
@@ -133,7 +133,7 @@ var VariantCurationHub = React.createClass({
                         let clinvarInterpretations = [];
                         let Urls = [];
                         for (let RCV of RCVs.values()) {
-                            Urls.push(this.props.href_url.protocol + external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV);
+                            Urls.push(external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV);
                         }
                         return this.getRestDatasXml(Urls).then(xml => {
                             xml.forEach(result => {
@@ -358,7 +358,7 @@ var VariantCurationHub = React.createClass({
         let symbol = response.gene.symbol;
         if (aminoAcidLocation && symbol) {
             let term = aminoAcidLocation.substr(0, aminoAcidLocation.length-1);
-            this.getRestData(this.props.href_url.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
+            this.getRestData(external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
                 // pass in these additional values, in case receiving component needs them
                 result.vci_term = term;
                 result.vci_symbol = symbol;
