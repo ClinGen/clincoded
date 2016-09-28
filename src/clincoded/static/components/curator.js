@@ -1805,6 +1805,7 @@ function flattenProvisionalVariant(provisional_variant) {
     return flat;
 }
 
+
 var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional"];
 
 function flattenInterpretation(interpretation) {
