@@ -398,13 +398,13 @@ var VariantCurationHub = React.createClass({
 
     // Method to persist provisional evaluation states
     setProvisionalEvaluation: function(field, value) {
-        if (field === 'provisional-pathogenicity') {
+        if (field === 'provisional-pathogenicity' && this.state.provisionalPathogenicity !== value) {
             this.setState({provisionalPathogenicity: value});
         }
-        if (field === 'provisional-reason') {
+        if (field === 'provisional-reason' && this.state.provisionalReason !== value) {
             this.setState({provisionalReason: value});
         }
-        if (field === 'provisional-interpretation') {
+        if (field === 'provisional-interpretation' && this.state.provisionalInterpretation !== value) {
             this.setState({provisionalInterpretation: value});
         }
     },

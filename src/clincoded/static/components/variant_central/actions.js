@@ -229,7 +229,8 @@ var AssociateDisease = React.createClass({
 
     getInitialState: function() {
         return {
-            submitResourceBusy: false
+            submitResourceBusy: false,
+            shouldShowWarning: false
         };
     },
 
@@ -249,6 +250,20 @@ var AssociateDisease = React.createClass({
             }
         }
         return valid;
+    },
+
+    // Handle value changes in provisional form
+    handleChange: function() {
+        if (!this.refs['orphanetid'].getValue()) {
+            let interpretation = this.props.interpretation;
+            if (interpretation && interpretation.markAsProvisional) {
+                this.setState({shouldShowWarning: true});
+            } else if (interpretation && !interpretation.markAsProvisional) {
+                this.setState({shouldShowWarning: false});
+            }
+        } else {
+            this.setState({shouldShowWarning: false});
+        }
     },
 
     // When the form is submitted...
@@ -377,9 +392,17 @@ var AssociateDisease = React.createClass({
                 <div className="modal-box">
                     <div className="modal-body clearfix">
                         <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
-                            error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
+                            error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                     </div>
+                    {this.state.shouldShowWarning ?
+                        <div className="alert alert-warning">
+                            Warning: This interpretation is marked as "Provisional." If it has a Modified Pathogenicity of "Likely pathogenic" or "Pathogenic,"
+                            or no Modified Pathogenicity but a Calculated Pathogenicity of "Likely pathogenic" or "Pathogenic," it must be associated with a disease.<br/><br/>
+                            <strong>If you still wish to delete the disease, select "Cancel," then select "View Summary" and remove the "Provisional" selection </strong>
+                            - otherwise, deleting the disease will automatically remove the "Provisional" status.
+                        </div>
+                    : null}
                     <div className='modal-footer'>
                         <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
                         <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />

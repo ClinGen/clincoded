@@ -1806,7 +1806,7 @@ function flattenProvisionalVariant(provisional_variant) {
 }
 
 
-var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections"];
+var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties
