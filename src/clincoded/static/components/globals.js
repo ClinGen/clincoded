@@ -136,12 +136,12 @@ module.exports.dbxref_prefix_map = {
     "HGNC": "http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
     // ENSEMBL link only works for human
     "ENSEMBL": "http://www.ensembl.org/Homo_sapiens/Gene/Summary?g=",
-    "GeneID": "http://www.ncbi.nlm.nih.gov/gene/",
-    "GEO": "http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",
+    "GeneID": "https://www.ncbi.nlm.nih.gov/gene/",
+    "GEO": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",
     "Caltech": "http://jumpgate.caltech.edu/library/",
     "FlyBase": "http://flybase.org/cgi-bin/quicksearch_solr.cgi?caller=quicksearch&tab=basic_tab&data_class=FBgn&species=Dmel&search_type=all&context=",
     "WormBase": "http://www.wormbase.org/species/c_elegans/gene/",
-    "RefSeq": "http://www.ncbi.nlm.nih.gov/gene/?term=",
+    "RefSeq": "https://www.ncbi.nlm.nih.gov/gene/?term=",
     // UCSC links need assembly (&db=) and accession (&hgt_mdbVal1=) added to url
     "UCSC-ENCODE-mm9": "http://genome.ucsc.edu/cgi-bin/hgTracks?tsCurTab=advancedTab&tsGroup=Any&tsType=Any&hgt_mdbVar1=dccAccession&hgt_tSearch=search&hgt_tsDelRow=&hgt_tsAddRow=&hgt_tsPage=&tsSimple=&tsName=&tsDescr=&db=mm9&hgt_mdbVal1=",
     "UCSC-ENCODE-hg19": "http://genome.ucsc.edu/cgi-bin/hgTracks?tsCurTab=advancedTab&tsGroup=Any&tsType=Any&hgt_mdbVar1=dccAccession&hgt_tSearch=search&hgt_tsDelRow=&hgt_tsAddRow=&hgt_tsPage=&tsSimple=&tsName=&tsDescr=&db=hg19&hgt_mdbVal1=",
@@ -149,8 +149,8 @@ module.exports.dbxref_prefix_map = {
     "UCSC-GB-mm9": "http://genome.cse.ucsc.edu/cgi-bin/hgTrackUi?db=mm9&g=",
     "UCSC-GB-hg19": "http://genome.cse.ucsc.edu/cgi-bin/hgTrackUi?db=hg19&g=",
     // Dataset, experiment, and document references
-    "PMID": "http://www.ncbi.nlm.nih.gov/pubmed/?term=",
-    "PMCID": "http://www.ncbi.nlm.nih.gov/pmc/articles/",
+    "PMID": "https://www.ncbi.nlm.nih.gov/pubmed/?term=",
+    "PMCID": "https://www.ncbi.nlm.nih.gov/pmc/articles/",
     "doi": "http://dx.doi.org/doi:"
 };
 
@@ -164,8 +164,8 @@ module.exports.external_url_map = {
     'HGNCHome': 'http://www.genenames.org/',
     'Entrez': 'https://www.ncbi.nlm.nih.gov/gene/',
     'MedGen': 'https://www.ncbi.nlm.nih.gov/medgen/',
-    'OMIM': 'https://omim.org/',
-    'OMIMEntry': 'https://www.omim.org/entry/',
+    'OMIM': 'http://omim.org/',
+    'OMIMEntry': 'http://www.omim.org/entry/',
     'ClinVar': 'https://www.ncbi.nlm.nih.gov/clinvar/',
     'ClinVarSearch': 'https://www.ncbi.nlm.nih.gov/clinvar/variation/',
     'ClinVarEfetch': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar',
