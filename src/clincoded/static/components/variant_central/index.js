@@ -110,7 +110,8 @@ var VariantCurationHub = React.createClass({
             if (variant.clinvarVariantId) {
                 this.setState({clinvar_id: variant.clinvarVariantId});
                 // Get ClinVar data via the parseClinvar method defined in parse-resources.js
-                this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
+                //this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
+                this.getRestDataXml(external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
                     // Passing 'true' option to invoke 'mixin' function
                     // To extract more ClinVar data for 'Basic Information' tab
                     var variantData = parseClinvar(xml, true);
@@ -133,7 +134,8 @@ var VariantCurationHub = React.createClass({
                         let clinvarInterpretations = [];
                         let Urls = [];
                         for (let RCV of RCVs.values()) {
-                            Urls.push(this.props.href_url.protocol + external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV);
+                            //Urls.push(this.props.href_url.protocol + external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV);
+                            Urls.push(external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV);
                         }
                         return this.getRestDatasXml(Urls).then(xml => {
                             xml.forEach(result => {
@@ -398,13 +400,13 @@ var VariantCurationHub = React.createClass({
 
     // Method to persist provisional evaluation states
     setProvisionalEvaluation: function(field, value) {
-        if (field === 'provisional-pathogenicity') {
+        if (field === 'provisional-pathogenicity' && this.state.provisionalPathogenicity !== value) {
             this.setState({provisionalPathogenicity: value});
         }
-        if (field === 'provisional-reason') {
+        if (field === 'provisional-reason' && this.state.provisionalReason !== value) {
             this.setState({provisionalReason: value});
         }
-        if (field === 'provisional-interpretation') {
+        if (field === 'provisional-interpretation' && this.state.provisionalInterpretation !== value) {
             this.setState({provisionalInterpretation: value});
         }
     },

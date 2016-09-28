@@ -1320,6 +1320,14 @@
             width: 100%;
         }
     }
+
+    .modal-associate-disease {
+        .modal-box {
+            .alert-warning {
+                margin: 0 30px 20px 30px;
+            }
+        }
+    }
 }
 
 .curation-data-curator .current-user-interpretations {

@@ -36,6 +36,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
 
     componentDidMount: function() {
         if (this.props.interpretation && this.props.calculatedAssertion) {
+            // FIXME: Figure out why this is needed while the same method is already invoked
+            // in the componentWillReceiveProps lifecycle method
             this.handleProvisionalCheckBox(this.state.provisionalPathogenicity);
             // Reset form values to last saved values
             let interpretation = this.props.interpretation;
@@ -75,6 +77,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                 this.refs['provisional-reason'].setValue(this.state.provisionalReason);
             }
         });
+        // FIXME: Figure out why this is needed while the same method is already invoked
+        // in the componentDidMount lifecycle method
+        this.handleProvisionalCheckBox(this.state.provisionalPathogenicity, true);
     },
 
     // Method to construct mode of inheritance linkout
@@ -95,7 +100,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
     },
 
     // Method to set provisional checkbox state given the modified or calculated pathogenicity
-    handleProvisionalCheckBox: function(pathogenicity) {
+    handleProvisionalCheckBox: function(pathogenicity, reset) {
         if (!this.props.interpretation.disease) {
             let assertion = this.props.calculatedAssertion;
             if (assertion === 'Likely pathogenic' || assertion === 'Pathogenic') {
@@ -106,18 +111,49 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                 } else {
                     this.props.setProvisionalEvaluation('provisional-interpretation', false);
                     this.setState({disabledCheckbox: true});
+                    // In addition to uncheck pre-existing marked provisional checkbox and disable it,
+                    // also reset provision ('markAsProvisional') in db
+                    if (reset) {
+                        this.handleProvisionReset();
+                    }
                 }
             } else {
                 if(pathogenicity === 'Likely pathogenic' ||
                    pathogenicity === 'Pathogenic') {
                     this.props.setProvisionalEvaluation('provisional-interpretation', false);
                     this.setState({disabledCheckbox: true});
+                    // In addition to uncheck pre-existing marked provisional checkbox and disable it,
+                    // also reset provision ('markAsProvisional') in db
+                    if (reset) {
+                        this.handleProvisionReset();
+                    }
                 } else {
                     this.setState({disabledCheckbox: false});
                 }
             }
         } else {
             this.setState({disabledCheckbox: false});
+        }
+    },
+
+    // Method to set a false boolean value to the 'markAsProvisional' property
+    // in the event in which the associated disease is deleted while either
+    // the calculated or modified pathogenicity are 'Likely Pathogenic' or 'Pathogenic'
+    // FIXME: Hacky and single use case
+    handleProvisionReset: function() {
+        const interpretation = this.state.interpretation;
+        const provisionalInterpretation = this.state.provisionalInterpretation;
+        if (interpretation && interpretation.markAsProvisional) {
+            // Flattened interpretation object
+            let flatInterpretationObj = curator.flatten(interpretation);
+            // Set 'markAsProvisional' property value in the flatten interpretation object
+            flatInterpretationObj.markAsProvisional = false;
+            // Update the interpretation object with a false boolean checkbox value
+            this.putRestData('/interpretation/' + interpretation.uuid, flatInterpretationObj).then(obj => {
+                this.props.updateInterpretationObj();
+            }).catch(err => {
+                console.log(err);
+            });
         }
     },
 
