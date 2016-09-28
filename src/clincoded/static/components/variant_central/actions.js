@@ -34,7 +34,6 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         return {
             variantUuid: null,
             interpretation: this.props.interpretation,
-            //hasExistingInterpretation: false,
             isInterpretationActive: this.props.interpretation ? true : false,
             hasAssociatedDisease: this.props.interpretation && this.props.interpretation.disease ? true : false,
             hasAssociatedInheritance: this.props.interpretation && this.props.interpretation.modeInheritance ? true : false
@@ -43,7 +42,6 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
 
     componentDidMount: function() {
         if (this.props.interpretation) {
-            //this.setState({hasExistingInterpretation: true});
             if (this.props.editKey && this.props.editKey === 'true') {
                 this.setState({isInterpretationActive: true});
                 let interpretation = this.props.interpretation;
