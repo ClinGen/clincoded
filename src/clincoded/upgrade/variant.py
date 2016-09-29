@@ -1,7 +1,6 @@
 from contentbase.upgrader import upgrade_step
-#import urllib.request
-#import json
-
+import urllib.request
+import json
 
 @upgrade_step('variant', '1', '2')
 def variant_1_2(value, system):
@@ -76,21 +75,16 @@ def variant_1_2(value, system):
                 value['clinvarVariantTitle'] = 'NM_001172813.1(SLC30A8):c.826C>T (p.Arg276Trp)'
             if value['clinvarVariantId'] == '5883':
                 value['clinvarVariantTitle'] = 'NM_005751.4(AKAP9):c.4709C>T (p.Ser1570Leu)'
+
         else:
             value['clinvarVariantTitle'] = ''
 
-
 @upgrade_step('variant', '2', '3')
 def variant_2_3(value, system):
-    # setup default values for carId and clinVarSCVs
-    # These properties are set
+    # Related to ticket #676 (https://github.com/ClinGen/clincoded/issues/676#issuecomment-218564765)
     if 'carId' not in value:
         value['carId'] = ''
 
-    if 'clinVarSCVs' not in value:
-        value['clinVarSCVs'] = []
-
-    # Replace properties dbSNPId (string) and clinVarRCV (string) with dbSNPIds (array) and clinVarRCVs (array)
     if 'dbSNPId' in value:
         if value['dbSNPId'] != '':
             value['dbSNPIds'] = [value['dbSNPId']]
@@ -109,6 +103,8 @@ def variant_2_3(value, system):
     if 'clinVarRCVs' not in value and 'clinVarRCV' not in value:
         value['clinVarRCVs'] = []
 
-    # Change type of hgvsNames from array to object
+    if 'clinVarSCVs' not in value:
+        value['clinVarSCVs'] = []
+
     if 'hgvsNames' in value and value['hgvsNames'] == []:
         value['hgvsNames'] = {}
