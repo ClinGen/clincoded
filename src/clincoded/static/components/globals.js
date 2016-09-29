@@ -136,12 +136,12 @@ module.exports.dbxref_prefix_map = {
     "HGNC": "http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
     // ENSEMBL link only works for human
     "ENSEMBL": "http://www.ensembl.org/Homo_sapiens/Gene/Summary?g=",
-    "GeneID": "http:s//www.ncbi.nlm.nih.gov/gene/",
-    "GEO": "http:s//www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",
+    "GeneID": "https://www.ncbi.nlm.nih.gov/gene/",
+    "GEO": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",
     "Caltech": "http://jumpgate.caltech.edu/library/",
     "FlyBase": "http://flybase.org/cgi-bin/quicksearch_solr.cgi?caller=quicksearch&tab=basic_tab&data_class=FBgn&species=Dmel&search_type=all&context=",
     "WormBase": "http://www.wormbase.org/species/c_elegans/gene/",
-    "RefSeq": "http:s//www.ncbi.nlm.nih.gov/gene/?term=",
+    "RefSeq": "https://www.ncbi.nlm.nih.gov/gene/?term=",
     // UCSC links need assembly (&db=) and accession (&hgt_mdbVal1=) added to url
     "UCSC-ENCODE-mm9": "http://genome.ucsc.edu/cgi-bin/hgTracks?tsCurTab=advancedTab&tsGroup=Any&tsType=Any&hgt_mdbVar1=dccAccession&hgt_tSearch=search&hgt_tsDelRow=&hgt_tsAddRow=&hgt_tsPage=&tsSimple=&tsName=&tsDescr=&db=mm9&hgt_mdbVal1=",
     "UCSC-ENCODE-hg19": "http://genome.ucsc.edu/cgi-bin/hgTracks?tsCurTab=advancedTab&tsGroup=Any&tsType=Any&hgt_mdbVar1=dccAccession&hgt_tSearch=search&hgt_tsDelRow=&hgt_tsAddRow=&hgt_tsPage=&tsSimple=&tsName=&tsDescr=&db=hg19&hgt_mdbVal1=",
