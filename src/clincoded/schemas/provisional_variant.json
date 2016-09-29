@@ -1,0 +1,58 @@
+{
+    "title": "Provisional_variant",
+    "id": "/profiles/provisional_variant.json",
+    "description": "Schema for storing provisional classification data for Variant Curation",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/standard_status" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "autoClassification": {
+            "title": "Classification",
+            "description": "Classification calculated from combinbed criteria.",
+            "type": "string"
+        },
+        "alteredClassification": {
+            "title": "Altered Classification",
+            "description": "Classification altered by user",
+            "type": "string"
+        },
+        "reason": {
+            "title": "Reasons",
+            "description": "Reasons user change the classification.",
+            "type": "string"
+        }
+    },
+    "columns": {
+        "uuid": {
+            "title": "Interpretation",
+            "type": "string"
+        },
+        "submitted_by.title": {
+            "title": "Curator",
+            "type": "string"
+        },
+        "autoClassification": {
+            "title": "Calculated Classification",
+            "type": "string"
+        },
+        "alteredClassification_present": {
+            "title": "Altered Classification",
+            "type": "string"
+        },
+        "reason_present": {
+            "title": "Reasons",
+            "type": "string"
+        }
+    }
+}

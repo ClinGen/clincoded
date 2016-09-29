@@ -141,6 +141,17 @@ var FormMixin = module.exports.FormMixin = {
         this.setState({formErrors: errors});
     },
 
+    // clears errors form all form inputs
+    clrAllFormErrors: function() {
+        var errors = this.state.formErrors;
+        if (this.refs && Object.keys(this.refs).length) {
+            Object.keys(this.refs).map(ref => {
+                errors[ref] = '';
+            });
+        }
+        this.setState({formErrors: errors});
+    },
+
     // Return true if the form's current state shows any Input errors. Return false if no
     // errors are indicated. This should be called in the render function so that the submit
     // form function will have had a chance to record any errors.
@@ -221,6 +232,7 @@ var Input = module.exports.Input = React.createClass({
         submitHandler: React.PropTypes.func, // Called to handle submit button click
         cancelHandler: React.PropTypes.func, // Called to handle cancel button click
         submitBusy: React.PropTypes.bool, //
+        onBlur: React.PropTypes.func,
         minVal: React.PropTypes.number, // Minimum value for a number formatted input
         maxVal: React.PropTypes.number // Maximum value for a number formatted input
     },
@@ -255,9 +267,11 @@ var Input = module.exports.Input = React.createClass({
 
     // Set the value of an input
     setValue: function(val) {
-        if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea') {
+        if (this.props.type === 'text' || this.props.type === 'email' || this.props.type === 'textarea' || this.props.type === 'number') {
             ReactDOM.findDOMNode(this.refs.input).value = val;
             this.setState({value: val});
+        } else if (this.props.type === 'select') {
+            this.setSelectedOption(val);
         } else if (this.props.type === 'checkbox') {
             ReactDOM.findDOMNode(this.refs.input).checked = val;
             this.setState({value: val});
@@ -287,6 +301,11 @@ var Input = module.exports.Input = React.createClass({
     resetSelectedCheckbox: function() {
         var selectNode = this.refs.input;
         selectNode.checked = false;
+    },
+
+    setSelectedOption: function(val) {
+        var select = this.refs.input;
+        select.value = val;
     },
 
     // Get the selected option from a <select> list
@@ -331,7 +350,7 @@ var Input = module.exports.Input = React.createClass({
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 var innerInput = (
                     <span>
-                        <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} maxLength={this.props.maxLength} disabled={this.props.inputDisabled} />
+                        <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} maxLength={this.props.maxLength} disabled={this.props.inputDisabled} />
                         <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                     </span>
                 );
@@ -344,11 +363,12 @@ var Input = module.exports.Input = React.createClass({
                 break;
 
             case 'select':
+                inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <select className="form-control" ref="input" onChange={this.handleChange.bind(null, this.props.id)} defaultValue={this.props.hasOwnProperty('value') ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled}>
+                            <select className={inputClasses} ref="input" onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} defaultValue={this.props.hasOwnProperty('value') ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled}>
                                 {this.props.children}
                             </select>
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
@@ -363,7 +383,7 @@ var Input = module.exports.Input = React.createClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} placeholder={this.props.placeholder} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} rows={this.props.rows} />
+                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} placeholder={this.props.placeholder} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} disabled={this.props.inputDisabled} rows={this.props.rows} />
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                         </div>
                     </div>

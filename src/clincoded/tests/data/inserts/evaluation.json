@@ -1,0 +1,27 @@
+[
+    {
+        "uuid": "09dbca61-a1a0-4ba4-ae68-99f4f1ca7493",
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
+        "population": "f0a51b16-cc7b-406f-9ae6-566d28e31b03",
+        "disease": "788e024f-16a6-11e5-a0b5-60f81dc5b05a",
+        "criteria": "BS1",
+        "criteriaStatus": "met",
+        "explanation": "some thing here.",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-05-11T22:47:10.000000+00:00",
+        "last_modified": "2016-05-11T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "1e66c5a1-6a7d-45c6-86b5-0bc4e4c0712b",
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
+        "disease": "788e024f-16a6-11e5-a0b5-60f81dc5b05a",
+        "computational": "63727d93-0d51-44b2-a568-d042ba10e8af",
+        "criteria": "PM1",
+        "criteriaStatus": "met",
+        "criteriaModifier": "very-strong",
+        "explanation": "description here.",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-05-11T22:47:10.000000+00:00",
+        "last_modified": "2016-05-11T22:59:10.000000+00:00"
+    }
+]

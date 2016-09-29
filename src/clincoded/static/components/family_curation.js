@@ -13,6 +13,7 @@ var methods = require('./methods');
 var individual_curation = require('./individual_curation');
 var Assessments = require('./assessment');
 var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
+var add_external_resource = require('./add_external_resource');
 var CuratorHistory = require('./curator_history');
 
 var Modal = modal.Modal;
@@ -39,7 +40,7 @@ var updateProbandVariants = individual_curation.updateProbandVariants;
 var recordIndividualHistory = individual_curation.recordIndividualHistory;
 var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
-var AddResourceId = curator.AddResourceId;
+var AddResourceId = add_external_resource.AddResourceId;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
@@ -681,7 +682,7 @@ var FamilyCuration = React.createClass({
                             results.forEach(function(result, i) {
                                 if (result.total) {
                                     // Search got a result. Add a string for family.variants for this existing variant
-                                    familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
+                                    familyVariants.push(result['@graph'][0]['@id']);
                                 } else {
                                     // Search got no result; make a new variant and save it in an array so we can write them.
                                     // Look for the term in the filters to see what term failed to find a match
@@ -730,7 +731,7 @@ var FamilyCuration = React.createClass({
 
                                 // Add the newly written variants to the family
                                 results.forEach(result => {
-                                    familyVariants.push('/variants/' + result['@graph'][0].uuid + '/');
+                                    familyVariants.push(result['@graph'][0]['@id']);
                                 });
                             }
                             return Promise.resolve(results);
@@ -1717,8 +1718,8 @@ var FamilyVariant = function() {
                         <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
-                        <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]}
-                            buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" }
+                        <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
+                            buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol}
                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                             updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} inputDisabled={this.state.variantOption[i] === VAR_SPEC}

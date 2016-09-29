@@ -11,59 +11,115 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/standard_status" },
         { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "clinvarVariantId": {
             "title": "Variant ID",
             "description": "ClinVar Variant ID",
-            "type": "string"
+            "type": "string",
+            "default": ""
+        },
+        "carId": {
+            "title": "CAR ID",
+            "description": "Canonical Allele Registration ID from Baylor's Allele Registration",
+            "type": "string",
+            "default": ""
         },
         "clinvarVariantTitle": {
             "title": "ClinVar Variant Title",
             "type": "string",
             "default": ""
         },
-        "dbSNPId": {
-            "title": "dbSNP ID",
-            "description": "dbSNP id of the variant",
-            "type": "string",
-            "default": ""
-        },
-        "clinVarRCV": {
-            "title": "ClinVar ID",
-            "description": "ClinVar id for the variant",
-            "type": "string",
-            "default": ""
-        },
-        "hgvsNames": {
-            "title": "HGVS Names",
-            "description": "List of HGVS names of the variant",
+        "clinVarRCVs": {
+            "title": "ClinVar RCV Accession",
+            "description": "List of ClinVar RCV ids associated to the variant",
             "type": "array",
             "default": [],
             "items": {
-                "title": "HGVS Name",
-                "type": "string",
-                "default": ""
+                "type": "string"
             }
+        },
+        "clinVarSCVs": {
+            "title": "ClinVar SCV Accession",
+            "description": "List of ClinVar SCV ids associated to the variant",
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "string"
+            }
+        },
+        "dbSNPIds": {
+            "title": "dbSNP ID",
+            "description": "List of dbSNP ids related of the variant",
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "string"
+            }
+        },
+        "hgvsNames": {
+            "title": "HGVS Terms",
+            "description": "Object containing HGVS terms. Separated to GRCh37, GRCh38 and others",
+            "type": "object",
+            "default": {}
         },
         "otherDescription": {
             "title": "Other Description",
             "description": "List of other descriptions",
             "type": "string",
             "default": ""
+        },
+        "variationType": {
+            "title": "Variation Type",
+            "description": "Variation type of the variant",
+            "type": "string"
+        },
+        "molecularConsequenceList": {
+            "title": "Molecular Consequence",
+            "description": "List of object to store molecular consequence term, SO id to transcripts of the variant",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "hgvsName": {
+                        "title": "HGVS term",
+                        "description": "Transcript name",
+                        "type": "string"
+                    },
+                    "term": {
+                        "title": "Term of Molecular Consequence",
+                        "description": "Term of molecular consequence",
+                        "type": "string"
+                    },
+                    "soId": {
+                        "title": "SO ID",
+                        "description": "SO id of molecular consequence",
+                        "type": "string"
+                    }
+                }
+            }
         }
     },
     "columns": {
-        "uuid": {
+        "variant_identifier": {
             "title": "Variant",
             "type": "string"
         },
-        "otherDescription": {
-            "title": "Other Description",
+        "source": {
+            "title": "Source",
+            "type": "string"
+        },
+        "variation_type": {
+            "title": "Variation Type",
+            "type": "string"
+        },
+        "molecular_consequence": {
+            "title": "Molecular Consequence",
             "type": "string"
         }
     }

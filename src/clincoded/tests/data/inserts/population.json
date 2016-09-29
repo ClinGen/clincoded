@@ -1,0 +1,72 @@
+[
+    {
+        "uuid": "f0a51b16-cc7b-406f-9ae6-566d28e31b03",
+        "populationData": {
+            "ExAC": [
+                {
+                    "population": "African",
+                    "alleleCount": 0,
+                    "alleleNumber": 10144,
+                    "numberOfHomozygotes": 0,
+                    "alleleFrequency": 0
+                },
+                {
+                    "population": "East Asian",
+                    "alleleCount": 0,
+                    "alleleNumber": 8000,
+                    "numberOfHomozygotes": 0,
+                    "alleleFrequency": 0
+                },
+                {
+                    "population": "European (Finnish)",
+                    "alleleCount": 2,
+                    "alleleNumber": 6524,
+                    "numberOfHomozygotes": 0,
+                    "alleleFrequency": 0.0003066
+                },
+                {
+                    "population": "European (Non-Finnish)",
+                    "alleleCount": 20,
+                    "alleleNumber": 64630,
+                    "numberOfHomozygotes": 0,
+                    "alleleFrequency": 0.0003095
+                },
+                {
+                    "population": "Latino",
+                    "alleleCount": 0,
+                    "alleleNumber": 11104,
+                    "numberOfHomozygotes": 0,
+                    "alleleFrequency": 0
+                },
+                {
+                    "population": "South Asian",
+                    "alleleCount": 0,
+                    "alleleNumber": 16290,
+                    "numberOfHomozygotes": 0,
+                    "alleleFrequency": 0
+                },
+                {
+                    "population": "Other",
+                    "alleleCount": 1,
+                    "alleleNumber": 866,
+                    "numberOfHomozygotes": 0,
+                    "alleleFrequency": 0.001129
+                },
+                {
+                    "population": "Total",
+                    "alleleCount": 23,
+                    "alleleNumber": 117576,
+                    "numberOfHomozygotes": 0,
+                    "alleleFrequency": 0.0001956
+                }
+            ],
+            "1000G": [
+                { "global MAF": 0 }
+            ]
+        },
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-05-11T22:47:10.000000+00:00",
+        "last_modified": "2016-05-11T22:59:10.000000+00:00"
+    }
+]

@@ -1,0 +1,11 @@
+[
+    {
+        "uuid": "a9886cb9-cea3-4372-8d2b-845563b47b1f",
+        "autoClassification": "Uncertain significance - conflicting evidence",
+        "alteredClassification": "Pathogenic",
+        "reason": "some reasons here",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-05-10T22:47:10.000000+00:00",
+        "last_modified": "2016-05-10T22:59:10.000000+00:00"
+    }
+]

@@ -1,0 +1,17 @@
+[
+    {
+        "uuid": "8f1b7cb9-e798-412d-adf4-cbe140998407",
+        "source": "Ensembl",
+        "sourceId": "ENST00000361739"
+    },
+    {
+        "uuid": "80b09246-29fd-4658-9799-158d9ecd00e2",
+        "source": "Ensembl",
+        "sourceId": "ENST00000387392"
+    },
+    {
+        "uuid": "6b921aa1-be9f-489b-82d2-043d97b0c2a0",
+        "source": "RefSeq",
+        "sourceId": "119395733"
+    }
+]

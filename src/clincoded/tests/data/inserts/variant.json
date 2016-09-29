@@ -1,16 +1,30 @@
 [
     {
         "uuid": "c71fc085-2683-11e5-b9fe-60f81dc5b05a",
-        "dbSNPId": "rs386833448",
+        "dbSNPIds": ["rs386833448"],
         "clinvarVariantId": "55966",
-        "clinVarRCV": "RCV000049375",
+        "clinVarRCVs": ["RCV000049375"],
         "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.1306C>T (p.Gln436Ter)",
-        "hgvsNames": [
-            "NM_000111.2:c.1306C>T",
-            "NG_008046.1:g.25432C>T",
-            "NC_000007.14:g.107782802G>A",
-            "NC_000007.13:g.107423247G>A",
-            "NP_000102.1:p.Gln436Ter"
+        "carId": "CA144043",
+        "hgvsNames": {
+            "GRCh38": "NC_000007.14:g.107782802G>A",
+            "GRCh37": "NC_000007.13:g.107423247G>A",
+            "others": [
+                "NG_008046.1:g.25432C>T",
+                "NM_000111.2:c.1306C>T",
+                "NP_000102.1:p.Gln436Ter",
+                "LRG_683p1:p.Gln436Ter",
+                "LRG_683t1:c.1306C>T",
+                "LRG_683:g.25432C>T"
+            ]
+        },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_000111.2:c.1028G>A",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
         ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
@@ -18,16 +32,30 @@
     },
     {
         "uuid": "3080772e-2685-11e5-ad92-60f81dc5b05a",
-        "dbSNPId": "rs386833446",
+        "dbSNPIds": ["rs386833446"],
         "clinvarVariantId": "55964",
-        "clinVarRCV": "RCV000049373",
+        "clinVarRCVs": ["RCV000049373"],
         "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.1136G>C (p.Gly379Ala)",
-        "hgvsNames": [
-            "NM_000111.2:c.1136G>C",
-            "NG_008046.1:g.25157G>C",
-            "NC_000007.14:g.107783077C>G",
-            "NC_000007.13:g.107423522C>G",
-            "NP_000102.1:p.Gly379Ala"
+        "carId": "CA144040",
+        "hgvsNames": {
+            "GRCh38": "NC_000007.14:g.107783077C>G",
+            "GRCh37": "NC_000007.13:g.107423522C>G",
+            "others": [
+                "NG_008046.1:g.25157G>C",
+                "NM_000111.2:c.1136G>C",
+                "NP_000102.1:p.Gly379Ala",
+                "LRG_683p1:p.Gly379Ala",
+                "LRG_683t1:c.1136G>C",
+                "LRG_683:g.25157G>C"
+            ]
+        },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_000111.2:c.1136G>C",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
         ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
@@ -35,16 +63,30 @@
     },
     {
         "uuid": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
-        "dbSNPId": "rs386833444",
+        "dbSNPIds": ["rs386833444"],
         "clinvarVariantId": "55962",
-        "clinVarRCV": "RCV000049371",
+        "clinVarRCVs": ["RCV000049371"],
         "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.1028G>A (p.Cys343Tyr)",
-        "hgvsNames": [
-            "NM_000111.2:c.1028G>A",
-            "NG_008046.1:g.24938G>A",
-            "NC_000007.14:g.107783296C>T",
-            "NC_000007.13:g.107423741C>T",
-            "NP_000102.1:p.Cys343Tyr"
+        "carId": "CA144035",
+        "hgvsNames": {
+            "GRCh38": "NC_000007.14:g.107783296C>T",
+            "GRCh37": "NC_000007.13:g.107423741C>T",
+            "others": [
+                "NG_008046.1:g.24938G>A",
+                "NM_000111.2:c.1028G>A",
+                "NP_000102.1:p.Cys343Tyr",
+                "LRG_683p1:p.Cys343Tyr",
+                "LRG_683t1:c.1028G>A",
+                "LRG_683:g.24938G>A"
+            ]
+        },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_000111.2:c.1028G>A",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
         ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
@@ -52,16 +94,27 @@
     },
     {
         "uuid": "3b3af7f0-2685-11e5-bc56-60f81dc5b05a",
-        "dbSNPId": "rs387907373",
+        "dbSNPIds": ["rs387907373"],
         "clinvarVariantId": "55874",
-        "clinVarRCV": "RCV000049288",
+        "clinVarRCVs": ["RCV000049288"],
         "clinvarVariantTitle": "NM_000475.4(NR0B1):c.1274G>T (p.Arg425Ile)",
-        "hgvsNames": [
-            "NM_000475.4:c.1274G>T",
-            "NG_009814.1:g.9661G>T",
-            "NC_000023.11:g.30304718C>A",
-            "NC_000023.10:g.30322835C>A",
-            "NP_000466.2:p.Arg425Ile"
+        "carId": "CA263240",
+        "hgvsNames": {
+            "GRCh38": "NC_000023.11:g.30304718C>A",
+            "GRCh37": "NC_000023.10:g.30322835C>A",
+            "others": [
+                "NM_000475.4:c.1274G>T",
+                "NG_009814.1:g.9661G>T",
+                "NP_000466.2:p.Arg425Ile"
+            ]
+        },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_000475.4:c.1274G>T",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
         ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
@@ -69,15 +122,29 @@
     },
     {
         "uuid": "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a",
-        "dbSNPId": "rs147674680",
+        "dbSNPIds": ["rs147674680"],
         "clinvarVariantId": "55847",
-        "clinVarRCV": "RCV000049262",
-        "hgvsNames": [
-            "NM_032682.5:c.1702C>T",
-            "NG_028243.1:g.618234C>T",
-            "NC_000003.12:g.70970756G>A",
-            "NC_000003.11:g.71019907G>A",
-            "NP_116071.2:p.Pro568Ser"
+        "clinVarRCVs": [
+            "RCV000049262",
+            "RCV000049263",
+            "RCV000175486"
+        ],
+        "hgvsNames": {
+            "GRCh37": "NC_000003.12:g.70970756G>A",
+            "GRCh38": "NC_000003.11:g.71019907G>A",
+            "others": [
+                "NM_032682.5:c.1702C>T",
+                "NG_028243.1:g.618234C>T",
+                "NP_116071.2:p.Pro568Ser"
+            ]
+        },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_032682.5:c.1702C>T",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
         ],
         "otherDescription": "",
         "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
@@ -85,18 +152,36 @@
     },
     {
         "uuid": "e496545c-2685-11e5-a4b3-60f81dc5b05a",
-        "dbSNPId": "rs76262710",
+        "dbSNPIds": ["rs76262710"],
         "clinvarVariantId": "38601",
-        "clinVarRCV": "RCV000032040",
+        "clinVarRCVs": [
+            "RCV000032040",
+            "RCV000182594"
+        ],
         "clinvarVariantTitle": "NM_020975.4(RET):c.1852T>A (p.Cys618Ser)",
-        "hgvsNames": [
-            "NM_020975.4:c.1852T>A",
-            "NM_020630.4:c.1852T>A",
-            "NG_007489.1:g.41580T>A",
-            "NC_000010.11:g.43113648T>A",
-            "NC_000010.10:g.43609096T>A",
-            "NP_066124.1:p.Cys618Ser",
-            "NP_065681.1:p.Cys618Ser"
+        "hgvsNames": {
+            "GRCh38": "NC_000010.11:g.43113648T>A",
+            "GRCh37": "NC_000010.10:g.43609096T>A",
+            "others": [
+                "NG_007489.1:g.41580T>A",
+                "NM_020630.4:c.1852T>A",
+                "NM_020975.4:c.1852T>A",
+                "NP_065681.1:p.Cys618Ser",
+                "NP_066124.1:p.Cys618Ser",
+                "LRG_518p1:p.Cys618Ser",
+                "LRG_518p2:p.Cys618Ser",
+                "LRG_518t1:c.1852T>A",
+                "LRG_518t2:c.1852T>A",
+                "LRG_518:g.41580T>A"
+            ]
+        },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_020975.4:c.1852T>A",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
         ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
@@ -104,24 +189,36 @@
     },
     {
         "uuid": "df8135d4-2685-11e5-af19-60f81dc5b05a",
-        "dbSNPId": "rs2298771",
+        "dbSNPIds": ["rs2298771"],
         "clinvarVariantId": "36753",
-        "clinVarRCV": "RCV000030432",
-        "clinvarVariantTitle": "NM_006920.4(SCN1A):c.3166G>A (p.Ala1056Thr)",
-        "hgvsNames": [
-            "LRG_8t1:c.3166G>A",
-            "NM_001165964.1:c.3115G>A",
-            "NM_006920.4:c.3166G>A",
-            "NM_001165963.1:c.3199G>A",
-            "LRG_8:g.42362G>A",
-            "NG_011906.1:g.42362G>A",
-            "NC_000002.12:g.166036278C>T",
-            "NC_000002.11:g.166892788C>T",
-            "p.A1067T:GCA>ACA",
-            "LRG_8p1:p.Ala1056Thr",
-            "NP_001159436.1:p.Ala1039Thr",
-            "NP_008851.3:p.Ala1056Thr",
-            "NP_001159435.1:p.Ala1067Thr"
+        "clinVarRCVs": [
+            "RCV000030432",
+            "RCV000079572"
+        ],
+        "clinvarVariantTitle": "NM_001165963.1(SCN1A):c.3199G>A (p.Ala1067Thr)",
+        "hgvsNames": {
+            "GRCh38": "NC_000002.12:g.166036278C>T",
+            "GRCh37": "NC_000002.11:g.166892788C>T",
+            "others": [
+                "NG_011906.1:g.42362G>A",
+                "NM_001165963.1:c.3199G>A",
+                "NM_001165964.1:c.3115G>A",
+                "NM_006920.4:c.3166G>A",
+                "NP_001159435.1:p.Ala1067Thr",
+                "NP_001159436.1:p.Ala1039Thr",
+                "NP_008851.3:p.Ala1056Thr",
+                "LRG_8p1:p.Ala1056Thr",
+                "LRG_8t1:c.3166G>A",
+                "LRG_8:g.42362G>A"
+            ]
+        },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_006920.4:c.3166G>A",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
         ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
@@ -129,16 +226,26 @@
     },
     {
         "uuid": "d9717187-2685-11e5-9eac-60f81dc5b05a",
-        "dbSNPId": "rs193922686",
+        "dbSNPIds": ["rs193922686"],
         "clinvarVariantId": "36485",
-        "clinVarRCV": "RCV000030157",
+        "clinVarRCVs": ["RCV000030157"],
         "clinvarVariantTitle": "NM_005912.2(MC4R):c.677T>C (p.Ile226Thr)",
-        "hgvsNames": [
-            "NM_005912.2:c.677T>C",
-            "NG_016441.1:g.6096T>C",
-            "NC_000018.10:g.60371673A>G",
-            "NC_000018.9:g.58038906A>G",
-            "NP_005903.2:p.Ile226Thr"
+        "hgvsNames": {
+            "GRCh38": "NC_000018.10:g.60371673A>G",
+            "GRCh37": "NC_000018.9:g.58038906A>G",
+            "others": [
+                "NM_005912.2:c.677T>C",
+                "NG_016441.1:g.6096T>C",
+                "NP_005903.2:p.Ile226Thr"
+            ]
+        },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_005912.2:c.677T>C",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
         ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
@@ -146,16 +253,26 @@
     },
     {
         "uuid": "d439f000-2685-11e5-9792-60f81dc5b05a",
-        "dbSNPId": "rs138281308",
+        "dbSNPIds": ["rs138281308"],
         "clinvarVariantId": "36484",
-        "clinVarRCV": "RCV000030156",
+        "clinVarRCVs": ["RCV000030156"],
         "clinvarVariantTitle": "NM_005912.2(MC4R):c.606C>A (p.Phe202Leu)",
-        "hgvsNames": [
-            "NM_005912.2:c.606C>A",
-            "NG_016441.1:g.6025C>A",
-            "NC_000018.10:g.60371744G>T",
-            "NC_000018.9:g.58038977G>T",
-            "NP_005903.2:p.Phe202Leu"
+        "hgvsNames": {
+            "GRCh38": "NC_000018.10:g.60371744G>T",
+            "GRCh37": "NC_000018.9:g.58038977G>T",
+            "others": [
+                "NM_005912.2:c.606C>A",
+                "NG_016441.1:g.6025C>A",
+                "NP_005903.2:p.Phe202Leu"
+            ]
+        },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_005912.2:c.606C>A",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            }
         ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
@@ -163,16 +280,29 @@
     },
     {
         "uuid": "95d62ca5-d344-4c0f-8509-488b2e043969",
-        "dbSNPId": "386833478",
+        "dbSNPIds": ["rs386833478"],
         "clinvarVariantId": "55996",
-        "clinVarRCV": "RCV000049405",
+        "clinVarRCVs": ["RCV000049405"],
         "clinvarVariantTitle": "NM_000111.2(SLC26A3):c.344delT (p.Ile115Thrfs)",
-        "hgvsNames": [
-            "NM_000111.2:c.344delT",
-            "NG_008046.1:g.16366delT",
-            "NC_000007.14:g.107791868delA",
-            "NC_000007.13:g.107432313delA",
-            "NP_000102.1:p.Ile115Thrfs"
+        "hgvsNames": {
+            "GRCh38": "NC_000007.14:g.107791868delA",
+            "GRCh37": "NC_000007.13:g.107432313delA",
+            "others": [
+                "NG_008046.1:g.16366delT",
+                "NM_000111.2:c.344delT",
+                "NP_000102.1:p.Ile115Thrfs",
+                "LRG_683p1:p.Ile115Thrfs",
+                "LRG_683t1:c.344delT",
+                "LRG_683:g.16366delT"
+            ]
+        },
+        "variationType": "Deletion",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_000111.2:c.344delT",
+                "term": "frameshift variant",
+                "soId": "SO:0001589"
+            }
         ],
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
@@ -181,10 +311,10 @@
     },
     {
         "uuid": "ad310ea9-e215-498c-a001-a6c216105e4c",
-        "dbSNPId": "",
-        "clinVarRCV": "",
+        "dbSNPIds": [],
+        "clinVarRCVs": [],
         "clinvarVariantTitle": "",
-        "hgvsNames": [],
+        "hgvsNames": {},
         "otherDescription": "hgvs",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-10-21T22:47:10.000000+00:00",
@@ -193,10 +323,19 @@
     {
         "uuid": "30f092b3-e87c-4d85-aa3f-10479644953c",
         "clinvarVariantId": "9492",
-        "dbSNPId": "",
-        "clinVarRCV": "RCV000010100",
+        "dbSNPIds": [],
+        "clinVarRCVs": ["RCV000010100"],
         "clinvarVariantTitle": "NM_005502.3(ABCA1):c.1584_1597delTGAGAGGAAGTTCTinsCGGGCGTGGTGGCAGGAGCTGTAATCCCAGCTACTTGGGAGGCTGAGGCACGAGAATCACTTGAACTCAGGAGGCAGAGGTTGCAGTGAGCTGAGGTCACGCCACTGTAC (p.Glu529_Gly867delinsGlyArgGlyGlyArgSerCysAsnProSerTyrLeuGlyGlyTer)",
-        "hgvsNames": [],
+        "hgvsNames": {
+            "GRCh38": "NC_000009.12:g.104831740_104831753delAGAACTTCCTCTCAinsGTACAGTGGCGTGACCTCAGCTCACTGCAACCTCTGCCTCCTGAGTTCAAGTGATTCTCGTGCCTCAGCCTCCCAAGTAGCTGGGATTACAGCTCCTGCCACCACGCCCG",
+            "GRCh37": "NC_000009.11:g.107594021_107594034delAGAACTTCCTCTCAinsGTACAGTGGCGTGACCTCAGCTCACTGCAACCTCTGCCTCCTGAGTTCAAGTGATTCTCGTGCCTCAGCCTCCCAAGTAGCTGGGATTACAGCTCCTGCCACCACGCCCG",
+            "others": [
+                "NG_007981.1:g.101403_101416delTGAGAGGAAGTTCTinsCGGGCGTGGTGGCAGGAGCTGTAATCCCAGCTACTTGGGAGGCTGAGGCACGAGAATCACTTGAACTCAGGAGGCAGAGGTTGCAGTGAGCTGAGGTCACGCCACTGTAC",
+                "NM_005502.3:c.1584_1597delTGAGAGGAAGTTCTinsCGGGCGTGGTGGCAGGAGCTGTAATCCCAGCTACTTGGGAGGCTGAGGCACGAGAATCACTTGAACTCAGGAGGCAGAGGTTGCAGTGAGCTGAGGTCACGCCACTGTAC",
+                "NP_005493.2:p.Glu529_Gly867delinsGlyArgGlyGlyArgSerCysAsnProSerTyrLeuGlyGlyTer"
+            ]
+        },
+        "variationType": "Indel",
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-10-21T22:47:10.000000+00:00",
@@ -205,10 +344,23 @@
     {
         "uuid": "e7c5ff6e-bc3a-4474-a07c-8538efe124e2",
         "clinvarVariantId": "90973",
-        "dbSNPId": "",
-        "clinVarRCV": "RCV000076475",
+        "dbSNPIds": [],
+        "clinVarRCVs": ["RCV000076475"],
         "clinvarVariantTitle": "NM_000251.2(MSH2):c.243_273del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG (p.Lys82_Glu425delinsTer)",
-        "hgvsNames": [],
+        "hgvsNames": {
+            "GRCh38": "NC_000002.12:g.47408432_47408462del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAA...(Total 257)",
+            "GRCh37": "NC_000002.11:g.47635571_47635601del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAA...(Total 257)",
+            "others": [
+                "LRG_218t1:c.243_273del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG",
+                "LRG_218:g.10309_10339del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG...(Total 250)",
+                "NM_000251.1:c.243_273delinsCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG",
+                "NM_000251.2:c.243_273del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG",
+                "NG_007110.2:g.10309_10339del31insCTGACAAGCGCCTATAGCACTCGAATAATTCTTCTCACCCTAACAGGTCAGCCTCGCTTCCCAGCCCTCACTAACATTAACGAAAACAACCCACCCACTAAACCCCATTAAACGCCTAACAATCGGAAGCCTATTTTGCAGGGTTTCTCCATCACCAACAGCATTCTCCCCACATCCACCCCCCAAATGACAATCCCACTTTACTTAAAACTCACAG...(Total 250)",
+                "NP_000242.1:p.Lys82_Glu425delinsTer",
+                "LRG_218p1:p.Lys82_Glu425delinsTer"
+            ]
+        },
+        "variationType": "Indel",
         "otherDescription": "",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2016-02-02T22:47:10.000000+00:00",

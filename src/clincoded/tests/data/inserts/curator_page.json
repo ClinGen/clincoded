@@ -82,5 +82,17 @@
         "title": "Add Curator",
         "status": "released",
         "uuid": "1d9c1f0c-4733-4cd0-a6f5-a5b40aa3ab48"
+    },
+    {
+        "name": "variant-central",
+        "title": "Variant Curation Hub",
+        "status": "released",
+        "uuid": "9a14d51e-a148-46a7-9e53-b6120e58b169"
+    },
+    {
+        "name": "select-variant",
+        "title": "Search and Select Variant",
+        "status": "released",
+        "uuid": "ccf2ad6f-8b50-471e-b071-b0b2607873ae"
     }
 ]

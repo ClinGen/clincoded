@@ -37,13 +37,16 @@
         margin: 5px 0 2px;
         font-size: 1.5rem;
         font-weight: bold;
+
+        span {
+            word-break: break-all;
+        }
     }
 
     h2 {
         margin: 2px 0 5px;
         font-size: 1.1rem;
         font-weight: 300;
-        font-style: italic;
     }
 
     a i {
@@ -65,6 +68,12 @@
     @media screen and (min-width: $screen-sm-min) {
         margin-bottom: -99999px;
         padding-bottom: 99999px;
+    }
+
+    h4 {
+        border-bottom: 1px solid #c9c9c9;
+        margin-top: 0;
+        padding-bottom: 10px;
     }
 }
 
@@ -280,7 +289,7 @@
     }
 }
 
-.panel-create-gene-disease {
+.panel-create-gene-disease, .panel-select-variant {
     .panel-std {
         padding-bottom: 40px;
     }
@@ -325,6 +334,15 @@
 
         a.block-link .block-link-no-color {
             color: #000;
+        }
+    }
+
+    a.help-doc {
+        margin-left: 8px;
+
+        .icon {
+            font-size: 16px;
+            vertical-align: text-top;
         }
     }
 }
@@ -467,6 +485,14 @@
     }
 }
 
+.title-ellipsis-shorter {
+    max-width: 80%;
+
+    @media screen and (min-width: $screen-sm-min) {
+        max-width: 77%;
+    }
+}
+
 .dotted {
     border-bottom: 1px dotted #000;
 }
@@ -496,6 +522,15 @@
     margin-bottom: 40px;
 }
 
+.input-note-below-no-bottom {
+    margin-top: -20px;
+}
+
+.input-note-top {
+    margin-top: 20px;
+    margin-bottom: -5px;
+}
+
 .orphanet-copy {
     margin-top: -15px;
 
@@ -517,6 +552,21 @@
     .no-resize {
         resize: none;
         overflow-x: hidden;
+    }
+}
+
+.variant-interpretation {
+    input[type=checkbox] {
+        margin-top: 11px;
+    }
+
+    .section-complete-bar {
+        margin: 0 -15px 0 -15px;
+        padding-top: 3px;
+        padding-bottom: 9px;
+        border-left: 0;
+        border-right: 0;
+        border-radius: 0;
     }
 }
 
@@ -580,7 +630,7 @@
     border-top: 2px solid #aaa;
 
     table {
-        width: 100%
+        width: 100%;
     }
 
     td {
@@ -645,8 +695,16 @@
     }
 }
 
-.delete-button-wrapper {
+.inline-button-wrapper {
     display: inline-block;
+}
+
+.inline-button-wrapper-fullwidth {
+    display: inline-block;
+    width: 100%;
+}
+
+.delete-button-push {
     margin-right: 20px;
 }
 
@@ -941,6 +999,39 @@
     }
 }
 
+.evaluation {
+    .form-group {
+        background-color: #fff;
+        margin: 0;
+    }
+    .form-group:after {
+        clear: none;
+    }
+    .pad-top {
+        padding: 20px 0 0 0;
+
+    }
+    .pad-bottom {
+        padding-bottom: 15px;
+    }
+    .center {
+        text-align: center;
+    }
+    .input-right input {
+        text-align: right;
+    }
+    .after-input {
+        padding: 7px 0 0 0;
+    }
+    .clear {
+        clear: both;
+    }
+    .divider {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ddd;
+    }
+}
+
 .panel-data {
     .variant-view-panel {
         dt {
@@ -951,6 +1042,1180 @@
         dd {
             word-break: break-all;
             word-wrap: break-word;
+        }
+    }
+}
+
+.curation-variant-tab-group {
+    margin-bottom: 20px;
+
+    .vci-tabs {
+        ul.vci-tabs-header[role=tablist] {
+            border: none;
+            margin: 0;
+            padding: 0;
+
+            li[role=tab] {
+                background-color: #1b75bc;
+                border-top: none;
+                border-left: none;
+                border-bottom: solid 1px #fff;
+                border-right: solid 1px #fff;
+                bottom: -1px;
+                color: #fff;
+                cursor: pointer;
+                display: inline-block;
+                list-style: none;
+                padding: 8px 2px;
+                position: relative;
+                text-align: center;
+            }
+
+            li[role=tab][aria-selected=true] {
+                background-color: #fff;
+                border: solid 1px #1b75bc;
+                border-bottom: solid 1px #fff;
+                color: #000;
+            }
+
+            li[role=tab][aria-selected=true] ~ li {
+                border-right: none;
+                border-left: solid 1px #fff;
+            }
+
+            li[role=tab][aria-disabled=true] {
+                color: GrayText;
+                cursor: default;
+            }
+
+            li[role=tab]:focus {
+                box-shadow: 0 0 5px hsl(208, 99%, 50%);
+                border-color: hsl(208, 99%, 50%);
+                outline: none;
+            }
+
+            li[role=tab]:focus:after {
+                background: #fff;
+                content: "";
+                position: absolute;
+                height: 5px;
+                left: -4px;
+                right: -4px;
+                bottom: -5px;
+            }
+        }
+
+        ul.vci-tabs-header[role=tablist].vci-subtabs {
+            li[role=tab] {
+                background-color: #fff;
+                color: #1b75bc;
+            }
+        }
+
+        .tab-panel {
+            border: solid 1px #1b75bc;
+            padding: 15px;
+            margin-bottom: 10px;
+            clear: both;
+
+            ul, li {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            dl {
+                margin-bottom: 0;
+
+                dd {
+                    margin-right: 20px;
+
+                    &.pull-right {
+                        margin-right: 0;
+                    }
+                }
+            }
+
+            .panel-content-wrapper .table {
+                margin-bottom: 0;
+            }
+
+            .basic-info .table th,
+            .basic-info .table td {
+                width: 25%;
+
+                .title-ellipsis {
+                    max-width: 250px;
+                }
+            }
+
+            .basic-info .datasource-clinvar-interpretaions {
+                .clinvar-interpretation-summary {
+                    border: solid 1px #ddd;
+                    margin: 15px 15px 12px 15px;
+                    -webkit-border-radius: 2px;
+                    -moz-border-radius: 2px;
+                    border-radius: 2px;
+
+                    .reviewStatus:first-letter {
+                        text-transform: capitalize;
+                    }
+                }
+            }
+
+            .basic-info .datasource-clinvar-interpretaions .table th,
+            .basic-info .datasource-clinvar-interpretaions .table td {
+                width: 16.67%;
+            }
+
+            .basic-info .datasource-clinvar-interpretaions {
+                margin-bottom: 20px;
+            }
+
+            .basic-info .datasource-clinvar-interpretaions .table th:last-child,
+            .basic-info .datasource-clinvar-interpretaions .table td:last-child {
+                width: 50%;
+            }
+
+            .basic-info .clinvar-interpretation .review-status:first-letter,
+            .basic-info .clinvar-interpretation .clinical-significance:first-letter {
+                text-transform: capitalize;
+            }
+
+            .basic-info .clinvar-interpretation .disease {
+                .condition {
+                    padding-bottom: 5px;
+                }
+
+                .identifiers {
+                    display: inline-block;
+
+                    ul {
+                        display: inline-block;
+                        list-style: none;
+                        margin: 0;
+                        padding: 0;
+                        vertical-align: bottom;
+                    }
+                }
+            }
+
+            .basic-info .clinvar-interpretation .disease .identifiers li {
+                float: left;
+            }
+
+            .basic-info .clinvar-interpretation .disease .identifiers li + li:before {
+                content: "-";
+                margin: 0 4px;
+            }
+
+            .basic-info .table .primary-transcript td:last-child:after {
+                content: "\f069";
+                font-family: 'FontAwesome';
+                color: #31708f;
+                float: right;
+                position: relative;
+                right: 0;
+            }
+
+            .population .table tfoot .count:first-child td {
+                border-top: 2px solid #333;
+                color: #333;
+            }
+
+            .population .datasource-ExAC .table tfoot td {
+                font-weight: bold;
+            }
+
+            .population .datasource-ExAC .table tbody td,
+            .population .datasource-ExAC .table tfoot td {
+                width: 20%;
+            }
+
+            .population .datasource-1000G .table tbody td,
+            .population .datasource-1000G .table tfoot td,
+            .population .datasource-ESP .table tbody td,
+            .population .datasource-ESP .table tfoot td {
+                width: 16.66%;
+            }
+
+            .computational .datasource-clingen .table th,
+            .computational .datasource-clingen .table td,
+            .computational .datasource-other .table th,
+            .computational .datasource-other .table td,
+            .computational .datasource-splice .table th,
+            .computational .datasource-splice .table td {
+                width: 25%;
+            }
+
+            .computational .datasource-conservation .table th,
+            .computational .datasource-conservation .table td,
+            .computational .datasource-additional .table th {
+                width: 50%;
+            }
+
+            .computational .datasource-clinvar dt {
+                margin-right: 15px;
+            }
+
+            .computational .page-header:first-child {
+                margin-top: 20px;
+            }
+
+            .computational .datasource-splice .table {
+                .row-span {
+                    border-left: 1px solid #ddd;
+                    border-right: 1px solid #ddd;
+                    font-weight: bold;
+                }
+
+                tfoot td {
+                    font-weight: bold;
+                }
+            }
+
+            .gene-specific .datasource-constraint-scores .table thead td,
+            .gene-specific .datasource-constraint-scores .table tbody td {
+                width: 25%;
+            }
+
+            .gene-specific .datasource-constraint-scores .table tfoot td {
+                font-size: 90%;
+            }
+        }
+    }
+}
+
+.wip {
+    background-color: #ccc;
+    border-radius: 4px;
+    color: white;
+    display: inline-block;
+    font-size: 10px;
+    font-weight: normal;
+    padding: 3px 8px;
+}
+
+/* variant curation interface - interpretation action bar */
+.curation-actions {
+    .evidence-only {
+        padding: 20px 0;
+    }
+
+    .interpretation-record {
+        padding: 20px 0;
+
+         h2 {
+            left: 0;
+            margin: 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        .btn-group {
+            left: 0;
+            padding: 0 15px;
+            position: absolute;
+            top: 20px;
+            width: 100%;
+        }
+    }
+
+    .modal-associate-disease {
+        .modal-box {
+            .alert-warning {
+                margin: 0 30px 20px 30px;
+            }
+        }
+    }
+}
+
+.curation-data-curator .current-user-interpretations {
+    margin-bottom: 10px;
+
+    dl.inline-dl dt {
+        float: none;
+    }
+}
+
+.curation-variant  {
+    .curation-data-disease,
+    .curation-data-gene,
+    .curation-data-curator {
+        padding: 10px;
+        background-color: rgb(215, 236, 215);
+
+        @media screen and (min-width: $screen-sm-min) {
+            margin-bottom: -99999px;
+            padding-bottom: 99999px;
+        }
+
+        h4 {
+            border-bottom: 1px solid #c9c9c9;
+            margin-top: 0;
+            padding-bottom: 5px;
+        }
+    }
+
+    .curation-data-disease,
+    .curation-data-gene {
+        dd {
+            float: none;
+        }
+    }
+
+    .curation-data-curator {
+        .btn-link {
+            border: none;
+            padding: 0;
+        }
+    }
+
+    .alert {
+        margin-top: 20px;
+        margin-bottom: 0;
+    }
+}
+
+/* bootstrap callout component styles */
+.bs-callout {
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+    background: #fff;
+
+    h4 {
+        margin-top: 0;
+        margin-bottom: 5px;
+    }
+}
+
+.bs-callout-info {
+    border-left-color: #1b809e;
+
+    h4 {
+        color: #1b809e;
+    }
+
+    .bs-callout-content-container {
+        float: left;
+        margin-right: 10%;
+    }
+
+    .bs-callout-content-container-fullwidth {
+        float: left;
+        margin-right: 10%;
+        width: 100%;
+    }
+}
+
+.bs-callout+.bs-callout {
+    margin-top: -5px;
+}
+
+.panel.panel-info {
+    .panel-title {
+        font-weight: bold;
+
+        a, .help-note {
+            font-size: 85%;
+            font-weight: normal;
+            line-height: 17.5px;
+            margin-left: 20px;
+        }
+
+        .help-note span {
+            font-style: italic;
+        }
+
+        a.label-primary {
+            color: #fff;
+            font-size: 55%;
+            font-weight: bold;
+            margin-left: 10px;
+            vertical-align: top;
+        }
+
+        a.credit-mygene {
+            background: url(/static/img/mygene-logo.png) 0 1px no-repeat;
+        }
+
+        a.credit-myvariant {
+            background: url(/static/img/myvariant-logo.png) 0 1px no-repeat;
+        }
+
+        a.credit-mygene,
+        a.credit-myvariant {
+            background-size: 18px 18px;
+            display: inline-block;
+            height: 18px;
+            width: 18px;
+            margin-left: 10px;
+            vertical-align: bottom;
+
+            span {
+                display: none;
+            }
+        }
+    }
+
+    .panel-subtitle {
+        a {
+            font-weight: normal;
+        }
+    }
+
+    .pull-right {
+        float: right;
+    }
+
+    .panel-body {
+        padding-bottom: 12px;
+
+        .pull-right a {
+            display: inline-block;
+
+            &:not(:last-child) {
+            margin-right: 20px;
+        }
+        }
+    }
+}
+
+/* variant curation interface - criteria bar */
+.criteria-group.btn-group-sm {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.criteria-group.btn-group-sm .btn {
+    background-color: #fff;
+    cursor: default;
+    padding: 5px 0.665em;
+    font-size: 12px;
+    font-weight: bold;
+
+    /*
+     * Suppress form element outline if criteria button is clicked.
+     * FIXME: Assessibility concern. Will address when implementing
+     * 'clicking on any given criteria button activates the
+     * corresponding tab' functionality.
+     */
+    &:focus {
+        outline: none;
+    }
+
+    /* Keep for future version
+    &.onCurrentTab span:after {
+        position: absolute;
+        margin-left: -38%;
+        content: "\f111";
+        font-family: 'FontAwesome';
+        font-size: 50%;
+        color: #ccc;
+        top: 32px;
+    }
+    */
+
+    &[data-status='not-met'] {
+        background-color: #ccc;
+    }
+}
+
+.criteria-group.btn-group-sm {
+    .benign-strong {
+        color: $benign-strong;
+
+        &:active {
+            color: $benign-strong;
+        }
+
+        &[data-status='met'] {
+            background-color: $benign-strong;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
+    }
+
+    .benign-supporting {
+        color: $benign-supporting;
+
+        &:active {
+            color: $benign-supporting;
+        }
+
+        &[data-status='met'] {
+            background-color: $benign-supporting;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
+    }
+
+    .pathogenic-supporting {
+        color: $pathogenic-supporting;
+
+        &:active {
+            color: $pathogenic-supporting;
+        }
+
+        &[data-status='met'] {
+            background-color: $pathogenic-supporting;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
+    }
+
+    .pathogenic-moderate {
+        color: $pathogenic-moderate;
+
+        &:active {
+            color: $pathogenic-moderate;
+        }
+
+        &[data-status='met'] {
+            background-color: $pathogenic-moderate;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
+    }
+
+    .pathogenic-strong {
+        color: $pathogenic-strong;
+
+        &:active {
+            color: $pathogenic-strong;
+        }
+
+        &[data-status='met'] {
+            background-color: $pathogenic-strong;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
+    }
+
+    .pathogenic-very-strong {
+        color: $pathogenic-very-strong;
+
+        &:active {
+            color: $pathogenic-very-strong;
+        }
+
+        &[data-status='met'] {
+            background-color: $pathogenic-very-strong;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
+    }
+
+    .stand-alone {
+        color: $stand-alone;
+
+        &:active {
+            color: $stand-alone;
+        }
+
+        &[data-status='met'] {
+            background-color: $stand-alone;
+            border-color: darken(#ccc, 15%);
+            color: #fff;
+        }
+    }
+}
+
+/**
+ * Criteria code colors
+ */
+.benign-strong {
+    color: $benign-strong;
+}
+
+.benign-supporting {
+    color: $benign-supporting;
+}
+
+.pathogenic-supporting {
+    color: $pathogenic-supporting;
+}
+
+.pathogenic-moderate {
+    color: $pathogenic-moderate;
+}
+
+.pathogenic-strong {
+    color: $pathogenic-strong;
+}
+
+.pathogenic-very-strong {
+    color: $pathogenic-very-strong;
+}
+
+.stand-alone {
+    color: $stand-alone;
+}
+
+/**
+ * Tooltip Styles for criteria bar
+ */
+
+/* Add this attribute to the element that needs a tooltip */
+[data-tooltip] {
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+}
+
+/* Hide the tooltip content by default */
+[data-tooltip]:before,
+[data-tooltip]:after {
+    visibility: hidden;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Position tooltip above the element */
+[data-tooltip]:before {
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    margin-bottom: 5px;
+    margin-left: -80px;
+    padding: 7px;
+    width: 160px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    background-color: #000;
+    background-color: hsla(0, 0%, 20%, 0.9);
+    color: #fff;
+    content: attr(data-tooltip);
+    text-align: center;
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 1.2;
+    white-space: normal;
+}
+
+/* Triangle hack to make tooltip look like a speech bubble */
+[data-tooltip]:after {
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    margin-left: -5px;
+    width: 0;
+    border-top: 5px solid #000;
+    border-top: 5px solid hsla(0, 0%, 20%, 0.9);
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+    content: " ";
+    font-size: 0;
+    line-height: 0;
+}
+
+/* Show tooltip content on hover */
+[data-tooltip]:hover:before,
+[data-tooltip]:hover:after {
+    visibility: visible;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+    filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+    opacity: 1;
+}
+
+/* Vertical padding for div */
+.btn-vertical-space {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.feature-in-development {
+    border: none;
+    border-left: 5px solid #fed84d;
+    border-radius: 2px;
+}
+
+.feature-in-development:hover {
+    border: none;
+    border-left: 5px solid #fed84d;
+    border-radius: 2px;
+}
+
+dl.inline-dl {
+    dd.fullWidth {
+        width: 100%;
+    }
+
+    dt.dtFormLabel {
+        line-height: 4.5;
+    }
+
+    dd.ddFormInput {
+        margin-top: 15px;
+    }
+}
+
+.panel-wide-content {
+    padding: 20px 30px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Credits at the bottom of tabs */
+.credits {
+    font-size: 12px;
+    margin: 20px 0 0 0;
+
+    .label-primary {
+        vertical-align: text-top;
+    }
+
+    span.credit-mygene {
+        background: url(/static/img/mygene-logo.png) 0 0 no-repeat;
+    }
+
+    span.credit-myvariant {
+        background: url(/static/img/myvariant-logo.png) 0 0 no-repeat;
+    }
+
+    span.credit-mygene,
+    span.credit-myvariant {
+        background-size: 18px 18px;
+        display: inline-block;
+        height: 18px;
+        width: 18px;
+        vertical-align: bottom;
+
+        span {
+            display: none;
+        }
+    }
+}
+
+.progress-bar-area {
+    border-radius: 4px;
+    margin-bottom: 10px;
+    padding: 10px 0;
+    border: solid 1px #dddddd;
+    background-color: #f5f5f5;
+
+    div {
+        margin: 0;
+        padding: 0;
+
+        dl {
+            margin: 0;
+            padding-left: 30px;
+            position:  relative;
+
+            &:before  {
+                content: "\f058";
+                font-family: 'FontAwesome';
+                font-size: 18pt;
+                position: absolute;
+                left: 0;
+                padding: 0px;
+            }
+
+            &.benign-result:before {
+                color: $stand-alone;
+            }
+
+            &.path-result:before {
+                color: $pathogenic-very-strong;
+            }
+
+            &.calculate-result:before {
+                content: "\f1ec";
+                font-family: 'FontAwesome';
+                font-size: 15pt;
+                color: #666;
+                top: 8px;
+            }
+
+            dd {
+                font-size: 12px;
+                line-height: 22px;
+            }
+
+            .criteria-strength {
+                border: none;
+                margin-left: 0;
+                padding-left: 0;
+                background-color: #f5f5f5;
+                color: #000;
+                cursor: text;
+            }
+
+            .badge {
+                background-color: #b7b7b7;
+                display: inline-block;
+                min-width: 10px;
+                padding: 3px 7px;
+                font-size: 12px;
+                font-weight: 700;
+                line-height: 1;
+                color: #fff;
+                text-align: center;
+                white-space: nowrap;
+                vertical-align: middle;
+                border-radius: 10px;
+            }
+        }
+    }
+
+    .benign-box {
+        padding-left: 1em;
+    }
+
+    .assertion-box {
+        padding-left: 0;
+        line-height: 20px;
+    }
+
+    @media not screen and (min-width: $screen-lg-min) {
+        .benign-box {
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .path-box {
+            padding-left: 1em;
+        }
+
+        .assertion-box {
+            padding-left: 4em;
+        }
+    }
+
+    @media not screen and (min-width: $screen-md-min) {
+        .benign-box {
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .path-box {
+            padding-left: 1em;
+        }
+
+        .assertion-box {
+            padding-left: 2em;
+        }
+    }
+
+    @media not screen and (min-width: $screen-sm-min) {
+        padding-left: 20px;
+
+        .assertion-box {
+            padding-left: 20px;
+        }
+
+        .path-box {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+    }
+}
+
+.criteria-description {
+    text-overflow: clip;
+}
+
+/* View Summary button */
+.view-summary {
+    &:focus,
+    &:active {
+        border: 1px solid #1b75bc;
+        background-color: #1b75bc;
+        outline: none;
+    }
+}
+
+/* Evaluation summary table UIs */
+.evaluation-summary {
+    h2 {
+        text-align: center;
+    }
+
+    .table tbody td {
+        vertical-align: inherit;
+
+        &.criteria-code,
+        &.criteria-modified,
+        &.evaluation-status {
+            line-height: 0;
+        }
+    }
+
+    .criteria-class {
+        font-size: 20px;
+
+        .benign {
+            color: $stand-alone;
+        }
+
+        .pathogenic {
+            color: $pathogenic-very-strong;
+        }
+    }
+
+    .criteria-code {
+        font-weight: bold;
+
+        &.benign-strong {
+            color: #62387e;
+        }
+
+        &.benign-supporting {
+            color: #2b67a0;
+        }
+
+        &.pathogenic-supporting  {
+            color: #728b42;
+        }
+
+        &.pathogenic-moderate {
+            color: #d36735;
+        }
+
+        &.pathogenic-strong {
+            color: #d33535;
+        }
+
+        &.pathogenic-very-strong {
+            color: #d33535;
+        }
+    }
+
+    .evaluation-status {
+        &:first-letter {
+            text-transform: capitalize;
+        }
+    }
+
+    .criteria-modified {
+        position: relative;
+
+        &:after {
+            font-family: 'FontAwesome';
+            float: left;
+            position: absolute;
+            left: 35px;
+            font-size: 135%;
+        }
+    }
+
+    [data-modlevel='1-up']:after {
+        content: "\f176";
+    }
+
+    [data-modlevel='2-up']:after {
+        content: "\f176 \f176";
+    }
+
+    [data-modlevel='3-up']:after {
+        content: "\f176 \f176 \f176";
+    }
+
+    [data-modlevel='1-down']:after {
+        content: "\f175";
+    }
+
+    [data-modlevel='2-down']:after {
+        content: "\f175 \f175";
+    }
+
+    [data-modlevel='3-down']:after {
+        content: "\f175 \f175 \f175";
+    }
+
+    [data-evaltype='benign'] {
+        .criteria-modified:after {
+            color: $stand-alone;
+        }
+    }
+
+    [data-evaltype='pathogenic'] {
+        .criteria-modified:after {
+            color: $pathogenic-very-strong;
+        }
+    }
+
+    .datasource-evaluation-summary-provision {
+        dl {
+            margin-bottom: 5px;
+
+            .provisional-interpretation-status:first-letter {
+                text-transform: capitalize;
+            }
+
+            .modeInheritance {
+                font-style: italic;
+            }
+        }
+    }
+
+    .provisional-static-content-wrapper {
+        margin-bottom: 10px;
+        padding: 0;
+    }
+
+    .provisional-form-content-wrapper {
+        border: solid 1px #dfdfdf;
+        padding: 15px 0;
+        -webkit-border-radius: 2px;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
+    }
+
+    .evaluation-provision {
+        margin-bottom: 5px;
+        margin-right: 0;
+
+        label {
+            padding-left: 0;
+        }
+
+        .col-sm-6 {
+            padding-left: 0;
+        }
+
+        &.provisional-pathogenicity {
+            .form-group {
+                margin-bottom: 0;
+            }
+
+            label {
+                padding-top: 0;
+            }
+
+            label i {
+                display: block;
+                font-weight: normal;
+            }
+
+            textarea:required {
+                background-color: #fde8e8;
+                border-color: #ffb2b2;
+            }
+        }
+
+        &.provisional-interpretation {
+            margin-top: 0;
+
+            .col-sm-7 {
+                margin-left: -15px;
+            }
+
+            .icon-question-circle {
+                cursor: pointer;
+                color: #2697d1;
+                font-size: 120%;
+                margin-right: 8px;
+                position: relative;
+
+                &:after {
+                    content: "Editing interpretation is permitted after selecting this option";
+                    background-color: #000;
+                    background-color: hsla(0, 0%, 20%, 0.9);
+                    color: #fff;
+                    text-align: center;
+                    border-radius: 3px;
+                    padding: 5px 0;
+                    position: absolute;
+                    visibility: hidden;
+                    width: 370px;
+                    font-size: 12px;
+                    font-family: "Helvetica";
+                    font-weight: bold;
+                    z-index: 1;
+                    top: 25px;
+                    left: 0;
+                }
+
+                &:hover:after {
+                    visibility: visible;
+                }
+            }
+
+            .form-group {
+                display: inline-block;
+                margin: 0 0 0 10px;
+
+                .col-sm-7 {
+                    margin-left: 0;
+                }
+
+                .form-error {
+                    display: none;
+                }
+            }
+
+            input[type="checkbox"] {
+                margin-top: 0;
+                position: relative;
+                top: 3px;
+                left: 0px;
+                visibility: hidden;
+
+                &:after,
+                &:checked:after {
+                    font-family: FontAwesome;
+                    font-size: 120%;
+                    display: inline-block;
+                    visibility: visible;
+                }
+
+                &:after {
+                    content: "\f096";
+                }
+
+                &:checked:after {
+                    content: "\f14a";
+                }
+
+                &[disabled] {
+                    color: #bbb;
+                }
+            }
+        }
+    }
+}
+
+table.login-users-interpretations {
+    td {
+        span.no-broken-item {
+            display: inline-block;
+        }
+    }
+
+    td.icon-box {
+        vertical-align: text-top;
+
+        a.continue-interpretation {
+            padding-left: 5px;
+
+            i.large-icon {
+                font-size: 1.75em;
+            }
+        }
+    }
+}
+
+.other-users-interpretations {
+    padding-left: 0;
+    padding-top: 5px;
+
+    dl {
+        dd {
+            width: 100%;
+
+            span.no-broken-item {
+                display: inline-block;
+            }
         }
     }
 }
