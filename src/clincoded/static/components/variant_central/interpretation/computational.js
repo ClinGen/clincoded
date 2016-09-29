@@ -36,7 +36,7 @@ var validTabs = ['missense', 'lof', 'silent-intron', 'indel'];
 var computationStatic = {
     conservation: {
         _order: ['phylop7way', 'phylop20way', 'phastconsp7way', 'phastconsp20way', 'gerp', 'siphy'],
-        _labels: {'phylop7way': 'phyloP7way', 'phylop20way': 'phyloP20way', 'phastconsp7way': 'phastCons7way', 'phastconsp20way': 'phastCons20way', 'gerp': 'GERP++', 'siphy': 'SiPhy'}
+        _labels: {'phylop7way': 'phyloP100way', 'phylop20way': 'phyloP20way', 'phastconsp7way': 'phastCons100way', 'phastconsp20way': 'phastCons20way', 'gerp': 'GERP++', 'siphy': 'SiPhy'}
     },
     other_predictors: {
         _order: ['sift', 'polyphen2_hdiv', 'polyphen2_hvar', 'lrt', 'mutationtaster', 'mutationassessor', 'fathmm', 'provean', 'metasvm', 'metalr', 'cadd', 'fathmm_mkl', 'fitcons'],
@@ -200,8 +200,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         if (response.results[0]) {
             if (response.results[0].predictions) {
                 let predictions = response.results[0].predictions;
-                computationObj.clingen.revel.score = (predictions.revel) ? parseFloat(predictions.revel.score) : null;
-                computationObj.clingen.cftr.score = (predictions.CFTR) ? parseFloat(predictions.CFTR.score): null;
+                computationObj.clingen.revel.score = (predictions.revel) ? this.numToString(predictions.revel.score) : null;
+                computationObj.clingen.cftr.score = (predictions.CFTR) ? this.numToString(predictions.CFTR.score): null;
                 computationObj.clingen.cftr.visible = (predictions.CFTR) ? true : false;
             }
             // update computationObj, and set flag indicating that we have clingen predictors data
@@ -244,7 +244,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         }
         if (response.cadd) {
             let cadd = response.cadd;
-            computationObj.other_predictors.cadd.score = parseFloat(cadd.rawscore);
+            computationObj.other_predictors.cadd.score = this.numToString(cadd.rawscore);
             // update computationObj, and set flag indicating that we have other predictors data
             this.setState({hasOtherPredData: true, computationObj: computationObj});
         }
@@ -290,15 +290,25 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             let computationObj = this.state.computationObj;
             let dbnsfp = response.dbnsfp;
             // get scores from dbnsfp
-            computationObj.conservation.phylop7way = (dbnsfp.phylo.p7way) ? parseFloat(dbnsfp.phylo.p7way.vertebrate) : parseFloat(dbnsfp.phylo.p100way.vertebrate);
-            computationObj.conservation.phylop20way = parseFloat(dbnsfp.phylo.p20way.mammalian);
-            computationObj.conservation.phastconsp7way = (dbnsfp.phastcons['7way']) ? parseFloat(dbnsfp.phastcons['7way'].vertebrate) : parseFloat(dbnsfp.phastcons['100way'].vertebrate);
-            computationObj.conservation.phastconsp20way = parseFloat(dbnsfp.phastcons['20way'].mammalian);
-            computationObj.conservation.gerp = parseFloat(dbnsfp['gerp++'].rs);
-            computationObj.conservation.siphy = parseFloat(dbnsfp.siphy_29way.logodds);
+            computationObj.conservation.phylop7way = (dbnsfp.phylo.p7way) ? this.numToString(dbnsfp.phylo.p7way.vertebrate) : this.numToString(dbnsfp.phylo.p100way.vertebrate);
+            computationObj.conservation.phylop20way = this.numToString(dbnsfp.phylo.p20way.mammalian);
+            computationObj.conservation.phastconsp7way = (dbnsfp.phastcons['7way']) ? this.numToString(dbnsfp.phastcons['7way'].vertebrate) : this.numToString(dbnsfp.phastcons['100way'].vertebrate);
+            computationObj.conservation.phastconsp20way = this.numToString(dbnsfp.phastcons['20way'].mammalian);
+            computationObj.conservation.gerp = this.numToString(dbnsfp['gerp++'].rs);
+            computationObj.conservation.siphy = this.numToString(dbnsfp.siphy_29way.logodds);
             // update computationObj, and set flag indicating that we have conservation analysis data
             this.setState({hasConservationData: true, computationObj: computationObj});
         }
+    },
+
+    // Method to handle conservation scores
+    numToString: function(num) {
+        let result;
+        if (num !== '' && num !== null) {
+            let score = parseFloat(num);
+            result = (!isNaN(score)) ? score.toString() : null;
+        }
+        return result;
     },
 
     // method to render a row of data for the clingen predictors table
