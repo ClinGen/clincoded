@@ -596,13 +596,12 @@ function clinvarSubmitResource() {
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
                     // Compare all variant data properties
                     // save ClinVar data if any of them is different
-                    if ((!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle']) ||
-                        (!_.isEqual(result['clinVarRCVs'], this.state.tempResource['clinVarRCVs'])) ||
-                        (!_.isEqual(result['dbSNPId'], this.state.tempResource['dbSNPId'])) ||
-                        (!_.isEqual(result['hgvsNames'], this.state.tempResource['hgvsNames'])) ||
-                        (!result['variationType'] || result['variationType'] !== this.state.tempResource['variationType']) ||
-                        (!result['molecularConsequenceList'] || !_.isEqual(result['molecularConsequenceList'], this.state.tempResource['molecularConsequenceList']))) {
-                        //difference = true;
+                    if ((!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'])
+                        || (this.state.tempResource['dbSNPIds'] && this.state.tempResource['dbSNPIds'].length && (!result['dbSNPIds'] || (result['dbSNPIds'] && !result['dbSNPIds'].length)))
+                        || (this.state.tempResource['hgvsNames'] && Object.keys(this.state.tempResource['hgvsNames']).length && (!result['hgvsNames'] || (result['hgvsNames'] && !Object.keys(result['hgvsNames']).length)))
+                        || (this.state.tempResource['variationType'] && !result['variationType'])
+                        || (this.state.tempResource['molecularConsequenceList'] && Object.keys(this.state.tempResource['molecularConsequenceList']).length && (!result['molecularConsequenceList'] || !Object.keys(!result['molecularConsequenceList'].length)))
+                        ) {
                         this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
                             return this.getRestData(result['@graph'][0]['@id']).then(result => {
                                 this.props.updateParentForm(result, this.props.fieldNum);
