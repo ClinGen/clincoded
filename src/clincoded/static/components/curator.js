@@ -1444,6 +1444,10 @@ var flatten = module.exports.flatten = function(obj, type) {
                 flat = flattenProvisional(obj);
                 break;
 
+            case 'provisional_variant':
+                flat = flattenProvisionalVariant(obj);
+                break;
+
             case 'interpretation':
                 flat = flattenInterpretation(obj);
                 break;
@@ -1790,7 +1794,19 @@ function flattenProvisional(provisional) {
     return flat;
 }
 
-var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections"];
+
+var provisionalVariantSimpleProps = [
+    "autoClassification", "alteredClassification", "reasons"
+];
+
+function flattenProvisionalVariant(provisional_variant) {
+    var flat = cloneSimpleProps(provisional_variant, provisionalVariantSimpleProps);
+
+    return flat;
+}
+
+
+var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties

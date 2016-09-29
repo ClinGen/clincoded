@@ -402,14 +402,14 @@ function pubmedQueryResource() {
     // for pinging and parsing data from PubMed
     this.saveFormValue('resourceId', this.state.inputValue);
     if (pubmedValidateForm.call(this)) {
-        var url = this.props.protocol + external_url_map['PubMedSearch'];
+        var url = external_url_map['PubMedSearch'];
         var data;
         var id = this.state.inputValue;
         this.getRestData('/articles/' + id).then(article => {
             // article already exists in db
             this.setState({queryResourceBusy: false, tempResource: article, resourceFetched: true});
         }, () => {
-            var url = this.props.protocol + external_url_map['PubMedSearch'];
+            var url = external_url_map['PubMedSearch'];
             // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
             this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
                 var data = parsePubmed(xml);
@@ -540,7 +540,7 @@ function clinvarQueryResource() {
     // for pinging and parsing data from ClinVar
     this.saveFormValue('resourceId', this.state.inputValue);
     if (clinvarValidateForm.call(this)) {
-        var url = this.props.protocol + external_url_map['ClinVarEutils'];
+        var url = external_url_map['ClinVarEutils'];
         var data;
         var id = this.state.inputValue;
         this.getRestDataXml(url + id).then(xml => {
@@ -682,7 +682,7 @@ function carQueryResource() {
             data = parseCAR(json);
             if (data.clinvarVariantId) {
                 // if the CAR result has a ClinVar variant ID, query ClinVar with it, and use its data
-                url = this.props.protocol + external_url_map['ClinVarEutils'];
+                url = external_url_map['ClinVarEutils'];
                 this.getRestDataXml(url + data.clinvarVariantId).then(xml => {
                     var data_cv = parseClinvar(xml);
                     if (data_cv.clinvarVariantId) {
