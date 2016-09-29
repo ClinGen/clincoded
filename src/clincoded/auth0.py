@@ -41,7 +41,41 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
     def unauthenticated_userid(self, request):
         if request.method != self.method or request.path != self.login_path:
             return None
-        return request.json['email']
+
+        cached = getattr(request, '_auth0_authenticated', _marker)
+        if cached is not _marker:
+            return cached
+
+        try:
+            access_token = request.json['accessToken']
+        except (ValueError, TypeError, KeyError):
+            if self.debug:
+                self._log(
+                    'Missing assertion.',
+                    'unauthenticated_userid',
+                    request)
+            request._auth0_authenticated = None
+            return None
+
+        try:
+            user_url = "https://{domain}/userinfo?access_token={access_token}" \
+                .format(domain='mrmin.auth0.com', access_token=access_token)
+
+            user_info = requests.get(user_url).json()
+        except Exception as e:
+            if self.debug:
+                self._log(
+                    ('Invalid assertion: %s (%s)', (e, type(e).__name__)),
+                    'unauthenticated_userid',
+                    request)
+            request._auth0_authenticated = None
+            return None
+
+        if user_info['email_verified'] is True:
+            email = request._auth0_authenticated = user_info['email'].lower()
+            return email
+        else:
+            return None
 
     def remember(self, request, principal, **kw):
         return []
@@ -62,10 +96,15 @@ def login(request):
         namespace = userid = None
     else:
         namespace, userid = login.split('.', 1)
+
     if namespace != 'auth0':
+        request.session.invalidate()
         request.session['user_properties'] = {}
         request.response.headerlist.extend(forget(request))
         raise LoginDenied()
+
+    request.session.invalidate()
+    request.session.get_csrf_token()
     request.session['user_properties'] = request.embed('/current-user', as_user=userid)
     request.response.headerlist.extend(remember(request, 'mailto.' + userid))
     return request.session
@@ -75,6 +114,7 @@ def login(request):
              permission=NO_PERMISSION_REQUIRED, http_cache=0)
 def logout(request):
     """View to forget the user"""
+    request.session.invalidate()
     request.session.get_csrf_token()
     request.session['user_properties'] = {}
     request.response.headerlist.extend(forget(request))

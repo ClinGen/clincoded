@@ -97,6 +97,17 @@ module.exports.Auth0 = {
     },
 
     componentDidMount: function() {
+        // Login / logout actions must be deferred until Auth0 is ready.
+        this.extractSessionCookie();
+        this.setState({loadingComplete: true});
+        this.lock = new window.Auth0Lock('L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo', 'mrmin.auth0.com', {
+            auth: {
+                redirect: false
+            }
+        });
+        this.lock.on("authenticated", this.handleAuth0Login);
+
+        /*
         // Check for Auth0 (defined by external js file from auth0)
         if (window.Auth0 !== undefined) {
             var auth0 = new window.Auth0({
@@ -123,6 +134,7 @@ module.exports.Auth0 = {
             };
             this.setState({context: auth0_not_found, loadingComplete: true});
         }
+        */
     },
 
     ajaxPrefilter: function (options, original, xhr) {
@@ -140,6 +152,12 @@ module.exports.Auth0 = {
     },
 
     triggerLogin: function(e, retrying) {
+        var $script = require('scriptjs');
+        if (this.state.session && !this.state.session._csrft_) {
+            this.fetch('/session');
+        }
+        this.lock.show();
+        /*
         if (window.auth0) {
             window.auth0.login({
                 connection: 'google-oauth2',
@@ -198,6 +216,7 @@ module.exports.Auth0 = {
                 });
             });
         }
+        */
     },
 
     triggerLoginFail: function() {
@@ -207,12 +226,48 @@ module.exports.Auth0 = {
         this.setState({context: login_failure, loadingComplete: true});
     },
 
-    componentDidUpdate: function(prevProps, prevState) {
-        // Check session on updates
-        if (prevState.session['auth.userid'] && !this.state.session['auth.userid']) {
-            // Session expired
-            window.auth0.logout();
-        }
+    handleAuth0Login: function (authResult, retrying) {
+        var accessToken = authResult.accessToken;
+        if (!accessToken) return;
+        this.sessionPropertiesRequest = true;
+        this.fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({accessToken: accessToken})
+        })
+        .then(response => {
+            this.lock.hide();
+            if (!response.ok) throw response;
+            return response.json();
+        })
+        .then(session => {
+            this.setState({session: session});
+            // Login was successful, so forward user to dashboard or target URI as necessary
+            var next_url = window.location.href;
+            if (!(window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/')) {
+                this.navigate(next_url, {replace: true}).then(() => {
+                    this.setState({loadingComplete: true});
+                });
+            } else {
+                this.setState({loadingComplete: true});
+            }
+        }, err => {
+            this.sessionPropertiesRequest = null;
+            parseError(err).then(data => {
+                // Server session creds might have changed.
+                if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
+                    if (!retrying) {
+                        window.setTimeout(this.handleAuth0Login);
+                        return;
+                    }
+                }
+                // If there is an error, show the error messages
+                this.setState({context: data});
+            });
+        });
     },
 
     triggerLogout: function() {
@@ -229,7 +284,6 @@ module.exports.Auth0 = {
             if (!response.ok) throw response;
             return response.json();
         })
-        .then(window.auth0.logout())
         .then(data => {
             this.DISABLE_POPSTATE = true;
             var old_path = window.location.pathname + window.location.search;
