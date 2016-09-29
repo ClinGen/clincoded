@@ -17,7 +17,8 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
         session: React.PropTypes.object,
         setSummaryVisibility: React.PropTypes.func,
         summaryVisible: React.PropTypes.bool,
-        getSelectedTab: React.PropTypes.func
+        getSelectedTab: React.PropTypes.func,
+        calculatedPathogenicity: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -44,20 +45,22 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = React.createC
         var interpretation = this.state.interpretation;
         var session = this.props.session;
 
+        let calculatedPathogenicity = this.props.calculatedPathogenicity;
+
         return (
             <div>
                 <div className="curation-data-title">
                     <div className="container">
                         <Title data={variant} interpretation={interpretation} interpretationUuid={interpretationUuid}
                             setSummaryVisibility={this.props.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
-                            getSelectedTab={this.props.getSelectedTab} />
+                            getSelectedTab={this.props.getSelectedTab} selectedTab={this.props.selectedTab} />
                     </div>
                 </div>
                 <div className="container curation-data curation-variant">
                     <div className="row equal-height">
                         <CurationRecordVariant data={variant} />
                         <CurationRecordGeneDisease data={variant} />
-                        <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} interpretation={interpretation} session={session} />
+                        <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} interpretation={interpretation} session={session} calculatedPathogenicity={calculatedPathogenicity} />
                     </div>
                     {variant && !variant.hgvsNames.GRCh37 ?
                         <div className="alert alert-warning">
