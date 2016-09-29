@@ -97,44 +97,15 @@ module.exports.Auth0 = {
     },
 
     componentDidMount: function() {
-        // Login / logout actions must be deferred until Auth0 is ready.
         this.extractSessionCookie();
         this.setState({loadingComplete: true});
+        // CHANGEME
         this.lock = new window.Auth0Lock('L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo', 'mrmin.auth0.com', {
             auth: {
                 redirect: false
             }
         });
         this.lock.on("authenticated", this.handleAuth0Login);
-
-        /*
-        // Check for Auth0 (defined by external js file from auth0)
-        if (window.Auth0 !== undefined) {
-            var auth0 = new window.Auth0({
-                domain:       'mrmin.auth0.com',
-                clientID:     'L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo',
-                callbackURL:  'https://mrmin.auth0.com/login/callback',
-                responseType: 'token'
-            });
-            window.auth0 = auth0;
-            this.extractSessionCookie();
-            this.setState({loadingComplete: true});
-        } else {
-            // auth0 is not defined, so it either did not load, was blocked by the user, or jest testing is occuring.
-            // A custom error cannot be set, otherwise jest tests will fail due to the error page returning
-            // instead of the normal home page as jest expects. The following is a workaround to mimic the normal
-            // home page despite gapi not being found.
-            let auth0_not_found = {};
-            // gapi_not_found['@type'] = ['GAPINotFound', 'error'];
-            auth0_not_found = {
-                "@id": "/",
-                "@type": ["portal"],
-                "portal_title": "ClinGen",
-                "title": "Home"
-            };
-            this.setState({context: auth0_not_found, loadingComplete: true});
-        }
-        */
     },
 
     ajaxPrefilter: function (options, original, xhr) {
@@ -152,71 +123,12 @@ module.exports.Auth0 = {
     },
 
     triggerLogin: function(e, retrying) {
+        // pressing the Login button shows the Auth0 Lock modal
         var $script = require('scriptjs');
         if (this.state.session && !this.state.session._csrft_) {
             this.fetch('/session');
         }
         this.lock.show();
-        /*
-        if (window.auth0) {
-            window.auth0.login({
-                connection: 'google-oauth2',
-                popup: true,
-                popupOptions: {
-                    width: 450,
-                    height: 600
-                }
-            }, (err, profile, id_token, access_token, state) => {
-                if (err) {
-                    console.log("Login failure: " + err.message);
-                    return;
-                }
-                this.fetch('https://mrmin.auth0.com/userinfo/?access_token=' + profile.accessToken, {
-                    method: 'GET',
-                    headers: {'Accept': 'application/json'}
-                }).then(response => {
-                    if (!response.ok) throw response;
-                    return response.json();
-                }).then(response => {
-                    this.fetch('/login', {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({email: response.email})
-                    }).then(response => {
-                        if (!response.ok) throw response;
-                        return response.json();
-                    }).then(session => {
-                        // Login was successful, so forward user to dashboard or target URI as necessary
-                        var next_url = window.location.href;
-                        if (!(window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/')) {
-                            this.navigate(next_url, {replace: true}).then(() => {
-                                this.setState({loadingComplete: true});
-                            });
-                        } else {
-                            this.setState({loadingComplete: true});
-                        }
-                    }, err => {
-                        parseError(err).then(data => {
-                            if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
-                                // On first page-load, the CSRF token might not be properly set, incurring a Bad Request error.
-                                // This logic is to silently refresh the page so that the request is re-done with the new CSRF token.
-                                if (!retrying) {
-                                    window.setTimeout(this.triggerLogin);
-                                    return;
-                                }
-                            }
-                            // If there is an error, show the error messages, and sign the user out of that Google account automatically
-                            window.auth0.logout();
-                            this.setState({context: data, loadingComplete: true});
-                        });
-                    });
-                });
-            });
-        }
-        */
     },
 
     triggerLoginFail: function() {
@@ -227,6 +139,8 @@ module.exports.Auth0 = {
     },
 
     handleAuth0Login: function (authResult, retrying) {
+        // method that handles what happens after Auth0 Lock modal interaction.
+        // most of this logic was in triggerLogin previously
         var accessToken = authResult.accessToken;
         if (!accessToken) return;
         this.sessionPropertiesRequest = true;
@@ -297,7 +211,6 @@ module.exports.Auth0 = {
                 this.setState({context: data});
             });
         });
-
     },
 
     extractSessionCookie: function () {
@@ -310,7 +223,6 @@ module.exports.Auth0 = {
                 session: this.parseSessionCookie(session_cookie)
             });
         }
-
     },
 
     parseSessionCookie: function (session_cookie) {

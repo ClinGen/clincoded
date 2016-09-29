@@ -58,6 +58,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             return None
 
         try:
+            # CHANGEME
             user_url = "https://{domain}/userinfo?access_token={access_token}" \
                 .format(domain='mrmin.auth0.com', access_token=access_token)
 
