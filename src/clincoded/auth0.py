@@ -1,6 +1,5 @@
-from browserid.errors import TrustError
+import requests
 from pyramid.authentication import CallbackAuthenticationPolicy
-from pyramid.config import ConfigurationError
 from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPFound,
