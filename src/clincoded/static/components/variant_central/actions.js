@@ -33,31 +33,33 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     getInitialState: function() {
         return {
             variantUuid: null,
-            interpretation: null,
-            hasExistingInterpretation: false,
-            isInterpretationActive: false,
-            hasAssociatedDisease: false,
-            hasAssociatedInheritance: false
+            interpretation: this.props.interpretation,
+            isInterpretationActive: this.props.interpretation ? true : false,
+            hasAssociatedDisease: this.props.interpretation && this.props.interpretation.disease ? true : false,
+            hasAssociatedInheritance: this.props.interpretation && this.props.interpretation.modeInheritance ? true : false
         };
     },
 
-    componentWillReceiveProps: function(nextProps) {
-        if (nextProps.variantData) {
-            if (nextProps.variantData.associatedInterpretations) {
-                if (nextProps.variantData.associatedInterpretations.length) {
-                    var associatedInterpretations = nextProps.variantData.associatedInterpretations;
-                    associatedInterpretations.forEach(associatedInterpretation => {
-                        if (associatedInterpretation.submitted_by['@id'] === this.props.session.user_properties['@id']) {
-                            this.setState({hasExistingInterpretation: true});
-                        }
-                    });
+    componentDidMount: function() {
+        if (this.props.interpretation) {
+            if (this.props.editKey && this.props.editKey === 'true') {
+                this.setState({isInterpretationActive: true});
+                let interpretation = this.props.interpretation;
+                if (interpretation.disease) {
+                    this.setState({hasAssociatedDisease: true});
+                }
+                if (interpretation.modeInheritance) {
+                    this.setState({hasAssociatedInheritance: true});
                 }
             }
         }
+    },
+
+    componentWillReceiveProps: function(nextProps) {
         if (this.props.editKey === 'true' && nextProps.interpretation) {
-            this.setState({isInterpretationActive: true});
+            this.setState({isInterpretationActive: true, interpretation: nextProps.interpretation});
             // set disease and inheritance flags accordingly
-            if (nextProps.interpretation.interpretation_disease) {
+            if (nextProps.interpretation.disease) {
                 this.setState({hasAssociatedDisease: true});
             } else {
                 this.setState({hasAssociatedDisease: false});
@@ -70,48 +72,44 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         }
     },
 
-    // handler for 'Start new interpretation' & 'Continue interpretation' button click events
+    // handler for 'Start new interpretation'
+    // 'Continue Interpretation' button is removed
     handleInterpretationEvent: function(e) {
         e.preventDefault(); e.stopPropagation();
         var variantObj = this.props.variantData;
         var selectedTab = queryKeyValue('tab', window.location.href),
             selectedSubtab = queryKeyValue('subtab', window.location.href);
-        var newInterpretationObj;
-        if (!this.state.hasExistingInterpretation) {
-            if (variantObj) {
-                this.setState({variantUuid: variantObj.uuid});
-                // Put together a new interpretation object
-                newInterpretationObj = {variant: variantObj.uuid};
-            }
-            // Post new interpretation to the DB. Once promise returns, go to /curation-variant page with
-            // the new interpretation UUID in the query string.
-            this.postRestData('/interpretations/', newInterpretationObj).then(data => {
-                var newInterpretationUuid = data['@graph'][0].uuid;
-                var meta = {
-                    interpretation: {
-                        variant: variantObj['@id']
-                    }
-                };
-                this.recordHistory('add-hide', data['@graph'][0], meta).then(result => {
-                    window.location.href = '/variant-central/?edit=true&variant=' + this.state.variantUuid + '&interpretation=' + newInterpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
-                });
-            }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
-        } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
-            window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + variantObj.associatedInterpretations[0].uuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
-        }
+        var newInterpretationObj = {variant: variantObj.uuid};
+        this.postRestData('/interpretations/', newInterpretationObj).then(interpretation => {
+            var newInterpretationUuid = interpretation['@graph'][0].uuid;
+            var meta = {
+                interpretation: {
+                    variant: variantObj['@id']
+                }
+            };
+            this.recordHistory('add-hide', interpretation['@graph'][0], meta).then(result => {
+                window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + newInterpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
+            });
+        }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
     },
 
     render: function() {
-        let interpretationButtonTitle = '';
-        if (!this.state.hasExistingInterpretation) {
-            interpretationButtonTitle = 'Start New Interpretation';
-        } else if (this.state.hasExistingInterpretation && !this.state.isInterpretationActive) {
-            interpretationButtonTitle = 'Continue Interpretation';
+        let hasExistingInterpretation = this.props.interpretation ? true : false;
+        if (!hasExistingInterpretation) {
+            let variant = this.props.variantData
+            if (variant && variant.associatedInterpretations && variant.associatedInterpretations.length) {
+                for (let interpretation of variant.associatedInterpretations) {
+                    if (interpretation.submitted_by.uuid === this.props.session.user_properties.uuid) {
+                        hasExistingInterpretation = true;
+                        break;
+                    }
+                }
+            }
         }
 
         return (
             <div className="container curation-actions curation-variant">
-                {(this.state.isInterpretationActive) ?
+                {this.props.interpretation ?
                     <div className="interpretation-record clearfix">
                         <h2><span>Variant Interpretation Record</span></h2>
                         <div className="btn-group">
@@ -121,11 +119,17 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                                 interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
                     </div>
-                :
+                    :
                     <div className="interpretation-record clearfix">
                         <h2><span>Evidence View</span></h2>
                         <div className="btn-group">
-                            <Input type="button-button" inputClassName="btn btn-primary pull-right" title={interpretationButtonTitle} clickHandler={this.handleInterpretationEvent} />
+                            {!hasExistingInterpretation ?
+                                <button className="btn btn-primary pull-right" onClick={this.handleInterpretationEvent}>
+                                    Interpretation <i className="icon icon-plus-circle"></i>
+                                </button>
+                                :
+                                null
+                            }
                         </div>
                     </div>
                 }
@@ -213,7 +217,8 @@ var AssociateDisease = React.createClass({
 
     getInitialState: function() {
         return {
-            submitResourceBusy: false
+            submitResourceBusy: false,
+            shouldShowWarning: false
         };
     },
 
@@ -233,6 +238,20 @@ var AssociateDisease = React.createClass({
             }
         }
         return valid;
+    },
+
+    // Handle value changes in provisional form
+    handleChange: function() {
+        if (!this.refs['orphanetid'].getValue()) {
+            let interpretation = this.props.interpretation;
+            if (interpretation && interpretation.markAsProvisional) {
+                this.setState({shouldShowWarning: true});
+            } else if (interpretation && !interpretation.markAsProvisional) {
+                this.setState({shouldShowWarning: false});
+            }
+        } else {
+            this.setState({shouldShowWarning: false});
+        }
     },
 
     // When the form is submitted...
@@ -361,9 +380,17 @@ var AssociateDisease = React.createClass({
                 <div className="modal-box">
                     <div className="modal-body clearfix">
                         <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
-                            error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
+                            error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                     </div>
+                    {this.state.shouldShowWarning ?
+                        <div className="alert alert-warning">
+                            Warning: This interpretation is marked as "Provisional." If it has a Modified Pathogenicity of "Likely pathogenic" or "Pathogenic,"
+                            or no Modified Pathogenicity but a Calculated Pathogenicity of "Likely pathogenic" or "Pathogenic," it must be associated with a disease.<br/><br/>
+                            <strong>If you still wish to delete the disease, select "Cancel," then select "View Summary" and remove the "Provisional" selection </strong>
+                            - otherwise, deleting the disease will automatically remove the "Provisional" status.
+                        </div>
+                    : null}
                     <div className='modal-footer'>
                         <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
                         <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />

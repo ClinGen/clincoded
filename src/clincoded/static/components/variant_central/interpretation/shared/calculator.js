@@ -11,8 +11,32 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
 
     getInitialState: function() {
         return {
-            rules: 'ACMG 2015' // Currently use ACMG rules only
+            rules: 'ACMG 2015', // Currently use ACMG rules only
+            interpretation: this.props.interpretation,
+            calculatedResult: null
         };
+    },
+
+    componentDidMount: function() {
+        if (this.props.interpretation && this.props.interpretation.evaluations && this.props.interpretation.evaluations.length) {
+            let evaluations = this.state.interpretation.evaluations;
+            let result = this.calculatePathogenicity(evaluations);
+            this.props.setCalculatedPathogenicity(result.assertion);
+            this.setState({calculatedResult: result});
+        }
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        if (nextProps.interpretation && !_.isEqual(nextProps.interpretation, this.state.interpretation)) {
+            this.setState({interpretation: nextProps.interpretation}, () => {
+                if (this.state.interpretation && this.state.interpretation.evaluations && this.state.interpretation.evaluations.length) {
+                    let evaluations = this.state.interpretation.evaluations;
+                    let result = this.calculatePathogenicity(evaluations);
+                    this.props.setCalculatedPathogenicity(result.assertion);
+                    this.setState({calculatedResult: result});
+                }
+            });
+        }
     },
 
     calculatePathogenicity: function(evaluationObjList) {
@@ -135,7 +159,7 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
                 assertion: assertion,
                 path_summary: {},
                 benign_summary: {}
-            }
+            };
 
             if (pvs_count > 0) {
                 result.path_summary['Very strong'] = pvs_count;
@@ -159,17 +183,13 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
                 result.benign_summary['Supporting'] = bp_count;
             }
         }
-
-        // set calculated pathogenicity in interpretation
-        this.props.setCalculatedPathogenicity(result.assertion);
-
         return result;
     },
 
     render: function() {
-        let interpretation = this.props.interpretation ? this.props.interpretation : null;
+        let interpretation = this.state.interpretation ? this.state.interpretation : null;
         let evaluations = interpretation && interpretation.evaluations && interpretation.evaluations.length ? interpretation.evaluations : null;
-        let result = evaluations ? this.calculatePathogenicity(evaluations) : null;
+        let result = this.state.calculatedResult ? this.state.calculatedResult : null;
         let rules = this.state.rules;
 
         let benign_summary = result && result.benign_summary ? result.benign_summary : null;
