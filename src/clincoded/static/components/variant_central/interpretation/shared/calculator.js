@@ -18,20 +18,22 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
     },
 
     componentDidMount: function() {
-        if (this.props.interpretation) {
-            if (this.props.interpretation.evaluations && this.props.interpretation.evaluations.length) {
-                let evaluations = this.state.interpretation.evaluations;
-                this.calculatePathogenicity(evaluations);
-            }
+        if (this.props.interpretation && this.props.interpretation.evaluations && this.props.interpretation.evaluations.length) {
+            let evaluations = this.state.interpretation.evaluations;
+            let result = this.calculatePathogenicity(evaluations);
+            this.props.setCalculatedPathogenicity(result.assertion);
+            this.setState({calculatedResult: result});
         }
     },
 
     componentWillReceiveProps: function(nextProps) {
-        if (nextProps.interpretation) {
+        if (nextProps.interpretation && !_.isEqual(nextProps.interpretation, this.state.interpretation)) {
             this.setState({interpretation: nextProps.interpretation}, () => {
-                if (this.state.interpretation && this.state.interpretation.evaluations) {
+                if (this.state.interpretation && this.state.interpretation.evaluations && this.state.interpretation.evaluations.length) {
                     let evaluations = this.state.interpretation.evaluations;
-                    this.calculatePathogenicity(evaluations);
+                    let result = this.calculatePathogenicity(evaluations);
+                    this.props.setCalculatedPathogenicity(result.assertion);
+                    this.setState({calculatedResult: result});
                 }
             });
         }
@@ -181,11 +183,7 @@ var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.cre
                 result.benign_summary['Supporting'] = bp_count;
             }
         }
-
-        // set calculated pathogenicity in interpretation
-        this.props.setCalculatedPathogenicity(result.assertion);
-
-        this.setState({calculatedResult: result});
+        return result;
     },
 
     render: function() {
