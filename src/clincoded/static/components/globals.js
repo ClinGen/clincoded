@@ -136,12 +136,12 @@ module.exports.dbxref_prefix_map = {
     "HGNC": "http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
     // ENSEMBL link only works for human
     "ENSEMBL": "http://www.ensembl.org/Homo_sapiens/Gene/Summary?g=",
-    "GeneID": "http://www.ncbi.nlm.nih.gov/gene/",
-    "GEO": "http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",
+    "GeneID": "http:s//www.ncbi.nlm.nih.gov/gene/",
+    "GEO": "http:s//www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",
     "Caltech": "http://jumpgate.caltech.edu/library/",
     "FlyBase": "http://flybase.org/cgi-bin/quicksearch_solr.cgi?caller=quicksearch&tab=basic_tab&data_class=FBgn&species=Dmel&search_type=all&context=",
     "WormBase": "http://www.wormbase.org/species/c_elegans/gene/",
-    "RefSeq": "http://www.ncbi.nlm.nih.gov/gene/?term=",
+    "RefSeq": "http:s//www.ncbi.nlm.nih.gov/gene/?term=",
     // UCSC links need assembly (&db=) and accession (&hgt_mdbVal1=) added to url
     "UCSC-ENCODE-mm9": "http://genome.ucsc.edu/cgi-bin/hgTracks?tsCurTab=advancedTab&tsGroup=Any&tsType=Any&hgt_mdbVar1=dccAccession&hgt_tSearch=search&hgt_tsDelRow=&hgt_tsAddRow=&hgt_tsPage=&tsSimple=&tsName=&tsDescr=&db=mm9&hgt_mdbVal1=",
     "UCSC-ENCODE-hg19": "http://genome.ucsc.edu/cgi-bin/hgTracks?tsCurTab=advancedTab&tsGroup=Any&tsType=Any&hgt_mdbVar1=dccAccession&hgt_tSearch=search&hgt_tsDelRow=&hgt_tsAddRow=&hgt_tsPage=&tsSimple=&tsName=&tsDescr=&db=hg19&hgt_mdbVal1=",
@@ -149,28 +149,28 @@ module.exports.dbxref_prefix_map = {
     "UCSC-GB-mm9": "http://genome.cse.ucsc.edu/cgi-bin/hgTrackUi?db=mm9&g=",
     "UCSC-GB-hg19": "http://genome.cse.ucsc.edu/cgi-bin/hgTrackUi?db=hg19&g=",
     // Dataset, experiment, and document references
-    "PMID": "http://www.ncbi.nlm.nih.gov/pubmed/?term=",
-    "PMCID": "http://www.ncbi.nlm.nih.gov/pmc/articles/",
+    "PMID": "https://www.ncbi.nlm.nih.gov/pubmed/?term=",
+    "PMCID": "https://www.ncbi.nlm.nih.gov/pmc/articles/",
     "doi": "http://dx.doi.org/doi:"
 };
 
 module.exports.external_url_map = {
-    'PubMedSearch': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&id=',
+    'PubMedSearch': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&id=',
     'PubMed': 'https://www.ncbi.nlm.nih.gov/pubmed/',
     'OrphaNet': 'http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=',
     'OrphanetHome': 'http://www.orpha.net/',
     'HGNC': 'http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=',
     'HGNCFetch': '//rest.genenames.org/fetch/symbol/',
     'HGNCHome': 'http://www.genenames.org/',
-    'Entrez': 'http://www.ncbi.nlm.nih.gov/gene/',
-    'MedGen': 'http://www.ncbi.nlm.nih.gov/medgen/',
+    'Entrez': 'https://www.ncbi.nlm.nih.gov/gene/',
+    'MedGen': 'https://www.ncbi.nlm.nih.gov/medgen/',
     'OMIM': 'http://omim.org/',
     'OMIMEntry': 'http://www.omim.org/entry/',
-    'ClinVar': 'http://www.ncbi.nlm.nih.gov/clinvar/',
-    'ClinVarSearch': 'http://www.ncbi.nlm.nih.gov/clinvar/variation/',
-    'ClinVarEfetch': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar',
-    'ClinVarEutils': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=',
-    'ClinVarEsearch': '//eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?',
+    'ClinVar': 'https://www.ncbi.nlm.nih.gov/clinvar/',
+    'ClinVarSearch': 'https://www.ncbi.nlm.nih.gov/clinvar/variation/',
+    'ClinVarEfetch': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar',
+    'ClinVarEutils': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=',
+    'ClinVarEsearch': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?',
     'HPO': 'http://compbio.charite.de/hpoweb/showterm?id=',
     'HPOBrowser': 'http://compbio.charite.de/hpoweb/showterm?id=HP:0000118',
     'Uberon': 'http://uberon.github.io/',
@@ -184,7 +184,7 @@ module.exports.external_url_map = {
     'CL': 'http://www.ontobee.org/browser/index.php?o=CL',
     'CLSearch': 'http://www.ontobee.org/browser/rdf.php?o=CL&iri=http://purl.obolibrary.org/obo/',
     'EFO': 'http://www.ebi.ac.uk/efo/',
-    'dbSNP': 'http://www.ncbi.nlm.nih.gov/snp/',
+    'dbSNP': 'https://www.ncbi.nlm.nih.gov/snp/',
     'CAR': 'http://reg.genome.network/site/cg-registry',
     'CARallele': '//reg.genome.network/allele/',
     'CAR-test': 'http://reg.test.genome.network/site/registry',
@@ -194,7 +194,7 @@ module.exports.external_url_map = {
     'EnsemblVariation': '//rest.ensembl.org/variation/human/',
     'EnsemblPopulationPage': 'http://ensembl.org/Homo_sapiens/Variation/Population?db=core;v=',
     'UCSCGenomeBrowser': '//genome.ucsc.edu/cgi-bin/hgTracks',
-    'NCBIVariationViewer': '//www.ncbi.nlm.nih.gov/variation/view/',
+    'NCBIVariationViewer': 'https://www.ncbi.nlm.nih.gov/variation/view/',
     'MyVariantInfo': '//myvariant.info/v1/variant/',
     'MyGeneInfo': '//mygene.info/v3/query?q=',
     'EXAC': '//exac.broadinstitute.org/variant/',
@@ -212,7 +212,7 @@ module.exports.external_url_map = {
     'EnsemblGRCh38': 'http://uswest.ensembl.org/Homo_sapiens/Location/View?db=core;r=',
     'EnsemblGRCh37': 'http://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r=',
     'Bustamante': '//predictvar.bustamante-lab.net/variant/position/',
-    'MeSH': 'http://www.ncbi.nlm.nih.gov/mesh?term='
+    'MeSH': 'https://www.ncbi.nlm.nih.gov/mesh?term='
 };
 
 
