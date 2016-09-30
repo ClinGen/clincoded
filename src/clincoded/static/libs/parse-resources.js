@@ -41,7 +41,7 @@ function parseClinvar(xml, extended){
                 if ($MolecularConsequenceListNode) {
                     console.log('parseClinvar molconlist passed');
                     $MolecularConsequenceNodes = $MolecularConsequenceListNode.getElementsByTagName('MolecularConsequence');
-                    for(let node in $MolecularConsequenceNodes) {
+                    for(let node of $MolecularConsequenceNodes) {
                         console.log('parseClinvar molcon loop');
                         let molecularItem = {
                             "hgvsName": node.getAttribute('HGVS'),
@@ -107,7 +107,7 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
     variant.clinvarVariationType = dataset.getAttribute('VariationType');
     // Parse <MolecularConsequence> nodes
     if (molecularConsequenceNodes) {
-        for(let n in molecularConsequenceNodes) {
+        for(let n of molecularConsequenceNodes) {
             // Used for transcript tables on "Basic Information" tab in VCI
             // HGVS property for mapping to transcripts with matching HGVS names
             // SOid and Function properties for UI display
@@ -122,7 +122,7 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
     // Parse <HGVS> nodes
     var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
     if (HGVSnodes) {
-        for (let x in HGVSnodes) {
+        for (let x of HGVSnodes) {
             // Used for transcript tables on "Basic Information" tab in VCI
             // Type property for identifying the nucleotide change transcripts
             // and protein change transcripts
@@ -184,7 +184,7 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
     // Parse <SequenceLocation> nodes
     var SequenceLocationNodes = allele.getElementsByTagName('SequenceLocation');
     if (SequenceLocationNodes) {
-        for(let y in SequenceLocationNodes) {
+        for(let y of SequenceLocationNodes) {
             // Properties in SequenceLocationObj are used to construct LinkOut URLs
             // Used primarily for LinkOut links on "Basic Information" tab in VCI
             // referenceAllele and alternateAllele properties are added for Population tab
