@@ -122,8 +122,8 @@ export function parseClinvarInterpretation(result) {
                         //if (disease_types.includes(Trait.getAttribute('Type'))) {
                         nameNodes = Traits[i].getElementsByTagName('Name');
                         // Expect to find the only one <ElementValue> node in each <Name> node
-                        for(let nameNode of nameNodes) {
-                            let ElementValueNode = nameNode.getElementsByTagName('ElementValue')[0];
+                        for(var l = 0; l < nameNodes.length ; l++) {
+                            let ElementValueNode = nameNodes[l].getElementsByTagName('ElementValue')[0];
                             if (ElementValueNode.getAttribute('Type') === 'Preferred') {
                                 // Set disease name property value for each associated condition
                                 disease = ElementValueNode.textContent;
