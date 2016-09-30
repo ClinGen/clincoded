@@ -41,12 +41,12 @@ function parseClinvar(xml, extended){
                 if ($MolecularConsequenceListNode) {
                     console.log('parseClinvar molconlist passed');
                     $MolecularConsequenceNodes = $MolecularConsequenceListNode.getElementsByTagName('MolecularConsequence');
-                    for(let node of $MolecularConsequenceNodes) {
+                    for(let molecularConsequenceNode of $MolecularConsequenceNodes) {
                         console.log('parseClinvar molcon loop');
                         let molecularItem = {
-                            "hgvsName": node.getAttribute('HGVS'),
-                            "term": node.getAttribute('Function'),
-                            "soId": node.getAttribute('SOid')
+                            "hgvsName": molecularConsequenceNode.getAttribute('HGVS'),
+                            "term": molecularConsequenceNode.getAttribute('Function'),
+                            "soId": molecularConsequenceNode.getAttribute('SOid')
                         };
                         variant.molecularConsequenceList.push(molecularItem);
                     }
