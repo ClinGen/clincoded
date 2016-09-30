@@ -108,3 +108,4 @@ def variant_2_3(value, system):
 
     if 'hgvsNames' in value and value['hgvsNames'] == []:
         value['hgvsNames'] = {}
+
