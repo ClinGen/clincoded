@@ -11,8 +11,12 @@ function parseClinvar(xml, extended){
     var variant = {};
     var doc = new DOMParser().parseFromString(xml, 'text/xml');
 
+    console.log('parseClinvar xml doc');
+    console.log(doc);
+
     var $ClinVarResult = doc.getElementsByTagName('ClinVarResult-Set')[0];
     if ($ClinVarResult) {
+        console.log('parseClinvar clinvarresult loop');
         var $VariationReport = $ClinVarResult.getElementsByTagName('VariationReport')[0];
         if ($VariationReport) {
             // Get the ID (just in case) and Preferred Title
