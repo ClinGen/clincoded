@@ -44,6 +44,7 @@ var VariantCurationHub = React.createClass({
             ext_clinvarInterpretationSummary: null,
             ext_myGeneInfo_MyVariant: null,
             ext_myGeneInfo_VEP: null,
+            ext_myGeneInfo_ClinVar: null,
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
             ext_singleNucleotide: true,
@@ -123,6 +124,16 @@ var VariantCurationHub = React.createClass({
                         ext_clinvarInterpretationSummary: getClinvarInterpretations(xml),
                         loading_clinvarEutils: false
                     });
+                    // Last alternative to get gene id and symbol from ClinVar
+                    // for API call to mygene.info to retreive gene related data
+                    if (variantData.gene && variantData.gene.id) {
+                        let clinvar_gene_id = variantData.gene.id;
+                        let clinvar_gene_symbol = variantData.gene.symbol;
+                        this.fetchMyGeneInfo(clinvar_gene_symbol, clinvar_gene_id, 'ClinVar');
+                    } else {
+                        // If all else fails, quit trying...
+                        this.setState({loading_myGeneInfo: false});
+                    }
                     this.handleCodonEsearch(variantData);
                     let clinVarRCVs = getClinvarRCVs(xml);
                     return Promise.resolve(clinVarRCVs);
@@ -280,6 +291,8 @@ var VariantCurationHub = React.createClass({
     },
 
     // Method to parse Entrez gene symbol and id from myvariant.info
+    // Primary option to get gene id and symbol for making
+    // API call to mygene.info to retreive gene related data
     parseMyVariantInfo: function(myVariantInfo) {
         let geneSymbol, geneId;
         if (myVariantInfo) {
@@ -313,6 +326,8 @@ var VariantCurationHub = React.createClass({
     },
 
     // Method to parse Entrez gene symbol and id from VEP
+    // Secondary option to get gene id and symbol for making
+    // API call to mygene.info to retreive gene related data
     parseEnsemblHgvsVEP: function(ensemblHgvsVEP) {
         let geneSymbol, geneId;
         if (ensemblHgvsVEP) {
@@ -343,6 +358,8 @@ var VariantCurationHub = React.createClass({
                     this.setState({ext_myGeneInfo_MyVariant: geneObj});
                 } else if (source === 'ensemblHgvsVEP') {
                     this.setState({ext_myGeneInfo_VEP: geneObj});
+                } else if (source === 'ClinVar') {
+                    this.setState({ext_myGeneInfo_ClinVar: geneObj});
                 }
                 this.setState({loading_myGeneInfo: false});
             }).catch(err => {
@@ -417,6 +434,7 @@ var VariantCurationHub = React.createClass({
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
         var selectedTab = this.state.selectedTab;
         let calculated_pathogenicity = (this.state.calculated_pathogenicity) ? this.state.calculated_pathogenicity : (this.state.autoClassification ? this.state.autoClassification : null);
+        let my_gene_info = (this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : (this.state.ext_myGeneInfo_VEP ? this.state.ext_myGeneInfo_VEP : this.state.ext_myGeneInfo_ClinVar);
 
         return (
             <div>
@@ -431,7 +449,7 @@ var VariantCurationHub = React.createClass({
                             calculatedAssertion={calculated_pathogenicity} provisionalPathogenicity={this.state.provisionalPathogenicity} />
                         <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
-                            ext_myGeneInfo={(this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : this.state.ext_myGeneInfo_VEP}
+                            ext_myGeneInfo={my_gene_info}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_bustamante={this.state.ext_bustamante}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
