@@ -27,7 +27,9 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         session: React.PropTypes.object,
         interpretation: React.PropTypes.object,
         editKey: React.PropTypes.string,
-        updateInterpretationObj: React.PropTypes.func
+        updateInterpretationObj: React.PropTypes.func,
+        calculatedAssertion: React.PropTypes.string,
+        provisionalPathogenicity: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -116,7 +118,8 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                             <InheritanceModalButton variantData={this.props.variantData} session={this.props.session} hasAssociatedInheritance={this.state.hasAssociatedInheritance}
                                 interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />
                             <DiseaseModalButton variantData={this.props.variantData} session={this.props.session} hasAssociatedDisease={this.state.hasAssociatedDisease}
-                                interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj}
+                                calculatedAssertion={this.props.calculatedAssertion} provisionalPathogenicity={this.props.provisionalPathogenicity} />
                         </div>
                     </div>
                     :
@@ -148,7 +151,9 @@ var DiseaseModalButton = React.createClass({
         session: React.PropTypes.object,
         interpretation: React.PropTypes.object,
         editKey: React.PropTypes.string,
-        updateInterpretationObj: React.PropTypes.func
+        updateInterpretationObj: React.PropTypes.func,
+        calculatedAssertion: React.PropTypes.string,
+        provisionalPathogenicity: React.PropTypes.string
     },
 
     render: function() {
@@ -162,7 +167,8 @@ var DiseaseModalButton = React.createClass({
         return (
             <Modal title={associateDiseaseModalTitle} wrapperClassName="modal-associate-disease">
                 <button className="btn btn-primary pull-right" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session}
-                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateDiseaseButtonTitle}</button>
+                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj}
+                    calculatedAssertion={this.props.calculatedAssertion} provisionalPathogenicity={this.props.provisionalPathogenicity} />}>{associateDiseaseButtonTitle}</button>
             </Modal>
         );
     }
@@ -212,7 +218,9 @@ var AssociateDisease = React.createClass({
         closeModal: React.PropTypes.func, // Function to call to close the modal
         interpretation: React.PropTypes.object, // interpretation object
         editKey: React.PropTypes.bool, // edit flag
-        updateInterpretationObj: React.PropTypes.func
+        updateInterpretationObj: React.PropTypes.func,
+        calculatedAssertion: React.PropTypes.string,
+        provisionalPathogenicity: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -328,6 +336,15 @@ var AssociateDisease = React.createClass({
                     // if the interpretation object does not have a disease object, create it
                     if ('disease' in flatInterpretation) {
                         delete flatInterpretation['disease'];
+                        let provisionalPathogenicity = this.props.provisionalPathogenicity;
+                        let calculatedAssertion = this.props.calculatedAssertion;
+                        if (provisionalPathogenicity === 'Likely pathogenic' || provisionalPathogenicity === 'Pathogenic') {
+                            flatInterpretation['markAsProvisional'] = false;
+                        } else if (!provisionalPathogenicity) {
+                            if (calculatedAssertion === 'Likely pathogenic' || calculatedAssertion === 'Pathogenic' ) {
+                                flatInterpretation['markAsProvisional'] = false;
+                            }
+                        }
 
                         // Update the intepretation object partially with the new disease property value
                         this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
