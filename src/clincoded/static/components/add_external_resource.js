@@ -546,6 +546,7 @@ function clinvarQueryResource() {
         this.getRestDataXml(url + id).then(xml => {
             console.log('clinvarQuestResource getRestDataXml');
             console.log(xml);
+            console.log(xml.length);
             data = parseClinvar(xml);
             console.log('clinvarQuestResource after parseClinvar');
             console.log(data);
