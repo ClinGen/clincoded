@@ -95,7 +95,7 @@ function parseClinvar(xml, extended){
 }
 
 // Function to extract more ClinVar data than what the db stores
-function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularConsequenceNodes) {
+function parseClinvarExtended(variant, allele, hgvs_list, dataset, $molecularConsequenceNodes) {
     variant.RefSeqTranscripts = {};
     variant.gene = {};
     variant.allele = {};
@@ -109,15 +109,15 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
     // Not to be confused with the <VariantType> node under <Allele>
     variant.clinvarVariationType = dataset.getAttribute('VariationType');
     // Parse <MolecularConsequence> nodes
-    if (molecularConsequenceNodes) {
-        for (var i = 0; i < molecularConsequenceNodes.length; i++) {
+    if ($molecularConsequenceNodes) {
+        for (var i = 0; i < $molecularConsequenceNodes.length; i++) {
             // Used for transcript tables on "Basic Information" tab in VCI
             // HGVS property for mapping to transcripts with matching HGVS names
             // SOid and Function properties for UI display
             var MolecularObj = {
-                "HGVS": molecularConsequenceNodes[i].getAttribute('HGVS'),
-                "SOid": molecularConsequenceNodes[i].getAttribute('SOid'),
-                "Function": molecularConsequenceNodes[i].getAttribute('Function')
+                "HGVS": $molecularConsequenceNodes[i].getAttribute('HGVS'),
+                "SOid": $molecularConsequenceNodes[i].getAttribute('SOid'),
+                "Function": $molecularConsequenceNodes[i].getAttribute('Function')
             };
             variant.RefSeqTranscripts.MolecularConsequenceList.push(MolecularObj);
         }
