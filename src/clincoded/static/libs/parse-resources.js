@@ -6,6 +6,8 @@ var _ = require('underscore');
 // https://github.com/standard-analytics/pubmed-schema-org/blob/master/lib/pubmed.js
 module.exports.parseClinvar = parseClinvar;
 function parseClinvar(xml, extended){
+    console.log('parseClinvar xml raw');
+    console.log(xml);
     var variant = {};
     var doc = new DOMParser().parseFromString(xml, 'text/xml');
 
@@ -71,6 +73,8 @@ function parseClinvar(xml, extended){
             }
         }
     }
+    console.log('parseClinvar pre-return variant');
+    console.log(variant);
     return variant;
 }
 
