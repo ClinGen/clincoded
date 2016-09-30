@@ -188,7 +188,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                     flatInterpretation.extra_evidence_list.splice(flatInterpretation.extra_evidence_list.indexOf(deleteTargetId), 1);
 
                     // update the interpretation object
-                    return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                    return this.putRestData('/interpretation/' + this.state.interpretation.uuid + '?render=false', flatInterpretation).then(data => {
                         return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
                             return Promise.resolve(data['@graph'][0]);
                         });
