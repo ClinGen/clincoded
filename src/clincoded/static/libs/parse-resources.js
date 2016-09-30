@@ -16,9 +16,10 @@ function parseClinvar(xml, extended){
 
     var $ClinVarResult = doc.getElementsByTagName('ClinVarResult-Set')[0];
     if ($ClinVarResult) {
-        console.log('parseClinvar clinvarresult loop');
+        console.log('parseClinvar clinvarresult passed');
         var $VariationReport = $ClinVarResult.getElementsByTagName('VariationReport')[0];
         if ($VariationReport) {
+            console.log('parseClinvar variationreport passed');
             // Get the ID (just in case) and Preferred Title
             variant.clinvarVariantId = $VariationReport.getAttribute('VariationID');
             variant.clinvarVariantTitle = $VariationReport.getAttribute('VariationName');
@@ -26,9 +27,11 @@ function parseClinvar(xml, extended){
             // e.g. http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=7901
             var $Allele = $VariationReport.getElementsByTagName('Allele')[0];
             if ($Allele) {
+                console.log('parseClinvar allele passed');
                 // Parse <VariantType> node under <Allele>
                 let $variationType = $Allele.getElementsByTagName('VariantType')[0];
                 if ($variationType) {
+                    console.log('parseClinvar variationtype passed');
                     variant.variationType = $variationType.textContent;
                 }
                 // Parse <MolecularConsequence> node under <MolecularConsequenceList>
@@ -36,8 +39,10 @@ function parseClinvar(xml, extended){
                 let $MolecularConsequenceNodes = [];
                 variant.molecularConsequenceList = [];
                 if ($MolecularConsequenceListNode) {
+                    console.log('parseClinvar molconlist passed');
                     $MolecularConsequenceNodes = $MolecularConsequenceListNode.getElementsByTagName('MolecularConsequence');
                     for(let node of $MolecularConsequenceNodes) {
+                        console.log('parseClinvar molcon loop');
                         let molecularItem = {
                             "hgvsName": node.getAttribute('HGVS'),
                             "term": node.getAttribute('Function'),
@@ -48,11 +53,13 @@ function parseClinvar(xml, extended){
                 }
                 var $HGVSlist_raw = $Allele.getElementsByTagName('HGVSlist')[0];
                 if ($HGVSlist_raw) {
+                    console.log('parseClinvar hvgs passed');
                     variant.hgvsNames = {};
                     variant.hgvsNames.others = [];
                     // get the HGVS entries
                     var $HGVSlist = $HGVSlist_raw.getElementsByTagName('HGVS');
                     _.map($HGVSlist, $HGVS => {
+                        console.log('parseClinvar hgvslist loop');
                         let temp_hgvs = $HGVS.textContent;
                         let assembly = $HGVS.getAttribute('Assembly');
                         if (assembly) {
@@ -66,12 +73,14 @@ function parseClinvar(xml, extended){
                 var $XRefList = $Allele.getElementsByTagName('XRefList')[0];
                 var $XRef = $XRefList.getElementsByTagName('XRef');
                 for(var i = 0; i < $XRef.length; i++) {
+                    console.log('parseClinvar xref loop');
                     if ($XRef[i].getAttribute('DB') === 'dbSNP') {
                         variant.dbSNPIds.push($XRef[i].getAttribute('ID'));
                     }
                 }
                 // Call to extract more ClinVar data from XML response
                 if (extended) {
+                    console.log('parseClinvar extended passed');
                     parseClinvarExtended(variant, $Allele, $HGVSlist_raw, $VariationReport, $MolecularConsequenceNodes);
                 }
             }
