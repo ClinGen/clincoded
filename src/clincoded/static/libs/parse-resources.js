@@ -95,7 +95,7 @@ function parseClinvar(xml, extended){
 }
 
 // Function to extract more ClinVar data than what the db stores
-function parseClinvarExtended(variant, allele, hgvs_list, dataset, $molecularConsequenceNodes) {
+function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularConsequenceNodes) {
     variant.RefSeqTranscripts = {};
     variant.gene = {};
     variant.allele = {};
@@ -109,15 +109,17 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, $molecularCon
     // Not to be confused with the <VariantType> node under <Allele>
     variant.clinvarVariationType = dataset.getAttribute('VariationType');
     // Parse <MolecularConsequence> nodes
-    if ($molecularConsequenceNodes) {
-        for (var i = 0; i < $molecularConsequenceNodes.length; i++) {
+    if (molecularConsequenceNodes) {
+        console.log('extended molcon passed');
+        for (var i = 0; i < molecularConsequenceNodes.length; i++) {
+            console.log('extended molcon loop');
             // Used for transcript tables on "Basic Information" tab in VCI
             // HGVS property for mapping to transcripts with matching HGVS names
             // SOid and Function properties for UI display
             var MolecularObj = {
-                "HGVS": $molecularConsequenceNodes[i].getAttribute('HGVS'),
-                "SOid": $molecularConsequenceNodes[i].getAttribute('SOid'),
-                "Function": $molecularConsequenceNodes[i].getAttribute('Function')
+                "HGVS": molecularConsequenceNodes[i].getAttribute('HGVS'),
+                "SOid": molecularConsequenceNodes[i].getAttribute('SOid'),
+                "Function": molecularConsequenceNodes[i].getAttribute('Function')
             };
             variant.RefSeqTranscripts.MolecularConsequenceList.push(MolecularObj);
         }
@@ -125,7 +127,9 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, $molecularCon
     // Parse <HGVS> nodes
     var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
     if (HGVSnodes) {
+        console.log('extended hgvs passed');
         for (var j = 0; j < HGVSnodes.length; j++) {
+            console.log('extended hgvs loop');
             // Used for transcript tables on "Basic Information" tab in VCI
             // Type property for identifying the nucleotide change transcripts
             // and protein change transcripts
@@ -148,8 +152,10 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, $molecularCon
     // Parse <gene> node
     var geneList = dataset.getElementsByTagName('GeneList')[0];
     if (geneList) {
+        console.log('extended gene passed');
         var geneNode = geneList.getElementsByTagName('Gene')[0];
         if (geneNode) {
+            console.log('extended genenode passed');
             variant.gene.id = geneNode.getAttribute('GeneID');
             variant.gene.symbol = geneNode.getAttribute('Symbol');
             variant.gene.full_name = geneNode.getAttribute('FullName');
@@ -163,6 +169,7 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, $molecularCon
     const protein_change = allele.getElementsByTagName('ProteinChange')[0];
     let alt_protein_change;
     if (variant.RefSeqTranscripts.ProteinChangeList.length > 0) {
+        console.log('extended refseq passed');
         const changeAttr = variant.RefSeqTranscripts.ProteinChangeList[0].Change;
         if (changeAttr.length) {
             // Remove 'p.' from string value
@@ -187,7 +194,9 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, $molecularCon
     // Parse <SequenceLocation> nodes
     var SequenceLocationNodes = allele.getElementsByTagName('SequenceLocation');
     if (SequenceLocationNodes) {
+        console.log('extended seqloc passed');
         for(var k = 0; k < SequenceLocationNodes.length; k++) {
+            console.log('extended seqloc loop');
             // Properties in SequenceLocationObj are used to construct LinkOut URLs
             // Used primarily for LinkOut links on "Basic Information" tab in VCI
             // referenceAllele and alternateAllele properties are added for Population tab
