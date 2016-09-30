@@ -6,19 +6,12 @@ pytestmark = [
 ]
 
 
-def persona_test_data(audience):
-    import requests
-    from urllib.parse import quote
-    url = 'http://personatestuser.org/email_with_assertion/%s' % quote(audience, '')
-    try:
-        res = requests.get(url)
-        res.raise_for_status()
-    except Exception as e:
-        pytest.skip("Error retrieving persona test user: %r" % e)
-    data = res.json()
-    if 'email' not in data:
-        pytest.skip("Missing 'email' in persona test user: %r" % data)
-    return data
+def persona_test_data():
+    domain = 'mrmin.auth0.com'
+    token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJYc0x0RHNkZ1Y1b2ExUzlrVlBDNUFDUzk5U1RkVkhUeSIsInNjb3BlcyI6eyJ1c2VycyI6eyJhY3Rpb25zIjpbInJlYWQiXX19LCJpYXQiOjE0NzUxOTI2ODcsImp0aSI6ImVhMzM3Zjg1ODQ1MGQ2YzQzZDk1ZGJhZTFkZGExNmUzIn0.tfAAji7tyE8VuPfGz7GsIJdAwYNywbf66IpO89tFSxw'
+
+    auth0 = Auth0(domain, token)
+    return auth0
 
 
 @pytest.fixture(scope='session')
