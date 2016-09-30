@@ -18,12 +18,12 @@ export function getClinvarInterpretations(xml) {
                 let ObservationNodes = ObservationList.getElementsByTagName('Observation');
                 if (ObservationNodes && ObservationNodes.length) {
                     let ReviewStatus, Description, DateLastEvaluated, SubmissionCount;
-                    for (let node of ObservationNodes) {
-                        let ObservationType = node.getAttribute('ObservationType');
+                    for (var i = 0; i < ObservationNodes.length; i++) {
+                        let ObservationType = ObservationNodes[i].getAttribute('ObservationType');
                         if (ObservationType === 'primary') {
-                            SubmissionCount = node.getAttribute('SubmissionCount');
-                            ReviewStatus = node.getElementsByTagName('ReviewStatus')[0];
-                            let ClinicalSignificance = node.getElementsByTagName('ClinicalSignificance')[0];
+                            SubmissionCount = ObservationNodes[i].getAttribute('SubmissionCount');
+                            ReviewStatus = ObservationNodes[i].getElementsByTagName('ReviewStatus')[0];
+                            let ClinicalSignificance = ObservationNodes[i].getElementsByTagName('ClinicalSignificance')[0];
                             if (ClinicalSignificance) {
                                 DateLastEvaluated = ClinicalSignificance.getAttribute('DateLastEvaluated');
                                 Description = ClinicalSignificance.getElementsByTagName('Description')[0];
@@ -58,13 +58,13 @@ export function getClinvarRCVs(xml) {
             if (ObservationList) {
                 let ObservationNodes = ObservationList.getElementsByTagName('Observation');
                 if (ObservationNodes && ObservationNodes.length) {
-                    for (let ObservationNode of ObservationNodes) {
+                    for (var i = 0; i < ObservationNodes.length; i++) {
                         // Filter RVCs, collect primary RCVs of this variant only
-                        if (ObservationNode.getAttribute('VariationID') === v_id && ObservationNode.getAttribute('ObservationType') === 'primary') {
-                            let RCV_Nodes = ObservationNode.getElementsByTagName('RCV');
+                        if (ObservationNodes[i].getAttribute('VariationID') === v_id && ObservationNodes[i].getAttribute('ObservationType') === 'primary') {
+                            let RCV_Nodes = ObservationNodes[i].getElementsByTagName('RCV');
                             if (RCV_Nodes.length) {
-                                for(let RCV_Node of RCV_Nodes) {
-                                    RCVs.push(RCV_Node.textContent);
+                                for(var j = 0; j < RCV_Nodes.length; j++) {
+                                    RCVs.push(RCV_Nodes[j].textContent);
                                 }
                             }
                         }
@@ -114,13 +114,13 @@ export function parseClinvarInterpretation(result) {
                 if (TraitSet) {
                     let Traits = TraitSet.getElementsByTagName('Trait');
                     // Handle one <Trait> node (e.g. each associated condition) at a time
-                    for(let Trait of Traits) {
+                    for(var i = 0; i < Traits.length; i++) {
                         let nameNodes = [],
                             xRefNodes = [],
                             identifiers = [],
                             disease = '';
                         //if (disease_types.includes(Trait.getAttribute('Type'))) {
-                        nameNodes = Trait.getElementsByTagName('Name');
+                        nameNodes = Traits[i].getElementsByTagName('Name');
                         // Expect to find the only one <ElementValue> node in each <Name> node
                         for(let nameNode of nameNodes) {
                             let ElementValueNode = nameNode.getElementsByTagName('ElementValue')[0];
@@ -130,22 +130,22 @@ export function parseClinvarInterpretation(result) {
                             }
                         }
 
-                        for (let childNode of Trait.childNodes) {
-                            if (childNode.nodeName === 'XRef' && childNode.getAttribute('ID') && childNode.getAttribute('DB')) {
-                                if (childNode.getAttribute('Type') && childNode.getAttribute('Type') === 'primary') {
-                                    xRefNodes.push(childNode);
-                                } else if (!childNode.getAttribute('Type')) {
-                                    xRefNodes.push(childNode);
+                        for (var j = 0; j < Traits[i].childNodes.length; j++) {
+                            if (Traits[i].childNodes[j].nodeName === 'XRef' && Traits[i].childNodes[j].getAttribute('ID') && Traits[i].childNodes[j].getAttribute('DB')) {
+                                if (Traits[i].childNodes[j].getAttribute('Type') && Traits[i].childNodes[j].getAttribute('Type') === 'primary') {
+                                    xRefNodes.push(Traits[i].childNodes[j]);
+                                } else if (!Traits[i].childNodes[j].getAttribute('Type')) {
+                                    xRefNodes.push(Traits[i].childNodes[j]);
                                 }
                             }
                         }
 
                         // Set identifiers property value for each associated condition
                         if (xRefNodes) {
-                            for(let xRef of xRefNodes) {
+                            for(var k = 0; k < xRefNodes.length; k++) {
                                 let identifier = {
-                                    'db': xRef.getAttribute('DB'),
-                                    'id': xRef.getAttribute('ID')
+                                    'db': xRefNodes[k].getAttribute('DB'),
+                                    'id': xRefNodes[k].getAttribute('ID')
                                 };
                                 identifiers.push(identifier);
                             }
