@@ -86,19 +86,20 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
     renderModeInheritanceLink: function(modeInheritance) {
         if (modeInheritance) {
             let start = modeInheritance.indexOf('(');
-            var end = modeInheritance.indexOf(')');
+            let end = modeInheritance.indexOf(')');
+            let hpoNumber;
             if (start && end) {
-                let hpoNumber = modeInheritance.substring(start+1, end);
-                if (hpoNumber && hpoNumber.indexOf('HP:') > -1) {
-                    let hpoLink = 'http://compbio.charite.de/hpoweb/showterm?id=' + hpoNumber;
-                    return (
-                        <a href={hpoLink} target="_blank">{modeInheritance}</a>
-                    );
-                } else {
-                    return (
-                        <span>{modeInheritance}</span>
-                    );
-                }
+                hpoNumber = modeInheritance.substring(start+1, end);
+            }
+            if (hpoNumber && hpoNumber.indexOf('HP:') > -1) {
+                let hpoLink = 'http://compbio.charite.de/hpoweb/showterm?id=' + hpoNumber;
+                return (
+                    <a href={hpoLink} target="_blank">{modeInheritance}</a>
+                );
+            } else {
+                return (
+                    <span>{modeInheritance}</span>
+                );
             }
         }
     },
