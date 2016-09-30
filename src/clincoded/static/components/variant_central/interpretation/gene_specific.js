@@ -174,7 +174,13 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                                 </dl>
                                 <dl className="inline-dl clearfix">
                                     <dt>Ensembl:</dt>
-                                    <dd><a href={dbxref_prefix_map['ENSEMBL'] + ensemblGeneId + ';db=core'} target="_blank">{ensemblGeneId}</a></dd>
+                                    <dd>
+                                        {ensemblGeneId ?
+                                            <a href={dbxref_prefix_map['ENSEMBL'] + ensemblGeneId + ';db=core'} target="_blank">{ensemblGeneId}</a>
+                                            :
+                                            <a href="http://ensembl.org" target="_blank">Search Ensembl <i className="icon icon-external-link"></i></a>
+                                        }
+                                    </dd>
                                 </dl>
                                 <dl className="inline-dl clearfix">
                                     <dt>GeneCards:</dt>

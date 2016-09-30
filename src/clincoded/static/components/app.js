@@ -242,6 +242,9 @@ var NavbarUser = React.createClass({
             <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
                 {this.props.portal.navUser.map(function(menu) {
                     if (menu.url || menu.title === 'space') {
+                        if (menu.id === 'help') {
+                            return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title} target={menu.target}>{menu.title}</NavItem>;
+                        }
                         // Normal menu item; disabled if user is not logged in
                         if (session && session['auth.userid']) {
                             return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title} target={menu.target}>{menu.title}</NavItem>;

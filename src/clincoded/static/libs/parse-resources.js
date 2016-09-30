@@ -127,9 +127,16 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
     }
     // Parse <gene> node
     var geneList = dataset.getElementsByTagName('GeneList')[0];
-    var geneNode = geneList.getElementsByTagName('Gene')[0];
-    variant.gene.symbol = geneNode.getAttribute('Symbol');
-    variant.gene.full_name = geneNode.getAttribute('FullName');
+    if (geneList) {
+        var geneNode = geneList.getElementsByTagName('Gene')[0];
+        if (geneNode) {
+            variant.gene.id = geneNode.getAttribute('GeneID');
+            variant.gene.symbol = geneNode.getAttribute('Symbol');
+            variant.gene.full_name = geneNode.getAttribute('FullName');
+            variant.gene.hgnc_id = geneNode.getAttribute('HGNCID');
+        }
+    }
+
     // Evaluate whether a variant has protein change
     // First check whether te <ProteinChange> node exists. If not,
     // then check whether the <HGVS> node with Type="HGVS, protein, RefSeq" attribute exists
