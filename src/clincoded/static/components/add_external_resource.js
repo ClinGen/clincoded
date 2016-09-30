@@ -594,8 +594,9 @@ function clinvarSubmitResource() {
             if (check.total) {
                 // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
-                    // Compare all variant data properties
-                    // save ClinVar data if any of them is different
+                    // Compare variant data properties
+                    // Existing variants in production db will be identified if any of data property below (except clinvarVariantTitle) has value at set retrieved from ClinVar API but not have value in db
+                    // In this case, save ClinVar data into the variant.
                     if ((!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'])
                         || (this.state.tempResource['dbSNPIds'] && this.state.tempResource['dbSNPIds'].length && (!result['dbSNPIds'] || (result['dbSNPIds'] && !result['dbSNPIds'].length)))
                         || (this.state.tempResource['hgvsNames'] && Object.keys(this.state.tempResource['hgvsNames']).length && (!result['hgvsNames'] || (result['hgvsNames'] && !Object.keys(result['hgvsNames']).length)))
