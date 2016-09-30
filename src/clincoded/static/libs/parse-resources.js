@@ -42,6 +42,7 @@ function parseClinvar(xml, extended){
                     console.log('parseClinvar molconlist passed');
                     $MolecularConsequenceNodes = $MolecularConsequenceListNode.getElementsByTagName('MolecularConsequence');
                     console.log($MolecularConsequenceNodes);
+                    /*
                     for(let node of $MolecularConsequenceNodes) {
                         console.log('parseClinvar molcon loop');
                         let molecularItem = {
@@ -51,6 +52,17 @@ function parseClinvar(xml, extended){
                         };
                         variant.molecularConsequenceList.push(molecularItem);
                     }
+                    */
+                    for (var l = 0; l < $MolecularConsequenceNodes.length; l++) {
+                        console.log('parseClinvar molcon loop');
+                        let molecularItem = {
+                            "hgvsName": $MolecularConsequenceNodes[l].getAttribute('HGVS'),
+                            "term": $MolecularConsequenceNodes[l].getAttribute('Function'),
+                            "soId": $MolecularConsequenceNodes[l].getAttribute('SOid')
+                        };
+                        variant.molecularConsequenceList.push(molecularItem);
+                    }
+
                     console.log('parseClinvar molconlist post-loop');
                 }
                 var $HGVSlist_raw = $Allele.getElementsByTagName('HGVSlist')[0];
