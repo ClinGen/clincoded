@@ -94,6 +94,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                     return (
                         <a href={hpoLink} target="_blank">{modeInheritance}</a>
                     );
+                } else {
+                    return (
+                        <span>{modeInheritance}</span>
+                    );
                 }
             }
         }
