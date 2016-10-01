@@ -572,7 +572,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     ]
                                 </dd>
                                 :
-                                <dd className="col-lg-3">UCSC</dd>
+                                <dd className="col-lg-3"><a href="https://genome.ucsc.edu/index.html" target="_blank">UCSC Browser <i className="icon icon-external-link"></i></a></dd>
                             }
                             {(links_38 || links_37) ?
                                 <dd>Variation Viewer [
@@ -582,7 +582,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     ]
                                 </dd>
                                 :
-                                <dd className="col-lg-4">Variation Viewer</dd>
+                                <dd className="col-lg-4"><a href={external_url_map['VariationViewerHome']} target="_blank">Variation Viewer <i className="icon icon-external-link"></i></a></dd>
                             }
                             {(links_38 || links_37) ?
                                 <dd>Ensembl Browser [
@@ -592,7 +592,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     ]
                                 </dd>
                                 :
-                                <dd className="col-lg-3">Ensembl Browser</dd>
+                                <dd className="col-lg-3"><a href={external_url_map['EnsemblBrowserHome']} target="_blank">Ensembl Browser <i className="icon icon-external-link"></i></a></dd>
                             }
                         </dl>
                     </div>
