@@ -197,7 +197,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                     <div className="panel-heading"><h3 className="panel-title">Protein Resources</h3></div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_myGeneInfo ? showActivityIndicator('Retrieving data... ') : null}
-                        {(myGeneInfo && myGeneInfo.uniprot['Swiss-Prot']) ?
+                        {(myGeneInfo && myGeneInfo.uniprot && myGeneInfo.uniprot['Swiss-Prot']) ?
                             <div className="panel-body">
                                 <dl className="inline-dl clearfix">
                                     <dt>UniProtKB:</dt>
