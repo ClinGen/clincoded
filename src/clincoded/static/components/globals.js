@@ -205,7 +205,7 @@ module.exports.external_url_map = {
     '1000GenomesHome': 'http://browser.1000genomes.org/',
     'mutalyzer': 'https://mutalyzer.nl/',
     'mutalyzerSnpConverter': 'https://mutalyzer.nl/snp-converter',
-    'UCSCBrowserHome': 'https://genome.ucsc.edu/',
+    'UCSCBrowserHome': 'https://genome.ucsc.edu/cgi-bin/hgGateway',
     'UCSCGRCh38': 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr',
     'UCSCGRCh37': 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr',
     'VariationViewerHome': 'https://www.ncbi.nlm.nih.gov/variation/view/',
