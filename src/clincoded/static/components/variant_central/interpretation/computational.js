@@ -868,7 +868,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             ]
                                         </dd>
                                         :
-                                        <dd className="col-lg-3"><a href="https://genome.ucsc.edu/index.html" target="_blank">UCSC Browser <i className="icon icon-external-link"></i></a></dd>
+                                        <dd className="col-lg-3"><a href={external_url_map['UCSCBrowserHome']} target="_blank">UCSC Browser <i className="icon icon-external-link"></i></a></dd>
                                     }
                                     {(links_38 || links_37) ?
                                         <dd>Variation Viewer [
