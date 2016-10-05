@@ -70,7 +70,7 @@ var SelectVariant = React.createClass({
                                         <option value="ClinVar Variation ID">ClinVar Variation ID</option>
                                         <option value="ClinGen Allele Registry ID (CA ID)">ClinGen Allele Registry ID (CA ID)</option>
                                     </Input>
-                                    <p className="col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4 input-note-below-no-bottom"><strong>Note:</strong> Select ID type based on above instructions. Use the ClinVar VariationID whenever possible.</p>
+                                    <p className="col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4 input-note-below-no-bottom"><strong>Note:</strong> Select ID type based on the instructions below. Use the ClinVar VariationID whenever possible.</p>
                                     {this.state.variantIdType == "ClinVar Variation ID" ?
                                     <div className="row col-sm-7 col-md-8 col-sm-offset-5 col-md-offset-4">
                                         <AddResourceId resourceType="clinvar" wrapperClass="modal-buttons-wrapper" protocol={this.props.href_url.protocol}
@@ -88,7 +88,7 @@ var SelectVariant = React.createClass({
                                 </div>
                                 <div className="row">
                                     <div className="alert alert-danger">
-                                        Note: <strong>This version of the interface currently supports SNVs (single nucleotide variants) only.</strong> We are currently working to optimize the evidence returned for non-SNVs.
+                                        Note: <strong>This version of the interface currently returns evidence for SNVs (single nucleotide variants) only.</strong> We are currently working to optimize the evidence returned for non-SNVs. However, the interface supports the evaluation/interpretation of any variant.
                                     </div>
                                     <div className="alert alert-info">
                                         Instructions (please follow this order to determine correct ID for variant)<br /><br />

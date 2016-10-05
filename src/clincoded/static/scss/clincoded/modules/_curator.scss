@@ -2185,6 +2185,61 @@ dl.inline-dl {
     }
 }
 
+.homepage-main-box {
+    h1, h2 {
+        font-weight: 500;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    h1 {
+        font-size: 3.0em;
+    }
+
+    h2 {
+        font-size: 30px;
+    }
+
+    .lead {
+        font-size: 19px;
+    }
+
+    .project-info {
+        background-color: #eee;
+        border-radius: 6px;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        padding: 25px 60px;
+    }
+
+    h3 {
+        border-top: solid 1px #eee;
+        border-bottom: solid 1px #eee;
+        font-style: italic;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    h4 {
+        margin-bottom: 20px;
+    }
+
+    .help-document {
+        margin-top: 20px;
+
+        .btn {
+            border-radius: 4px;
+        }
+    }
+
+    .col-sm-6 .promo {
+        border: solid 1px #ddd;
+        border-radius: 4px;
+        padding: 10px 35px 20px 35px;
+        min-height: 325px;
+    }
+}
+
 table.login-users-interpretations {
     td {
         span.no-broken-item {
