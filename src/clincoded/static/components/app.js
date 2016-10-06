@@ -126,7 +126,6 @@ var App = module.exports = React.createClass({
                     <title>ClinGen</title>
                     <link rel="canonical" href={canonical} />
                     <script async src='//www.google-analytics.com/analytics.js'></script>
-                    <script src="https://cdn.auth0.com/js/lock/10.2/lock.min.js"></script>
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="@@cssFile" />
                     <script src="@@bundleJsFile"></script>

@@ -1,58 +1,61 @@
 import pytest
-
-pytestmark = [
-    pytest.mark.persona,
-    pytest.mark.slow,
-]
-
-
-def persona_test_data():
-    domain = 'mrmin.auth0.com'
-    token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJYc0x0RHNkZ1Y1b2ExUzlrVlBDNUFDUzk5U1RkVkhUeSIsInNjb3BlcyI6eyJ1c2VycyI6eyJhY3Rpb25zIjpbInJlYWQiXX19LCJpYXQiOjE0NzUxOTI2ODcsImp0aSI6ImVhMzM3Zjg1ODQ1MGQ2YzQzZDk1ZGJhZTFkZGExNmUzIn0.tfAAji7tyE8VuPfGz7GsIJdAwYNywbf66IpO89tFSxw'
-
-    auth0 = Auth0(domain, token)
-    return auth0
+import requests
 
 
 @pytest.fixture(scope='session')
-def persona_assertion(app_settings):
-    audience = app_settings['persona.audiences']
-    return persona_test_data(audience)
+def auth0_access_token():
+    creds = {
+        'connection': 'Username-Password-Authentication',
+        'scope': 'openid',
+        'client_id': 'L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo',
+        'grant_type': 'password',
+        'username': 'clingen.test.automated@genome.stanford.edu',
+        'password': 'curateme'
+    }
+    url = 'https://mrmin.auth0.com/oauth/ro'
+    try:
+        res = requests.post(url, data=creds)
+        res.raise_for_status()
+    except Exception as e:
+        pytest.skip("Error retrieving auth0 test user access token: %r" % e)
+    data = res.json()
+    if 'access_token' not in data:
+        pytest.skip("Missing 'access_token' in auth0 test user access token: %r" % data)
+    return data['access_token']
 
 
 @pytest.fixture(scope='session')
-def persona_bad_assertion():
-    return persona_test_data('http://badaudience')
+def auth0_encode_user_token(auth0_access_token):
+    return {'accessToken': auth0_access_token}
+
+@pytest.fixture(scope='session')
+def auth0_encode_user_profile(auth0_access_token):
+    user_url = "https://{domain}/userinfo?access_token={access_token}" \
+        .format(domain='mrmin.auth0.com', access_token=auth0_access_token)
+    user_info = requests.get(user_url).json()
+    return user_info
 
 
-def test_login_no_csrf(anontestapp, persona_assertion):
-    res = anontestapp.post_json('/login', persona_assertion, status=400)
+def test_login_no_csrf(anontestapp, auth0_encode_user_token):
+    res = anontestapp.post_json('/login', auth0_encode_user_token, status=400)
     assert 'Set-Cookie' in res.headers
 
 
-def test_login_unknown_user(anontestapp, persona_assertion):
+def test_login_unknown_user(anontestapp, auth0_encode_user_token):
     res = anontestapp.get('/session')
     csrf_token = str(res.json['_csrft_'])
     headers = {'X-CSRF-Token': csrf_token}
-    res = anontestapp.post_json('/login', persona_assertion, headers=headers, status=403)
+    res = anontestapp.post_json('/login', auth0_encode_user_token, headers=headers, status=403)
     assert 'Set-Cookie' in res.headers
 
 
-def test_login_bad_audience(anontestapp, persona_bad_assertion):
-    res = anontestapp.get('/session')
-    csrf_token = str(res.json['_csrft_'])
-    headers = {'X-CSRF-Token': csrf_token}
-    res = anontestapp.post_json('/login', persona_bad_assertion, headers=headers, status=403)
-    assert 'Set-Cookie' in res.headers
-
-
-def test_login_logout(testapp, anontestapp, persona_assertion):
+def test_login_logout(testapp, anontestapp, auth0_encode_user_token, auth0_encode_user_profile):
     # Create a user with the persona email
     url = '/users/'
-    email = persona_assertion['email']
+    email = auth0_encode_user_profile['email']
     item = {
         'email': email,
-        'first_name': 'Persona',
+        'first_name': 'Auth0',
         'last_name': 'Test User',
     }
     testapp.post_json(url, item, status=201)
@@ -61,7 +64,7 @@ def test_login_logout(testapp, anontestapp, persona_assertion):
     res = anontestapp.get('/session')
     csrf_token = str(res.json['_csrft_'])
     headers = {'X-CSRF-Token': csrf_token}
-    res = anontestapp.post_json('/login', persona_assertion, headers=headers, status=200)
+    res = anontestapp.post_json('/login', auth0_encode_user_token, headers=headers, status=200)
     assert 'Set-Cookie' in res.headers
     res = anontestapp.get('/session')
     assert res.json['auth.userid'] == email
