@@ -109,7 +109,7 @@ module.exports.Auth0 = {
             },
             socialButtonStyle: 'big',
             languageDictionary: {
-                title: "ClinGen Curator Interface Login"
+                title: "ClinGen Curator Interface"
             }
         });
         this.lock.on('authenticated', this.handleAuth0Login);
