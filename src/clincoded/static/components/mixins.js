@@ -104,9 +104,12 @@ module.exports.Auth0 = {
             auth: {
                 redirect: false
             },
+            theme: {
+                logo: 'static/img/clingen-logo-only.svg'
+            },
             socialButtonStyle: 'big',
             languageDictionary: {
-                title: "ClinGen Login"
+                title: "ClinGen Curator Interface Login"
             }
         });
         this.lock.on('authenticated', this.handleAuth0Login);
