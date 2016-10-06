@@ -641,7 +641,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             const linkoutEnsembl = external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name;
             return (
                 <h3 className="panel-title">1000 Genomes: {variantTGenomes}
-                    <a href="#credit-vep" className="label label-primary">VEP</a>
+                    <a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
                     <a className="panel-subtitle pull-right" href={linkoutEnsembl} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
                 </h3>
             );
