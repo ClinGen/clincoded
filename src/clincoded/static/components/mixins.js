@@ -99,20 +99,69 @@ module.exports.Auth0 = {
     componentDidMount: function() {
         this.extractSessionCookie();
         this.setState({loadingComplete: true});
+
         var $lock = require('auth0-lock');
         this.lock = new $lock.default('L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo', 'mrmin.auth0.com', {
+            additionalSignUpFields: [
+                {
+                    name: "name",
+                    placeholder: "Your full name"
+                }
+            ],
             auth: {
                 redirect: false
             },
-            theme: {
-                logo: 'static/img/clingen-logo-only.svg'
-            },
+            avatar: null,
             socialButtonStyle: 'big',
+            theme: {
+                logo: 'static/img/clingen-logo-only.svg',
+                primaryColor: '#294297'
+            },
             languageDictionary: {
                 title: "ClinGen Curator Interface"
             }
         });
         this.lock.on('authenticated', this.handleAuth0Login);
+
+        /*
+        if (window.Auth0Lock !== undefined) {
+            // CHANGEME
+            this.lock = new window.Auth0Lock('L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo', 'mrmin.auth0.com', {
+                additionalSignUpFields: [
+                    {
+                        name: "name",
+                        placeholder: "Your full name"
+                    }
+                ],
+                auth: {
+                    redirect: false
+                },
+                avatar: null,
+                socialButtonStyle: 'big',
+                theme: {
+                    logo: '/static/img/clingen-logo-only.svg',
+                    primaryColor: '#294297'
+                },
+                languageDictionary: {
+                    title: "ClinGen Curator Interface"
+                }
+            });
+            this.lock.on('authenticated', this.handleAuth0Login);
+        } else {
+            // Auth0Lock is not defined, so it either did not load, was blocked by the user, or jest testing is occuring.
+            // A custom error cannot be set, otherwise jest tests will fail due to the error page returning
+            // instead of the normal home page as jest expects. The following is a workaround to mimic the normal
+            // home page despite Auth0Lock not being found.
+            let auth0_not_found = {};
+            auth0_not_found = {
+                "@id": "/",
+                "@type": ["portal"],
+                "portal_title": "ClinGen",
+                "title": "Home"
+            };
+            this.setState({context: auth0_not_found});
+        }
+        */
     },
 
     ajaxPrefilter: function (options, original, xhr) {

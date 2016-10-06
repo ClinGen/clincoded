@@ -28,6 +28,7 @@ def auth0_access_token():
 def auth0_encode_user_token(auth0_access_token):
     return {'accessToken': auth0_access_token}
 
+
 @pytest.fixture(scope='session')
 def auth0_encode_user_profile(auth0_access_token):
     user_url = "https://{domain}/userinfo?access_token={access_token}" \
