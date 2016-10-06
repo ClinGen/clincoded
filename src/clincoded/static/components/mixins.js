@@ -99,31 +99,6 @@ module.exports.Auth0 = {
     componentDidMount: function() {
         this.extractSessionCookie();
         this.setState({loadingComplete: true});
-
-        var $lock = require('auth0-lock');
-        this.lock = new $lock.default('L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo', 'mrmin.auth0.com', {
-            additionalSignUpFields: [
-                {
-                    name: "name",
-                    placeholder: "Your full name"
-                }
-            ],
-            auth: {
-                redirect: false
-            },
-            avatar: null,
-            socialButtonStyle: 'big',
-            theme: {
-                logo: 'static/img/clingen-logo-only.svg',
-                primaryColor: '#294297'
-            },
-            languageDictionary: {
-                title: "ClinGen Curator Interface"
-            }
-        });
-        this.lock.on('authenticated', this.handleAuth0Login);
-
-        /*
         if (window.Auth0Lock !== undefined) {
             // CHANGEME
             this.lock = new window.Auth0Lock('L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo', 'mrmin.auth0.com', {
@@ -161,7 +136,6 @@ module.exports.Auth0 = {
             };
             this.setState({context: auth0_not_found});
         }
-        */
     },
 
     ajaxPrefilter: function (options, original, xhr) {
