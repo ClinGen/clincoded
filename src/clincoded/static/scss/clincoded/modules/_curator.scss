@@ -2232,18 +2232,6 @@ dl.inline-dl {
         }
     }
 
-    @media screen and (min-width: $screen-sm-min) {
-        .row:not(:first-child) {
-            display: table;
-
-            .col-sm-6 {
-                display: table-cell;
-                float: none;
-                vertical-align: top;
-            }
-        }
-    }
-
     .col-sm-6 {
         margin-bottom: 30px;
 
