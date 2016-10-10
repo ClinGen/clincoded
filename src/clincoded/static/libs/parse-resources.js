@@ -103,25 +103,27 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
         }
     }
     // Parse <HGVS> nodes
-    var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
-    if (HGVSnodes) {
-        for (let x of HGVSnodes) {
-            // Used for transcript tables on "Basic Information" tab in VCI
-            // Type property for identifying the nucleotide change transcripts
-            // and protein change transcripts
-            var hgvsObj = {
-                "HGVS": x.textContent,
-                "Change": x.getAttribute('Change'),
-                "AccessionVersion": x.getAttribute('AccessionVersion'),
-                "Type": x.getAttribute('Type')
-            };
-            // nucleotide change
-            if (x.getAttribute('Type') === 'HGVS, coding, RefSeq') {
-                variant.RefSeqTranscripts.NucleotideChangeList.push(hgvsObj);
-            }
-            // protein change
-            if (x.getAttribute('Type') === 'HGVS, protein, RefSeq') {
-                variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
+    if (hgvs_list) {
+        var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
+        if (HGVSnodes) {
+            for (let x of HGVSnodes) {
+                // Used for transcript tables on "Basic Information" tab in VCI
+                // Type property for identifying the nucleotide change transcripts
+                // and protein change transcripts
+                var hgvsObj = {
+                    "HGVS": x.textContent,
+                    "Change": x.getAttribute('Change'),
+                    "AccessionVersion": x.getAttribute('AccessionVersion'),
+                    "Type": x.getAttribute('Type')
+                };
+                // nucleotide change
+                if (x.getAttribute('Type') === 'HGVS, coding, RefSeq') {
+                    variant.RefSeqTranscripts.NucleotideChangeList.push(hgvsObj);
+                }
+                // protein change
+                if (x.getAttribute('Type') === 'HGVS, protein, RefSeq') {
+                    variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
+                }
             }
         }
     }
