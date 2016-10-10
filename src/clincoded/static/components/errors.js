@@ -90,7 +90,8 @@ var LoginDenied = module.exports.LoginDenied = React.createClass({
                         <div className="col-sm-12">
                             <h1>Login failure</h1>
                             <p>Access is restricted to ClinGen curators.</p>
-                            <p>If you are a ClinGen curator, you may <a href='mailto:clingen-helpdesk@lists.stanford.edu'>request an account</a>.</p>
+                            <p>If you are a ClinGen curator with a newly-created account, you may need to wait while we verify and add your account to the system.</p>
+                            <p>Please <a href='mailto:clingen-helpdesk@lists.stanford.edu'>email us</a> if we have not verified you for a long time.</p>
                         </div>
                     </div>
                 </div>
