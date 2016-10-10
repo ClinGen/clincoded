@@ -102,6 +102,29 @@ var LoginDenied = module.exports.LoginDenied = React.createClass({
 globals.content_views.register(LoginDenied, 'LoginDenied');
 
 
+var LoginNotVerified = module.exports.LoginNotVerified = React.createClass({
+    render: function() {
+        var context = this.props.context;
+        var itemClass = globals.itemClass(context, 'panel-gray');
+        return (
+            <div className="container">
+                <div className={itemClass}>
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <h1>Account not verified</h1>
+                            <p>Please check your inbox for an email from Auth0, and verify your email there.</p>
+                            <p>If you do not see this email or cannot verify your email, please <a href='mailto:clingen-helpdesk@lists.stanford.edu'>contact us</a>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+});
+
+globals.content_views.register(LoginNotVerified, 'LoginNotVerified');
+
+
 var RenderingError = module.exports.RenderingError = React.createClass({
     render: function() {
         var context = this.props.context;

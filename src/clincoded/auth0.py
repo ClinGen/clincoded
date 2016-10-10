@@ -31,6 +31,10 @@ class LoginDenied(HTTPForbidden):
     title = 'Login failure'
 
 
+class LoginNotVerified(HTTPForbidden):
+    title = 'Account not verified'
+
+
 class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
     """
     Checks assertion during authentication so login can construct user session.
@@ -76,7 +80,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             email = request._auth0_authenticated = user_info['email'].lower()
             return email
         else:
-            return None
+            raise LoginNotVerified()
 
     def remember(self, request, principal, **kw):
         return []
