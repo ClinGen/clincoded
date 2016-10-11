@@ -13,6 +13,15 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var InputMixin = form.InputMixin;
 
+/*
+NOTE: disease dependency of criteria codes are in a state of flux right now. The mapping to actually
+dictate whether or not a criteria is disease-dependent is in ../mapping/evidence_code.json, but the
+code to deal with the associated form rendering and storing is here. If criteria codes need to have
+their disease dependency modified, edit evidence_code. To change or remove its behavior, edit here
+(if re-enabling, search for 'DISEASE DEPENDENCY RESTRICTION' and read involved notes. For other tweaks,
+search for 'diseaseCriteria', 'diseaseAssociated', 'diseaseDependent', and finally 'disease')
+*/
+
 // Form component to be re-used by various tabs
 var CurationInterpretationForm = module.exports.CurationInterpretationForm = React.createClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
@@ -68,7 +77,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
         if (this.props.evidenceData) {
             this.setState({evidenceData: this.props.evidenceData, evidenceDataUpdated: this.props.evidenceDataUpdated});
         }
-        // ascertain which criteria code are disease dependent
+        // ascertain which criteria code are disease dependent - UNCOMMENT FOR DISEASE DEPENDENCY RESTRICTION
+        /*
         let tempDiseaseCriteria = [];
         this.props.criteria.map(criterion => {
             if (evidenceCodes[criterion].diseaseDependent) {
@@ -76,6 +86,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             }
         });
         this.setState({diseaseCriteria: tempDiseaseCriteria});
+        */
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -204,6 +215,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             flatInterpretation = curator.flatten(freshInterpretation);
             // lets do the disease check for saving criteria code here
             this.props.criteria.map(criterion => {
+                /*
                 if (evidenceCodes[criterion].diseaseDependent) {
                     // criteria is disease-dependent
                     if (flatInterpretation.disease && flatInterpretation.disease !== '') {
@@ -215,6 +227,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     // criteria is not disease-dependent, so add it to list of criteria to
                     submittedCriteria.push(criterion);
                 }
+                */
+                // UNCOMMENT ABOVE + COMMENT LINE BELOW FOR DISEASE DEPENDENCY RESTRICTION
+                submittedCriteria.push(criterion);
             });
             // do hard-coded check for PM2 vs PS4
             if (interpretation.evaluations && interpretation.evaluations.length > 0) {
@@ -421,12 +436,12 @@ var evalFormSectionWrapper = module.exports.evalFormSectionWrapper = function(no
 // description and disease-dependency are ascertained from evidence_codes.json
 var evalFormNoteSectionWrapper = module.exports.evalFormNoteSectionWrapper = function(criteriaList) {
     return (
-        <p className="alert alert-info">
+        <p className="alert alert-info criteria-description">
             {criteriaList.map((criteria, i) => {
                 return (
                     <span key={i}>
-                        <strong>{criteria}:</strong> {evidenceCodes[criteria].definitionLong}
-                        {evidenceCodes[criteria].diseaseDependent ? <span><br /><span className="label label-warning pull-right">Disease dependent</span></span> : null}
+                        <strong>{criteria}:</strong> <span dangerouslySetInnerHTML={ { __html: evidenceCodes[criteria].definitionLong } }></span>
+                        {evidenceCodes[criteria].diseaseDependent ? <span><br /><span className="label label-warning pull-right">Disease-specific</span></span> : null}
                         {i < criteriaList.length - 1 ? <span><br /><br /></span> : null}
                     </span>
                 );
@@ -455,11 +470,12 @@ var evalFormDropdownSectionWrapper = module.exports.evalFormDropdownSectionWrapp
 
 // helper function for evalFormDropdownSectionWrapper() to generate the dropdown for each criteria
 function evalFormValueDropdown(criteria) {
+    // ADD FOLLOWING LINE TO <INPUT> BELOW FOR DISEASE DEPENDENCY RESTRICTION
+    // inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated}
     return (
         <Input type="select" ref={criteria + "-status"} label={criteria + ":"} defaultValue="not-evaluated" handleChange={this.handleDropdownChange}
             error={this.getFormError(criteria + "-status")} clearError={this.clrFormErrors.bind(null, criteria + "-status")}
-            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group"
-            inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated}>
+            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group">
             <option value="not-evaluated">Not Evaluated</option>
             <option disabled="disabled"></option>
             <option value="met">Met</option>
@@ -493,10 +509,11 @@ var evalFormExplanationSectionWrapper = module.exports.evalFormExplanationSectio
 
 // helper function for evalFormExplanationSectionWrapper() to generate the explanation input for each criteria
 function evalFormExplanationDefaultInput(criteria, hidden) {
+    // ADD FOLLOWING LINE TO <INPUT> BELOW FOR DISEASE DEPENDENCY RESTRICTION
+    // inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated}
     return (
         <Input type="textarea" ref={criteria + "-explanation"} rows="3" label="Explanation:"
-            labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName={hidden ? "hidden" : "form-group"} handleChange={this.handleFormChange}
-            inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated} />
+            labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName={hidden ? "hidden" : "form-group"} handleChange={this.handleFormChange} />
     );
 }
 

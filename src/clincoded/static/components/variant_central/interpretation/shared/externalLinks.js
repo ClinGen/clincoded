@@ -21,22 +21,26 @@ module.exports.setContextLinks = function(nc_hgvs, ref) {
     var start = null;
     var end = null;
     var re = /:[g].(\d+)\D/;
-    var point = nc_hgvs.match(re)[1];
-    start = (parseInt(point) - 30).toString();
-    end = (parseInt(point) + 30).toString();
 
-    // set links and return
-    if (ref === 'GRCh38') {
-        return {
-            ucsc_url_38: external_url_map['UCSCGRCh38'] + chr + '%3A' + start + '-' + end,
-            viewer_url_38: external_url_map['VariationViewerGRCh38'] + chr + '&assm=GCF_000001405.28&from=' + start + '&to=' + end,
-            ensembl_url_38: external_url_map['EnsemblGRCh38'] + chr + ':' + start + '-' + end
-        };
-    } else if (ref === 'GRCh37') {
-        return {
-            ucsc_url_37: external_url_map['UCSCGRCh37'] + chr + '%3A' + start + '-' + end,
-            viewer_url_37: external_url_map['VariationViewerGRCh37'] + chr + '&assm=GCF_000001405.25&from=' + start + '&to=' + end,
-            ensembl_url_37: external_url_map['EnsemblGRCh37'] + chr + ':' + start + '-' + end
-        };
+    if (nc_hgvs.match(re) && nc_hgvs.match(re).length > 1) {
+        var point = nc_hgvs.match(re)[1];
+        start = (parseInt(point) - 30).toString();
+        end = (parseInt(point) + 30).toString();
+
+        //debugger;
+        // set links and return
+        if (ref === 'GRCh38') {
+            return {
+                ucsc_url_38: external_url_map['UCSCGRCh38'] + chr + '%3A' + start + '-' + end,
+                viewer_url_38: external_url_map['VariationViewerGRCh38'] + chr + '&assm=GCF_000001405.28&from=' + start + '&to=' + end,
+                ensembl_url_38: external_url_map['EnsemblGRCh38'] + chr + ':' + start + '-' + end
+            };
+        } else if (ref === 'GRCh37') {
+            return {
+                ucsc_url_37: external_url_map['UCSCGRCh37'] + chr + '%3A' + start + '-' + end,
+                viewer_url_37: external_url_map['VariationViewerGRCh37'] + chr + '&assm=GCF_000001405.25&from=' + start + '&to=' + end,
+                ensembl_url_37: external_url_map['EnsemblGRCh37'] + chr + ':' + start + '-' + end
+            };
+        }
     }
 };

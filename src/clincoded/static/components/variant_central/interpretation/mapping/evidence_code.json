@@ -1,6 +1,6 @@
 {
     "BA1": {
-        "class": "benign-strong",
+        "class": "stand-alone",
         "definition": "Allele frequency greater than 5% in a population database",
         "definitionLong": "Allele frequency is > 5% in ExAC, 1000 Genomes, or ESP",
         "category": "population",
@@ -17,34 +17,34 @@
         "class": "benign-strong",
         "definition": "Observation in controls inconsistent with disease penetrance",
         "definitionLong": "Observed in a healthy adult individual for a recessive (homozygous), dominant (heterozygous), or X-linked (hemizygous) disorder, with full penetrance expected at an early age",
-        "category": "population",
+        "category": "segregation",
         "diseaseDependent": true
     },
     "BS3": {
         "class": "benign-strong",
         "definition": "Well-established functional studies show no deleterious effect",
-        "definitionLong": "Well established in vitro or in vivo functional studies show no damaging effect on protein function or splicing",
-        "category": "functional",
+        "definitionLong": "Well established <i>in vitro</i> or <i>in vivo</i> functional studies show no damaging effect on protein function or splicing",
+        "category": "experimental",
         "diseaseDependent": true
     },
     "BS4": {
         "class": "benign-strong",
-        "definition": "Nonsegregation with disease",
+        "definition": "Non-segregation with disease",
         "definitionLong": "Lack of segregation in affected members of family (has caveat)",
         "category": "segregation",
         "diseaseDependent": true
     },
     "BP1": {
         "class": "benign-supporting",
-        "definition": "Missense in gene where only truncating cause disease",
+        "definition": "Missense in gene where primarily truncating cause disease",
         "definitionLong": "Missense variant in a gene for which primarily truncating variants are known to cause disease",
-        "category": "computational",
+        "category": "predictors",
         "diseaseDependent": true
     },
     "BP2": {
         "class": "benign-supporting",
-        "definition": "Observed in trans with a dominant variant",
-        "definitionLong": "Observed in trans with a pathogenic variant for a fully penetrant dominant gene/disorder or observed in cis with a pathogenic variant in any inheritance pattern",
+        "definition": "Observed in trans with path. variant for dominant disorder or cis any inheritance",
+        "definitionLong": "Observed in <i>trans</i> with a pathogenic variant for a fully penetrant dominant gene/disorder or observed in <i>cis</i> with a pathogenic variant in any inheritance pattern",
         "category": "segregation",
         "diseaseDependent": true
     },
@@ -58,7 +58,7 @@
     "BP4": {
         "class": "benign-supporting",
         "definition": "Multiple lines of computational evidence suggest no impact on gene /gene product",
-        "definitionLong": "Multiple lines of computational evidence suggest no impact on the gene or gene product (conservation, evolutionary, splicing impact, etc.) (has caveat)",
+        "definitionLong": "Multiple lines of computational evidence suggest no impact on gene or gene product (conservation, evolutionary, splicing impact, etc.) (has caveat)",
         "category": "computational",
         "diseaseDependent": false
     },
@@ -72,13 +72,13 @@
     "BP6": {
         "class": "benign-supporting",
         "definition": "Reputable source w/out shared data = benign",
-        "definitionLong": "Reputable source recently reports variant as benign, but the evidence is not available to the laboratory to perform an independent evalutation",
-        "category": "functional",
+        "definitionLong": "Reputable source recently reports variant as benign, but the evidence is not available to the laboratory to perform an independent evaluation",
+        "category": "segregation",
         "diseaseDependent": true
     },
     "BP7": {
         "class": "benign-supporting",
-        "definition": "Silent variant with non predicted splice impact",
+        "definition": "Silent variant predicted with no splice impact",
         "definitionLong": "A synonymous (silent) variant for which splicing prediction algorithms predict no impact to the splice consensus sequence nor the creation of a new splice site AND the nucleotide is not highly conserved",
         "category": "computational",
         "diseaseDependent": false
@@ -108,20 +108,20 @@
         "class": "pathogenic-supporting",
         "definition": "Patient's phenotype or FH highly specific for gene",
         "definitionLong": "Patient's phenotype or family history is highly specific for a disease with a single genetic etiology",
-        "category": "functional",
+        "category": "segregation",
         "diseaseDependent": true
     },
     "PP5": {
         "class": "pathogenic-supporting",
         "definition": "Reputable source = pathogenic",
         "definitionLong": "Reputable source recently reports variant as pathogenic, but the evidence is not available to the laboratory to perform an independent evalutation",
-        "category": "functional",
+        "category": "segregation",
         "diseaseDependent": true
     },
     "PM1": {
         "class": "pathogenic-moderate",
         "definition": "Mutational hot spot or well-studied functional domain without benign variation",
-        "definitionLong": "Located in a mutational hot spot and/or critical and well-established functional domain without benign variation",
+        "definitionLong": "Located in a mutational hot spot and/or critical and well-established functional domain (e.g. active site of enzyme) without benign variation",
         "category": "functional",
         "diseaseDependent": true
     },
@@ -135,14 +135,14 @@
     "PM3": {
         "class": "pathogenic-moderate",
         "definition": "For recessive disorders, detected in trans with a pathogenic variant",
-        "definitionLong": "For recessive disorders, detected in trans with a pathogenic variant",
+        "definitionLong": "For recessive disorders, detected in <i>trans</i> with a pathogenic variant",
         "category": "segregation",
         "diseaseDependent": true
     },
     "PM4": {
         "class": "pathogenic-moderate",
         "definition": "Protein length changing variant",
-        "definitionLong": "Protein length changes as a result of in-frame deletions/insertions in a nonrepeat region or stop-loss variant",
+        "definitionLong": "Protein length changes as a result of in-frame deletions/insertions in a non-repeat region or stop-loss variant",
         "category": "computational",
         "diseaseDependent": false
     },
@@ -156,28 +156,28 @@
     "PM6": {
         "class": "pathogenic-moderate",
         "definition": "De novo (without paternity & maternity confirmed)",
-        "definitionLong": "Assumed de novo, but without confirmation of maternity/paternity",
+        "definitionLong": "Assumed <i>de novo</i>, but without confirmation of maternity/paternity",
         "category": "segregation",
         "diseaseDependent": false
     },
     "PS1": {
         "class": "pathogenic-strong",
         "definition": "Same amino acid change as an established pathogenic variant",
-        "definitionLong": "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change (caveat - changes impacting splicing)",
+        "definitionLong": "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change (has caveat)",
         "category": "computational",
         "diseaseDependent": true
     },
     "PS2": {
         "class": "pathogenic-strong",
         "definition": "De novo (paternity and maternity confirmed)",
-        "definitionLong": "De novo (both maternity and paternity confirmed) in a patient with the disease and no family history",
+        "definitionLong": "<i>De novo</i> (both maternity and paternity confirmed) in a patient with the disease and no family history",
         "category": "segregation",
         "diseaseDependent": true
     },
     "PS3": {
         "class": "pathogenic-strong",
         "definition": "Well-established functional studies show a deleterious effect",
-        "definitionLong": "Well established in vitro or in vivo functional studies supportive of a damaging effect on the gene or gene product",
+        "definitionLong": "Well established <i>in vitro</i> or <i>in vivo</i> functional studies supportive of a damaging effect on the gene or gene product",
         "category": "functional",
         "diseaseDependent": true
     },
@@ -185,13 +185,13 @@
         "class": "pathogenic-strong",
         "definition": "Prevalence in affecteds statistically increased over controls",
         "definitionLong": "The prevalence of the variant in affected individuals is significantly increased compared with the prevalence in controls",
-        "category": "population",
-        "diseaseDependent": false
+        "category": "segregation",
+        "diseaseDependent": true
     },
     "PVS1": {
         "class": "pathogenic-very-strong",
         "definition": "Predicted null variant in a gene where LOF is a known mechanism of disease",
-        "definitionLong": "Null variant (nonsense, frameshift, cononical +/-1 or 2 splice sites, initiation codon, single or multiexon deletion) in a gene where LOF is a known mechanism of disease (caveats - variants at 3' end, genes where LOF is not a known disease mechanism, splice variants that lead to exon skipping but rest of protein intact, caution in presence of multiple transcripts)",
+        "definitionLong": "Null variant (nonsense, frameshift, canonical +/- 1 or 2 splice sites, initiation codon, single or multiexon deletion) in a gene where LOF is a known mechanism of disease (has caveats)",
         "category": "computational",
         "diseaseDependent": true
     }

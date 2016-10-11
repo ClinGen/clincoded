@@ -1930,5 +1930,20 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "bh7@sanger.ac.uk",
+        "first_name": "Ben",
+        "last_name": "Hutton",
+        "uuid": "246cd8b6-e6c5-4f2e-a4be-923c1188e213",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]

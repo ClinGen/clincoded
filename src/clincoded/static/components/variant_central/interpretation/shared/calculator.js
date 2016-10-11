@@ -1,100 +1,80 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var RestMixin = require('../../../rest').RestMixin;
-var form = require('../../../../libs/bootstrap/form');
-var Form = form.Form;
-var Input = form.Input;
-var FormMixin = form.FormMixin;
+import React from 'react';
+import  _ from 'underscore';
 
 
 var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.createClass({
-    mixins: [FormMixin, RestMixin],
-
     propTypes: {
         interpretation: React.PropTypes.object,
+        setCalculatedPathogenicity: React.PropTypes.func
     },
 
     getInitialState: function() {
         return {
-            rules: 'ACMG 2015' // Default role for calculation
+            rules: 'ACMG 2015', // Currently use ACMG rules only
+            interpretation: this.props.interpretation,
+            calculatedResult: null
         };
     },
 
-    render: function() {
-        var interpretation = this.props.interpretation;
-        var evaluations = interpretation && interpretation.evaluations && interpretation.evaluations.length ? interpretation.evaluations : null;
-        var result = evaluations ? calculatePathogenicity(evaluations) : null;
-        var rules = this.state.rules;
-
-        return (
-            <div>{interpretation ?
-                    progressBar(result, rules)
-                    :
-                    null
-                }
-            </div>
-        );
+    componentDidMount: function() {
+        if (this.props.interpretation && this.props.interpretation.evaluations && this.props.interpretation.evaluations.length) {
+            let evaluations = this.state.interpretation.evaluations;
+            let result = this.calculatePathogenicity(evaluations);
+            this.props.setCalculatedPathogenicity(result.assertion);
+            this.setState({calculatedResult: result});
+        }
     },
-});
 
-var progressBar = function(result, rules) {
-    return (
-        <div>
-            <div className="progress-bar">
-                <div className="benign-box">
-                    <dt>Benign:</dt>
-                    {result && result.benign_summary && result.benign_summary.length ? result.benign_summary.join(' | ') : 'No criteria met' }
-                </div>
-                <div className="pathogenic-box">
-                    <dt>Pathogenic:</dt>
-                    {result && result.path_summary && result.path_summary.length ? result.path_summary.join(' | ') : 'No criteria met' }
-                </div>
-                <div className="assertion-box">
-                    <dt>Calculated Pathogenicity{' (' + rules +')'}:</dt>
-                    {result && result.assertion ? result.assertion : 'None'}
-                </div>
-            </div>
-            <br /><br />
-        </div>
-    );
-};
+    componentWillReceiveProps: function(nextProps) {
+        if (nextProps.interpretation && !_.isEqual(nextProps.interpretation, this.state.interpretation)) {
+            this.setState({interpretation: nextProps.interpretation}, () => {
+                if (this.state.interpretation && this.state.interpretation.evaluations && this.state.interpretation.evaluations.length) {
+                    let evaluations = this.state.interpretation.evaluations;
+                    let result = this.calculatePathogenicity(evaluations);
+                    this.props.setCalculatedPathogenicity(result.assertion);
+                    this.setState({calculatedResult: result});
+                }
+            });
+        }
+    },
 
-// Function to calculate pathogenicity
-var calculatePathogenicity = function(evaluationObjList) {
+    calculatePathogenicity: function(evaluationObjList) {
         // setup count values
-        var MET = 'met';
-        var NOT_MET = 'not-met';
-        var NOT_EVALUATED = 'not-evaluated';
-        var MODIFIER_VS = 'very-strong';
-        var MODIFIER_S = 'strong';
-        var MODIFIER_M = 'moderate';
-        var MODIFIER_P = 'supporting';
-        var MODIFIER_SA = 'stand-alone';
+        const MET = 'met';
+        const NOT_MET = 'not-met';
+        const NOT_EVALUATED = 'not-evaluated';
+        const MODIFIER_VS = 'very-strong';
+        const MODIFIER_S = 'strong';
+        const MODIFIER_M = 'moderate';
+        const MODIFIER_P = 'supporting';
+        const MODIFIER_SA = 'stand-alone';
+
+        let result = null;
 
         if (evaluationObjList && evaluationObjList.length) {
-            var evaluated = false;
+            let evaluated = false;
 
             // Initialize count numbers
-            var pvs_count = 0;
-            var ps_count = 0;
-            var pm_count = 0;
-            var pp_count = 0;
-            var ba_count = 0;
-            var bs_count = 0;
-            var bp_count = 0;
+            let pvs_count = 0;
+            let ps_count = 0;
+            let pm_count = 0;
+            let pp_count = 0;
+            let ba_count = 0;
+            let bs_count = 0;
+            let bp_count = 0;
 
             // count each criteria level (PVS, PS, PM, PP, BA, BS, BP)
-            for (var evaluationObj of evaluationObjList) {
+            for (let evaluationObj of evaluationObjList) {
                 // In each evaluation object, criteria and criteriaStatus must exist, criteriaModifier may or may not
-                var criteria = evaluationObj.criteria;
-                var criteriaStatus = evaluationObj.criteriaStatus;
+                let criteria = evaluationObj.criteria;
+                let criteriaStatus = evaluationObj.criteriaStatus;
 
                 // count met criteria only, modified by criteriaModifier
                 if (criteriaStatus === MET) {
                     evaluated = true;
 
-                    var criteriaModifier = evaluationObj.criteriaModifier;
+                    let criteriaModifier = evaluationObj.criteriaModifier;
                     if ((criteria.indexOf('PVS') === 0 && criteriaModifier === '') || (criteria.indexOf('P') === 0 && criteriaModifier === MODIFIER_VS)) {
                         pvs_count += 1;
                     } else if ((criteria.indexOf('PS') === 0 && criteriaModifier === '') || (criteria.indexOf('P') === 0 && criteriaModifier === MODIFIER_S)) {
@@ -115,13 +95,13 @@ var calculatePathogenicity = function(evaluationObjList) {
                 }
             }
 
-            var contradict = ((pvs_count > 0 || ps_count > 0 || pm_count > 0 || pp_count > 0) && (ba_count > 0 || bs_count > 0 || bp_count > 0)) ? true : false;
-            var patho_assertion = null;
-            var benign_assertion = null;
+            let contradict = ((pvs_count > 0 || ps_count > 0 || pm_count > 0 || pp_count > 0) && (ba_count > 0 || bs_count > 0 || bp_count > 0)) ? true : false;
+            let patho_assertion = null;
+            let benign_assertion = null;
 
             // Algorithm, ACMG Standarts & Guidelines 2015
             // setup cases for 4 types of assertions (Pathogenic, Likely pathogenic, Benign and Likely benign)
-            var cases = {
+            let cases = {
                 path_pvs2: pvs_count >= 2 ? true : false,
                 path_pvs1_ps1: (pvs_count === 1 && ps_count >= 1) ? true : false,
                 path_pvs1_pm2: (pvs_count === 1 && pm_count >= 2) ? true : false,
@@ -144,9 +124,9 @@ var calculatePathogenicity = function(evaluationObjList) {
 
                 likelyBenign_bs1_pp1: (bs_count === 1 && bp_count === 1) ? true : false,
                 likelyBenign_pp2: (bp_count >= 2) ? true : false,
-            }
+            };
 
-            for (var cs of Object.keys(cases)) {
+            for (let cs of Object.keys(cases)) {
                 if (cases[cs]) {
                     if (cs.indexOf('path_') !== -1) {
                         patho_assertion = 'Pathogenic';
@@ -162,7 +142,7 @@ var calculatePathogenicity = function(evaluationObjList) {
                 }
             }
 
-            var assertion = null;
+            let assertion = null;
             if (!evaluated) {
                 assertion = '';
             } else if ((patho_assertion && contradict) || (benign_assertion && contradict)) {
@@ -175,206 +155,101 @@ var calculatePathogenicity = function(evaluationObjList) {
                 assertion = 'Uncertain significance - insufficient evidence';
             }
 
-            var result = {
+            result = {
                 assertion: assertion,
-                path_summary: [],
-                benign_summary: []
+                path_summary: {},
+                benign_summary: {}
             };
+
             if (pvs_count > 0) {
-                result.path_summary.push('Very strong: ' + pvs_count.toString());
+                result.path_summary['Very strong'] = pvs_count;
             }
             if (ps_count > 0) {
-                result.path_summary.push('Strong: ' + ps_count.toString());
+                result.path_summary['Strong'] = ps_count;
             }
             if (pm_count > 0) {
-                result.path_summary.push('Moderate: ' + pm_count.toString());
+                result.path_summary['Moderate'] = pm_count;
             }
             if (pp_count > 0) {
-                result.path_summary.push('Supporting: ' + pp_count.toString());
+                result.path_summary['Supporting'] = pp_count;
             }
             if (ba_count > 0) {
-                result.benign_summary.push('Stand alone: ' + ba_count.toString());
+                result.benign_summary['Stand alone'] = ba_count;
             }
             if (bs_count > 0) {
-                result.benign_summary.push('Strong: ' + bs_count.toString());
+                result.benign_summary['Strong'] = bs_count;
             }
             if (bp_count > 0) {
-                result.benign_summary.push('Supporting: ' + bp_count.toString());;
+                result.benign_summary['Supporting'] = bp_count;
             }
         }
-
         return result;
-};
-
-var TestCalculator = module.exports.TestCalculator = React.createClass({
-    mixins: [FormMixin, RestMixin],
-
-    propTypes: {
-        interpretation: React.PropTypes.object,
-    },
-
-    getInitialState: function() {
-        return {
-            // For test pathogenicity calculator only
-            //criteriaList: null,
-            criteria_evaluated: null,
-            PVS1: false,
-            PS1: false,
-            PS2: false,
-            PS3: false,
-            PS4: false,
-            PM1: false,
-            PM2: false,
-            PM3: false,
-            PM4: false,
-            PM5: false,
-            PM6: false,
-            PP1: false,
-            PP2: false,
-            PP3: false,
-            PP4: false,
-            PP5: false,
-            BA1: false,
-            BS1: false,
-            BS2: false,
-            BS3: false,
-            BS4: false,
-            BP1: false,
-            BP2: false,
-            BP3: false,
-            BP4: false,
-            BP5: false,
-            BP6: false,
-            BP7: false,
-            // Test above
-
-            rules: 'ACMG 2015' // Default role for calculation
-        };
-    },
-
-    // Function for test pathogeinicity calculator only, will be removed later.
-    handleChange: function(ref, e) {
-        var criteria_value = this.refs[ref].getValue();
-        if (!this.state.ref || this.state.ref !== criteria_value) {
-            var critObj = {};
-            critObj[ref] = criteria_value;
-            this.setState(critObj);
-        }
-
-        var criteria_evaluated = this.state.criteria_evaluated ? this.state.criteria_evaluated : [];
-        var criteriaObj = {};
-        criteriaObj.criteria = ref;
-        if (criteria_value === 'not-met' || criteria_value === 'met') {
-            criteriaObj.criteriaStatus = criteria_value;
-            criteriaObj.criteriaModifier = '';
-        } else {
-            criteriaObj.criteriaStatus = 'met';
-            criteriaObj.criteriaModifier = criteria_value;
-        }
-
-        var criteria_index = -1;
-        criteria_evaluated.map((ct, i) => {
-            if (ct.criteria === ref) {
-                criteria_index = i;
-            }
-        });
-        if (criteria_index > -1 && criteria_value === 'not-evaluated') {
-            criteria_evaluated.splice(criteria_index, 1);
-        } else if (criteria_index > -1 ) {
-            criteria_evaluated[criteria_index] = criteriaObj;
-        } else if (criteria_value !== 'not-evaluated') {
-            criteria_evaluated.push(criteriaObj);
-        }
-
-        this.setState({
-            criteria_evaluated: criteria_evaluated
-        });
-    },
-
-    // Function for testing pathogenic calculator. Will be removed later.
-    setDropdown: function(criteria) {
-        return (
-            <Input type="select" ref={criteria} label={criteria + ':'} defaultValue="not-evaluated" handleChange={this.handleChange} labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-9">
-                <option value="not-evaluated">Not Evaluated</option>
-                <option disabled="disabled"></option>
-                <option value="met">Met</option>
-                <option value="not-met">Not Met</option>
-                {(criteria.indexOf('PP') === 0 || criteria.indexOf('BP') === 0) ? null : <option value="supporting">Supporting</option>}
-                {criteria.indexOf('M') === 1 ? null : (criteria.indexOf('P') === 0 ? <option value="moderate">Moderate</option> : null)}
-                {criteria.indexOf('S') === 1 ? null : <option value="strong">Strong</option>}
-                {criteria.indexOf('VS') === 1 ? null : (criteria.indexOf('P') === 0 ? <option value="very-strong">Very Strong</option> : null)}
-            </Input>
-        );
     },
 
     render: function() {
-        var result = calculatePathogenicity(this.state.criteria_evaluated);
-        var rules = this.state.rules;
+        let interpretation = this.state.interpretation ? this.state.interpretation : null;
+        let evaluations = interpretation && interpretation.evaluations && interpretation.evaluations.length ? interpretation.evaluations : null;
+        let result = this.state.calculatedResult ? this.state.calculatedResult : null;
+        let rules = this.state.rules;
+
+        let benign_summary = result && result.benign_summary ? result.benign_summary : null;
+        let path_summary = result && result.path_summary ? result.path_summary : null;
 
         return (
-            <div style={{'marginTop':'30px','paddingTop':'10px','borderTop':'solid 1px #aaa'}}>
-                <div>
-                    <span style={{'fontSize':'18px'}}><b>Test Pathogenicity Calculator</b></span>
-                    <br />
-                    <span style={{'paddingLeft':'10px','fontSize':'16px'}}><i>Select option values for any combination of criteria and check result in <b>progress bar below</b>.</i></span>
-                </div>
-                {progressBar(result, rules)}
-                <br />
-                <Form>
-                    <table style={{'width':'100%', 'marginTop':'20px'}}>
-                        <tbody>
-                            <tr style={{'backgroundColor':'#f9d8d8'}}>
-                                <td style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('PVS1')}
-                                </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('PS1')}
-                                    {this.setDropdown('PS2')}
-                                    {this.setDropdown('PS3')}
-                                    {this.setDropdown('PS4')}
-                                </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%', 'paddingTop':'20px'}}>
-                                    {this.setDropdown('PM1')}
-                                    {this.setDropdown('PM2')}
-                                    {this.setDropdown('PM3')}
-                                    {this.setDropdown('PM4')}
-                                    {this.setDropdown('PM5')}
-                                    {this.setDropdown('PM6')}
-                                </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('PP1')}
-                                    {this.setDropdown('PP2')}
-                                    {this.setDropdown('PP3')}
-                                    {this.setDropdown('PP4')}
-                                    {this.setDropdown('PP5')}
-                                </td>
-                            </tr>
-                            <tr style={{'backgroundColor':'#c7e9c7'}}>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('BA1')}
-                                </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('BS1')}
-                                    {this.setDropdown('BS2')}
-                                    {this.setDropdown('BS3')}
-                                    {this.setDropdown('BS4')}
-                                </td>
-                                <td className="clearfix" style={{'verticalAlign':'top','width':'25%','paddingTop':'20px'}}>
-                                    {this.setDropdown('BP1')}
-                                    {this.setDropdown('BP2')}
-                                    {this.setDropdown('BP3')}
-                                    {this.setDropdown('BP4')}
-                                    {this.setDropdown('BP5')}
-                                    {this.setDropdown('BP6')}
-                                    {this.setDropdown('BP7')}
-                                </td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </Form>
+            <div>
+                {interpretation ?
+                    <div className="clearfix progress-bar-area">
+                        <div className="col-lg-4 col-md-4 col-sm-4 col-xs-12 benign-box">
+                            <dl className="benign-result">
+                                <dt>Benign</dt>
+                                <dd>
+                                    {benign_summary && Object.keys(benign_summary).length ?
+                                        Object.keys(benign_summary).map((criteria, i) => {
+                                            return (
+                                                <span key={i} className="btn btn-default btn-xs criteria-strength">
+                                                    {criteria + ': '}
+                                                    <span className="badge">{benign_summary[criteria]}</span>
+                                                    {i < 2 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
+                                                </span>
+                                            );
+                                        })
+                                        :
+                                        'No criteria met'
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                        <div className="col-lg-5 col-md-4 col-sm-4 col-xs-12 path-box">
+                            <dl className="path-result">
+                                <dt>Pathogenic</dt>
+                                <dd>
+                                    {path_summary && Object.keys(path_summary).length ?
+                                        Object.keys(path_summary).map((criteria, i) => {
+                                            return (
+                                                <span key={i} className="btn btn-default btn-xs criteria-strength">
+                                                    {criteria + ': '}
+                                                    <span className="badge">{path_summary[criteria]}</span>
+                                                    {i < 3 ? <span>&nbsp;&nbsp;&nbsp;</span> : null}
+                                                </span>
+                                            );
+                                        })
+                                        :
+                                        'No criteria met'
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                        <div className="col-lg-3 col-md-4 col-sm-4 col-xs-12 assertion-box">
+                             <dl className="calculate-result">
+                                <dt>Calculated Pathogenicity</dt>
+                                <dd>{result && result.assertion ? result.assertion : 'None'}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    :
+                    null
+                }
             </div>
         );
-    }
+    },
 });
-

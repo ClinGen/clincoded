@@ -20,26 +20,12 @@
         "autoClassification": {
             "title": "Classification",
             "description": "Classification calculated from combinbed criteria.",
-            "type": "string",
-            "enum": [
-                "Pathogenic",
-                "Likely pathogenic",
-                "Benign",
-                "Likely benign",
-                "Uncertain significance"
-            ]
+            "type": "string"
         },
         "alteredClassification": {
             "title": "Altered Classification",
             "description": "Classification altered by user",
-            "type": "string",
-            "enum": [
-                "Pathogenic",
-                "Likely pathogenic",
-                "Benign",
-                "Likely benign",
-                "Uncertain significance"
-            ]
+            "type": "string"
         },
         "reason": {
             "title": "Reasons",

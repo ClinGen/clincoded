@@ -16,8 +16,30 @@ function parseClinvar(xml, extended){
             // Get the ID (just in case) and Preferred Title
             variant.clinvarVariantId = $VariationReport.getAttribute('VariationID');
             variant.clinvarVariantTitle = $VariationReport.getAttribute('VariationName');
+            // FIXME: Need to handle 'Haplotype' variant which has multiple alleles
+            // e.g. http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=7901
             var $Allele = $VariationReport.getElementsByTagName('Allele')[0];
             if ($Allele) {
+                // Parse <VariantType> node under <Allele>
+                let $variationType = $Allele.getElementsByTagName('VariantType')[0];
+                if ($variationType) {
+                    variant.variationType = $variationType.textContent;
+                }
+                // Parse <MolecularConsequence> node under <MolecularConsequenceList>
+                let $MolecularConsequenceListNode = $Allele.getElementsByTagName('MolecularConsequenceList')[0];
+                let $MolecularConsequenceNodes = [];
+                variant.molecularConsequenceList = [];
+                if ($MolecularConsequenceListNode) {
+                    $MolecularConsequenceNodes = $MolecularConsequenceListNode.getElementsByTagName('MolecularConsequence');
+                    for(let node of $MolecularConsequenceNodes) {
+                        let molecularItem = {
+                            "hgvsName": node.getAttribute('HGVS'),
+                            "term": node.getAttribute('Function'),
+                            "soId": node.getAttribute('SOid')
+                        };
+                        variant.molecularConsequenceList.push(molecularItem);
+                    }
+                }
                 var $HGVSlist_raw = $Allele.getElementsByTagName('HGVSlist')[0];
                 if ($HGVSlist_raw) {
                     variant.hgvsNames = {};
@@ -44,7 +66,7 @@ function parseClinvar(xml, extended){
                 }
                 // Call to extract more ClinVar data from XML response
                 if (extended) {
-                    parseClinvarExtended(variant, $Allele, $HGVSlist_raw, $VariationReport);
+                    parseClinvarExtended(variant, $Allele, $HGVSlist_raw, $VariationReport, $MolecularConsequenceNodes);
                 }
             }
         }
@@ -53,7 +75,7 @@ function parseClinvar(xml, extended){
 }
 
 // Function to extract more ClinVar data than what the db stores
-function parseClinvarExtended(variant, allele, hgvs_list, dataset) {
+function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularConsequenceNodes) {
     variant.RefSeqTranscripts = {};
     variant.gene = {};
     variant.allele = {};
@@ -63,11 +85,12 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset) {
     variant.RefSeqTranscripts.NucleotideChangeList = [];
     variant.RefSeqTranscripts.MolecularConsequenceList = [];
     variant.RefSeqTranscripts.ProteinChangeList = [];
+    // Get the 'VariationType' attribute in <VariationReport> node
+    // Not to be confused with the <VariantType> node under <Allele>
+    variant.clinvarVariationType = dataset.getAttribute('VariationType');
     // Parse <MolecularConsequence> nodes
-    var MolecularConsequenceList = allele.getElementsByTagName('MolecularConsequenceList')[0];
-    if (MolecularConsequenceList) {
-        var MolecularConsequence = MolecularConsequenceList.getElementsByTagName('MolecularConsequence');
-        for(let n of MolecularConsequence) {
+    if (molecularConsequenceNodes) {
+        for(let n of molecularConsequenceNodes) {
             // Used for transcript tables on "Basic Information" tab in VCI
             // HGVS property for mapping to transcripts with matching HGVS names
             // SOid and Function properties for UI display
@@ -80,33 +103,42 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset) {
         }
     }
     // Parse <HGVS> nodes
-    var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
-    if (HGVSnodes) {
-        for (let x of HGVSnodes) {
-            // Used for transcript tables on "Basic Information" tab in VCI
-            // Type property for identifying the nucleotide change transcripts
-            // and protein change transcripts
-            var hgvsObj = {
-                "HGVS": x.textContent,
-                "Change": x.getAttribute('Change'),
-                "AccessionVersion": x.getAttribute('AccessionVersion'),
-                "Type": x.getAttribute('Type')
-            };
-            // nucleotide change
-            if (x.getAttribute('Type') === 'HGVS, coding, RefSeq') {
-                variant.RefSeqTranscripts.NucleotideChangeList.push(hgvsObj);
-            }
-            // protein change
-            if (x.getAttribute('Type') === 'HGVS, protein, RefSeq') {
-                variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
+    if (hgvs_list) {
+        var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
+        if (HGVSnodes) {
+            for (let x of HGVSnodes) {
+                // Used for transcript tables on "Basic Information" tab in VCI
+                // Type property for identifying the nucleotide change transcripts
+                // and protein change transcripts
+                var hgvsObj = {
+                    "HGVS": x.textContent,
+                    "Change": x.getAttribute('Change'),
+                    "AccessionVersion": x.getAttribute('AccessionVersion'),
+                    "Type": x.getAttribute('Type')
+                };
+                // nucleotide change
+                if (x.getAttribute('Type') === 'HGVS, coding, RefSeq') {
+                    variant.RefSeqTranscripts.NucleotideChangeList.push(hgvsObj);
+                }
+                // protein change
+                if (x.getAttribute('Type') === 'HGVS, protein, RefSeq') {
+                    variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
+                }
             }
         }
     }
     // Parse <gene> node
     var geneList = dataset.getElementsByTagName('GeneList')[0];
-    var geneNode = geneList.getElementsByTagName('Gene')[0];
-    variant.gene.symbol = geneNode.getAttribute('Symbol');
-    variant.gene.full_name = geneNode.getAttribute('FullName');
+    if (geneList) {
+        var geneNode = geneList.getElementsByTagName('Gene')[0];
+        if (geneNode) {
+            variant.gene.id = geneNode.getAttribute('GeneID');
+            variant.gene.symbol = geneNode.getAttribute('Symbol');
+            variant.gene.full_name = geneNode.getAttribute('FullName');
+            variant.gene.hgnc_id = geneNode.getAttribute('HGNCID');
+        }
+    }
+
     // Evaluate whether a variant has protein change
     // First check whether te <ProteinChange> node exists. If not,
     // then check whether the <HGVS> node with Type="HGVS, protein, RefSeq" attribute exists

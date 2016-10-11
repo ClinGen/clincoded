@@ -1,20 +1,18 @@
 'use strict';
 var React = require('react');
-var globals = require('../../globals');
 var evidenceCodes = require('./mapping/evidence_code.json');
-
-var queryKeyValue = globals.queryKeyValue;
-var editQueryValue = globals.editQueryValue;
 
 // Display met criteria
 var CurationInterpretationCriteria = module.exports.CurationInterpretationCriteria = React.createClass({
     propTypes: {
-        interpretation: React.PropTypes.object
+        interpretation: React.PropTypes.object,
+        selectedTab: React.PropTypes.string
     },
 
     getInitialState: function() {
         return {
-            interpretation: this.props.interpretation
+            interpretation: this.props.interpretation,
+            selectedTab: this.props.selectedTab
         };
     },
 
@@ -22,50 +20,79 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
         if (nextProps.interpretation && this.props.interpretation) {
             this.setState({interpretation: nextProps.interpretation});
         }
+        if (nextProps.selectedTab) {
+            this.setState({selectedTab: nextProps.selectedTab});
+        }
     },
 
-    // FIXME: fake data attribute to flag criteria that can be evaluated but not yet evaluated
-    // after associating a disease with interpretation.
-    // Shall be removed when actual functionality is implemented.
-    handleCriteria: function(criteria_code) {
-        var status;
-        var evaluated = ["BA1", "BS1", "BS2", "BP1", "BP3", "BP7", "PP3", "PM2", "PM4", "PM5", "PS1", "PS4"];
-        var not_evaluated = ["BS3", "BS4", "BP2", "BP4", "PP1", "PP2", "PM1", "PS3"];
-        for (let x of evaluated) {
-            if (x === criteria_code) {
-                status = "evaluated";
+    // Method to render individual criteria codes and their respective tooltip
+    // 'data-status' attribute flags whether a criterion is met
+    renderCriteriaBar: function(key, evidence, interpretation) {
+        let status = 'not-evaluated';
+        // Flag 'met' criteria via [data-status]
+        let evalArray = interpretation.evaluations;
+        if (evalArray) {
+            if (evalArray.length) {
+                evalArray.forEach(entry => {
+                    if (typeof entry.criteria !== 'undefined' && entry.criteria === key) {
+                        status = entry.criteriaStatus;
+                    }
+                });
             }
         }
-        for (let y of not_evaluated) {
-            if (y === criteria_code) {
-                status = "not_evaluated";
-            }
-        }
-        return status;
-    },
-
-    render: function() {
-        var self =this;
-        var evidenceCodesList = ["BA1","BS1", "BS2", "BS3", "BS4", "BP1", "BP2", "BP3", "BP4", "BP5", "BP6", "BP7", "PP1", "PP2", "PP3", "PP4", "PP5",
-            "PM1", "PM2", "PM3", "PM4", "PM5", "PM6", "PS1", "PS2", "PS3", "PS4", "PVS1"];
         return (
-            <div className="container curation-variant">
-                {(this.state.interpretation) ?
-                    <div className="btn-toolbar" role="toolbar" aria-label="Criteria bar with code buttons">
+            <button className={'btn btn-default ' + evidence[key].class + ' ' + evidence[key].category
+                + this.getCurrentTab(evidence[key].category)}
+                type="button" key={key} data-status={status} data-
+                data-toggle="tooltip" data-placement="top" data-tooltip={evidence[key].definition}>
+                <span>{key}</span>
+            </button>
+        );
+    },
+
+    // Method to return current tab
+    getCurrentTab: function(category) {
+        let currentTabName, className = '';
+        let currentTab = this.state.selectedTab;
+        if (currentTab) {
+            switch (currentTab) {
+                case 'population':
+                    currentTabName = 'population';
+                    break;
+                case 'predictors':
+                    currentTabName = 'computational';
+                    break;
+                case 'experimental':
+                    currentTabName = 'functional';
+                    break;
+                case 'segregation-case':
+                    currentTabName = 'segregation';
+                    break;
+                default:
+                    currentTabName = null;
+            }
+        }
+        if (currentTabName && currentTabName === category) {
+            className = ' onCurrentTab';
+        }
+        return className;
+    },
+
+    render() {
+        var keys = Object.keys(evidenceCodes);
+        var interpretation = this.state.interpretation;
+
+        return (
+            <div className="container curation-criteria curation-variant">
+                {(interpretation) ?
+                    <div className="criteria-bar btn-toolbar" role="toolbar" aria-label="Criteria bar with code buttons">
                         <div className="criteria-group btn-group btn-group-sm" role="group" aria-label="Criteria code button group">
-                            {/* FIXME: Remove 'data-status' attribute when actual functionality is implemented to handle 'met' criteria */}
-                            {evidenceCodesList.map(function(evidence, i) {
-                                return (
-                                    <button type="button" className={'btn btn-default ' + evidenceCodes[evidence].class} key={i} data-status={self.handleCriteria(evidence)}
-                                        data-toggle="tooltip" data-placement="top" data-tooltip={evidenceCodes[evidence].definition}>
-                                        <span>{evidence}</span>
-                                    </button>
-                                );
+                            {keys.map(key => {
+                                return (this.renderCriteriaBar(key, evidenceCodes, interpretation));
                             })}
-                        </div>
+                        </div> 
                     </div>
-                    : null
-                }
+                : null}
             </div>
         );
     }

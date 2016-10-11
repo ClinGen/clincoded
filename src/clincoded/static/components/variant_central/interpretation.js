@@ -34,6 +34,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_myGeneInfo: React.PropTypes.object,
         href_url: React.PropTypes.object,
         updateInterpretationObj: React.PropTypes.func,
+        getSelectedTab: React.PropTypes.func,
         ext_myVariantInfo: React.PropTypes.object,
         ext_bustamante: React.PropTypes.object,
         ext_ensemblVariation: React.PropTypes.object,
@@ -41,8 +42,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_clinvarEutils: React.PropTypes.object,
         ext_clinVarEsearch: React.PropTypes.object,
         ext_clinVarRCV: React.PropTypes.array,
+        ext_clinvarInterpretationSummary: React.PropTypes.object,
         ext_ensemblGeneId: React.PropTypes.string,
         ext_geneSynonyms: React.PropTypes.array,
+        ext_singleNucleotide: React.PropTypes.bool,
         loading_clinvarEutils: React.PropTypes.bool,
         loading_clinvarEsearch: React.PropTypes.bool,
         loading_clinvarRCV: React.PropTypes.bool,
@@ -50,7 +53,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         loading_ensemblVariation: React.PropTypes.bool,
         loading_myVariantInfo: React.PropTypes.bool,
         loading_myGeneInfo: React.PropTypes.bool,
-        loading_bustamante: React.PropTypes.bool
+        loading_bustamante: React.PropTypes.bool,
+        setCalculatedPathogenicity: React.PropTypes.func,
+        selectedTab:React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -64,8 +69,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_clinvarEutils: this.props.ext_clinvarEutils,
             ext_clinVarEsearch: this.props.ext_clinVarEsearch,
             ext_clinVarRCV: this.props.ext_clinVarRCV,
+            ext_clinvarInterpretationSummary: this.props.ext_clinvarInterpretationSummary,
             ext_ensemblGeneId: this.props.ext_ensemblGeneId,
             ext_geneSynonyms: this.props.ext_geneSynonyms,
+            ext_singleNucleotide: this.props.ext_singleNucleotide,
             loading_clinvarEutils: this.props.loading_clinvarEutils,
             loading_clinvarEsearch: this.props.loading_clinvarEsearch,
             loading_clinvarRCV: this.props.loading_clinvarRCV,
@@ -75,16 +82,14 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_myGeneInfo: this.props.loading_myGeneInfo,
             loading_bustamante: this.props.loading_bustamante,
             //remember current tab/subtab so user will land on that tab when interpretation starts
-            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
+            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info')
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
         // this block is for handling props and states when props (external data) is updated after the initial load/rendering
         // when props are updated, update the parent interpreatation object, if applicable
-        if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
-            this.setState({interpretation: nextProps.interpretation});
-        }
+        this.setState({interpretation: nextProps.interpretation});
         if (nextProps.ext_myGeneInfo) {
             this.setState({ext_myGeneInfo: nextProps.ext_myGeneInfo});
         }
@@ -109,13 +114,20 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (nextProps.ext_clinVarRCV) {
             this.setState({ext_clinVarRCV: nextProps.ext_clinVarRCV});
         }
+        if (nextProps.ext_clinvarInterpretationSummary) {
+            this.setState({ext_clinvarInterpretationSummary: nextProps.ext_clinvarInterpretationSummary});
+        }
         if (nextProps.ext_ensemblGeneId) {
             this.setState({ext_ensemblGeneId: nextProps.ext_ensemblGeneId});
         }
         if (nextProps.ext_geneSynonyms) {
             this.setState({ext_geneSynonyms: nextProps.ext_geneSynonyms});
         }
+        if (nextProps.selectedTab) {
+            this.setState({selectedTab: nextProps.selectedTab});
+        }
         this.setState({
+            ext_singleNucleotide: nextProps.ext_singleNucleotide,
             loading_myGeneInfo: nextProps.loading_myGeneInfo,
             loading_myVariantInfo: nextProps.loading_myVariantInfo,
             loading_bustamante: nextProps.loading_bustamante,
@@ -136,6 +148,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             this.setState({selectedTab: tab});
             window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'tab', tab));
         }
+        this.props.getSelectedTab(tab);
     },
 
     render: function() {
@@ -148,7 +161,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
         return (
             <div className="container curation-variant-tab-group">
-                <PathogenicityCalculator interpretation={interpretation} />
+                <PathogenicityCalculator interpretation={interpretation} setCalculatedPathogenicity={this.props.setCalculatedPathogenicity} />
                 <div className="vci-tabs">
                     <ul className="vci-tabs-header tab-label-list" role="tablist">
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
@@ -166,6 +179,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_clinVarRCV={this.state.ext_clinVarRCV}
+                            ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             loading_clinvarEutils={this.state.loading_clinvarEutils}
                             loading_clinvarRCV={this.state.loading_clinvarRCV}
                             loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP} />
@@ -178,6 +192,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
+                            ext_singleNucleotide={this.state.ext_singleNucleotide}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_ensemblVariation={this.state.loading_ensemblVariation} />
                     </div>
@@ -190,6 +205,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_bustamante={this.state.ext_bustamante}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch}
+                            ext_singleNucleotide={this.state.ext_singleNucleotide}
                             loading_bustamante={this.state.loading_bustamante}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch} />
@@ -251,10 +267,17 @@ var InterpretationModifyHistory = React.createClass({
         return (
             <div>
                 {history.meta.interpretation.mode == 'edit-disease' ?
-                    <span>Disease <strong>{disease.term}</strong> associated with Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></a> interpretation</span>
+                    disease ?
+                        <span>Disease <strong>{disease.term}</strong> associated with Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></a> interpretation</span>
+                        : <span>Disease association removed from Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></a> interpretation</span>
+                : null}
+                {history.meta.interpretation.mode == 'edit-inheritance' ?
+                    interpretation.modeInheritance ?
+                        <span>Mode of inheritance <i>{interpretation.modeInheritance}</i> associated with Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></a> interpretation</span>
+                        : <span>Mode of inheritance association removed from Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></a> interpretation</span>
                 : null}
                 {history.meta.interpretation.mode == 'update-eval' ?
-                    <span>Evaluation(s) updated for Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong> {disease ? <span>({disease.term})</span> : null}</a></span>
+                    <span>Evaluation(s) updated for Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong> {disease ? <span>({disease.term})</span> : null}</a></span>
                 : null}
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>

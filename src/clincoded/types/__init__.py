@@ -124,6 +124,7 @@ class Variant(Item):
         'associatedInterpretations.disease',
         'associatedInterpretations.transcripts',
         'associatedInterpretations.proteins',
+        'associatedInterpretations.provisional_variant',
     ]
     rev = {
         'associatedPathogenicities': ('pathogenicity', 'variant'),
@@ -1003,7 +1004,11 @@ class Interpretation(Item):
         'evaluations.computational',
         'evaluations.computational.submitted_by',
         'provisional_variant',
-        'provisional_variant.submitted_by'
+        'provisional_variant.submitted_by',
+        'extra_evidence_list',
+        'extra_evidence_list.submitted_by',
+        'extra_evidence_list.articles',
+        'extra_evidence_list.articles.submitted_by'
     ]
 
     @calculated_property(schema={
@@ -1053,6 +1058,22 @@ class Interpretation(Item):
     })
     def provisional_count(self, provisional_variant=[]):
         return len(provisional_variant)
+
+
+@collection(
+    name='extra-evidence',
+    properties={
+        'title': "Extra evidence for VCI",
+        'description': 'Extra evidence for VCI',
+    })
+class ExtraEvidence(Item):
+    item_type = 'extra_evidence'
+    schema = load_schema('clincoded:schemas/extra_evidence.json')
+    embedded = [
+        'variant',
+        'articles',
+        'submitted_by',
+    ]
 
 
 @collection(

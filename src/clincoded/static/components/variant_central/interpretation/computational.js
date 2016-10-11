@@ -36,7 +36,7 @@ var validTabs = ['missense', 'lof', 'silent-intron', 'indel'];
 var computationStatic = {
     conservation: {
         _order: ['phylop7way', 'phylop20way', 'phastconsp7way', 'phastconsp20way', 'gerp', 'siphy'],
-        _labels: {'phylop7way': 'phyloP7way', 'phylop20way': 'phyloP20way', 'phastconsp7way': 'phastCons7way', 'phastconsp20way': 'phastCons20way', 'gerp': 'GERP++', 'siphy': 'SiPhy'}
+        _labels: {'phylop7way': 'phyloP100way', 'phylop20way': 'phyloP20way', 'phastconsp7way': 'phastCons100way', 'phastconsp20way': 'phastCons20way', 'gerp': 'GERP++', 'siphy': 'SiPhy'}
     },
     other_predictors: {
         _order: ['sift', 'polyphen2_hdiv', 'polyphen2_hvar', 'lrt', 'mutationtaster', 'mutationassessor', 'fathmm', 'provean', 'metasvm', 'metalr', 'cadd', 'fathmm_mkl', 'fitcons'],
@@ -74,6 +74,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         ext_myVariantInfo: React.PropTypes.object,
         ext_bustamante: React.PropTypes.object,
         ext_clinVarEsearch: React.PropTypes.object,
+        ext_singleNucleotide: React.PropTypes.bool,
         loading_bustamante: React.PropTypes.bool,
         loading_myVariantInfo: React.PropTypes.bool,
         loading_clinvarEsearch: React.PropTypes.bool
@@ -114,6 +115,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             },
             computationObjDiff: null,
             computationObjDiffFlag: false,
+            ext_singleNucleotide: this.props.ext_singleNucleotide,
             loading_bustamante: this.props.loading_bustamante,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_clinvarEsearch: this.props.loading_clinvarEsearch
@@ -165,6 +167,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             this.compareExternalDatas(this.state.computationObj, nextProps.interpretation.evaluations);
         }
         this.setState({
+            ext_singleNucleotide: nextProps.ext_singleNucleotide,
             loading_bustamante: nextProps.loading_bustamante,
             loading_myVariantInfo: nextProps.loading_myVariantInfo,
             loading_clinvarEsearch: nextProps.loading_clinvarEsearch
@@ -197,8 +200,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         if (response.results[0]) {
             if (response.results[0].predictions) {
                 let predictions = response.results[0].predictions;
-                computationObj.clingen.revel.score = (predictions.revel) ? parseFloat(predictions.revel.score) : null;
-                computationObj.clingen.cftr.score = (predictions.CFTR) ? parseFloat(predictions.CFTR.score): null;
+                computationObj.clingen.revel.score = (predictions.revel) ? this.numToString(predictions.revel.score) : null;
+                computationObj.clingen.cftr.score = (predictions.CFTR) ? this.numToString(predictions.CFTR.score): null;
                 computationObj.clingen.cftr.visible = (predictions.CFTR) ? true : false;
             }
             // update computationObj, and set flag indicating that we have clingen predictors data
@@ -241,7 +244,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         }
         if (response.cadd) {
             let cadd = response.cadd;
-            computationObj.other_predictors.cadd.score = parseFloat(cadd.rawscore);
+            computationObj.other_predictors.cadd.score = this.numToString(cadd.rawscore);
             // update computationObj, and set flag indicating that we have other predictors data
             this.setState({hasOtherPredData: true, computationObj: computationObj});
         }
@@ -287,15 +290,25 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             let computationObj = this.state.computationObj;
             let dbnsfp = response.dbnsfp;
             // get scores from dbnsfp
-            computationObj.conservation.phylop7way = (dbnsfp.phylo.p7way) ? parseFloat(dbnsfp.phylo.p7way.vertebrate) : parseFloat(dbnsfp.phylo.p100way.vertebrate);
-            computationObj.conservation.phylop20way = parseFloat(dbnsfp.phylo.p20way.mammalian);
-            computationObj.conservation.phastconsp7way = (dbnsfp.phastcons['7way']) ? parseFloat(dbnsfp.phastcons['7way'].vertebrate) : parseFloat(dbnsfp.phastcons['100way'].vertebrate);
-            computationObj.conservation.phastconsp20way = parseFloat(dbnsfp.phastcons['20way'].mammalian);
-            computationObj.conservation.gerp = parseFloat(dbnsfp['gerp++'].rs);
-            computationObj.conservation.siphy = parseFloat(dbnsfp.siphy_29way.logodds);
+            computationObj.conservation.phylop7way = (dbnsfp.phylo.p7way) ? this.numToString(dbnsfp.phylo.p7way.vertebrate) : this.numToString(dbnsfp.phylo.p100way.vertebrate);
+            computationObj.conservation.phylop20way = this.numToString(dbnsfp.phylo.p20way.mammalian);
+            computationObj.conservation.phastconsp7way = (dbnsfp.phastcons['7way']) ? this.numToString(dbnsfp.phastcons['7way'].vertebrate) : this.numToString(dbnsfp.phastcons['100way'].vertebrate);
+            computationObj.conservation.phastconsp20way = this.numToString(dbnsfp.phastcons['20way'].mammalian);
+            computationObj.conservation.gerp = this.numToString(dbnsfp['gerp++'].rs);
+            computationObj.conservation.siphy = this.numToString(dbnsfp.siphy_29way.logodds);
             // update computationObj, and set flag indicating that we have conservation analysis data
             this.setState({hasConservationData: true, computationObj: computationObj});
         }
+    },
+
+    // Method to handle conservation scores
+    numToString: function(num) {
+        let result;
+        if (num !== '' && num !== null) {
+            let score = parseFloat(num);
+            result = (!isNaN(score)) ? score.toString() : null;
+        }
+        return result;
     },
 
     // method to render a row of data for the clingen predictors table
@@ -405,6 +418,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         var clingenPred = (this.state.computationObj && this.state.computationObj.clingen) ? this.state.computationObj.clingen : null;
         var codon = (this.state.codonObj) ? this.state.codonObj : null;
         var computationObjDiffFlag = this.state.computationObjDiffFlag;
+        var singleNucleotide = this.state.ext_singleNucleotide;
 
         var variant = this.props.data;
         var gRCh38 = null;
@@ -455,24 +469,30 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
                             <div className="panel-content-wrapper">
                                 {this.state.loading_bustamante ? showActivityIndicator('Retrieving data... ') : null}
-                                {clingenPred ?
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Source</th>
-                                                <th>Score Range</th>
-                                                <th>Score</th>
-                                                <th>Prediction</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {clingenPredStatic._order.map(key => {
-                                                return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
-                                            })}
-                                        </tbody>
-                                    </table>
+                                {!singleNucleotide ?
+                                    <div className="panel-body"><span>These predictors only return data for missense variants.</span></div>
                                     :
-                                    <div className="panel-body"><span>No predictors found for this allele.</span></div>
+                                    <div>
+                                    {clingenPred ?
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Source</th>
+                                                    <th>Score Range</th>
+                                                    <th>Score</th>
+                                                    <th>Prediction</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {clingenPredStatic._order.map(key => {
+                                                    return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
+                                                })}
+                                            </tbody>
+                                        </table>
+                                        :
+                                        <div className="panel-body"><span>No predictor data found for this allele.</span></div>
+                                    }
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -484,24 +504,30 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                             <div className="panel-content-wrapper">
                                 {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
-                                {this.state.hasOtherPredData ?
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Source</th>
-                                                <th>Score Range</th>
-                                                <th>Score</th>
-                                                <th>Prediction</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {otherPredStatic._order.map(key => {
-                                                return (this.renderOtherPredRow(key, otherPred, otherPredStatic));
-                                            })}
-                                        </tbody>
-                                    </table>
+                                {!singleNucleotide ?
+                                    <div className="panel-body"><span>Data is currently only returned for single nucleotide variants.</span></div>
                                     :
-                                    <div className="panel-body"><span>No predictors found for this allele.</span></div>
+                                    <div>
+                                    {this.state.hasOtherPredData ?
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Source</th>
+                                                    <th>Score Range</th>
+                                                    <th>Score</th>
+                                                    <th>Prediction</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {otherPredStatic._order.map(key => {
+                                                    return (this.renderOtherPredRow(key, otherPred, otherPredStatic));
+                                                })}
+                                            </tbody>
+                                        </table>
+                                        :
+                                        <div className="panel-body"><span>No predictor data found for this allele.</span></div>
+                                    }
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -513,22 +539,28 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                             <div className="panel-content-wrapper">
                                 {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
-                                {this.state.hasConservationData ?
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Source</th>
-                                                <th>Score</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {conservationStatic._order.map(key => {
-                                                return (this.renderConservationRow(key, conservation, conservationStatic));
-                                            })}
-                                        </tbody>
-                                    </table>
+                                {!singleNucleotide ?
+                                    <div className="panel-body"><span>Data is currently only returned for single nucleotide variants.</span></div>
                                     :
-                                    <div className="panel-body"><span>No conservation analysis data found for this allele.</span></div>
+                                    <div>
+                                    {this.state.hasConservationData ?
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Source</th>
+                                                    <th>Score</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {conservationStatic._order.map(key => {
+                                                    return (this.renderConservationRow(key, conservation, conservationStatic));
+                                                })}
+                                            </tbody>
+                                        </table>
+                                        :
+                                        <div className="panel-body"><span>No conservation analysis data found for this allele.</span></div>
+                                    }
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -721,6 +753,103 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 </div>
                             </div>
                         : null}
+                        <div className="panel panel-info datasource-splice">
+                            <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
+                            <div className="panel-body">
+                                <span className="pull-right">
+                                    <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
+                                    <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
+                                    <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
+                                </span>
+                            </div>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Source</th>
+                                        <th>5' or 3'</th>
+                                        <th>Score Range</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th colSpan="4">WT Sequence</th>
+                                    </tr>
+                                    <tr>
+                                        <td>MaxEntScan</td>
+                                        <td rowSpan="3" className="row-span">5'</td>
+                                        <td>[0-12]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>NNSPLICE</td>
+                                        <td>[0-1]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>MaxEntScan</td>
+                                        <td rowSpan="3" className="row-span">3'</td>
+                                        <td>[0-16]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>NNSPLICE</td>
+                                        <td>[0-1]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th colSpan="4">Variant Sequence</th>
+                                    </tr>
+                                    <tr>
+                                        <td>MaxEntScan</td>
+                                        <td rowSpan="3" className="row-span">5'</td>
+                                        <td>[0-12]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>NNSPLICE</td>
+                                        <td>[0-1]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>MaxEntScan</td>
+                                        <td rowSpan="3" className="row-span">3'</td>
+                                        <td>[0-16]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>NNSPLICE</td>
+                                        <td>[0-1]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HumanSplicingFinder</td>
+                                        <td>[0-100]</td>
+                                        <td><span className="wip">IN PROGRESS</span></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colSpan="4">Average Change to Nearest Splice Site: <span className="splice-avg-change wip">IN PROGRESS</span></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </Panel></PanelGroup>
                 </div>
                 : null}
@@ -739,7 +868,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             ]
                                         </dd>
                                         :
-                                        null
+                                        <dd className="col-lg-3"><a href={external_url_map['UCSCBrowserHome']} target="_blank">UCSC Browser <i className="icon icon-external-link"></i></a></dd>
                                     }
                                     {(links_38 || links_37) ?
                                         <dd>Variation Viewer [
@@ -749,7 +878,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             ]
                                         </dd>
                                         :
-                                        null
+                                        <dd className="col-lg-4"><a href={external_url_map['VariationViewerHome']} target="_blank">Variation Viewer <i className="icon icon-external-link"></i></a></dd>
                                     }
                                     {(links_38 || links_37) ?
                                         <dd>Ensembl Browser [
@@ -759,7 +888,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             ]
                                         </dd>
                                         :
-                                        null
+                                        <dd className="col-lg-3"><a href={external_url_map['EnsemblBrowserHome']} target="_blank">Ensembl Browser <i className="icon icon-external-link"></i></a></dd>
                                     }
                                 </dl>
                             </div>

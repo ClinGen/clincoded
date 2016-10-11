@@ -15,9 +15,10 @@ var queryKeyValue = globals.queryKeyValue;
 var parseClinvar = require('../../libs/parse-resources').parseClinvar;
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
-import { getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
+import { getClinvarInterpretations, getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
 
 var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
+var EvaluationSummary = require('./interpretation/summary').EvaluationSummary;
 
 // Variant Curation Hub
 var VariantCurationHub = React.createClass({
@@ -29,6 +30,9 @@ var VariantCurationHub = React.createClass({
             interpretationUuid: queryKeyValue('interpretation', this.props.href),
             interpretation: null,
             editKey: queryKeyValue('edit', this.props.href),
+            summaryKey: queryKeyValue('summary', this.props.href),
+            summaryVisible: false,
+            selectedTab: queryKeyValue('tab', this.props.href),
             variantObj: null,
             ext_myVariantInfo: null,
             ext_bustamante: null,
@@ -37,10 +41,13 @@ var VariantCurationHub = React.createClass({
             ext_clinvarEutils: null,
             ext_clinVarEsearch: null,
             ext_clinVarRCV: null,
+            ext_clinvarInterpretationSummary: null,
             ext_myGeneInfo_MyVariant: null,
             ext_myGeneInfo_VEP: null,
+            ext_myGeneInfo_ClinVar: null,
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
+            ext_singleNucleotide: true,
             loading_clinvarEutils: true,
             loading_clinvarEsearch: true,
             loading_clinvarRCV: true,
@@ -48,16 +55,37 @@ var VariantCurationHub = React.createClass({
             loading_ensemblVariation: true,
             loading_myVariantInfo: true,
             loading_myGeneInfo: true,
-            loading_bustamante: true
+            loading_bustamante: true,
+            calculated_pathogenicity: null,
+            autoClassification: null,
+            provisionalPathogenicity: null,
+            provisionalReason: null,
+            provisionalInterpretation: false
         };
     },
 
     componentDidMount: function() {
         this.getClinVarData(this.state.variantUuid);
         if (this.state.interpretationUuid) {
-            this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
-                this.setState({interpretation: interpretation});
+            this.getRestData('/interpretations/' + this.state.interpretationUuid).then(interpretation => {
+                this.setState({interpretation: interpretation}, () => {
+                    // Return provisional-variant object properties
+                    if (this.state.interpretation.provisional_variant && this.state.interpretation.provisional_variant.length) {
+                        this.setState({
+                            autoClassification: interpretation.provisional_variant[0].autoClassification,
+                            provisionalPathogenicity: interpretation.provisional_variant[0].alteredClassification,
+                            provisionalReason: interpretation.provisional_variant[0].reason
+                        });
+                    }
+                    // Return interpretation object's 'maskAsProvisional' property
+                    if (this.state.interpretation.markAsProvisional) {
+                        this.setState({provisionalInterpretation: true});
+                    }
+                });
             });
+        }
+        if (this.state.summaryKey) {
+            this.setState({summaryVisible: true});
         }
     },
 
@@ -71,6 +99,7 @@ var VariantCurationHub = React.createClass({
             this.fetchMyVariantInfoAndBustamante(this.state.variantObj);
             this.fetchEnsemblVariation(this.state.variantObj);
             this.fetchEnsemblHGVSVEP(this.state.variantObj);
+            this.parseVariantType(this.state.variantObj);
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
@@ -82,11 +111,29 @@ var VariantCurationHub = React.createClass({
             if (variant.clinvarVariantId) {
                 this.setState({clinvar_id: variant.clinvarVariantId});
                 // Get ClinVar data via the parseClinvar method defined in parse-resources.js
-                this.getRestDataXml(this.props.href_url.protocol + external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
+                this.getRestDataXml(external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
                     // Passing 'true' option to invoke 'mixin' function
                     // To extract more ClinVar data for 'Basic Information' tab
                     var variantData = parseClinvar(xml, true);
-                    this.setState({ext_clinvarEutils: variantData, loading_clinvarEutils: false});
+                    // Won't show population/predictor data if variation type is 'Haplotype'
+                    if (variantData.clinvarVariationType && variantData.clinvarVariationType === 'Haplotype') {
+                        this.setState({ext_singleNucleotide: false});
+                    }
+                    this.setState({
+                        ext_clinvarEutils: variantData,
+                        ext_clinvarInterpretationSummary: getClinvarInterpretations(xml),
+                        loading_clinvarEutils: false
+                    });
+                    // Last alternative to get gene id and symbol from ClinVar
+                    // for API call to mygene.info to retreive gene related data
+                    if (variantData.gene && variantData.gene.id) {
+                        let clinvar_gene_id = variantData.gene.id;
+                        let clinvar_gene_symbol = variantData.gene.symbol;
+                        this.fetchMyGeneInfo(clinvar_gene_symbol, clinvar_gene_id, 'ClinVar');
+                    } else {
+                        // If all else fails, quit trying...
+                        this.setState({loading_myGeneInfo: false});
+                    }
                     this.handleCodonEsearch(variantData);
                     let clinVarRCVs = getClinvarRCVs(xml);
                     return Promise.resolve(clinVarRCVs);
@@ -97,7 +144,7 @@ var VariantCurationHub = React.createClass({
                         let clinvarInterpretations = [];
                         let Urls = [];
                         for (let RCV of RCVs.values()) {
-                            Urls.push(this.props.href_url.protocol + external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV);
+                            Urls.push(external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV);
                         }
                         return this.getRestDatasXml(Urls).then(xml => {
                             xml.forEach(result => {
@@ -214,7 +261,38 @@ var VariantCurationHub = React.createClass({
         }
     },
 
+    // Method to parse variant type
+    // Won't show population/predictor data if subject is not single nucleotide variant
+    parseVariantType: function(variant) {
+        if (variant) {
+            // Reference to http://www.hgvs.org/mutnomen/recs-DNA.html
+            let seqChangeTypes = ['del', 'dup', 'ins', 'indels', 'inv', 'con'];
+            let genomicHGVS, ncGenomic;
+
+            if (variant.hgvsNames && variant.hgvsNames.GRCh37) {
+                genomicHGVS = variant.hgvsNames.GRCh37;
+            } else if (variant.hgvsNames && variant.hgvsNames.GRCh38) {
+                genomicHGVS = variant.hgvsNames.GRCh38;
+            }
+            // Filter variant by its change type
+            // Look for the <VariantType> node value in first pass
+            // Then look into HGVS term for non-SNV type patterns
+            if (variant.variationType && variant.variationType !== 'single nucleotide variant') {
+                this.setState({ext_singleNucleotide: false});
+            } else if (genomicHGVS) {
+                ncGenomic = genomicHGVS.substring(genomicHGVS.indexOf(':'));
+                seqChangeTypes.forEach(type => {
+                    if (ncGenomic.indexOf(type) > 0) {
+                        this.setState({ext_singleNucleotide: false});
+                    }
+                });
+            }
+        }
+    },
+
     // Method to parse Entrez gene symbol and id from myvariant.info
+    // Primary option to get gene id and symbol for making
+    // API call to mygene.info to retreive gene related data
     parseMyVariantInfo: function(myVariantInfo) {
         let geneSymbol, geneId;
         if (myVariantInfo) {
@@ -248,6 +326,8 @@ var VariantCurationHub = React.createClass({
     },
 
     // Method to parse Entrez gene symbol and id from VEP
+    // Secondary option to get gene id and symbol for making
+    // API call to mygene.info to retreive gene related data
     parseEnsemblHgvsVEP: function(ensemblHgvsVEP) {
         let geneSymbol, geneId;
         if (ensemblHgvsVEP) {
@@ -278,6 +358,8 @@ var VariantCurationHub = React.createClass({
                     this.setState({ext_myGeneInfo_MyVariant: geneObj});
                 } else if (source === 'ensemblHgvsVEP') {
                     this.setState({ext_myGeneInfo_VEP: geneObj});
+                } else if (source === 'ClinVar') {
+                    this.setState({ext_myGeneInfo_ClinVar: geneObj});
                 }
                 this.setState({loading_myGeneInfo: false});
             }).catch(err => {
@@ -293,7 +375,7 @@ var VariantCurationHub = React.createClass({
         let symbol = response.gene.symbol;
         if (aminoAcidLocation && symbol) {
             let term = aminoAcidLocation.substr(0, aminoAcidLocation.length-1);
-            this.getRestData(this.props.href_url.protocol + external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
+            this.getRestData(external_url_map['ClinVarEsearch'] + 'db=clinvar&term=' + term + '+%5Bvariant+name%5D+and+' + symbol + '&retmode=json').then(result => {
                 // pass in these additional values, in case receiving component needs them
                 result.vci_term = term;
                 result.vci_symbol = symbol;
@@ -314,39 +396,90 @@ var VariantCurationHub = React.createClass({
         });
     },
 
+    // Method to update status of summary page visibility
+    setSummaryVisibility: function(visible) {
+        this.setState({summaryVisible: visible});
+    },
+
+    // Method to update the selected tab state to be used by criteria bar
+    getSelectedTab: function(selectedTab) {
+        this.setState({selectedTab: selectedTab});
+    },
+
+    // Method to set the calculated pathogenicity state for summary page
+    setCalculatedPathogenicity: function(assertion) {
+        if (assertion && this.state.calculated_pathogenicity !== assertion) {
+            this.setState({calculated_pathogenicity: assertion});
+        }
+    },
+
+    // Method to persist provisional evaluation states
+    setProvisionalEvaluation: function(field, value) {
+        if (field === 'provisional-pathogenicity' && this.state.provisionalPathogenicity !== value) {
+            this.setState({provisionalPathogenicity: value});
+        }
+        if (field === 'provisional-reason' && this.state.provisionalReason !== value) {
+            this.setState({provisionalReason: value});
+        }
+        if (field === 'provisional-interpretation' && this.state.provisionalInterpretation !== value) {
+            this.setState({provisionalInterpretation: value});
+        }
+    },
+
     render: function() {
         var variantData = this.state.variantObj;
         var interpretation = (this.state.interpretation) ? this.state.interpretation : null;
         var interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
         var editKey = this.state.editKey;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        var selectedTab = this.state.selectedTab;
+        let calculated_pathogenicity = (this.state.calculated_pathogenicity) ? this.state.calculated_pathogenicity : (this.state.autoClassification ? this.state.autoClassification : null);
+        let my_gene_info = (this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : (this.state.ext_myGeneInfo_VEP ? this.state.ext_myGeneInfo_VEP : this.state.ext_myGeneInfo_ClinVar);
 
         return (
             <div>
-                <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session} interpretation={interpretation} />
-                <CurationInterpretationCriteria interpretation={interpretation} />
-                <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
-                    href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj} />
-                <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
-                    href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj}
-                    ext_myGeneInfo={(this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : this.state.ext_myGeneInfo_VEP}
-                    ext_myVariantInfo={this.state.ext_myVariantInfo}
-                    ext_bustamante={this.state.ext_bustamante}
-                    ext_ensemblVariation={this.state.ext_ensemblVariation}
-                    ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
-                    ext_clinvarEutils={this.state.ext_clinvarEutils}
-                    ext_clinVarEsearch={this.state.ext_clinVarEsearch}
-                    ext_clinVarRCV={this.state.ext_clinVarRCV}
-                    ext_ensemblGeneId={this.state.ext_ensemblGeneId}
-                    ext_geneSynonyms={this.state.ext_geneSynonyms}
-                    loading_clinvarEutils={this.state.loading_clinvarEutils}
-                    loading_clinvarEsearch={this.state.loading_clinvarEsearch}
-                    loading_clinvarRCV={this.state.loading_clinvarRCV}
-                    loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
-                    loading_ensemblVariation={this.state.loading_ensemblVariation}
-                    loading_myVariantInfo={this.state.loading_myVariantInfo}
-                    loading_myGeneInfo={this.state.loading_myGeneInfo}
-                    loading_bustamante={this.state.loading_bustamante} />
+                <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session}
+                    interpretation={interpretation} setSummaryVisibility={this.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
+                    getSelectedTab={this.getSelectedTab} calculatedPathogenicity={calculated_pathogenicity} />
+                {!this.state.summaryVisible ?
+                    <div>
+                        <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab} />
+                        <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
+                            href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj}
+                            calculatedAssertion={calculated_pathogenicity} provisionalPathogenicity={this.state.provisionalPathogenicity} />
+                        <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
+                            href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
+                            ext_myGeneInfo={my_gene_info}
+                            ext_myVariantInfo={this.state.ext_myVariantInfo}
+                            ext_bustamante={this.state.ext_bustamante}
+                            ext_ensemblVariation={this.state.ext_ensemblVariation}
+                            ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
+                            ext_clinvarEutils={this.state.ext_clinvarEutils}
+                            ext_clinVarEsearch={this.state.ext_clinVarEsearch}
+                            ext_clinVarRCV={this.state.ext_clinVarRCV}
+                            ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
+                            ext_ensemblGeneId={this.state.ext_ensemblGeneId}
+                            ext_geneSynonyms={this.state.ext_geneSynonyms}
+                            ext_singleNucleotide={this.state.ext_singleNucleotide}
+                            loading_clinvarEutils={this.state.loading_clinvarEutils}
+                            loading_clinvarEsearch={this.state.loading_clinvarEsearch}
+                            loading_clinvarRCV={this.state.loading_clinvarRCV}
+                            loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
+                            loading_ensemblVariation={this.state.loading_ensemblVariation}
+                            loading_myVariantInfo={this.state.loading_myVariantInfo}
+                            loading_myGeneInfo={this.state.loading_myGeneInfo}
+                            loading_bustamante={this.state.loading_bustamante}
+                            setCalculatedPathogenicity={this.setCalculatedPathogenicity}
+                            selectedTab={selectedTab} />
+                    </div>
+                    :
+                    <EvaluationSummary interpretation={interpretation} calculatedAssertion={calculated_pathogenicity}
+                        updateInterpretationObj={this.updateInterpretationObj}
+                        setProvisionalEvaluation={this.setProvisionalEvaluation}
+                        provisionalPathogenicity={this.state.provisionalPathogenicity}
+                        provisionalReason={this.state.provisionalReason}
+                        provisionalInterpretation={this.state.provisionalInterpretation} />
+                }
             </div>
         );
     }
