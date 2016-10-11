@@ -2232,11 +2232,26 @@ dl.inline-dl {
         }
     }
 
-    .col-sm-6 .promo {
-        border: solid 1px #ddd;
-        border-radius: 4px;
-        padding: 10px 35px 20px 35px;
-        min-height: 325px;
+    .col-sm-6 {
+        margin-bottom: 30px;
+
+        .promo {
+            border: solid 1px #ddd;
+            border-radius: 4px;
+            padding: 10px 35px 20px 35px;
+
+            @media screen and (min-width: $screen-lg-min) {
+                min-height: 325px;
+            }
+
+            @media screen and (min-width: $screen-md-min) and (max-width: $screen-lg-min) {
+                min-height: 395px;
+            }
+
+            @media screen and (min-width: $screen-sm-min) and (max-width: $screen-md-min) {
+                min-height: 416px;
+            }
+        }
     }
 }
 
@@ -2270,6 +2285,33 @@ table.login-users-interpretations {
 
             span.no-broken-item {
                 display: inline-block;
+            }
+        }
+    }
+}
+
+.form-variant-select {
+    .resource-metadata {
+        &>.row {
+            margin-left: 12px;
+            margin-right: 12px;
+
+            .row {
+                margin-bottom: 5px;
+
+                .control-label {
+                    padding-right: 10px;
+                }
+
+                .text-no-input {
+                    padding-left: 10px;
+                }
+
+                @media screen and (max-width: $screen-sm-min) {
+                    .text-no-input {
+                        padding-top: 0;
+                    }
+                }
             }
         }
     }
