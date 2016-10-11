@@ -1446,11 +1446,16 @@
             background: url(/static/img/myvariant-logo.png) 0 1px no-repeat;
         }
 
+        a.credit-vep {
+            background: url(/static/img/vep-logo.png) 0 1px no-repeat;
+        }
+
         a.credit-mygene,
-        a.credit-myvariant {
+        a.credit-myvariant,
+        a.credit-vep {
             background-size: 18px 18px;
             display: inline-block;
-            height: 18px;
+            height: 19px;
             width: 18px;
             margin-left: 10px;
             vertical-align: bottom;
@@ -1458,6 +1463,12 @@
             span {
                 display: none;
             }
+        }
+
+        a.credit-vep {
+            background-size: 38px 16px;
+            height: 17px;
+            width: 38px;
         }
     }
 
@@ -1781,8 +1792,13 @@ dl.inline-dl {
         background: url(/static/img/myvariant-logo.png) 0 0 no-repeat;
     }
 
+    span.credit-vep {
+        background: url(/static/img/vep-logo.png) 0 0 no-repeat;
+    }
+
     span.credit-mygene,
-    span.credit-myvariant {
+    span.credit-myvariant,
+    span.credit-vep {
         background-size: 18px 18px;
         display: inline-block;
         height: 18px;
@@ -1792,6 +1808,12 @@ dl.inline-dl {
         span {
             display: none;
         }
+    }
+
+    span.credit-vep {
+        background-size: 38px 16px;
+        height: 16px;
+        width: 38px;
     }
 }
 

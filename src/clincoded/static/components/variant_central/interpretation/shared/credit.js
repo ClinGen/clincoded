@@ -43,7 +43,7 @@ export function renderDataCredit(source) {
         return (
             <div className="credits">
                 <div className="credit credit-vep" id="credit-vep"><a name="credit-vep"></a>
-                    <span className="label label-primary">VEP</span> - When available, data in this table was retrieved using:
+                    <span className="credit-vep"><span>VEP</span></span> - When available, data in this table was retrieved using:
                     The Ensembl Variant Effect Predictor (<a href="http://www.ensembl.org/Homo_sapiens/Tools/VEP" target="_blank">www.ensembl.org/Homo_sapiens/Tools/VEP</a>)
                     McLaren W, Gil L, Hunt SE, Riat HS, Ritchie GR, Thormann A, Flicek P, Cunningham F.
                     Genome Biol. 2016 Jun 6;17(1):122.
