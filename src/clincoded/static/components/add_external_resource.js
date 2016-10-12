@@ -728,24 +728,24 @@ function carQueryResource() {
 }
 function carRenderResourceResult() {
     return(
-        <div>
+        <div className="resource-metadata">
             <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
             {this.state.tempResource && this.state.tempResource.hgvsNames ?
                 <div className="row">
                     <div className="row">
-                        <span className="col-sm-5 col-md-3 control-label"><label>CA ID</label></span>
-                        <span className="col-sm-7 col-md-9 text-no-input"><a href={external_url_map['CARallele'] + this.state.tempResource.carId + '.html'} target="_blank"><strong>{this.state.tempResource.carId}</strong> <i className="icon icon-external-link"></i></a></span>
+                        <span className="col-xs-4 col-md-4 control-label"><label>CA ID</label></span>
+                        <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['CARallele'] + this.state.tempResource.carId + '.html'} target="_blank"><strong>{this.state.tempResource.carId}</strong> <i className="icon icon-external-link"></i></a></span>
                     </div>
                     {this.state.tempResource.clinvarVariantId ?
                         <div className="row">
-                            <span className="col-sm-5 col-md-3 control-label"><label>ClinVar Variant ID</label></span>
-                            <span className="col-sm-7 col-md-9 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
+                            <span className="col-xs-4 col-md-4 control-label"><label>ClinVar Variant ID</label></span>
+                            <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
                         </div>
                     : null}
                     {this.state.tempResource.hgvsNames ?
                         <div className="row">
-                            <span className="col-sm-5 col-md-3 control-label"><label>HGVS terms</label></span>
-                            <span className="col-sm-7 col-md-9 text-no-input">
+                            <span className="col-xs-4 col-md-4 control-label"><label>HGVS terms</label></span>
+                            <span className="col-xs-8 col-md-8 text-no-input">
                                 {variantHgvsRender(this.state.tempResource.hgvsNames)}
                             </span>
                         </div>
