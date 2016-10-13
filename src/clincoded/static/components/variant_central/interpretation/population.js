@@ -648,7 +648,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         } else {
             return (
                 <h3 className="panel-title">1000 Genomes
-                    <a href="#credit-vep" className="label label-primary">VEP</a>
+                    <a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
                 </h3>
             );
         }
