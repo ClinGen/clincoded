@@ -94,5 +94,11 @@
         "title": "Search and Select Variant",
         "status": "released",
         "uuid": "ccf2ad6f-8b50-471e-b071-b0b2607873ae"
+    },
+    {
+        "name": "case-control-curation",
+        "title": "Case-Control Curation",
+        "status": "released",
+        "uuid": "e5e7bda0-98fb-46ad-9b29-42be70076f9b"
     }
 ]
