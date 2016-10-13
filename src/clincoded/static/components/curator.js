@@ -511,8 +511,9 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var caseControlUrl = curatorMatch ? ('/case-control-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var experimentalUrl = curatorMatch ? ('/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var groupRenders = [], familyRenders = [], individualRenders = [], experimentalRenders = [];
+        var groupRenders = [], familyRenders = [], individualRenders = [], caseControlRenders = [], experimentalRenders = [];
 
         // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
         if (annotation && annotation.groups) {
@@ -595,6 +596,9 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                         </Panel>
                         <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
                             {individualRenders}
+                        </Panel>
+                        <Panel title={<CurationPaletteTitles title="Case-Control" url={caseControlUrl} />} panelClassName="panel-evidence">
+                            {caseControlRenders}
                         </Panel>
                         <Panel title={<CurationPaletteTitles title="Experimental Data" url={experimentalUrl} />} panelClassName="panel-evidence">
                             {experimentalRenders}
