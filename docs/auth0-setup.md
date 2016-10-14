@@ -6,24 +6,29 @@ With Mozilla's Persona service [being sunsetted](https://developer.mozilla.org/e
 ## Auth0 setup
 
 1. Navigate to the Auth0 [management dashboard](https://manage.auth0.com/)
+
 2. Add a **New Client**
 
-3. Specify a name for the client and select **Single Page Application** as the client type
+3. Specify a client name and select **Single Page Application** as the client type
 
-4. On the **Settings** tab for the client, specify the comma-delimited list of **Allowed Callback URLs** for the client, including test URLs. For example:
+4. Navigate to the **Settings** tab for the client and specify a comma-delimited list of **Allowed Callback URLs** for the client, including test URLs. For example:
 > http://localhost:6543/callback, https://localhost:6543/callback, http://*.clinicalgenome.org/callback, https://*.clinicalgenome.org/callback, http://*.demo.clinicalgenome.org/callback, https://*.demo.clinicalgenome.org/callback, http://*.instance.clinicalgenome.org/callback, https://*.instance.clinicalgenome.org/callback
 
-5. In the **Addons** and **Connections** tabs, enable the signup methods you want to allow. Even if you do not allow users to use the Username-Password-Authentication Database option, you should enable it to add the account for automated tests later.
+5. Navigate to the **Addons** and **Connections** tabs and enable the signup methods you want to allow. Even if you do not allow users to use the Username-Password-Authentication Database option, you should enable it to add the account for automated tests later.
 
 
 ## Google Auth setup
 
-While logged in to the Google account that will serve as the master account for the site's authentication app, go to the [Developer's Console](https://console.developers.google.com/).
+1. Navigate to the [Google APIs Developer's Console](https://console.developers.google.com/)
 
-Add app?
+2. Navigate to the **Credentials** page and **Create a project**
 
-Navigate to the **Credentials** tab then **Create Credentials** for the app of the **OAuth Client ID** type. Select **Web application** for the Application type, give it a name, and add the Auth0 callback URI to the list of **Authorized redirect URIs**. For example:
+3. Specify a project name and **Create** the project
 
+4. Navigate to the **OAuth consent screen** tab and specify the necessary details
+
+5. Navigate to the **Credentials** tab and **Create Credentials** for the project of the **OAuth Client ID** type
+
+5. Select **Web application** for the Application type, give it a name, and add the Auth0 callback URI to the list of **Authorized redirect URIs** (you do not need to specify an Authorized JavaScript origin). For example:
 > https://mrmin.auth0.com/login/callback
 
-You do not need to specify an Authorized JavaScript origin.
