@@ -27,6 +27,20 @@
             "default": "",
             "maxLength": 60
         },
+        "groupType": {
+            "title": "Group Type",
+            "description": "Belonging to case level or case control",
+            "type": "string",
+            "common": "case-level, case-cohort, control-cohort"
+        },
+        "numberOfCasesWithVariant": {
+            "title": "Number of Cases with Variants",
+            "type": "number"
+        },
+        "numberOfAllCasesGenotyped": {
+            "title": "Number of All Cases",
+            "type": "number"
+        },
         "commonDiagnosis": {
             "title": "Common Diagnosis",
             "description": "List of Orphanet IDs of common diagnosis for the group",

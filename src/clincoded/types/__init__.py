@@ -233,8 +233,6 @@ class Gdm(Item):
         'annotations.groups.otherGenes',
         'annotations.groups.otherPMIDs',
         'annotations.groups.otherPMIDs.submitted_by',
-        # 'annotations.groups.statistic',
-        # 'annotations.groups.statistic.variants',
         'annotations.groups.familyIncluded',
         'annotations.groups.familyIncluded.associatedGroups',
         'annotations.groups.familyIncluded.commonDiagnosis',
@@ -272,7 +270,6 @@ class Gdm(Item):
         'annotations.groups.individualIncluded.variants.associatedPathogenicities.submitted_by',
         'annotations.groups.individualIncluded.otherPMIDs',
         'annotations.groups.individualIncluded.otherPMIDs.submitted_by',
-        # 'annotations.groups.control',
         'annotations.families',
         'annotations.families.associatedGroups',
         'annotations.families.commonDiagnosis',
@@ -323,7 +320,13 @@ class Gdm(Item):
         'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'annotations.experimentalData.proteinInteractions.interactingGenes',
         'annotations.experimentalData.assessments',
-        'annotations.experimentalData.assessments.submitted_by'
+        'annotations.experimentalData.assessments.submitted_by',
+        'annotations.caseControlStudies',
+        'annotations.caseControlStudies.submitted_by',
+        'annotations.caseControlStudies.caseCohort',
+        'annotations.caseControlStudies.caseCohort.submitted_by',
+        'annotations.caseControlStudies.controlCohort',
+        'annotations.caseControlStudies.controlCohort.submitted_by',
     ]
 
     @calculated_property(schema={
@@ -422,7 +425,6 @@ class Annotation(Item):
         'groups.individualIncluded.variants.submitted_by',
         'groups.individualIncluded.otherPMIDs',
         'groups.individualIncluded.otherPMIDs.submitted_by',
-        # 'groups.control',
         'families',
         'families.associatedGroups',
         'families.commonDiagnosis',
@@ -457,7 +459,13 @@ class Annotation(Item):
         'experimentalData.proteinInteractions.interactingGenes',
         'associatedGdm',
         'experimentalData.assessments',
-        'experimentalData.assessments.submitted_by'
+        'experimentalData.assessments.submitted_by',
+        'caseControlStudies',
+        'caseControlStudies.submitted_by',
+        'caseControlStudies.caseCohort',
+        'caseControlStudies.caseCohort.submitted_by',
+        'caseControlStudies.controlCohort',
+        'caseControlStudies.controlCohort.submitted_by'
     ]
     rev = {
         'associatedGdm': ('gdm', 'annotations')
@@ -512,6 +520,48 @@ class Annotation(Item):
 
 
 @collection(
+    name='casecontrol',
+    unique_key='caseControl:uuid',
+    properties={
+        'title': 'Case Control',
+        'description': 'List of case-control objects in all gdm pairs',
+    })
+class CaseControl(Item):
+    item_type = 'caseControl'
+    schema = load_schema('clincoded:schemas/caseControl.json')
+    name_key = 'uuid'
+    embedded = [
+        'caseCohort',
+        'controlCohort',
+        'associatedAnnotation',
+        'associatedAnnotation.article'
+    ]
+    rev = {
+        'associatedAnnotation': ('annotation', 'caseControlStudies')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated annotation",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.caseControlStudies",
+        },
+    })
+    def associatedAnnotation(self, request, associatedAnnotation):
+        return paths_filtered_by_status(request, associatedAnnotation)
+
+    @calculated_property(schema={
+        "title": "Article PMID",
+        "type": "string",
+    })
+    def annotation_associated(selft, associatedAnnotation=[]):
+        if len(associatedAnnotation) > 0:
+            return associatedAnnotation[0]
+        return ''
+
+
+@collection(
     name='groups',
     unique_key='group:uuid',
     properties={
@@ -528,7 +578,6 @@ class Group(Item):
         'otherGenes',
         'otherPMIDs',
         'otherPMIDs.submitted_by',
-        #'statistic',
         'familyIncluded',
         'familyIncluded.commonDiagnosis',
         'familyIncluded.submitted_by',
@@ -557,7 +606,6 @@ class Group(Item):
         'associatedAnnotations.associatedGdm',
         'associatedAnnotations.associatedGdm.disease',
         'associatedAnnotations.associatedGdm.gene'
-        #'control'
     ]
     rev = {
         'associatedAnnotations': ('annotation', 'groups')
