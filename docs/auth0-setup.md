@@ -5,7 +5,7 @@ With Mozilla's Persona service [being sunsetted](https://developer.mozilla.org/e
 
 ## Auth0 setup
 
-1. Navigate to the Auth0 [management dashboard](https://manage.auth0.com/)
+1. Navigate to the [Auth0 management dashboard](https://manage.auth0.com/)
 
 2. Add a **New Client**
 
@@ -29,6 +29,18 @@ With Mozilla's Persona service [being sunsetted](https://developer.mozilla.org/e
 
 5. Navigate to the **Credentials** tab and **Create Credentials** for the project of the **OAuth Client ID** type
 
-5. Select **Web application** for the Application type, give it a name, and add the Auth0 callback URI to the list of **Authorized redirect URIs** (you do not need to specify an Authorized JavaScript origin). For example:
-> https://mrmin.auth0.com/login/callback
+5. Select **Web application** for the Application type and give it a name
 
+    1. Add the Auth0 source to the list of **Authorized JavaScript origins**
+
+    2. Add the Auth0 redirect URI to the list of **Authorized redirect URIs**
+
+6. Navigate to the **Library** page of the manager
+
+7. Select the **Admin SDK** option, and **Enable** it
+
+8. On the [Auth0 management dashboard](https://manage.auth0.com/), navigate to the **Connections** category's **Social** page
+
+9. Enable the **Google** option, then click the **Google** button to open its settings
+
+10. Add the Google **Client ID** and **Client Secret** and **Save** them
