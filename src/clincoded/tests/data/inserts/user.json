@@ -1648,8 +1648,8 @@
     },
     {
         "email": "alwayswright@stanford.edu",
-        "first_name": "Matt",
-        "last_name": "Wright3",
+        "first_name": "ClinGen Test Curator",
+        "last_name": "",
         "uuid": "768e4c49-9a39-4604-9c0d-c8a875c41814",
         "groups": [
             "curator"
@@ -1936,6 +1936,36 @@
         "first_name": "Ben",
         "last_name": "Hutton",
         "uuid": "246cd8b6-e6c5-4f2e-a4be-923c1188e213",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "clingen.test.curator@genome.stanford.edu",
+        "first_name": "ClinGen Test Curator",
+        "last_name": "",
+        "uuid": "26e18032-1ea1-4a2b-90c9-a39b3897b10c",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "dritter@bcm.edu",
+        "first_name": "Deborah",
+        "last_name": "Ritter",
+        "uuid": "7971d5ed-379d-4e08-8cfc-390e1e0146d5",
         "groups": [
             "curator"
         ],
