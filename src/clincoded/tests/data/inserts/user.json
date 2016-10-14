@@ -1648,8 +1648,8 @@
     },
     {
         "email": "alwayswright@stanford.edu",
-        "first_name": "ClinGen Test Curator",
-        "last_name": "",
+        "first_name": "ClinGen",
+        "last_name": "Test Curator",
         "uuid": "768e4c49-9a39-4604-9c0d-c8a875c41814",
         "groups": [
             "curator"
@@ -1948,8 +1948,8 @@
     },
     {
         "email": "clingen.test.curator@genome.stanford.edu",
-        "first_name": "ClinGen Test Curator",
-        "last_name": "",
+        "first_name": "ClinGen",
+        "last_name": "Test Curator",
         "uuid": "26e18032-1ea1-4a2b-90c9-a39b3897b10c",
         "groups": [
             "curator"
