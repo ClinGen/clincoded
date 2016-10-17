@@ -89,9 +89,8 @@ var LoginDenied = module.exports.LoginDenied = React.createClass({
                     <div className="row">
                         <div className="col-sm-12">
                             <h1>Login failure</h1>
-                            <p>Access is restricted to ClinGen curators.</p>
-                            <p>If you are a ClinGen curator with a newly-created account, you may need to wait while we verify and add your account to the system.</p>
-                            <p>Please <a href='mailto:clingen-helpdesk@lists.stanford.edu'>email us</a> if we have not verified you for a long time.</p>
+                            <p>In addition to creating an account with Auth0, your email must be registered with the ClinGen interfaces in order to log in to the interfaces. If you are encountering this error message, you have either not yet registered your email with us or we have not yet been able to verify and add your account to the system.</p>
+                            <p>Currently, access is restricted to ClinGen curators. Please send us an email at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu</a> if you feel your email should be registered for use with the ClinGen interfaces.</p>
                         </div>
                     </div>
                 </div>
@@ -113,8 +112,9 @@ var LoginNotVerified = module.exports.LoginNotVerified = React.createClass({
                     <div className="row">
                         <div className="col-sm-12">
                             <h1>Account not verified</h1>
-                            <p>Please check your inbox for an email from Auth0, and verify your email there.</p>
-                            <p>If you do not see this email or cannot verify your email, please <a href='mailto:clingen-helpdesk@lists.stanford.edu'>contact us</a>.</p>
+                            <p>Once you have created an account with Auth0, you must verify it via email - please check your inbox for an email from Auth0 and verify it according to their instructions.</p>
+                            <p>Additionally, the same email you use for Auth0 must be registered for use with the interfaces. If you have not yet registered your email for the ClinGen interfaces, please send an email to <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu</a>, supplying the email you used for your Auth0 account and your preferred display name within the interfaces.</p>
+                            <p>Please note that access to the ClinGen interfaces is currently restricted to ClinGen curators.</p>
                         </div>
                     </div>
                 </div>
