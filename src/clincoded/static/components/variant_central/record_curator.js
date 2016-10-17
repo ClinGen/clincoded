@@ -102,7 +102,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                     <div><strong>Calculated Pathogenicity:</strong> {calculatedPathogenicity}</div>
                                     <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
                                     <div><strong>Status:</strong> <i>{myInterpretation.markAsProvisional ? 'Provisional ' : 'In Progress '}</i></div>
-                                    <div><strong>Last Edited:</strong> <a href={'mailto:' + myInterpretation.submitted_by.email}>{myInterpretation.submitted_by.title}</a> — {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}</div>
+                                    <div><strong>Last Edited:</strong> {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}</div>
                                 </div>
                                 :
                                 null
