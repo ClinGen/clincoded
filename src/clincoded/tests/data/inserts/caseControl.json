@@ -1,7 +1,7 @@
 [
     {
         "uuid": "2fa791d5-f1e4-4ede-8397-1c48a2e834e2",
-        "caseCohort": "41e88858-a726-4d82-a2f7-160eafaa9fb6",
+        "caseCohort": "64df7938-33bc-4789-8e5c-52f45da24006",
         "controlCohort": "342cccda-b3ed-4228-8956-9825b58cd36b",
         "studyType": "Single variant analysis",
         "detectionMethod": "Cases and controls genotyped for variant(s)",

@@ -54,6 +54,10 @@
                     "value": {
                         "title": "Value",
                         "type": "number"
+                    },
+                    "other": {
+                        "title": "Other description",
+                        "type": "string"
                     }
                 }
             }
@@ -131,6 +135,20 @@
         },
         "reasonModified": {
             "title": "Reason for Midification",
+            "type": "string"
+        }
+    },
+    "columns": {
+        "uuid": {
+            "title": "ID",
+            "type": "string"
+        },
+        "caseCohort.label": {
+            "title": "Case Cohort",
+            "type": "string"
+        },
+        "controlCohort.label": {
+            "title": "Control Cohort",
             "type": "string"
         }
     }

@@ -1,10 +1,10 @@
 {
     "title": "Control Cohort",
-    "id": "/profiles/controlCohortjson.json",
+    "id": "/profiles/controlCohort.json",
     "description": "Schema for storing control cohort data",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [],
+    "required": ["label"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -19,19 +19,244 @@
         },
         "label": {
             "title": "Label",
+            "description": "Label of control cohort",
+            "type": "string",
+            "maxLength": 60
+        },
+        "controlCohortType": {
+            "title": "Control Cohort Type",
             "type": "string"
         },
-        "controlGroupType": {
-            "title": "Control Group Type",
+        "termsInElimination": {
+            "title": "Non-HPO term(s) Eliminated",
+            "description": "Non-HPO terms (separated by comma) eliminated from the disease",
+            "type": "string",
+            "default": ""
+        },
+        "numberOfMale": {
+            "title": "Number of Male",
+            "description": "Count of Male in the group",
+            "type": "integer",
+            "minimum": 0
+        },
+        "numberOfFemale": {
+            "title": "Number of Female",
+            "description": "Count of female in the group",
+            "type": "integer",
+            "minimum": 0
+        },
+        "countryOfOrigin": {
+            "title": "Country Of Origin",
+            "description": "Country in which the group original live",
+            "type": "string",
+            "default": ""
+        },
+        "ethnicity": {
+            "title": "Ethnicity",
+            "description": "Ethnicity",
+            "type": "string",
+            "default": "",
+            "enum": [
+                "",
+                "Hispanic or Latino",
+                "Not Hispanic or Latino",
+                "Unknown"
+            ]
+        },
+        "race": {
+            "title": "Race",
+            "description": "Race",
+            "type": "string",
+            "default": "",
+            "enum": [
+                "",
+                "American Indian or Alaska Native",
+                "Asian",
+                "Black",
+                "Native Hawaiian or Other Pacific Islander",
+                "White",
+                "Mixed",
+                "Unknown"
+            ]
+        },
+        "ageRangeType": {
+            "title": "Type of Age Range",
+            "description": "Type of age range in group",
+            "type": "string",
+            "default": "",
+            "enum": [
+                "",
+                "Onset",
+                "Report",
+                "Diagnosis",
+                "Death"
+            ]
+        },
+        "ageRangeFrom": {
+            "title": "Age Range From",
+            "description": "Yongest age in the group",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 150
+        },
+        "ageRangeTo": {
+            "title": "Age Range To",
+            "description": "Oldest age in the group",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 150
+        },
+        "ageRangeUnit": {
+            "title": "Age Range Unit",
+            "description": "Unit of age",
+            "type": "string",
+            "default": "",
+            "enum": [
+                "",
+                "Days",
+                "Weeks",
+                "Months",
+                "Years"
+            ]
+        },
+        "numberOfControlsWithVariant": {
+            "title": "Number of Controls with Variant",
+            "description": "Number of individuals associated with variant in control cohort",
+            "type": "integer",
+            "minimum": 0
+        },
+        "numberOfAllControls": {
+            "title": "Total Number of Control",
+            "description": "Total number of individuals in control cohort",
+            "type": "integer",
+            "minimum": 0
+        },
+        "alleleFrequency": {
+            "title": "Allele Frequency",
+            "type": "number"
+        },
+        "method": {
+            "title": "Group Method",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "previousTesting": {
+                    "title": "Previous Testing",
+                    "description": "Previous testing",
+                    "type": "boolean"
+                },
+                "previousTestingDescription": {
+                    "title": "Previous Testing",
+                    "description": "Previous testing",
+                    "type": "string",
+                    "default": ""
+                },
+                "genomeWideStudy": {
+                    "title": "Genome-Wide Study",
+                    "description": "Genome-wide study",
+                    "type": "boolean"
+                },
+                "genotypingMethods": {
+                    "title": "Genotyping Method(s)",
+                    "description": "List of genotyping methods",
+                    "type": "array",
+                    "default": [],
+                    "items": {
+                        "title": "Genotyping Method",
+                        "description": "Genotyping method",
+                        "type": "string",
+                        "enum": [
+                            "Exome sequencing",
+                            "Genotyping",
+                            "High resolution melting",
+                            "PCR",
+                            "Sanger sequencing",
+                            "Whole genome shotgun sequencing"
+                        ]
+                    }
+                },
+                "entireGeneSequenced": {
+                    "title": "Entire Gene Sequenced",
+                    "description": "Entire gene sequenced",
+                    "type": "boolean"
+                },
+                "copyNumberAssessed": {
+                    "title": "Copy Number Assessed",
+                    "description": "Copy number assessed",
+                    "type": "boolean"
+                },
+                "specificMutationsGenotyped": {
+                    "title": "Copy Number Assessed",
+                    "description": "Copy number assessed",
+                    "type": "boolean"
+                },
+                "specificMutationsGenotypedMethod": {
+                    "title": "Specific Mutations Genotyped Method",
+                    "description": "Method by which specific mutations genotyped",
+                    "type": "string",
+                    "default": ""
+                },
+                "additionalInformation": {
+                    "title": "Additional Information",
+                    "description": "Additional information",
+                    "type": "string",
+                    "default": ""
+                },
+                "dateTime": {
+                    "title": "Date Time",
+                    "description": "Time stamp for creation",
+                    "type": "string",
+                    "default": ""
+                }
+            }
+        },
+        "additionalInformation": {
+            "title": "Additional Information",
+            "description": "List of Additional information of the group",
+            "type": "string",
+            "default": ""
+        },
+        "numberOfIndividualsWithFamilyInformation": {
+            "title": "# Individuals with Family Information",
+            "description": "# Individuals with Family Information",
+            "type": "integer",
+            "minimum": 0
+        },
+        "numberOfIndividualsWithVariantInOtherGene": {
+            "title": "# Individuals with Variant in Other Gene",
+            "description": "# Individuals with Variant in other gene",
+            "type": "integer",
+            "minimum": 0
+        },
+        "otherGenes": {
+            "title": "Other Gene(s)",
+            "description": "List of other genes",
+            "type": "array",
+            "default": [],
+            "items": {
+                "title": "Gene Symbol",
+                "description": "HGNC symbol of other gene",
+                "type": "string",
+                "linkTo": "gene"
+            }
+        },
+        "otherPMIDs": {
+            "title": "Other PMIDs",
+            "description": "List of other PMIDs having evidence about the group",
+            "type": "array",
+            "default": [],
+            "items": {
+                "title": "PMID",
+                "description": "PMID",
+                "type": "string",
+                "linkTo": "article"
+            }
+        }
+    },
+    "columns": {
+        "label": {
+            "title": "Label",
             "type": "string"
-        },
-        "numberOfCasesWithVariant": {
-            "title": "Number of Cases with Variants",
-            "type": "number"
-        },
-        "numberOfAllCasesGenotyped": {
-            "title": "Number of All Cases",
-            "type": "number"
         }
     }
 }
