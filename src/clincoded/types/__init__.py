@@ -460,12 +460,12 @@ class Annotation(Item):
         'associatedGdm',
         'experimentalData.assessments',
         'experimentalData.assessments.submitted_by',
-        'caseControlStudies',
-        'caseControlStudies.submitted_by',
-        'caseControlStudies.caseCohort',
-        'caseControlStudies.caseCohort.submitted_by',
-        'caseControlStudies.controlCohort',
-        'caseControlStudies.controlCohort.submitted_by'
+        #'caseControlStudies',
+        #'caseControlStudies.submitted_by',
+        #'caseControlStudies.caseCohort',
+        #'caseControlStudies.caseCohort.submitted_by',
+        #'caseControlStudies.controlCohort',
+        #'caseControlStudies.controlCohort.submitted_by'
     ]
     rev = {
         'associatedGdm': ('gdm', 'annotations')
@@ -517,67 +517,6 @@ class Annotation(Item):
         if len(experimentalData) > 0:
             return len(experimentalData)
         return ""
-
-
-@collection(
-    name='casecontrol',
-    unique_key='caseControl:uuid',
-    properties={
-        'title': 'Case Control',
-        'description': 'List of case-control objects in all gdm pairs',
-    })
-class CaseControl(Item):
-    item_type = 'caseControl'
-    schema = load_schema('clincoded:schemas/caseControl.json')
-    name_key = 'uuid'
-    embedded = [
-        'caseCohort',
-        'caseCohort.submitted_by',
-        'controlCohort',
-        'controlCohort.submitted_by',
-        'associatedAnnotation',
-        'associatedAnnotation.article'
-    ]
-    rev = {
-        'associatedAnnotation': ('annotation', 'caseControlStudies')
-    }
-
-    @calculated_property(schema={
-        "title": "Associated annotation",
-        "type": "array",
-        "items": {
-            "type": ['string', 'object'],
-            "linkFrom": "annotation.caseControlStudies",
-        },
-    })
-    def associatedAnnotation(self, request, associatedAnnotation):
-        return paths_filtered_by_status(request, associatedAnnotation)
-
-
-@collection(
-    name='casecohort',
-    unique_key='caseCohort:uuid',
-    properties={
-        'title': 'Case Cohort',
-        'description': 'List of case cohort',
-    })
-class CaseCohort(Item):
-    item_type = 'case cohort'
-    schema = load_schema('clincoded:schemas/caseCohort.json')
-    name_key = 'uuid'
-
-
-@collection(
-    name='controlcohort',
-    unique_key='controlCohort:uuid',
-    properties={
-        'title': 'Control Cohort',
-        'description': 'List of control cohort',
-    })
-class CaseCohort(Item):
-    item_type = 'control cohort'
-    schema = load_schema('clincoded:schemas/controlCohort.json')
-    name_key = 'uuid'
 
 
 @collection(

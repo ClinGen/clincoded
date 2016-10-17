@@ -133,15 +133,5 @@
             "title": "Reason for Midification",
             "type": "string"
         }
-    },
-    "columns": {
-        "caseCohort.label": {
-            "title": "Case Cohort",
-            "type": "string"
-        },
-        "controlCohort.label": {
-            "title": "Control Control",
-            "type": "string"
-        }
     }
 }
