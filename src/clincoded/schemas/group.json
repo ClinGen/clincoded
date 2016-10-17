@@ -27,20 +27,6 @@
             "default": "",
             "maxLength": 60
         },
-        "groupType": {
-            "title": "Group Type",
-            "description": "Belonging to case level or case control",
-            "type": "string",
-            "common": "case-level, case-cohort, control-cohort"
-        },
-        "numberOfCasesWithVariant": {
-            "title": "Number of Cases with Variants",
-            "type": "number"
-        },
-        "numberOfAllCasesGenotyped": {
-            "title": "Number of All Cases",
-            "type": "number"
-        },
         "commonDiagnosis": {
             "title": "Common Diagnosis",
             "description": "List of Orphanet IDs of common diagnosis for the group",
@@ -312,12 +298,6 @@
                 "linkTo": "article"
             }
         },
-        "statistic": {
-            "title": "Statistical Study",
-            "description": "Statistical study associated to the group",
-            "type": "string",
-            "linkTo": "statistic"
-        },
         "familyIncluded": {
             "title": "Family Included",
             "description": "List of families included in the group",
@@ -341,12 +321,6 @@
                 "type": "string",
                 "linkTo": "individual"
             }
-        },
-        "control": {
-            "title": "Control Group",
-            "description": "ID of control group associated to the group",
-            "type": "string",
-            "linkTo": "controlGroup"
         },
         "active": {
             "description": "boolean switch to set if the group avaliable for curation.",

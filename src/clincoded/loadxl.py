@@ -28,6 +28,8 @@ ORDER = [
     'individual',
     'family',
     'group',
+    'caseCohort',
+    'controlCohort',
     'caseControl',
     'experimental',
     'annotation',

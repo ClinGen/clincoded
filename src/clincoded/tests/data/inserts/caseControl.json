@@ -11,7 +11,7 @@
                 "value": 12.345
             }
         ],
-        "pValue": 0.05,
+        "pValue": 3.15,
         "confidenceIntervalFrom": 6.7,
         "confidenceIntervalTo": 8.9,
         "demographicInfoMatched": "Yes",

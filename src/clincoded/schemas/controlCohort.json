@@ -1,0 +1,37 @@
+{
+    "title": "Control Cohort",
+    "id": "/profiles/controlCohortjson.json",
+    "description": "Schema for storing control cohort data",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/standard_status" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "label": {
+            "title": "Label",
+            "type": "string"
+        },
+        "controlGroupType": {
+            "title": "Control Group Type",
+            "type": "string"
+        },
+        "numberOfCasesWithVariant": {
+            "title": "Number of Cases with Variants",
+            "type": "number"
+        },
+        "numberOfAllCasesGenotyped": {
+            "title": "Number of All Cases",
+            "type": "number"
+        }
+    }
+}

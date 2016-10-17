@@ -22,15 +22,15 @@
         },
         "caseCohort": {
             "title": "Case Cohort",
-            "description": "group object compared to control",
+            "description": "Case cohort in case-control study",
             "type": "string",
-            "linkTo": "group"
+            "linkTo": "caseCohort"
         },
         "controlCohort": {
             "title": "Control Cohort",
-            "description": "group object compared to case",
+            "description": "Control cohort in case-control study",
             "type": "string",
-            "linkTo": "group"
+            "linkTo": "controlCohort"
         },
         "studyType": {
             "title": "Study Type",

@@ -532,7 +532,9 @@ class CaseControl(Item):
     name_key = 'uuid'
     embedded = [
         'caseCohort',
+        'caseCohort.submitted_by',
         'controlCohort',
+        'controlCohort.submitted_by',
         'associatedAnnotation',
         'associatedAnnotation.article'
     ]
@@ -551,14 +553,31 @@ class CaseControl(Item):
     def associatedAnnotation(self, request, associatedAnnotation):
         return paths_filtered_by_status(request, associatedAnnotation)
 
-    @calculated_property(schema={
-        "title": "Article PMID",
-        "type": "string",
+
+@collection(
+    name='casecohort',
+    unique_key='caseCohort:uuid',
+    properties={
+        'title': 'Case Cohort',
+        'description': 'List of case cohort',
     })
-    def annotation_associated(selft, associatedAnnotation=[]):
-        if len(associatedAnnotation) > 0:
-            return associatedAnnotation[0]
-        return ''
+class CaseCohort(Item):
+    item_type = 'case cohort'
+    schema = load_schema('clincoded:schemas/caseCohort.json')
+    name_key = 'uuid'
+
+
+@collection(
+    name='controlcohort',
+    unique_key='controlCohort:uuid',
+    properties={
+        'title': 'Control Cohort',
+        'description': 'List of control cohort',
+    })
+class CaseCohort(Item):
+    item_type = 'control cohort'
+    schema = load_schema('clincoded:schemas/controlCohort.json')
+    name_key = 'uuid'
 
 
 @collection(
