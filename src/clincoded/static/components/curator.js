@@ -567,6 +567,16 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             individualRenders = individualRenders.concat(individualAnnotationRenders);
         }
 
+        // FIXME: Add to the array of case-control renders
+        if (annotation && annotation.groups) {
+            let caseControlGroups = annotation.groups.map(group => {
+                if (group.caseControlType && group.caseControlType !== 'undefined') {
+                    return <div key={group.uuid}>{renderGroup(group, gdm, annotation, curatorMatch)}</div>;
+                }
+            });
+            caseControlRenders = caseControlRenders.concat(caseControlGroups);
+        }
+
         // Add to the array of experiment renders.
         if (annotation && annotation.experimentalData) {
             var experimentalAnnotationRenders = annotation.experimentalData.map(experimental => {
@@ -588,20 +598,26 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             <div>
                 {annotation ?
                     <Panel panelClassName="panel-evidence-groups" title={'Evidence for PMID:' + annotation.article.pmid}>
-                        <Panel title={<CurationPaletteTitles title="Group" url={groupUrl} />} panelClassName="panel-evidence">
-                            {groupRenders}
+                        <Panel panelClassName="genetic-evidence-group" title="Genetic Evidence">
+                            <div className="group-separator"><span className="label label-default">Case Level</span></div>
+                            <Panel title={<CurationPaletteTitles title="Group" url={groupUrl} />} panelClassName="panel-evidence">
+                                {groupRenders}
+                            </Panel>
+                            <Panel title={<CurationPaletteTitles title="Family" url={familyUrl} />} panelClassName="panel-evidence">
+                                {familyRenders}
+                            </Panel>
+                            <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
+                                {individualRenders}
+                            </Panel>
+                            <div className="group-separator"><span className="label label-default">Case-Control</span></div>
+                            <Panel title={<CurationPaletteTitles title="Case-Control" url={caseControlUrl} />} panelClassName="panel-evidence">
+                                {caseControlRenders}
+                            </Panel>
                         </Panel>
-                        <Panel title={<CurationPaletteTitles title="Family" url={familyUrl} />} panelClassName="panel-evidence">
-                            {familyRenders}
-                        </Panel>
-                        <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
-                            {individualRenders}
-                        </Panel>
-                        <Panel title={<CurationPaletteTitles title="Case-Control" url={caseControlUrl} />} panelClassName="panel-evidence">
-                            {caseControlRenders}
-                        </Panel>
-                        <Panel title={<CurationPaletteTitles title="Experimental Data" url={experimentalUrl} />} panelClassName="panel-evidence">
-                            {experimentalRenders}
+                        <Panel panelClassName="experimental-group" title="Experimental">
+                            <Panel title={<CurationPaletteTitles title="Experimental Data" url={experimentalUrl} />} panelClassName="panel-evidence">
+                                {experimentalRenders}
+                            </Panel>
                         </Panel>
                         {variantRenders && variantRenders.length ?
                             <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence">
