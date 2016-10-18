@@ -27,12 +27,6 @@
             "title": "Control Cohort Type",
             "type": "string"
         },
-        "termsInElimination": {
-            "title": "Non-HPO term(s) Eliminated",
-            "description": "Non-HPO terms (separated by comma) eliminated from the disease",
-            "type": "string",
-            "default": ""
-        },
         "numberOfMale": {
             "title": "Number of Male",
             "description": "Count of Male in the group",

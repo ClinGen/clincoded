@@ -79,7 +79,7 @@
         "demographicInfoMatched": {
             "title": "Demographic Info Matched",
             "description": "Whether case and control cohorts are mateched by demogtaphic information?",
-            "type": "string"
+            "type": "boolean"
         },
         "typeDemographicInfoMatched": {
             "title": "Type of Demographic Info Matched",
@@ -93,7 +93,7 @@
         "geneticAncestryMatched": {
             "title": "Genetic Ancestry Matched",
             "description": "Whether case and control cohorts are matched for genetic ancestry?",
-            "type": "string"
+            "type": "boolean"
         },
         "typeGeneticAncestryMatched": {
             "title": "Type of Genetic Ancestry Matched",
@@ -117,7 +117,7 @@
         "differInVariables": {
             "title": "Differ In Other Variables",
             "description": "Whether case and control cohorts differ in any other variables?",
-            "type": "string"
+            "type": "boolean"
         },
         "explanationForDifference": {
             "title": "Explanation",
