@@ -323,7 +323,11 @@ class Gdm(Item):
         'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'annotations.experimentalData.proteinInteractions.interactingGenes',
         'annotations.experimentalData.assessments',
-        'annotations.experimentalData.assessments.submitted_by'
+        'annotations.experimentalData.assessments.submitted_by',
+        'annotations.caseControlStudies',
+        'annotations.caseControlStudies.submitted_by',
+        'annotations.caseControlStudies.caseCohort',
+        'annotations.caseControlStudies.controlCohort'
     ]
 
     @calculated_property(schema={
