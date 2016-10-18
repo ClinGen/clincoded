@@ -51,7 +51,7 @@
                         "title": "Value Type",
                         "type": "string"
                     },
-                    "other": {
+                    "otherType": {
                         "title": "Other Type",
                         "description": "Description of other type",
                         "type": "string"
@@ -82,11 +82,11 @@
             "description": "Whether case and control cohorts are mateched by demogtaphic information?",
             "type": "string"
         },
-        "typeDemographicInfoMatched": {
+        "factorOfDemographicInfoMatched": {
             "title": "Type of Demographic Info Matched",
             "type": "string"
         },
-        "explanationForTypeDemographicInfo": {
+        "explanationForDemographicMatched": {
             "title": "Explanation",
             "description": "Explanation for selecting type of demographic info",
             "type": "string"
@@ -96,11 +96,11 @@
             "description": "Whether case and control cohorts are matched for genetic ancestry?",
             "type": "string"
         },
-        "typeGeneticAncestryMatched": {
+        "factorOfGeneticAncestryNotMatched": {
             "title": "Type of Genetic Ancestry Matched",
             "type": "string"
         },
-        "explanationForTypeGeneticAncestry": {
+        "explanationForGeneticAncestryNotMatched": {
             "title": "Explanation",
             "description": "Explanation for selecting type of genetic ancestry",
             "type": "string"
@@ -110,7 +110,7 @@
             "description": "Whether primary disease and/or family history of disease are evaluated?",
             "type": "string"
         },
-        "explanationForDiseaseEvaluation": {
+        "explanationForDiseaseHistoryEvaluation": {
             "title": "Explanation",
             "description": "Explanation for selecting type of disease evaluation",
             "type": "string"
