@@ -1,0 +1,43 @@
+[
+    {
+        "uuid": "64df7938-33bc-4789-8e5c-52f45da24006",
+        "label": "Case Cohort 001",
+        "commonDiagnosis": [
+            "891"
+        ],
+        "numberOfMale": 28,
+        "numberOfFemale": 17,
+        "numberOfCasesWithVariant": 20,
+        "numberOfAllCases": 35,
+        "alleleFrequency": 1.03,
+        "method": {
+            "previousTesting": true,
+            "previousTestingDescription": "Previous test is good",
+            "genomeWideStudy": true,
+            "genotypingMethods": [
+                "Sanger sequencing"
+            ],
+            "entireGeneSequenced": true,
+            "copyNumberAssessed": true,
+            "specificMutationsGenotyped": true,
+            "specificMutationsGenotypedMethod": "method #2",
+            "additionalInformation": "additional info here.",
+            "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        },
+        "additionalInformation" : "Why this one is a case cohort?",
+        "numberOfIndividualsWithFamilyInformation": 30,
+        "numberOfIndividualsWithVariantInOtherGene": 13,
+        "otherGenes": [
+            "PIDD1",
+            "PPM1D",
+            "JMY"
+        ],
+        "otherPMIDs": [
+            "23272854",
+            "19556464"
+        ],
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "last_modified": "2015-08-19T08:35:18.000000+00:00",
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
+    }
+]

@@ -1,0 +1,39 @@
+[
+    {
+        "uuid": "342cccda-b3ed-4228-8956-9825b58cd36b",
+        "label": "Control Cohort 01",
+        "controlCohortType": "New",
+        "numberOfMale": 21,
+        "numberOfFemale": 17,
+        "numberOfControlsWithVariant": 24,
+        "numberOfAllControls": 35,
+        "alleleFrequency": 1.033,
+        "method": {
+            "previousTesting": true,
+            "previousTestingDescription": "method here",
+            "genomeWideStudy": true,
+            "genotypingMethods": [
+                "Sanger sequencing"
+            ],
+            "entireGeneSequenced": true,
+            "copyNumberAssessed": true,
+            "specificMutationsGenotyped": true,
+            "specificMutationsGenotypedMethod": "method #2",
+            "additionalInformation": "additional info here.",
+            "dateTime": "2015-07-14T22:47:10.000000+00:00"
+        },
+        "additionalInformation": "Why is it a control cohort",
+        "numberOfIndividualsWithFamilyInformation": 30,
+        "numberOfIndividualsWithVariantInOtherGene": 11,
+        "otherGenes": [
+            "NGLY1"
+        ],
+        "otherPMIDs": [
+            "23272854",
+            "19556464"
+        ],
+        "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
+        "last_modified": "2015-08-19T08:35:18.000000+00:00",
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
+    }
+]

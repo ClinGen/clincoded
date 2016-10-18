@@ -323,7 +323,11 @@ class Gdm(Item):
         'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'annotations.experimentalData.proteinInteractions.interactingGenes',
         'annotations.experimentalData.assessments',
-        'annotations.experimentalData.assessments.submitted_by'
+        'annotations.experimentalData.assessments.submitted_by',
+        'annotations.caseControlStudies',
+        'annotations.caseControlStudies.submitted_by',
+        'annotations.caseControlStudies.caseCohort',
+        'annotations.caseControlStudies.controlCohort'
     ]
 
     @calculated_property(schema={
@@ -457,7 +461,13 @@ class Annotation(Item):
         'experimentalData.proteinInteractions.interactingGenes',
         'associatedGdm',
         'experimentalData.assessments',
-        'experimentalData.assessments.submitted_by'
+        'experimentalData.assessments.submitted_by',
+        'caseControlStudies',
+        'caseControlStudies.submitted_by',
+        'caseControlStudies.caseCohort',
+        'caseControlStudies.caseCohort.submitted_by',
+        'caseControlStudies.controlCohort',
+        'caseControlStudies.controlCohort.submitted_by'
     ]
     rev = {
         'associatedGdm': ('gdm', 'annotations')
@@ -512,6 +522,124 @@ class Annotation(Item):
 
 
 @collection(
+    name='casecontrol',
+    unique_key='caseControl:uuid',
+    properties={
+        'title': 'Case Control',
+        'description': 'List of case-control objects in all GDM(s)',
+    })
+class CaseControl(Item):
+    item_type = 'caseControl'
+    schema = load_schema('clincoded:schemas/caseControl.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'caseCohort',
+        'caseCohort.submitted_by',
+        'controlCohort',
+        'controlCohort.submitted_by',
+        'associatedAnnotation',
+        'associatedAnnotation.article',
+        'associatedAnnotation.groups',
+        'associatedAnnotation.associatedGdm'
+    ]
+    rev = {
+        'associatedAnnotation': ('annotation', 'caseControlStudies')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated annotation",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.caseControlStudies"
+        }
+    })
+    def associatedAnnotation(self, request, associatedAnnotation):
+        return paths_filtered_by_status(request, associatedAnnotation)
+
+
+@collection(
+    name='casecohort',
+    unique_key='caseCohort:uuid',
+    properties={
+        'title': 'Case Cohort',
+        'description': 'List of case cohort in all GDM(s)',
+    })
+class CaseCohort(Item):
+    item_type = 'caseCohort'
+    schema = load_schema('clincoded:schemas/caseCohort.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'commonDiagnosis',
+        'otherPMIDs',
+        'otherGenes',
+        'associatedCaseControl',
+        'associatedCaseControl.submitted_by',
+        'associatedCaseControl.controlCohort',
+        'associatedCaseControl.associatedAnnotation',
+        'associatedCaseControl.associatedAnnotation.article',
+        'associatedCaseControl.associatedAnnotation.submitted_by',
+        'associatedCaseControl.associatedAnnotation.groups',
+        'associatedCaseControl.associatedAnnotation.associatedGdm'
+    ]
+    rev = {
+        'associatedCaseControl': ('caseControl', 'caseCohort')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated Case-Control",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "caseControl.caseCohort"
+        }
+    })
+    def associatedCaseControl(self, request, associatedCaseControl):
+        return paths_filtered_by_status(request, associatedCaseControl)
+
+
+@collection(
+    name='controlcohort',
+    unique_key='controlCohort:uuid',
+    properties={
+        'title': 'Control Cohort',
+        'description': 'List of control cohort in all GDM(s)',
+    })
+class ControlCohort(Item):
+    item_type = 'controlCohort'
+    schema = load_schema('clincoded:schemas/controlCohort.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'otherPMIDs',
+        'otherGenes',
+        'associatedCaseControl',
+        'associatedCaseControl.submitted_by',
+        'associatedCaseControl.caseCohort',
+        'associatedCaseControl.associatedAnnotation',
+        'associatedCaseControl.associatedAnnotation.article',
+        'associatedCaseControl.associatedAnnotation.submitted_by',
+        'associatedCaseControl.associatedAnnotation.associatedGdm'
+    ]
+    rev = {
+        'associatedCaseControl': ('caseControl', 'controlCohort')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated Case-Control",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "caseControl.controlCohort"
+        }
+    })
+    def associatedCaseControl(self, request, associatedCaseControl):
+        return paths_filtered_by_status(request, associatedCaseControl)
+
+
+@collection(
     name='groups',
     unique_key='group:uuid',
     properties={
@@ -528,7 +656,6 @@ class Group(Item):
         'otherGenes',
         'otherPMIDs',
         'otherPMIDs.submitted_by',
-        #'statistic',
         'familyIncluded',
         'familyIncluded.commonDiagnosis',
         'familyIncluded.submitted_by',
@@ -557,7 +684,6 @@ class Group(Item):
         'associatedAnnotations.associatedGdm',
         'associatedAnnotations.associatedGdm.disease',
         'associatedAnnotations.associatedGdm.gene'
-        #'control'
     ]
     rev = {
         'associatedAnnotations': ('annotation', 'groups')
