@@ -298,6 +298,12 @@
                 "linkTo": "article"
             }
         },
+        "statistic": {
+            "title": "Statistical Study",
+            "description": "Statistical study associated to the group",
+            "type": "string",
+            "linkTo": "statistic"
+        },
         "familyIncluded": {
             "title": "Family Included",
             "description": "List of families included in the group",
@@ -321,6 +327,12 @@
                 "type": "string",
                 "linkTo": "individual"
             }
+        },
+        "control": {
+            "title": "Control Group",
+            "description": "ID of control group associated to the group",
+            "type": "string",
+            "linkTo": "controlGroup"
         },
         "active": {
             "description": "boolean switch to set if the group avaliable for curation.",

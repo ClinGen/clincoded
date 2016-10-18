@@ -76,6 +76,7 @@
             "description": "List of case-control study",
             "type": "array",
             "items": {
+                "title": "Case Control",
                 "type": "string",
                 "linkTo": "caseControl"
             }
